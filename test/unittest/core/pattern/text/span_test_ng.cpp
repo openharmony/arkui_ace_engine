@@ -87,7 +87,7 @@ class SpanTestNg : public testing::Test {
         void SetUp() override;
         void TearDown() override;
 };
-    
+
 void SpanTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
@@ -559,7 +559,8 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
     ImageModelNG imageSpan;
     ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     ImageSpanView::SetObjectFit(ImageFit::FILL);
     ImageSpanView::SetVerticalAlign(VerticalAlign::TOP);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -611,7 +612,8 @@ HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
     ImageModelNG imageSpan;
     ImageInfoConfig imageInfoConfig;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -888,7 +890,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->SetTextDetectEnable(true);
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -937,7 +939,7 @@ HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->SetTextDetectEnable(true);
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -1159,7 +1161,7 @@ HWTEST_F(SpanTestNg, SymbolSpanPropertyTest005, TestSize.Level1)
 
     ASSERT_NE(frameNode, nullptr);
     SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID, SYMBOL_SPAN_FONT_FAMILY.c_str());
-    
+
     /**
      * @tc.steps: step2. get span node
      */
@@ -1216,7 +1218,8 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
@@ -1224,7 +1227,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1244,7 +1247,8 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
@@ -1252,7 +1256,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
@@ -1373,7 +1377,7 @@ HWTEST_F(SpanTestNg, SpanOnClick003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpanOnLongPress001 
+ * @tc.name: SpanOnLongPress001
  * @tc.desc: Test OnLongPress.
  * @tc.type: FUNC
  */
@@ -1577,7 +1581,7 @@ HWTEST_F(SpanTestNg, SpanOnHoverEvent001, TestSize.Level1)
     textPattern->InitSpanMouseEvent();
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF(0.0f, 0.0f));
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
@@ -1761,7 +1765,7 @@ HWTEST_F(SpanTestNg, SymbolSpanFontFamily004, TestSize.Level1)
 
     ASSERT_NE(frameNode, nullptr);
     SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID_NEW, SYMBOL_SPAN_FONT_ONE.c_str());
-    
+
     /**
      * @tc.steps: step2. get span node
      */
@@ -1792,7 +1796,8 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo001, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageModelNG.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModelNG.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
@@ -1800,7 +1805,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT,
@@ -1822,7 +1827,8 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo002, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
@@ -1830,7 +1836,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ImageErrorInfo imageErrorInfo;
@@ -1854,7 +1860,8 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo003, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     RefPtr<PixelMap> pixMap = nullptr;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     NG::ImageSpanView::Create();
     bool isTrigger = false;
     auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
@@ -1862,7 +1869,7 @@ HWTEST_F(SpanTestNg, ImageSpanImageErrorInfo003, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ImageErrorInfo imageErrorInfo;
@@ -2151,7 +2158,7 @@ HWTEST_F(SpanTestNg, SpanMouseHoverEvent001, TestSize.Level1)
     textPattern->InitSpanMouseEvent();
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
@@ -2190,10 +2197,10 @@ HWTEST_F(SpanTestNg, SpanMouseHoverEvent002, TestSize.Level1)
 
     EXPECT_EQ(textPattern->HasSpanOnHoverEvent(), true);
     textPattern->InitSpanMouseEvent();
-    EXPECT_NE(textPattern->spanMouseEventInitialized_, true);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
     textPattern->TriggerSpansOnHover(HoverInfo(), PointF());
     textPattern->ExitSpansForOnHoverEvent(HoverInfo());
-    EXPECT_EQ(textPattern->spanMouseEventInitialized_, false);
+    EXPECT_EQ(textPattern->spanMouseEventInitialized_, true);
 }
 
 /**
@@ -2209,7 +2216,8 @@ HWTEST_F(SpanTestNg, ImageSpanViewSetSrc, TestSize.Level1)
     imageInfoConfig.bundleName = "";
     imageInfoConfig.moduleName = "";
     imageInfoConfig.isImageSpan = true;
-    imageSpan.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageSpan.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();

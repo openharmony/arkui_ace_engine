@@ -15,6 +15,10 @@
 
 #include "common.h"
 
+#include <set>
+#include <string>
+#include <mutex>
+
 KNativePointer impl_AstNodeRecheck(KNativePointer contextPtr, KNativePointer nodePtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -149,14 +153,6 @@ KNativePointer impl_ContextProgram(KNativePointer contextPtr)
 }
 KOALA_INTEROP_1(ContextProgram, KNativePointer, KNativePointer)
 
-KNativePointer impl_ProgramAst(KNativePointer contextPtr, KNativePointer programPtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto program = reinterpret_cast<es2panda_Program*>(programPtr);
-    return GetImpl()->ProgramAst(context, program);
-}
-KOALA_INTEROP_2(ProgramAst, KNativePointer, KNativePointer, KNativePointer)
-
 KBoolean impl_IsIdentifier(KNativePointer nodePtr)
 {
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
@@ -231,6 +227,25 @@ static KNativePointer impl_ProgramExternalSources(KNativePointer contextPtr, KNa
     return StageArena::cloneVector(external_sources, source_len);
 }
 KOALA_INTEROP_2(ProgramExternalSources, KNativePointer, KNativePointer, KNativePointer);
+
+static KNativePointer impl_ProgramDirectExternalSources(KNativePointer contextPtr, KNativePointer instancePtr)
+{
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto&& instance = reinterpret_cast<es2panda_Program *>(instancePtr);
+    std::size_t sourceLen = 0;
+    auto externalSources = GetImpl()->ProgramDirectExternalSources(context, instance, &sourceLen);
+    return new std::vector<void*>(externalSources, externalSources + sourceLen);
+}
+KOALA_INTEROP_2(ProgramDirectExternalSources, KNativePointer, KNativePointer, KNativePointer);
+
+static KNativePointer impl_ProgramSourceFilePath(KNativePointer contextPtr, KNativePointer instancePtr)
+{
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto&& instance = reinterpret_cast<es2panda_Program *>(instancePtr);
+    auto&& result = GetImpl()->ProgramSourceFilePathConst(context, instance);
+    return StageArena::strdup(result);
+}
+KOALA_INTEROP_2(ProgramSourceFilePath, KNativePointer, KNativePointer, KNativePointer);
 
 static KNativePointer impl_ExternalSourceName(KNativePointer instance)
 {
@@ -331,3 +346,275 @@ KNativePointer impl_CreateSourceRange(KNativePointer context, KNativePointer sta
     return GetImpl()->CreateSourceRange(_context_, _start_, _end_);
 }
 KOALA_INTEROP_3(CreateSourceRange, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
+
+KNativePointer impl_ConfigGetOptions(KNativePointer config)
+{
+    const auto _config = reinterpret_cast<es2panda_Config *>(config);
+    auto result = GetImpl()->ConfigGetOptions(_config);
+    return (void*)result;
+}
+KOALA_INTEROP_1(ConfigGetOptions, KNativePointer, KNativePointer)
+
+KNativePointer impl_OptionsArkTsConfig(KNativePointer context, KNativePointer options)
+{
+    const auto _context = reinterpret_cast<es2panda_Context *>(context);
+    const auto _options = reinterpret_cast<es2panda_Options *>(options);
+    auto result = GetImpl()->OptionsUtilArkTSConfigConst(_context, _options);
+    return (void*)result;
+}
+KOALA_INTEROP_2(OptionsArkTsConfig, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_CreateCacheContextFromFile(KNativePointer configPtr, KStringPtr& source_file_namePtr, KNativePointer globalContextPtr, KBoolean isExternal) {
+    auto config = reinterpret_cast<es2panda_Config*>(configPtr);
+    auto globalContext = reinterpret_cast<es2panda_GlobalContext*>(globalContextPtr);
+    return GetImpl()->CreateCacheContextFromFile(config, getStringCopy(source_file_namePtr), globalContext, isExternal);
+}
+KOALA_INTEROP_4(CreateCacheContextFromFile, KNativePointer, KNativePointer, KStringPtr, KNativePointer, KBoolean)
+
+KNativePointer impl_CreateGlobalContext(KNativePointer configPtr, KStringArray externalFileListPtr, KUInt fileNum, KBoolean LspUsage) {
+    auto config = reinterpret_cast<es2panda_Config*>(configPtr);
+    const int headerLen = 4;
+    const char** files = StageArena::allocArray<const char*>(fileNum);
+    uint8_t* filesPtr = (uint8_t*)externalFileListPtr;
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(fileNum); ++i) {
+        strLen = unpackUInt(filesPtr + position);
+        position += headerLen;
+        files[i] = StageArena::strdup(std::string(reinterpret_cast<const char*>(filesPtr + position), strLen).c_str());
+        position += strLen;
+    }
+    return GetImpl()->CreateGlobalContext(config, files, fileNum, LspUsage);
+}
+KOALA_INTEROP_4(CreateGlobalContext, KNativePointer, KNativePointer, KStringArray, KUInt, KBoolean)
+
+void impl_DestroyGlobalContext(KNativePointer globalContextPtr) {
+    auto globalContext = reinterpret_cast<es2panda_GlobalContext*>(globalContextPtr);
+    GetImpl()->DestroyGlobalContext(globalContext);
+}
+KOALA_INTEROP_V1(DestroyGlobalContext, KNativePointer)
+
+// From koala-wrapper
+// Improve: check if some code should be generated
+
+std::set<std::string> globalStructInfo;
+std::mutex g_structMutex;
+
+void impl_InsertGlobalStructInfo(KNativePointer contextPtr, KStringPtr& instancePtr)
+{
+    std::lock_guard<std::mutex> lock(g_structMutex);
+    globalStructInfo.insert(getStringCopy(instancePtr));
+    return;
+}
+KOALA_INTEROP_V2(InsertGlobalStructInfo, KNativePointer, KStringPtr);
+
+KBoolean impl_HasGlobalStructInfo(KNativePointer contextPtr, KStringPtr& instancePtr)
+{
+    std::lock_guard<std::mutex> lock(g_structMutex);
+    return globalStructInfo.count(getStringCopy(instancePtr));
+}
+KOALA_INTEROP_2(HasGlobalStructInfo, KBoolean, KNativePointer, KStringPtr);
+
+KNativePointer impl_ClassVariableDeclaration(KNativePointer context, KNativePointer classInstance)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _classInstance = reinterpret_cast<es2panda_AstNode*>(classInstance);
+    auto _typedTsType = GetImpl()->TypedTsType(_context, _classInstance);
+    if (_typedTsType == nullptr) {
+        return nullptr;
+    }
+    const auto _instanceType = reinterpret_cast<es2panda_Type*>(_typedTsType);
+    auto _typeVar = GetImpl()->TypeVariable(_context, _instanceType);
+    if (_typeVar == nullptr) {
+        return nullptr;
+    }
+    const auto result = reinterpret_cast<es2panda_Declaration*>(GetImpl()->VariableDeclaration(_context, _typeVar));
+    const auto declNode = GetImpl()->DeclNode(_context, result);
+    return declNode;
+}
+KOALA_INTEROP_2(ClassVariableDeclaration, KNativePointer, KNativePointer, KNativePointer)
+
+KBoolean impl_IsMethodDefinition(KNativePointer nodePtr)
+{
+    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
+    return GetImpl()->IsMethodDefinition(node);
+}
+KOALA_INTEROP_1(IsMethodDefinition, KBoolean, KNativePointer)
+KNativePointer impl_TSInterfaceBodyBodyPtr(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    std::size_t length;
+    auto result = GetImpl()->TSInterfaceBodyBodyPtr(_context, _receiver, &length);
+    return StageArena::cloneVector(result, length);
+}
+KOALA_INTEROP_2(TSInterfaceBodyBodyPtr, KNativePointer, KNativePointer, KNativePointer);
+
+KNativePointer impl_AnnotationDeclarationPropertiesPtrConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    std::size_t length;
+    auto result = GetImpl()->AnnotationDeclarationPropertiesPtrConst(_context, _receiver, &length);
+    return StageArena::cloneVector(result, length);
+}
+KOALA_INTEROP_2(AnnotationDeclarationPropertiesPtrConst, KNativePointer, KNativePointer, KNativePointer);
+
+KNativePointer impl_SourceRangeStart(KNativePointer context, KNativePointer range)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
+    auto result = GetImpl()->SourceRangeStart(_context, _range);
+    return result;
+}
+KOALA_INTEROP_2(SourceRangeStart, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_SourceRangeEnd(KNativePointer context, KNativePointer range) {
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
+    auto result = GetImpl()->SourceRangeEnd(_context, _range);
+    return result;
+}
+KOALA_INTEROP_2(SourceRangeEnd, KNativePointer, KNativePointer, KNativePointer)
+
+KBoolean impl_IsArrayExpression(KNativePointer nodePtr)
+{
+    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
+    return GetImpl()->IsArrayExpression(node);
+}
+KOALA_INTEROP_1(IsArrayExpression, KBoolean, KNativePointer)
+
+KNativePointer impl_ETSParserGetGlobalProgramAbsName(KNativePointer contextPtr)
+{
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto result = GetImpl()->ETSParserGetGlobalProgramAbsName(context);
+    return new std::string(result);
+}
+KOALA_INTEROP_1(ETSParserGetGlobalProgramAbsName, KNativePointer, KNativePointer)
+
+KNativePointer impl_CreateDiagnosticKind(KNativePointer context, KStringPtr& message, KInt type)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _message = getStringCopy(message);
+    const auto _type = static_cast<es2panda_PluginDiagnosticType>(type);
+    return const_cast<es2panda_DiagnosticKind *>(GetImpl()->CreateDiagnosticKind(_context, _message, _type));
+}
+KOALA_INTEROP_3(CreateDiagnosticKind, KNativePointer, KNativePointer, KStringPtr, KInt)
+
+KNativePointer impl_CreateDiagnosticInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr, KInt argc)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _kind = reinterpret_cast<es2panda_DiagnosticKind*>(kind);
+    const std::size_t headerLen = 4;
+    const char** _args = new const char*[argc];
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(argc); ++i) {
+        strLen = unpackUInt(argsPtr + position);
+        position += headerLen;
+        _args[i] = strdup(std::string(reinterpret_cast<const char*>(argsPtr + position), strLen).c_str());
+        position += strLen;
+    }
+    return GetImpl()->CreateDiagnosticInfo(_context, _kind, _args, argc);
+}
+KOALA_INTEROP_4(CreateDiagnosticInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt)
+
+KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr,
+                                         KInt argc, KStringPtr& substitutionCode)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _kind = reinterpret_cast<es2panda_DiagnosticKind *>(kind);
+    const std::size_t headerLen = 4;
+    const char** _args = new const char*[argc];
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(argc); ++i) {
+        strLen = unpackUInt(argsPtr + position);
+        position += headerLen;
+        _args[i] = strdup(std::string(reinterpret_cast<const char*>(argsPtr + position), strLen).c_str());
+        position += strLen;
+    }
+    const auto _substitutionCode = getStringCopy(substitutionCode);
+    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode);
+}
+KOALA_INTEROP_5(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr)
+
+void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArray argvPtr,
+                        KInt argc, KNativePointer pos)
+{
+    auto&& _context_ = reinterpret_cast<es2panda_Context *>(context);
+    auto&& _kind_ = reinterpret_cast<es2panda_DiagnosticKind *>(kind);
+    auto&& _pos_ = reinterpret_cast<es2panda_SourcePosition *>(pos);
+    const std::size_t headerLen = 4;
+    const char** argv = new const char*[argc];
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(argc); ++i) {
+        strLen = unpackUInt(argvPtr + position);
+        position += headerLen;
+        argv[i] = strdup(std::string(reinterpret_cast<const char*>(argvPtr + position), strLen).c_str());
+        position += strLen;
+    }
+    GetImpl()->LogDiagnostic(_context_, _kind_, argv, argc, _pos_);
+}
+KOALA_INTEROP_V5(LogDiagnostic, KNativePointer, KNativePointer, KStringArray, KInt, KNativePointer)
+
+void impl_LogDiagnosticWithSuggestion(KNativePointer context, KNativePointer diagnosticInfo,
+                                      KNativePointer suggestionInfo, KNativePointer range)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _diagnosticInfo = reinterpret_cast<es2panda_DiagnosticInfo*>(diagnosticInfo);
+    const auto _suggestionInfo = reinterpret_cast<es2panda_SuggestionInfo*>(suggestionInfo);
+    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
+    GetImpl()->LogDiagnosticWithSuggestion(_context, _diagnosticInfo, _suggestionInfo, _range);
+}
+KOALA_INTEROP_V4(LogDiagnosticWithSuggestion, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
+
+KInt impl_GenerateStaticDeclarationsFromContext(KNativePointer contextPtr, KStringPtr &outputPath)
+{
+    auto context = reinterpret_cast<es2panda_Context *>(contextPtr);
+    return GetImpl()->GenerateStaticDeclarationsFromContext(context, outputPath.data());
+}
+KOALA_INTEROP_2(GenerateStaticDeclarationsFromContext, KInt, KNativePointer, KStringPtr)
+
+KNativePointer impl_AnnotationUsageIrPropertiesPtrConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    std::size_t length;
+    auto result = GetImpl()->AnnotationUsageIrPropertiesPtrConst(_context, _receiver, &length);
+    return StageArena::cloneVector(result, length);
+}
+KOALA_INTEROP_2(AnnotationUsageIrPropertiesPtrConst, KNativePointer, KNativePointer, KNativePointer);
+
+KInt impl_GenerateTsDeclarationsFromContext(KNativePointer contextPtr, KStringPtr &outputDeclEts, KStringPtr &outputEts,
+                                            KBoolean exportAll, KBoolean isolated)
+{
+    auto context = reinterpret_cast<es2panda_Context *>(contextPtr);
+    return GetImpl()->GenerateTsDeclarationsFromContext(context, outputDeclEts.data(), outputEts.data(), exportAll, isolated );
+}
+KOALA_INTEROP_5(GenerateTsDeclarationsFromContext, KInt, KNativePointer, KStringPtr, KStringPtr, KBoolean, KBoolean)
+
+// Improve: simplify
+KNativePointer impl_CreateContextGenerateAbcForExternalSourceFiles(
+    KNativePointer configPtr, KInt fileNamesCount, KStringArray fileNames)
+{
+    auto config = reinterpret_cast<es2panda_Config *>(configPtr);
+    const std::size_t headerLen = 4;
+    const char **argv =
+        new const char *[static_cast<unsigned int>(fileNamesCount)];
+    std::size_t position = headerLen;
+    std::size_t strLen;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(fileNamesCount); ++i) {
+        strLen = unpackUInt(fileNames + position);
+        position += headerLen;
+        argv[i] = strdup(
+            std::string(reinterpret_cast<const char *>(fileNames + position),
+                        strLen)
+                .c_str());
+        position += strLen;
+    }
+    return GetImpl()->CreateContextGenerateAbcForExternalSourceFiles(
+        config, fileNamesCount, argv);
+}
+KOALA_INTEROP_3(CreateContextGenerateAbcForExternalSourceFiles, KNativePointer, KNativePointer, KInt, KStringArray)

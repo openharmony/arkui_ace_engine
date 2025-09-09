@@ -223,6 +223,7 @@ bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
     Ark_OnPromptEvent parameter;
     parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+    parameter.value = Converter::ArkValue<Ark_String>(eventInfo->GetValue());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;

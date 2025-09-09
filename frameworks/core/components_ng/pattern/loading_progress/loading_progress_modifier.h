@@ -22,6 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_base.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_owner.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -32,7 +33,8 @@ class LoadingProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
 
 public:
-    explicit LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner = LoadingProgressOwner::SELF);
+    explicit LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner = LoadingProgressOwner::SELF,
+        const WeakPtr<Pattern>& pattern = nullptr);
     ~LoadingProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
     void DrawOrbit(DrawingContext& canvas, const CometParam& cometParam, float orbitRadius, float date);
@@ -131,6 +133,7 @@ private:
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
     RefPtr<AnimatablePropertyFloat> sizeScale_;
     RefPtr<PropertyBool> useContentModifier_;
+    WeakPtr<Pattern> pattern_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;

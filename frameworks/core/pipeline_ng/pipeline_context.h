@@ -400,6 +400,8 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
+    void AddAfterModifierTask(std::function<void()>&& task);
+
     void AddAfterRenderTask(std::function<void()>&& task);
 
     void AddSafeAreaPaddingProcessTask(FrameNode* node);
@@ -551,7 +553,7 @@ public:
 
     void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
-    void FirePageChanged(int32_t pageId, bool isOnShow);
+    void FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow);
 
     bool HasDifferentDirectionGesture() const;
 
@@ -1026,7 +1028,11 @@ public:
 
     void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
 
+    // remove task of ResponseRegionChanged
     void DisableNotifyResponseRegionChanged() override;
+
+    // re-Post task of ResponseRegionChanged
+    void PostTaskResponseRegion(int32_t delay) override;
 
     void SetLocalColorMode(ColorMode colorMode)
     {
@@ -1255,7 +1261,7 @@ public:
     }
 
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
-    void NotifyDragTouchEvent(const TouchEvent& event);
+    void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
 

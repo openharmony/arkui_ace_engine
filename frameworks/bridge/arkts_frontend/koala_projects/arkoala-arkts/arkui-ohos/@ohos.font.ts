@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 
 export interface FontOptions {
     familyName: string | Resource;

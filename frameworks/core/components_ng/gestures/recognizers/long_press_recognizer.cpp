@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+
+#include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/event/event_constants.h"
-
-#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -80,11 +80,7 @@ void LongPressRecognizer::OnAccepted()
         isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
     SendCallbackMsg(onAction_, false, GestureCallbackType::START);
-    if (isLimitFingerCount_ && hasRepeated_) {
-        return;
-    }
     if (repeat_) {
-        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -150,9 +146,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 #endif
     int64_t currentTimeStamp = GetSysTimestamp();
-    extraInfo_ += "currentTimeStamp: " + std::to_string(currentTimeStamp);
-    extraInfo_ += ", curDuration: " + std::to_string(curDuration);
-    extraInfo_ += ", duration_: " + std::to_string(duration_);
+    extraInfo_ += "curTimeStamp: " + std::to_string(currentTimeStamp);
+    extraInfo_ += ", Duration: " + std::to_string(curDuration)  + "(cur) - " + std::to_string(duration_);
     extraInfo_ += ".";
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
@@ -209,7 +204,6 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onAction_, false, GestureCallbackType::START);
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
-            hasRepeated_ = false;
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
             if (firstInputTime_.has_value()) {
@@ -407,6 +401,9 @@ void LongPressRecognizer::SendCallbackMsg(
         isOnActionTriggered_ = true;
     }
     TriggerCallbackMsg(callback, isRepeat, type);
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
+    }
 }
 
 void LongPressRecognizer::TriggerCallbackMsg(
@@ -444,6 +441,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetInputEventType(inputEventType_);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetPassThrough(lastTouchEvent_.passThrough);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
@@ -480,8 +478,6 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
-    globalPoint_ = Point();
-    hasRepeated_ = false;
     longPressFingerCountForSequence_ = 0;
     isOnActionTriggered_ = false;
 }
@@ -615,6 +611,7 @@ void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestur
     info->SetRawInputDeviceId(deviceId_);
     info->SetLastAction(lastAction_);
     info->SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
+    info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

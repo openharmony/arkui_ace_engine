@@ -770,6 +770,36 @@ HWTEST_F(ScrollEffectTestNg, FadingEdge002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FadingEdge003
+ * @tc.desc: Test FadingEdge property with safe area
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, FadingEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateContent(2000.f);
+    CreateScrollDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 400.f);
+
+    /**
+     * @tc.steps: step2. Update Safe Area
+     * @tc.expected: overlay frame size expand safe area.
+     */
+    frameNode_->GetGeometryNode()->SetSelfAdjust(RectF(0, 0, 0, 10.f));
+    FlushUITasks(frameNode_);
+    geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
  * @tc.name: SetPaintDirection001
  * @tc.desc: Test ScrollFadeEffect SetPaintDirection
  * @tc.type: FUNC

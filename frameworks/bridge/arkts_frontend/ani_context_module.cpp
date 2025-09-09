@@ -17,15 +17,13 @@
 
 #include <ani.h>
 
-#include "base/log/log.h"
-#include "frameworks/core/common/container.h"
+#include <mutex>
 
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/common/plugin_manager.h"
-#endif
+#include "base/log/log.h"
 namespace OHOS::Ace::Framework {
 
-thread_local std::unordered_map<int32_t, std::shared_ptr<ani_ref>> AniContextModule::aniContexts_;
+std::unordered_map<int32_t, ani_ref*> AniContextModule::aniContexts_;
+std::shared_mutex AniContextModule::aniContextsMutex_;
 
 AniContextModule* AniContextModule::GetInstance()
 {
@@ -33,45 +31,19 @@ AniContextModule* AniContextModule::GetInstance()
     return &instance;
 }
 
-std::shared_ptr<ani_ref> AniContextModule::GetAniContext()
+ani_ref* AniContextModule::GetAniContext(int32_t key)
 {
-    int32_t currentInstance = Container::CurrentIdSafely();
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-    if (currentInstance >= MIN_PLUGIN_SUBCONTAINER_ID) {
-        currentInstance = PluginManager::GetInstance().GetPluginParentContainerId(currentInstance);
-    }
-#endif
-
-    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
-        // currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
-    }
-
-    if (currentInstance <= 0) {
-        currentInstance = CONTAINER_ID_DIVIDE_SIZE;
-    }
-    auto it = aniContexts_.find(currentInstance);
-    if (it != aniContexts_.end()) {
-        return it->second;
-    }
-    int32_t currentInstanceBak = currentInstance;
-
-    // Try to get the active container.
-    auto container = Container::GetActive();
-    if (container) {
-        currentInstance = container->GetInstanceId();
-        it = aniContexts_.find(currentInstance);
-        if (it != aniContexts_.end()) {
-            return it->second;
-        } else {
-            TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "Context not found, id:%{public}d, active:%{public}d",
-                currentInstanceBak, currentInstance);
-        }
+    std::shared_lock<std::shared_mutex> lock(aniContextsMutex_);
+    auto it1 = aniContexts_.find(key);
+    if (it1 != aniContexts_.end()) {
+        return it1->second;
     }
     return nullptr;
 }
 
-void AniContextModule::AddAniContext(int32_t key, const std::shared_ptr<ani_ref>& value)
+void AniContextModule::AddAniContext(int32_t key, ani_ref* value)
 {
+    std::unique_lock<std::shared_mutex> lock(aniContextsMutex_);
     if (aniContexts_.find(key) != aniContexts_.end()) {
         LOGW("AniContext exists for key %d", key);
         return;
@@ -81,6 +53,7 @@ void AniContextModule::AddAniContext(int32_t key, const std::shared_ptr<ani_ref>
 
 void AniContextModule::RemoveAniContext(int32_t key)
 {
+    std::unique_lock<std::shared_mutex> lock(aniContextsMutex_);
     auto it = aniContexts_.find(key);
     if (it != aniContexts_.end()) {
         aniContexts_.erase(it);

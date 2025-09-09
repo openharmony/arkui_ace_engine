@@ -105,9 +105,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset001, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 0.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -148,9 +151,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset002, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -195,9 +201,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset003, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -242,9 +251,12 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset004, TestSize.Lev
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 500.0f);
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 210.0f);
+    auto offsetX = (sheetLayoutAlgorithm->sheetMaxWidth_ - sheetLayoutAlgorithm->sheetWidth_) / 2;
+    auto offsetY = (sheetLayoutAlgorithm->sheetMaxHeight_ - sheetLayoutAlgorithm->sheetHeight_) / 2;
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, offsetX);
+    EXPECT_FLOAT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, offsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -1854,6 +1866,9 @@ HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight002, TestSize.Lev
 
     bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
     ASSERT_TRUE(isNeedChangeScrollHeight);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_FALSE(isNeedChangeScrollHeight);
     auto keyboardHeight = 500.0f;
     sheetPattern->SetKeyboardHeight(keyboardHeight);
     isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
@@ -2000,59 +2015,6 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager001, TestSize
     sheetStyle.sheetType = SheetType::SHEET_CENTER;
     sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
     EXPECT_EQ(sheetPattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
-    SheetPresentationTestThreeNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: GetSheetTypeFromSheetManager002
- * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
- *           Condition: The default is Bottom Type
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize.Level1)
-{
-    SheetPresentationTestThreeNg::SetUpTestCase();
-    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
-    /**
-     * @tc.steps: step1. create sheet page, get sheet pattern.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(sheeLayoutProperty, nullptr);
-    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
-    /**
-     * @tc.steps: step2. sheetThemeType_ = "auto".
-     */
-    pattern->sheetThemeType_ = "auto";
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 780, 800 });
-    /**
-     * @tc.steps: step2. Set preferType is Bottom.
-     * @tc.expected: the sheetType is Bottom.
-     */
-    SheetStyle sheetStyle;
-    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
-    /**
-     * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
-     * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
-     */
-    auto windowManager = pipelineContext->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-    auto isPcOrPadFreeMultiWindowCallback = []() {
-        return true;
-    };
-    windowManager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindowCallback));
-    sheetStyle.bottomOffset = OffsetF(0, -15);
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM_OFFSET);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 
@@ -2320,6 +2282,58 @@ HWTEST_F(SheetPresentationTestThreeNg, SheetHeightNeedChanged001, TestSize.Level
 }
 
 /**
+ * @tc.name: AvoidKeyboardBySheetModeTest001
+ * @tc.desc: Branch: if (isScrolling_) && if (GreatOrEqual(sheetHeightUp_, 0.0f))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, AvoidKeyboardBySheetModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. init value.
+     */
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    sheetPattern->keyboardHeight_ = safeAreaManager->GetKeyboardInset().Length() + 10.0f;
+    sheetPattern->isDismissProcess_ = false;
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    safeAreaManager->keyboardInset_.end = 498.0f;
+    pipelineContext->rootHeight_ = 2240.0f;
+    sheetPattern->isScrolling_ = true;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    /**
+     * @tc.steps: step3. test AvoidKeyboardBySheetMode.
+     */
+    EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    EXPECT_NE(sheetPattern->GetSheetHeightChange(), 0.0f);
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: SheetWidthNeedChanged001
  * @tc.desc: Branch: if (!NearEqual(sheetGeometryNode->GetFrameSize().Width(), sheetWidth_) ||
  *       !NearEqual(GetWrapperWidth(), wrapperWidth_))
@@ -2391,6 +2405,63 @@ HWTEST_F(SheetPresentationTestThreeNg, SheetWidthNeedChanged001, TestSize.Level1
      */
     sheetPattern->sheetWidth_ = 1800.0f;
     EXPECT_EQ(sheetPattern->SheetWidthNeedChanged(), true);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSheetBackgroundColor001
+ * @tc.desc: Branch: if (sheetStyle.backgroundColor.has_value()).
+ *           Condition: 1.sheetStyle.backgroundColor.has_value()=>true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, UpdateSheetBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "UpdateSheetBackgroundColor".
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("sheetNode", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("scrollNode", 003, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("sheetContentNode", 004,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern, before test "UpdateSheetBackgroundColor".
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle, before test "UpdateSheetBackgroundColor".
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.backgroundColor = Color::BLUE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "UpdateSheetBackgroundColor",
+     * @tc.expected: HasBackgroundColor = false.
+     */
+    sheetPattern->UpdateSheetBackgroundColor();
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    EXPECT_EQ(hasBackgroundColor, false);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

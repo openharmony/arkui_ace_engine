@@ -35,7 +35,7 @@ struct TouchTestResultInfo {
 class GestureEventHub;
 
 class TouchEventImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(TouchEventImpl, AceType)
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
 public:
     explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
     ~TouchEventImpl() override = default;
@@ -57,7 +57,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
-    DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget)
+    DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget);
 public:
     TouchEventActuator() = default;
     ~TouchEventActuator() override = default;
@@ -138,7 +138,7 @@ public:
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
-    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& callback)
+    void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& callback)
     {
         if (commonTouchEventCallback_) {
             commonTouchEventCallback_.Reset();
@@ -152,6 +152,14 @@ public:
         userCallback_ = touchEventActuator->userCallback_;
         onTouchEventCallback_ = touchEventActuator->onTouchEventCallback_;
         commonTouchEventCallback_ = touchEventActuator->commonTouchEventCallback_;
+    }
+
+    void SetNeedPropagation(bool isNeedPropagation) {
+        isNeedPropagation_ = isNeedPropagation;
+    }
+
+    bool IsNeedPropagation() const {
+        return isNeedPropagation_;
     }
 
 private:
@@ -172,6 +180,7 @@ private:
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;
     std::map<int32_t, TimeStamp> firstInputTimeWithId_;
+    bool isNeedPropagation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

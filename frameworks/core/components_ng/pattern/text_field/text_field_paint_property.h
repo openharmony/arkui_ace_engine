@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class TextFieldPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty);
 public:
     TextFieldPaintProperty() = default;
     ~TextFieldPaintProperty() override = default;
@@ -32,7 +32,6 @@ public:
     {
         auto value = MakeRefPtr<TextFieldPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
-        value->UpdatePaintPropertyHost(DynamicCast<PaintProperty>(this));
         value->propPlaceholderColor_ = ClonePlaceholderColor();
         value->propInputStyle_ = CloneInputStyle();
         value->propCursorColor_ = CloneCursorColor();

@@ -68,7 +68,14 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
     * @tc.steps: step1. Create GestureEventHub.
     * @tc.expected: gestureEventHub is not null.
     */
+    auto parentNode = FrameNode::CreateFrameNode(
+        "stack", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(parentNode);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
 
@@ -80,6 +87,49 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
+    renderContext->UpdateTransformRotate({ 0.0f, 0.0f, 1.0f, 1.0f, 0.0f });
+
+    /**
+     * @tc.steps: step3. call CalcFrameNodeOffsetAndSize.
+     */
+    guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, true);
+    EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
+    guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, false);
+    EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
+    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetX(), 0.0);
+    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetY(), 0.0);
+}
+
+/**
+ * @tc.name: CalcFrameNodeOffsetAndSize_002
+ * @tc.desc: Test CalcFrameNodeOffsetAndSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+   /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    auto menuWrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    dragDropManager->SetMenuWrapperNode(menuWrapperNode);
 
     /**
      * @tc.steps: step3. call CalcFrameNodeOffsetAndSize.
@@ -1459,6 +1509,54 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
     EXPECT_EQ(data.menuPositionTop, -1.0f);
     EXPECT_EQ(data.menuPositionRight, 2.0f);
     EXPECT_EQ(data.menuPositionBottom, 2.0f);
+}
+
+/**
+ * @tc.name: UpdateMenuNode003
+ * @tc.desc: Test UpdateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateMenuNode003, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    textNode->MountToParent(targetNode);
+    MenuParam menuParam;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    PreparedInfoForDrag data;
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    frameNode->SetDragPreviewOptions(previewOption);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+    menuWrapperPattern->SetHasTransitionEffect(true);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
+    menuWrapperPattern->SetHasTransitionEffect(false);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    EXPECT_EQ(data.menuNode, nullptr);
 }
 
 /**

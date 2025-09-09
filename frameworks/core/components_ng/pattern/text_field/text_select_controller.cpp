@@ -92,6 +92,9 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
     if (textAlign != TextAlign::END) {
         AdjustHandleAtEdge(rect);
     }
+    if (GreatNotEqual(rect.Height(), contentRect_.Height()) && !textField->IsTextArea()) {
+        rect.SetHeight(contentRect_.Height());
+    }
     return rect;
 }
 
@@ -706,7 +709,7 @@ void TextSelectController::FireSelectEvent()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
-    auto eventHub = textField->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     if (needReport && textField->IsModifyDone() && (textField->HasFocus()

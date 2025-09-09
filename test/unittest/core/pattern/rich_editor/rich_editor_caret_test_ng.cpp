@@ -401,6 +401,25 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCaretOffset003
+ * @tc.desc: test set caret offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, SetCaretOffset003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorController->SetCaretOffset(2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorController->SetCaretOffset(-1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+}
+
+/**
  * @tc.name: MoveCaretAndStartFocus001
  * @tc.desc: test MoveCaretAndStartFocus
  * @tc.type: FUNC
@@ -585,6 +604,11 @@ HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest003, TestSize.Level1)
     richEditorPattern->floatingCaretState_.Reset();
     richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
+    richEditorPattern->OnAttachToFrameNode();
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(contentPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
     paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(100.0f, 0));
     EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
@@ -676,6 +700,31 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretRect002, TestSize.Level1)
 
     EXPECT_EQ(GreatNotEqual(manager->GetHeight(), 0.0f), true);
     EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
+}
+
+/**
+ * @tc.name: GetCaretRect003
+ * @tc.desc: test get caret rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, GetCaretRect003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto rect1 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect1.GetOffset().GetX(), -1);
+    EXPECT_EQ(rect1.GetOffset().GetY(), -1);
+    EXPECT_EQ(rect1.Width(), -1);
+    EXPECT_EQ(rect1.Height(), -1);
+    richEditorPattern->caretTwinkling_ = true;
+    auto rect2 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect2.GetOffset().GetX(), 0);
+    EXPECT_EQ(rect2.GetOffset().GetY(), 0);
+    EXPECT_EQ(rect2.Width(), 0);
+    EXPECT_EQ(rect2.Height(), 0);
 }
 
 /**
@@ -869,11 +918,11 @@ HWTEST_F(RichEditorCaretTestNg, CalcMoveUpPos001, TestSize.Level0)
 }
 
 /**
- * @tc.name: TriggerAvoidOnCaretChange
+ * @tc.name: TriggerAvoidOnCaretChange001
  * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -889,6 +938,61 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange, TestSize.Level1)
     context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
     pattern_->TriggerAvoidOnCaretChange();
     EXPECT_EQ(pattern_->GetLastCaretPos(), std::nullopt);
+}
+
+/**
+ * @tc.name: TriggerAvoidOnCaretChange002
+ * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto focusHub = pattern_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->currentFocus_ = true;
+    pattern_->HandleFocusEvent();
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1000 };
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    PipelineBase::GetCurrentContext()->textFieldManager_ = textFieldManager;
+    textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    pattern_->TriggerAvoidOnCaretChange();
+    EXPECT_NE(textFieldManager->GetHeight(), richEditorTheme->GetDefaultCaretHeight().ConvertToPx());
+}
+
+/**
+ * @tc.name: GetCaretOffset001
+ * @tc.desc: test get caret offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, GetCaretOffset001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = 1;
+    auto offset1 = richEditorController->GetCaretOffset();
+    EXPECT_EQ(offset1, 1);
+    richEditorPattern->caretPosition_ = 2;
+    auto offset2 = richEditorController->GetCaretOffset();
+    EXPECT_EQ(offset2, 2);
 }
 
 }

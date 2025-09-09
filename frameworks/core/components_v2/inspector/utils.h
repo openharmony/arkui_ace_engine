@@ -437,6 +437,18 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
     return TextAlign::START;
 }
 
+inline std::string ConvertWrapTextContentAlignToString(TextContentAlign textContentAlign)
+{
+    static const LinearEnumMapNode<TextContentAlign, std::string> textContentAlignTable[] = {
+        { TextContentAlign::TOP, "TextContentAlign.TOP" },
+        { TextContentAlign::CENTER, "TextContentAlign.CENTER" },
+        { TextContentAlign::BOTTOM, "TextContentAlign.BOTTOM" },
+    };
+
+    auto index = BinarySearchFindIndex(textContentAlignTable, ArraySize(textContentAlignTable), textContentAlign);
+    return index < 0 ? "TextContentAlign.CENTER" : textContentAlignTable[index].value;
+}
+
 inline std::string ConvertWrapTextVerticalAlignToString(TextVerticalAlign textVerticalAlign)
 {
     static const LinearEnumMapNode<TextVerticalAlign, std::string> textVerticalAlignTable[] = {
@@ -591,6 +603,17 @@ inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
     return index < 0 ? "CopyOptions::None" : copyOptionsTable[index].value;
 }
 
+inline std::string ConvertEllipsisModeToString(EllipsisMode value)
+{
+    static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {
+        { EllipsisMode::HEAD, "EllipsisMode.START" },
+        { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
+        { EllipsisMode::TAIL, "EllipsisMode.END" },
+    };
+    auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
+    return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
+}
+
 inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 {
     static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
@@ -615,17 +638,6 @@ inline std::string ConvertTextDirectionToString(TextDirection direction)
 
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), direction);
     return index < 0 ? "AUTO" : textDirectionTable[index].value;
-}
-
-inline std::string ConvertEllipsisModeToString(EllipsisMode value)
-{
-    static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {
-        { EllipsisMode::HEAD, "EllipsisMode.START" },
-        { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
-        { EllipsisMode::TAIL, "EllipsisMode.END" },
-    };
-    auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
-    return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
 }
 
 inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBreakStrategy)

@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace::NG {
 using OnCoordScrollStartAction = std::function<void()>;
-using OnCoordScrollUpdateAction = std::function<void(float)>;
+using OnCoordScrollUpdateAction = std::function<void(float, float)>;
 using OnCoordScrollEndAction = std::function<void()>;
 using BeforeCreateLayoutWrapper = std::function<void()>;
 
 class NavBarEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavBarEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavBarEventHub, EventHub);
 public:
     void SetOnCoordScrollStartAction(OnCoordScrollStartAction&& action)
     {
@@ -51,10 +51,10 @@ public:
         onCoordScrollUpdateAction_ = std::move(action);
     }
     
-    void FireOnCoordScrollUpdateAction(float currentOffset)
+    void FireOnCoordScrollUpdateAction(float offset, float currentOffset)
     {
         if (onCoordScrollUpdateAction_) {
-            onCoordScrollUpdateAction_(currentOffset);
+            onCoordScrollUpdateAction_(offset, currentOffset);
         }
     }
     

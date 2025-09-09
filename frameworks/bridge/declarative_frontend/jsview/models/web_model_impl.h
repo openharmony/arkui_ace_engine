@@ -118,6 +118,7 @@ public:
     void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedMouseEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override {};
+    void SetNativeEmbedObjectParamChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
@@ -126,7 +127,10 @@ public:
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
+    void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
+    void SetForceEnableZoom(bool isForceEnableZoom) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

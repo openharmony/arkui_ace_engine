@@ -14,6 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("ime_test") {
+  module_name = "Component-Text"
+  module_output = ""
   type = "new"
   sources = [ "ime_test.cpp" ]
 

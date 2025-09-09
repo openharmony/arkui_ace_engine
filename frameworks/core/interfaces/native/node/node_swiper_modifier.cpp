@@ -17,6 +17,7 @@
 #include "node_model.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
@@ -213,6 +214,42 @@ bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParamete
         swiperArrowParameters.resourceArrowColorValueObject = resourceObjs.at(ARROW_RESOURCE_COLOR);
     }
     return true;
+}
+
+void GetSwiperArrowResObj(FrameNode* frameNode, SwiperArrowParameters& swiperArrowParameters)
+{
+    // If the dark and light switch is not turned on,
+    // do not need to acquire the resource object.
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    // Use "backgroundColor" to obtain the corresponding resource object.
+    Color backgroundColor =
+        swiperArrowParameters.backgroundColor.value_or(
+            swiperArrowParameters.isSidebarMiddle.value()
+            ? swiperIndicatorTheme->GetBigArrowBackgroundColor()
+            : swiperIndicatorTheme->GetSmallArrowBackgroundColor());
+    RefPtr<ResourceObject> bgColorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(bgColorResObj, backgroundColor, frameNode->GetTag());
+    swiperArrowParameters.backgroundColor = backgroundColor;
+    swiperArrowParameters.resourceBackgroundColorValueObject = bgColorResObj;
+
+    // Use "arrowColor" to obtain the corresponding resource object.
+    Color arrowColor =
+        swiperArrowParameters.arrowColor.value_or(
+            swiperArrowParameters.isSidebarMiddle.value()
+            ? swiperIndicatorTheme->GetBigArrowColor()
+            : swiperIndicatorTheme->GetSmallArrowColor());
+    RefPtr<ResourceObject> arrowColorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(arrowColorResObj, arrowColor, frameNode->GetTag());
+    swiperArrowParameters.arrowColor = arrowColor;
+    swiperArrowParameters.resourceArrowColorValueObject = arrowColorResObj;
 }
 
 std::string GetInfoFromVectorByIndex(const std::vector<std::string>& dotIndicatorInfo, int32_t index)
@@ -418,6 +455,36 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
     return swiperParameters;
 }
 
+void GetSwiperIndicatorResObj(FrameNode* frameNode, SwiperParameters& swiperParameters)
+{
+    // If the dark and light switch is not turned on,
+    // do not need to acquire the resource object.
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    // Use "colorVal" to obtain the corresponding resource object.
+    Color colorVal =
+        swiperParameters.colorVal.value_or(swiperIndicatorTheme->GetColor());
+    RefPtr<ResourceObject> colorValResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(colorValResObj, colorVal, frameNode->GetTag());
+    swiperParameters.colorVal = colorVal;
+    swiperParameters.resourceColorValueObject = colorValResObj;
+
+    // Use "selectedColorVal" to obtain the corresponding resource object.
+    Color selectedColorVal =
+        swiperParameters.selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor());
+    RefPtr<ResourceObject> selectedColorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(selectedColorResObj, selectedColorVal, frameNode->GetTag());
+    swiperParameters.selectedColorVal = selectedColorVal;
+    swiperParameters.resourceSelectedColorValueObject = selectedColorResObj;
+}
+
 SwiperDigitalParameters GetDigitIndicatorProps(FrameNode* frameNode, ArkUISwiperDigitIndicator* indicator)
 {
     CHECK_NULL_RETURN(frameNode, SwiperDigitalParameters());
@@ -457,6 +524,39 @@ SwiperDigitalParameters GetDigitIndicatorProps(FrameNode* frameNode, ArkUISwiper
                                                  : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
     swiperDigitalParameters.ignoreSizeValue = indicator->ignoreSizeValue.value == 1 ? true : false;
     return swiperDigitalParameters;
+}
+
+void GetSwiperDigitIndicatorResObj(FrameNode* frameNode, SwiperDigitalParameters& swiperDigitParameters)
+{
+    // If the dark and light switch is not turned on,
+    // do not need to acquire the resource object.
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    // Use "fontColor" to obtain the corresponding resource object.
+    Color fontColor =
+        swiperDigitParameters.fontColor.value_or(
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
+    RefPtr<ResourceObject> fontColorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(fontColorResObj, fontColor, frameNode->GetTag());
+    swiperDigitParameters.fontColor = fontColor;
+    swiperDigitParameters.resourceFontColorValueObject = fontColorResObj;
+
+    // Use "selectedFontColor" to obtain the corresponding resource object.
+    Color selectedFontColor =
+        swiperDigitParameters.selectedFontColor.value_or(
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
+    RefPtr<ResourceObject> selectedFontColorResObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(selectedFontColorResObj,
+        selectedFontColor, frameNode->GetTag());
+    swiperDigitParameters.selectedFontColor = selectedFontColor;
+    swiperDigitParameters.resourceSelectedFontColorValueObject = selectedFontColorResObj;
 }
 
 void GetFontContent(
@@ -754,6 +854,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
             SwiperModelNG::SetDisplayArrow(frameNode, false);
             return;
         }
+        GetSwiperArrowResObj(frameNode, swiperArrowParameters);
         SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
         SwiperModelNG::SetDisplayArrow(frameNode, true);
     } else if (displayArrowValue == DISPLAY_ARROW_TRUE) {
@@ -763,6 +864,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
                 SwiperModelNG::SetDisplayArrow(frameNode, false);
                 return;
             }
+            GetSwiperArrowResObj(frameNode, swiperArrowParameters);
             SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
             SwiperModelNG::SetDisplayArrow(frameNode, true);
         } else {
@@ -1462,6 +1564,7 @@ void SetSwiperIndicatorStyle(ArkUINodeHandle node, ArkUISwiperIndicator* indicat
     if (indicator->type == ArkUISwiperIndicatorType::DOT) {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         SwiperParameters swiperParameters = GetDotIndicatorProps(frameNode, indicator);
+        GetSwiperIndicatorResObj(frameNode, swiperParameters);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, swiperParameters);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }
@@ -1515,6 +1618,7 @@ void SetSwiperDigitIndicatorStyle(ArkUINodeHandle node, ArkUISwiperDigitIndicato
     if (indicator->type == ArkUISwiperIndicatorType::DIGIT) {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         SwiperDigitalParameters swiperDigitParameters = GetDigitIndicatorProps(frameNode, indicator);
+        GetSwiperDigitIndicatorResObj(frameNode, swiperDigitParameters);
         SwiperModelNG::SetDigitIndicatorStyle(frameNode, swiperDigitParameters);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
     }

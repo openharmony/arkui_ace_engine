@@ -158,9 +158,9 @@ struct ParagraphStyle {
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
     int32_t textStyleUid = 0;
-    bool optimizeTrailingSpace = false;
     bool isOnlyBetweenLines = false;
     bool isFirstParagraphLineSpacing = true;
+    bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
@@ -196,9 +196,9 @@ struct ParagraphStyle {
         result += ", fontSize: ";
         result += std::to_string(fontSize);
         result += ", indent: ";
-        result += indent.ToString();
         result += ", paragraphSpacing: ";
         result += paragraphSpacing.ToString();
+        result += indent.ToString();
         result += ", enableAutoSpacing: ";
         result += enableAutoSpacing;
         return result;
@@ -243,7 +243,7 @@ struct PositionWithAffinity {
 
 // Paragraph is interface for drawing text and text paragraph.
 class Paragraph : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::Paragraph, AceType)
+    DECLARE_ACE_TYPE(NG::Paragraph, AceType);
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
@@ -306,7 +306,6 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
-    virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual RectF GetPaintRegion(float x, float y) = 0;
@@ -319,6 +318,14 @@ public:
     {
         return false;
     };
+    virtual bool DidExceedMaxLinesInner()
+    {
+        return false;
+    }
+    virtual std::string GetDumpInfo()
+    {
+        return "";
+    }
 };
 } // namespace OHOS::Ace::NG
 

@@ -63,7 +63,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
         isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         if (isMainFix) {
-            frameSize_.SetMainSize(Infinity<float>(), info_.axis_);
+            frameSize_.SetMainSize(LayoutInfinity<float>(), info_.axis_);
         }
     }
     bool matchChildren = GreaterOrEqualToInfinity(mainSize) || isMainWrap;
@@ -221,7 +221,9 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+    auto property = wrapper_->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (property->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
         auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
         overscrollOffsetBeforeJump_ =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
@@ -688,12 +690,12 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         auto itemWrapper = wrapper_->GetChildByIndex(l, true);
-        if (l >= 0 && (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout())) {
+        if (l >= 0 && GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
         itemWrapper = wrapper_->GetChildByIndex(r, true);
-        if (r < info_.GetChildrenCount() && (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout())) {
+        if (r < info_.GetChildrenCount() && GridUtils::CheckNeedCacheLayout(itemWrapper)) {
             itemsToPreload.emplace_back(r);
         }
     }

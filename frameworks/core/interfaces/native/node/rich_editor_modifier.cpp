@@ -658,6 +658,49 @@ void ResetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetEnableHapticFeedback(frameNode, true);
 }
+
+void SetRichEditorEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableAutoSpacing(frameNode, value);
+}
+ 
+void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
+}
+ 
+void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool enable = (undoStyleValue == static_cast<int32_t>(UndoStyle::KEEP_STYLE));
+    RichEditorModelNG::SetSupportStyledUndo(frameNode, enable);
+}
+ 
+void ResetRichEditorUndoStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
+}
+
+void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, Color(color));
+}
+ 
+void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
+}
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -725,6 +768,12 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
         .setRichEditorEnableHapticFeedback = SetRichEditorEnableHapticFeedback,
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
+        .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
+        .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
+        .setRichEditorUndoStyle = SetRichEditorUndoStyle,
+        .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
+        .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
+        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

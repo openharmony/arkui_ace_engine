@@ -181,3 +181,13 @@ ohos_unittest("form_special_style_test") {
     "form_fwk:fmskit_native",
   ]
 }
+
+group("ace_form_test") {
+  testonly = true
+  deps = [
+    ":form_node_test",
+    ":form_pattern_test",
+    ":form_test_ng",
+    ":form_special_style_test"
+  ]
+}

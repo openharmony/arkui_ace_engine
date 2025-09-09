@@ -32,27 +32,27 @@ namespace OHOS::Ace {
 struct UIInputEvent {
     virtual ~UIInputEvent() = default;
     TimeStamp time;
-    UIInputEventType eventType = UIInputEventType::NONE;
     ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
+    UIInputEventType eventType = UIInputEventType::NONE;
 };
 
 struct PointerEvent : public UIInputEvent {
     virtual ~PointerEvent() = default;
-    explicit PointerEvent(float x = {}, float y = {}, float screenX = {},
-        float screenY = {}, double globalDisplayX = {}, double globalDisplayY = {}, TimeStamp time = {})
-        :x(x), y(y), screenX(screenX), screenY(screenY), globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY)
+    explicit PointerEvent(float x = {}, float y = {}, float screenX = {}, float screenY = {},
+        double globalDisplayX = {}, double globalDisplayY = {}, TimeStamp time = {})
+        : globalDisplayX(globalDisplayX), globalDisplayY(globalDisplayY), x(x), y(y), screenX(screenX), screenY(screenY)
     {
         this->time = time;
     }
+    double globalDisplayX = {};
+    double globalDisplayY = {};
     float x = {};
     float y = {};
     float screenX = {};
     float screenY = {};
-    bool passThrough = {};
     // ID of the node to which this event is being explicitly posted (not necessarily the original target)
     int32_t postEventNodeId = {};
-    double globalDisplayX = {};
-    double globalDisplayY = {};
+    bool passThrough = {};
 };
 
 struct AxisEvent final : public PointerEvent {
@@ -134,8 +134,6 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
-    void SetPinchAxisScale(float scale);
-    float GetPinchAxisScale() const;
     void SetRotateAxisAngle(float angle);
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);
@@ -153,7 +151,6 @@ public:
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;
-    float pinchAxisScale_ = 0.0;
     float rotateAxisAngle_ = 0.0;
     bool isRotationEvent_ = false;
     // global position at which the touch point contacts the screen.

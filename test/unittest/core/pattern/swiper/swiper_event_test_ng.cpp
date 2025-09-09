@@ -1427,6 +1427,41 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnIndexChange003
+ * @tc.desc: OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    bool isTrigger = false;
+    auto onChangeEvent = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChangeEvent(std::move(onChangeEvent));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->oldIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(false);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+    /**
+     * @tc.steps: step3. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->fastAnimationChange_ = true;
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(false);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
+}
+
+/**
  * @tc.name: OnScrollStartEnd001
  * @tc.desc: test OnScrollStartRecursive/OnScrollEndRecursive
  * @tc.type: FUNC
@@ -1636,7 +1671,7 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+    auto panEvent = frameNode_->GetEventHub<EventHub>()
         ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
@@ -1665,7 +1700,7 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+    auto panEvent = frameNode_->GetEventHub<EventHub>()
         ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
@@ -2111,5 +2146,58 @@ HWTEST_F(SwiperEventTestNg, FireSelectedEvent001, TestSize.Level1)
      */
     pattern_->FireSelectedEvent(3, 4);
     EXPECT_EQ(pattern_->selectedIndex_, 4);
+}
+
+/**
+ * @tc.name: FireSelectedEvent002
+ * @tc.desc: Test FireSelectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, FireSelectedEvent002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->selectedIndex_ = 2;
+    pattern_->jumpOnChange_ = true;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 2);
+
+    pattern_->jumpOnChange_ = false;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 3);
+}
+
+/**
+ * @tc.name: OnIndexChange002
+ * @tc.desc: Test OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->oldIndex_ = 3;
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(3);
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(true);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(true);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
 }
 } // namespace OHOS::Ace::NG

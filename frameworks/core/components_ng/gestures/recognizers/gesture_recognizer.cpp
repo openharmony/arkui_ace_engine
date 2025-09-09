@@ -151,6 +151,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
     deviceType_ = point.sourceType;
     deviceTool_ = point.sourceTool;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
+
     auto result = AboutToAddCurrentFingers(point);
     if (result) {
         HandleTouchDownEvent(point);
@@ -357,7 +358,6 @@ std::vector<Matrix4> NGGestureRecognizer::GetTransformMatrix(const WeakPtr<Frame
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
-        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:"
                 SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
@@ -574,13 +574,12 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     }
 
     PointF localPoint(event.x, event.y);
-    bool isPostEventResult = isPostEventResult_ || event.passThrough;
     if (isRealTime) {
-        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult,
-            isPostEventResult, event.postEventNodeId);
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_ && !event.passThrough,
+            isPostEventResult_ || event.passThrough, event.postEventNodeId);
     } else {
         TransformForRecognizer(
-            localPoint, frameNode, false, isPostEventResult, event.postEventNodeId);
+            localPoint, frameNode, false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -593,10 +592,10 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
         for (const auto& item : responseRegion) {
             responseInfo.append(item.ToString()).append("; ");
         }
-        TAG_LOGW(AceLogTag::ACE_GESTURE, SEC_PLD(,
-            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s, point = "
-            "%{public}s, frameRect = %{public}s, %{public}s"),
-            SEC_PARAM(AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
+        TAG_LOGW(AceLogTag::ACE_GESTURE, "%{public}s IsInAttachedNode result is negative" SEC_PLD(,
+            ", node tag = %{public}s, id = %{public}s, point = "
+            "%{public}s, frameRect = %{public}s, %{public}s"), AceType::TypeName(this),
+            SEC_PARAM(host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
             localPoint.ToString().c_str(), host->GetFrameRectWithoutSafeArea().ToString().c_str(),
             responseInfo.c_str()));
     }
@@ -700,6 +699,11 @@ std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEv
     return "";
 }
 
+void NGGestureRecognizer::ResetResponseLinkRecognizer()
+{
+    responseLinkRecognizer_.clear();
+}
+
 void NGGestureRecognizer::HandleGestureAccept(
     const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType)
 {
@@ -741,10 +745,5 @@ GestureActionPhase NGGestureRecognizer::GetActionPhase(
         default:
             return GestureActionPhase::UNKNOWN;
     }
-}
-
-void NGGestureRecognizer::ResetResponseLinkRecognizer()
-{
-    responseLinkRecognizer_.clear();
 }
 } // namespace OHOS::Ace::NG

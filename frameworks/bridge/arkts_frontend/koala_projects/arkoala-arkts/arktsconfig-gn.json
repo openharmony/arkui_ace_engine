@@ -58,9 +58,6 @@
             "@ohos/font": [
                 "@ohos.font.ets"
             ],
-            "global/resource": [
-                "global/resource/resource.ets"
-            ],
             "@ohos/router": [
                 "@ohos.router.ets"
             ],

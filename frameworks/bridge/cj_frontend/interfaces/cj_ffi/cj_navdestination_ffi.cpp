@@ -356,12 +356,12 @@ void FfiOHOSAceFrameworkNavdestinationSetSystemBarStyle(uint32_t styleColor)
     NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
 }
 
-void FfiOHOSAceFrameworkNavdestinationSetOnShown(void (*callback)())
+void FfiOHOSAceFrameworkNavdestinationSetOnShown(void (*callback)(int32_t))
 {
     NavDestinationModel::GetInstance()->SetOnShown(CJLambda::Create(callback));
 }
 
-void FfiOHOSAceFrameworkNavdestinationSetOnHidden(void (*callback)())
+void FfiOHOSAceFrameworkNavdestinationSetOnHidden(void (*callback)(int32_t))
 {
     NavDestinationModel::GetInstance()->SetOnHidden(CJLambda::Create(callback));
 }

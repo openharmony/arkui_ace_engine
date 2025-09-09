@@ -40,7 +40,9 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
+#include "ui_extension_context.h"
 #include "wm_common.h"
+#include "form_ashmem.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -73,6 +75,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -156,7 +159,7 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 const std::string ACTION_APPDETAIL = "ohos.want.action.appdetail";
 const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
-const std::string ACRION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
+const std::string ACTION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
 const std::string ABILITYNAME_CALENDAR = "MainAbility";
 const std::string ACTION_PARAM = "action";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
@@ -1094,6 +1097,14 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
     auto context = context_.lock();
     CHECK_NULL_VOID(context);
     StoreConfiguration(context->GetConfiguration());
+}
+
+UIContentImpl::~UIContentImpl()
+{
+    UnSubscribeEventsPassThroughMode();
+    ProcessDestructCallbacks();
+    DestroyUIDirector();
+    DestroyCallback();
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -2208,6 +2219,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    // init xml config for performance feature
+    FeatureParamManager::GetInstance().Init(bundleName_);
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
     });
@@ -2462,47 +2475,78 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             });
     }
 
-    container->SetAbilityOnSearch([context = context_](const std::string& queryWord) {
+    container->SetAbilityOnSearch([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+                                      const std::string& queryWord) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
-        abilityContext->StartAbility(want, REQUEST_CODE);
-    });
-
-    container->SetAbilityOnCalendar([context = context_](const std::map<std::string, std::string>& params) {
-        auto sharedContext = context.lock();
-        CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        AAFwk::Want want;
-        auto bundleName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
-        CHECK_NULL_VOID(!bundleName.empty());
-        want.SetElementName(bundleName, ABILITYNAME_CALENDAR);
-        for (const auto& param : params) {
-            want.SetParam(param.first, param.second);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
         }
-        want.SetParam(ACTION_PARAM, ACRION_CALENDAR);
-        abilityContext->StartAbility(want, REQUEST_CODE);
-    });
-
-    container->SetAbilityOnInstallAppInStore([context = context_](const std::string& appName) {
-        auto sharedContext = context.lock();
-        CHECK_NULL_VOID(sharedContext);
         auto abilityContext =
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
         CHECK_NULL_VOID(abilityContext);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetAbilityOnCalendar(
+        [context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+            const std::map<std::string, std::string>& params) {
+            auto sharedContext = context.lock();
+            CHECK_NULL_VOID(sharedContext);
+            auto container = containerWeak.Upgrade();
+            CHECK_NULL_VOID(container);
+            AAFwk::Want want;
+            auto bundleName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
+            CHECK_NULL_VOID(!bundleName.empty());
+            want.SetElementName(bundleName, ABILITYNAME_CALENDAR);
+            for (const auto& param : params) {
+                want.SetParam(param.first, param.second);
+            }
+            want.SetParam(ACTION_PARAM, ACTION_CALENDAR);
+            if (container->IsUIExtensionWindow()) {
+                auto uiExtensionContext =
+                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+                CHECK_NULL_VOID(uiExtensionContext);
+                uiExtensionContext->StartAbility(want, REQUEST_CODE);
+                return;
+            }
+            auto abilityContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->StartAbility(want, REQUEST_CODE);
+        });
+
+    container->SetAbilityOnInstallAppInStore([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
+        container))](const std::string& appName) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.SetAction(ACTION_APPDETAIL);
         auto urlPrefix = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
         auto url = urlPrefix + appName;
         want.SetUri(url);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
@@ -2513,22 +2557,33 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
         CHECK_NULL_VOID(abilityContext);
         AAFwk::Want want;
-        auto url = SystemProperties::GetMapSearchPrefix() + address + "&utm_source=fb";
+        // In practical use, a prefix is required; this function is currently not in use as its logic has been reverted.
+        auto url = address;
         want.SetUri(url);
         abilityContext->OpenLink(want, REQUEST_CODE);
     });
 
-    container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {
+    container->SetAbilityOnJumpBrowser([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
+        container))](const std::string& address) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.SetAction(ACTION_VIEWDATA);
         want.SetUri(address);
         auto appName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::URL);
         want.SetBundle(appName);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
@@ -2721,7 +2776,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     // setLogFunc of current app
     AddAlarmLogFunc(pipeline);
-    InitUISessionManagerCallbacks(pipeline);
+    if (pipeline) {
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (taskExecutor) {
+            InitUISessionManagerCallbacks(taskExecutor);
+        }
+    }
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
@@ -3932,7 +3992,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 pipelineContext->OnSurfaceChanged(
                     config.Width(), config.Height(), static_cast<WindowSizeChangeReason>(reason), rsTransaction);
                 pipelineContext->FlushUITasks(true);
-            });
+            }, nullptr, nullptr, pipelineContext);
         } else {
             Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason), rsTransaction);
@@ -4363,7 +4423,6 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             container->SetApiTargetVersion(appInfo->apiTargetVersion);
         }
 
-        container->SetBundleName(context->GetBundleName());
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
@@ -4956,6 +5015,11 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
         [container, isVisible]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipeline);
+            if (isVisible) {
+                pipeline->OnShow();
+            } else {
+                pipeline->OnHide();
+            }
             auto mgr = pipeline->GetFormVisibleManager();
             if (mgr) {
                 mgr->HandleFormVisibleChangeEvent(isVisible);
@@ -5290,10 +5354,11 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     Ace::DecorButtonStyle decorButtonStyle;
     ConvertDecorButtonStyle(buttonStyle, decorButtonStyle);
     taskExecutor->PostTask(
-        [container, decorButtonStyle]() {
+        [container, buttonStyle]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, decorButtonStyle);
+            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
+                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
@@ -5503,14 +5568,17 @@ void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d", config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
+        config.navigationDisablePlaceholder, config.navigationDisableDivider);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
     navManager->SetForceSplitNavigationId(config.navigationId);
     navManager->SetForceSplitNavigationDepth(config.navigationDepth);
+    navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+    navManager->SetDividerDisabled(config.navigationDisableDivider);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()
@@ -5715,21 +5783,19 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
-void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
+void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandCallback = [weakContext = WeakPtr(pipeline)](int32_t value) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
+    auto sendCommandCallback = [weakTaskExecutor = taskExecutor](int32_t value) {
         KeyEvent keyEvent;
         keyEvent.action = KeyAction::DOWN;
         keyEvent.code = static_cast<KeyCode>(value);
         keyEvent.pressedCodes = { keyEvent.code };
 
-        auto taskExecutor = pipeline->GetTaskExecutor();
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), keyEvent]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [keyEvent]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->OnNonPointerEvent(keyEvent);
             },
@@ -5738,22 +5804,16 @@ void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
-void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     // set get inspector tree function for ui session manager
-    auto callback = [weakContext = WeakPtr(pipeline)](bool onlyNeedVisible) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (pipeline == nullptr) {
-            pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        }
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), onlyNeedVisible]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [onlyNeedVisible]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                ContainerScope scope(pipeline->GetInstanceId());
                 if (onlyNeedVisible) {
                     pipeline->GetInspectorTree(true);
                 } else {
@@ -5765,14 +5825,12 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
-    auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), isRegister]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [isRegister]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->NotifyAllWebPattern(isRegister);
             },
@@ -5780,24 +5838,22 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
-    SetupGetPixelMapCallback(pipeline);
-    RegisterGetCurrentPageName(pipeline);
-    InitSendCommandFunctionsCallbacks(pipeline);
-    sendCommandCallbackInner(pipeline);
+    SetupGetPixelMapCallback(taskExecutor);
+    RegisterGetCurrentPageName();
+    InitSendCommandFunctionsCallbacks(taskExecutor);
+    sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
-    RegisterExeAppAIFunction(pipeline);
+    RegisterExeAppAIFunction();
 }
 
-void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto getPixelMapCallback = [weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline)]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->GetAllPixelMap();
             },
@@ -5819,25 +5875,20 @@ void UIContentImpl::SaveGetCurrentInstanceId()
     });
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterGetCurrentPageName()
 {
-    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+    auto getPageNameCallback = []() -> std::string {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
         return pipeline->GetCurrentPageNameCallback();
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
-void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandAsync = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (!pipeline) {
-            LOGI("Pipeline context is null");
-            return 10;
-        }
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommandAsync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         if (!taskExecutor) {
             LOGI("Task executor is null");
             return 11;
@@ -5857,10 +5908,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipel
         return result;
     };
     UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
-    auto sendCommand = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [id, command]() {
@@ -6101,12 +6150,12 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
-void UIContentImpl::RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterExeAppAIFunction()
 {
-    auto exeAppAIFunctionCallback = [weakContext = WeakPtr(pipeline)](
+    auto exeAppAIFunctionCallback = [](
         const std::string& funcName, const std::string& params) -> uint32_t {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
         return pipeline->ExeAppAIFunctionCallback(funcName, params);
     };

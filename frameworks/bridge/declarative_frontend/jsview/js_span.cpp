@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 
+#include <cstdint>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -135,14 +136,6 @@ void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
 
 void JSSpan::SetFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-    auto infoZero = info[0];
-    if (infoZero->IsUndefined() || infoZero->IsNull()) {
-        SpanModel::GetInstance()->ResetFont();
-        return;
-    }
     Font font;
     if (SystemProperties::ConfigChangePerform()) {
         RegisterSpanFontInfo(info, font);
@@ -161,12 +154,16 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     UnregisterSpanResource("fontSize");
     if (!ParseJsDimensionFpNG(info[0], fontSize, resObj, false) || fontSize.IsNegative()) {
-        SpanModel::GetInstance()->ResetFontSize();
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        fontSize = theme->GetTextStyle().GetFontSize();
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
     }
+
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
@@ -180,7 +177,7 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
     std::string fontWeight;
     JSRef<JSVal> args = info[0];
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         ParseJsString(args, fontWeight, resObj);
     }
@@ -195,14 +192,12 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     RefPtr<ResourceObject> resObj;
     UnregisterSpanResource("fontColor");
-    auto infoZero = info[0];
-    if (infoZero->IsUndefined() || infoZero->IsNull()) {
-        SpanModel::GetInstance()->ResetTextColor();
-        return;
-    }
     if (!ParseJsColor(info[0], textColor, resObj)) {
-        SpanModel::GetInstance()->ResetTextColor();
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        textColor = theme->GetTextStyle().GetTextColor();
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<Color>("fontColor", resObj, textColor);
@@ -215,8 +210,6 @@ void JSSpan::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
         SpanModel::GetInstance()->SetItalicFontStyle(style);
-    } else {
-        SpanModel::GetInstance()->ResetItalicFontStyle();
     }
 }
 
@@ -341,7 +334,9 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     if (colorVal) {
         SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
     }
-    SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    if (textDecorationStyle) {
+        SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
     SpanModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
 

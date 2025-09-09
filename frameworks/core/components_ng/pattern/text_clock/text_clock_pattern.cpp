@@ -22,9 +22,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
-#if defined(ACE_STATIC)
 #include "base/utils/multi_thread.h"
-#endif
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -104,11 +102,9 @@ TextClockPattern::TextClockPattern()
 
 void TextClockPattern::OnAttachToFrameNode()
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-#endif
     InitTextClockController();
     InitUpdateTimeTextCallBack();
     auto* eventProxy = TimeEventProxy::GetInstance();
@@ -119,15 +115,12 @@ void TextClockPattern::OnAttachToFrameNode()
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-#if defined(ACE_STATIC)
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
-#endif
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
-#if defined(ACE_STATIC)
 void TextClockPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -141,7 +134,6 @@ void TextClockPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
-#endif
 
 void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
     RefPtr<TextLayoutProperty>& textLayoutProperty, const TextStyle& textStyleTheme)
@@ -805,7 +797,7 @@ std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string
 
 void TextClockPattern::FireChangeEvent() const
 {
-    auto textClockEventHub = GetOrCreateEventHub<TextClockEventHub>();
+    auto textClockEventHub = GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(textClockEventHub);
     textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND));
 }
@@ -898,7 +890,7 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto timeValue = static_cast<int64_t>(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<TextClockEventHub>();
+    auto eventHub = host->GetEventHub<TextClockEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);

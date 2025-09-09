@@ -1760,7 +1760,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGDetachCallbackTest045, TestS
      * @tc.steps: step4. call FireDetachEvent
      * @tc.expected: onDetachKey != CHECK_KEY
      */
-    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);

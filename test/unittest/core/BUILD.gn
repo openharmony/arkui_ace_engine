@@ -51,6 +51,7 @@ group("scroll_test") {
     "pattern/waterflow:water_flow_test_original",
     "pattern/waterflow:water_flow_test_segmented",
     "pattern/waterflow:water_flow_test_sw",
+    "pattern/lazy_layout:lazy_grid_layout_test",
   ]
 }
 
@@ -169,6 +170,7 @@ group("linux_core_unittest") {
     "pattern/view_context:view_context_test_ng",
     "pattern/withtheme:withtheme_test_ng",
     "pattern/xcomponent:xcomponent_test_ng",
+    "pattern/xcomponent:xcomponent_test_set_rate_range",
     "property:core_property_unittest",
     "render:core_render_unittest",
     "syntax:core_syntax_unittest",

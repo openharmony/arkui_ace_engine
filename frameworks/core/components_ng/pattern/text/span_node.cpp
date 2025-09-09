@@ -97,7 +97,6 @@ std::string SpanItem::GetFont() const
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
-    /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
@@ -116,8 +115,14 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("textCase",
             V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
-        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-            .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        if (spanItemType == SpanItemType::SYMBOL) {
+            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+            auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+        } else {
+            json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+                .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        }
         json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
         json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
         json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
@@ -127,19 +132,16 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
         json->Put("symbolEffect",
             GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-        // Determines if there are multiple textShadows
         auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
         json->PutExtAttr("textShadow", jsonShadow, filter);
     }
+    auto dim = Dimension();
     if (textLineStyle) {
-        json->PutExtAttr("lineHeight",
-            textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("lineSpacing",
-            textLineStyle->GetLineSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(dim).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(dim).ToString().c_str(), filter);
         json->PutExtAttr("baselineOffset",
-            textLineStyle->GetBaselineOffset().value_or(Dimension()).ToString().c_str(), filter);
+            textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
@@ -216,8 +218,6 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModify
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
-                ACE_TEXT_SCOPED_TRACE("RequestTextFlushDirty [Parent:%d,Tag:%s][Span:%d]", textNode->GetId(),
-                    textNode->GetTag().c_str(), node->GetId());
                 CHECK_NULL_VOID(markModifyDone);
                 textPattern->OnModifyDone();
                 return;
@@ -329,7 +329,10 @@ void SpanItem::SpanDumpInfoAdvance()
     }
     ADD_LINE_STYLE_DESC(LineHeight);
     ADD_FONT_STYLE_DESC(LetterSpacing);
-    ADD_LINE_STYLE_DESC(LineSpacing);
+    dumpLog.AddDesc(std::string("LineSpacing: ")
+            .append(textStyle->GetLineSpacing().ToString())
+            .append(" isOnlyBetweenLines: ")
+            .append((textStyle->GetIsOnlyBetweenLines()) ? "true" : "false"));
     ADD_LINE_STYLE_DESC_UTILS(TextAlign, TextAlign);
     ADD_LINE_STYLE_DESC(TextIndent);
     dumpLog.AddDesc(
@@ -720,13 +723,13 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
-    UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextCase, TextCase);
-
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
+
     if (isSymbol) {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolColorList, SymbolColorList);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, RenderStrategy);
@@ -795,6 +798,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
     auto symbolSpanStyle = textStyle;
     auto symbolUnicode = GetSymbolUnicode();
     symbolSpanStyle.SetTextStyleUid(nodeId_);
+    symbolSpanStyle.SetSymbolUid(nodeId_);
     if (fontStyle || textLineStyle) {
         UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
         if (fontStyle && fontStyle->HasFontWeight()) {
@@ -1099,10 +1103,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->backgroundStyle = backgroundStyle;
     }
     sameSpan->urlAddress = urlAddress;
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    sameSpan->onTouch = onTouch;
+    CopySpanItemEvents(sameSpan);
     return sameSpan;
 }
 
@@ -1112,12 +1113,12 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
     COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
     COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
-    COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
     COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
     COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
+    COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
     COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
@@ -1128,6 +1129,14 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
     COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
+}
+
+void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
+{
+    spanItem->urlOnRelease = urlOnRelease;
+    spanItem->onClick = onClick;
+    spanItem->onLongPress = onLongPress;
+    spanItem->onTouch = onTouch;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1193,9 +1202,9 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
+    WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
     WRITE_TLV_INHERIT(fontStyle, StrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension, StrokeWidth);
     WRITE_TLV_INHERIT(fontStyle, StrokeColor, TLV_SPAN_FONT_STYLE_STROKECOLOR, Color, StrokeColor);
-    WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
     WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
@@ -1392,7 +1401,7 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_BUNDLENAME_TAG);
         TLVUtil::WriteString(buff, options.bundleName.value());
     }
-    if (options.bundleName.has_value()) {
+    if (options.moduleName.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_MODULENAME_TAG);
         TLVUtil::WriteString(buff, options.moduleName.value());
     }
@@ -1707,7 +1716,8 @@ void PlaceholderSpanItem::DumpInfo() const
         std::string("TextColor: ")
             .append(textStyle.GetTextColor().ColorToString())
             .append(" self: ")
-            .append(fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
+            .append(
+            fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
     dumpLog.AddDesc(std::string("BaselineOffset: ")
                         .append(textStyle.GetBaselineOffset().ToString())
                         .append(" self: ")
@@ -1774,10 +1784,6 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());
     json->Put("LetterSpacing", textStyle->GetLetterSpacing().ToString().c_str());
     json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
-    if (spanItem_ && spanItem_->fontStyle) {
-        json->Put(
-            "SpanTextColor", spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString().c_str());
-    }
     json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
     json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
     json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());

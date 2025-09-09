@@ -591,7 +591,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     parent->GetPattern<NavigationPattern>()->navigationStack_ = stack;
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     EXPECT_EQ(layoutProperty->GetNavigationModeValue(NavigationMode::AUTO), NavigationMode::AUTO);
     layoutProperty->propNavigationMode_ = NavigationMode::STACK;
     navRouterGroupNode->OnAttachToMainTree(false);
@@ -601,7 +601,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
         "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
     stack->navPathList_.push_back(p);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
 
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -614,11 +614,11 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     navDestinationNode->titleBarNode_ = titleBarNode;
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     parent->isOnAnimation_ = false;
@@ -646,7 +646,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     parent->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     parent->isOnAnimation_ = false;
@@ -664,7 +664,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     auto backButton = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
     AceType::DynamicCast<TitleBarNode>(navDestinationNode->titleBarNode_)->backButton_ = backButton;
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 }
 

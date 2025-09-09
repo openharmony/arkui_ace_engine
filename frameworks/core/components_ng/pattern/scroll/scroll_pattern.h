@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,9 +67,12 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         if (freeScroll_) {
-            return MakeRefPtr<ScrollLayoutAlgorithm>(freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
+            return MakeRefPtr<ScrollLayoutAlgorithm>(
+                freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
         }
-        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
+        auto scrollLayoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
+        scrollLayoutAlgorithm->SetScrollableDistance(scrollableDistance_);
+        return scrollLayoutAlgorithm;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
@@ -196,8 +199,8 @@ public:
         SnapDirection snapDirection = SnapDirection::NONE) override;
     std::optional<float> CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection);
     bool NeedScrollSnapToSide(float delta) override;
-    void CaleSnapOffsets();
-    void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
+    void CaleSnapOffsets(const RefPtr<FrameNode>& host);
+    void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, const RefPtr<FrameNode>& host);
     void CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign);
 
     float GetSelectScrollWidth();
@@ -281,6 +284,8 @@ public:
         CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
+
+    ScrollSnapAlign GetScrollSnapAlign(const RefPtr<FrameNode>& host) const;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -412,9 +417,11 @@ private:
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);
-    float ValidateOffset(int32_t source, float willScrollOffset);
+    double ValidateOffset(int32_t source, double willScrollOffset);
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
+    TwoDimensionScrollResult FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
+        ScrollState state, ScrollSource source);
     void FireOnDidScroll(float scroll);
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -424,15 +431,15 @@ private:
     bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
-    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
+    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host);
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
 
-    float currentOffset_ = 0.0f;
-    float lastOffset_ = 0.0f;
+    double currentOffset_ = 0.0;
+    double lastOffset_ = 0.0;
     // keep lastOffset_ for compatibility, use prevOffset_ for onReachStart/onReachEnd
-    float prevOffset_ = 0.0f;
-    float scrollableDistance_ = 0.0f;
+    double prevOffset_ = 0.0;
+    double scrollableDistance_ = 0.0;
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
     SizeF viewSize_;

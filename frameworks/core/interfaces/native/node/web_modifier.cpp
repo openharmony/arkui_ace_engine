@@ -43,6 +43,7 @@ constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
 constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
+constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 8;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 16;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 13;
@@ -64,6 +65,7 @@ constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
 constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
+constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1990,6 +1992,47 @@ void ResetGestureFocusMode(ArkUINodeHandle node)
     WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
 }
 
+void SetEnableDataDetector(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDataDetector(frameNode, value);
+}
+
+void ResetEnableDataDetector(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDataDetector(frameNode, DEFAULT_ENABLE_DATA_DETECTOR);
+}
+
+void SetDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    detectConfig.types = arkUITextDetectConfig->types;
+    if (arkUITextDetectConfig->onResult) {
+        detectConfig.onResult =
+            std::move(*(reinterpret_cast<std::function<void(const std::string&)>*>(arkUITextDetectConfig->onResult)));
+    }
+    detectConfig.entityColor = Color(arkUITextDetectConfig->entityColor);
+    detectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
+    detectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
+    detectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    detectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
+    WebModelNG::SetDataDetectorConfig(frameNode, detectConfig);
+}
+
+void ResetDataDetectorConfigWithEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig detectConfig;
+    WebModelNG::SetDataDetectorConfig(frameNode, detectConfig);
+}
+
 void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2152,6 +2195,20 @@ void ResetJavaScriptProxy(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+}
+
+void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceEnableZoom(frameNode, value);
+}
+
+void ResetForceEnableZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceEnableZoom(frameNode, DEFAULT_FORCE_ENABLE_ZOOM_ENABLED);
 }
 
 namespace NodeModifier {
@@ -2347,6 +2404,10 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setEnableDataDetector = SetEnableDataDetector,
+        .resetEnableDataDetector = ResetEnableDataDetector,
+        .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
+        .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
@@ -2359,6 +2420,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnBeforeUnload = ResetOnBeforeUnload,
         .setJavaScriptProxy = SetJavaScriptProxy,
         .resetJavaScriptProxy = ResetJavaScriptProxy,
+        .setForceEnableZoom = SetForceEnableZoom,
+        .resetForceEnableZoom = ResetForceEnableZoom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2556,6 +2619,10 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setEnableDataDetector = SetEnableDataDetector,
+        .resetEnableDataDetector = ResetEnableDataDetector,
+        .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
+        .resetDataDetectorConfigWithEvent = ResetDataDetectorConfigWithEvent,
         .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
         .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
         .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
@@ -2568,6 +2635,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnBeforeUnload = ResetOnBeforeUnload,
         .setJavaScriptProxy = SetJavaScriptProxy,
         .resetJavaScriptProxy = ResetJavaScriptProxy,
+        .setForceEnableZoom = SetForceEnableZoom,
+        .resetForceEnableZoom = ResetForceEnableZoom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

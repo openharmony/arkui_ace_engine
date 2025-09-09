@@ -37,7 +37,7 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColorSetByUser, bool);
 
     void ToJsonValue(
-        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const;
+        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode>& host) const;
 };
 
 struct SwitchAnimationStyle {
@@ -47,7 +47,7 @@ struct SwitchAnimationStyle {
 
 // PaintProperty are used to set paint properties.
 class SwitchPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SwitchPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SwitchPaintProperty, PaintProperty);
 public:
     SwitchPaintProperty() = default;
     ~SwitchPaintProperty() override = default;

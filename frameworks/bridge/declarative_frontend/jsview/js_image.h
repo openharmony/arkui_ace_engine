@@ -77,11 +77,14 @@ public:
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo& info);
+    static void SupportSvg2(const JSCallbackInfo& info);
     static void ParseResizableSlice(const JSRef<JSObject>& info);
     static void ParseResizableLattice(const JSRef<JSObject>& info);
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
     static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
+    static bool ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType);
+    static void SetContentTransition(const JSCallbackInfo& info);
 
 protected:
     static void SetBorder(const Border& border);

@@ -74,13 +74,13 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
 }
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const RefPtr<FrameNode>& iconNode)
+    const std::string& message, const RefPtr<FrameNode>& iconNode, bool isWithDialogTheme)
 {
-    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), iconNode);
+    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), iconNode, isWithDialogTheme);
 }
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::u16string& message, const RefPtr<FrameNode>& iconNode)
+    const std::u16string& message, const RefPtr<FrameNode>& iconNode, bool isWithDialogTheme)
 {
     CHECK_NULL_RETURN(iconNode, nullptr);
     int32_t themeScopeId = iconNode->GetThemeScopeId();
@@ -99,8 +99,9 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
     symbolProperty->UpdateSymbolSourceInfo(srcLayoutProperty->GetSymbolSourceInfoValue());
     auto symbolColorList = srcLayoutProperty->GetSymbolColorListValue({});
-    symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
-                            : symbolProperty->UpdateSymbolColorList(symbolColorList);
+    (symbolColorList.empty() || isWithDialogTheme)
+        ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
+        : symbolProperty->UpdateSymbolColorList(symbolColorList);
     auto fontWeight = srcLayoutProperty->GetFontWeightValue(FontWeight::NORMAL);
     symbolProperty->UpdateFontWeight(fontWeight);
     auto renderStrategy = srcLayoutProperty->GetSymbolRenderingStrategyValue(0);

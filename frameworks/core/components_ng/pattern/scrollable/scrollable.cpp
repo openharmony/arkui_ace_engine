@@ -86,6 +86,7 @@ constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
+
 } // namespace
 
 double Scrollable::GetVelocityScale()
@@ -229,10 +230,11 @@ void Scrollable::SetOnActionEnd()
     CHECK_NULL_VOID(panRecognizerNG_);
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
-        CHECK_NULL_VOID(scroll);
-        scroll->HandleDragEnd(info);
-        scroll->ProcessPanActionEndEvents(info);
-        scroll->isDragging_ = false;
+        if (scroll) {
+            scroll->HandleDragEnd(info);
+            scroll->ProcessPanActionEndEvents(info);
+            scroll->isDragging_ = false;
+        }
     };
     panRecognizerNG_->SetOnActionEnd(actionEnd);
 }
@@ -269,7 +271,9 @@ void Scrollable::SetOnActionCancel()
     CHECK_NULL_VOID(panRecognizerNG_);
     auto actionCancel = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
-        CHECK_NULL_VOID(scroll);
+        if (!scroll) {
+            return;
+        }
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
@@ -430,11 +434,9 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
         info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     }
     HandleDragEnd(info);
-    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
-        [info](GestureEventFunc& event) {
-            auto gestureInfo = info;
-            event(gestureInfo);
-        });
+    if (actionEnd_) {
+        actionEnd_(info);
+    }
     isDragging_ = false;
     isCrownDragging_ = false;
     auto context = context_.Upgrade();
@@ -461,11 +463,9 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
     info.SetMainDelta(0);
     info.SetMainVelocity(0);
     HandleDragEnd(info);
-    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
-        [info](GestureEventFunc& event) {
-            auto gestureInfo = info;
-            event(gestureInfo);
-        });
+    if (actionEnd_) {
+        actionEnd_(info);
+    }
     isDragging_ = false;
     isCrownDragging_ = false;
 }
@@ -950,12 +950,18 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         .snapDelta = GetFinalPosition() - mainPosition,
         .animationVelocity = correctVelocity,
         .dragDistance = GetDragOffset(),
+        .snapDirection = SnapDirection::NONE,
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
         if (GetSnapType() == SnapType::LIST_SNAP) {
             currentVelocity_ = 0.0;
         }
         return;
+    }
+    if (fixScrollParamCallback_) {
+        fixScrollParamCallback_(mainPosition, initVelocity_, finalPosition_);
+        correctVelocity = initVelocity_;
+        currentVelocity_ = correctVelocity;
     }
     float threshold = START_FRICTION_VELOCITY_THRESHOLD;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -1213,7 +1219,6 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
                 ACE_SCOPED_TRACE("Scroll snap animation finish, id:%d", scroll->nodeId_);
                 scroll->ProcessScrollMotionStop();
             }
-            scroll->snapAnimationFromScrollBar_ = false;
         });
     state_ = AnimationState::SNAP;
     auto context = context_.Upgrade();
@@ -1292,6 +1297,7 @@ void Scrollable::StartSpringMotion(
         "%{public}f, maxExtent is %{public}f, initMinExtent is %{public}f, initMaxExtent is %{public}f",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     if (state_ == AnimationState::SPRING || (skipRestartSpring_ && NearEqual(mainVelocity, 0.0f, 0.001f))) {
+        OnAnimateStop();
         return;
     }
     currentPos_ = mainPosition;
@@ -1300,6 +1306,7 @@ void Scrollable::StartSpringMotion(
     } else if (mainPosition < initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading(), 0.01f)) {
         finalPosition_ = extent.Leading();
     } else {
+        OnAnimateStop();
         return;
     }
 

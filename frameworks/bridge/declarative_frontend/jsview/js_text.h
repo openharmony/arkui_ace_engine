@@ -46,6 +46,7 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetAlign(const JSCallbackInfo& info);
+    static void SetTextContentAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
@@ -57,10 +58,10 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetWordBreak(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
-    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
     static void SetTextCaretColor(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
+    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
@@ -75,7 +76,6 @@ public:
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
-    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
@@ -87,8 +87,8 @@ public:
         const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name);
     static NG::PreviewMenuOptions ParsePreviewMenuOptions(const JSRef<JSObject>& menuOptions);
     static void JsClip(const JSCallbackInfo& info);
-    static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo &info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
     static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);

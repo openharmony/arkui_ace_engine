@@ -1077,6 +1077,18 @@ HWTEST_F(DatePickerTestOne, CreateLunarSwitchTextNode001, TestSize.Level1)
 {
     auto textNode = DatePickerDialogView::CreateLunarSwitchTextNode();
     EXPECT_NE(textNode, nullptr);
+
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), 1);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    ASSERT_TRUE(textLayoutProperty->HasAdaptMaxFontSize());
+    EXPECT_EQ(textLayoutProperty->GetAdaptMaxFontSizeValue(Dimension()),
+        DatePickerDialogView::ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
 }
 
 /**

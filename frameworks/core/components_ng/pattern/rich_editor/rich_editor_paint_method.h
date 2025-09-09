@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
-    DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod)
+    DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod);
 public:
     RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager, float baselineOffset,
         const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod);
@@ -31,6 +31,7 @@ public:
     ~RichEditorPaintMethod() override = default;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentOverlayModifier(PaintWrapper* paintWrapper);
     void SetCaretState(PaintWrapper* paintWrapper);
     void SetPreviewTextDecoration(PaintWrapper* paintWrapper);
     void SetCaretOffsetAndHeight(PaintWrapper* paintWrapper);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,25 +33,31 @@ class ArkResourcesHelper {
 ArkResourcesHelper.COLOR = 10001;
 ArkResourcesHelper.FLOAT = 10002;
 class ArkThemeNativeHelper {
-    static sendThemeToNative(theme, elmtId) {
+    static sendThemeToNative(theme, elmtId, darkSetStatus) {
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.darkColors);
-        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId);
+        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId, darkSetStatus);
     }
-    static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy) {
+    static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy, darkSetStatus) {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus );
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
     }
     static setDefaultTheme(theme) {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
-        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        let darkColorArray = [];
+        if(!!theme?.darkColors) {
+            darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        }else {
+            darkColorArray = colorArray;
+        }
+        
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
@@ -173,7 +179,7 @@ class ArkThemeCache {
     }
     remove(theme) {
         const index = this.cache.indexOf(theme);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.cache.splice(index, 1);
@@ -264,7 +270,7 @@ class ArkThemeBase {
     }
     unbindFromScope(themeScopeId) {
         const index = this.bindedThemeScopesIds.indexOf(themeScopeId);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.scopesCounter--;
@@ -298,10 +304,6 @@ class ArkThemeBase {
             copyTheme.darkColors = {};
             // For properties missing in darkColors, use the values from colors
             Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
-        } else if (customTheme.colors) {
-            // If the user does not provide darkColors, use the values from colors
-            copyTheme.darkColors = {};
-            Object.assign(copyTheme.darkColors, customTheme.colors);
         }
         
         if (customTheme.shapes) {
@@ -528,14 +530,15 @@ if (globalThis.WithTheme !== undefined) {
         const onThemeScopeDestroy = () => {
             ArkThemeScopeManager.getInstance().onScopeDestroy(elmtId);
         };
-        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId, !!cloneTheme?.darkColors);
+        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy, !!cloneTheme?.darkColors);
         ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions !== null && themeOptions !== void 0 ? themeOptions : {}, theme);
     };
     globalThis.WithTheme.pop = function () {
         var _a;
         if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc = () => {
+                ArkThemeScopeManager.getInstance().setIsFirstRender(true);
                 globalThis.WithTheme.pop();
             };
             (_a = PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)) === null || _a === void 0 ? void 0 : _a.push(prebuildFunc);
@@ -1071,7 +1074,7 @@ class ArkThemeScopeManager {
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
         this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         this.defaultTheme.bindToScope(0);
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0);
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0, !!cloneTheme?.darkColors);
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
         this.notifyGlobalThemeChanged();
     }
@@ -1092,6 +1095,9 @@ class ArkThemeScopeManager {
             this.lastThemeScopeId = currentThemeScopeId;
             WithTheme.setThemeScopeId(currentThemeScopeId);
         }
+    }
+    setIsFirstRender(isFirstRender) {
+        this.handledIsFirstRender = isFirstRender;
     }
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {

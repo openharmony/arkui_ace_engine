@@ -257,6 +257,30 @@ void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParam
     }
 }
 
+void ResourceParseUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+    Color& color, const std::string& nodeTag)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto instanceId = Container::CurrentIdSafely();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if (colorMode == ColorMode::DARK) {
+        color = Color(invertFunc(color.GetValue()));
+    }
+    resObj = AceType::MakeRefPtr<ResourceObject>();
+    resObj->SetIsResource(false);
+    resObj->SetInstanceId(instanceId);
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(false);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
+}
+
 bool ResourceParseUtils::ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result)
 {
     return ParseResInteger<uint32_t>(resObj, result);
@@ -431,17 +455,20 @@ bool ResourceParseUtils::ParseResColorWithColorMode(const RefPtr<ResourceObject>
     const ColorMode& colorMode)
 {
     CHECK_NULL_RETURN(resObj, false);
-
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
     if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
-        resObj->SetInstanceId(Container::CurrentIdSafely());
+        resObj->SetInstanceId(container->GetInstanceId());
     }
     auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     CHECK_NULL_RETURN(resourceWrapper, false);
     auto resourceAdapter = resourceWrapper->GetResourceAdapter();
-    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : Container::CurrentColorMode();
-    ResourceManager::GetInstance().UpdateColorMode(colorMode);
+    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : container->GetColorMode();
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorMode);
     bool state = ParseResColor(resObj, result);
-    ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+    ResourceManager::GetInstance().UpdateColorMode(
+        container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
     return state;
 }
 

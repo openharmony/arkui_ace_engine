@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "base/utils/system_properties.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -561,7 +562,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_015, TestSize.Level1)
      * @tc.steps: step2. get inputHub.
      * @tc.expected: hoverEvent_ is not nullptr.
      */
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto inputHub = hub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -602,7 +603,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_016, TestSize.Level1)
      * @tc.steps: step2. get gestureHub.
      * @tc.expected: pattern is not nullptr.
      */
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -816,7 +817,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetOrCreateEventHub<EventHub>());
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
     ASSERT_NE(navigationEventHub, nullptr);
     navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
     EXPECT_TRUE(isSelected);
@@ -1210,7 +1211,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    ASSERT_NE(preTopNavDestination->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
@@ -1397,7 +1398,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest002, TestSiz
      * @tc.steps: step5. barItem is disable.
      * @tc.expected: IsEnabled function return false.
      */
-    auto itemEventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+    auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
     EXPECT_NE(itemEventHub, nullptr);
     EXPECT_FALSE(itemEventHub->IsEnabled());
 }
@@ -1878,7 +1879,7 @@ HWTEST_F(NavigationPatternTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());
@@ -2038,5 +2039,41 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
     EXPECT_NE(ResSchedReport::GetInstance().loadPageOn_, true);
     ResSchedReport::GetInstance().TriggerModuleSerializer();
     EXPECT_EQ(ResSchedReport::GetInstance().loadPageOn_, true);
+}
+
+
+/**
+ * @tc.name: NavigationPatternTest_019
+ * @tc.desc: Test Navigation HandleDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation ,then get pattern.
+     */
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    pattern->HandleDragStart();
+    pattern->HandleDragEnd();
+    /**
+     * @tc.steps: step2. check pattern->preNavBarWidth_.
+     * @tc.expected: preNavBarWidth_ is correct.
+     */
+    EXPECT_EQ(pattern->preNavBarWidth_, static_cast<float>(DEFAULT_NAVBAR_WIDTH.ConvertToPx()));
+    pattern->preNavBarWidth_ = 0;
+    pattern->userSetMinContentFlag_ = true;
+    pattern->userSetNavBarRangeFlag_ = false;
+    pattern->HandleDragUpdate(FLOAT_260);
+    EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
 }
 } // namespace OHOS::Ace::NG

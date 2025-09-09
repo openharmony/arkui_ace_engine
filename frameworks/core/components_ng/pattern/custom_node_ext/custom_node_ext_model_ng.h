@@ -39,6 +39,8 @@ public:
     static void SetOnModifyDoneCallback(FrameNode* frameNode, std::function<void()>&& onModifyDone);
     static void SetOnWindowFocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowFocused);
     static void SetOnWindowUnfocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowUnfocused);
+    static void SetOnWindowActivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowActivated);
+    static void SetOnWindowDeactivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowDeactivated);
     static void SetOnAttachToMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onAttachToMainTree);
     static void SetOnDetachFromMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onDetachFromMainTree);
     static void SetOnAvoidInfoChangeCallback(FrameNode* frameNode, std::function<void()>&& onAvoidInfoChange);
@@ -49,6 +51,8 @@ public:
     static void SetIsAtomic(FrameNode* frameNode, bool isAtomic);
     static void SetBeforeCreateLayoutWrapperCallback(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
+    static void SetOnWindowSizeChangedCallback(FrameNode* frameNode,
+        std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>&& onWindowSizeChanged);
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_MODEL_NG_H

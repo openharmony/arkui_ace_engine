@@ -475,6 +475,12 @@ export class FrameNode implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FrameNode_getNodeType(this.peer!.ptr)
         return retval
     }
+    public invalidateAttributes(): void {
+        this.applyAttributesFinish_serialize();
+    }
+    private applyAttributesFinish_serialize(): void {
+        ArkUIGeneratedNativeModule._FrameNode_applyAttributesFinish(this.peer!.ptr)
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {

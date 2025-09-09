@@ -280,7 +280,7 @@ void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetGestureSwipeEvent(
@@ -363,6 +363,15 @@ void SwiperModelNG::SetJSIndicatorController(std::function<void()> resetFunc)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetJSIndicatorController(resetFunc);
+}
+
+void SwiperModelNG::ResetJSIndicatorController()
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetJSIndicatorController();
 }
 
 void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
@@ -784,7 +793,7 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
         auto pattern = frameNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSwiperArrowParameters(swiperArrowParameters);
-        CreateArrowWithResourceObj(swiperArrowParameters);
+        CreateArrowWithResourceObj(swiperArrowParameters, frameNode);
     }
 }
 
@@ -912,7 +921,7 @@ void SwiperModelNG::SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& 
 void SwiperModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(
         [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) {
@@ -1776,6 +1785,13 @@ void SwiperModelNG::CreateDigitWithResourceObj(FrameNode* frameNode,
 void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    CreateArrowWithResourceObj(swiperArrowParameters, swiperNode);
+}
+
+void SwiperModelNG::CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters,
+    FrameNode* swiperNode)
+{
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);

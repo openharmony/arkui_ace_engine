@@ -29,9 +29,9 @@ LayoutManagerDfx* LayoutManagerDfx::GetInstance()
 
 void LayoutManagerDfx::DumpFlushInfo(const TraverseResult& res)
 {
-    TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64, res.screenId);
+    TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64, res.screenId);
     for (const auto& [winId, uiParam] : res.uiParams) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "%{public}d|%{public}s|%{public}s|%{public}f|%{public}f|%{public}f|"
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "%{public}d|%{public}s|%{public}s|%{public}f|%{public}f|%{public}f|"
             "%{public}f|%{public}d", winId, uiParam.sessionName_.c_str(), uiParam.rect_.ToString().c_str(),
             uiParam.scaleX_, uiParam.scaleY_, uiParam.transX_, uiParam.transY_, uiParam.interactive_);
     }
@@ -53,21 +53,41 @@ void LayoutManagerDfx::PerformUIParams()
 
     int32_t cnt = 0;
     while (!recordQue.empty()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "PerformUIParams cnt:%{public}d", cnt);
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "PerformUIParams cnt:%{public}d", cnt);
         DumpFlushInfo(recordQue.front());
         recordQue.pop();
         cnt++;
     }
 }
 
-void LayoutManagerDfx::RecordUIParams(TraverseResult uiParams)
+void LayoutManagerDfx::RecordUIParams(TraverseResult res)
 {
     std::lock_guard lock(recordMutex_);
     if (recordRes_.size >= RECORD_LIST_MAX_CAPACITY) {
         recordRes_.que.pop();
         recordRes_.size--;
     }
-    recordRes_.que.push(uiParams);
+    if (!uiParams_.empty()) {
+        for (auto it = uiParams_.begin(); it != uiParams_.end();) {
+            if (!res.uiParams.count(it->first)) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d hide", it->first);
+                it = uiParams_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    for (const auto& [winId, uiParam] : res.uiParams) {
+        if (!uiParams_.count(winId)) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "window:%{public}d show", winId);
+        } else if (!NearEqual(uiParams_[winId].scaleX_, uiParam.scaleX_) ||
+            !NearEqual(uiParams_[winId].scaleY_, uiParam.scaleY_)) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "%{public}d|scale:%{public}f,%{public}f->%{public}f,%{public}f",
+                winId, uiParams_[winId].scaleX_, uiParams_[winId].scaleY_, uiParam.scaleX_, uiParam.scaleY_);
+        }
+        uiParams_[winId] = uiParam;
+    }
+    recordRes_.que.push(res);
     recordRes_.size++;
     curVsyncCnt_++;
 }

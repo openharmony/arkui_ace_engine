@@ -25,7 +25,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
+#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_action_function_utils.h"
+#include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
@@ -47,7 +49,6 @@ const char SCROLL_START_EVENT[] = "scrollstart";
 const char MOUSE_HOVER_ENTER[] = "mousehoverenter";
 const char MOUSE_HOVER_EXIT[] = "mousehoverexit";
 const char LIST_TAG[] = "List";
-const char SIDEBARCONTAINER_TAG[] = "SideBarContainer";
 const char STRING_DIR_FORWARD[] = "forward";
 const char STRING_DIR_BACKWARD[] = "backward";
 constexpr int32_t INVALID_PARENT_ID = -2100000;
@@ -60,8 +61,8 @@ constexpr int32_t CARD_BASE = 100000;
 constexpr int32_t DELAY_SEND_EVENT_MILLISECOND = 20;
 constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
 constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
-constexpr int32_t MIN_NUM = 2;
 constexpr size_t MIN_PARAMS_SIZE = 2;
+constexpr int32_t MIN_NUM = 2;
 constexpr int64_t INVALID_NODE_ID = -1;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
@@ -113,6 +114,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
     { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION,
         [](const AccessibilityActionParam& param) {
+            auto switchFunc = param.accessibilityProperty->GetSwitchEditableModeFunc();
+            if (switchFunc) {
+                switchFunc(true);
+            }
             return param.accessibilityProperty->ActActionSetIndex(static_cast<int32_t>(param.setCursorIndex));
         } },
     { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK,
@@ -261,6 +266,8 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ELEMENT_INFO_CHANGE, Accessibility::EventType::TYPE_ELEMENT_INFO_CHANGE },
         { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT,
             Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT },
+        { AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT,
+            Accessibility::EventType::TYPE_VIEW_REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT },
         { AccessibilityEventType::SCROLLING_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLING_EVENT },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -269,39 +276,6 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         eventType = eventTypeMap[idx].value;
     }
     return eventType;
-}
-
-ActionType ConvertAceAction(AceAction aceAction)
-{
-    static const ActionTable actionTable[] = {
-        { AceAction::ACTION_CLICK, ActionType::ACCESSIBILITY_ACTION_CLICK },
-        { AceAction::ACTION_LONG_CLICK, ActionType::ACCESSIBILITY_ACTION_LONG_CLICK },
-        { AceAction::ACTION_SCROLL_FORWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD },
-        { AceAction::ACTION_SCROLL_BACKWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD },
-        { AceAction::ACTION_FOCUS, ActionType::ACCESSIBILITY_ACTION_FOCUS },
-        { AceAction::ACTION_CLEAR_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS },
-        { AceAction::ACTION_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS },
-        { AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS },
-        { AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT },
-        { AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT },
-        { AceAction::ACTION_SET_TEXT, ActionType::ACCESSIBILITY_ACTION_SET_TEXT },
-        { AceAction::ACTION_COPY, ActionType::ACCESSIBILITY_ACTION_COPY },
-        { AceAction::ACTION_PASTE, ActionType::ACCESSIBILITY_ACTION_PASTE },
-        { AceAction::ACTION_CUT, ActionType::ACCESSIBILITY_ACTION_CUT },
-        { AceAction::ACTION_SELECT, ActionType::ACCESSIBILITY_ACTION_SELECT },
-        { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
-        { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
-        { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
-        { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
-        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
-        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
-    };
-    for (const auto& item : actionTable) {
-        if (aceAction == item.aceAction) {
-            return item.action;
-        }
-    }
-    return ActionType::ACCESSIBILITY_ACTION_INVALID;
 }
 
 inline RangeInfo ConvertAccessibilityValue(const AccessibilityValue& value)
@@ -324,158 +298,20 @@ int64_t ConvertToCardAccessibilityId(int64_t nodeId, int64_t cardId, int64_t roo
     }
     return result;
 }
-void CheckInvalidNodeParentID(const RefPtr<AccessibilityNode>& node, AccessibilityElementInfo& nodeInfo,
-    const RefPtr<JsAccessibilityManager>& manager, int& leftTopX, int& leftTopY, int& rightBottomX, int& rightBottomY)
-{
-    if (node->GetParentId() == -1) {
-        const auto& children = node->GetChildList();
-        if (!children.empty()) {
-            auto lastChildNode = manager->GetAccessibilityNodeById(children.back()->GetNodeId());
-            if (lastChildNode) {
-                rightBottomX = leftTopX + static_cast<int>(lastChildNode->GetWidth());
-                rightBottomY = leftTopY + static_cast<int>(lastChildNode->GetHeight());
-                Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
-                nodeInfo.SetRectInScreen(bounds);
-            }
-        }
-        nodeInfo.SetParent(INVALID_PARENT_ID);
-    }
-    if (node->GetNodeId() == 0) {
-        nodeInfo.SetParent(INVALID_PARENT_ID);
-    }
-}
-void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, AccessibilityElementInfo& nodeInfo,
-    const RefPtr<JsAccessibilityManager>& manager, int windowId)
-{
-    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft(node->GetWindowId());
-    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop(node->GetWindowId());
-    int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
-    int rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
-    if (manager->isOhosHostCard()) {
-        int64_t id = ConvertToCardAccessibilityId(node->GetNodeId(), manager->GetCardId(), manager->GetRootNodeId());
-        nodeInfo.SetAccessibilityId(id);
-        if (node->GetParentId() == -1) {
-            nodeInfo.SetParent(-1);
-        } else {
-            nodeInfo.SetParent(
-                ConvertToCardAccessibilityId(node->GetParentId(), manager->GetCardId(), manager->GetRootNodeId()));
-        }
-        leftTopX = static_cast<int>(node->GetLeft() + manager->GetCardOffset().GetX());
-        leftTopY = static_cast<int>(node->GetTop() + manager->GetCardOffset().GetY());
-        rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
-        rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
-        Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
-        nodeInfo.SetRectInScreen(bounds);
-    } else {
-        if (node->GetTag() == SIDEBARCONTAINER_TAG) {
-            Rect sideBarRect = node->GetRect();
-            for (const auto& childNode : node->GetChildList()) {
-                sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
-            }
-            leftTopX = static_cast<int>(sideBarRect.Left()) + manager->GetWindowLeft(node->GetWindowId());
-            leftTopY = static_cast<int>(sideBarRect.Top()) + manager->GetWindowTop(node->GetWindowId());
-            rightBottomX = static_cast<int>(sideBarRect.Right()) + manager->GetWindowLeft(node->GetWindowId());
-            rightBottomY = static_cast<int>(sideBarRect.Bottom()) + manager->GetWindowTop(node->GetWindowId());
-        }
-        Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
-        nodeInfo.SetRectInScreen(bounds);
-        nodeInfo.SetComponentId(static_cast<int64_t>(node->GetNodeId()));
-        nodeInfo.SetParent(static_cast<int64_t>(node->GetParentId()));
-    }
-    CheckInvalidNodeParentID(node, nodeInfo, manager, leftTopX, leftTopY, rightBottomX, rightBottomY);
-    nodeInfo.SetPagePath(manager->GetPagePath());
-    nodeInfo.SetWindowId(windowId);
-    nodeInfo.SetChecked(node->GetCheckedState());
-    nodeInfo.SetEnabled(node->GetEnabledState());
-    nodeInfo.SetFocused(node->GetFocusedState());
-    nodeInfo.SetSelected(node->GetSelectedState());
-    nodeInfo.SetCheckable(node->GetCheckableState());
-    nodeInfo.SetClickable(node->GetClickableState());
-    nodeInfo.SetFocusable(node->GetFocusableState());
-    nodeInfo.SetScrollable(node->GetScrollableState());
-    nodeInfo.SetLongClickable(node->GetLongClickableState());
-    nodeInfo.SetEditable(node->GetEditable());
-    nodeInfo.SetPluraLineSupported(node->GetIsMultiLine());
-    nodeInfo.SetPassword(node->GetIsPassword());
-    nodeInfo.SetTextLengthLimit(node->GetMaxTextLength());
-    nodeInfo.SetSelectedBegin(node->GetTextSelectionStart());
-    nodeInfo.SetSelectedEnd(node->GetTextSelectionEnd());
-    nodeInfo.SetVisible(node->GetShown() && node->GetVisible());
-    nodeInfo.SetHint(node->GetHintText());
-    std::string accessibilityLabel = node->GetAccessibilityLabel();
-    nodeInfo.SetLabeled(atol(accessibilityLabel.c_str()));
-    nodeInfo.SetError(node->GetErrorText());
-    nodeInfo.SetComponentResourceId(node->GetJsComponentId());
-    nodeInfo.SetInspectorKey(node->GetJsComponentId());
-    RangeInfo rangeInfo = ConvertAccessibilityValue(node->GetAccessibilityValue());
-    nodeInfo.SetRange(rangeInfo);
-    nodeInfo.SetInputType(static_cast<int>(node->GetTextInputType()));
-    nodeInfo.SetComponentType(node->GetTag());
-    GridInfo gridInfo(
-        node->GetCollectionInfo().rows, node->GetCollectionInfo().columns, (nodeInfo.IsPluraLineSupported() ? 0 : 1));
-    nodeInfo.SetGrid(gridInfo);
-    nodeInfo.SetAccessibilityFocus(node->GetAccessibilityFocusedState());
-    nodeInfo.SetPageId(node->GetPageId());
-
-    int32_t row = node->GetCollectionItemInfo().row;
-    int32_t column = node->GetCollectionItemInfo().column;
-    GridItemInfo gridItemInfo(row, row, column, column, false, nodeInfo.IsSelected());
-    nodeInfo.SetGridItem(gridItemInfo);
-    nodeInfo.SetBundleName(Container::CurrentBundleName());
-
-    if (node->GetTag() == LIST_TAG) {
-        nodeInfo.SetItemCounts(node->GetListItemCounts());
-        nodeInfo.SetBeginIndex(node->GetListBeginIndex());
-        nodeInfo.SetEndIndex(node->GetListEndIndex());
-    }
-    if (node->GetIsPassword()) {
-        std::string strStar(node->GetText().size(), '*');
-        nodeInfo.SetContent(strStar);
-    } else {
-        nodeInfo.SetContent(node->GetText());
-    }
-
-    auto supportAceActions = node->GetSupportAction();
-    std::vector<ActionType> actions(supportAceActions.size());
-
-    for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
-        AccessibleAction action(ConvertAceAction(*it), "ace");
-        nodeInfo.AddAction(action);
-    }
-
-    if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::YES_STR) {
-        actions.emplace_back(ActionType::ACCESSIBILITY_ACTION_FOCUS);
-        nodeInfo.SetCheckable(true);
-    } else if (node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_STR ||
-               node->GetImportantForAccessibility() == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-        nodeInfo.SetVisible(false);
-    }
-    manager->UpdateNodeChildIds(node);
-    for (const auto& child : node->GetChildIds()) {
-        nodeInfo.AddChild(child);
-    }
-
-#ifdef ACE_DEBUG
-    std::string actionForLog;
-    for (const auto& action : supportAceActions) {
-        if (!actionForLog.empty()) {
-            actionForLog.append(",");
-        }
-        actionForLog.append(std::to_string(static_cast<int32_t>(action)));
-    }
-#endif
-}
 
 void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, const RefPtr<AccessibilityNode>& node,
     const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, int windowId)
 {
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(jsAccessibilityManager);
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}d, mode: %{public}d", node->GetNodeId(), mode);
     // parent
     uint32_t umode = mode;
     if (umode & static_cast<uint32_t>(PREFETCH_PREDECESSORS)) {
         if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
             AccessibilityElementInfo parentNodeInfo;
-            UpdateAccessibilityNodeInfo(node->GetParentNode(), parentNodeInfo, jsAccessibilityManager, windowId);
+            jsAccessibilityManager->UpdateAccessibilityNodeInfo(
+                node->GetParentNode(), parentNodeInfo, jsAccessibilityManager, windowId);
             infos.emplace_back(parentNodeInfo);
         }
     }
@@ -485,7 +321,8 @@ void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, 
             for (const auto& item : node->GetParentNode()->GetChildList()) {
                 if (node->GetNodeId() != item->GetNodeId()) {
                     AccessibilityElementInfo siblingNodeInfo;
-                    UpdateAccessibilityNodeInfo(item, siblingNodeInfo, jsAccessibilityManager, windowId);
+                    jsAccessibilityManager->UpdateAccessibilityNodeInfo(
+                        item, siblingNodeInfo, jsAccessibilityManager, windowId);
                     infos.emplace_back(siblingNodeInfo);
                 }
             }
@@ -495,7 +332,7 @@ void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, 
     if (umode & static_cast<uint32_t>(PREFETCH_CHILDREN)) {
         for (const auto& item : node->GetChildList()) {
             AccessibilityElementInfo childNodeInfo;
-            UpdateAccessibilityNodeInfo(item, childNodeInfo, jsAccessibilityManager, windowId);
+            jsAccessibilityManager->UpdateAccessibilityNodeInfo(item, childNodeInfo, jsAccessibilityManager, windowId);
             infos.emplace_back(childNodeInfo);
         }
     }
@@ -511,7 +348,8 @@ void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, 
             auto parent = children.front();
             children.pop_front();
             AccessibilityElementInfo childNodeInfo;
-            UpdateAccessibilityNodeInfo(parent, childNodeInfo, jsAccessibilityManager, windowId);
+            jsAccessibilityManager->UpdateAccessibilityNodeInfo(
+                parent, childNodeInfo, jsAccessibilityManager, windowId);
             infos.push_back(childNodeInfo);
             for (const auto& item : parent->GetChildList()) {
                 children.emplace_back(item);
@@ -666,8 +504,6 @@ void SetUiExtensionAbilityParentIdForFocus(const RefPtr<NG::UINode>& uiExtension
     }
 }
 
-RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>& root, int64_t id);
-
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     int32_t focusType, Accessibility::AccessibilityElementInfo& info,
     const int64_t uiExtensionOffset, const RefPtr<PipelineBase>& context, int64_t currentFocusNodeId)
@@ -676,11 +512,7 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode) {
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
-            auto node = GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
-            std::string finalNodeId = node ? std::to_string(node->GetAccessibilityId()) : "nullptr";
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-                "currentFocusNodeId: %{public}" PRId64 ", result accessiblityId: %s",
-                currentFocusNodeId, finalNodeId.c_str());
+            auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
             return node;
         }
     }
@@ -804,63 +636,6 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
             FindText(child, text, nodeList);
         }
     }
-}
-
-bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
-    std::queue<RefPtr<NG::UINode>>& nodes, RefPtr<NG::FrameNode>& result)
-{
-    for (const auto& child : children) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
-        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
-            if (frameNode->GetAccessibilityId() == id) {
-                result = AceType::DynamicCast<NG::FrameNode>(child);
-                return true;
-            }
-        }
-        nodes.push(child);
-    }
-    return false;
-}
-
-RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>& root, int64_t id)
-{
-    CHECK_NULL_RETURN(root, nullptr);
-    if (root->GetAccessibilityId() == id) {
-        return root;
-    }
-    std::queue<RefPtr<NG::UINode>> nodes;
-    nodes.push(root);
-    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
-
-    while (!nodes.empty()) {
-        auto current = nodes.front();
-        nodes.pop();
-        if (current->HasVirtualNodeAccessibilityProperty()) {
-            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
-            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
-            }
-        } else {
-            const auto& children = current->GetChildren(true);
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
-            }
-        }
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
-        if (!frameNode) {
-            continue;
-        }
-        auto overlayNode = frameNode->GetOverlayNode();
-        if (overlayNode) {
-            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
-            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
-                return frameNodeResult;
-            }
-        }
-    }
-    return nullptr;
 }
 
 using FindCondition = std::function<bool(const RefPtr<NG::FrameNode>&)>;
@@ -1112,135 +887,61 @@ void GetFrameNodeChildren(
     }
 }
 
-bool GetNodeAccessibilityVisible(const RefPtr<NG::FrameNode>& frameNode, bool isAllAncestorAccessibilityVisible,
-                                 bool clipVisible)
-{
-    if (frameNode->IsFirstVirtualNode()) {
-        return frameNode->IsVisible() && isAllAncestorAccessibilityVisible && clipVisible;
-    } else {
-        return frameNode->IsActive() && frameNode->IsVisible() && isAllAncestorAccessibilityVisible && clipVisible;
-    }
-}
-
-bool ProcessParentFrameNode(
-    const RefPtr<NG::UINode>& parent, std::string& parentPath, bool& isAllAncestorAccessibilityVisible)
-{
-    auto parentFrameNode = AceType::DynamicCast<NG::FrameNode>(parent);
-    if (parentFrameNode->CheckAccessibilityLevelNo()) {
-        return false;
-    }
-
-    parentPath += "Parent ID: " + std::to_string(parent->GetAccessibilityId()) +
-                  " IsActive: " + std::to_string(parentFrameNode->IsActive()) +
-                  " IsVisible: " + std::to_string(parentFrameNode->IsVisible()) +
-                  " AccessibilityVisible: " + std::to_string(parentFrameNode->GetAccessibilityVisible()) +
-                  " Parent Tag: " + parent->GetTag() + " | ";
-
-    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
-        isAllAncestorAccessibilityVisible = parentFrameNode->GetAccessibilityVisible();
-    } else if (parentFrameNode->IsFirstVirtualNode()) {
-        isAllAncestorAccessibilityVisible = parentFrameNode->IsVisible();
-    } else {
-        isAllAncestorAccessibilityVisible = parentFrameNode->IsActive() && parentFrameNode->IsVisible();
-    }
-
-    return !isAllAncestorAccessibilityVisible;
-}
-
-RefPtr<NG::UINode> GetInitialParent(const RefPtr<NG::UINode>& uiNode)
-{
-    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-        if (frameNode->IsFirstVirtualNode()) {
-            auto weakNode = frameNode->GetVirtualNodeParent();
-            return weakNode.Upgrade();
-        } else {
-            return uiNode->GetParent();
-        }
-    }
-    return nullptr;
-}
-
-void UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
-{
-    RefPtr<NG::UINode> parent = GetInitialParent(uiNode);
-    bool isAllAncestorAccessibilityVisible = true;
-    bool clipVisible = true;
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::NG::RectF frameRect;
-    OHOS::Ace::NG::RectF visibleInnerRect;
-    OHOS::Ace::NG::RectF visibleRect;
-    frameNode->SetIsCalculateInnerVisibleRectClip(true);
-    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    bool isClipCheckSkip = NearEqual(visibleRect.Width(), 0.0) && NearEqual(visibleRect.Height(), 0.0) &&
-                           NearEqual(visibleInnerRect.Width(), 0.0) && NearEqual(visibleInnerRect.Height(), 0.0);
-    clipVisible = (GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0)) ||
-                  isClipCheckSkip;
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto rect = renderContext->GetPaintRectWithoutTransform();
-    if (NearEqual(rect.Width(), 0.0) && NearEqual(rect.Height(), 0.0)) {
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Component %{public}s is not visible: width and height are both zero.",
-                 std::to_string(frameNode->GetAccessibilityId()).c_str());
-        clipVisible = false;
-    }
-    std::string parentPath;
-    while (parent) {
-        if (AceType::InstanceOf<NG::FrameNode>(parent)) {
-            if (ProcessParentFrameNode(parent, parentPath, isAllAncestorAccessibilityVisible)) {
-                break;
-            }
-        }
-        parent = parent->GetParent();
-    }
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Complete parent path:current id %{public}" PRId64 " %{public}s",
-        frameNode->GetAccessibilityId(), parentPath.c_str());
-
-    bool nodeAccessibilityVisible =
-        GetNodeAccessibilityVisible(frameNode, isAllAncestorAccessibilityVisible, clipVisible);
-    if (!nodeAccessibilityVisible) {
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "Element %{public}" PRId64 " is invisible. isActive %{public}d, isVisible %{public}d"
-            " isAllAncestorAccessibilityVisible:%{public}d clipVisible:%{public}d",
-            frameNode->GetAccessibilityId(), frameNode->IsActive(), frameNode->IsVisible(),
-            isAllAncestorAccessibilityVisible, clipVisible);
-    }
-
-    if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
-        frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
-    }
-}
-
 void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, AccessibilityElementInfo& nodeInfo)
 {
-    UpdateAccessibilityVisibleToRoot(uiNode);
+    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(uiNode);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
     CHECK_NULL_VOID(frameNode);
     nodeInfo.SetAccessibilityVisible(frameNode->GetAccessibilityVisible());
 }
 
-void SetRootAccessibilityNextFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
-                                     AccessibilityElementInfo& nodeInfo)
+RefPtr<NG::FrameNode> GetAccessibilityNextFocusNode(
+    const RefPtr<NG::UINode>& currentNode,
+    const RefPtr<NG::FrameNode>& rootNode)
 {
     auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
-    CHECK_NULL_VOID(currentFrameNode);
+    CHECK_NULL_RETURN(currentFrameNode, nullptr);
     auto accessibilityProperty = currentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_RETURN(accessibilityProperty, nullptr);
     if (accessibilityProperty->GetAccessibilityNextFocusInspectorKey() == "") {
-        return;
+        return nullptr;
     }
 
     FindCondition condition = [accessibilityProperty](const RefPtr<NG::FrameNode>& node) {
         return node->GetInspectorId() == accessibilityProperty->GetAccessibilityNextFocusInspectorKey();
     };
-    auto nextNode = GetFramenodeByCondition(rootNode, condition);
+    return GetFramenodeByCondition(rootNode, condition);
+}
+
+void SetRootAccessibilityNextFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
+                                     AccessibilityElementInfo& nodeInfo)
+{
+    auto nextNode = GetAccessibilityNextFocusNode(currentNode, rootNode);
     CHECK_NULL_VOID(nextNode);
     auto elementId = nextNode->GetAccessibilityId();
     if (nodeInfo.GetBelongTreeId() > 0) {
         AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), elementId);
     }
     nodeInfo.SetAccessibilityNextFocusId(elementId);
+}
+
+RefPtr<NG::FrameNode> GetAccessibilityPrevFocusNode(
+    const RefPtr<NG::UINode>& currentNode,
+    const RefPtr<NG::FrameNode>& rootNode,
+    const std::map<std::string, int64_t>& nextFocusIdMap)
+{
+    auto currentFrameNode = AceType::DynamicCast<NG::FrameNode>(currentNode);
+    CHECK_NULL_RETURN(currentFrameNode, nullptr);
+
+    auto currentInspectorId = currentFrameNode->GetInspectorId().value_or("");
+    if (currentInspectorId == "") {
+        return nullptr;
+    }
+    auto it = nextFocusIdMap.find(currentInspectorId);
+    if (it != nextFocusIdMap.end()) {
+        return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, it->second);
+    }
+    return nullptr;
 }
 
 void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const RefPtr<NG::FrameNode>& rootNode,
@@ -1257,6 +958,9 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
         int64_t preAccessibilityId = it->second;
+        if (nodeInfo.GetBelongTreeId() > 0) {
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), preAccessibilityId);
+        }
         nodeInfo.SetAccessibilityPreviousFocusId(preAccessibilityId);
     }
 }
@@ -1278,7 +982,6 @@ void HandleExistingContext(std::map<int32_t, std::map<std::string, int64_t>>::it
     if (nextFocusInspectorKey.empty()) {
         RemoveEntriesWithPreAccessibilityId(it->second, preAccessibilityId);
     } else {
-        auto nextFocusMap = it->second;
         it->second[nextFocusInspectorKey] = preAccessibilityId;
     }
 }
@@ -1317,6 +1020,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, c
     CHECK_NULL_VOID(jsAccessibilityManager);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     if (uiExtensionManager->IsWrapExtensionAbilityId(elementId)) {
@@ -1458,7 +1162,7 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         }
     }
 
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1514,18 +1218,8 @@ bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
 void UpdateAccessibilityTextValueInfo(
     RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
 {
-    if (accessibilityProperty->HasUserTextValue()) {
-        nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
-    } else {
-        nodeInfo.SetContent(accessibilityProperty->GetGroupText());
-    }
-
-    if (!accessibilityProperty->HasUserTextValue() && accessibilityProperty->GetAccessibilityText().empty() &&
-        accessibilityProperty->IsAccessibilityGroup() && accessibilityProperty->IsAccessibilityTextPreferred()) {
-        nodeInfo.SetAccessibilityText(accessibilityProperty->GetGroupPreferAccessibilityText());
-    } else {
-        nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
-    }
+    nodeInfo.SetContent(NG::AccessibilityPropertyUtils::GetContent(accessibilityProperty));
+    nodeInfo.SetAccessibilityText(NG::AccessibilityPropertyUtils::GetAccessibilityText(accessibilityProperty));
     nodeInfo.SetOriginalText(accessibilityProperty->GetText());
 }
 
@@ -1625,7 +1319,7 @@ int32_t GetLastPageId(const RefPtr<NG::PipelineContext>& ngPipeline)
 void AddHasRegisteredHover(const RefPtr<NG::FrameNode>& node, ExtraElementInfo& extraElementInfo)
 {
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
@@ -1647,6 +1341,61 @@ void UpdateWebEmbedParent(std::list<AccessibilityElementInfo>& infos,
 }
 } // namespace
 
+
+ActionType JsAccessibilityManager::ConvertAceAction(AceAction aceAction)
+{
+    static const ActionTable actionTable[] = {
+        { AceAction::ACTION_CLICK, ActionType::ACCESSIBILITY_ACTION_CLICK },
+        { AceAction::ACTION_LONG_CLICK, ActionType::ACCESSIBILITY_ACTION_LONG_CLICK },
+        { AceAction::ACTION_SCROLL_FORWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD },
+        { AceAction::ACTION_SCROLL_BACKWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD },
+        { AceAction::ACTION_FOCUS, ActionType::ACCESSIBILITY_ACTION_FOCUS },
+        { AceAction::ACTION_CLEAR_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS },
+        { AceAction::ACTION_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS },
+        { AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS },
+        { AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT },
+        { AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT },
+        { AceAction::ACTION_SET_TEXT, ActionType::ACCESSIBILITY_ACTION_SET_TEXT },
+        { AceAction::ACTION_COPY, ActionType::ACCESSIBILITY_ACTION_COPY },
+        { AceAction::ACTION_PASTE, ActionType::ACCESSIBILITY_ACTION_PASTE },
+        { AceAction::ACTION_CUT, ActionType::ACCESSIBILITY_ACTION_CUT },
+        { AceAction::ACTION_SELECT, ActionType::ACCESSIBILITY_ACTION_SELECT },
+        { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
+        { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
+        { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
+        { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
+        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
+        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
+    };
+    for (const auto& item : actionTable) {
+        if (aceAction == item.aceAction) {
+            return item.action;
+        }
+    }
+    return ActionType::ACCESSIBILITY_ACTION_INVALID;
+}
+
+RefPtr<NG::FrameNode> JsAccessibilityManager::GetNextFocusNodeByManager(
+    const RefPtr<NG::UINode>& currentNode,
+    const RefPtr<NG::FrameNode>& rootNode)
+{
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    return GetAccessibilityNextFocusNode(currentNode, rootNode);
+}
+
+RefPtr<NG::FrameNode> JsAccessibilityManager::GetPrevFocusNodeByManager(
+    const RefPtr<NG::UINode>& currentNode,
+    const RefPtr<NG::FrameNode>& rootNode,
+    const RefPtr<PipelineBase>& context)
+{
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    CHECK_NULL_RETURN(context, nullptr);
+    return GetAccessibilityPrevFocusNode(currentNode, rootNode, nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+}
+
+
 bool JsAccessibilityManager::IsTagInEmbedComponent(const std::string& tag)
 {
     return TAGS_EMBED_COMPONENT.find(tag) != TAGS_EMBED_COMPONENT.end();
@@ -1666,7 +1415,6 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     }
 
     UpdateAccessibilityTextValueInfo(accessibilityProperty, nodeInfo);
-
     RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
     if (accessibilityProperty->HasUserRangeCurrentValue()) {
         rangeInfo.SetCurrent(accessibilityProperty->GetUserRangeCurrentValue());
@@ -1705,7 +1453,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.SetBlur(context->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
         }
     }
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     if (eventHub != nullptr) {
         nodeInfo.SetHitTestBehavior(NG::GestureEventHub::GetHitTestModeStr(eventHub->GetGestureEventHub()));
     }
@@ -1846,6 +1594,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
         nodeInfo.AddAction(action);
     }
     nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
+
     ExtraElementInfo extraElementInfo {};
     extraElementInfo.SetExtraElementInfo("componentTypeDescription", node->GetComponentTypeDescription());
     extraElementInfo.SetExtraElementInfo("CheckboxGroupSelectedStatus", node->GetCheckboxGroupSelectedStatus());
@@ -1925,7 +1674,7 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(
         GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
-    nodeInfo.SetBundleName(Container::CurrentBundleName());
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
@@ -1975,7 +1724,7 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(
         GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
-    nodeInfo.SetBundleName(Container::CurrentBundleName());
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
@@ -2101,6 +1850,12 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
 void JsAccessibilityManager::UpdateAccessibilityVisible(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+        NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
+        nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
+        return;
+    }
+
     auto parentNode = node->GetParentFrameNode();
     UpdateElementInfoTreeId(nodeInfo);
 
@@ -2134,6 +1889,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     CHECK_NULL_VOID(node);
     nodeInfo.SetParent(GetParentId(node));
     UpdateChildrenOfAccessibilityElementInfo(node, commonProperty, nodeInfo);
+
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
     nodeInfo.SetUniqueId(node->GetId());
@@ -2156,7 +1912,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     }
     nodeInfo.SetPagePath(
         GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
-    nodeInfo.SetBundleName(Container::CurrentBundleName());
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
@@ -2190,7 +1946,7 @@ void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::Transiti
             node->GetRectWidth(),
             node->GetRectHeight()
         };
-        if (!NearZero(commonProperty.scaleX, 1.0f) || !NearZero(commonProperty.scaleY, 1.0f)) {
+        if (!NearZero(commonProperty.scaleX) || !NearZero(commonProperty.scaleY)) {
             rectInt.SetRect(static_cast<int32_t>(std::floor(rectInt.GetX() * commonProperty.scaleX)),
                 static_cast<int32_t>(std::floor(rectInt.GetY() * commonProperty.scaleY)),
                 static_cast<int32_t>(std::floor(rectInt.Width() * commonProperty.scaleX)),
@@ -2240,7 +1996,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(
         GetPagePathInPageNodes(nodeInfo.GetPageId(), commonProperty.pageNodes, commonProperty.pagePaths));
-    nodeInfo.SetBundleName(Container::CurrentBundleName());
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetFocusable(node->GetIsFocusable());
@@ -2493,7 +2249,7 @@ bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
 void HandleWillClickAccept(const RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -2505,7 +2261,7 @@ void HandleWillClickAccept(const RefPtr<NG::FrameNode>& frameNode)
 void HandleDidClickAccept(const RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -2528,7 +2284,7 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& s
     if (interceptResult == AccessibilityActionInterceptResult::ACTION_INTERCEPT) {
         return true;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto gesture = eventHub->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
@@ -2551,7 +2307,10 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& s
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
 {
-    auto gesture = frameNode->GetOrCreateEventHub<NG::EventHub>()->GetGestureEventHub();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gesture = eventHub->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
     return gesture->ActLongClick();
 }
@@ -2624,7 +2383,7 @@ void PaintAccessibilityFocusNode(const RefPtr<NG::FrameNode>& focusNode, bool fo
 
 void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t focusNodeId)
 {
-    auto oldFocusNode = GetFramenodeByAccessibilityId(root, focusNodeId);
+    auto oldFocusNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(root, focusNodeId);
     CHECK_NULL_VOID(oldFocusNode);
     if (oldFocusNode->IsDrawFocusOnTop()) {
         PaintAccessibilityFocusNode(oldFocusNode, false);
@@ -2675,7 +2434,8 @@ void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
 void ClearVirtualNodeAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t currentFocusVirtualNodeParentId)
 {
     CHECK_EQUAL_VOID(currentFocusVirtualNodeParentId, -1);
-    auto currentFocusVirtualNodeParentNode = GetFramenodeByAccessibilityId(root, currentFocusVirtualNodeParentId);
+    auto currentFocusVirtualNodeParentNode =
+        NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(root, currentFocusVirtualNodeParentId);
     CHECK_NULL_VOID(currentFocusVirtualNodeParentNode);
     auto renderContext = currentFocusVirtualNodeParentNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -2936,7 +2696,7 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetEventType(type);
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
-    eventInfo.SetBundleName(Container::CurrentBundleName());
+    eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
     eventInfo.SetBeginIndex(accessibilityEvent.startIndex);
     eventInfo.SetEndIndex(accessibilityEvent.endIndex);
     if (accessibilityEvent.extraEventInfo.size() > 0) {
@@ -2987,6 +2747,7 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
     DumpLog::GetInstance().AddDesc("accessibilityNextFocusInspectorKey: ",
                                    nodeInfo.GetAccessibilityNextFocusInspectorKey());
+    DumpLog::GetInstance().AddDesc("accessibilityTextHint: ", nodeInfo.GetTextType());
     DumpLog::GetInstance().AddDesc("accessibilityScrollTriggerable: ",
                                    nodeInfo.GetAccessibilityScrollable());
     DumpLog::GetInstance().AddDesc("accessibilityNextFocusId: ", nodeInfo.GetAccessibilityNextFocusId());
@@ -3121,8 +2882,6 @@ void JsAccessibilityManager::UpdateAccessibilityNextFocusIdMap(int32_t container
                                                                const std::string& nextFocusInspectorKey,
                                                                int64_t preAccessibilityId)
 {
-    std::lock_guard<std::mutex> lock(nextFocusMapWithSubWindowMutex_);
-
     auto it = nextFocusMapWithSubWindow_.find(containerId);
     if (it != nextFocusMapWithSubWindow_.end()) {
         HandleExistingContext(it, nextFocusInspectorKey, preAccessibilityId);
@@ -3184,6 +2943,40 @@ void JsAccessibilityManager::InitializeCallback()
     if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
+}
+void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
+{
+    auto accessibilityGetParentRect = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
+        CHECK_NULL_VOID(ngPipeline);
+        auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
+        CHECK_NULL_VOID(container);
+        auto containerHandler = container->GetContainerHandler();
+        CHECK_NULL_VOID(containerHandler);
+
+        HandlerData data = {
+            .actionCode = static_cast<int32_t>(NG::DynamicContainerHandleAction::ACCESSIBILITY_GET_RECT) };
+        HandlerReply reply;
+
+        containerHandler->SendDataToHost(data, reply);
+
+        parentRectInfo.left = reply.GetParam<int32_t>("left", 0);
+        parentRectInfo.top = reply.GetParam<int32_t>("top", 0);
+        parentRectInfo.scaleX = reply.GetParam<float>("scaleX", 1.0f);
+        parentRectInfo.scaleY = reply.GetParam<float>("scaleY", 1.0f);
+        RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
+                                   reply.GetParam<int32_t>("centerX", 0),
+                                   reply.GetParam<int32_t>("centerY", 0),
+                                   reply.GetParam<int32_t>("innerCenterX", 0),
+                                   reply.GetParam<int32_t>("innerCenterY", 0));
+        parentRectInfo.rotateTransform = rotateData;
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "Get DC host rect [left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
+            parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
+    };
+    SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
 }
 
 void JsAccessibilityManager::RegisterGetParentRectHandler()
@@ -3260,42 +3053,6 @@ void JsAccessibilityManager::UpdateUECAccessibilityParentRectInfo(const Accessib
     uecRectInfo_ = info;
 }
 
-void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
-{
-    auto accessibilityGetParentRect = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
-        auto jsAccessibilityManager = weak.Upgrade();
-        CHECK_NULL_VOID(jsAccessibilityManager);
-        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
-        CHECK_NULL_VOID(ngPipeline);
-        auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
-        CHECK_NULL_VOID(container);
-        auto containerHandler = container->GetContainerHandler();
-        CHECK_NULL_VOID(containerHandler);
-
-        HandlerData data = {
-            .actionCode = static_cast<int32_t>(NG::DynamicContainerHandleAction::ACCESSIBILITY_GET_RECT) };
-        HandlerReply reply;
-
-        containerHandler->SendDataToHost(data, reply);
-
-        parentRectInfo.left = reply.GetParam<int32_t>("left", 0);
-        parentRectInfo.top = reply.GetParam<int32_t>("top", 0);
-        parentRectInfo.scaleX = reply.GetParam<float>("scaleX", 1.0f);
-        parentRectInfo.scaleY = reply.GetParam<float>("scaleY", 1.0f);
-        RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
-                                   reply.GetParam<int32_t>("centerX", 0),
-                                   reply.GetParam<int32_t>("centerY", 0),
-                                   reply.GetParam<int32_t>("innerCenterX", 0),
-                                   reply.GetParam<int32_t>("innerCenterY", 0));
-        parentRectInfo.rotateTransform = rotateData;
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "Get DC host rect [left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
-            parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
-    };
-    SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
-}
-
-
 namespace {
     const char FULL_SILENT[] = "FULL_SILENT";
 
@@ -3334,7 +3091,7 @@ namespace {
     {
         for (const auto& [node, status] : nodeVec) {
             auto frameNode = node.Upgrade();
-            if (frameNode && (frameNode->GetPageId() == pageId && !status)) {
+            if (frameNode && ((frameNode->GetPageId() == pageId || pageId == -1) && !status)) {
                 return false;
             }
         }
@@ -3359,6 +3116,32 @@ namespace {
                 ++it;
             }
         }
+    }
+
+    int32_t GetNowPageId(const RefPtr<PipelineBase>& context, int32_t originPageId)
+    {
+        if (originPageId != -1) {
+            return originPageId;
+        }
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        CHECK_NULL_RETURN(ngPipeline, originPageId);
+        auto stageManager = ngPipeline->GetStageManager();
+        CHECK_NULL_RETURN(stageManager, originPageId);
+        auto node = stageManager->GetLastPage();
+        CHECK_NULL_RETURN(node, originPageId);
+        return node->GetPageId();
+    }
+
+    bool NotInPage(const RefPtr<NG::FrameNode>& node)
+    {
+        auto parent = node->GetParent();
+        while (parent) {
+            if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+                return false;
+            }
+            parent = parent->GetParent();
+        }
+        return true;
     }
 
     void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList)
@@ -3612,14 +3395,21 @@ void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node,
     }
 
     if (releaseAll) {
-        pageController_.DeleteInstanceNodeAll(node);
-        ReleaseAllCacheAccessibilityEvent(containerId);
+        pageController_.DeleteInstanceNodeAllWithPriority(node);
+        if (pageController_.CheckEmpty(containerId)) {
+            ReleaseAllCacheAccessibilityEvent(containerId);
+        }
     }
 }
 
 void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode>& node)
 {
     pageController_.Add(node);
+}
+
+bool JsAccessibilityManager::DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node)
+{
+    return pageController_.Delete(node);
 }
 
 bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage)
@@ -3651,7 +3441,6 @@ bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& n
         PRId64, pageId, ret, containerId, node->GetAccessibilityId());
     return ret;
 }
-
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
@@ -3722,6 +3511,21 @@ int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::Frame
 #endif
 }
 
+bool JsAccessibilityManager::CheckAndGetEmbedWebElementInfo(
+    const RefPtr<NG::FrameNode>& node,
+    AccessibilityElementInfo& elementInfo)
+{
+    auto surfaceId = GetSurfaceIdByEmbedNode(node);
+    if (surfaceId == "0") {
+        return false;
+    }
+#ifdef WEB_SUPPORTED
+    return GetWebAccessibilityInfoBySurfaceId(surfaceId, elementInfo);
+#else
+    return false;
+#endif
+}
+
 void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager)
 {
     CHECK_NULL_VOID(uiExtManager);
@@ -3776,7 +3580,7 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
     eventInfo.SetPageId(info.GetPageId());
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
         "send accessibility componentType:%{public}s event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     if (IsTagInEmbedComponent(eventInfo.GetComponentType()) &&
@@ -3897,6 +3701,7 @@ bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& 
     if (!accessibilityWorkMode.isTouchExplorationEnabled) {
         switch (accessibilityEvent.type) {
             case AccessibilityEventType::ELEMENT_INFO_CHANGE:
+            case AccessibilityEventType::COMPONENT_CHANGE:
             case AccessibilityEventType::TEXT_CHANGE:
             case AccessibilityEventType::FOCUS:
             case AccessibilityEventType::SCROLLING_EVENT:
@@ -4063,10 +3868,11 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
-    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
-        eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
+    if (ngPipeline != nullptr) {
+        if (ngPipeline->IsFormRender()) {
+            eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
+        }
     }
-
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
     auto container = Container::GetContainer(context->GetInstanceId());
@@ -4263,10 +4069,9 @@ bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start
     return true;
 }
 
-bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator start,
+bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator& arg,
     const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
-    auto arg = start;
     argument.mode = DumpMode::HOVER_TEST;
     static constexpr int32_t NUM_POINT_DIMENSION = 2;
     if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
@@ -4501,7 +4306,7 @@ void JsAccessibilityManager::DumpEmbedHoverTestNG(const std::vector<std::string>
     if (rootId == -1) {
         root = pipelineRoot;
     } else {
-        root = GetFramenodeByAccessibilityId(pipelineRoot, rootId);
+        root = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(pipelineRoot, rootId);
     }
     CHECK_NULL_VOID(root);
 
@@ -4529,29 +4334,6 @@ void JsAccessibilityManager::DumpEmbedHoverTestNG(const std::vector<std::string>
     NG::HandleHoverEventParam param = {
         hoverPoint, SourceType::TOUCH, NG::AccessibilityHoverEventType::ENTER, time, true };
     accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(surfaceId, param);
-}
-
-void JsAccessibilityManager::DumpSetCheckListTest(const std::vector<std::string>& params)
-{
-    std::vector<uint32_t> vec;
-    if (!DumpProcessSetCheckListParameters(params, vec)) {
-        return;
-    }
-    UpdateEventWhiteList(vec);
-    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
-    DumpLog::GetInstance().Print(std::string("Result: Set White List Done"));
-}
-
-void JsAccessibilityManager::DumpGetCheckListTest(const std::vector<std::string>& params)
-{
-    if (!DumpProcessGetCheckListParameters(params)) {
-        return;
-    }
-    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
-    for (const auto& event : eventWhiteList_) {
-        DumpLog::GetInstance().Print("white list No: "+ std::to_string(event));
-    }
-    DumpLog::GetInstance().Print(std::string("Result: Get White List Done"));
 }
 
 void JsAccessibilityManager::DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId)
@@ -4588,6 +4370,29 @@ void JsAccessibilityManager::DumpSpecificPropertySearchTest(const std::vector<st
     DumpLog::GetInstance().Print(std::string("Result: customId search done"));
 }
 
+void JsAccessibilityManager::DumpSetCheckListTest(const std::vector<std::string>& params)
+{
+    std::vector<uint32_t> vec;
+    if (!DumpProcessSetCheckListParameters(params, vec)) {
+        return;
+    }
+    UpdateEventWhiteList(vec);
+    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
+    DumpLog::GetInstance().Print(std::string("Result: Set White List Done"));
+}
+
+void JsAccessibilityManager::DumpGetCheckListTest(const std::vector<std::string>& params)
+{
+    if (!DumpProcessGetCheckListParameters(params)) {
+        return;
+    }
+    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
+    for (const auto& event : eventWhiteList_) {
+        DumpLog::GetInstance().Print("white list No: "+ std::to_string(event));
+    }
+    DumpLog::GetInstance().Print(std::string("Result: Get White List Done"));
+}
+
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
 {
     if (!useWindowId && rootId == -1) {
@@ -4622,7 +4427,7 @@ void JsAccessibilityManager::DumpHoverTestNG(uint32_t windowId, int64_t rootId, 
     if (rootId == -1) {
         root = pipelineRoot;
     } else {
-        root = GetFramenodeByAccessibilityId(pipelineRoot, rootId);
+        root = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(pipelineRoot, rootId);
     }
     CHECK_NULL_VOID(root);
 
@@ -4752,14 +4557,14 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         } else if (*arg == "--embed-hover") {
             argument.mode = DumpMode::EMBED_HOVER_TEST;
             break;
+        } else if (*arg == "--specific-search") {
+            argument.mode = DumpMode::SPECIFIC_SEARCH_TEST;
+            break;
         } else if (*arg == "--set-whitelist") {
             argument.mode = DumpMode::SET_CHECKLIST_TEST;
             break;
         } else if (*arg == "--get-whitelist") {
             argument.mode = DumpMode::GET_CHECKLIST_TEST;
-            break;
-        } else if (*arg == "--specific-search") {
-            argument.mode = DumpMode::SPECIFIC_SEARCH_TEST;
             break;
         } else if (*arg == "-v") {
             argument.verbose = true;
@@ -4834,14 +4639,14 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
         case DumpMode::EMBED_HOVER_TEST:
             DumpEmbedHoverTestNG(params, windowId);
             break;
+        case DumpMode::SPECIFIC_SEARCH_TEST:
+            DumpSpecificPropertySearchTest(params, windowId);
+            break;
         case DumpMode::SET_CHECKLIST_TEST:
             DumpSetCheckListTest(params);
             break;
         case DumpMode::GET_CHECKLIST_TEST:
             DumpGetCheckListTest(params);
-            break;
-        case DumpMode::SPECIFIC_SEARCH_TEST:
-            DumpSpecificPropertySearchTest(params, windowId);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -5106,9 +4911,9 @@ static void DumpAccessibilityElementInfosTreeNG(
         DumpLog::GetInstance().AddDesc("compid: " + accessibilityInfo.GetInspectorKey());
         DumpLog::GetInstance().AddDesc("text: " + accessibilityInfo.GetContent());
         DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityInfo.GetContent());
+        DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + accessibilityInfo.GetCustomComponentType());
         DumpLog::GetInstance().AddDesc("accessibilityGroup: ");
         DumpLog::GetInstance().AddDesc("accessibilityLevel: ");
-        DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + accessibilityInfo.GetCustomComponentType());
         DumpLog::GetInstance().AddDesc("top: " +
             std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
         DumpLog::GetInstance().AddDesc("left: " +
@@ -5146,8 +4951,8 @@ static void DumpTreeNodeInfoNG(
     if (accessibilityProperty) {
         DumpLog::GetInstance().AddDesc("text: " + accessibilityProperty->GetGroupText());
         DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityProperty->GetAccessibilityText());
-        DumpLog::GetInstance().AddDesc(
-            "accessibilityGroup: " + std::to_string(accessibilityProperty->IsAccessibilityGroup()));
+        DumpLog::GetInstance().AddDesc("accessibilityGroup: "
+            + std::to_string(accessibilityProperty->IsAccessibilityGroup()));
         DumpLog::GetInstance().AddDesc("accessibilityLevel: " + accessibilityProperty->GetAccessibilityLevel());
         DumpLog::GetInstance().AddDesc(
             "accessibilityCustomRole: " + accessibilityProperty->GetAccessibilityCustomRole());
@@ -5157,7 +4962,7 @@ static void DumpTreeNodeInfoNG(
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     if (eventHub) {
         auto gestureEventHub = eventHub->GetGestureEventHub();
         DumpLog::GetInstance().AddDesc(
@@ -5281,10 +5086,6 @@ void JsAccessibilityManager::DumpTreeNodeCommonInfoNg(
         if (padding) {
             DumpPadding(padding, std::string("Padding: "));
         }
-        auto& safeAreaPadding = layoutProperty->GetSafeAreaPaddingProperty();
-        if (safeAreaPadding) {
-            DumpPadding(safeAreaPadding, std::string("SafeAreaPadding: "));
-        }
         auto& margin = layoutProperty->GetMarginProperty();
         if (margin) {
             DumpPadding(margin, std::string("Margin: "));
@@ -5314,7 +5115,7 @@ void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode
     CHECK_NULL_VOID(uiNodeParent);
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(uiNodeParent);
     auto uiNodeChildren = uiNodeParent->GetChildren(true);
-    auto vNode = GetFramenodeByAccessibilityId(virtualFrameNode, nodeID);
+    auto vNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(virtualFrameNode, nodeID);
     if (!vNode) {
         if (uiNodeChildren.size() == 0) {
             return;
@@ -5335,7 +5136,7 @@ void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode
 void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
     int64_t nodeID, const CommonProperty& commonProperty, bool isDumpSimplify)
 {
-    auto node = GetFramenodeByAccessibilityId(parent, nodeID);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(parent, nodeID);
     if (!node) {
         DumpLog::GetInstance().Print("Error: failed to get accessibility node with ID " + std::to_string(nodeID));
         return;
@@ -5479,6 +5280,7 @@ RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t windowId)
 {
     auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         CHECK_NULL_RETURN(context, nullptr);
         if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
@@ -5797,9 +5599,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
             SearchElementInfoByAccessibilityIdNG(elementId, mode, infos, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
-            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-                "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-                infos.size(), elementId);
             SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
             return;
         }
@@ -5814,9 +5613,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-            infos.size(), elementId);
         SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
         return;
     }
@@ -5826,9 +5622,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     infos.push_back(nodeInfo);
     // cache parent/siblings/children infos
     UpdateCacheInfo(infos, mode, node, jsAccessibilityManager, jsAccessibilityManager->windowId_);
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-        infos.size(), elementId);
+
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
 }
 
@@ -5860,7 +5654,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
     }
 #endif
 
-    auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, nodeId);
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
@@ -5924,7 +5718,7 @@ bool JsAccessibilityManager::FindUIExtensionAccessibilityElement(const RefPtr<NG
 
     SearchParameter searchParam {
         .nodeId = NG::UI_EXTENSION_ROOT_ID,
-        .mode = static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN),
+        .mode = static_cast<int32_t>(PREFETCH_RECURSIVE_CHILDREN),
         .uiExtensionOffset = NG::UI_EXTENSION_OFFSET_MAX,
     };
 
@@ -5966,11 +5760,12 @@ void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t element
 
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, rootNode);
+    commonProperty.checkEmbedNode = false;
     int64_t nodeId = elementId;
     if (elementId == -1) {
         nodeId = rootNode->GetAccessibilityId();
     }
-    auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, nodeId);
     CHECK_NULL_VOID(node);
     std::list<RefPtr<NG::FrameNode>> children { node };
     while (!children.empty()) {
@@ -6078,6 +5873,37 @@ void JsAccessibilityManager::SearchElementInfoBySpecificProperty(const int64_t e
     const SpecificPropertyParam &param, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback, const int32_t windowId)
 {
+    auto context = GetPipelineByWindowId(windowId);
+    if (!context) {
+        std::list<AccessibilityElementInfo> infos;
+        std::list<AccessibilityElementInfo> treeInfos;
+        callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+    }
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    if (ngPipeline) {
+        ngPipeline->AddAfterRenderTask(
+            [weak = WeakClaim(this), elementId, param, requestId, &callback, windowId]() {
+                auto jsAccessibilityManager = weak.Upgrade();
+                if (!jsAccessibilityManager) {
+                    std::list<AccessibilityElementInfo> infos;
+                    std::list<AccessibilityElementInfo> treeInfos;
+                    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SearchElementInfoBySpecificPropertyInner(
+                    elementId, param, requestId, callback, windowId);
+            }
+        );
+        ngPipeline->RequestFrame();
+    } else {
+        SearchElementInfoBySpecificPropertyInner(elementId, param, requestId, callback, windowId);
+    }
+}
+
+void JsAccessibilityManager::SearchElementInfoBySpecificPropertyInner(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback, const int32_t windowId)
+{
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", propType: %{public}d,"
         "propTarget: %{public}s", elementId, param.propertyType, param.propertyTarget.c_str());
     std::list<AccessibilityElementInfo> infos;
@@ -6144,7 +5970,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     if (elementId == NG::UI_EXTENSION_ROOT_ID) {
         elementId = rootNode->GetAccessibilityId();
     }
-    auto node = GetFramenodeByAccessibilityId(rootNode, elementId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, elementId);
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
@@ -6274,7 +6100,7 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowId(const int32_t windowId
     auto defaultFocusNodeList = GetDefaultFocusList();
     for (const auto& defaultFocusNode : defaultFocusNodeList) {
         auto frameNode = defaultFocusNode.Upgrade();
-        if (frameNode && frameNode->GetPageId() == pageId) {
+        if (frameNode && (frameNode->GetPageId() == pageId || pageId == -1)) {
             auto node = GetAccessibilityNodeFromPage(frameNode->GetAccessibilityId());
             CHECK_NULL_CONTINUE(node);
             AccessibilityElementInfo nodeInfo;
@@ -6295,7 +6121,13 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
 
     for (const auto& defaultFocusNode : defaultFocusList_) {
         auto node = defaultFocusNode.Upgrade();
-        if (node && node->GetPageId() == pageId) {
+        CHECK_NULL_CONTINUE(node);
+        auto checkPageId = GetNowPageId(context, pageId);
+        if ((pageId == -1) && NotInPage(node)) {
+            checkPageId = -1;
+        }
+
+        if (node->GetPageId() == checkPageId) {
             AccessibilityElementInfo nodeInfo;
 
             CommonProperty commonProperty;
@@ -6402,7 +6234,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     if (elementId == -1) {
         nodeId = rootNode->GetAccessibilityId();
     }
-    auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, nodeId);
     if (!node) {
         return info.SetValidElement(false);
     }
@@ -6468,7 +6300,7 @@ RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromPipeline(
         nodeId = rootNode->GetAccessibilityId();
     }
 
-    auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, nodeId);
     if (node) {
         return node;
     }
@@ -6746,7 +6578,14 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         param.scrollType = getAccessibilityScrollType(actionArguments, ACTION_ARGU_SCROLL_STUB);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
-        param.spanId = getArgumentByKey(actionArguments, ACTION_ARGU_SPAN_ID);
+        auto iter = actionArguments.find(ACTION_ARGU_SPAN_ID);
+        int32_t spanId = -1;
+        if (iter != actionArguments.end()) {
+            std::stringstream strSpanId;
+            strSpanId << iter->second;
+            strSpanId >> spanId;
+        }
+        param.spanId = spanId;
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
@@ -6792,15 +6631,12 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
     }
 #endif
     ContainerScope instance(ngPipeline->GetInstanceId());
-    auto frameNode = GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), elementId);
-
+    auto frameNode =
+        NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), elementId);
     if (!frameNode && elementId == lastElementId_) {
         frameNode = lastFrameNode_.Upgrade();
     }
-
-
     CHECK_NULL_RETURN(frameNode, result);
-
     auto enabled = frameNode->GetFocusHub() ? frameNode->GetFocusHub()->IsEnabled() : true;
     if (!enabled && action != ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS &&
         action != ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS) {
@@ -6811,9 +6647,6 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
         result = ActAccessibilityAction(action, actionArguments, accessibilityProperty);
-        if (!result) {
-            EventReport::ReportAccessibilityFailEvent(ConvertActionTypeToString(action));
-        }
     }
     return result;
 }
@@ -6926,7 +6759,8 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
         return;
     }
 #endif
-    auto frameNode = GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), splitElementId);
+    auto frameNode =
+        NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), splitElementId);
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
@@ -7106,6 +6940,13 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
 
     WebFocusMoveSearchNG(elementId, direction, nodeInfo, context, webPattern);
     WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context);
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "JsAccessibilityManager WebFocusMoveSearch AccessibilityId: %{public}" PRId64
+        ", ComponentType: %{public}s, ParentNodeId: %{public}" PRId64 ", TreeId: %{public}d",
+        nodeInfo.GetAccessibilityId(),
+        nodeInfo.GetComponentType().c_str(),
+        nodeInfo.GetParentNodeId(),
+        nodeInfo.GetBelongTreeId());
     SetFocusMoveSearchResult(callback, nodeInfo, requestId);
 }
 
@@ -7205,33 +7046,51 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
 
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, accessibilityId);
 
-    uint32_t windowId = GetWindowId();
+    uint32_t parentWindowId = GetWindowId();
+    auto pattern = webPattern.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     interactionOperation->SetWebPattern(webPattern);
-    auto pattern = webPattern.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
+    
     Accessibility::Registration registration {
         .windowId = static_cast<int32_t>(windowId),
-        .parentWindowId = static_cast<int32_t>(windowId),
+        .parentWindowId = static_cast<int32_t>(parentWindowId),
         .parentTreeId = treeId_,
         .elementId = accessibilityId,
     };
-    parentWebWindowId_ = windowId;
+    parentWebWindowId_ = parentWindowId;
     TAG_LOGI(AceLogTag::ACE_WEB, "windowId: %{public}u, parentWindowId: %{public}u, "
         "parentTreeId: %{public}d, elementId %{public}" PRId64,
-        windowId, windowId, treeId_, accessibilityId);
+        windowId, parentWindowId, treeId_, accessibilityId);
     Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
-    TAG_LOGI(AceLogTag::ACE_WEB, "RegisterWebInteractionOperationAsChildTree result: %{public}d", retReg);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "RegisterWebInteractionOperationAsChildTree result: %{public}d, accessibilityId: %{public}" PRId64, retReg,
+        accessibilityId);
     return retReg == RET_OK;
 }
 
-bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_t treeId,
+    const WeakPtr<NG::WebPattern>& webPattern)
 {
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
-    uint32_t windowId = GetWindowId();
+    auto pattern = webPattern.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     Accessibility::RetError retReg = instance->DeregisterElementOperator(windowId, treeId);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "DeregisterWebInteractionOperationAsChildTree result: %{public}d, accessibilityId: %{public}" PRId64, retReg,
+        frameNode->GetAccessibilityId());
     return retReg == RET_OK;
 }
 
@@ -7328,11 +7187,37 @@ int64_t JsAccessibilityManager::GetWebAccessibilityIdBySurfaceId(const std::stri
     auto webPattern = weakWebPattern.Upgrade();
     CHECK_NULL_RETURN(webPattern, INVALID_NODE_ID);
     int64_t webAccessibilityId = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    if (webAccessibilityId == INVALID_NODE_ID) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "JsAccessibilityManager GetWebAccessibilityIdBySurfaceId node is Invalid");
+        return INVALID_NODE_ID;
+    }
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(webPattern->GetTreeId(), webAccessibilityId);
     TAG_LOGD(AceLogTag::ACE_WEB,
         "JsAccessibilityManager GetWebAccessibilityIdBySurfaceId return webAccessibilityId: %{public}" PRId64,
         webAccessibilityId);
     return webAccessibilityId;
+}
+
+bool JsAccessibilityManager::GetWebAccessibilityInfoBySurfaceId(
+    const std::string& surfaceId,
+    AccessibilityElementInfo& elementInfo)
+{
+    WeakPtr<NG::WebPattern> weakWebPattern = GetWebPatternBySurfaceId(surfaceId);
+    CHECK_EQUAL_RETURN(weakWebPattern.Invalid(), true, false);
+    auto webPattern = weakWebPattern.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    auto webNode = webPattern->GetHost();
+    CHECK_NULL_RETURN(webNode, false);
+    auto context = webNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    auto webAccessibilityId = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    CHECK_EQUAL_RETURN(webAccessibilityId, INVALID_NODE_ID, false);
+    std::list<AccessibilityElementInfo> elementInfos;
+    SearchWebElementInfoByAccessibilityIdNG(webAccessibilityId, 0, elementInfos, context, webPattern);
+    CHECK_EQUAL_RETURN(elementInfos.empty(), true, false);
+    elementInfo = elementInfos.front();
+    UpdateElementInfoTreeId(elementInfo);
+    return true;
 }
 #endif //WEB_SUPPORTED
 
@@ -7712,7 +7597,7 @@ void JsAccessibilityManager::SendUecOnTreeEvent(int64_t splitElementId)
     CHECK_NULL_VOID(ngPipeline);
     auto rootNode = ngPipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    auto frameNode = GetFramenodeByAccessibilityId(rootNode, splitElementId);
+    auto frameNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, splitElementId);
     CHECK_NULL_VOID(frameNode);
 
     if ((!frameNode) || (IsExtensionComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode))) {
@@ -8317,7 +8202,7 @@ void JsAccessibilityManager::FocusMoveSearchNG(int64_t elementId, int32_t direct
     CHECK_NULL_VOID(ngPipeline);
     auto rootNode = ngPipeline->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    auto node = GetFramenodeByAccessibilityId(rootNode, elementId);
+    auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, elementId);
     info.SetValidElement(false);
     GetResultOfFocusMoveSearchNG(elementId, direction, info);
 }
@@ -8609,7 +8494,7 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
     CHECK_NULL_RETURN(ngPipeline, windowInfo);
     auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
     if (container && !container->IsSubWindow()) {
-        // subwindow by subpipeline, donot use getParentRectHandler when it is registered in mainpipeline
+        // subwindow by subpipeline, donot use getParentRectHandler when it is registerd in mainpipeline
         if (getParentRectHandler_) {
             getParentRectHandler_(windowInfo.top, windowInfo.left);
             return windowInfo;
@@ -8640,7 +8525,6 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
 
     return windowInfo;
 }
-
 void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
     const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node)
 {
@@ -8782,7 +8666,7 @@ void JsAccessibilityManager::CreateNodeInfoJson(const RefPtr<NG::FrameNode>& nod
     child->Put("width", rect.Width());
     child->Put("height", rect.Height());
     child->Put("visible", node->IsVisible());
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     if (eventHub) {
         auto gestureEventHub = eventHub->GetGestureEventHub();
         child->Put("clickable", gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false);
@@ -8810,7 +8694,6 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
     std::string fulljson = prefix.append(content);
     DumpLog::GetInstance().PrintJson(fulljson);
 }
-
 
 void JsAccessibilityManager::TransferThirdProviderHoverEvent(
     const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
@@ -8861,6 +8744,11 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
             event.nodeId = parameter;
             event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
             event.type = AccessibilityEventType::CHANGE;
+            SendAccessibilityAsyncEvent(event);
+            break;
+        case AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE:
+            event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+            event.nodeId = parameter;
             SendAccessibilityAsyncEvent(event);
             break;
         default:
@@ -8975,7 +8863,7 @@ void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG:
 
 bool JsAccessibilityManager::CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node)
 {
-    UpdateAccessibilityVisibleToRoot(node);
+    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
     CHECK_NULL_RETURN(node, true);
     return node->GetAccessibilityVisible();
 }
@@ -9017,7 +8905,7 @@ SearchSurfaceIdRet JsAccessibilityManager::SearchElementInfoBySurfaceId(
     CHECK_NULL_RETURN(mainContext, SearchSurfaceIdRet::NO_MATCH_NODE);
     CommonProperty commonProperty;
     GenerateCommonProperty(pipeline, commonProperty, mainContext, node);
-    UpdateAccessibilityVisibleToRoot(node);
+    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
     commonProperty.checkEmbedNode = false;
     auto lastNode = GetLastChildFrameNode(node, commonProperty);
     CHECK_NULL_RETURN(lastNode, SearchSurfaceIdRet::NO_MATCH_NODE);
@@ -9057,23 +8945,6 @@ void JsAccessibilityManager::RemoveWebPatternBySurfaceId(const std::string& surf
             webPatternMap_.erase(it);
         }
     }
-}
-
-bool JsAccessibilityManager::CheckWhiteList(const uint32_t& eventType)
-{
-    auto whiteList = eventWhiteList_;
-    if (whiteList.size() == 0) {
-        return true;
-    }
-
-    if (whiteList.size() == 1) {
-        if (whiteList[0] == Accessibility::EventType::TYPE_VIEW_INVALID) {
-            return false;
-        } else if (whiteList[0] == Accessibility::EventType::TYPES_ALL_MASK) {
-            return true;
-        }
-    }
-    return std::find(whiteList.begin(), whiteList.end(), eventType) != whiteList.end();
 }
 
 void JsAccessibilityManager::SearchAccessibilityNodeBySpecificProperty(const int64_t elementId,
@@ -9128,5 +8999,22 @@ void JsAccessibilityManager::SearchAccessibilityNodeBySpecificProperty(const int
     }
     SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
     return;
+}
+
+bool JsAccessibilityManager::CheckWhiteList(const uint32_t& eventType)
+{
+    auto whiteList = eventWhiteList_;
+    if (whiteList.size() == 0) {
+        return true;
+    }
+
+    if (whiteList.size() == 1) {
+        if (whiteList[0] == Accessibility::EventType::TYPE_VIEW_INVALID) {
+            return false;
+        } else if (whiteList[0] == Accessibility::EventType::TYPES_ALL_MASK) {
+            return true;
+        }
+    }
+    return std::find(whiteList.begin(), whiteList.end(), eventType) != whiteList.end();
 }
 } // namespace OHOS::Ace::Framework

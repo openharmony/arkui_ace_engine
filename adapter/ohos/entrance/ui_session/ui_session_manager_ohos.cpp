@@ -96,19 +96,21 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     }
 }
 
-void UiSessionManagerOhos::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
+void UiSessionManagerOhos::ReportWebInputEvent(
+    int64_t accessibilityId, const std::string& data, const std::string& type)
 {
     auto jsonValue = InspectorJsonUtil::Create(true);
     jsonValue->Put("id", accessibilityId);
     jsonValue->Put("$type", "web");
     jsonValue->Put("text", data.c_str());
+    jsonValue->Put("eventType", type.c_str());
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->ReportWebUnfocusEvent(accessibilityId, jsonValue->ToString());
         } else {
-            LOGW("report web unfocus event failed,process id:%{public}d", pair.first);
+            LOGW("report web input event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -502,11 +504,6 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
     } else {
         LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
     }
-}
-
-bool UiSessionManagerOhos::IsHasReportObject()
-{
-    return !reportObjectMap_.empty();
 }
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)

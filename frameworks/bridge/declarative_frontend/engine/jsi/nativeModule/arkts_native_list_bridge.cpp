@@ -591,11 +591,24 @@ ArkUINativeModuleValue ListBridge::SetListScrollBarColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     Local<JSValueRef> argColor = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
-    std::string color = "";
-    if (!ArkTSUtils::ParseJsString(vm, argColor, color) || argColor->IsUndefined() || color.empty()) {
+    Color color;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, argColor, color, resObj, nodeInfo) || color.ColorToString().empty()) {
+            GetArkUINodeModifiers()->getListModifier()->resetListScrollBarColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(
+                nativeNode, color.ColorToString().c_str());
+            GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(
+                nativeNode, AceType::RawPtr(resObj));
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, argColor, color) || color.ColorToString().empty()) {
         GetArkUINodeModifiers()->getListModifier()->resetListScrollBarColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(nativeNode, color.c_str());
+        GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(nativeNode, color.ColorToString().c_str());
     }
     return panda::JSValueRef::Undefined(vm);
 }

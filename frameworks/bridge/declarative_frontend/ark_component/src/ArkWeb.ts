@@ -1292,6 +1292,34 @@ class WebOnDataResubmittedModifier extends ModifierWithKey<(event: { handler: Da
   }
 }
 
+class WebEnableDataDetectorModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDataDetectorModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableDataDetector(node, this.value);
+    }
+  }
+}
+
+class WebDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
+  constructor(value: TextDataDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webDataDetectorConfigModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+    }
+  }
+}
+
 class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
   constructor(value: GestureFocusMode) {
     super(value);
@@ -1390,6 +1418,19 @@ class WebJavaScriptProxyModifier extends ModifierWithKey<JavaScriptProxy> {
     } else {
       getUINativeModule().web.setJavaScriptProxy(node, this.value.object, this.value.name, this.value.methodList,
         this.value.controller, this.value?.asyncMethodList, this.value?.permission);
+    }
+  }
+}
+class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webForceEnableZoom');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetForceEnableZoom(node);
+    } else {
+      getUINativeModule().web.setForceEnableZoom(node, this.value);
     }
   }
 }
@@ -1882,8 +1923,20 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
     return this;
   }
+  enableDataDetector(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDataDetectorModifier.identity, WebEnableDataDetectorModifier, enabled);
+    return this;
+  }
+  dataDetectorConfig(config: TextDataDetectorConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, config);
+    return this;
+  }
   gestureFocusMode(mode: GestureFocusMode): this {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
+    return this;
+  }
+  forceEnableZoom(forceEnableZoom: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, forceEnableZoom);
     return this;
   }
 }

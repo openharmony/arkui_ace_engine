@@ -346,7 +346,8 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
     void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
 
 /**
- * @brief Register a callback to be executed at the end of the next idle frame.If there is no next frame, will request one automatically.
+ * @brief Register a callback to be executed at the end of the next idle frame.
+          If there is no next frame, will request one automatically.
  *
  * @param uiContext ArkUI_ContextHandle.
  * @param userData Indicates the custom data to be saved.
@@ -360,7 +361,7 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
  *         Returns {@link ARKUI_ERROR_CODE_CALLBACK_INVALID} if the callback function is invalid.
  * @since 20
  */
- int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
+int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
 
 #ifdef __cplusplus

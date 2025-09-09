@@ -41,7 +41,7 @@ private:
 };
 
 class WantWrapOhos : public WantWrap {
-    DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
+    DECLARE_ACE_TYPE(WantWrapOhos, WantWrap);
 
 public:
     explicit WantWrapOhos(const AAFwk::Want& want);

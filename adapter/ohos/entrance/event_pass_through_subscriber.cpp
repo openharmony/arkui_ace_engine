@@ -25,7 +25,7 @@ const std::string TOUCH_EVENTS_UEGAME_START = "touch.events.uegame.start";
 
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through event");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through Event");
     std::lock_guard<std::mutex> lock(mutex_);
     if (eventPassThroughReceiver_ == nullptr) {
         // create subscribe info

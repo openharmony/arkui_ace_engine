@@ -2334,4 +2334,43 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTypeTest001, TestSize.Level1)
     pinchRecognizerPtr->HandleReports(info, GestureCallbackType::END);
     EXPECT_EQ(pinchRecognizerPtr->GetRecognizerType(), GestureTypeName::PINCH_GESTURE);
 }
+
+/*
+ * @tc.name: GetGestureEventInfoTest001
+ * @tc.desc: Test GetGestureEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    pinchRecognizerPtr->AttachFrameNode(frameNode);
+    /**
+     * @tc.steps: step2. call GetGestureEventInfo function and compare result.
+     * @tc.steps: case: touchEvent is not default.
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    axisEvent.sourceTool = SourceTool::MOUSE;
+    axisEvent.pinchAxisScale = 0.5f;
+    pinchRecognizerPtr->lastAxisEvent_ = axisEvent;
+    pinchRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    pinchRecognizerPtr->lastTouchEvent_ = touchEvent;
+    
+    GestureEvent info;
+    info.SetPinchAxisScale(1.0f);
+    pinchRecognizerPtr->GetGestureEventInfo(info);
+    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
+    EXPECT_EQ(info.GetPinchAxisScale(), 0.5f);
+
+    pinchRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    pinchRecognizerPtr->GetGestureEventInfo(info);
+    EXPECT_EQ(info.GetSourceTool(), SourceTool::PEN);
+}
 } // namespace OHOS::Ace::NG

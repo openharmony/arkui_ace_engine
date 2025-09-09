@@ -341,6 +341,12 @@ enum class TextVerticalAlign {
     TOP = 3,
 };
 
+enum class TextContentAlign {
+    TOP = 0,
+    CENTER,
+    BOTTOM,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextAlign& textAlign)
 {
@@ -1246,6 +1252,16 @@ enum class LayoutType : int32_t {
     NONE = 0,
     MEASURE_FOR_IGNORE = 1,
     LAYOUT_FOR_IGNORE = 2
+};
+
+enum class ListItemSwipeActionDirection {
+    START = 0,
+    END = 1,
+};
+
+enum class ContentTransitionType : int32_t {
+    IDENTITY = 0,
+    OPACITY = 1,
 };
 } // namespace OHOS::Ace
 

@@ -57,6 +57,18 @@ struct LayoutPolicyProperty {
     std::optional<LayoutCalPolicy> widthLayoutPolicy_;
     std::optional<LayoutCalPolicy> heightLayoutPolicy_;
 
+    bool IsAllNoMatch()
+    {
+        return IsWidthNoMatch() && IsHeightNoMatch();
+    }
+    bool IsWidthNoMatch()
+    {
+        return !widthLayoutPolicy_.has_value() || widthLayoutPolicy_.value() == LayoutCalPolicy::NO_MATCH;
+    }
+    bool IsHeightNoMatch()
+    {
+        return !heightLayoutPolicy_.has_value() || heightLayoutPolicy_.value() == LayoutCalPolicy::NO_MATCH;
+    }
     bool IsWidthWrap()
     {
         return widthLayoutPolicy_.has_value() && widthLayoutPolicy_.value() == LayoutCalPolicy::WRAP_CONTENT;
@@ -112,6 +124,13 @@ struct LayoutPolicyProperty {
     bool IsAllAdaptive()
     {
         return IsWidthAdaptive() && IsHeightAdaptive();
+    }
+    std::optional<LayoutCalPolicy> GetLayoutPolicy(bool isWidth)
+    {
+        if (isWidth) {
+            return widthLayoutPolicy_;
+        }
+        return heightLayoutPolicy_;
     }
 };
 

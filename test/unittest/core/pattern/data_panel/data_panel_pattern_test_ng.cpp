@@ -65,7 +65,7 @@ public:
 };
 
 class DataPanelTheme : public Theme {
-    DECLARE_ACE_TYPE(DataPanelTheme, Theme)
+    DECLARE_ACE_TYPE(DataPanelTheme, Theme);
 public:
     DataPanelTheme()
     {
@@ -270,5 +270,75 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest060, TestSize.Level1)
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     EXPECT_TRUE(pattern->IsEnableMatchParent());
     EXPECT_TRUE(pattern->IsEnableFix());
+}
+
+/**
+ * @tc.name: DataPanelSetValuesTest001
+ * @tc.desc: Test DataPanel Modifier SetValues
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest001, TestSize.Level0)
+{
+    /**
+     * case 1:sum of value = max ,max > 0
+     * values ={10.0f,10.0f} max = 20.0f
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier(nullptr);
+    dataPanelModifier.SetMax(20.0f);
+    std::vector<double> VALUES = { 10.0f, 10.0f };
+    dataPanelModifier.SetValues(VALUES);
+    EXPECT_EQ(dataPanelModifier.GetValuesCount(), 2.0f);
+}
+
+/**
+ * @tc.name: DataPanelSetValuesTest002
+ * @tc.desc: Test DataPanel Modifier SetValues
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest002, TestSize.Level0)
+{
+    /**
+     * case 1:sum of value = max ,max > 0
+     * values ={10.0f,10.0f} max = 20.0f
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier(nullptr);
+    dataPanelModifier.SetMax(20.0f);
+    EXPECT_EQ(dataPanelModifier.GetValuesCount(), 0.0f);
+}
+
+/**
+ * @tc.name: DataPanelSetValuesTest003
+ * @tc.desc: Test DataPanel Modifier SetValues
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest003, TestSize.Level0)
+{
+    /**
+     * case 1:sum of value = max ,max > 0
+     * values ={10.0f,10.0f} max = 20.0f
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier(nullptr);
+    dataPanelModifier.SetMax(20.0f);
+    std::vector<double> VALUES = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f };
+    dataPanelModifier.SetValues(VALUES);
+    EXPECT_EQ(dataPanelModifier.GetValuesCount(), 9.0f);
 }
 } // namespace OHOS::Ace::NG

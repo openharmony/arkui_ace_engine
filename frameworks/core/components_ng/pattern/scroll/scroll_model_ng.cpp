@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -43,6 +44,8 @@ void ScrollModelNG::Create()
 
 RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollPattern>());
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -86,7 +89,7 @@ void ScrollModelNG::SetScrollController(
 void ScrollModelNG::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(event));
 }
@@ -94,7 +97,7 @@ void ScrollModelNG::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
 void ScrollModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(event));
 }
@@ -102,7 +105,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeg
 void ScrollModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(event));
 }
@@ -110,7 +113,7 @@ void ScrollModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& 
 void ScrollModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(event));
 }
@@ -143,7 +146,7 @@ void ScrollModelNG::SetOnScrollBegin(OnScrollBeginEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBegin(std::move(event));
 }
@@ -152,7 +155,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(event));
 }
@@ -167,7 +170,7 @@ void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithReturn&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScrollEvent(std::move(event));
 }
@@ -175,7 +178,7 @@ void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithReturn&& event)
 void ScrollModelNG::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScrollEvent(std::move(event));
 }
@@ -184,7 +187,7 @@ void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidScrollEvent(std::move(event));
 }
@@ -192,7 +195,7 @@ void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
 void ScrollModelNG::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithState&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidScrollEvent(std::move(event));
 }
@@ -201,7 +204,7 @@ void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEdge(std::move(event));
 }
@@ -210,7 +213,7 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEnd(std::move(event));
 }
@@ -219,7 +222,7 @@ void ScrollModelNG::SetOnScrollStart(OnScrollStartEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(event));
 }
@@ -228,7 +231,7 @@ void ScrollModelNG::SetOnScrollStop(OnScrollStopEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(event));
 }
@@ -416,14 +419,14 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto scrollBar = pattern->GetScrollBar();
-    CHECK_NULL_VOID(scrollBar);
-    scrollBar->SetForegroundColor(color);
+    SetScrollBarColor(frameNode, color);
+}
+
+void ScrollModelNG::ResetScrollBarColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetScrollBarColor(frameNode);
 }
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -436,6 +439,12 @@ int32_t ScrollModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
+}
+
+EffectEdge ScrollModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    return ScrollableModelNG::GetEffectEdge(frameNode);
 }
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
@@ -507,6 +516,11 @@ void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
     scrollBar->SetForegroundColor(color);
 }
 
+void ScrollModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, std::nullopt);
+}
+
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
@@ -546,7 +560,7 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController(FrameNode* fra
 void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEdge(std::move(event));
 }
@@ -838,6 +852,14 @@ void ScrollModelNG::SetZoomScale(FrameNode* frameNode, float scale)
     pattern->SetZoomScale(scale);
 }
 
+float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetZoomScale();
+}
+
 void ScrollModelNG::ResetZoomScale()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -852,19 +874,11 @@ void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
     pattern->SetZoomScale(std::nullopt);
 }
 
-float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, 1.0f);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(pattern, 1.0f);
-    return pattern->GetZoomScale();
-}
-
 void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnZoomScaleChange(std::move(event));
 }
@@ -912,7 +926,7 @@ void ScrollModelNG::SetOnZoomStop(std::function<void()>&& event)
 void ScrollModelNG::SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidZoom(std::move(event));
 }
@@ -920,7 +934,7 @@ void ScrollModelNG::SetOnDidZoom(FrameNode* frameNode, std::function<void(float)
 void ScrollModelNG::SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnZoomStart(std::move(event));
 }
@@ -928,8 +942,20 @@ void ScrollModelNG::SetOnZoomStart(FrameNode* frameNode, std::function<void()>&&
 void ScrollModelNG::SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnZoomStop(std::move(event));
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

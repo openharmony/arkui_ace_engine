@@ -128,7 +128,7 @@ void ImageAnimatorTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ImageAnimatorPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<ImageAnimatorEventHub>();
+    eventHub_ = frameNode_->GetEventHub<ImageAnimatorEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty();
 }
 
@@ -384,7 +384,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -478,7 +478,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -539,7 +539,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -621,7 +621,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -692,7 +692,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest008, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     auto repeatCallback = eventHub->GetRepeatEvent();
     EXPECT_NE(repeatCallback, nullptr);
@@ -741,7 +741,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest009, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
@@ -790,7 +790,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
@@ -2771,7 +2771,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -2866,6 +2866,40 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest003, TestSize.Level1)
     std::vector<ImageProperties> images = {};
     imageAnimatorModelNG.SetImages(std::move(images));
     auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
+    EXPECT_TRUE(pattern->images_.empty());
+}
+
+/**
+ * @tc.name: ImageAnimatorSetImagesTest004
+ * @tc.desc: SetImages into ImageAnimatorPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelNG.
+     */
+    ImageAnimatorModelNG imageAnimatorModelNG;
+    imageAnimatorModelNG.Create();
+    std::vector<ImageProperties> images1 = {};
+    ImageProperties imageProperties1;
+    imageProperties1.src = IMAGE_SRC_URL;
+    imageProperties1.width = IMAGE_WIDTH;
+    imageProperties1.height = IMAGE_HEIGHT;
+    imageProperties1.top = IMAGE_TOP;
+    imageProperties1.left = IMAGE_LEFT;
+    imageProperties1.duration = -IMAGE_DURATION;
+    std::vector<ImageProperties> images2 = { imageProperties1 };
+    imageAnimatorModelNG.SetImages(std::move(images2));
+    /**
+     * @tc.step2: step5. Verify that the image list has been set successfully (size should be 1).
+     */
+    auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
+    EXPECT_EQ(pattern->images_.size(), 1);
+    /**
+     * @tc.step3: step6. Switch to an empty image list dynamically and verify that the image list is cleared.
+     */
+    imageAnimatorModelNG.SetImages(std::move(images1));
     EXPECT_TRUE(pattern->images_.empty());
 }
 } // namespace OHOS::Ace::NG

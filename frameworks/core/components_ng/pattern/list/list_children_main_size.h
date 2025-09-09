@@ -46,7 +46,7 @@ constexpr float DEFAULT_SIZE = -1.0f;
 }
 
 class ListChildrenMainSize : public virtual AceType {
-    DECLARE_ACE_TYPE(ListChildrenMainSize, AceType)
+    DECLARE_ACE_TYPE(ListChildrenMainSize, AceType);
 public:
     ListChildrenMainSize() = default;
     ListChildrenMainSize(const std::vector<float>& mainSize, float defaulatMainSize)

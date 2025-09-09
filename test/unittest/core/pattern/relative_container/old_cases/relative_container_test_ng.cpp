@@ -143,7 +143,7 @@ void RelativeContainerTestNg::SetContainerParam(std::string id, float width, flo
  * @tc.desc: Add first item--Bottom1 with alignrules value into RelativeContainer and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerPatternTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerPatternTest001, TestSize.Level0)
 {
     RelativeContainerModelNG relativeContainerNg;
     relativeContainerNg.Create();
@@ -179,23 +179,13 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerPatternTest001, TestSize.Leve
  * @tc.desc: Set an item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -269,23 +259,13 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level
  * @tc.desc: Set two item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -396,7 +376,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
  * @tc.desc: Set five items with different align rules value into RelativeContainer and check .
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level0)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
@@ -405,15 +385,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(CONTAINER_SIZE);
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
 
@@ -640,7 +611,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
  * @tc.desc: Set no child in RelativeContainer.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -680,7 +651,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level
  * @tc.desc: Set one child with no flexItemProperty another depend on itself in RelativeContainer.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -769,7 +740,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest005, TestSize.Level
  * @tc.desc: Set two child with no flexItemProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -847,7 +818,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest006, TestSize.Level
  * @tc.desc: Set two children with wrong alignRules which makes calc length < 0.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -942,7 +913,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest007, TestSize.Level
  * @tc.desc: Set two children with remain alignRules.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1049,7 +1020,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest008, TestSize.Level
  * @tc.desc: Set two children with remain alignRules to check offset.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1145,7 +1116,7 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest009, TestSize.Level
  * @tc.desc: Set an item with bias with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTest001, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1241,7 +1212,7 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest001, TestSize.Level1)
  * @tc.desc: Set one child item to auto, at the top/left
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTest002, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1309,7 +1280,7 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest002, TestSize.Level1)
  * @tc.desc: Set two child item to auto, one at top/left, the other at top/right
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTest003, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1420,7 +1391,7 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest003, TestSize.Level1)
  * @tc.desc: Set two child item to auto, one at top/left, the other at bottom/left
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTest004, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1519,7 +1490,7 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest004, TestSize.Level1)
  * @tc.desc: Set two child item to auto, one at top/left, the other at bottom/right
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTest005, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1619,7 +1590,7 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest005, TestSize.Level1)
  * @tc.desc: component in chain has margin
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, ChainTest0017, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, ChainTest0017, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1709,7 +1680,7 @@ static void AddAlignRule(const std::string& id, const AlignDirection& direction,
  * @tc.desc: Set an item with align rules with RelativeContainer and check it, direction::RTL.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutRtlTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutRtlTest001, TestSize.Level0)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -1816,7 +1787,7 @@ static void LayoutConstraint(RefPtr<LayoutWrapperNode> layoutWrapper, SizeF cont
  * @tc.desc: Set an item with bias with RelativeContainer and check it, direction::RTL.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestNg, BiasRulesTestRtl001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestNg, BiasRulesTestRtl001, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });

@@ -17,10 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -77,16 +77,14 @@ static RefPtr<MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
     return pipeline->GetTheme<NG::MenuTheme>();
 }
 
-static RefPtr<RenderContext> GetMenuTargetRenderContext(const RefPtr<MenuWrapperPattern>& wrapperPattern)
+static RefPtr<FrameNode> GetMenuTargetNode(const RefPtr<MenuWrapperPattern>& wrapperPattern)
 {
     CHECK_NULL_RETURN(wrapperPattern, nullptr);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, nullptr);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
-    auto targetNode = FrameNode::GetFrameNodeOnly(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
-    CHECK_NULL_RETURN(targetNode, nullptr);
-    return targetNode->GetRenderContext();
+    return FrameNode::GetFrameNodeOnly(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
 }
 
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
@@ -264,7 +262,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 }
 
 void MountScrollToMenu(
-    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, RefPtr<FrameNode> menuNode)
 {
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
@@ -341,7 +339,12 @@ void ShowBorderRadiusAndShadowAnimation(
     imageContext->UpdateBorderRadius(imageContext->GetBorderRadius().value_or(BorderRadiusProperty()));
     auto pipelineContext = imageNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddAfterLayoutTask([option, imageContext, previewBorderRadius, shadow, isShowHoverImage]() {
+    pipelineContext->AddAfterLayoutTask([option, weakImage = AceType::WeakClaim(AceType::RawPtr(imageNode)),
+                                            previewBorderRadius, shadow, isShowHoverImage]() {
+        auto imageNode = weakImage.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
         AnimationUtils::Animate(
             option,
             [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
@@ -354,7 +357,7 @@ void ShowBorderRadiusAndShadowAnimation(
                 CHECK_NULL_VOID(!isShowHoverImage);
                 imageContext->UpdateBorderRadius(previewBorderRadius);
             },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, imageNode->GetContextRefPtr());
     });
 }
 
@@ -377,7 +380,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
         option, [previewContext]() {
             CHECK_NULL_VOID(previewContext);
             previewContext->UpdateOpacity(1.0);
-        });
+        }, nullptr, nullptr, previewNode->GetContextRefPtr());
 }
 
 RadiusF GetPreviewBorderRadiusFromPattern(
@@ -501,7 +504,7 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
             CHECK_NULL_VOID(animateProperty);
             animateProperty->Set(1.0);
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, hoverImageStackNode->GetContextRefPtr());
 }
 
 void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
@@ -571,7 +574,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, hoverImageStackNode->GetContextRefPtr());
 }
 
 void ShowPixelMapScaleAnimationProc(
@@ -585,6 +588,7 @@ void ShowPixelMapScaleAnimationProc(
     auto previewAfterAnimationScale =
         LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
+    CHECK_NULL_VOID(imageNode);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
@@ -596,7 +600,6 @@ void ShowPixelMapScaleAnimationProc(
         previewBeforeAnimationScale *= imageRawSize.Width() / geometrySize.Width();
     }
 
-    CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
@@ -614,7 +617,7 @@ void ShowPixelMapScaleAnimationProc(
             CHECK_NULL_VOID(imageContext);
             imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, imageNode->GetContextRefPtr());
 }
 
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
@@ -626,7 +629,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu(HideMenuType::VIEW_DRAG_END);
 }
 
@@ -714,30 +716,6 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
         previewPattern->GetHoverImageAfterScaleHeight()) / HALF_DIVIDE));
 }
 
-void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
-{
-    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(targetProps);
-    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
-        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
-        if (!focus) {
-            auto targetNode = targetWK.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            auto context = targetNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto pixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(pixelMap);
-            auto imageNode = imageWK.Upgrade();
-            CHECK_NULL_VOID(imageNode);
-            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(props);
-            props->UpdateAutoResize(false);
-            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-            imageNode->MarkModifyDone();
-        }
-    });
-}
-
 BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_RETURN(previewNode, {});
@@ -772,7 +750,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(target);
-    auto eventHub = target->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = target->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -783,13 +761,15 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
-    SetAccessibilityPixelMap(target, imageNode);
-    auto hub = imageNode->GetOrCreateEventHub<EventHub>();
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
+    auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
@@ -930,7 +910,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1136,7 +1116,9 @@ void MenuView::ShowMenuTargetScaleToOrigin(
     CHECK_NULL_VOID(previewPattern);
     auto scale = previewPattern->GetHoverTargetOriginScale() * scaleFrom;
 
-    auto targetRenderContext = GetMenuTargetRenderContext(wrapperPattern);
+    auto targetNode = GetMenuTargetNode(wrapperPattern);
+    CHECK_NULL_VOID(targetNode);
+    auto targetRenderContext = targetNode->GetRenderContext();
     CHECK_NULL_VOID(targetRenderContext);
 
     auto menuTheme = GetMenuTheme(wrapperPattern->GetHost());
@@ -1145,7 +1127,7 @@ void MenuView::ShowMenuTargetScaleToOrigin(
     AnimationUtils::Animate(option, [targetRenderContext, scale]() {
         CHECK_NULL_VOID(targetRenderContext);
         targetRenderContext->UpdateTransformScale(scale);
-    });
+    }, nullptr, nullptr, targetNode->GetContextRefPtr());
 }
 
 void MenuView::UpdateHoverImagePreivewPosition(const RefPtr<MenuPreviewPattern>& previewPattern)
@@ -1191,7 +1173,9 @@ void MenuView::ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImage
     scaleTo = LessOrEqual(scaleTo, 0.0) ? PREVIEW_ORIGIN_SCALE : scaleTo;
     scaleTo += NearEqual(scaleFrom, scaleTo) ? MIN_HOVER_SCALE_DIFF : 0.f;
 
-    auto targetRenderContext = GetMenuTargetRenderContext(wrapperPattern);
+    auto targetNode = GetMenuTargetNode(wrapperPattern);
+    CHECK_NULL_VOID(targetNode);
+    auto targetRenderContext = targetNode->GetRenderContext();
     CHECK_NULL_VOID(targetRenderContext);
     auto targetScale = targetRenderContext->GetTransformScaleValue({ 1.0f, 1.0f });
     previewPattern->SetHoverTargetOriginScale(targetScale);
@@ -1214,7 +1198,7 @@ void MenuView::ShowHoverImageForInterruption(const RefPtr<FrameNode>& hoverImage
             CHECK_NULL_VOID(targetRenderContext);
             targetRenderContext->UpdateTransformScale(scale);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, targetNode->GetContextRefPtr());
 }
 
 bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPattern>& wrapperPattern,
@@ -1516,7 +1500,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
-    MountScrollToMenu(customNode, scroll, type, menuNode);
+    MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
@@ -1551,6 +1535,12 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
+            if (!menuParamValue.borderRadius->radiusTopLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusTopRight.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomRight.has_value()) {
+                menuParamValue.borderRadius = std::nullopt;
+            }
         }
         if (menuParamValue.previewBorderRadius) {
             menuParamValue.previewBorderRadius->ReloadResources();
@@ -1856,7 +1846,7 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     pattern->SetTextNode(textNode);
     pattern->SetBlockClick(params[index].disableSystemClick);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(params[index].action);
 }
@@ -1876,7 +1866,7 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(onClickFunc);
 }
@@ -1976,7 +1966,7 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         CHECK_NULL_VOID(menuPattern);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = optionNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetEnabled(params[i].enabled);
         auto focusHub = optionNode->GetFocusHub();
@@ -2036,7 +2026,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteNode->MarkModifyDone();
     row->MountToParent(option);
     row->MarkModifyDone();
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
         if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
@@ -2212,9 +2202,10 @@ void MenuView::ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data)
     menuNodeRenderContext->UpdateTransformScale({ 0.95f, 0.95f });
     AnimationUtils::Animate(
         optionOpacity, [menuNodeRenderContext]() { menuNodeRenderContext->UpdateOpacity(0.0f); },
-        optionOpacity.GetOnFinishEvent());
+        optionOpacity.GetOnFinishEvent(), nullptr, menuNode->GetContextRefPtr());
     AnimationUtils::Animate(
-        optionScale, [menuNode, data]() { UpdateMenuNodeByAnimation(menuNode, data); }, optionScale.GetOnFinishEvent());
+        optionScale, [menuNode, data]() { UpdateMenuNodeByAnimation(menuNode, data); }, optionScale.GetOnFinishEvent(),
+        nullptr, menuNode->GetContextRefPtr());
 }
 
 // update the alignment rules according to the positional relationship between the menu and the menu preview.
@@ -2517,6 +2508,9 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetNotifyChildAction(
         [weak = WeakPtr<FrameNode>(menuNode)] (const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
             auto result = AccessibilityActionResult::ACTION_ERROR;
             CHECK_NULL_RETURN(node, result);
             auto menu = weak.Upgrade();

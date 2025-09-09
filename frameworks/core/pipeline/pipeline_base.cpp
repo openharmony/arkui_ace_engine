@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
@@ -26,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
@@ -36,7 +38,6 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
-constexpr int32_t DEFAULT_RESPONSE_DELAY = 70000000; // default max response delay is 70ms.
 
 PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -97,6 +98,7 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
+    NG::UiNodeGc::PostReleaseNodeRawMemoryTask(taskExecutor_);
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }
@@ -211,12 +213,11 @@ double PipelineBase::Vp2PxInner(double vpValue) const
 
 double PipelineBase::CalcPageWidth(double rootWidth) const
 {
-    if (!isCurrentInForceSplitMode_) {
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
         return rootWidth;
     }
-    // Divider Width equal to 1.0_vp
-    constexpr double HALF = 2.0;
-    return (rootWidth - Vp2PxInner(1.0)) / HALF;
+
+    return rootWidth / 2.0;
 }
 
 double PipelineBase::GetPageWidth() const
@@ -527,26 +528,7 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
-    auto frontend = weakFrontend_.Upgrade();
-    CHECK_NULL_VOID(frontend);
-    auto lock = frontend->GetLock();
-    auto& windowConfig = frontend->GetWindowConfig();
-    if (windowConfig.designWidth <= 0) {
-        return;
-    }
-    if (GetIsDeclarative()) {
-        viewScale_ = DEFAULT_VIEW_SCALE;
-        double pageWidth = width;
-        if (IsContainerModalVisible()) {
-            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-        }
-        pageWidth = CalcPageWidth(pageWidth);
-        designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
-        windowConfig.designWidthScale = designWidthScale_;
-    } else {
-        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
-    }
+    ForceUpdateDesignWidthScale(width);
     if (NearZero(viewScale_)) {
         return;
     }
@@ -804,7 +786,8 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 bool PipelineBase::ReachResponseDeadline() const
 {
     if (currRecvTime_ >= 0) {
-        return currRecvTime_ + DEFAULT_RESPONSE_DELAY < GetSysTimestamp();
+        auto deadline = FeatureParam::GetSyncloadResponseDeadline();
+        return currRecvTime_ + deadline < GetSysTimestamp();
     }
     return false;
 }
@@ -862,6 +845,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #endif
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
@@ -888,6 +872,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
         }
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, false)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
@@ -930,15 +915,27 @@ void PipelineBase::ContainerModalUnFocus() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     if (window_) {
-        return window_->GetCurrentWindowRect();
+        Rect res = window_->GetCurrentWindowRect();
+        if (res.IsValid()) {
+            return res;
+        }
     }
-    return {};
+    return Rect { 0.0, 0.0, width_, height_ };
 }
 
 Rect PipelineBase::GetGlobalDisplayWindowRect() const
 {
     CHECK_NULL_RETURN(window_, {});
     return window_->GetGlobalDisplayWindowRect();
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
 }
 
 bool PipelineBase::HasFloatTitle() const
@@ -1170,5 +1167,29 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
     commandTimeUpdate_ = true;
     dvsyncTimeUpdate_ = true;
     dvsyncTimeUseCount_ = 0;
+}
+
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
+    auto frontend = weakFrontend_.Upgrade();
+    CHECK_NULL_VOID(frontend);
+    auto lock = frontend->GetLock();
+    auto& windowConfig = frontend->GetWindowConfig();
+    if (windowConfig.designWidth <= 0) {
+        return;
+    }
+    if (GetIsDeclarative()) {
+        viewScale_ = DEFAULT_VIEW_SCALE;
+        double pageWidth = width;
+        if (IsContainerModalVisible()) {
+            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+        }
+        pageWidth = CalcPageWidth(pageWidth);
+        designWidthScale_ =
+            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
+        windowConfig.designWidthScale = designWidthScale_;
+    } else {
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
 }
 } // namespace OHOS::Ace

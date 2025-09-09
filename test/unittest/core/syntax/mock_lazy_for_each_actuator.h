@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class MockLazyForEachActuator : public LazyForEachActuator {
-    DECLARE_ACE_TYPE(MockLazyForEachActuator, LazyForEachActuator)
+    DECLARE_ACE_TYPE(MockLazyForEachActuator, LazyForEachActuator);
 };
 } // namespace OHOS::Ace::Framework
 

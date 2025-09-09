@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 class RenderingContext2DModel : public AceType {
-    DECLARE_ACE_TYPE(RenderingContext2DModel, AceType)
+    DECLARE_ACE_TYPE(RenderingContext2DModel, AceType);
 
 public:
     RenderingContext2DModel()
@@ -143,7 +143,7 @@ protected:
 };
 
 class CanvasRenderingContext2DModel : public RenderingContext2DModel {
-    DECLARE_ACE_TYPE(CanvasRenderingContext2DModel, RenderingContext2DModel)
+    DECLARE_ACE_TYPE(CanvasRenderingContext2DModel, RenderingContext2DModel);
 
 public:
     CanvasRenderingContext2DModel() = default;
@@ -170,7 +170,7 @@ protected:
 };
 
 class OffscreenCanvasRenderingContext2DModel : public RenderingContext2DModel {
-    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModel, RenderingContext2DModel)
+    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModel, RenderingContext2DModel);
 
 public:
     OffscreenCanvasRenderingContext2DModel() = default;

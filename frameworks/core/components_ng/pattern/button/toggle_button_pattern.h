@@ -148,7 +148,6 @@ private:
     bool isbgColorFocus_ = false;
     bool isFocus_ = false;
     bool isPress_ = false;
-    bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
     bool isTextFadeOut_ = false;
     bool isHover_ = false;

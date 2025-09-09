@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SheetWrapperPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SheetWrapperPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SheetWrapperPaintMethod, NodePaintMethod);
 public:
     SheetWrapperPaintMethod() {}
     ~SheetWrapperPaintMethod() override = default;

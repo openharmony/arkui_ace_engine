@@ -81,4 +81,42 @@ HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg002, TestSize.Level1)
     geometryNode->SetAccumulatedSafeAreaEdges(edge);
     EXPECT_EQ(geometryNode->accumulatedSafeAreaExpand_->left, edge.left);
 }
+/**
+ * @tc.name: GeometryNodeTestNg003
+ * @tc.desc: Test SetIgnoreAdjust and GetIgnoreAdjust
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg003, TestSize.Level1)
+{
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    OffsetF selfIgnoreAdjust(15.0f, 30.0f);
+    geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+    EXPECT_EQ(geometryNode->GetIgnoreAdjust(), OffsetF(15.0f, 30.0f));
+}
+/**
+ * @tc.name: GeometryNodeTestNg004
+ * @tc.desc: Test SetIgnoreAdjust
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg004, TestSize.Level1)
+{
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_EQ(geometryNode->ignoreAdjust_, OffsetF());
+    OffsetF selfIgnoreAdjust(15.0f, 30.0f);
+    geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+    EXPECT_EQ(geometryNode->ignoreAdjust_, OffsetF(15.0f, 30.0f));
+}
+/**
+ * @tc.name: GeometryNodeTestNg005
+ * @tc.desc: Test GetIgnoreAdjust
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg005, TestSize.Level1)
+{
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_EQ(geometryNode->GetIgnoreAdjust(), OffsetF());
+    OffsetF selfIgnoreAdjust(15.0f, 30.0f);
+    geometryNode->ignoreAdjust_ = selfIgnoreAdjust;
+    EXPECT_EQ(geometryNode->GetIgnoreAdjust(), OffsetF(15.0f, 30.0f));
+}
 } // namespace OHOS::Ace::NG

@@ -593,6 +593,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& 
 
 void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
 {
+    MarkNeedInitRealSideBarWidth();
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
     } else {
@@ -642,7 +643,7 @@ void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onCh
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -660,7 +661,7 @@ void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -676,7 +677,7 @@ void SideBarContainerModelNG::SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeE
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSideBarWidthChangeEvent(std::move(event));
 }
@@ -1026,6 +1027,7 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dim
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
 {
+    MarkNeedInitRealSideBarWidth(frameNode);
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
     } else {

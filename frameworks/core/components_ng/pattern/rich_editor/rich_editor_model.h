@@ -415,6 +415,7 @@ public:
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};
+    virtual void SetScrollBarColor(std::optional<Color> value) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

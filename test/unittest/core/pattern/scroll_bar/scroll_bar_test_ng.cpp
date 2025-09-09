@@ -16,7 +16,9 @@
 #include "scroll_bar_test_ng.h"
 
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -305,7 +307,7 @@ HWTEST_F(ScrollBarTestNg, SetNestedScroll001, TestSize.Level1)
     pattern_->SetEnableNestedSorll(true);
     auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
     scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
 }
 
 /**
@@ -327,9 +329,9 @@ HWTEST_F(ScrollBarTestNg, UnSetNestedScroll001, TestSize.Level1)
     pattern_->SetEnableNestedSorll(true);
     auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
     scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
-    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern_->GetScrollBarProxy(), nullptr);
     scrollBarModel.UnSetNestedScroll(scrollNode_, scrollPnTest);
-    ASSERT_EQ(scrollPnTest->nestScrollBarProxy_.size(), 0);
+    EXPECT_EQ(scrollPnTest->nestScrollBarProxy_.size(), 0);
 }
 
 /**
@@ -1206,5 +1208,124 @@ HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest002, TestSize.Level1)
     auto scrollBar = scrollPattern_->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+}
+
+/**
+ * @tc.name: CreateWithResourceObj
+ * @tc.desc: Test CreateWithResourceObj in ScrollBaModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, CreateWithResourceObj001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    auto paintProperty = pattern_->GetPaintProperty<ScrollBarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto color = paintProperty->GetScrollBarColorValue(Color::BLUE);
+    EXPECT_EQ(color, Color::BLUE);
+
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, resObjWithString);
+    pattern_->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateScrollBarDisplay
+ * @tc.desc: Test UpdateScrollBarDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateScrollBarDisplay, TestSize.Level1)
+{
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::AUTO));
+    GetScrollBar();
+
+    /**
+     * @tc.steps: step1. scrollable node is scrolling
+     * @tc.expected: don't start disappearAnimation
+     */
+    pattern_->controlDistance_ = 100.0f;
+    pattern_->controlDistanceChanged_ = true;
+    pattern_->scrollBarProxy_->SetIsScrollableNodeScrolling(true);
+    pattern_->UpdateScrollBarDisplay();
+    EXPECT_FALSE(pattern_->controlDistanceChanged_);
+    EXPECT_FALSE(pattern_->disappearAnimation_);
+
+    /**
+     * @tc.steps: step2. scrollable node isn't scrolling
+     * @tc.expected: start disappearAnimation
+     */
+    pattern_->controlDistanceChanged_ = true;
+    pattern_->scrollBarProxy_->SetIsScrollableNodeScrolling(false);
+    pattern_->UpdateScrollBarDisplay();
+    EXPECT_FALSE(pattern_->controlDistanceChanged_);
+    EXPECT_TRUE(pattern_->disappearAnimation_);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifierTest001
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateOverlayModifierTest001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_BAR_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode->GetRenderContext(), frameNode->geometryNode_, frameNode->paintProperty_);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto paintMethod = ScrollBarPaintMethod(false);
+    ScrollModelNG model;
+    model.Create();
+    scrollNode_ = CreateMainFrameNode();
+    CHECK_NULL_VOID(scrollNode_);
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern_);
+    auto scrollBar = scrollPattern_->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), theme->GetForegroundColor());
+    model.SetScrollBarColor(Color::BLUE);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+
+    auto inputHub = pattern_->GetInputHub();
+    auto onHover = inputHub->hoverEventActuator_->inputEvents_.front()->GetOnHoverFunc();
+    HoverInfo info;
+    onHover(true, info);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    Color color = Color::BLUE;
+    EXPECT_EQ(scrollBar->GetForegroundColor(), color.BlendColor(theme->GetForegroundHoverBlendColor()));
+    onHover(false, info);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+    ViewStackProcessor::GetInstance()->Pop();
 }
 } // namespace OHOS::Ace::NG

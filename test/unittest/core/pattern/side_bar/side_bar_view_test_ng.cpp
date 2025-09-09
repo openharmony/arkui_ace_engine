@@ -715,7 +715,7 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg018, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool localShow = false;
     ChangeEvent eventOnChange = [&localShow](const bool isShow) { localShow = isShow; };
@@ -771,7 +771,7 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg019, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool localShow = false;
     ChangeEvent eventOnChange = [&localShow](const bool isShow) { localShow = isShow; };

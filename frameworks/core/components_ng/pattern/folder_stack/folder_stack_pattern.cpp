@@ -31,7 +31,9 @@ const RefPtr<Curve> FOLDER_STACK_ANIMATION_CURVE =
 void FolderStackPattern::OnAttachToFrameNode()
 {
     Pattern::OnAttachToFrameNode();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
@@ -45,7 +47,8 @@ void FolderStackPattern::OnAttachToFrameNode()
 
 void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
         pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
@@ -66,7 +69,7 @@ void FolderStackPattern::InitFolderStackPatternAppearCallback()
     if (isAppearCallback_) {
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDisappear = [weak = WeakClaim(this)]() {
         auto folderStackPattern = weak.Upgrade();
@@ -122,7 +125,9 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -168,7 +173,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
 {
     FolderEventInfo event(foldStatus);
-    auto eventHub = GetOrCreateEventHub<FolderStackEventHub>();
+    auto eventHub = GetEventHub<FolderStackEventHub>();
     if (eventHub) {
         needCallBack_ = true;
         eventHub->OnFolderStateChange(event);
@@ -279,13 +284,13 @@ void FolderStackPattern::UpdateChildAlignment()
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
+    if (controlPartsStackNode && controlPartsStackNode->GetLayoutProperty()) {
         auto controlPartsLayoutProperty =
             AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
         controlPartsLayoutProperty->UpdateAlignment(align);
     }
     auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
+    if (hoverStackNode && hoverStackNode->GetLayoutProperty()) {
         auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
         hoverLayoutProperty->UpdateAlignment(align);
     }

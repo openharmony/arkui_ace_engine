@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
@@ -54,6 +55,8 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
 
 RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 
@@ -112,7 +115,7 @@ void GridItemModelNG::SetSelected(bool selected)
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -121,7 +124,7 @@ void GridItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -130,7 +133,7 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }
@@ -157,7 +160,7 @@ void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -193,7 +196,7 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
 void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }

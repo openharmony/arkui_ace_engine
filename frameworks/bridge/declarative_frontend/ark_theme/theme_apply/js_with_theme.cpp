@@ -49,26 +49,38 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     }
     auto jsLightColorsArray = JSRef<JSArray>::Cast(jsLightColors);
 
-    auto jsDarkColors = info[1];
-    if (!jsDarkColors->IsArray()) {
-        return;
-    }
-    auto jsDarkColorsArray = JSRef<JSArray>::Cast(jsDarkColors);
-
     auto jsThemeScopeId = info[2];
     if (!jsThemeScopeId->IsNumber()) {
         return;
     }
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
 
+    auto jsDarkSetStatus = info[3];
+    if (!jsDarkSetStatus->IsBoolean()) {
+        return;
+    }
+    auto darkSetStatus = jsDarkSetStatus->ToBoolean();
+
     auto colors = JSThemeColors();
     colors.SetColors(jsLightColorsArray);
 
-    auto darkColors = JSThemeColors();
-    darkColors.SetColors(jsDarkColorsArray);
-
     JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
-    JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
+
+    if (darkSetStatus) {
+        auto jsDarkColors = info[1];
+        if (!jsDarkColors->IsArray()) {
+            return;
+        }
+        auto jsDarkColorsArray = JSRef<JSArray>::Cast(jsDarkColors);
+
+        auto darkColors = JSThemeColors();
+        darkColors.SetColors(jsDarkColorsArray);
+
+        JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
+    } else {
+        JSThemeScope::jsThemes[themeScopeId].SetDarkColors(colors);
+    }
+
     // save the current theme when Theme was created by WithTheme container
     if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
         std::optional<JSTheme> themeOpt = std::make_optional(JSThemeScope::jsThemes[themeScopeId]);

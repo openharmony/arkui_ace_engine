@@ -113,6 +113,11 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         needReCreateParagraph_, static_cast<int32_t>(spans_.size()));
     if (textStyle_.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
+        if (paragraphManager_) {
+            auto height = paragraphManager_->GetHeight();
+            auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
+            SetContentHeight(heightFinal);
+        }
         auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
@@ -147,6 +152,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
+    SetContentHeight(heightFinal);
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
     } else {
@@ -734,7 +740,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     textStyleTmp.ResetTextBaselineOffset();
     paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
-        UpdateParagraphForAISpan(textStyleTmp, layoutWrapper, paragraph);
+        UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
     } else {
         if (pattern->IsDragging()) {
             auto dragContents = pattern->GetDragContents();
@@ -750,7 +756,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     if (paragraph) {
         CreateOrUpdateTextEffect(oldParagraph, paragraph, pattern, content);
     }
-    ParagraphUtil::ApplyIndent(paraStyle, paragraph, maxWidth, textStyle);
+    ParagraphUtil::ApplyIndent(paraStyle, paragraph, maxWidth, textStyle, GetIndentMaxWidth(maxWidth));
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
@@ -793,8 +799,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         (!spans_.empty() && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
         if (!CreateParagraphAndLayout(
             textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint, layoutWrapper)) {
-            TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",
-                contentConstraint.ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
             return false;
         }
     } else {
@@ -967,7 +972,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraphManager_, false);
-    bool didExceedMaxLines = paragraphManager_->DidExceedMaxLines();
+    bool didExceedMaxLines = paragraphManager_->DidExceedMaxLinesInner();
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraphManager_->GetHeight(), maxSize.Height());
     didExceedMaxLines =
         didExceedMaxLines || GreatNotEqual(paragraphManager_->GetLongestLineWithIndent(), maxSize.Width());
@@ -977,7 +982,7 @@ bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 bool TextLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraphManager_, false);
-    return (paragraphManager_->GetLineCount() > 1) || paragraphManager_->DidExceedMaxLines() ||
+    return (paragraphManager_->GetLineCount() > 1) || paragraphManager_->DidExceedMaxLinesInner() ||
            GreatNotEqual(paragraphManager_->GetLongestLineWithIndent(), maxSize.Width());
 }
 

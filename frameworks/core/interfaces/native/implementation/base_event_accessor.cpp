@@ -71,7 +71,7 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    return Converter::ArkValue<Ark_Int64>(tstamp);
+    return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
                       Ark_Int64 timestamp)
@@ -121,6 +121,18 @@ void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
 {
     LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
+}
+Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    int32_t value = peer->GetBaseInfo()->GetPinchAxisScale();
+    return Converter::ArkValue<Opt_Number>(value);
+}
+void SetAxisPinchImpl(Ark_BaseEvent peer,
+                         const Ark_Number* axisPinch)
+{
+    LOGE("BaseEventAccessor.SetAxisPinchImpl does nothing");
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
@@ -238,6 +250,8 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetAxisHorizontalImpl,
         BaseEventAccessor::GetAxisVerticalImpl,
         BaseEventAccessor::SetAxisVerticalImpl,
+        BaseEventAccessor::GetAxisPinchImpl,
+        BaseEventAccessor::SetAxisPinchImpl,
         BaseEventAccessor::GetPressureImpl,
         BaseEventAccessor::SetPressureImpl,
         BaseEventAccessor::GetTiltXImpl,

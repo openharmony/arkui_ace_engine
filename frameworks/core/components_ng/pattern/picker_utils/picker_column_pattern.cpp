@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
@@ -41,14 +42,17 @@ void PickerColumnPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
+
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     tossAnimationController_->SetPipelineContext(context);
     tossAnimationController_->SetColumn(AceType::WeakClaim(this));
     jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
@@ -61,11 +65,27 @@ void PickerColumnPattern::OnAttachToFrameNode()
 
 void PickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
     isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
     }
     UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void PickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void PickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
 }
 
 void PickerColumnPattern::RegisterWindowStateChangedCallback()
@@ -281,11 +301,13 @@ void PickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetDuration(PRESS_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(pressColor);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void PickerColumnPattern::PlayHoverAnimation(const Color& color)
@@ -294,11 +316,13 @@ void PickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(color);
-    });
+    }, nullptr, nullptr, context);
 }
 
 bool PickerColumnPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -551,11 +575,13 @@ void PickerColumnPattern::CreateAnimation(double from, double to)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
     scrollProperty_->Set(from);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->scrollProperty_->Set(to);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void PickerColumnPattern::ScrollOption(double delta, bool isJump)

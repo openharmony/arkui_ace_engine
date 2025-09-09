@@ -46,7 +46,7 @@ public:
 };
 
 class JsiAnimatorBridge : public BaseAnimationBridge {
-    DECLARE_ACE_TYPE(JsiAnimatorBridge, BaseAnimationBridge)
+    DECLARE_ACE_TYPE(JsiAnimatorBridge, BaseAnimationBridge);
 public:
     JsiAnimatorBridge(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& animatorContext);
     ~JsiAnimatorBridge() override;
@@ -82,7 +82,7 @@ private:
 };
 
 class JsiAnimatorTaskCreate : public AnimatorBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimatorTaskCreate, AnimatorBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimatorTaskCreate, AnimatorBridgeTask);
 public:
     JsiAnimatorTaskCreate(shared_ptr<JsRuntime> runtime,
         const RefPtr<JsiAnimatorBridge>& bridge, const std::string& param);
@@ -96,7 +96,7 @@ private:
 };
 
 class JsiAnimatorTaskOperation : public AnimatorBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimatorTaskOperation, AnimatorBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimatorTaskOperation, AnimatorBridgeTask);
 public:
     explicit JsiAnimatorTaskOperation(AnimatorOperation operation) : operation_(operation) {};
     ~JsiAnimatorTaskOperation() override = default;
@@ -107,7 +107,7 @@ private:
 };
 
 class JsiAnimatorTaskUpdate : public AnimatorBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimatorTaskUpdate, AnimatorBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimatorTaskUpdate, AnimatorBridgeTask);
 public:
     JsiAnimatorTaskUpdate(shared_ptr<JsRuntime> runtime, const std::unordered_map<std::string, std::string>& params)
         : runtime_(runtime), params_(params) {};

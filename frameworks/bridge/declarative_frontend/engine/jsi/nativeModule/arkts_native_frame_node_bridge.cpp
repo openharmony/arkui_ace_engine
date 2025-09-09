@@ -487,6 +487,15 @@ ArkUINativeModuleValue FrameNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::ApplyAttributesFinish(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getFrameNodeModifier()->applyAttributesFinish(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     CHECK_NULL_VOID(frameNode);
@@ -759,11 +768,15 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
+        panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return obj;
@@ -802,7 +815,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnClick(frameNode, std::move(onClick));
+    NG::ViewAbstract::SetFrameNodeCommonOnClick(frameNode, std::move(onClick));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -855,6 +868,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     eventObj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    eventObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
@@ -897,7 +912,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnTouch(frameNode, std::move(onTouch));
+    NG::ViewAbstract::SetFrameNodeCommonOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -931,7 +946,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnAppear(ArkUIRuntimeCallInfo* runtim
         PipelineContext::SetCallBackNode(node);
         function->Call(vm, function.ToLocal(), nullptr, 0);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnAppear(frameNode, std::move(onAppear));
+    NG::ViewAbstract::SetFrameNodeCommonOnAppear(frameNode, std::move(onAppear));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -965,7 +980,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(node);
         function->Call(vm, function.ToLocal(), nullptr, 0);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnDisappear(frameNode, std::move(onDisappear));
+    NG::ViewAbstract::SetFrameNodeCommonOnDisappear(frameNode, std::move(onDisappear));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1161,7 +1176,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
     };
-    NG::ViewAbstract::SetJSFrameNodeOnHover(frameNode, std::move(onHover));
+    NG::ViewAbstract::SetFrameNodeCommonOnHover(frameNode, std::move(onHover));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1199,7 +1214,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* run
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
     };
-    NG::ViewAbstract::SetJSFrameNodeOnHoverMove(frameNode, std::move(onHoverMove));
+    NG::ViewAbstract::SetFrameNodeCommonOnHoverMove(frameNode, std::move(onHoverMove));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1250,6 +1265,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
@@ -1296,7 +1313,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnMouse(frameNode, std::move(onMouse));
+    NG::ViewAbstract::SetFrameNodeCommonOnMouse(frameNode, std::move(onMouse));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1746,8 +1763,10 @@ std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
     auto nodeId = frameNode->GetId();
     panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), keyArg, // 3 number of parameters
         valueArg };
-    return [vm, frameNode, params3]() -> bool {
+    return [vm, weak = AceType::WeakClaim(frameNode), params3]() -> bool {
         CHECK_NULL_RETURN(vm, false);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_RETURN(frameNode, false);
         panda::LocalScope scope(vm);
         auto global = JSNApi::GetGlobalObject(vm);
         auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
@@ -1963,7 +1982,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnSizeChange(ArkUIRuntimeCallInfo* ru
         panda::Local<panda::JSValueRef> params[2] = { oldSize, newSize };
         function->Call(vm, function.ToLocal(), params, 2);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnSizeChange(frameNode, std::move(onSizeChange));
+    NG::ViewAbstract::SetFrameNodeCommonOnSizeChange(frameNode, std::move(onSizeChange));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2021,7 +2040,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
     if (intervalMs < 0) {
         intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
     }
-    NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
+    NG::ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);
 }

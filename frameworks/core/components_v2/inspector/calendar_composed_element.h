@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT CalendarComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(CalendarComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(CalendarComposedElement, InspectorComposedElement);
 
 public:
     explicit CalendarComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

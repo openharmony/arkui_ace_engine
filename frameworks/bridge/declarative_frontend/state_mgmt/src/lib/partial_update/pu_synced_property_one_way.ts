@@ -454,7 +454,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
          * it will not crash but copy will be a normal JSObject, not a @Sendable object.
          * To keep the functionality of @Sendable, still not define copy with initial value.
          */
-        stateMgmtConsole.warn('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
+        stateMgmtConsole.debug('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
         return obj;
       }
       Object.keys(obj).forEach((objKey: any) => {

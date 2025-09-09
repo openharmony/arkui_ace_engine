@@ -13,6 +13,96 @@
  * limitations under the License.
  */
 
+/**
+ * 测试目的：验证Swiper组件的onContentWillScroll回调功能在基础场景下的拦截机制和各种配置属性的影响
+ * 建议测试前阅读代码了解各个场景具体操作和预期结果
+ *
+ * 0-初始化页面
+ * 1、打开demo页面，页面包含：
+ *    - 上方：单个Swiper组件（粉色背景，带导航箭头）
+ *    - 下方：丰富的控制面板，包含实时显示区域和各种配置选项
+ * 2、观察初始状态：
+ *    - Swiper默认显示页面0，包含5个页面（'0', '1', '2', '3', '4'）
+ *    - 拦截条件：currentIndex = 0, comingIndex = 0
+ *    - 实时显示：willScrollCurrentIndex = 0, comingIndex = 0, offset = 0
+ *    - 配置：loop = true, displayCount = 1, width = 300, height = 30%
+ * 
+ * 说明：
+ * 1、Swiper为水平方向滚动，支持循环、多页显示等多种模式
+ * 2、onContentWillScroll拦截逻辑：当 info.currentIndex == this.currentIndex && info.comingIndex == this.comingIndex
+ *     时返回false阻止滚动
+ * 3、页面提供了完整的Swiper配置控制，可以动态测试各种参数组合
+ */
+
+/**
+ * 1-场景1：基础拦截功能测试
+ * 验证onContentWillScroll回调的基本拦截能力
+ *
+ * 操作步骤：
+ * 1、保持默认拦截条件：currentIndex = 0, comingIndex = 0
+ * 2、在Swiper中从页面0向右滑动到页面1（应该正常）
+ * 3、设置拦截条件：currentIndex = 0, comingIndex = 1
+ * 4、再次从页面0向右滑动到页面1
+ * 5、观察实时显示数据变化
+ * 
+ * 预期结果：
+ * 1、默认条件下（0→0）不会拦截实际的滑动操作
+ * 2、设置0→1拦截后，该方向的切换被阻止
+ * 3、其他方向的切换（如0→4循环）正常执行
+ * 4、实时显示正确反映滑动过程中的参数变化
+ */
+
+/**
+ * 2-场景2：控制器操作拦截测试
+ * 验证通过SwiperController调用时的拦截功能
+ *
+ * 操作步骤：
+ * 1、设置拦截条件：currentIndex = 1, comingIndex = 2
+ * 2、使用changeIndex按钮切换到页面1
+ * 3、点击"showNext"按钮，尝试切换到页面2
+ * 4、点击"showPrevious"按钮，尝试切换到页面0
+ * 5、使用"changeIndex(2, true/false)"按钮直接切换到页面2
+ * 
+ * 预期结果：
+ * 1、showNext操作正常执行
+ * 2、showPrevious操作正常执行
+ * 3、changeIndex操作正常执行
+ */
+
+/**
+ * 3-场景3：循环模式拦截测试
+ * 验证loop模式下的边界拦截功能
+ *
+ * 操作步骤：
+ * 1、确保loop = true
+ * 2、设置拦截条件：currentIndex = 4, comingIndex = 0（拦截末页到首页的循环）
+ * 3、滑动到页面4
+ * 4、向右滑动，尝试循环到页面0
+ * 5、设置拦截条件：currentIndex = 0, comingIndex = 4（拦截首页到末页的循环）
+ * 6、在页面0向左滑动，尝试循环到页面4
+ * 
+ * 预期结果：
+ * 1、末页→首页的循环切换被拦截
+ * 2、首页→末页的循环切换被拦截
+ * 3、非循环方向的切换正常执行
+ */
+
+/**
+ * 4-场景4：多页显示模式拦截测试
+ * 验证displayCount > 1时的拦截功能
+ *
+ * 操作步骤：
+ * 1、点击"displayCount++"设置为2
+ * 2、点击"change swipeByGroup"测试分组滑动
+ * 3、设置拦截条件：currentIndex = 0, comingIndex = 2
+ * 4、观察分组滑动和单页滑动的区别
+ * 
+ * 预期结果：
+ * 1、多页显示模式下拦截功能正常工作
+ * 2、swipeByGroup模式影响切换行为但不影响拦截逻辑
+ * 3、页面索引正确对应实际显示的页面
+ */
+
 @Entry
 @Component
 struct OnContentWillScrollNormal {
@@ -375,4 +465,4 @@ struct OnContentWillScrollComponent {
     .width(100)
     .height(200)
   }
-}
+}

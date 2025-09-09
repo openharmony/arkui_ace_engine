@@ -34,7 +34,7 @@ using IdToDisplaySyncMap = std::unordered_map<IdType, WeakPtr<UIDisplaySync>>;
 constexpr uint32_t ACE_ANIMATOR_OFFSET = 16;
 
 class ACE_FORCE_EXPORT UIDisplaySyncManager : public AceType {
-    DECLARE_ACE_TYPE(UIDisplaySyncManager, AceType)
+    DECLARE_ACE_TYPE(UIDisplaySyncManager, AceType);
 public:
     bool AddDisplaySync(const RefPtr<UIDisplaySync>& displaySync);
     bool RemoveDisplaySync(const RefPtr<UIDisplaySync>& displaySync);

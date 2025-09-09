@@ -154,8 +154,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
-
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -177,13 +175,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableVariableFontWeight, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LineThicknessScale, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontForegroudGradiantColor,
-        FontForegroudGradiantColor, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
+        FontForegroudGradiantColor, FontForegroudGradiantColor, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, IsOnlyBetweenLines, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
@@ -199,6 +197,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, ParagraphSpacing, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextContentAlign, TextContentAlign, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStart, bool, PROPERTY_UPDATE_RENDER);
@@ -214,6 +213,10 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(TextEffectStrategy, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipDirection, TextFlipDirection, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipEnableBlur, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
 
 public:
@@ -230,9 +233,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlDefualtColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlHoverColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlPressedColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(TextEffectStrategy, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipDirection, TextFlipDirection, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipEnableBlur, bool, PROPERTY_UPDATE_NORMAL);
 
     // symbol
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -245,10 +245,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolShadow, SymbolShadow, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShaderStyle, std::vector<SymbolGradient>, PROPERTY_UPDATE_MEASURE_SELF);
 
     // fontscale
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);

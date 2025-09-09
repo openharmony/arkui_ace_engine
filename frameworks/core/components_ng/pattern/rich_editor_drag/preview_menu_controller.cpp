@@ -25,6 +25,7 @@
 #include "ui/properties/dirty_flag.h"
 #include "ui/properties/flex.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/text_style.h"
@@ -49,17 +50,15 @@ namespace {
 constexpr Dimension PREVIEW_MAX_WIDTH = 360.0_vp;
 constexpr Dimension MENU_WIDTH = 224.0_vp;
 constexpr Dimension AVATAR_SIZE = 40.0_vp;
-constexpr Dimension PADDING_SIZE = 12.0_vp;
-constexpr Dimension MARGIN_SIZE = 16.0_vp;
 constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
 constexpr Dimension FAILED_TEXT_LINE_SPACING = 8.0_vp;
 constexpr float MAX_HEIGHT_PROPORTIONS = 0.65;
+constexpr int32_t MAX_LINES = 4;
 const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
+const std::string CONTACTS_ABILITY_NAME = "DataDetectorUIExtensionAbility";
 const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
-#if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
 constexpr float PERCENT_FULL = 1.0;
-#endif
 } // namespace
 PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern)
 {
@@ -95,6 +94,7 @@ PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern
         auto textPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetAISelected(AIResetSelectionReason::CLOSE_CONTEXT_MENU);
+        textPattern->DragNodeDetachFromParent();
         if (SystemProperties::GetTextTraceEnabled()) {
             auto host = textPattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -108,7 +108,7 @@ void PreviewMenuController::CreateAIEntityMenu()
     auto textPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(textPattern);
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = textPattern->CreateAIEntityMenu();
     if (!menuNode) {
         menuNode = FrameNode::GetOrCreateFrameNode(
@@ -161,10 +161,11 @@ std::function<void()> PreviewMenuController::GetLinkingCallback(const std::strin
 }
 
 void PreviewMenuController::CreatePreviewMenu(TextDataDetectType type, const std::string& content,
-    std::function<void()> disappearCallback, std::map<std::string, std::string> AIparams)
+    std::function<void()> disappearCallback, std::map<std::string, std::string> AIparams,
+    std::function<void()> aiSpanClickCallabck)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
@@ -181,6 +182,34 @@ void PreviewMenuController::CreatePreviewMenu(TextDataDetectType type, const std
     flexRenderContext->UpdateBackgroundColor(bgColor);
     auto previewNode = CreatePreview(type);
     CHECK_NULL_VOID(previewNode);
+    previewNode->MountToParent(frameNode);
+
+    // Other types have not been integrated.
+    if (type != TextDataDetectType::DATE_TIME && type != TextDataDetectType::PHONE_NUMBER &&
+        type != TextDataDetectType::EMAIL) {
+        MountErrorNode(previewNode, type, content, disappearCallback, aiSpanClickCallabck);
+        previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    CreateWantParams(type, content, AIparams);
+    MountUIExtensionNode(previewNode, content, std::move(disappearCallback), type, AIparams);
+    return;
+}
+
+void PreviewMenuController::CreateWantParams(
+    TextDataDetectType type, const std::string& content, std::map<std::string, std::string>& AIparams)
+{
+    if (type == TextDataDetectType::PHONE_NUMBER) {
+        AIparams["phoneNumber"] = content;
+    } else if (type == TextDataDetectType::EMAIL) {
+        AIparams["email"] = content;
+    }
+}
+
+void PreviewMenuController::MountUIExtensionNode(const RefPtr<FrameNode>& previewNode, const std::string& content,
+    std::function<void()>&& disappearCallback, TextDataDetectType type,
+    const std::map<std::string, std::string>& AIparams)
+{
 #if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
     const auto& extensionAdapter = PreviewUIExtensionAdapter::GetInstance();
     CHECK_NULL_VOID(extensionAdapter);
@@ -189,7 +218,9 @@ void PreviewMenuController::CreatePreviewMenu(TextDataDetectType type, const std
     std::string abilityName;
     std::map<std::string, std::string> params;
     CreateWantConfig(type, bundleName, abilityName, params, AIparams);
-    PreviewNodeClickCallback(type, previewNode, AIparams);
+    // 第一次使用：创建副本供 PreviewNodeClickCallback 使用
+    auto callbackCopy = disappearCallback;
+    PreviewNodeClickCallback(type, previewNode, AIparams, std::move(callbackCopy));
     auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     CHECK_NULL_VOID(wantWrap);
     wantWrap->SetWantParam(params);
@@ -209,12 +240,10 @@ void PreviewMenuController::CreatePreviewMenu(TextDataDetectType type, const std
         error(-1, "", "");
     }
 #endif
-    previewNode->MountToParent(frameNode);
-    return;
 }
 
-void PreviewMenuController::PreviewNodeClickCallback(
-    TextDataDetectType type, const RefPtr<FrameNode>& previewNode, const std::map<std::string, std::string>& AIparams)
+void PreviewMenuController::PreviewNodeClickCallback(TextDataDetectType type, const RefPtr<FrameNode>& previewNode,
+    const std::map<std::string, std::string>& AIparams, std::function<void()>&& disappearCallback)
 {
     CHECK_NULL_VOID(previewNode);
     std::function<void()> clickCallback;
@@ -231,6 +260,8 @@ void PreviewMenuController::PreviewNodeClickCallback(
             break;
         case TextDataDetectType::PHONE_NUMBER:
         case TextDataDetectType::EMAIL:
+            clickCallback = disappearCallback;
+            break;
         case TextDataDetectType::ADDRESS:
         case TextDataDetectType::URL:
         default:
@@ -257,7 +288,11 @@ void PreviewMenuController::CreateWantConfig(TextDataDetectType type, std::strin
             break;
         }
         case TextDataDetectType::PHONE_NUMBER:
-        case TextDataDetectType::EMAIL:
+        case TextDataDetectType::EMAIL: {
+            bundleName = ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::PHONE_NUMBER);
+            abilityName = CONTACTS_ABILITY_NAME;
+            break;
+        }
         case TextDataDetectType::ADDRESS:
         case TextDataDetectType::URL:
         default:
@@ -279,7 +314,7 @@ AIPreviewMenuErrorCallback PreviewMenuController::GetErrorCallback(const RefPtr<
         auto previewNode = node.Upgrade();
         CHECK_NULL_VOID(previewNode);
         previewNode->Clean();
-        PreviewMenuController::MountErrorNode(previewNode, type, content, disappearCallback);
+        PreviewMenuController::MountErrorNode(previewNode, type, content, disappearCallback, nullptr);
         previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 }
@@ -290,11 +325,11 @@ RefPtr<FrameNode> PreviewMenuController::CreatePreview(TextDataDetectType type)
     switch (type) {
         case TextDataDetectType::PHONE_NUMBER:
         case TextDataDetectType::EMAIL:
-            node = CreateContactPreviewNode();
-            break;
-        case TextDataDetectType::DATE_TIME:
         case TextDataDetectType::ADDRESS:
         case TextDataDetectType::URL:
+            node = CreateContactAndAddressPreviewNode(type);
+            break;
+        case TextDataDetectType::DATE_TIME:
             node = CreateLinkingPreviewNode();
             break;
         default:
@@ -303,7 +338,7 @@ RefPtr<FrameNode> PreviewMenuController::CreatePreview(TextDataDetectType type)
     return node;
 }
 
-RefPtr<FrameNode> PreviewMenuController::CreateContactPreviewNode()
+RefPtr<FrameNode> PreviewMenuController::CreateContactAndAddressPreviewNode(TextDataDetectType type)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<FlexLayoutPattern>(false); });
@@ -312,20 +347,23 @@ RefPtr<FrameNode> PreviewMenuController::CreateContactPreviewNode()
     CHECK_NULL_RETURN(flexLayoutProperty, nullptr);
     auto context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto padding = CalcLength(PADDING_SIZE);
-    flexLayoutProperty->UpdatePadding({ padding, padding, std::nullopt, std::nullopt });
+    auto theme = context->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto padding = CalcLength(theme->GetPreviewMenuPadding());
+    flexLayoutProperty->UpdatePadding({ padding, padding, padding, padding });
     flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    auto windowRect = context->GetDisplayWindowRectInfo();
-    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
-    auto maxHeightValue = windowRect.Height() * MAX_HEIGHT_PROPORTIONS;
-    std::optional<CalcLength> maxHeight = CalcLength(Dimension(maxHeightValue));
-    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
+    std::optional<CalcLength> minHeight = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
+    std::optional<CalcLength> maxHeight = CalcLength(GetPreviewMaxHeight(frameNode));
+    std::optional<CalcLength> maxWidth = CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx()));
     flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
     flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
-    std::optional<CalcLength> height = CalcLength(PREVIEW_MIN_HEIGHT);
-    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 
+    // Adaptive internal content height for URL and address.
+    if (type == TextDataDetectType::EMAIL || type == TextDataDetectType::PHONE_NUMBER) {
+        std::optional<CalcLength> height = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
+        flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+    }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return frameNode;
 }
@@ -337,35 +375,68 @@ RefPtr<FrameNode> PreviewMenuController::CreateLinkingPreviewNode()
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto flexLayoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_RETURN(flexLayoutProperty, nullptr);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
     flexLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
     flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     flexLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-    auto windowRect = context->GetDisplayWindowRectInfo();
-    std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
-    auto maxHeightValue = windowRect.Height() * MAX_HEIGHT_PROPORTIONS;
-    std::optional<CalcLength> maxHeight = CalcLength(Dimension(maxHeightValue));
-    std::optional<CalcLength> maxWidth = CalcLength(PREVIEW_MAX_WIDTH);
+    std::optional<CalcLength> maxHeight = CalcLength(GetPreviewMaxHeight(frameNode));
+    std::optional<CalcLength> maxWidth = CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx()));
+    std::optional<CalcLength> minHeight = CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx()));
     flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
     flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
-    auto heightValue = std::clamp(PREVIEW_MAX_WIDTH.ConvertToPx(), PREVIEW_MIN_HEIGHT.ConvertToPx(), maxHeightValue);
-    std::optional<CalcLength> height = CalcLength(Dimension(heightValue));
+    std::optional<CalcLength> height = CalcLength(Dimension(PERCENT_FULL, DimensionUnit::PERCENT));
     flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return frameNode;
 }
 
+Dimension PreviewMenuController::GetPreviewMaxHeight(const RefPtr<FrameNode>& frameNode)
+{
+    auto maxWidth = Dimension(PREVIEW_MAX_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(frameNode, maxWidth);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, maxWidth);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, maxWidth);
+    auto bottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    auto top = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, maxWidth);
+    // Get FreeMultiWindow status of main window or host window
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    float height;
+    if (!isFreeMultiWindow) {
+        height = context->GetDisplayWindowRectInfo().Height();
+    } else {
+        height = context->GetDisplayAvailableRect().Height();
+    }
+    auto maxHeightValue = (height - static_cast<float>(bottom + top)) * MAX_HEIGHT_PROPORTIONS;
+
+    if (SystemProperties::GetTextTraceEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "GetPreviewMaxHeight availableRect:%{public}s GetSafeAreaWithoutProcess:%{public}s "
+            "displayWindowRect:%{public}s "
+            "isFreeMultiWindow:%{public}d maxHeightValue:%{public}f",
+            context->GetDisplayAvailableRect().ToString().c_str(),
+            safeAreaManager->GetSafeAreaWithoutProcess().ToString().c_str(),
+            context->GetDisplayWindowRectInfo().ToString().c_str(), isFreeMultiWindow, maxHeightValue);
+    }
+    return Dimension(maxHeightValue);
+}
+
 void PreviewMenuController::MountErrorNode(const RefPtr<FrameNode>& previewNode, TextDataDetectType type,
-    const std::string& content, std::function<void()> disappearCallback)
+    const std::string& content, std::function<void()> disappearCallback, std::function<void()> aiSpanClickCallabck)
 {
     switch (type) {
         case TextDataDetectType::PHONE_NUMBER:
         case TextDataDetectType::EMAIL:
             CreateContactErrorNode(previewNode, content, std::move(disappearCallback));
             break;
-        case TextDataDetectType::DATE_TIME:
         case TextDataDetectType::ADDRESS:
         case TextDataDetectType::URL:
+            CreateURLAndAddressNode(previewNode, content, type, std::move(aiSpanClickCallabck));
+            break;
+        case TextDataDetectType::DATE_TIME:
             CreateLinkingErrorNode(previewNode, type, std::move(disappearCallback));
             break;
         default:
@@ -395,15 +466,87 @@ void PreviewMenuController::CreateContactErrorNode(
     CHECK_NULL_VOID(imageLayoutProperty);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    UpdateNonLinkNodeProperty(imageLayoutProperty, textLayoutProperty, content);
+    UpdateImageAndTitleNodeProperty(imageLayoutProperty, textLayoutProperty, TextDataDetectType::PHONE_NUMBER, content);
     avatarNode->MarkModifyDone();
     avatarNode->MountToParent(previewNode);
     textNode->MountToParent(previewNode);
     previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void PreviewMenuController::UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutProperty>& imageLayoutProperty,
-    const RefPtr<TextLayoutProperty>& textLayoutProperty, const std::string& content)
+void PreviewMenuController::CreateURLAndAddressNode(const RefPtr<FrameNode>& previewNode, const std::string& content,
+    TextDataDetectType type, std::function<void()>&& aiSpanClickCallabck)
+{
+    CHECK_NULL_VOID(previewNode);
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto flexLayoutProperty = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(flexLayoutProperty);
+    flexLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+
+    auto eventHub = previewNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void()> callback;
+    if (type == TextDataDetectType::URL) {
+        callback = [content, type, mainId = Container::CurrentIdSafelyWithCheck()]() {
+            ContainerScope scope(mainId);
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(context);
+            auto fontManager = context->GetFontManager();
+            CHECK_NULL_VOID(fontManager);
+            fontManager->OnPreviewMenuOptionClick(type, content);
+        };
+    } else if (type == TextDataDetectType::ADDRESS) {
+        callback = std::move(aiSpanClickCallabck);
+    }
+    eventHub->SetUserOnClick([callback, mainId = Container::CurrentIdSafelyWithCheck()](GestureEvent& info) {
+        ContainerScope scope(mainId);
+        if (callback) {
+            callback();
+        }
+    });
+    CreateURLAndAddressContentNode(previewNode, contentNode, content, type);
+    previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void PreviewMenuController::CreateURLAndAddressContentNode(const RefPtr<FrameNode>& previewNode,
+    const RefPtr<FrameNode>& contentNode, const std::string& content, TextDataDetectType type)
+{
+    auto avatarNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto titleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto imageLayoutProperty = avatarNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleProperty);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto context = contentNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto title = type == TextDataDetectType::ADDRESS ? theme->GetLocationTitle() : theme->GetLinkTitle();
+    UpdateImageAndTitleNodeProperty(imageLayoutProperty, titleProperty, type, title);
+    textLayoutProperty->UpdateContent(content);
+    textLayoutProperty->UpdateMaxLines(MAX_LINES);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateTextColor(theme->GetPreviewFailedFontColor());
+    textLayoutProperty->UpdateFontSize(theme->GetPreviewFailedFontSize());
+    auto topMargin = CalcLength(theme->GetPreviewContentSpace());
+    textLayoutProperty->UpdateMargin(
+        { std::nullopt, std::nullopt, topMargin, std::nullopt, std::nullopt, std::nullopt });
+    titleNode->MountToParent(contentNode);
+    textNode->MountToParent(contentNode);
+    avatarNode->MarkModifyDone();
+    avatarNode->MountToParent(previewNode);
+    contentNode->MountToParent(previewNode);
+}
+
+void PreviewMenuController::UpdateImageAndTitleNodeProperty(const RefPtr<ImageLayoutProperty>& imageLayoutProperty,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, TextDataDetectType type, const std::string& content)
 {
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -412,12 +555,27 @@ void PreviewMenuController::UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutPr
     auto iconTheme = context->GetTheme<IconTheme>();
     std::string iconPath = "";
     if (iconTheme) {
-        iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PERSON_FILL_SVG);
+        switch (type) {
+            case TextDataDetectType::PHONE_NUMBER:
+            case TextDataDetectType::EMAIL:
+                iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PERSON_FILL_SVG);
+                break;
+            case TextDataDetectType::ADDRESS:
+                iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_LOACTION_SVG);
+                break;
+            case TextDataDetectType::URL:
+                iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_LINK_SVG);
+                break;
+            default:
+                break;
+        }
     }
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(iconPath);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto endMargin = CalcLength(MARGIN_SIZE);
+    auto overlayTheme = context->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(overlayTheme);
+    auto endMargin = CalcLength(overlayTheme->GetMenuSafeSpacing());
     imageLayoutProperty->UpdateFlexShrink(0);
     imageLayoutProperty->UpdateMargin(
         { std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, endMargin });
@@ -440,8 +598,12 @@ void PreviewMenuController::CreateLinkingErrorNode(
     if (type == TextDataDetectType::URL) {
         callback = disappearCallback;
     } else if (type == TextDataDetectType::DATE_TIME) {
-        auto name = ExpandedMenuPluginLoader::GetInstance().GetAPPName(type);
-        callback = GetLinkingCallback(name);
+        if (SystemProperties::GetPreviewStatus() == 0) {
+            auto name = ExpandedMenuPluginLoader::GetInstance().GetAPPName(type);
+            callback = GetLinkingCallback(name);
+        } else {
+            callback = disappearCallback;
+        }
     } else if (type == TextDataDetectType::ADDRESS) {
         auto name = ExpandedMenuPluginLoader::GetInstance().GetAPPName(type);
         callback = GetLinkingCallback(name);
@@ -496,7 +658,8 @@ void PreviewMenuController::BindContextMenu(const RefPtr<FrameNode>& targetNode,
         auto textPattern = pattern.Upgrade();
         CHECK_NULL_VOID(textPattern);
         auto data = textPattern->GetSelectedAIData();
-        controller->CreatePreviewMenu(data.type, data.content, func, data.params);
+        auto spanClickFunc = textPattern->GetPreviewMenuAISpanClickrCallback(data);
+        controller->CreatePreviewMenu(data.type, data.content, func, data.params, spanClickFunc);
     };
     menuParam_.isShow = isShow;
     isShow_ = isShow;

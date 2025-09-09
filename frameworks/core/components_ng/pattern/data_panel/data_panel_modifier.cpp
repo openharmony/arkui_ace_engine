@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/base/constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,7 +33,7 @@ constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
 constexpr float ZERO_CORNER_RADIUS = 0.0f;
 } // namespace
 
-DataPanelModifier::DataPanelModifier()
+DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_(pattern)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -46,12 +47,14 @@ DataPanelModifier::DataPanelModifier()
         values_.emplace_back(value);
     }
     max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
+    count_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE_COUNT);
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
     isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(date_);
     AttachProperty(max_);
+    AttachProperty(count_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
     AttachProperty(isEffect_);
@@ -108,7 +111,10 @@ void DataPanelModifier::UpdateDate()
         option.SetDelay(ANIMATION_DELAY);
         option.SetCurve(curve);
         option.SetIteration(ANIMATION_TIMES);
-        AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); });
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
+        AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); }, nullptr, nullptr, context);
     } else {
         date_->Set(ANIMATION_END);
     }

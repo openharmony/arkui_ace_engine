@@ -109,6 +109,33 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
 }
 
 /**
+ * @tc.name: GetListDriection001
+ * @tc.desc: Test GetListDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetListDriection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list, default direction is vertical.
+     */
+    CreateList();
+    CreateDone();
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+
+    /**
+     * @tc.steps: step2. Set direction to horizontal.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::HORIZONTAL));
+
+    /**
+     * @tc.steps: step3. Set direction to vertical.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::VERTICAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+}
+
+/**
  * @tc.name: GetOverScrollOffset001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC
@@ -286,289 +313,6 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset003, TestSize.Level1)
     offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
     expectOffset = { 0, -ITEM_MAIN_SIZE };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
-}
-
-/**
- * @tc.name: ListCanOverScrollStartTest001
- * @tc.desc: test func JudgeCanOverScrollStart, list at top
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListCanOverScrollStartTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init List
-       @tc.expected: List is at top
-     */
-    ListModelNG model = CreateList();
-    model.SetInitialIndex(0);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    EXPECT_TRUE(pattern_->IsAtTop());
-    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    EXPECT_NE(scrollable, nullptr);
-
-    /**
-     * @tc.steps: step2. slide List over top by SCROLL_FROM_UPDATE.
-     * @tc.expected: can over scroll
-     */
-    scrollable->isTouching_ = true;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_TRUE(Negative(pattern_->GetTotalOffset()));
-
-    /**
-     * @tc.steps: step3. slide to top then scroll over by SCROLL_FROM_ANIMATION
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->isTouching_ = false;
-    scrollable->state_ = NG::Scrollable::AnimationState::FRICTION;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -ITEM_MAIN_SIZE);
-
-    /**
-     * @tc.steps: step4. slide to top then scroll over by SCROLL_FROM_ANIMATION_SPRING
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->state_ = NG::Scrollable::AnimationState::SPRING;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -ITEM_MAIN_SIZE);
-
-    /**
-     * @tc.steps: step5. slide to top then scroll over by SCROLL_FROM_JUMP
-     * @tc.expected: can not over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->state_ = NG::Scrollable::AnimationState::IDLE;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    EXPECT_FALSE(pattern_->JudgeCanOverScrollStart());
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-}
-
-/**
- * @tc.name: ListCanOverScrollStartTest002
- * @tc.desc: test func JudgeCanOverScrollStart, list at bottom
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListCanOverScrollStartTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init List
-       @tc.expected: List is at bottom
-     */
-    ListModelNG model = CreateList();
-    model.SetInitialIndex(TOTAL_ITEM_NUMBER - 1);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    EXPECT_TRUE(pattern_->IsAtBottom());
-    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    EXPECT_NE(scrollable, nullptr);
-
-    /**
-     * @tc.steps: step2. slide List over bottom by SCROLL_FROM_UPDATE.
-     * @tc.expected: can over scroll
-     */
-    scrollable->isTouching_ = true;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -HEIGHT);
-
-    /**
-     * @tc.steps: step3. slide to bottom then scroll over by SCROLL_FROM_ANIMATION
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->isTouching_ = false;
-    scrollable->state_ = NG::Scrollable::AnimationState::FRICTION;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -HEIGHT);
-
-    /**
-     * @tc.steps: step4. slide to bottom then scroll over by SCROLL_FROM_ANIMATION_SPRING
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->state_ = NG::Scrollable::AnimationState::SPRING;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -HEIGHT);
-
-    /**
-     * @tc.steps: step5. slide to bottom then scroll over by SCROLL_FROM_JUMP
-     * @tc.expected: can not over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->state_ = NG::Scrollable::AnimationState::IDLE;
-    pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_JUMP);
-    EXPECT_FALSE(pattern_->JudgeCanOverScrollStart());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-}
-
-/**
- * @tc.name: ListCanOverScrollEndTest001
- * @tc.desc: test func JudgeCanOverScrollEnd, list at top
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListCanOverScrollEndTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init List
-       @tc.expected: List is at top
-     */
-    ListModelNG model = CreateList();
-    model.SetInitialIndex(0);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    EXPECT_TRUE(pattern_->IsAtTop());
-    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    EXPECT_NE(scrollable, nullptr);
-
-    /**
-     * @tc.steps: step2. slide List over top by SCROLL_FROM_UPDATE.
-     * @tc.expected: can over scroll
-     */
-    scrollable->isTouching_ = true;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_TRUE(GreatNotEqual(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT));
-
-    /**
-     * @tc.steps: step3. slide to top then scroll over by SCROLL_FROM_ANIMATION
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->isTouching_ = false;
-    scrollable->state_ = NG::Scrollable::AnimationState::FRICTION;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER);
-
-    /**
-     * @tc.steps: step4. slide to top then scroll over by SCROLL_FROM_ANIMATION_SPRING
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->state_ = NG::Scrollable::AnimationState::SPRING;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER);
-
-    /**
-     * @tc.steps: step5. slide to top then scroll over by SCROLL_FROM_JUMP
-     * @tc.expected: can not over scroll
-     */
-    pattern_->ScrollToIndex(0);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    scrollable->state_ = NG::Scrollable::AnimationState::IDLE;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER, SCROLL_FROM_JUMP);
-    EXPECT_FALSE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-}
-
-/**
- * @tc.name: ListCanOverScrollEndTest002
- * @tc.desc: test func JudgeCanOverScrollEnd, list at bottom
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListCanOverScrollEndTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init List
-       @tc.expected: List is at bottom
-     */
-    ListModelNG model = CreateList();
-    model.SetInitialIndex(TOTAL_ITEM_NUMBER - 1);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    EXPECT_TRUE(pattern_->IsAtBottom());
-    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    EXPECT_NE(scrollable, nullptr);
-
-    /**
-     * @tc.steps: step2. slide List over bottom by SCROLL_FROM_UPDATE.
-     * @tc.expected: can over scroll
-     */
-    scrollable->isTouching_ = true;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_TRUE(GreatNotEqual(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT));
-
-    /**
-     * @tc.steps: step3. slide to bottom then scroll over by SCROLL_FROM_ANIMATION
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->isTouching_ = false;
-    scrollable->state_ = NG::Scrollable::AnimationState::FRICTION;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * (TOTAL_ITEM_NUMBER + 1) - HEIGHT);
-
-    /**
-     * @tc.steps: step4. slide to bottom then scroll over by SCROLL_FROM_ANIMATION_SPRING
-     * @tc.expected: can over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->state_ = NG::Scrollable::AnimationState::SPRING;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_TRUE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * (TOTAL_ITEM_NUMBER + 1) - HEIGHT);
-
-    /**
-     * @tc.steps: step5. slide to bottom then scroll over by SCROLL_FROM_JUMP
-     * @tc.expected: can not over scroll
-     */
-    pattern_->ScrollToIndex(TOTAL_ITEM_NUMBER - 1);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
-    scrollable->state_ = NG::Scrollable::AnimationState::IDLE;
-    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP);
-    EXPECT_FALSE(pattern_->JudgeCanOverScrollEnd());
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * TOTAL_ITEM_NUMBER - HEIGHT);
 }
 
 /**
@@ -892,7 +636,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(header0Rect.Top(), contentStartOffset - groupPos);
 
     auto group1 = GetChildFrameNode(frameNode_, 1);
-    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footerIndex = 1 + GROUP_ITEM_NUMBER; // HeaderCount + GroupItemNumber
     auto footer1Rect = GetChildRect(group1, footerIndex);
     EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
 
@@ -2648,6 +2392,106 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount005
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1, true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushUITasks();
+    const int64_t time = GetSysTimestamp();
+    auto pipeline = listPattern->GetContext();
+    pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [&sizeChanged](const RectF& oldRect, const RectF& rect) { sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(sizeChanged, false);
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+
+    FlushUITasks();
+    EXPECT_EQ(sizeChanged, true);
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 400);
+}
+
+/**
+ * @tc.name: ListRepeatCacheCount006
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step3. Flush UI Task
+     * @tc.expected: After ListItem 4 is marked as dirty， ListItem 5 and 6 still remains cached.
+     */
+    cachedItem->SetLayoutDirtyMarked(true);
+    FlushUITasks();
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+}
+
+/**
  * @tc.name: GetRepeatCountInfo001
  * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
  * @tc.type: FUNC
@@ -2874,7 +2718,20 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
     FlushUITasks(frameNode_);
     FlushIdleTask(listPattern);
     EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+
+    /**
+     * @tc.steps: step5. UpdateCurrentOffset
+     * @tc.expected: 5 ListItem cached.
+     */
+    UpdateCurrentOffset(-250);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(0), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(1), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.count(7), 1);
 }
+
 /**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
@@ -3641,6 +3498,18 @@ HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
     EXPECT_TRUE(graphicProps);
     auto blendMode = graphicProps->GetBackBlendMode();
     EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    EXPECT_TRUE(paintMethod);
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
 
     /**
      * @tc.steps: step2. user close fadingEdge
@@ -3651,6 +3520,10 @@ HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
     FlushUITasks();
     blendMode = graphicProps->GetBackBlendMode();
     EXPECT_EQ(blendMode, BlendMode::NONE);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 0); // 4: both top and bottom have gradient
 
     /**
      * @tc.steps: step3. user re-open fadingEdge
@@ -3839,6 +3712,41 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent and padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ViewAbstract::SetPadding(AceType::RawPtr(list), CalcLength(10.f));
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's height is 280.
+    auto listPattern = list->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto height = listPattern->contentMainSize_;
+    EXPECT_EQ(height, 280.0f);
+}
+
+/**
  * @tc.name: LayoutPolicyTest001
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
@@ -3876,5 +3784,78 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore001, TestSize.Level1)
     auto offset = geometryNode->GetFrameOffset();
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 10.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTestWithIgnore002
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    layoutProperty_->UpdateSafeAreaPadding(paddingProperty);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    cachedItem->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = cachedItem->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(240.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 440.0f));
+}
+
+/**
+ * @tc.name: BigJumpAccuracyTest001
+ * @tc.desc: jump with big offset and check position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, BigJumpAccuracyTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create List with big ListItem height
+    * @tc.expected: currentOffset_ is 0.
+    */
+    auto model = CreateList();
+    model.SetInitialIndex(0);
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(10000));
+    CreateDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+    * @tc.steps: step2. UpdateCurrentOffset big offset with ScrollBar
+    * @tc.expected: Scroll to bottom
+    */
+    UpdateCurrentOffset(-10000.f, SCROLL_FROM_BAR);
+    EXPECT_EQ(pattern_->currentOffset_, 9600.f);
 }
 } // namespace OHOS::Ace::NG

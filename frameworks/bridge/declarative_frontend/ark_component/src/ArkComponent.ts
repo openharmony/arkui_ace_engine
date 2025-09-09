@@ -3625,8 +3625,8 @@ class CustomPropertyModifier extends ModifierWithKey<ArkCustomProperty> {
   }
 }
 
-class TransitionModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class TransitionModifier extends ModifierWithKey<ArkTransition> {
+  constructor(value: ArkTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('transition');
@@ -3634,7 +3634,7 @@ class TransitionModifier extends ModifierWithKey<object> {
     if (reset) {
       getUINativeModule().common.resetTransition(node);
     } else {
-      getUINativeModule().common.setTransition(node, this.value);
+      getUINativeModule().common.setTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
 }
@@ -4864,8 +4864,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  transition(value: TransitionOptions | TransitionEffect): this {
-    modifierWithKey(this._modifiersWithKeys, TransitionModifier.identity, TransitionModifier, value);
+  transition(value: TransitionOptions | TransitionEffect, callback: (transitionIn: boolean) => void): this {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, TransitionModifier.identity, TransitionModifier, arkTransition);
     return this;
   }
 
@@ -5732,6 +5737,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   customProperty(key: string, value: object): this {
+    if (this._weakPtr?.invalid()) {
+      return this;
+    }
     let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
     if (!returnBool) {
       const property = new ArkCustomProperty();

@@ -37,7 +37,7 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -757,7 +757,7 @@ PanelMode SlidingPanelPattern::GetPanelMode() const
 
 void SlidingPanelPattern::FireSizeChangeEvent()
 {
-    auto slidingPanelEventHub = GetOrCreateEventHub<SlidingPanelEventHub>();
+    auto slidingPanelEventHub = GetEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(slidingPanelEventHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -780,7 +780,7 @@ void SlidingPanelPattern::FireSizeChangeEvent()
 
 void SlidingPanelPattern::FireHeightChangeEvent()
 {
-    auto slidingPanelEventHub = GetOrCreateEventHub<SlidingPanelEventHub>();
+    auto slidingPanelEventHub = GetEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(slidingPanelEventHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

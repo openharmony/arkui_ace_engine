@@ -205,6 +205,7 @@ void TextModelNG::ResetTextColor(FrameNode* frameNode)
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
@@ -312,6 +313,21 @@ void TextModelNG::SetTextAlign(Ace::TextAlign value)
 void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value, frameNode);
+}
+
+void TextModelNG::SetTextContentAlign(Ace::TextContentAlign value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextContentAlign, value);
+}
+
+void TextModelNG::SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextContentAlign, value, frameNode);
+}
+
+void TextModelNG::ReSetTextContentAlign()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT);
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -460,6 +476,7 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -611,6 +628,7 @@ void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
 void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto index = 0;
@@ -811,7 +829,7 @@ void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
 void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnMarqueeStateChange(std::move(func));
 }
@@ -936,6 +954,14 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
     auto& textLineStyle = layoutProperty->GetTextLineStyle();
     CHECK_NULL_RETURN(textLineStyle, OHOS::Ace::TextAlign::START);
     return textLineStyle->GetTextAlign().value_or(TextAlign::START);
+}
+
+TextContentAlign TextModelNG::GetTextContentAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextContentAlign::CENTER);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextContentAlign::CENTER);
+    return layoutProperty->GetTextContentAlign().value_or(TextContentAlign::CENTER);
 }
 
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
@@ -1243,7 +1269,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
-
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto key = "textDetectorConfig";
     auto&& updateFunc = [textDetectConfig, weak = AceType::WeakClaim(frameNode)]
@@ -1262,7 +1288,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
 }
@@ -1270,7 +1296,7 @@ void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::
 void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
 }
@@ -1401,6 +1427,7 @@ void TextModelNG::SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim)
 
 bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OptimizeTrailingSpace, value, frameNode, value);
     return value;
@@ -1517,5 +1544,11 @@ void TextModelNG::ResetContentTransition(FrameNode* frameNode)
         TextLayoutProperty, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, frameNode);
+}
+
+void TextModelNG::ReSetTextContentAlign(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT, frameNode);
 }
 } // namespace OHOS::Ace::NG

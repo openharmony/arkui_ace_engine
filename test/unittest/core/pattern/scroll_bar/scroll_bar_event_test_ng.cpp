@@ -553,65 +553,52 @@ HWTEST_F(ScrollBarEventTestNg, ScrollScrollBar001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HoverScrollBar001
- * @tc.desc: Test Hover event in VERSION_TWELVE
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: Test ScrollBar about HandleDragEnd in HORIZONTAL Layout and RTL Layout
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarEventTestNg, HoverScrollBar001, TestSize.Level1)
+HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
 {
-    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    CreateStack();
-    CreateScroll();
-    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateStack(Alignment::BOTTOM_CENTER);
+    CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
+    CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
     CreateScrollBarChild();
     CreateDone();
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
+    float controlDistance = pattern_->GetControlDistance();
+    float scrollableDistance = pattern_->GetScrollableDistance();
+    EXPECT_EQ(controlDistance, CONTENT_MAIN_SIZE - SCROLL_WIDTH);          // 520.f
+    EXPECT_EQ(scrollableDistance, SCROLL_WIDTH - SCROLL_BAR_CHILD_HEIGHT); // 320.f
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
 
     /**
-     * @tc.steps: step1. DisplayMode::ON, hover or not hover
-     * @tc.expected: Always show scrollBar
+     * @tc.steps: step1. HandleDragStart, drag on scrollBar
      */
-    auto inputHub = pattern_->GetInputHub();
-    auto onHover = inputHub->hoverEventActuator_->inputEvents_.front()->GetOnHoverFunc();
-    HoverInfo info;
-    onHover(true, info);
-    auto scrollBarRenderContext = frameNode_->GetRenderContext();
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
-    onHover(false, info);
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
+    GestureEvent info;
+    info.SetGlobalPoint(Point(1.f, SCROLL_HEIGHT - 1.f));
+    HandleDragStart(info);
 
     /**
-     * @tc.steps: step2. DisplayMode::AUTO, hover or not hover
-     * @tc.expected: Show scrollBar when hover, hide when not hover
+     * @tc.steps: step2. HandleDragEnd, drag left
+     * @tc.expected: Scroll left
      */
-    pattern_->displayMode_ = DisplayMode::AUTO;
-    onHover(true, info);
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
-    onHover(false, info);
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 0);
+    info.SetMainVelocity(-1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(stackNode_);
+    EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
 
     /**
-     * @tc.steps: step3. Press scrollBar
-     * @tc.expected: Show scrollBar
+     * @tc.steps: step2. HandleDragEnd, drag right
+     * @tc.expected: Scroll right
      */
-    MouseInfo mouseInfo;
-    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
-    mouseInfo.SetAction(MouseAction::PRESS);
-    mouseInfo.SetLocalLocation(Offset());
-    HandleMouseEvent(mouseInfo);
-    EXPECT_TRUE(pattern_->isMousePressed_);
-    onHover(false, info);
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
-
-    /**
-     * @tc.steps: step4. When isScrolling_
-     * @tc.expected: Show scrollBar
-     */
-    pattern_->isScrolling_ = true;
-    onHover(false, info);
-    EXPECT_EQ(scrollBarRenderContext->GetOpacityValue(), 1);
-
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+    info.SetMainVelocity(1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(stackNode_);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
 }
 
 /**
@@ -810,113 +797,6 @@ HWTEST_F(ScrollBarEventTestNg, HandleLongPress003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnHover001
- * @tc.desc: Test mouse onhover show bar
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create CreateScrollBar and MouseInfo.
-     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
-     */
-    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    CreateStack();
-    CreateScroll();
-    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
-    CreateScrollBarChild();
-    CreateDone();
-    pattern_->SetControlDistance(1.f);
-    pattern_->CreateScrollBarOverlayModifier();
-    auto context = PipelineContext::GetCurrentContext();
-    EXPECT_NE(context, nullptr);
-    if (context->taskExecutor_ == nullptr) {
-        context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    }
-    EXPECT_NE(context->taskExecutor_, nullptr);
-
-    /**
-     * @tc.steps: step2. Test not hover on bar.
-     * @tc.expect: Opacity = 0 .
-     */
-    pattern_->InitMouseEvent();
-    pattern_->SetScrollBar(DisplayMode::AUTO);
-    HoverInfo info;
-    auto inputHub = pattern_->GetInputHub();
-    auto& inputEvents =
-        pattern_->GetOrCreateEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
-    EXPECT_TRUE(inputEvents.size() > 1);
-    for (const auto& callback : inputEvents) {
-        if (callback) {
-            (*callback)(false, info);
-        }
-    }
-    EXPECT_EQ(pattern_->opacity_, 0);
-
-    /**
-     * @tc.steps: step2. Test hover on bar.
-     * @tc.expect: Opacity = UINT8_MAX .
-     */
-    for (const auto& callback : inputEvents) {
-        if (callback) {
-            (*callback)(true, info);
-        }
-    }
-    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
-}
-
-/**
- * @tc.name: HandleDragEnd001
- * @tc.desc: Test ScrollBar about HandleDragEnd in HORIZONTAL Layout and RTL Layout
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
-{
-    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    CreateStack(Alignment::BOTTOM_CENTER);
-    CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
-    CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
-    CreateScrollBarChild();
-    CreateDone();
-    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
-    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
-    float controlDistance = pattern_->GetControlDistance();
-    float scrollableDistance = pattern_->GetScrollableDistance();
-    EXPECT_EQ(controlDistance, CONTENT_MAIN_SIZE - SCROLL_WIDTH);          // 520.f
-    EXPECT_EQ(scrollableDistance, SCROLL_WIDTH - SCROLL_BAR_CHILD_HEIGHT); // 320.f
-    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
-
-    /**
-     * @tc.steps: step1. HandleDragStart, drag on scrollBar
-     */
-    GestureEvent info;
-    info.SetGlobalPoint(Point(1.f, SCROLL_HEIGHT - 1.f));
-    HandleDragStart(info);
-
-    /**
-     * @tc.steps: step2. HandleDragEnd, drag left
-     * @tc.expected: Scroll left
-     */
-    info.SetMainVelocity(-1000.f);
-    HandleDragEnd(info);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
-
-    /**
-     * @tc.steps: step2. HandleDragEnd, drag right
-     * @tc.expected: Scroll right
-     */
-    info.SetMainVelocity(1000.f);
-    HandleDragEnd(info);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
-}
-
-/**
  * @tc.name: IsScrolling001
  * @tc.desc: Test isScrolling in scrollBar without child
  * @tc.type: FUNC
@@ -1000,7 +880,7 @@ HWTEST_F(ScrollBarEventTestNg, OnScrollStartStop001, TestSize.Level1)
         }
         isScrollStopCalled++;
     };
-    auto eventHub = scrollNode_->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = scrollNode_->GetEventHub<ScrollEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->SetOnScrollStart(std::move(scrollStart));
     eventHub->SetOnScrollStop(std::move(scrollStop));

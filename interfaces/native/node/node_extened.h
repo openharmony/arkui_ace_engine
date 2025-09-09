@@ -101,6 +101,13 @@ struct ArkUI_OptionalCharPtr {
     const char* value;
 };
 
+struct ArkUI_PositionEdges {
+    ArkUI_OptionalFloat top;
+    ArkUI_OptionalFloat left;
+    ArkUI_OptionalFloat bottom;
+    ArkUI_OptionalFloat right;
+};
+
 struct ArkUI_SwiperIndicator {
     ArkUI_SwiperIndicatorType type;
     ArkUI_OptionalFloat dimLeft;
@@ -205,6 +212,10 @@ struct ArkUI_CrossLanguageOption {
 struct ArkUI_VisibleAreaEventOptions {
     std::vector<float> ratios;
     int32_t expectedUpdateInterval;
+};
+
+struct ArkUI_ContentTransitionEffect {
+    int32_t contentTransitionType;
 };
 
 #ifdef __cplusplus

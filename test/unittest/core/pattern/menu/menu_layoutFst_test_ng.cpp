@@ -798,7 +798,6 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
     auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(menuNode, menuGeometryNode, property);
     ASSERT_NE(layoutWrapper, nullptr);
-
     /**
      * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
      */
@@ -1311,7 +1310,6 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg032, TestSize.Level1)
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
 {
     // create parent menu item
-    MockPipelineContextGetTheme();
     auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
     auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
     // set parent item size
@@ -1339,14 +1337,14 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 100);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 100);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
 /**
@@ -2013,6 +2011,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuWeakNode = WeakPtr<FrameNode>(menuNode);
     ASSERT_NE(menuNode, nullptr);
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -2112,5 +2113,260 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
         EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), offset);
         offset.AddY(MENU_SIZE_HEIGHT / 3);
     }
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg051
+ * @tc.desc: Test MultiMenu MarkChildForDelayedMeasurement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement01, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProp->UpdateSafeAreaPadding(padding);
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+
+    algorithm->MarkChildForDelayedMeasurement(wrapper);
+    EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 0);
+    delete(wrapper);
+}
+
+/**
+ * @tc.name: MarkChildForDelayedMeasurement02
+ * @tc.desc: Test MultiMenu MarkChildForDelayedMeasurement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement02, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProp->UpdateSafeAreaPadding(padding);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        layoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        menuItem->SetLayoutProperty(layoutProperty);
+        itemGeoNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProperty);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    algorithm->MeasureAdaptiveLayoutChildren(wrapper, childLayoutConstraint);
+    EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 3);
+    delete(wrapper);
+}
+
+/**
+ * @tc.name: MarkChildForDelayedMeasurement03
+ * @tc.desc: Test MultiMenu MarkChildForDelayedMeasurement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement03, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    menuPattern->SetIsEmbedded();
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProp->UpdateSafeAreaPadding(padding);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        layoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        menuItem->SetLayoutProperty(layoutProperty);
+        itemGeoNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProperty);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    algorithm->MeasureAdaptiveLayoutChildren(wrapper, childLayoutConstraint);
+    EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 3);
+    delete(wrapper);
+}
+
+/**
+ * @tc.name: MarkChildForDelayedMeasurement04
+ * @tc.desc: Test MultiMenu  MarkChildForDelayedMeasurement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MarkChildForDelayedMeasurement04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    /**
+     * @tc.steps: step2. Create menuitem and do not set width LayoutPolicy to Match.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+        layoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+        menuItem->SetLayoutProperty(layoutProperty);
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProperty);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    /**
+     * @tc.steps: step3. expect layoutPolicyChildren_ equals number of menuitem.
+     */
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    algorithm->MeasureAdaptiveLayoutChildren(wrapper, childLayoutConstraint);
+    EXPECT_EQ(algorithm->layoutPolicyChildren_.size(), 3);
+    delete (wrapper);
+}
+
+/**
+ * @tc.name: GetMaxWidthTest01
+ * @tc.desc: Test MultiMenu  GetMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, GetMaxWidthTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    /**
+     * @tc.steps: step2. Create menuitem and do not set width LayoutPolicy.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(50.0f * (i + 1), MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    /**
+     * @tc.steps: step3. expect maxWidth equals to max width of menuitem.
+     */
+    auto maxWidth = algorithm->GetChildrenMaxWidth(wrapper, childLayoutConstraint);
+    EXPECT_FLOAT_EQ(maxWidth, 150.0f);
+    delete (wrapper);
+}
+
+/**
+ * @tc.name: GetMaxWidthTest02
+ * @tc.desc: Test MultiMenu  GetMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, GetMaxWidthTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu.
+     */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    /**
+     * @tc.steps: step2. Create menuitem and set width LayoutPolicy to MATCH_PARENT.
+     */
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        menuItem->SetLayoutProperty(layoutProperty);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+    /**
+     * @tc.steps: step3. expect maxWidth equals to 0.0f if width LayoutPolicy to MATCH_PARENT.
+     */
+    LayoutConstraintF childLayoutConstraint;
+    childLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    childLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    auto maxWidth = algorithm->GetChildrenMaxWidth(wrapper, childLayoutConstraint);
+    EXPECT_FLOAT_EQ(maxWidth, 0.0f);
+    delete (wrapper);
 }
 } // namespace OHOS::Ace::NG

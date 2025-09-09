@@ -895,7 +895,7 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
 {
     if (lineHeightMap_.empty() || endIndex_ < childrenCount_ - 1 ||
         endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
-        return Infinity<float>();
+        return LayoutInfinity<float>();
     }
 
     float offset = currentOffset_;

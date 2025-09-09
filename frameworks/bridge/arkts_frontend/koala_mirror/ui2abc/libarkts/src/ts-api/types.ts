@@ -19,7 +19,7 @@ import * as arkts from "../arkts-api"
 import { throwError } from "../utils"
 import {
     passModifiers,
-    todo,
+    emptyImplementation,
     unpackModifiers,
     unpackNode,
     unpackNodeArray,
@@ -27,13 +27,13 @@ import {
 } from "./utilities/private"
 import { SyntaxKind } from "./static/enums"
 
-// TODO: write implementation
+// Improve: write implementation
 export interface TransformationContext {}
 
-// TODO: write implementation
+// Improve: write implementation
 export interface Program {}
 
-// TODO: remove U type param
+// Improve: remove U type param
 export type NodeArray<T extends Node<U>, U extends arkts.AstNode | undefined = arkts.AstNode | undefined> = ts.NodeArray<T>
 
 export abstract class Node<T extends arkts.AstNode | undefined = arkts.AstNode | undefined> implements ts.Node {
@@ -43,7 +43,7 @@ export abstract class Node<T extends arkts.AstNode | undefined = arkts.AstNode |
 
     readonly node: T
 
-    // TODO: remove any
+    // Improve: remove any
     get parent(): any {
         if (this.node === undefined) {
             throwError('trying to get parent of undefined _node')
@@ -74,7 +74,7 @@ export abstract class Node<T extends arkts.AstNode | undefined = arkts.AstNode |
 
     abstract kind: SyntaxKind
 
-    // TODO:
+    // Improve:
     forEachChild<T>(cbNode: (node: ts.Node) => T | undefined, cbNodeArray?: ((nodes: ts.NodeArray<ts.Node>) => T | undefined) | undefined): T | undefined { throw new Error("Method not implemented.") }
     getSourceFile(): ts.SourceFile { throw new Error("Method not implemented.") }
     getChildCount(sourceFile?: ts.SourceFile | undefined): number { throw new Error("Method not implemented.") }
@@ -92,13 +92,13 @@ export abstract class Node<T extends arkts.AstNode | undefined = arkts.AstNode |
     getFirstToken(sourceFile?: ts.SourceFile | undefined): ts.Node | undefined { throw new Error("Method not implemented.") }
     getLastToken(sourceFile?: ts.SourceFile | undefined): ts.Node | undefined { throw new Error("Method not implemented.") }
 
-    get symbol(): ts.Symbol { return todo() }
-    get flags(): ts.NodeFlags { return todo() }
-    get pos(): number { return todo() }
-    get end(): number { return todo() }
+    get symbol(): ts.Symbol { return emptyImplementation() }
+    get flags(): ts.NodeFlags { return emptyImplementation() }
+    get pos(): number { return emptyImplementation() }
+    get end(): number { return emptyImplementation() }
 }
 
-// TODO: add all tokens
+// Improve: add all tokens
 export type BinaryOperator =
     | ts.SyntaxKind.PlusToken
     | ts.SyntaxKind.MinusToken
@@ -107,7 +107,7 @@ export type BinaryOperator =
 
 export type BinaryOperatorToken = Token<BinaryOperator>;
 
-// TODO: rethink maybe (temporary solution)
+// Improve: rethink maybe (temporary solution)
 export class Token<TKind extends ts.TokenSyntaxKind> extends Node<undefined> {
     constructor(kind: TKind) {
         super(undefined)
@@ -149,7 +149,7 @@ export class Modifier extends Node<undefined> {
 }
 
 export abstract class Expression extends Node<arkts.AstNode> implements ts.Expression {
-    // TODO: support minimal interface
+    // Improve: support minimal interface
     _expressionBrand: any
 }
 
@@ -212,8 +212,8 @@ export class Identifier extends Node<arkts.Identifier> implements ts.Identifier,
     readonly text: string
     readonly kind: ts.SyntaxKind.Identifier = ts.SyntaxKind.Identifier
 
-    // TODO:
-    get escapedText(): ts.__String { return todo() }
+    // Improve:
+    get escapedText(): ts.__String { return emptyImplementation() }
 
     // brands
     _primaryExpressionBrand: any
@@ -237,8 +237,8 @@ export class PrivateIdentifier extends Node<arkts.Identifier> implements ts.Priv
     readonly text: string
     readonly kind: ts.SyntaxKind.PrivateIdentifier = ts.SyntaxKind.PrivateIdentifier
 
-    // TODO:
-    get escapedText(): ts.__String { return todo() }
+    // Improve:
+    get escapedText(): ts.__String { return emptyImplementation() }
 
     // brands
     _primaryExpressionBrand: any
@@ -278,23 +278,23 @@ export class SourceFile extends Node<arkts.EtsScript> implements ts.SourceFile {
     readonly statements: NodeArray<Statement>
     readonly kind: ts.SyntaxKind.SourceFile = ts.SyntaxKind.SourceFile
 
-    // TODO:
+    // Improve:
     getLineAndCharacterOfPosition(pos: number): ts.LineAndCharacter { throw new Error("Method not implemented.") }
     getLineEndOfPosition(pos: number): number { throw new Error("Method not implemented.") }
     getLineStarts(): readonly number[] { throw new Error("Method not implemented.") }
     getPositionOfLineAndCharacter(line: number, character: number): number { throw new Error("Method not implemented.") }
     update(newText: string, textChangeRange: ts.TextChangeRange): ts.SourceFile { throw new Error("Method not implemented.") }
-    get endOfFileToken(): ts.Token<ts.SyntaxKind.EndOfFileToken> { return todo() }
-    get fileName(): string { return todo() }
-    get text() { return todo() }
-    get amdDependencies(): readonly ts.AmdDependency[] { return todo() }
-    get referencedFiles(): readonly ts.FileReference[] { return todo() }
-    get typeReferenceDirectives(): readonly ts.FileReference[] { return todo() }
-    get libReferenceDirectives(): readonly ts.FileReference[] { return todo() }
-    get languageVariant(): ts.LanguageVariant { return todo() }
-    get isDeclarationFile(): boolean { return todo() }
-    get hasNoDefaultLib(): boolean { return todo() }
-    get languageVersion(): ts.ScriptTarget { return todo() }
+    get endOfFileToken(): ts.Token<ts.SyntaxKind.EndOfFileToken> { return emptyImplementation() }
+    get fileName(): string { return emptyImplementation() }
+    get text() { return emptyImplementation() }
+    get amdDependencies(): readonly ts.AmdDependency[] { return emptyImplementation() }
+    get referencedFiles(): readonly ts.FileReference[] { return emptyImplementation() }
+    get typeReferenceDirectives(): readonly ts.FileReference[] { return emptyImplementation() }
+    get libReferenceDirectives(): readonly ts.FileReference[] { return emptyImplementation() }
+    get languageVariant(): ts.LanguageVariant { return emptyImplementation() }
+    get isDeclarationFile(): boolean { return emptyImplementation() }
+    get hasNoDefaultLib(): boolean { return emptyImplementation() }
+    get languageVersion(): ts.ScriptTarget { return emptyImplementation() }
 
     // brands
     _declarationBrand: any
@@ -407,11 +407,11 @@ export abstract class ClassElement extends Node<arkts.AstNode> implements ts.Cla
 
 export type MemberName = Identifier | PrivateIdentifier;
 
-// TODO: support
+// Improve: support
 // export type PropertyName = Identifier | StringLiteral | NumericLiteral | ts.ComputedPropertyName | PrivateIdentifier;
 export type PropertyName = Identifier | StringLiteral | NumericLiteral | PrivateIdentifier;
 
-// TODO: support
+// Improve: support
 export type DeclarationName =
     | PropertyName
     // | JsxAttributeName
@@ -440,7 +440,7 @@ export interface FunctionLikeDeclarationBase extends SignatureDeclarationBase {
     _functionLikeDeclarationBrand: any;
 }
 
-// TODO: support
+// Improve: support
 // export type FunctionLikeDeclaration = FunctionDeclaration | MethodDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration | ConstructorDeclaration | FunctionExpression | ArrowFunction;
 export type FunctionLikeDeclaration = FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | FunctionExpression | ArrowFunction;
 
@@ -453,7 +453,7 @@ export class MethodSignature extends Node<arkts.AstNode> implements ts.MethodSig
     // readonly parameters: NodeArray<ParameterDeclaration>
     readonly kind: ts.SyntaxKind.MethodSignature = ts.SyntaxKind.MethodSignature
 
-    // TODO:
+    // Improve:
     name: any
     parameters: any
 
@@ -508,7 +508,7 @@ export class ConstructorDeclaration extends Node<arkts.MethodDefinition> impleme
     _declarationBrand: any
 }
 
-// TODO: specify arkts.AstNode type
+// Improve: specify arkts.AstNode type
 export class PropertySignature extends Node<arkts.AstNode> implements ts.TypeElement {
     constructor(node: arkts.AstNode) {
         super(node)
@@ -522,7 +522,7 @@ export class PropertySignature extends Node<arkts.AstNode> implements ts.TypeEle
     _declarationBrand: any
 }
 
-// TODO: specify arkts.AstNode type
+// Improve: specify arkts.AstNode type
 export class PropertyDeclaration extends Node<arkts.AstNode> implements ts.PropertyDeclaration, ClassElement {
     constructor(node: arkts.AstNode) {
         super(node)
@@ -530,7 +530,7 @@ export class PropertyDeclaration extends Node<arkts.AstNode> implements ts.Prope
 
     readonly kind: ts.SyntaxKind.PropertyDeclaration = ts.SyntaxKind.PropertyDeclaration
 
-    // TODO:
+    // Improve:
     name: any
 
     // brands
@@ -538,7 +538,7 @@ export class PropertyDeclaration extends Node<arkts.AstNode> implements ts.Prope
     _declarationBrand: any
 }
 
-// TODO: specify arkts.AstNode type
+// Improve: specify arkts.AstNode type
 export class GetAccessorDeclaration extends Node<arkts.AstNode> implements ts.GetAccessorDeclaration, FunctionLikeDeclarationBase, ClassElement {
     constructor(node: arkts.AstNode) {
         super(node)
@@ -548,7 +548,7 @@ export class GetAccessorDeclaration extends Node<arkts.AstNode> implements ts.Ge
     // readonly parameters: NodeArray<ParameterDeclaration>
     readonly kind: ts.SyntaxKind.GetAccessor = ts.SyntaxKind.GetAccessor
 
-    // TODO:
+    // Improve:
     name: any
     parameters: any
 
@@ -560,7 +560,7 @@ export class GetAccessorDeclaration extends Node<arkts.AstNode> implements ts.Ge
     _objectLiteralBrand: any
 }
 
-// TODO: specify arkts.AstNode type
+// Improve: specify arkts.AstNode type
 export class SetAccessorDeclaration extends Node<arkts.AstNode> implements ts.SetAccessorDeclaration, FunctionLikeDeclarationBase, ClassElement {
     constructor(node: arkts.AstNode) {
         super(node)
@@ -570,7 +570,7 @@ export class SetAccessorDeclaration extends Node<arkts.AstNode> implements ts.Se
     // readonly parameters: NodeArray<ParameterDeclaration>
     readonly kind: ts.SyntaxKind.SetAccessor = ts.SyntaxKind.SetAccessor
 
-    // TODO:
+    // Improve:
     name: any
     parameters: any
 
@@ -589,7 +589,7 @@ export class ParameterDeclaration extends Node<arkts.ETSParameterExpression> imp
 
     readonly kind: ts.SyntaxKind.Parameter = ts.SyntaxKind.Parameter
 
-    // TODO:
+    // Improve:
     name: any
 
     // brands
@@ -671,7 +671,7 @@ export class TypeReferenceNode extends Node<arkts.AstNode> implements ts.TypeRef
 
     readonly kind: ts.SyntaxKind.TypeReference = ts.SyntaxKind.TypeReference
 
-    // TODO:
+    // Improve:
     typeName: any
 
     // brands
@@ -686,7 +686,7 @@ export class FunctionTypeNode extends Node<arkts.AstNode> implements ts.Function
     readonly name?: DeclarationName
     readonly kind: ts.SyntaxKind.FunctionType = ts.SyntaxKind.FunctionType
 
-    // TODO: support minimal interface
+    // Improve: support minimal interface
     parameters: any
     type: any
 
@@ -728,7 +728,7 @@ export class IfStatement extends Node<arkts.IfStatement> implements ts.IfStateme
 
     readonly kind: ts.SyntaxKind.IfStatement = ts.SyntaxKind.IfStatement
 
-    // TODO:
+    // Improve:
     thenStatement: any
     expression: any
 
@@ -743,7 +743,7 @@ export class BinaryExpression extends Node<arkts.BinaryExpression> implements ts
 
     readonly kind: ts.SyntaxKind.BinaryExpression = ts.SyntaxKind.BinaryExpression
 
-    // TODO:
+    // Improve:
     left: any
     right: any
     operatorToken: any
@@ -760,7 +760,7 @@ export class AssignmentExpression extends Node<arkts.AssignmentExpression> imple
 
     readonly kind: ts.SyntaxKind.BinaryExpression = ts.SyntaxKind.BinaryExpression
 
-    // TODO:
+    // Improve:
     right: any
     left: any
     operatorToken: any
@@ -785,7 +785,7 @@ export class ArrowFunction extends Node<arkts.ArrowFunctionExpression> implement
     readonly parameters: NodeArray<ParameterDeclaration>
     readonly kind: ts.SyntaxKind.ArrowFunction = ts.SyntaxKind.ArrowFunction
 
-    // TODO:
+    // Improve:
     equalsGreaterThanToken: any
 
     // brands
@@ -840,13 +840,13 @@ export class HeritageClause extends Node<arkts.SuperExpression> implements ts.He
     // token: ts.SyntaxKind.ExtendsKeyword | ts.SyntaxKind.ImplementsKeyword
     // types: ts.NodeArray<ts.ExpressionWithTypeArguments>
 
-    // TODO:
+    // Improve:
     token: any
     types: any
 }
 
 
-// TODO: there is no ParenthesizedExpression in ArkTS,
+// Improve: there is no ParenthesizedExpression in ArkTS,
 // so for temporary solution we're just gonna ignore this type of nodes
 // and replace it with Expression underneath
 export type ParenthesizedExpression = Expression
@@ -868,7 +868,7 @@ export type ParenthesizedExpression = Expression
 //     _expressionBrand: any
 // }
 
-// TODO:
+// Improve:
 export class ImportDeclaration extends Node<arkts.UnsupportedNode> implements ts.ImportDeclaration {
     constructor(node: arkts.UnsupportedNode) {
         super(node)
@@ -876,14 +876,14 @@ export class ImportDeclaration extends Node<arkts.UnsupportedNode> implements ts
 
     readonly kind: ts.SyntaxKind.ImportDeclaration = ts.SyntaxKind.ImportDeclaration
 
-    // TODO:
+    // Improve:
     moduleSpecifier: any
 
     // brands
     _statementBrand: any
 }
 
-// TODO:
+// Improve:
 export class ImportClause extends Node<arkts.UnsupportedNode> implements ts.ImportClause {
     constructor(node: arkts.UnsupportedNode) {
         super(node)
@@ -891,14 +891,14 @@ export class ImportClause extends Node<arkts.UnsupportedNode> implements ts.Impo
 
     readonly kind: ts.SyntaxKind.ImportClause = ts.SyntaxKind.ImportClause
 
-    // TODO:
+    // Improve:
     isTypeOnly: any
 
     // brands
     _declarationBrand: any
 }
 
-// TODO:
+// Improve:
 export class NamedImports extends Node<arkts.UnsupportedNode> implements ts.NamedImports {
     constructor(node: arkts.UnsupportedNode) {
         super(node)
@@ -906,7 +906,7 @@ export class NamedImports extends Node<arkts.UnsupportedNode> implements ts.Name
 
     readonly kind: ts.SyntaxKind.NamedImports = ts.SyntaxKind.NamedImports
 
-    // TODO:
+    // Improve:
     elements: any
 }
 
@@ -919,7 +919,7 @@ export class ImportSpecifier extends Node<arkts.Identifier> implements ts.Import
     readonly name: Identifier
     readonly kind: ts.SyntaxKind.ImportSpecifier = ts.SyntaxKind.ImportSpecifier
 
-    // TODO:
+    // Improve:
     isTypeOnly: any
 
     // brands

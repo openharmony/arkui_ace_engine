@@ -402,7 +402,7 @@ HWTEST_F(TextFieldPatternTestFour, PerformAction001, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
@@ -444,7 +444,7 @@ HWTEST_F(TextFieldPatternTestFour, RecordSubmitEvent001, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().eventSwitch_[index] = true;

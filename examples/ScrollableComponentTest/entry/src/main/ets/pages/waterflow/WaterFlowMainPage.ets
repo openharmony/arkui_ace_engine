@@ -39,6 +39,8 @@ struct WaterFlowMainPage {
     new TextList(5, '设置边缘渐隐效果', 'pages/waterflow/demo01/WaterFlowWithFading'),
     new TextList(6, 'WaterFlowNodeFooter', 'pages/waterflow/demo01/WaterFlowNodeFooter'),
     new TextList(7, 'WaterFlowNodeFooterContent', 'pages/waterflow/demo01/WaterFlowNodeFooterContent'),
+    new TextList(8, 'lazyVGrid-ori', 'pages/waterflow/lazyVGrid/lazyVGrid-ori'),
+    new TextList(9, 'lazyVGrid-seg', 'pages/waterflow/lazyVGrid/lazyVGrid-seg'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

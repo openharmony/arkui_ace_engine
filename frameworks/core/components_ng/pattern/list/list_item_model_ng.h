@@ -46,11 +46,11 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) override;
+    void SetAutoScale(bool autoScale) override;
     void SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) override;
-    void SetAutoScale(bool autoScale) override;
     void ParseResObjStartArea(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjEndArea(const RefPtr<ResourceObject>& resObj) override;
 
@@ -66,6 +66,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
     static void SetStyle(FrameNode* frameNode, V2::ListItemStyle style);
+    static void ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction);
+    static void CollapseSwipeAction(const NG::FrameNode* listItem);
+
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

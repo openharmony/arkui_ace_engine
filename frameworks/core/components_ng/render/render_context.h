@@ -96,7 +96,7 @@ inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
 class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::RenderContext, AceType)
+    DECLARE_ACE_TYPE(NG::RenderContext, AceType);
 
 public:
     ~RenderContext() override = default;
@@ -184,6 +184,7 @@ public:
         EXTERNAL,
         INCREMENTAL_CANVAS,
         HARDWARE_SURFACE,
+        COMPOSITE_COMPONENT,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -516,7 +517,7 @@ public:
 
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
-    virtual void PaintAccessibilityFocus() {};
+    virtual void PaintAccessibilityFocus(bool isRectUpdate = false) {};
 
     virtual void UpdateAccessibilityRoundRect() {};
 
@@ -836,6 +837,8 @@ public:
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
     virtual void UpdateCustomBackground() {}
+
+    virtual void UpdateOverlayText() {}
 
 protected:
     RenderContext() = default;

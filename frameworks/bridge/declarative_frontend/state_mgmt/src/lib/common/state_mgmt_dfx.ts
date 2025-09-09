@@ -47,7 +47,7 @@ class stateMgmtDFX {
     }
   }
 
-  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo) {
+  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo): void {
     const decoratorInfo: string = ObserveV2.getObserve().getDecoratorInfo(target, attrName);
     let val;
     let id;
@@ -126,20 +126,22 @@ class stateMgmtDFX {
   }
 
   private static dumpV2VariableInfo(view: ViewV2, dumpInfo: DumpInfo): void {
-    const meta = view[ObserveV2.V2_DECO_META];
+    const propertyVariableNames: [string, any][] = view.__getDecoratorPropertyName__V2View__Internal();
     // no decorated variables, return view info directly
-    if (!meta) {
+    if (propertyVariableNames.length === 0) {
       return;
     }
-    Object.getOwnPropertyNames(meta)
-      .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
-      .forEach((varName) => {
-        dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.dumpSingleV2VariableInfo(view, varName));
+    propertyVariableNames
+      .filter((entry) => !entry[0].startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX))
+      .forEach((entry) => {
+        dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.dumpSingleV2VariableInfo(view, entry));
       });
   }
 
-  private static dumpSingleV2VariableInfo<T>(view: ViewV2, varName: string): ObservedPropertyInfo<T> {
-    const decorators: string = ObserveV2.getObserve().getDecoratorInfo(view, varName);
+  private static dumpSingleV2VariableInfo<T>(view: ViewV2, entry: [string, any]): ObservedPropertyInfo<T> {
+    const varName = entry[0];
+    const deco: any = entry[1];
+    const decorators: string = ObserveV2.getObserve().parseDecorator(deco);
     const prop: any = Reflect.get(view, varName);
     let dependentElmIds: Set<number> | undefined = undefined;
     if (view[ObserveV2.SYMBOL_REFS]) {

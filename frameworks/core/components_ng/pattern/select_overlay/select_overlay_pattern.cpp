@@ -118,7 +118,7 @@ void SelectOverlayPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -755,8 +755,7 @@ void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
         taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS,
             "ArkUISelectOverlayHiddenHandle");
     } else {
-        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle",
-                               PriorityType::VIP);
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle");
     }
 }
 
@@ -879,7 +878,9 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateSelectMenuBg();
+    CHECK_NULL_VOID(info_);
+    auto caller = info_->callerFrameNode.Upgrade();
+    host->UpdateSelectMenuBg(caller);
     host->UpdateToolBarFromMainWindow(true, true);
 }
 

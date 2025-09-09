@@ -127,6 +127,20 @@ class TextAlignModifier extends ModifierWithKey<number> {
   }
 }
 
+class TextContentAlignModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textContentAlign');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextContentAlign(node);
+    } else {
+      getUINativeModule().text.setTextContentAlign(node, this.value);
+    }
+  }
+}
+
 class TextHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
   constructor(value: TextHeightAdaptivePolicy) {
     super(value);
@@ -418,7 +432,7 @@ class TextLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
         this.value.onlyBetweenLines);
     }
   }
-
+ 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -894,7 +908,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
   radius: number | string;
   angle?: number | string;
   direction?: GradientDirection;
-  colors: Array<any>;
+  colors: Array<[ ResourceColor, number ]>;
   repeating?: boolean;
   color: ResourceColor;
 }> {
@@ -903,7 +917,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
     radius: number | string;
     angle?: number | string;
     direction?: GradientDirection;
-    colors: Array<any>;
+    colors: Array<[ ResourceColor, number ]>;
     repeating?: boolean;
     color: ResourceColor;
   }) {
@@ -915,8 +929,13 @@ class TextShaderStyleModifier extends ModifierWithKey<{
       getUINativeModule().text.resetShaderStyle(node, this.value);
     }
     else {
-      getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
-        this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      if (this.value.options) {
+        getUINativeModule().text.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
     }
   }
   checkObjectDiff(): boolean {
@@ -1012,6 +1031,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   textAlign(value: TextAlign): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
+    return this;
+  }
+  textContentAlign(value: TextContentAlign): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextContentAlignModifier.identity, TextContentAlignModifier, value);
     return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {
@@ -1132,7 +1155,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
-  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
     return this;
@@ -1170,7 +1193,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     radius: number | string;
     angle?: number | string;
     direction?: GradientDirection;
-    colors: Array<any>;
+    colors: Array<[ ResourceColor, number ]>;
     repeating?: boolean;
   }): this {
     modifierWithKey(this._modifiersWithKeys, TextShaderStyleModifier.identity, TextShaderStyleModifier, value);

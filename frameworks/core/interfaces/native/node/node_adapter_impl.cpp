@@ -476,11 +476,22 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
     return builder->GetHostHandle();
 }
 
-ArkUI_CharPtr GetNodeTypeInNodeAdapter(ArkUINodeHandle node)
+ArkUI_CharPtr GetNodeTypeInNodeAdapter(ArkUINodeAdapterHandle handle)
 {
-    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, "");
-    return currentNode->GetTag().c_str();
+    CHECK_NULL_RETURN(handle, "");
+    CHECK_NULL_RETURN(handle->node, "");
+    static std::string nodeType = handle->node->GetTag();
+    return nodeType.c_str();
+}
+
+void FireArkUIObjectLifecycleCallback(void* data, ArkUINodeAdapterHandle handle)
+{
+    CHECK_NULL_VOID(data);
+    CHECK_NULL_VOID(handle);
+    CHECK_NULL_VOID(handle->node);
+    auto context = handle->node->GetContext();
+    CHECK_NULL_VOID(context);
+    context->FireArkUIObjectLifecycleCallback(data);
 }
 } // namespace
 
@@ -504,6 +515,7 @@ const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
         .detachHostNode = DetachHostNode,
         .getNodeAdapter = GetNodeAdapter,
         .getNodeType = GetNodeTypeInNodeAdapter,
+        .fireArkUIObjectLifecycleCallback = FireArkUIObjectLifecycleCallback
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

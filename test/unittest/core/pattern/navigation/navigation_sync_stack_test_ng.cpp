@@ -259,6 +259,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg004, TestSize.Level
     NavigationModelNG navigationModel;
     navigationModel.Create();
     auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(mockNavPathStack, nullptr);
     navigationModel.SetNavigationStack(mockNavPathStack);
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());

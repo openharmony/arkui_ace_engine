@@ -111,7 +111,7 @@ void FlexTestThreeNg::TearDownTestCase()
  * layoutweight, the 6 has 2 displayPriority and 1 layoutweight.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest004, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest004, TestSize.Level0)
 {
     auto columnFrameNode =
         FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -250,7 +250,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest004, TestSize.Level1)
  * texts with 20% width, and 4,5 has 1 layoutweight, the 6 has 2 displayPriority and 1 layoutweight.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest005, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest005, TestSize.Level0)
 {
     auto columnFrameNode =
         FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -396,7 +396,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest005, TestSize.Level1)
  * @tc.desc: Set three texts with different flexBasis, flexGrows, flexShrink.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level0)
 {
     auto columnFrameNode =
         FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -519,7 +519,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level1)
  * the latter 3 has 2 displayPriority with 20% width.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest018, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest018, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -613,7 +613,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest018, TestSize.Level1)
  * the latter 3 has 2 displayPriority with 20% width.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest019, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest019, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -697,7 +697,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest019, TestSize.Level1)
  * the latter 3 has 2 displayPriority with 20 height.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest007, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest007, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -780,7 +780,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest007, TestSize.Level1)
  * @tc.desc: Set one child in Row direction and no constraint
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest020, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest020, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -837,7 +837,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest020, TestSize.Level1)
  * @tc.desc: Set one child in RowReverse direction and no constraint
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest021, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest021, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -894,7 +894,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest021, TestSize.Level1)
  * @tc.desc: Set no child in Row direction and no constraint
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest022, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest022, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -935,7 +935,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest022, TestSize.Level1)
  * @tc.desc: Set one child in Column direction and no constraint
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest008, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest008, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -992,7 +992,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest008, TestSize.Level1)
  * @tc.desc: Set two children and first child to be visible gone
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest011, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest011, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -1091,7 +1091,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest011, TestSize.Level1)
  * @tc.desc: Set flex has a flex child and a blank children and second child has layout weight 1
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest012, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest012, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
     for (int32_t i = 0; i < platformVersions.size(); i++) {
@@ -1184,7 +1184,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest012, TestSize.Level1)
  * @tc.desc: Set two children parent has padding, first child has layout weight
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest013, TestSize.Level1)
+HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest013, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);

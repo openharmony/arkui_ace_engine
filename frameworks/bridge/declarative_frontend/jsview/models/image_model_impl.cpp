@@ -117,7 +117,7 @@ void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
     image->SetSvgAnimatorFinishEvent(onFinishEvent);
 }
 
-void ImageModelImpl::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixmap)
+void ImageModelImpl::Create(ImageInfoConfig& imageInfoConfig)
 {
     RefPtr<ImageComponent> image =
         AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(imageInfoConfig.src ? *imageInfoConfig.src : "");
@@ -127,12 +127,12 @@ void ImageModelImpl::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<Pixel
     ViewStackProcessor::GetInstance()->Push(image);
     JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
-    if (!pixmap) {
+    if (!imageInfoConfig.pixelMap) {
         return;
     }
 
 #if defined(PIXEL_MAP_SUPPORTED)
-    image->SetPixmap(pixmap);
+    image->SetPixmap(imageInfoConfig.pixelMap);
 #endif
 }
 

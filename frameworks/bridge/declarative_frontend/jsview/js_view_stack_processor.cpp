@@ -87,11 +87,11 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("moveDeletedElmtIds", &JSViewStackProcessor::JsMoveDeletedElmtIds);
     JSClass<JSViewStackProcessor>::StaticMethod(
         "scheduleUpdateOnNextVSync", &JSViewStackProcessor::JSScheduleUpdateOnNextVSync);
-    JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
     JSClass<JSViewStackProcessor>::StaticMethod("PushPrebuildCompCmd",
         &JSViewStackProcessor::JsPushPrebuildCompCmd, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("CheckIsPrebuildTimeout",
         &JSViewStackProcessor::JsCheckIsPrebuildTimeout, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
 #ifdef ACE_STATIC
     JSClass<JSViewStackProcessor>::StaticMethod("push", &JSViewStackProcessor::JsPush, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("pop", &JSViewStackProcessor::JsPop, opt);

@@ -25,7 +25,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT WaterFlowComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(WaterFlowComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(WaterFlowComposedElement, InspectorComposedElement);
 
 public:
     explicit WaterFlowComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

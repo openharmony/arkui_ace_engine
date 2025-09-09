@@ -450,7 +450,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -482,7 +482,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -775,7 +775,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -819,7 +819,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -871,7 +871,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
     /**
      * @tc.steps: step3. change parameter and call function.
      */
@@ -879,13 +879,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     spanItem3->unicode = 0;
     richEditorPattern->spans_.emplace_back(spanItem3);
     ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
     /**
      * @tc.steps: step4. change parameter and call function.
      */
     firstInfo.SetSpanIndex(1);
     ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
 }
 
 /**
@@ -1204,5 +1204,42 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.L
     keyEvent.pressedCodes.pop_back();
     richEditorPattern->UpdateShiftFlag(keyEvent);
     EXPECT_FALSE(richEditorPattern->shiftFlag_);
+}
+
+/**
+ * @tc.name: HandleDelKeyOnDragging
+ * @tc.desc: test the shortcut for deletion on dragging status
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleDelKeyOnDragging, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DEL;
+    keyEvent.action = KeyAction::DOWN;
+    richEditorPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+    richEditorPattern->status_ = Status::DRAGGING;
+    EXPECT_TRUE(richEditorPattern->IsShortCutBlocked());
+    richEditorPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
 } // namespace OHOS::Ace::NG

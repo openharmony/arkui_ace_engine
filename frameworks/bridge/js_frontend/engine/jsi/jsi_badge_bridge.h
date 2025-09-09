@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiBadgeBridge : public virtual AceType {
-    DECLARE_ACE_TYPE(JsiBadgeBridge, AceType)
+    DECLARE_ACE_TYPE(JsiBadgeBridge, AceType);
 public:
     void ParseBadgeConfig(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& valObject);
 

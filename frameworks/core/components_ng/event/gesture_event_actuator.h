@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
 
 class GestureEventActuator : public virtual AceType {
-    DECLARE_ACE_TYPE(GestureEventActuator, AceType)
+    DECLARE_ACE_TYPE(GestureEventActuator, AceType);
 public:
     GestureEventActuator() = default;
     ~GestureEventActuator() override = default;

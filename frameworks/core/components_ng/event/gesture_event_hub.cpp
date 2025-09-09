@@ -345,13 +345,12 @@ bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority
         }
         return !IsSystemRecognizerCollected(externalParallelRecognizer_[gestureGroupIndex]) &&
                IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
-    } else {
-        if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
-            return false;
-        }
-        return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
-               IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
     }
+    if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
+        return false;
+    }
+    return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
+            IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -388,7 +387,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         } else {
             responseLinkResult.emplace_back(recognizer);
         }
-
+        recognizer->SetNodeId(host->GetId());
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetCoordinateOffset(offset);
@@ -406,11 +405,13 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto parentRecognizer = recognizer->GetGestureGroup().Upgrade();
         if (priority == GesturePriority::Parallel) {
             checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
+                !IsDifferentFrameNodeCollected(current, host) &&
                 CheckLastInnerRecognizerCollected(priority, parallelIndex);
             ProcessParallelPriorityGesture(
                 offset, touchId, targetComponent, host, current, recognizers, parallelIndex, checkCurrentRecognizer);
         } else {
             checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
+                !IsDifferentFrameNodeCollected(current, host) &&
                 CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
             ProcessExternalExclusiveRecognizer(offset, touchId, targetComponent,
                 host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);
@@ -631,7 +632,7 @@ void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
     }
 }
 
-void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+void GestureEventHub::SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent)
 {
     CheckClickActuator();
     if (parallelCombineClick) {
@@ -761,7 +762,7 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
         CHECK_NULL_VOID(gestureHub);
         auto node = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(node);
-        node->OnAccessibilityEvent(eventType);
+        node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     };
     return callback;
 }
@@ -848,7 +849,8 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
     if (clickRecognizer) {
         click = clickRecognizer->GetTapActionFunc();
         click(info);
-        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
         return true;
     }
     return false;
@@ -918,6 +920,7 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     GestureEvent info;
     info.SetSourceDevice(event.sourceType);
     info.SetTimeStamp(event.timeStamp);
+    info.SetDeviceId(event.deviceId);
     EventTarget target;
     target.id = host->GetInspectorId().value_or("").c_str();
     target.type = host->GetTag();
@@ -1037,6 +1040,22 @@ bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
            frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
+}
+
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     responseRegion_ = responseRegion;
@@ -1062,22 +1081,6 @@ void GestureEventHub::RemoveLastResponseRect()
     if (responseRegionFunc_) {
         responseRegionFunc_(responseRegion_);
     }
-}
-
-void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
-{
-    if (!touchEventActuator_) {
-        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-    }
-    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
-}
-
-void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
-{
-    if (!touchEventActuator_) {
-        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-    }
-    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
 
 void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)

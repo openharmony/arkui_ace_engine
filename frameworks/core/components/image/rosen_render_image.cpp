@@ -112,15 +112,6 @@ void RosenRenderImage::InitializeCallbacks()
         if (info != renderImage->sourceInfo_) {
             return;
         }
-        auto context = renderImage->GetContext().Upgrade();
-        if (!context) {
-            return;
-        }
-        auto isDeclarative = context->GetIsDeclarative();
-        if (!isDeclarative && !renderImage->syncMode_ && renderImage->RetryLoading()) {
-            LOGI("retry loading. sourceInfo: %{private}s", renderImage->sourceInfo_.ToString().c_str());
-            return;
-        }
         renderImage->ImageObjFailed(errorMsg);
     };
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](

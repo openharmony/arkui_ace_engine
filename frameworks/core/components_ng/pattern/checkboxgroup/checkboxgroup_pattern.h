@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -61,7 +62,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         paintProperty->SetHost(host);
-        auto eventHub = host->GetOrCreateEventHub<EventHub>();
+        auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         if (!checkBoxGroupModifier_) {
@@ -76,6 +77,7 @@ public:
                 checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
             }
             checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
+            checkBoxGroupModifier_->SetUseContentModifier(UseContentModifier());
         }
         auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(checkBoxGroupModifier_);
         paintMethod->SetEnabled(enabled);
@@ -155,7 +157,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto checkBoxEventHub = host->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->PutExtAttr("group", group.c_str(), filter);
     }
@@ -163,6 +165,9 @@ public:
     void ResetUIStatus()
     {
         uiStatus_ = UIStatus::UNSELECTED;
+        if (UseContentModifier()) {
+            FireBuilder();
+        }
     }
 
     RefPtr<GroupManager> GetGroupManager();
@@ -177,14 +182,25 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
-    int32_t OnInjectionEvent(const std::string& command) override;
-    void ReportChangeEvent(bool selectStatus);
-    std::optional<bool> ParseSelectStatus(const std::string& command);
-
     bool IsEnableMatchParent() override
     {
         return true;
     }
+    void SetBuilderFunc(CheckBoxGroupMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+ 
+    void SetCheckBoxGroupSelect(bool value);
 
 private:
     void OnAttachToFrameNode() override;
@@ -219,6 +235,10 @@ private:
         CheckBoxStyle checkBoxGroupStyle);
     void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
     void InnerFocusPaintCircle(RoundRect& paintRect);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<CheckBoxGroupMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;
@@ -241,6 +261,7 @@ private:
     SizeF hotZoneSize_;
     bool initSelected_ = false;
     std::optional<std::string> currentNavId_ = std::nullopt;
+
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };
 } // namespace OHOS::Ace::NG

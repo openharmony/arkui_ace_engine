@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 class ImagePackerOhos : public ImagePacker {
-    DECLARE_ACE_TYPE(ImagePackerOhos, ImagePacker)
+    DECLARE_ACE_TYPE(ImagePackerOhos, ImagePacker);
 public:
     ImagePackerOhos();
 

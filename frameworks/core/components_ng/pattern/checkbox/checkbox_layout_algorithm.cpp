@@ -18,8 +18,23 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+PaddingPropertyF CheckBoxLayoutAlgorithm::GetBorderWidth(LayoutWrapper* layoutWrapper)
+{
+    PaddingPropertyF padding;
+    CHECK_NULL_RETURN(layoutWrapper, padding);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, padding);
+    auto borderWidth = layoutProperty->CreateBorder();
+    padding.left = borderWidth.leftDimen.value_or(0.0f);
+    padding.right = borderWidth.rightDimen.value_or(0.0f);
+    padding.top = borderWidth.topDimen.value_or(0.0f);
+    padding.bottom = borderWidth.bottomDimen.value_or(0.0f);
+    return padding;
+}
 
 std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -67,6 +82,8 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto width = defaultWidth_ - 2 * horizontalPadding_;
     auto height = defaultHeight_ - 2 * verticalPadding_;
     auto size = SizeF(width, height);
+    auto padding = GetBorderWidth(layoutWrapper);
+    MinusPaddingToSize(padding, size);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());
@@ -85,7 +102,8 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
         // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            child->GetGeometryNode()->SetFrameSize(SizeF());
+            child->GetGeometryNode()->Reset();
+            child->GetGeometryNode()->SetContentSize(SizeF());
         }
         PerformMeasureSelf(layoutWrapper);
     }  else if (pattern->UseContentModifier()) {
@@ -93,6 +111,7 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         std::list<RefPtr<LayoutWrapper>> list;
         for (const auto& child : childList) {
             if (pattern->GetContentModifierNode()->GetId() != child->GetHostNode()->GetId()) {
+                child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
                 auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -146,7 +165,8 @@ void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = GetBorderWidth(layoutWrapper);
+    MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);

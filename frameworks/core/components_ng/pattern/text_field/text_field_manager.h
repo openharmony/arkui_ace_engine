@@ -53,6 +53,7 @@ public:
     ~TextFieldManagerNG() override;
 
     void SetClickPosition(const Offset& position) override;
+
     const Offset& GetClickPosition() override
     {
         return position_;
@@ -146,11 +147,6 @@ public:
     void UpdatePrevHasTextFieldPattern()
     {
         prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
-    }
-
-    bool HasKeyboard() const override
-    {
-        return imeShow_ || uiExtensionImeShow_;
     }
 
     void AvoidKeyBoardInNavigation();
@@ -249,6 +245,16 @@ public:
     {
         return clickPositionOffset_;
     }
+    
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
+
+    void RemoveAvoidKeyboardCallback(int32_t id)
+    {
+        avoidCustomKeyboardCallbacks_.erase(id);
+        avoidSystemKeyboardCallbacks_.erase(id);
+    }
+
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
@@ -276,16 +282,6 @@ public:
         return isImeAttached_;
     }
 
-    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
-
-    void RemoveAvoidKeyboardCallback(int32_t id)
-    {
-        avoidCustomKeyboardCallbacks_.erase(id);
-        avoidSystemKeyboardCallbacks_.erase(id);
-    }
-
-    void OnAfterAvoidKeyboard(bool isCustomKeyboard);
-
     int32_t GetContextTriggerAvoidTaskOrientation() const
     {
         return contextTriggerAvoidTaskOrientation_;
@@ -299,6 +295,16 @@ public:
     bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject);
     FillContentMap GetFillContentMap(int32_t id);
     void RemoveFillContentMap(int32_t id);
+
+    int32_t GetAttachInputId() const
+    {
+        return attachInputId_;
+    }
+
+    void SetAttachInputId(int32_t attachInputId)
+    {
+        attachInputId_ = attachInputId;
+    }
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
@@ -338,6 +344,7 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
     std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
+    int32_t attachInputId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

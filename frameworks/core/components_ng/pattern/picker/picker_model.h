@@ -26,18 +26,18 @@
 namespace OHOS::Ace {
 using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;
 struct PickerDialogInfo {
-    bool isLunar;
+    bool isLunar = false;
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
     PickerTime parseStartTime;
     PickerTime parseEndTime;
     PickerTime pickerTime;
-    bool isUseMilitaryTime;
-    bool isSelectedTime;
-    bool isStartDate;
-    bool isEndDate;
-    bool isSelectedDate;
+    bool isUseMilitaryTime = false;
+    bool isSelectedTime = false;
+    bool isStartDate = false;
+    bool isEndDate = false;
+    bool isSelectedDate = false;
     bool enableHoverMode = false;
     bool isEnableCascade = false;
     std::optional<DialogAlignment> alignment;

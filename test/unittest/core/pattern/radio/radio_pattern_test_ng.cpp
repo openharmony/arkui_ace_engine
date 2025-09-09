@@ -514,7 +514,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest056, TestSize.Level1)
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -536,7 +536,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest057, TestSize.Level1)
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -559,7 +559,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest058, TestSize.Level1)
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -582,7 +582,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest059, TestSize.Level1)
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -605,7 +605,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest060, TestSize.Level1)
     radioModelNG.SetChecked(false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1398,7 +1398,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest094, TestSize.Level1)
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1420,7 +1420,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest095, TestSize.Level1)
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1443,7 +1443,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest096, TestSize.Level1)
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1466,7 +1466,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest097, TestSize.Level1)
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1489,7 +1489,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest098, TestSize.Level1)
     radioModelNG.SetChecked(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1898,7 +1898,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest116, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto status = eventHub->IsEnabled();
@@ -1931,7 +1931,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest117, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto status = eventHub->IsEnabled();
@@ -2183,6 +2183,40 @@ HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate, TestSize.Level1)
     paintProperty->UpdateRadioIndicatorColorSetByUser(false);
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(paintProperty->GetRadioIndicatorColorValue(), Color::BLACK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern->SetUncheckedBorderColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    pattern->SetIndicatorColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), radioTheme->GetUnCheckBorderColor());
     g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

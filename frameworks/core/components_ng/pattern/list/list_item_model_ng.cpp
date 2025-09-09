@@ -106,7 +106,7 @@ void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
-    ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, node);
 }
 
 void ListItemModelNG::SetSticky(V2::StickyMode stickyMode)
@@ -135,7 +135,7 @@ void ListItemModelNG::SetSelected(bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -144,7 +144,7 @@ void ListItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -153,7 +153,7 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -172,7 +172,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -186,7 +186,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetStartNode(startNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         RefPtr<NG::UINode> endNode;
         if (builderAction) {
@@ -197,7 +197,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetEndNode(endNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
 }
 
@@ -225,7 +225,7 @@ void ListItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -243,7 +243,7 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -281,9 +281,15 @@ void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()
 void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
+}
+
+void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
 }
 
 void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
@@ -294,7 +300,7 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -302,19 +308,13 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         pattern->SetStartNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         pattern->SetEndNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
-}
-
-void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
 }
 
 void ListItemModelNG::SetStyle(FrameNode* frameNode, V2::ListItemStyle style)
@@ -359,5 +359,21 @@ void ListItemModelNG::ParseResObjEndArea(const RefPtr<ResourceObject>& resObj)
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, result, frameNode);
     };
     pattern->AddResObj("listItem.EndDeleteAreaDistance", resObj, std::move(updateFunc));
+}
+
+void ListItemModelNG::ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->ExpandSwipeAction(direction);
+}
+
+void ListItemModelNG::CollapseSwipeAction(const NG::FrameNode* listItem)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->CloseSwipeAction(nullptr);
 }
 } // namespace OHOS::Ace::NG

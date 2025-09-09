@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
@@ -46,10 +47,19 @@ constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 void ListItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread() by multi thread;
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
         SetListItemDefaultAttributes(host);
     }
+}
+
+void ListItemPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread() by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ListItemPattern::OnColorConfigurationUpdate()
@@ -96,7 +106,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_RETURN(listItemEventHub, nullptr);
     if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
         !listItemEventHub->GetEndOnDelete()) {
@@ -112,6 +122,9 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     if (swipeActionState_ == SwipeActionState::ACTIONING && !isSpringMotionRunning_) {
         layoutAlgorithm->SetCanUpdateCurOffset();
         layoutAlgorithm->SetItemChildCrossSize(GetContentSize().CrossSize(axis_));
+    }
+    if (expandSwipeAction_) {
+        layoutAlgorithm->SetExpandSwipeAction(expandSwipeAction_.value());
     }
     return layoutAlgorithm;
 }
@@ -131,8 +144,12 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     startNodeSize_ = layoutAlgorithm->GetStartNodeSize();
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
+    } else if (expandSwipeAction_ && host->IsActive()) {
+        ExpandSwipeActionWithAnimate(expandSwipeAction_.value());
     } else if (layoutAlgorithm->GetCurOffsetUpdated()) {
         float newOffset = layoutAlgorithm->GetCurOffset();
         FireSwipeActionOffsetChange(curOffset_, newOffset);
@@ -142,6 +159,7 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         pendingSwipeFunc_();
         pendingSwipeFunc_ = nullptr;
     }
+    expandSwipeAction_.reset();
     return false;
 }
 
@@ -306,7 +324,7 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     listItemEventHub->SetOnOffsetChangeOffset(std::move(offsetChangeCallback));
 }
@@ -317,11 +335,58 @@ void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
     ResetSwipeStatus(true);
 }
 
+void ListItemPattern::ExpandSwipeAction(ListItemSwipeActionDirection direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_EQUAL_VOID(host->IsOnMainTree(), false);
+    CHECK_EQUAL_VOID(host->IsActive(), false);
+    auto targetIndex = direction == ListItemSwipeActionDirection::START ? ListItemSwipeIndex::SWIPER_END
+                                                                        : ListItemSwipeIndex::SWIPER_START;
+    CHECK_EQUAL_VOID(targetIndex, swiperIndex_);
+    auto nodeIndex = direction == ListItemSwipeActionDirection::START ? endNodeIndex_ : startNodeIndex_;
+    CHECK_EQUAL_VOID(nodeIndex, -1);
+    auto targetSize = targetIndex == ListItemSwipeIndex::SWIPER_START ? startNodeSize_ : -endNodeSize_;
+    if (!NearZero(targetSize)) {
+        ExpandSwipeActionWithAnimate(targetIndex);
+        return;
+    }
+    expandSwipeAction_ = std::make_optional<ListItemSwipeIndex>(targetIndex);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ListItemPattern::ExpandSwipeActionWithAnimate(ListItemSwipeIndex index)
+{
+    float offset = index == ListItemSwipeIndex::SWIPER_START ? startNodeSize_ : -endNodeSize_;
+    auto listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    listPattern->StopAnimate();
+    auto oldSwiperItem = listPattern->GetSwiperItem().Upgrade();
+    if (oldSwiperItem && oldSwiperItem->GetSwipeActionState() == SwipeActionState::EXPANDED) {
+        oldSwiperItem->CloseSwipeAction(nullptr);
+    }
+    FireSwipeActionStateChange(index);
+    float velocity = 0.0f;
+    if (springMotion_) {
+        velocity = springMotion_->GetCurrentVelocity();
+    }
+    if (springController_ && !springController_->IsStopped()) {
+        // clear stop listener before stop
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
+    StartSpringMotion(curOffset_, offset, velocity, true);
+    listPattern->SetSwiperItem(AceType::WeakClaim(this));
+    listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+}
+
 void ListItemPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     InitOnFocusEvent();
     Pattern::OnModifyDone();
@@ -368,7 +433,7 @@ void ListItemPattern::ChangeAxis(Axis axis)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     axis_ = axis;
     if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
@@ -440,7 +505,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
     if (isPanInit || axisChanged) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -518,7 +583,7 @@ void ListItemPattern::ChangeDeleteAreaStage()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto enterStartDeleteArea = listItemEventHub->GetOnEnterStartDeleteArea();
     auto enterEndDeleteArea = listItemEventHub->GetOnEnterEndDeleteArea();
@@ -564,7 +629,7 @@ void ListItemPattern::UpdatePostion(float delta)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto offset = curOffset_;
     IsRTLAndVertical() ? curOffset_ -= delta : curOffset_ += delta;
@@ -729,7 +794,7 @@ void ListItemPattern::FireSwipeActionOffsetChange(float oldOffset, float newOffs
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     listItemEventHub->FireOffsetChangeEvent(Dimension(newOffset).ConvertToVp());
 }
@@ -744,7 +809,7 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
         return;
     }
     auto oldState = swipeActionState_;
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
     bool trigStart = GreatNotEqual(curOffset_, 0.0f);
@@ -815,7 +880,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
@@ -921,7 +986,7 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
-        auto eventHub = GetOrCreateEventHub<ListItemEventHub>();
+        auto eventHub = GetEventHub<ListItemEventHub>();
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1083,7 +1148,7 @@ Color ListItemPattern::GetBlendGgColor()
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_RETURN(theme, color);
     if (isSelected_) {
-        auto eventHub = GetOrCreateEventHub<ListItemEventHub>();
+        auto eventHub = GetEventHub<ListItemEventHub>();
         CHECK_NULL_RETURN(eventHub, color);
         if (!eventHub->HasStateStyle(UI_STATE_SELECTED)) {
             color = theme->GetItemSelectedColor();
@@ -1104,7 +1169,7 @@ void ListItemPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1172,7 +1237,7 @@ void ListItemPattern::InitDisableEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

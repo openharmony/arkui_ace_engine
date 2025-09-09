@@ -112,18 +112,17 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
-                option.GetDuration());
+                "keyframe inf iteration. dur:%{public}d", option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "%{public}s iteration is infinite. duration:%{public}d, curve:%{public}s",
+                "%{public}s inf iteration. dur:%{public}d, curve:%{public}s",
                 animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
         }
         return;
     }
     if (cnt) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
-            animationInterfaceName, option.ToString().c_str(), cnt.value());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, %{public}s, cnt:%{public}d",
+            animationInterfaceName, option.ToSimpleString().c_str(), cnt.value());
     }
 }
 
@@ -174,7 +173,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId,
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, tokenOut,
         multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
@@ -186,7 +186,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
             return;
         }
         context->PrepareCloseImplicitAnimation();
-        if (multiInstanceEnabled) {
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
             AnimationUtils::CloseImplicitAnimation(context);
         }
     });
@@ -206,7 +207,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
         if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
             TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
-                animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
+                animationInterfaceName, option.ToSimpleString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
             break;
         }
@@ -236,7 +237,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             "param is [option:%{public}s]", option.ToString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainersOrderly([triggerId, &option,
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, &option, tokenOut,
         multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
@@ -248,7 +250,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             return;
         }
         context->PrepareOpenImplicitAnimation();
-        if (multiInstanceEnabled) {
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
             AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
         }
     });
@@ -795,7 +798,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         if (usingSharedRuntime) {
             if (GetAnyContextIsLayouting(pipelineContext)) {
-                TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                TAG_LOGD(AceLogTag::ACE_ANIMATION,
                     "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(

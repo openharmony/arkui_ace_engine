@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,10 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, ColorBlock, SliderBlock, useEnabled, useEnabledNumber } from 'common';
-import {
-  FoldSplitContainer,
-  PresetSplitRatio,
-  ExtraRegionPosition,
-  matrix4,
-  LengthMetrics,
+import { FoldSplitContainer, PresetSplitRatio, ExtraRegionPosition, matrix4, LengthMetrics,
   ColorMetrics,
-  promptAction
-} from '@kit.ArkUI';
+  promptAction,
+  curves} from '@kit.ArkUI';
 import { pointer } from '@kit.InputKit';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
@@ -492,8 +487,15 @@ export struct FoldSplitContainerBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
+
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -506,7 +508,7 @@ export struct FoldSplitContainerBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time, value)
+      new BlockTag(time,value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -534,6 +536,9 @@ export struct FoldSplitContainerBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -659,527 +664,527 @@ export struct FoldSplitContainerBootcamp {
             )
           }
         },
-      })
-        .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-        .direction(useEnabled(this.enableCompDirection, this.compDirection))
-        .width(useEnabled(this.enableCompWidth, this.compWidth))
-        .height(useEnabled(this.enableCompHeight, this.compHeight))
-        .padding(useEnabled(this.enableCompPadding, this.compPadding))
-        .margin(useEnabled(this.enableCompMargin, this.compMargin))
-        .constraintSize({
-          maxWidth: useEnabled(this.enableCompConstraintSizeMaxWidth, this.compConstraintSizeMaxWidth),
-          maxHeight: useEnabled(this.enableCompConstraintSizeMaxHeight, this.compConstraintSizeMaxHeight),
-          minWidth: useEnabled(this.enableCompConstraintSizeMinWidth, this.compConstraintSizeMinWidth),
-          minHeight: useEnabled(this.enableCompConstraintSizeMinHeight, this.compConstraintSizeMinHeight)
-        })
-        .position(this.enableCompPosition ? {
-          top: useEnabled(this.enableCompPositionTop, this.compPositionTop),
-          bottom: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
-          left: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
-          right: useEnabled(this.enableCompPositionBottom, this.compPositionBottom)
-        } : {})
-        .markAnchor(this.enableCompMarkAnchor ? {
-          x: useEnabled(this.enableCompMarkAnchorX, this.compMarkAnchorX),
-          y: useEnabled(this.enableCompMarkAnchorY, this.compMarkAnchorY)
-        } : {})
-        .offset({
-          x: useEnabled(this.enableCompOffsetX, this.compOffsetX),
-          y: useEnabled(this.enableCompOffsetY, this.compOffsetY)
-        })
-        .aspectRatio(useEnabled(this.enableCompAspectRatio, this.compAspectRatio))
-        .pixelRound(this.enableCompPixelRound ? {
-          start: useEnabled(this.enableCompPixelRoundStart, this.compPixelRoundStart),
-          end: useEnabled(this.enableCompPixelRoundEnd, this.compPixelRoundEnd),
-          bottom: useEnabled(this.enableCompPixelRoundBottom, this.compPixelRoundBottom),
-          top: useEnabled(this.enableCompPixelRoundTop, this.compPixelRoundTop)
-        } : {})
-        .border({
-          width: useEnabled(this.enableCompBorderWidth, this.compBorderWidth),
-          color: useEnabled(this.enableCompBorderColor, this.compBorderColor),
-          radius: useEnabled(this.enableCompBorderRadius, this.compBorderRadius),
-          style: useEnabled(this.enableCompBorderStyle, this.compBorderStyle),
-          dashGap: {
-            left: useEnabled(this.enableCompBorderDashGapLeft, this.compBorderDashGapLeft),
-            right: useEnabled(this.enableCompBorderDashGapRight, this.compBorderDashGapRight),
-            top: useEnabled(this.enableCompBorderDashGapTop, this.compBorderDashGapTop),
-            bottom: useEnabled(this.enableCompBorderDashGapBottom, this.compBorderDashGapBottom)
-          },
-          dashWidth: {
-            left: useEnabled(this.enableCompBorderDashWidthLeft, this.compBorderDashWidthLeft),
-            right: useEnabled(this.enableCompBorderDashWidthRight, this.compBorderDashWidthRight),
-            top: useEnabled(this.enableCompBorderDashWidthTop, this.compBorderDashWidthTop),
-            bottom: useEnabled(this.enableCompBorderDashWidthBottom, this.compBorderDashWidthBottom)
-          }
-        })
-        .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
-        .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
-        .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
-        .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
-        .borderImage(this.enableCompBorderImage ? {
-          source: this.enableCompBorderImageSource ? $r('app.media.startIcon') : '',
-          slice: this.enableCompBorderImageSlice ? {
-            top: useEnabled(this.enableCompBorderImageSliceTop, this.compBorderImageSliceTop),
-            bottom: useEnabled(this.enableCompBorderImageSliceBottom, this.compBorderImageSliceBottom),
-            left: useEnabled(this.enableCompBorderImageSliceLeft, this.compBorderImageSliceLeft),
-            right: useEnabled(this.enableCompBorderImageSliceRight, this.compBorderImageSliceRight)
-          } : 0,
-          width: this.enableCompBorderImageWidth ? {
-            top: useEnabled(this.enableCompBorderImageWidthTop, this.compBorderImageWidthTop),
-            bottom: useEnabled(this.enableCompBorderImageWidthBottom, this.compBorderImageWidthBottom),
-            left: useEnabled(this.enableCompBorderImageWidthLeft, this.compBorderImageWidthLeft),
-            right: useEnabled(this.enableCompBorderImageWidthRight, this.compBorderImageWidthRight)
-          } : 0,
-          outset: this.enableCompBorderImageOutset ? {
-            top: useEnabled(this.enableCompBorderImageOutsetTop, this.compBorderImageOutsetTop),
-            bottom: useEnabled(this.enableCompBorderImageOutsetBottom, this.compBorderImageOutsetBottom),
-            left: useEnabled(this.enableCompBorderImageOutsetLeft, this.compBorderImageOutsetLeft),
-            right: useEnabled(this.enableCompBorderImageOutsetRight, this.compBorderImageOutsetRight)
-          } : 0,
-          repeat: useEnabled(this.enableCompBorderImageRepeat, this.compBorderImageRepeat),
-          fill: useEnabled(this.enableCompBorderImageFill, this.compBorderImageFill)
-        } : {})
-        .background(this.enableCompBackgroundAlign ? this.compBackground() : null,
-          this.enableCompBackgroundAlign ? {
-            align: useEnabled(this.enableCompBackgroundAlign, this.compBackgroundAlign)
-          }
-            : {}
-        )
-        .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
-        .backgroundImage(this.enableCompBackgroundImageSrc ? $r('app.media.app_icon') : '',
-          useEnabled(this.enableCompBackgroundImageRepeat, this.compBackgroundImageRepeat))
-        .backgroundImageSize(useEnabled(this.enableCompBackgroundImageSize, this.compBackgroundImageSize))
-        .backgroundImagePosition({
-          x: useEnabled(this.enableCompBackgroundImagePositionX, this.compBackgroundImagePositionX),
-          y: useEnabled(this.enableCompBackgroundImagePositionY, this.compBackgroundImagePositionY)
-        })
-        .backgroundBlurStyle(useEnabled(this.enableCompBackgroundBlurStyle, this.compBackgroundBlurStyle),
-          this.enableCompBackgroundBlurStyleParams ? {
-            colorMode: useEnabled(
-              this.enableCompBackgroundBlurStyleParamsColorMode,
-              this.compBackgroundBlurStyleParamsColorMode
-            ),
-            adaptiveColor: useEnabled(
-              this.enableCompBackgroundBlurStyleParamsAdaptiveColor,
-              this.compBackgroundBlurStyleParamsAdaptiveColor
-            ),
-            scale: useEnabled(
-              this.enableCompBackgroundBlurStyleParamsScale,
-              this.compBackgroundBlurStyleParamsScale
-            ),
-            blurOptions: {
-              grayscale: [
-                useEnabled(
-                  this.enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
-                  this.compBackgroundBlurStyleParamsBlurOptionsLeft
-                ),
-                useEnabled(
-                  this.enableCompBackgroundBlurStyleParamsBlurOptionsRight,
-                  this.compBackgroundBlurStyleParamsBlurOptionsRight
-                )
-              ]
-            }
-          } : null)
-        .backdropBlur(useEnabled(
-          this.enableCompBackdropBlur,
-          this.compBackdropBlur
-        ), {
-          grayscale:
-          this.enableCompBackdropBlurGrayscale ? [
-            useEnabled(
-              this.enableCompBackdropBlurGrayscaleLeft,
-              this.compBackdropBlurGrayscaleLeft
-            ),
-            useEnabled(
-              this.enableCompBackdropBlurGrayscaleRight,
-              this.compBackdropBlurGrayscaleRight
-            )
-          ] : [0, 0]
-        })
-        .backgroundEffect({
-          radius: useEnabled(
-            this.enableCompBackgroundEffectRadius,
-            this.compBackgroundEffectRadius
-          ),
-          saturation: useEnabled(
-            this.enableCompBackgroundEffectSaturation,
-            this.compBackgroundEffectSaturation
-          ),
-          brightness: useEnabled(
-            this.enableCompBackgroundEffectBrightness,
-            this.compBackgroundEffectBrightness
-          ),
-          color: useEnabled(
-            this.enableCompBackgroundEffectColor,
-            this.compBackgroundEffectColor
-          ),
-          adaptiveColor: useEnabled(
-            this.enableCompBackgroundEffectAdaptiveColor,
-            this.compBackgroundEffectAdaptiveColor
-          ),
-          blurOptions: {
-            grayscale: [
-              useEnabled(
-                this.enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
-                this.compBackgroundEffectBlurOptionsGrayscaleLeft
-              ),
-              useEnabled(
-                this.enableCompBackgroundEffectBlurOptionsGrayscaleRight,
-                this.compBackgroundEffectBlurOptionsGrayscaleRight
-              )
-            ]
-          }
-        })
-        .backgroundImageResizable({
-          slice: {
-            top: useEnabled(
-              this.enableCompBackgroundImageResizableSliceTop,
-              this.compBackgroundImageResizableSliceTop
-            ),
-            bottom: useEnabled(
-              this.enableCompBackgroundImageResizableSliceBottom,
-              this.compBackgroundImageResizableSliceBottom
-            ),
-            left: useEnabled(
-              this.enableCompBackgroundImageResizableSliceLeft,
-              this.compBackgroundImageResizableSliceLeft
-            ),
-            right: useEnabled(
-              this.enableCompBackgroundImageResizableSliceRight,
-              this.compBackgroundImageResizableSliceRight
-            )
-          },
-          lattice: {
-            xDivs: useEnabled(
-              this.enableCompBackgroundImageResizableLatticeXDivs,
-              this.compBackgroundImageResizableLatticeXDivs
-            ),
-            yDivs: useEnabled(
-              this.enableCompBackgroundImageResizableLatticeYDivs,
-              this.compBackgroundImageResizableLatticeYDivs
-            ),
-            fXCount: useEnabled(
-              this.enableCompBackgroundImageResizableLatticeFXCount,
-              this.compBackgroundImageResizableLatticeFXCount
-            ),
-            fYCount: useEnabled(
-              this.enableCompBackgroundImageResizableLatticeFYCount,
-              this.compBackgroundImageResizableLatticeFYCount
-            ),
-            fBounds: this.enableCompBackgroundImageResizableLatticeFBounds ? {
-              left: useEnabled(
-                this.enableCompBackgroundImageResizableLatticeFBoundsLeft,
-                this.compBackgroundImageResizableLatticeFBoundsLeft
-              ),
-              right: useEnabled(
-                this.enableCompBackgroundImageResizableLatticeFBoundsRight,
-                this.compBackgroundImageResizableLatticeFBoundsRight
-              ),
-              top: useEnabled(
-                this.enableCompBackgroundImageResizableLatticeFBoundsTop,
-                this.compBackgroundImageResizableLatticeFBoundsTop
-              ),
-              bottom: useEnabled(
-                this.enableCompBackgroundImageResizableLatticeFBoundsBottom,
-                this.compBackgroundImageResizableLatticeFBoundsBottom
-              ),
-            } as common2D.Rect : null,
-            fRectTypes: null,
-            fColors: useEnabled(
-              this.enableCompBackgroundImageResizableLatticeFColors,
-              this.compBackgroundImageResizableLatticeFColors
-            )
-          }
-        })
-        .opacity(useEnabled(
-          this.enableCompOpacity,
-          this.compOpacity
-        ))
-        .visibility(useEnabled(
-          this.enableCompVisibility,
-          this.compVisibility
-        ))
-        .enabled(useEnabled(
-          this.enableCompEnabled,
-          this.compEnabled
-        ))
-        .overlay(
-          useEnabled(this.enableCompOverlay, this.compOverlay),
-          this.enableCompOverlayOptions ? {
-            align: useEnabled(
-              this.enableCompOverlayOptionsAlign,
-              this.compOverlayOptionsAlign
-            ),
-            offset: {
-              x: useEnabled(
-                this.enableCompOverlayOptionsOffsetX,
-                this.compOverlayOptionsOffsetX
-              ),
-              y: useEnabled(
-                this.enableCompOverlayOptionsOffsetY,
-                this.compOverlayOptionsOffsetY
-              ),
-            }
-          } : {})
-        .zIndex(useEnabled(this.enableCompZIndex, this.compZIndex))
-        .rotate(this.enableCompRotate ? {
-          x: useEnabled(
-            this.enableCompRotateX,
-            this.compRotateX
-          ),
-          y: useEnabled(
-            this.enableCompRotateY,
-            this.compRotateY
-          ),
-          z: useEnabled(
-            this.enableCompRotateZ,
-            this.compRotateZ
-          ),
-          angle: useEnabled(
-            this.enableCompRotateAngle,
-            this.compRotateAngle
-          ),
-          centerX: useEnabled(
-            this.enableCompRotateCenterX,
-            this.compRotateCenterX
-          ),
-          centerY: useEnabled(
-            this.enableCompRotateCenterY,
-            this.compRotateCenterY
-          ),
-          centerZ: useEnabled(
-            this.enableCompRotateCenterZ,
-            this.compRotateCenterZ
-          ),
-          perspective: useEnabled(
-            this.enableCompRotatePerspective,
-            this.compRotatePerspective
-          )
-        } : {
-          angle: useEnabled(
-            this.enableCompRotateAngle,
-            this.compRotateAngle
-          )
-        })
-        .translate(this.enableCompTranslate ? {
-          x: useEnabled(
-            this.enableCompTranslateX,
-            this.compTranslateX
-          ),
-          y: useEnabled(
-            this.enableCompTranslateY,
-            this.compTranslateY
-          ),
-          z: useEnabled(
-            this.enableCompTranslateZ,
-            this.compTranslateZ
-          )
-        } : {})
-        .scale(this.enableCompScale ? {
-          x: useEnabled(
-            this.enableCompScaleX,
-            this.compScaleX
-          ),
-          y: useEnabled(
-            this.enableCompScaleY,
-            this.compScaleY
-          ),
-          z: useEnabled(
-            this.enableCompScaleZ,
-            this.compScaleZ
-          ),
-          centerX: useEnabled(
-            this.enableCompScaleCenterX,
-            this.compScaleCenterX
-          ),
-          centerY: useEnabled(
-            this.enableCompScaleCenterY,
-            this.compScaleCenterY
-          )
-        } : {})
-        .transform(this.enableCompTransform ?
-        matrix4.identity().rotate({ z: 1, angle: 90 }) :
-        matrix4.identity()
-        )
-        .clip(useEnabled(
-          this.enableCompClip,
-          this.compClip
-        ))
-        .mask(this.progress)
-        .blur(useEnabled(this.enableCompBlurValue, this.compBlurValue), {
-          grayscale: [
-            useEnabled(this.enableCompBlurOptionsNumber1, this.compBlurOptionsNumber1),
-            useEnabled(this.enableCompBlurOptionsNumber2, this.compBlurOptionsNumber2)
-          ]
-        })
-        .shadow({
-          radius: useEnabled(this.enableCompShadowValueRadius, this.compShadowValueRadius),
-          type: useEnabled(this.enableCompShadowValueType, this.compShadowValueType),
-          color: useEnabled(this.enableCompShadowValueColor, this.compShadowValueColor),
-          offsetX: useEnabled(this.enableCompShadowValueOffsetX, this.compShadowValueOffsetX),
-          offsetY: useEnabled(this.enableCompShadowValueOffsetY, this.compShadowValueOffsetY),
-          fill: useEnabled(this.enableCompShadowValueFill, this.compShadowValueFill)
-        })
-        .grayscale(useEnabled(this.enableCompGrayscale, this.compGrayscale))
-        .brightness(useEnabled(this.enableCompBrightness, this.compBrightness))
-        .saturate(useEnabled(this.enableCompSaturate, this.compSaturate))
-        .contrast(useEnabled(this.enableCompContrast, this.compContrast))
-        .invert(useEnabled(this.enableCompInvert, this.compInvert))
-        .sepia(useEnabled(this.enableCompSepia, this.compSepia))
-        .hueRotate(useEnabled(this.enableCompHueRotate, this.compHueRotate))
-        .colorBlend(useEnabled(this.enableCompColorBlend, this.compColorBlend))
-        .linearGradient({
-          angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
-          direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
-          colors: [
-            [
-              useEnabled(this.enableCompLinearGradientColors1, this.compLinearGradientColors1),
-              useEnabled(this.enableCompLinearGradientColorsNumber1, this.compLinearGradientColorsNumber1)
-            ],
-            [
-              useEnabled(this.enableCompLinearGradientColors2, this.compLinearGradientColors2),
-              useEnabled(this.enableCompLinearGradientColorsNumber2, this.compLinearGradientColorsNumber2)
-            ]
-          ],
-          repeating: useEnabled(this.enableCompLinearGradientRepeating, this.compLinearGradientRepeating),
-        })
-        .focusable(useEnabled(this.enableCompFocusable,
-          this.compFocusable))
-        .defaultFocus(useEnabled(this.enableCompDefaultFocus, this.compDefaultFocus))
-        .groupDefaultFocus(useEnabled(this.enableCompGroupDefaultFocus, this.compGroupDefaultFocus))
-        .focusOnTouch(useEnabled(this.enableCompFocusOnTouch, this.compFocusOnTouch))
-        .focusBox({
-          margin: useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin) ?
-          LengthMetrics.vp(useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin)) : null,
-          strokeColor: useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor) ?
-          ColorMetrics.resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
-            null,
-          strokeWidth: useEnabled(this.enableCompFocusBoxStrokeWidth, this.compFocusBoxStrokeWidth) ?
-          LengthMetrics.vp(useEnabled(this.enableCompFocusBoxStrokeWidth,
-            this.compFocusBoxStrokeWidth)) : null,
-        })
-        .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : null)
-        .focusScopePriority(
-          useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
-          useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
-        )
-        .focusScopeId(
-          useEnabled(this.enableCompFocusScopeId, this.compFocusScopeId),
-          useEnabled(this.enableCompFocusScopeIdIsGroup, this.compFocusScopeIdIsGroup)
-        )
-        .hoverEffect(useEnabled(this.enableCompHoverEffect, this.compHoverEffect))
-        .reuseId(useEnabled(this.enableCompReuseId, this.compReuseId)
-          ? useEnabled(this.enableCompReuseId, this.compReuseId) : null)
-        .restoreId(useEnabled(this.enableCompRestoreId, this.compRestoreId)
-          ? useEnabled(this.enableCompRestoreId, this.compRestoreId) : null)
-        .foregroundEffect({
-          radius: useEnabled(this.enableCompForegroundEffectRadius, this.compForegroundEffectRadius)
-        })
-        .foregroundBlurStyle(useEnabled(this.enableCompForegroundBlurStyleValue, this.compForegroundBlurStyleValue),
-          {
-            colorMode: useEnabled(this.enableCompForegroundBlurStyleOptionsColorMode,
-              this.compForegroundBlurStyleOptionsColorMode),
-            adaptiveColor: useEnabled(this.enableCompForegroundBlurStyleOptionsAdaptiveColor,
-              this.compForegroundBlurStyleOptionsAdaptiveColor),
-            blurOptions: {
-              grayscale: [0, useEnabled(this.enableCompForegroundBlurStyleOptionsBlurOptions,
-                this.compForegroundBlurStyleOptionsBlurOptions)]
-            },
-            scale: useEnabled(this.enableCompForegroundBlurStyleOptionsScale,
-              this.compForegroundBlurStyleOptionsScale)
-          })
-        .clickEffect(useEnabled(this.enableCompClickEffect, this.compClickEffect) ? {
-          level: useEnabled(this.enableCompClickEffectLevel, this.compClickEffectLevel),
-          scale: useEnabled(this.enableCompClickEffectScale, this.compClickEffectScale)
-        } : null)
-        .accessibilityGroup(useEnabled(this.enableCompAccessibilityGroup, this.compAccessibilityGroup))
-        .accessibilityText(useEnabled(this.enableCompAccessibilityText, this.compAccessibilityText))
-        .accessibilityDescription(useEnabled(this.enableCompAccessibilityDescription,
-          this.compAccessibilityDescription))
-        .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
-        .responseRegion({
-          x: useEnabled(this.enableCompResponseRegionValueX, this.compResponseRegionValueX),
-          y: useEnabled(this.enableCompResponseRegionValueY, this.compResponseRegionValueY),
-          width: useEnabled(this.enableCompResponseRegionValueWidth, this.compResponseRegionValueWidth),
-          height: useEnabled(this.enableCompResponseRegionValueHeight, this.compResponseRegionValueHeight)
-        })
-        .hitTestBehavior(useEnabled(this.enableCompHitTestBehavior, this.compHitTestBehavior))
-        .obscured(useEnabled(this.enableCompObscured, this.compObscured))
-        .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
-        .onHover((flag) => {
-          if (flag) {
-            this.getUIContext()
-              .getCursorController()
-              .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
-          } else {
-            this.getUIContext().getCursorController().restoreDefault()
-          }
-        })
-        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
-        .onClick((event?: ClickEvent) => {
-          this.compEventTriggeredLog('点击事件onClick触发');
-        })
-        .onTouch((event?: TouchEvent) => {
-          this.compEventTriggeredLog('触摸事件onTouch触发');
-        })
-        .onAttach(() => {
-          this.compEventTriggeredLog('挂载卸载事件onAttach触发');
-        })
-        .onDetach(() => {
-          this.compEventTriggeredLog('挂载卸载事件onDetach触发');
-        })
-        .onAppear(() => {
-          this.compEventTriggeredLog('挂载卸载事件onAppear触发');
-        })
-        .onDisAppear(() => {
-          this.compEventTriggeredLog('挂载卸载事件onDisAppear触发');
-        })
-        .onKeyEvent((event: KeyEvent) => {
-          this.compEventTriggeredLog('按键事件onKeyEvent触发');
-        })
-        .onFocus(() => {
-          this.compEventTriggeredLog('焦点事件onFocus触发');
-        })
-        .onBlur(() => {
-          this.compEventTriggeredLog('焦点事件onBlur触发');
-        })
-        .onMouse((event: MouseEvent) => {
-          this.compEventTriggeredLog('鼠标事件onMouse触发');
-        })
-        .onHover((isHover: boolean, event: HoverEvent) => {
-          this.compEventTriggeredLog('悬浮事件onHover触发');
-        })
-        .onAreaChange((oldValue: Area, newValue: Area) => {
-          this.compEventTriggeredLog('组件区域变化事件onAreaChange触发')
-        })
-        .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-          this.compEventTriggeredLog('组件尺寸变化事件onSizeChange触发')
-        })
-        .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
-          if (isVisible && currentRatio >= 1.0) {
-            this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全可见')
-          } else if (!isVisible && currentRatio <= 0.0) {
-            this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全不可见')
-          }
-        })
-        .keyboardShortcut('1', [ModifierKey.CTRL], () => {
-          this.compEventTriggeredLog('组件快捷键事件keyboardShortcut触发,Ctrl+1')
-        })
-        .onChildTouchTest((touchInfo: Array<TouchTestInfo>) => {
-          this.compEventTriggeredLog('自定义事件分发onChildTouchTest触发')
-          return { strategy: TouchTestStrategy.DEFAULT };
-        })
-        .onTouchIntercept((event: TouchEvent) => {
-          this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
-          return HitTestMode.Default;
-        })
+     })
+       .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+       .direction(useEnabled(this.enableCompDirection, this.compDirection))
+       .width(useEnabled(this.enableCompWidth, this.compWidth))
+       .height(useEnabled(this.enableCompHeight, this.compHeight))
+       .padding(useEnabled(this.enableCompPadding, this.compPadding))
+       .margin(useEnabled(this.enableCompMargin, this.compMargin))
+       .constraintSize({
+         maxWidth: useEnabled(this.enableCompConstraintSizeMaxWidth, this.compConstraintSizeMaxWidth),
+         maxHeight: useEnabled(this.enableCompConstraintSizeMaxHeight, this.compConstraintSizeMaxHeight),
+         minWidth: useEnabled(this.enableCompConstraintSizeMinWidth, this.compConstraintSizeMinWidth),
+         minHeight: useEnabled(this.enableCompConstraintSizeMinHeight, this.compConstraintSizeMinHeight)
+       })
+       .position(this.enableCompPosition ? {
+         top: useEnabled(this.enableCompPositionTop, this.compPositionTop),
+         bottom: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
+         left: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
+         right: useEnabled(this.enableCompPositionBottom, this.compPositionBottom)
+       } : {})
+       .markAnchor(this.enableCompMarkAnchor ? {
+         x: useEnabled(this.enableCompMarkAnchorX, this.compMarkAnchorX),
+         y: useEnabled(this.enableCompMarkAnchorY, this.compMarkAnchorY)
+       } : {})
+       .offset({
+         x: useEnabled(this.enableCompOffsetX, this.compOffsetX),
+         y: useEnabled(this.enableCompOffsetY, this.compOffsetY)
+       })
+       .aspectRatio(useEnabled(this.enableCompAspectRatio, this.compAspectRatio))
+       .pixelRound(this.enableCompPixelRound ? {
+         start: useEnabled(this.enableCompPixelRoundStart, this.compPixelRoundStart),
+         end: useEnabled(this.enableCompPixelRoundEnd, this.compPixelRoundEnd),
+         bottom: useEnabled(this.enableCompPixelRoundBottom, this.compPixelRoundBottom),
+         top: useEnabled(this.enableCompPixelRoundTop, this.compPixelRoundTop)
+       } : {})
+       .border({
+         width: useEnabled(this.enableCompBorderWidth, this.compBorderWidth),
+         color: useEnabled(this.enableCompBorderColor, this.compBorderColor),
+         radius: useEnabled(this.enableCompBorderRadius, this.compBorderRadius),
+         style: useEnabled(this.enableCompBorderStyle, this.compBorderStyle),
+         dashGap: {
+           left: useEnabled(this.enableCompBorderDashGapLeft, this.compBorderDashGapLeft),
+           right: useEnabled(this.enableCompBorderDashGapRight, this.compBorderDashGapRight),
+           top: useEnabled(this.enableCompBorderDashGapTop, this.compBorderDashGapTop),
+           bottom: useEnabled(this.enableCompBorderDashGapBottom, this.compBorderDashGapBottom)
+         },
+         dashWidth: {
+           left: useEnabled(this.enableCompBorderDashWidthLeft, this.compBorderDashWidthLeft),
+           right: useEnabled(this.enableCompBorderDashWidthRight, this.compBorderDashWidthRight),
+           top: useEnabled(this.enableCompBorderDashWidthTop, this.compBorderDashWidthTop),
+           bottom: useEnabled(this.enableCompBorderDashWidthBottom, this.compBorderDashWidthBottom)
+         }
+       })
+       .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+       .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+       .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+       .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+       .borderImage(this.enableCompBorderImage ? {
+         source: this.enableCompBorderImageSource ? $r('app.media.startIcon') : '',
+         slice: this.enableCompBorderImageSlice ? {
+           top: useEnabled(this.enableCompBorderImageSliceTop, this.compBorderImageSliceTop),
+           bottom: useEnabled(this.enableCompBorderImageSliceBottom, this.compBorderImageSliceBottom),
+           left: useEnabled(this.enableCompBorderImageSliceLeft, this.compBorderImageSliceLeft),
+           right: useEnabled(this.enableCompBorderImageSliceRight, this.compBorderImageSliceRight)
+         } : 0,
+         width: this.enableCompBorderImageWidth ? {
+           top: useEnabled(this.enableCompBorderImageWidthTop, this.compBorderImageWidthTop),
+           bottom: useEnabled(this.enableCompBorderImageWidthBottom, this.compBorderImageWidthBottom),
+           left: useEnabled(this.enableCompBorderImageWidthLeft, this.compBorderImageWidthLeft),
+           right: useEnabled(this.enableCompBorderImageWidthRight, this.compBorderImageWidthRight)
+         } : 0,
+         outset: this.enableCompBorderImageOutset ? {
+           top: useEnabled(this.enableCompBorderImageOutsetTop, this.compBorderImageOutsetTop),
+           bottom: useEnabled(this.enableCompBorderImageOutsetBottom, this.compBorderImageOutsetBottom),
+           left: useEnabled(this.enableCompBorderImageOutsetLeft, this.compBorderImageOutsetLeft),
+           right: useEnabled(this.enableCompBorderImageOutsetRight, this.compBorderImageOutsetRight)
+         } : 0,
+         repeat: useEnabled(this.enableCompBorderImageRepeat, this.compBorderImageRepeat),
+         fill: useEnabled(this.enableCompBorderImageFill, this.compBorderImageFill)
+       } : {})
+       .background(this.enableCompBackgroundAlign ? this.compBackground() : null,
+         this.enableCompBackgroundAlign ? {
+           align: useEnabled(this.enableCompBackgroundAlign, this.compBackgroundAlign)
+         }
+           : {}
+       )
+       .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+       .backgroundImage(this.enableCompBackgroundImageSrc ? $r('app.media.app_icon') : '',
+         useEnabled(this.enableCompBackgroundImageRepeat, this.compBackgroundImageRepeat))
+       .backgroundImageSize(useEnabled(this.enableCompBackgroundImageSize, this.compBackgroundImageSize))
+       .backgroundImagePosition({
+         x: useEnabled(this.enableCompBackgroundImagePositionX, this.compBackgroundImagePositionX),
+         y: useEnabled(this.enableCompBackgroundImagePositionY, this.compBackgroundImagePositionY)
+       })
+       .backgroundBlurStyle(useEnabled(this.enableCompBackgroundBlurStyle, this.compBackgroundBlurStyle),
+         this.enableCompBackgroundBlurStyleParams ? {
+           colorMode: useEnabled(
+             this.enableCompBackgroundBlurStyleParamsColorMode,
+             this.compBackgroundBlurStyleParamsColorMode
+           ),
+           adaptiveColor: useEnabled(
+             this.enableCompBackgroundBlurStyleParamsAdaptiveColor,
+             this.compBackgroundBlurStyleParamsAdaptiveColor
+           ),
+           scale: useEnabled(
+             this.enableCompBackgroundBlurStyleParamsScale,
+             this.compBackgroundBlurStyleParamsScale
+           ),
+           blurOptions: {
+             grayscale: [
+               useEnabled(
+                 this.enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+                 this.compBackgroundBlurStyleParamsBlurOptionsLeft
+               ),
+               useEnabled(
+                 this.enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+                 this.compBackgroundBlurStyleParamsBlurOptionsRight
+               )
+             ]
+           }
+         } : null)
+       .backdropBlur(useEnabled(
+         this.enableCompBackdropBlur,
+         this.compBackdropBlur
+       ), {
+         grayscale:
+         this.enableCompBackdropBlurGrayscale ? [
+           useEnabled(
+             this.enableCompBackdropBlurGrayscaleLeft,
+             this.compBackdropBlurGrayscaleLeft
+           ),
+           useEnabled(
+             this.enableCompBackdropBlurGrayscaleRight,
+             this.compBackdropBlurGrayscaleRight
+           )
+         ] : [0, 0]
+       })
+       .backgroundEffect({
+         radius: useEnabled(
+           this.enableCompBackgroundEffectRadius,
+           this.compBackgroundEffectRadius
+         ),
+         saturation: useEnabled(
+           this.enableCompBackgroundEffectSaturation,
+           this.compBackgroundEffectSaturation
+         ),
+         brightness: useEnabled(
+           this.enableCompBackgroundEffectBrightness,
+           this.compBackgroundEffectBrightness
+         ),
+         color: useEnabled(
+           this.enableCompBackgroundEffectColor,
+           this.compBackgroundEffectColor
+         ),
+         adaptiveColor: useEnabled(
+           this.enableCompBackgroundEffectAdaptiveColor,
+           this.compBackgroundEffectAdaptiveColor
+         ),
+         blurOptions: {
+           grayscale: [
+             useEnabled(
+               this.enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
+               this.compBackgroundEffectBlurOptionsGrayscaleLeft
+             ),
+             useEnabled(
+               this.enableCompBackgroundEffectBlurOptionsGrayscaleRight,
+               this.compBackgroundEffectBlurOptionsGrayscaleRight
+             )
+           ]
+         }
+       })
+       .backgroundImageResizable({
+         slice: {
+           top: useEnabled(
+             this.enableCompBackgroundImageResizableSliceTop,
+             this.compBackgroundImageResizableSliceTop
+           ),
+           bottom: useEnabled(
+             this.enableCompBackgroundImageResizableSliceBottom,
+             this.compBackgroundImageResizableSliceBottom
+           ),
+           left: useEnabled(
+             this.enableCompBackgroundImageResizableSliceLeft,
+             this.compBackgroundImageResizableSliceLeft
+           ),
+           right: useEnabled(
+             this.enableCompBackgroundImageResizableSliceRight,
+             this.compBackgroundImageResizableSliceRight
+           )
+         },
+         lattice: {
+           xDivs: useEnabled(
+             this.enableCompBackgroundImageResizableLatticeXDivs,
+             this.compBackgroundImageResizableLatticeXDivs
+           ),
+           yDivs: useEnabled(
+             this.enableCompBackgroundImageResizableLatticeYDivs,
+             this.compBackgroundImageResizableLatticeYDivs
+           ),
+           fXCount: useEnabled(
+             this.enableCompBackgroundImageResizableLatticeFXCount,
+             this.compBackgroundImageResizableLatticeFXCount
+           ),
+           fYCount: useEnabled(
+             this.enableCompBackgroundImageResizableLatticeFYCount,
+             this.compBackgroundImageResizableLatticeFYCount
+           ),
+           fBounds: this.enableCompBackgroundImageResizableLatticeFBounds ? {
+             left: useEnabled(
+               this.enableCompBackgroundImageResizableLatticeFBoundsLeft,
+               this.compBackgroundImageResizableLatticeFBoundsLeft
+             ),
+             right: useEnabled(
+               this.enableCompBackgroundImageResizableLatticeFBoundsRight,
+               this.compBackgroundImageResizableLatticeFBoundsRight
+             ),
+             top: useEnabled(
+               this.enableCompBackgroundImageResizableLatticeFBoundsTop,
+               this.compBackgroundImageResizableLatticeFBoundsTop
+             ),
+             bottom: useEnabled(
+               this.enableCompBackgroundImageResizableLatticeFBoundsBottom,
+               this.compBackgroundImageResizableLatticeFBoundsBottom
+             ),
+           } as common2D.Rect : null,
+           fRectTypes: null,
+           fColors: useEnabled(
+             this.enableCompBackgroundImageResizableLatticeFColors,
+             this.compBackgroundImageResizableLatticeFColors
+           )
+         }
+       })
+       .opacity(useEnabled(
+         this.enableCompOpacity,
+         this.compOpacity
+       ))
+       .visibility(useEnabled(
+         this.enableCompVisibility,
+         this.compVisibility
+       ))
+       .enabled(useEnabled(
+         this.enableCompEnabled,
+         this.compEnabled
+       ))
+       .overlay(
+         useEnabled(this.enableCompOverlay, this.compOverlay),
+         this.enableCompOverlayOptions ? {
+           align: useEnabled(
+             this.enableCompOverlayOptionsAlign,
+             this.compOverlayOptionsAlign
+           ),
+           offset: {
+             x: useEnabled(
+               this.enableCompOverlayOptionsOffsetX,
+               this.compOverlayOptionsOffsetX
+             ),
+             y: useEnabled(
+               this.enableCompOverlayOptionsOffsetY,
+               this.compOverlayOptionsOffsetY
+             ),
+           }
+         } : {})
+       .zIndex(useEnabled(this.enableCompZIndex, this.compZIndex))
+       .rotate(this.enableCompRotate ? {
+         x: useEnabled(
+           this.enableCompRotateX,
+           this.compRotateX
+         ),
+         y: useEnabled(
+           this.enableCompRotateY,
+           this.compRotateY
+         ),
+         z: useEnabled(
+           this.enableCompRotateZ,
+           this.compRotateZ
+         ),
+         angle: useEnabled(
+           this.enableCompRotateAngle,
+           this.compRotateAngle
+         ),
+         centerX: useEnabled(
+           this.enableCompRotateCenterX,
+           this.compRotateCenterX
+         ),
+         centerY: useEnabled(
+           this.enableCompRotateCenterY,
+           this.compRotateCenterY
+         ),
+         centerZ: useEnabled(
+           this.enableCompRotateCenterZ,
+           this.compRotateCenterZ
+         ),
+         perspective: useEnabled(
+           this.enableCompRotatePerspective,
+           this.compRotatePerspective
+         )
+       } : {
+         angle: useEnabled(
+           this.enableCompRotateAngle,
+           this.compRotateAngle
+         )
+       })
+       .translate(this.enableCompTranslate ? {
+         x: useEnabled(
+           this.enableCompTranslateX,
+           this.compTranslateX
+         ),
+         y: useEnabled(
+           this.enableCompTranslateY,
+           this.compTranslateY
+         ),
+         z: useEnabled(
+           this.enableCompTranslateZ,
+           this.compTranslateZ
+         )
+       } : {})
+       .scale(this.enableCompScale ? {
+         x: useEnabled(
+           this.enableCompScaleX,
+           this.compScaleX
+         ),
+         y: useEnabled(
+           this.enableCompScaleY,
+           this.compScaleY
+         ),
+         z: useEnabled(
+           this.enableCompScaleZ,
+           this.compScaleZ
+         ),
+         centerX: useEnabled(
+           this.enableCompScaleCenterX,
+           this.compScaleCenterX
+         ),
+         centerY: useEnabled(
+           this.enableCompScaleCenterY,
+           this.compScaleCenterY
+         )
+       } : {})
+       .transform(this.enableCompTransform ?
+       matrix4.identity().rotate({ z: 1, angle: 90 }) :
+       matrix4.identity()
+       )
+       .clip(useEnabled(
+         this.enableCompClip,
+         this.compClip
+       ))
+       .mask(this.progress)
+       .blur(useEnabled(this.enableCompBlurValue, this.compBlurValue), {
+         grayscale: [
+           useEnabled(this.enableCompBlurOptionsNumber1, this.compBlurOptionsNumber1),
+           useEnabled(this.enableCompBlurOptionsNumber2, this.compBlurOptionsNumber2)
+         ]
+       })
+       .shadow({
+         radius: useEnabled(this.enableCompShadowValueRadius, this.compShadowValueRadius),
+         type: useEnabled(this.enableCompShadowValueType, this.compShadowValueType),
+         color: useEnabled(this.enableCompShadowValueColor, this.compShadowValueColor),
+         offsetX: useEnabled(this.enableCompShadowValueOffsetX, this.compShadowValueOffsetX),
+         offsetY: useEnabled(this.enableCompShadowValueOffsetY, this.compShadowValueOffsetY),
+         fill: useEnabled(this.enableCompShadowValueFill, this.compShadowValueFill)
+       })
+       .grayscale(useEnabled(this.enableCompGrayscale, this.compGrayscale))
+       .brightness(useEnabled(this.enableCompBrightness, this.compBrightness))
+       .saturate(useEnabled(this.enableCompSaturate, this.compSaturate))
+       .contrast(useEnabled(this.enableCompContrast, this.compContrast))
+       .invert(useEnabled(this.enableCompInvert, this.compInvert))
+       .sepia(useEnabled(this.enableCompSepia, this.compSepia))
+       .hueRotate(useEnabled(this.enableCompHueRotate, this.compHueRotate))
+       .colorBlend(useEnabled(this.enableCompColorBlend, this.compColorBlend))
+       .linearGradient( {
+         angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
+         direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
+         colors: [
+           [
+             useEnabled(this.enableCompLinearGradientColors1, this.compLinearGradientColors1),
+             useEnabled(this.enableCompLinearGradientColorsNumber1, this.compLinearGradientColorsNumber1)
+           ],
+           [
+             useEnabled(this.enableCompLinearGradientColors2, this.compLinearGradientColors2),
+             useEnabled(this.enableCompLinearGradientColorsNumber2, this.compLinearGradientColorsNumber2)
+           ]
+         ],
+         repeating: useEnabled(this.enableCompLinearGradientRepeating, this.compLinearGradientRepeating),
+       })
+       .focusable(useEnabled(this.enableCompFocusable,
+         this.compFocusable))
+       .defaultFocus(useEnabled(this.enableCompDefaultFocus, this.compDefaultFocus))
+       .groupDefaultFocus(useEnabled(this.enableCompGroupDefaultFocus, this.compGroupDefaultFocus))
+       .focusOnTouch(useEnabled(this.enableCompFocusOnTouch, this.compFocusOnTouch))
+       .focusBox({
+         margin: useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin) ?
+         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin)) : null,
+         strokeColor: useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor) ?
+         ColorMetrics.resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
+           null,
+         strokeWidth: useEnabled(this.enableCompFocusBoxStrokeWidth, this.compFocusBoxStrokeWidth) ?
+         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxStrokeWidth,
+           this.compFocusBoxStrokeWidth)) : null,
+       })
+       .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
+       .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : null)
+       .focusScopePriority(
+         useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
+         useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
+       )
+       .focusScopeId(
+         useEnabled(this.enableCompFocusScopeId, this.compFocusScopeId),
+         useEnabled(this.enableCompFocusScopeIdIsGroup, this.compFocusScopeIdIsGroup)
+       )
+       .hoverEffect(useEnabled(this.enableCompHoverEffect, this.compHoverEffect))
+       .reuseId(useEnabled(this.enableCompReuseId, this.compReuseId)
+         ? useEnabled(this.enableCompReuseId, this.compReuseId) : null)
+       .restoreId(useEnabled(this.enableCompRestoreId, this.compRestoreId)
+         ? useEnabled(this.enableCompRestoreId, this.compRestoreId) : null)
+       .foregroundEffect({
+         radius: useEnabled(this.enableCompForegroundEffectRadius, this.compForegroundEffectRadius)
+       })
+       .foregroundBlurStyle(useEnabled(this.enableCompForegroundBlurStyleValue, this.compForegroundBlurStyleValue),
+         {
+           colorMode: useEnabled(this.enableCompForegroundBlurStyleOptionsColorMode,
+             this.compForegroundBlurStyleOptionsColorMode),
+           adaptiveColor: useEnabled(this.enableCompForegroundBlurStyleOptionsAdaptiveColor,
+             this.compForegroundBlurStyleOptionsAdaptiveColor),
+           blurOptions: {
+             grayscale: [0, useEnabled(this.enableCompForegroundBlurStyleOptionsBlurOptions,
+               this.compForegroundBlurStyleOptionsBlurOptions)]
+           },
+           scale: useEnabled(this.enableCompForegroundBlurStyleOptionsScale,
+             this.compForegroundBlurStyleOptionsScale)
+         })
+       .clickEffect(useEnabled(this.enableCompClickEffect, this.compClickEffect) ? {
+         level: useEnabled(this.enableCompClickEffectLevel, this.compClickEffectLevel),
+         scale: useEnabled(this.enableCompClickEffectScale, this.compClickEffectScale)
+       } : null)
+       .accessibilityGroup(useEnabled(this.enableCompAccessibilityGroup, this.compAccessibilityGroup))
+       .accessibilityText(useEnabled(this.enableCompAccessibilityText, this.compAccessibilityText))
+       .accessibilityDescription(useEnabled(this.enableCompAccessibilityDescription,
+         this.compAccessibilityDescription))
+       .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
+       .responseRegion({
+         x: useEnabled(this.enableCompResponseRegionValueX, this.compResponseRegionValueX),
+         y: useEnabled(this.enableCompResponseRegionValueY, this.compResponseRegionValueY),
+         width: useEnabled(this.enableCompResponseRegionValueWidth, this.compResponseRegionValueWidth),
+         height: useEnabled(this.enableCompResponseRegionValueHeight, this.compResponseRegionValueHeight)
+       })
+       .hitTestBehavior(useEnabled(this.enableCompHitTestBehavior, this.compHitTestBehavior))
+       .obscured(useEnabled(this.enableCompObscured, this.compObscured))
+       .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
+       .onHover((flag) => {
+         if (flag) {
+           this.getUIContext()
+             .getCursorController()
+             .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
+         } else {
+           this.getUIContext().getCursorController().restoreDefault()
+         }
+       })
+       .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
+       .onClick((event?: ClickEvent) => {
+         this.compEventTriggeredLog('点击事件onClick触发');
+       })
+       .onTouch((event?: TouchEvent) => {
+         this.compEventTriggeredLog('触摸事件onTouch触发');
+       })
+       .onAttach(() => {
+         this.compEventTriggeredLog('挂载卸载事件onAttach触发');
+       })
+       .onDetach(() => {
+         this.compEventTriggeredLog('挂载卸载事件onDetach触发');
+       })
+       .onAppear(() => {
+         this.compEventTriggeredLog('挂载卸载事件onAppear触发');
+       })
+       .onDisAppear(() => {
+         this.compEventTriggeredLog('挂载卸载事件onDisAppear触发');
+       })
+       .onKeyEvent((event: KeyEvent) => {
+         this.compEventTriggeredLog('按键事件onKeyEvent触发');
+       })
+       .onFocus(() => {
+         this.compEventTriggeredLog('焦点事件onFocus触发');
+       })
+       .onBlur(() => {
+         this.compEventTriggeredLog('焦点事件onBlur触发');
+       })
+       .onMouse((event: MouseEvent) => {
+         this.compEventTriggeredLog('鼠标事件onMouse触发');
+       })
+       .onHover((isHover: boolean, event: HoverEvent) => {
+         this.compEventTriggeredLog('悬浮事件onHover触发');
+       })
+       .onAreaChange((oldValue: Area, newValue: Area) => {
+         this.compEventTriggeredLog('组件区域变化事件onAreaChange触发')
+       })
+       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+         this.compEventTriggeredLog('组件尺寸变化事件onSizeChange触发')
+       })
+       .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
+         if (isVisible && currentRatio >= 1.0) {
+           this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全可见')
+         } else if (!isVisible && currentRatio <= 0.0) {
+           this.compEventTriggeredLog('组件可见区域变化事件onVisibleAreaChange触发,组件完全不可见')
+         }
+       })
+       .keyboardShortcut('1', [ModifierKey.CTRL], () => {
+         this.compEventTriggeredLog('组件快捷键事件keyboardShortcut触发,Ctrl+1')
+       })
+       .onChildTouchTest((touchInfo: Array<TouchTestInfo>) => {
+         this.compEventTriggeredLog('自定义事件分发onChildTouchTest触发')
+         return { strategy: TouchTestStrategy.DEFAULT };
+       })
+       .onTouchIntercept((event: TouchEvent) => {
+         this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
+         return HitTestMode.Default;
+       })
 
     }.width('100%').height('100%')
   }
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'expandedLayoutOptions.isExtraRegionPerpendicular',
@@ -1773,7 +1778,6 @@ export struct FoldSplitContainerBootcamp {
                 min: 0,
                 max: 100
               })
-
             }
 
             RadioBlock({
@@ -1810,7 +1814,6 @@ export struct FoldSplitContainerBootcamp {
         })
 
         if (this.enableCompMask) {
-
           SliderBlock({
             title: 'mask.value',
             isEnabled: $enableCompMaskValue,
@@ -2302,7 +2305,406 @@ export struct FoldSplitContainerBootcamp {
       .width('100%')
     }
     .align(Alignment.Top)
-    .height('50%')
+    .width('100%')
+    .id('scroll')
+    .height('52%')
+  }
+
+  @State selection: string | null = null;
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
+
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+      Column({ space: 8 }) {
+        List({space:8}){
+          CompSizeBlocks({
+            enableCompWidth: $enableCompWidth,
+            compWidth: $compWidth,
+            enableCompHeight: $enableCompHeight,
+            compHeight: $compHeight,
+            enableCompPadding: $enableCompPadding,
+            compPadding: $compPadding,
+            enableCompMargin: $enableCompMargin,
+            compMargin: $compMargin,
+            enableCompConstraintSize: $enableCompConstraintSize,
+            enableCompConstraintSizeMinWidth: $enableCompConstraintSizeMinWidth,
+            compConstraintSizeMinWidth: $compConstraintSizeMinWidth,
+            enableCompConstraintSizeMinHeight: $enableCompConstraintSizeMinHeight,
+            compConstraintSizeMinHeight: $compConstraintSizeMinHeight,
+            enableCompConstraintSizeMaxWidth: $enableCompConstraintSizeMaxWidth,
+            compConstraintSizeMaxWidth: $compConstraintSizeMaxWidth,
+            enableCompConstraintSizeMaxHeight: $enableCompConstraintSizeMaxHeight,
+            compConstraintSizeMaxHeight: $compConstraintSizeMaxHeight
+          })
+          CompLocationBlocks({
+            enableCompPosition: $enableCompPosition,
+            enableCompPositionTop: $enableCompPositionTop,
+            compPositionTop: $compPositionTop,
+            enableCompPositionBottom: $enableCompPositionBottom,
+            compPositionBottom: $compPositionBottom,
+            enableCompPositionLeft: $enableCompPositionLeft,
+            compPositionLeft: $compPositionLeft,
+            enableCompPositionRight: $enableCompPositionRight,
+            compPositionRight: $compPositionRight,
+            enableCompMarkAnchor: $enableCompMarkAnchor,
+            enableCompMarkAnchorX: $enableCompMarkAnchorX,
+            compMarkAnchorX: $compMarkAnchorX,
+            enableCompMarkAnchorY: $enableCompMarkAnchorY,
+            compMarkAnchorY: $compMarkAnchorY,
+            enableCompOffset: $enableCompOffset,
+            enableCompOffsetX: $enableCompOffsetX,
+            compOffsetX: $compOffsetX,
+            enableCompOffsetY: $enableCompOffsetY,
+            compOffsetY: $compOffsetY
+          })
+          CompBorderBlocks({
+            enableCompBorderWidth: $enableCompBorderWidth,
+            compBorderWidth: $compBorderWidth,
+            enableCompBorderColor: $enableCompBorderColor,
+            compBorderColor: $compBorderColor,
+            enableCompBorderRadius: $enableCompBorderRadius,
+            compBorderRadius: $compBorderRadius,
+            enableCompBorderStyle: $enableCompBorderStyle,
+            compBorderStyle: $compBorderStyle,
+            enableCompBorderDashGapLeft: $enableCompBorderDashGapLeft,
+            compBorderDashGapLeft: $compBorderDashGapLeft,
+            enableCompBorderDashGapRight: $enableCompBorderDashGapRight,
+            compBorderDashGapRight: $compBorderDashGapRight,
+            enableCompBorderDashGapTop: $enableCompBorderDashGapTop,
+            compBorderDashGapTop: $compBorderDashGapTop,
+            enableCompBorderDashGapBottom: $enableCompBorderDashGapBottom,
+            compBorderDashGapBottom: $compBorderDashGapBottom,
+            enableCompBorderDashWidthLeft: $enableCompBorderDashWidthLeft,
+            compBorderDashWidthLeft: $compBorderDashWidthLeft,
+            enableCompBorderDashWidthRight: $enableCompBorderDashWidthRight,
+            compBorderDashWidthRight: $compBorderDashWidthRight,
+            enableCompBorderDashWidthTop: $enableCompBorderDashWidthTop,
+            compBorderDashWidthTop: $compBorderDashWidthTop,
+            enableCompBorderDashWidthBottom: $enableCompBorderDashWidthBottom,
+            compBorderDashWidthBottom: $compBorderDashWidthBottom
+          })
+          CompOpacityBlocks({
+            enableCompOpacity: $enableCompOpacity,
+            compOpacity: $compOpacity
+          })
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性1')
+          }) {
+            if (this.selection === '通用属性1') {
+              CompLayoutConstraintsBlocks({
+                enableCompAspectRatio: $enableCompAspectRatio,
+                compAspectRatio: $compAspectRatio,
+                enableCompPixelRound: $enableCompPixelRound,
+                enableCompPixelRoundStart: $enableCompPixelRoundStart,
+                compPixelRoundStart: $compPixelRoundStart,
+                enableCompPixelRoundTop: $enableCompPixelRoundTop,
+                compPixelRoundTop: $compPixelRoundTop,
+                enableCompPixelRoundEnd: $enableCompPixelRoundEnd,
+                compPixelRoundEnd: $compPixelRoundEnd,
+                enableCompPixelRoundBottom: $enableCompPixelRoundBottom,
+                compPixelRoundBottom: $compPixelRoundBottom
+              })
+              CompBorderImageBlocks({
+                enableCompBorderImage: $enableCompBorderImage,
+                enableCompBorderImageSource: $enableCompBorderImageSource,
+                enableCompBorderImageSlice: $enableCompBorderImageSlice,
+                enableCompBorderImageSliceTop: $enableCompBorderImageSliceTop,
+                compBorderImageSliceTop: $compBorderImageSliceTop,
+                enableCompBorderImageSliceBottom: $enableCompBorderImageSliceBottom,
+                compBorderImageSliceBottom: $compBorderImageSliceBottom,
+                enableCompBorderImageSliceLeft: $enableCompBorderImageSliceLeft,
+                compBorderImageSliceLeft: $compBorderImageSliceLeft,
+                enableCompBorderImageSliceRight: $enableCompBorderImageSliceRight,
+                compBorderImageSliceRight: $compBorderImageSliceRight,
+                enableCompBorderImageWidth: $enableCompBorderImageWidth,
+                enableCompBorderImageWidthTop: $enableCompBorderImageWidthTop,
+                compBorderImageWidthTop: $compBorderImageWidthTop,
+                enableCompBorderImageWidthBottom: $enableCompBorderImageWidthBottom,
+                compBorderImageWidthBottom: $compBorderImageWidthBottom,
+                enableCompBorderImageWidthLeft: $enableCompBorderImageWidthLeft,
+                compBorderImageWidthLeft: $compBorderImageWidthLeft,
+                enableCompBorderImageWidthRight: $enableCompBorderImageWidthRight,
+                compBorderImageWidthRight: $compBorderImageWidthRight,
+                enableCompBorderImageOutset: $enableCompBorderImageOutset,
+                enableCompBorderImageOutsetTop: $enableCompBorderImageOutsetTop,
+                compBorderImageOutsetTop: $compBorderImageOutsetTop,
+                enableCompBorderImageOutsetBottom: $enableCompBorderImageOutsetBottom,
+                compBorderImageOutsetBottom: $compBorderImageOutsetBottom,
+                enableCompBorderImageOutsetLeft: $enableCompBorderImageOutsetLeft,
+                compBorderImageOutsetLeft: $compBorderImageOutsetLeft,
+                enableCompBorderImageOutsetRight: $enableCompBorderImageOutsetRight,
+                compBorderImageOutsetRight: $compBorderImageOutsetRight,
+                enableCompBorderImageRepeat: $enableCompBorderImageRepeat,
+                compBorderImageRepeat: $compBorderImageRepeat,
+                enableCompBorderImageFill: $enableCompBorderImageFill,
+                compBorderImageFill: $compBorderImageFill
+              })
+              CompVisibilityBlocks({
+                enableCompVisibility: $enableCompVisibility,
+                compVisibility: $compVisibility
+              })
+              CompEnabledBlocks({
+                enableCompEnabled: $enableCompEnabled,
+                compEnabled: $compEnabled
+              })
+              CompOverlayBlocks({
+                enableCompOverlay: $enableCompOverlay,
+                compOverlay: $compOverlay,
+                enableCompOverlayOptions: $enableCompOverlayOptions,
+                enableCompOverlayOptionsAlign: $enableCompOverlayOptionsAlign,
+                compOverlayOptionsAlign: $compOverlayOptionsAlign,
+                enableCompOverlayOptionsOffsetX: $enableCompOverlayOptionsOffsetX,
+                compOverlayOptionsOffsetX: $compOverlayOptionsOffsetX,
+                enableCompOverlayOptionsOffsetY: $enableCompOverlayOptionsOffsetY,
+                compOverlayOptionsOffsetY: $compOverlayOptionsOffsetY
+              })
+              CompZOrderControlBlocks({
+                enableCompZIndex: $enableCompZIndex,
+                compZIndex: $compZIndex
+              })
+              CompTransformationBlocks({
+                enableCompRotate: $enableCompRotate,
+                enableCompRotateX: $enableCompRotateX,
+                compRotateX: $compRotateX,
+                enableCompRotateY: $enableCompRotateY,
+                compRotateY: $compRotateY,
+                enableCompRotateZ: $enableCompRotateZ,
+                compRotateZ: $compRotateZ,
+                enableCompRotateAngle: $enableCompRotateAngle,
+                compRotateAngle: $compRotateAngle,
+                enableCompRotateCenterX: $enableCompRotateCenterX,
+                compRotateCenterX: $compRotateCenterX,
+                enableCompRotateCenterY: $enableCompRotateCenterY,
+                compRotateCenterY: $compRotateCenterY,
+                enableCompRotateCenterZ: $enableCompRotateCenterZ,
+                compRotateCenterZ: $compRotateCenterZ,
+                enableCompRotatePerspective: $enableCompRotatePerspective,
+                compRotatePerspective: $compRotatePerspective,
+                enableCompTranslate: $enableCompTranslate,
+                enableCompTranslateX: $enableCompTranslateX,
+                compTranslateX: $compTranslateX,
+                enableCompTranslateY: $enableCompTranslateY,
+                compTranslateY: $compTranslateY,
+                enableCompTranslateZ: $enableCompTranslateZ,
+                compTranslateZ: $compTranslateZ,
+                enableCompScale: $enableCompScale,
+                enableCompScaleX: $enableCompScaleX,
+                compScaleX: $compScaleX,
+                enableCompScaleY: $enableCompScaleY,
+                compScaleY: $compScaleY,
+                enableCompScaleZ: $enableCompScaleZ,
+                compScaleZ: $compScaleZ,
+                enableCompScaleCenterX: $enableCompScaleCenterX,
+                compScaleCenterX: $compScaleCenterX,
+                enableCompScaleCenterY: $enableCompScaleCenterY,
+                compScaleCenterY: $compScaleCenterY,
+                enableCompTransform: $enableCompTransform
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性2')
+          }) {
+            if (this.selection === '通用属性2') {
+              //linearGradient
+              CompGradientColorBlocks({
+                enableCompLinearGradientAngle: $enableCompLinearGradientAngle,
+                compLinearGradientAngle: $compLinearGradientAngle,
+                enableCompLinearGradientDirection: $enableCompLinearGradientDirection,
+                compLinearGradientDirection: $compLinearGradientDirection,
+                enableCompLinearGradientColors1: $enableCompLinearGradientColors1,
+                compLinearGradientColors1: $compLinearGradientColors1,
+                enableCompLinearGradientColorsNumber1: $enableCompLinearGradientColorsNumber1,
+                compLinearGradientColorsNumber1: $compLinearGradientColorsNumber1,
+                enableCompLinearGradientColors2: $enableCompLinearGradientColors2,
+                compLinearGradientColors2: $compLinearGradientColors2,
+                enableCompLinearGradientColorsNumber2: $enableCompLinearGradientColorsNumber2,
+                compLinearGradientColorsNumber2: $compLinearGradientColorsNumber2,
+                enableCompLinearGradientRepeating: $enableCompLinearGradientRepeating,
+                compLinearGradientRepeating: $compLinearGradientRepeating,
+              })
+              //focusable
+              CompFocusControlBlocks({
+                enableCompFocusable: $enableCompFocusable,
+                compFocusable: $compFocusable,
+                enableCompDefaultFocus: $compDefaultFocus,
+                compDefaultFocus: $compDefaultFocus,
+                enableCompGroupDefaultFocus: $enableCompGroupDefaultFocus,
+                compGroupDefaultFocus: $compGroupDefaultFocus,
+                enableCompFocusOnTouch: $enableCompFocusOnTouch,
+                compFocusOnTouch: $compFocusOnTouch,
+                enableCompFocusBoxMargin: $enableCompFocusBoxMargin,
+                compFocusBoxMargin: $compFocusBoxMargin,
+                enableCompFocusBoxStrokeColor: $enableCompFocusBoxStrokeColor,
+                compFocusBoxStrokeColor: $compFocusBoxStrokeColor,
+                enableCompFocusBoxStrokeWidth: $enableCompFocusBoxStrokeWidth,
+                compFocusBoxStrokeWidth: $compFocusBoxStrokeWidth,
+                enableCompFocusScopePriorityScopeId: $enableCompFocusScopePriorityScopeId,
+                compFocusScopePriorityScopeId: $compFocusScopePriorityScopeId,
+                enableCompFocusScopePriorityPriority: $enableCompFocusScopePriorityPriority,
+                compFocusScopePriorityPriority: $compFocusScopePriorityPriority,
+                enableCompFocusScopeId: $enableCompFocusScopeId,
+                compFocusScopeId: $compFocusScopeId,
+                enableCompFocusScopeIdIsGroup: $enableCompFocusScopeIdIsGroup,
+                compFocusScopeIdIsGroup: $compFocusScopeIdIsGroup,
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性3')
+          }) {
+            if (this.selection === '通用属性3') {
+              CompHoverEffectBlocks({
+                enableCompHoverEffect: $enableCompHoverEffect,
+                compHoverEffect: $compHoverEffect,
+              })
+              CompComponentIDBlocks({
+                enableCompId: $enableCompId,
+                compId: $compId,
+                enableCompKey: $enableCompKey,
+                compKey: $compKey,
+              })
+              CompReuseIDBlocks({
+                enableCompReuseId: $enableCompReuseId,
+                compReuseId: $compReuseId,
+              })
+              CompRestoreIdBlocks({
+                enableCompRestoreId: $enableCompRestoreId,
+                compRestoreId: $compRestoreId,
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性4')
+          }) {
+            if (this.selection === '通用属性4') {
+              CompForegroundEffectBlocks({
+                enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
+                compForegroundEffectRadius: $compForegroundEffectRadius
+              })
+              CompForegroundBlurBlocks({
+                enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
+                compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
+                enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
+                compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
+                enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
+                compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
+                enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
+                compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
+                enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
+                compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
+              })
+              CompClickEffectBlocks({
+                enableCompClickEffect: $enableCompClickEffect,
+                compClickEffect: $compClickEffect,
+                enableCompClickEffectLevel: $enableCompClickEffectLevel,
+                compClickEffectLevel: $compClickEffectLevel,
+                enableCompClickEffectScale: $enableCompClickEffectScale,
+                compClickEffectScale: $compClickEffectScale,
+              })
+              CompAccessibilityBlocks({
+                enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
+                compAccessibilityGroup: $compAccessibilityGroup,
+                enableCompAccessibilityText: $enableCompAccessibilityText,
+                compAccessibilityText: $compAccessibilityText,
+                enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
+                compAccessibilityDescription: $compAccessibilityDescription,
+                enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
+                compAccessibilityLevel: $compAccessibilityLevel,
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性5')
+          }) {
+            if (this.selection === '通用属性5') {
+              CompTouchTargetBlocks({
+                enableCompResponseRegionValueX: $enableCompResponseRegionValueX,
+                compResponseRegionValueX: $compResponseRegionValueX,
+                enableCompResponseRegionValueY:
+                $enableCompResponseRegionValueY,
+                compResponseRegionValueY: $compResponseRegionValueY,
+                enableCompResponseRegionValueWidth: $enableCompResponseRegionValueWidth,
+                compResponseRegionValueWidth: $compResponseRegionValueWidth,
+                enableCompResponseRegionValueHeight: $enableCompResponseRegionValueHeight,
+                compResponseRegionValueHeight: $compResponseRegionValueHeight
+              })
+              CompHitTestControlBlocks({
+                enableCompHitTestBehavior: $enableCompHitTestBehavior,
+                compHitTestBehavior: $compHitTestBehavior
+              })
+            }
+          }
+
+          ListItemGroup({
+            header: this.ListItemGroupHeaders('通用属性6')
+          }) {
+            if (this.selection === '通用属性6') {
+              CompObscuringBlocks({
+                enableCompObscured: $enableCompObscured, compObscured: $compObscured
+              })
+              CompEventMonopolizationBlocks({
+                enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
+                compMonopolizeEvents: $compMonopolizeEvents
+              })
+              CompCursorControlBlocks({
+                enableCompCursorControl: $enableCompCursorControl,
+                compCursorControl: $compCursorControl
+              })
+              RadioBlock({
+                title: 'useEffect',
+                isEnabled: $enableCompUseEffect,
+                value: $compUseEffect,
+                dataSource: [
+                  { label: 'true', value: true },
+                  { label: 'false', value: false },
+                ]
+              })
+            }
+          }
+        }
+      }
+      .width('100%')
+      .id('column')
+    }
+    .id('scroll')
+    .height('52%')
   }
 }
 

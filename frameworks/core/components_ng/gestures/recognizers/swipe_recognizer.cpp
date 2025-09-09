@@ -78,8 +78,6 @@ void SwipeRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
     int64_t overTime = GetSysTimestamp();
     if (SystemProperties::GetTraceInputEventEnabled()) {
@@ -390,7 +388,6 @@ void SwipeRecognizer::OnResetStatus()
     globalPoint_ = Point();
     prevAngle_ = std::nullopt;
     matchedTouch_.clear();
-    localMatrix_.clear();
 }
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
@@ -427,10 +424,12 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
             info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {
@@ -517,8 +516,10 @@ void SwipeRecognizer::UpdateGestureEventInfo(std::shared_ptr<SwipeGestureEvent>&
     info->SetRawInputDeviceId(deviceId_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
     }
 }
 

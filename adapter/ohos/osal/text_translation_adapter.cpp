@@ -32,7 +32,7 @@ void TextTranslationAdapter::StartAITextTranslationTask(const std::string& trans
                 translation");
             TextTranslationMgr::GetInstance().PullUpTranslationPanel(translateText, rectStr);
         },
-        "ArkUITextInitTextTranslation", PriorityType::IMMEDIATE);
+        "ArkUITextInitTextTranslation");
 }
 
 } // namespace OHOS::Ace

@@ -30,7 +30,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -296,6 +296,7 @@ export interface BaseEvent {
     source: SourceType
     axisHorizontal?: number | undefined
     axisVertical?: number | undefined
+    axisPinch?: number | undefined
     pressure: number
     tiltX: number
     tiltY: number
@@ -341,6 +342,13 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set axisVertical(axisVertical: number | undefined) {
         const axisVertical_NonNull  = (axisVertical as number)
         this.setAxisVertical(axisVertical_NonNull)
+    }
+    get axisPinch(): number | undefined {
+        return this.getAxisPinch()
+    }
+    set axisPinch(axisPinch: number | undefined) {
+        const axisPinch_NonNull  = (axisPinch as number)
+        this.setAxisPinch(axisPinch_NonNull)
     }
     get pressure(): number {
         return this.getPressure()
@@ -448,6 +456,14 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     private setAxisVertical(axisVertical: number): void {
         const axisVertical_casted = axisVertical as (number)
         this.setAxisVertical_serialize(axisVertical_casted)
+        return
+    }
+    private getAxisPinch(): number | undefined {
+        return this.getAxisPinch_serialize()
+    }
+    private setAxisPinch(axisPinch: number): void {
+        const axisPinch_casted = axisPinch as (number)
+        this.setAxisPinch_serialize(axisPinch_casted)
         return
     }
     private getPressure(): number {
@@ -591,6 +607,27 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     }
     private setAxisVertical_serialize(axisVertical: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, axisVertical)
+    }
+    private getAxisPinch_serialize(): number | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisPinch(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
+    }
+    private setAxisPinch_serialize(axisPinch: number): void {
+        ArkUIGeneratedNativeModule._BaseEvent_setAxisPinch(this.peer!.ptr, axisPinch)
     }
     private getPressure_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getPressure(this.peer!.ptr)
@@ -7272,21 +7309,21 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface HorizontalAlignOptions {
+export interface HorizontalAlignParam {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface VerticalAlignOptions {
+export interface VerticalAlignParam {
     anchor: string;
     align: VerticalAlign;
 }
 export interface AlignRuleOption {
-    left?: HorizontalAlignOptions;
-    right?: HorizontalAlignOptions;
-    middle?: HorizontalAlignOptions;
-    top?: VerticalAlignOptions;
-    bottom?: VerticalAlignOptions;
-    center?: VerticalAlignOptions;
+    left?: HorizontalAlignParam;
+    right?: HorizontalAlignParam;
+    middle?: HorizontalAlignParam;
+    top?: VerticalAlignParam;
+    bottom?: VerticalAlignParam;
+    center?: VerticalAlignParam;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
@@ -7673,11 +7710,23 @@ export type Callback_SheetDismiss_Void = (sheetDismiss: SheetDismiss) => void;
 export type Callback_DismissSheetAction_Void = (parameter: DismissSheetAction) => void;
 export type Callback_SpringBackAction_Void = (parameter: SpringBackAction) => void;
 export type Callback_SheetType_Void = (parameter: SheetType) => void;
+export type SingleLengthDetent = [
+    SheetSize | Length
+]
+export type DoubleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined
+]
+export type TripleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined,
+    SheetSize | Length | undefined
+]
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
     maskColor?: ResourceColor;
-    detents?: [ SheetSize | Length, SheetSize | Length | undefined, SheetSize | Length | undefined ];
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;
@@ -8145,6 +8194,14 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this
     useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
     alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
+    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
+    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
     aspectRatio(value: number | undefined): this
     clickEffect(value: ClickEffect | undefined): this
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
@@ -8226,8 +8283,8 @@ export interface CommonMethod {
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
-    bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
+    bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
+    bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
@@ -8951,10 +9008,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
-    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
+    public bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
         return this
     }
-    public bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+    public bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         return this
     }
     public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -8972,6 +9029,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
 }
 export type CommonAttribute = CommonMethod
 export type CustomBuilder = 
+/** @memo */
 () => void;
 export interface OverlayOptions {
     align?: Alignment;
@@ -11474,7 +11532,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
+    public bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
         if (this.checkPriority("bindContentCover")) {
             const isShow_type = runtimeType(isShow)
             const builder_type = runtimeType(builder)
@@ -11490,7 +11548,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+    public bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         if (this.checkPriority("bindSheet")) {
             const isShow_casted = isShow as (boolean | undefined)
             const builder_casted = builder as (CustomBuilder | undefined)
@@ -13017,6 +13075,7 @@ export interface AxisEvent extends BaseEvent {
     propagation: (() => void)
     getHorizontalAxisValue(): number
     getVerticalAxisValue(): number
+    getPinchAxisScaleValue(): number
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
     get action(): AxisAction {
@@ -13091,6 +13150,9 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     }
     public getVerticalAxisValue(): number {
         return this.getVerticalAxisValue_serialize()
+    }
+    public getPinchAxisScaleValue(): number {
+        return this.getPinchAxisScaleValue_serialize()
     }
     private getAction(): AxisAction {
         return this.getAction_serialize()
@@ -13170,6 +13232,10 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     }
     private getVerticalAxisValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getVerticalAxisValue(this.peer!.ptr)
+        return retval
+    }
+    private getPinchAxisScaleValue_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPinchAxisScaleValue(this.peer!.ptr)
         return retval
     }
     private getAction_serialize(): AxisAction {

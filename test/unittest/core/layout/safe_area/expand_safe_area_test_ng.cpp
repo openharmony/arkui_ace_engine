@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,7 @@ SafeAreaInsets ExpandSafeAreaTestNg::GetSafeAreaInsets()
  * @tc.desc: Test SafeAreaManager top & bottom system safeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(ExpandSafeAreaTestNg, Manager001, TestSize.Level1)
+HWTEST_F(ExpandSafeAreaTestNg, Manager001, TestSize.Level0)
 {
     AvoidConfig config { .isFullScreen = true };
     InitSafeAreaManager(config);

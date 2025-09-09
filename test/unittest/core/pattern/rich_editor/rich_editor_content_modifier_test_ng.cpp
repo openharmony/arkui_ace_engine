@@ -74,6 +74,8 @@ void RichEditorContentModifierTestNg::SetUp()
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
     richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
     richEditorPattern->CreateNodePaintMethod();

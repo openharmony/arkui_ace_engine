@@ -890,8 +890,7 @@ private:
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void PutLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
     void PopLevelOrder(int32_t nodeId);
-    RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
-    RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetNextNodeWithOrder(const std::optional<double>& levelOrder);
     RefPtr<FrameNode> GetTopOrderNode();
     bool GetNodeFocusable(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetTopFocusableNode();

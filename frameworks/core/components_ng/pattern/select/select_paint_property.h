@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set paint properties.
 class SelectPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SelectPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SelectPaintProperty, PaintProperty);
 public:
     SelectPaintProperty() = default;
     ~SelectPaintProperty() override = default;

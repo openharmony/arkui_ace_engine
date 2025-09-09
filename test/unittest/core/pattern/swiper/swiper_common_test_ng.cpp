@@ -1761,7 +1761,7 @@ HWTEST_F(SwiperCommonTestNg, UpdateOnUnselectedEvent, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->unselectedEvents_.clear();
@@ -1790,7 +1790,7 @@ HWTEST_F(SwiperCommonTestNg, UpdateOnSelectedEvent, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->selectedEvents_.clear();
@@ -1888,5 +1888,35 @@ HWTEST_F(SwiperCommonTestNg, SwiperIndicatorAccessibilityProperty001, TestSize.L
     EXPECT_EQ(GetAccessibilityText, "");
     auto accessibilityAction = accessibilityProperty->GetAccessibilityValue();
     EXPECT_EQ(accessibilityAction.current, 0);
+}
+
+/**
+ * @tc.name: UpdateAnimationProperty001
+ * @tc.desc: test function UpdateAnimationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, UpdateAnimationProperty001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->targetIndex_ = std::make_optional<int>(0);
+    EXPECT_EQ(pattern_->targetIndex_, 0);
+    pattern_->currentIndex_ = 3;
+    pattern_->isDragging_ = true;
+    pattern_->UpdateAnimationProperty(100);
+    EXPECT_EQ(pattern_->targetIndex_, 2);
+    pattern_->isDragging_ = false;
+    pattern_->UpdateAnimationProperty(100);
+    EXPECT_FALSE(pattern_->targetIndex_.has_value());
+
+    pattern_->targetIndex_ = std::make_optional<int>(0);
+    EXPECT_EQ(pattern_->targetIndex_, 0);
+    pattern_->isDragging_ = true;
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->UpdateAnimationProperty(100);
+    EXPECT_EQ(pattern_->targetIndex_, 0);
 }
 } // namespace OHOS::Ace::NG

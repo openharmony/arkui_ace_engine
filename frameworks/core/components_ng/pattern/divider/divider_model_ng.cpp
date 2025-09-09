@@ -111,9 +111,11 @@ void DividerModelNG::LineCap(FrameNode* frameNode, const Ace::LineCap& value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value, frameNode);
 }
 
-void DividerModelNG::SetDividerColor(FrameNode* frameNode, const Color& color, bool isSetByTheme)
+void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt, bool isSetByTheme)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, color, frameNode);
+    if (colorOpt) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, colorOpt.value(), frameNode);
+    }
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByTheme, frameNode);
     }

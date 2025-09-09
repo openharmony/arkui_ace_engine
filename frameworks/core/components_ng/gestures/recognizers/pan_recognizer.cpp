@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
-
-#include "base/perfmonitor/perf_monitor.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,6 +44,7 @@ void PanRecognizer::ForceCleanRecognizer()
     touchPointsDistance_.clear();
     localMatrix_.clear();
     isStartTriggered_ = false;
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
@@ -145,6 +148,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
 void PanRecognizer::OnAccepted()
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     int64_t acceptTime = GetSysTimestamp();
     int64_t inputTime = acceptTime;
     if (firstInputTime_.has_value()) {
@@ -181,6 +185,7 @@ void PanRecognizer::OnAccepted()
         isStartTriggered_ = false;
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
     }
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 void PanRecognizer::OnRejected()
@@ -241,6 +246,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
     extraInfo_ = "";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
                                                                   : static_cast<int32_t>(MouseAction::PRESS);
@@ -344,7 +350,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
+    extraInfo_ = "Fingers: " + std::to_string(currentFingers_) + "(cur) - " + std::to_string(fingers_);
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
     fingersId_.erase(event.id);
@@ -364,7 +371,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
-
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
@@ -382,6 +388,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
+            ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
             AddOverTimeTrace();
             lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
@@ -509,8 +516,8 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
     } else if (event.sourceTool == SourceTool::TOUCHPAD) {
         PointF originPoint(lastAxisEvent_.horizontalAxis, lastAxisEvent_.verticalAxis);
         PointF finalPoint(originPoint.GetX() + delta_.GetX(), originPoint.GetY() + delta_.GetY());
-        TransformForRecognizer(originPoint, GetAttachedNode(), false, false, -1);
-        TransformForRecognizer(finalPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(originPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(finalPoint, GetAttachedNode(), false, false, -1);
         delta_ = Offset(finalPoint.GetX(), finalPoint.GetY()) - Offset(originPoint.GetX(), originPoint.GetY());
     }
 }
@@ -606,6 +613,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
@@ -737,7 +745,6 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         return IsPanGestureAcceptInAllDirection(judgeDistance);
     }
-
     if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
         return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
     }
@@ -774,6 +781,7 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
+    ResSchedTouchOptimizer::GetInstance().SetSlideAcceptOffset(averageDistance_);
 }
 
 void PanRecognizer::OnSucceedCancel()
@@ -813,7 +821,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
     info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
-    info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
+    info.SetMainDelta((ResSchedTouchOptimizer::GetInstance().HandleMainDelta(mainDelta_,
+        static_cast<double>(touchPoints_.size()), touchPoints_)));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());
@@ -823,6 +832,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.SetPointerEventId(lastAxisEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+        info.SetPassThrough(lastAxisEvent_.passThrough);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
@@ -830,6 +840,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetPassThrough(lastTouchEvent_.passThrough);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -864,6 +875,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             auto callbackFunction = *panEndOnDisableState_;
             callbackFunction(info);
             HandleReports(info, type);
+            localMatrix_.clear();
             return;
         }
     }
@@ -874,6 +886,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         HandleCallbackReports(info, type, PanGestureState::BEFORE);
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
+    }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
     }
 }
 
@@ -953,11 +968,13 @@ void PanRecognizer::UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& inf
         info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
         info->SetVelocity(panVelocity_.GetVelocity());
         info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
         info->SetSourceTool(lastTouchEvent_.sourceTool);
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);

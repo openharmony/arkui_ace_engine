@@ -39,7 +39,7 @@ class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
     ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false,
-        const ImageDfxConfig& imageDfxConfig = {});
+        bool isSceneBoardWindow = false, const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
     // return true if calling MakeCanvasImage is necessary
@@ -166,6 +166,11 @@ public:
         return onProgressCallback_;
     }
 
+    void SetSupportSvg2(bool enable)
+    {
+        src_.SetSupportSvg2(enable);
+    }
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -209,6 +214,7 @@ private:
     PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool isSceneBoardWindow_ = false;
 
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 

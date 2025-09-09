@@ -1130,4 +1130,27 @@ HWTEST_F(OverlayManagerExtendTestNg, GetDragPixelMapBadgeNodeTest002, TestSize.L
     auto result = overlayManager->GetDragPixelMapBadgeNode();
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: GetPixelMapBadgeNodeTest001
+ * @tc.desc: Test GetPixelMapBadgeNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, GetPixelMapBadgeNodeTest001, TestSize.Level1)
+{
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(rootNode, nullptr);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->children_.push_front(rootNode);
+    overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
+    auto result = overlayManager->GetPixelMapBadgeNode();
+    EXPECT_NE(result, nullptr);
+}
 }

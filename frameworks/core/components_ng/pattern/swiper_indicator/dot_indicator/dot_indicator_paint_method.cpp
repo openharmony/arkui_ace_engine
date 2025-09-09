@@ -88,6 +88,13 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+
+    auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
+    RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
+    auto origin = dotIndicatorModifier_->GetBoundsRect();
+    CHECK_EQUAL_VOID(origin, boundsRect);
+    dotIndicatorModifier_->SetBoundsRect(boundsRect);
+    paintWrapper->FlushContentModifier();
 }
 
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
@@ -509,14 +516,6 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
             longPointRightCenterMoveRate;
-    if (isHorizontalAndRightToLeft_) {
-        longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX +
-        (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
-            longPointLeftCenterMoveRate;
-        longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
-            (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
-                longPointRightCenterMoveRate;
-    }
     return longPointCenterX;
 }
 

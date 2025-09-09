@@ -44,7 +44,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 #include "frameworks/core/components_ng/svg/svg_fit_convertor.h"
-#include "frameworks/core/components_ng/svg/svg_ulils.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
@@ -73,30 +73,24 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
     { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
-    { "linearGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-             return SvgGradient::CreateLinearGradient();
-        } else {
-            return SvgLinearGradient::Create();
-        }
-        } },
+    { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
     { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
     { "path", []() -> RefPtr<SvgNode> { return SvgPath::Create(); } },
     { "pattern", []() -> RefPtr<SvgNode> { return SvgPattern::Create(); } },
     { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
     { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
-    { "radialGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            return SvgGradient::CreateRadialGradient();
-        } else {
-            return SvgRadialGradient::Create();
-        }
-        } },
+    { "radialGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateRadialGradient(); } },
     { "rect", []() -> RefPtr<SvgNode> { return SvgRect::Create(); } },
     { "stop", []() -> RefPtr<SvgNode> { return SvgStop::Create(); } },
     { "style", []() -> RefPtr<SvgNode> { return SvgStyle::Create(); } },
     { "svg", []() -> RefPtr<SvgNode> { return SvgSvg::Create(); } },
     { "use", []() -> RefPtr<SvgNode> { return SvgUse::Create(); } },
+};
+
+/*Only add new feature elements */
+static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES_SVG2[] = {
+    { "linearGradient", []() -> RefPtr<SvgNode> { return SvgLinearGradient::Create(); } },
+    { "radialGradient", []() -> RefPtr<SvgNode> { return SvgRadialGradient::Create(); } },
 };
 
 SvgDom::SvgDom()
@@ -119,6 +113,10 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& 
     RefPtr<SvgDom> svgDom = AceType::MakeRefPtr<SvgDom>();
     svgDom->fillColor_ = src.GetFillColor();
     svgDom->path_ = src.GetSrc();
+    auto supportSvg2 = src.IsSupportSvg2();
+    if (supportSvg2) {
+        svgDom->svgContext_->SetUsrConfigVersion(SVG_FEATURE_SUPPORT_TWO);
+    }
     bool ret = svgDom->ParseSvg(svgStream);
     if (ret) {
         return svgDom;
@@ -167,6 +165,22 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     return root;
 }
 
+static RefPtr<SvgNode> FindAndCreateNode(const char* element, bool featureEnable)
+{
+    int64_t elementIter = -1;
+    if (featureEnable) {
+        elementIter = BinarySearchFindIndex(TAG_FACTORIES_SVG2, ArraySize(TAG_FACTORIES_SVG2), element);
+        if (elementIter != -1) {
+            return TAG_FACTORIES_SVG2[elementIter].value();
+        }
+    }
+    elementIter = BinarySearchFindIndex(TAG_FACTORIES, ArraySize(TAG_FACTORIES), element);
+    if (elementIter == -1) {
+        return nullptr;
+    }
+    return TAG_FACTORIES[elementIter].value();
+}
+
 RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
     const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
@@ -177,12 +191,8 @@ RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
             SvgStyle::ParseCssStyle(element, attrCallback_);
         }
     }
-
-    auto elementIter = BinarySearchFindIndex(TAG_FACTORIES, ArraySize(TAG_FACTORIES), element);
-    if (elementIter == -1) {
-        return nullptr;
-    }
-    RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
+    auto featureEnable = SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion());
+    RefPtr<SvgNode> node = FindAndCreateNode(element, featureEnable);
     CHECK_NULL_RETURN(node, nullptr);
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         isStatic_.store(false);
@@ -220,7 +230,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
         std::string newValue;
         std::stringstream stream;
         auto fillColor = fillColor_.value();
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion())) {
             stream << std::hex << fillColor.GetValue();
             newValue = stream.str();
         } else {
@@ -356,7 +366,7 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, svgContext_->GetUsrConfigVersion())) {
         root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     } else {
         Size viewPort = svgContext_->GetRootViewBox().GetSize();
@@ -423,10 +433,11 @@ void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
     colorFilter_ = colorFilter;
 }
 
-std::string SvgDom::IntToHexString(const int number)
+std::string SvgDom::IntToHexString(const uint8_t number)
 {
     std::stringstream stringStream;
     stringStream << std::setw(ONE_BYTE_TO_HEX_LEN) << std::setfill('0') << std::hex << number;
     return stringStream.str();
 }
+
 } // namespace OHOS::Ace::NG

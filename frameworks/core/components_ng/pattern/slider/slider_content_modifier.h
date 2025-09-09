@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+using UpdateImageCenterCallback = std::function<void(const PointF&)>;
+
 enum class SliderStatus : uint32_t {
     DEFAULT,
     CLICK,
@@ -50,11 +52,11 @@ public:
         PointF circleCenter;
         Gradient selectGradientColor;
         Gradient trackBackgroundColor;
+        Gradient blockGradientColor;
         Color blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters, std::function<void(float)> updateImageCenterX,
-        std::function<void(float)> updateImageCenterY);
+    explicit SliderContentModifier(const Parameters& parameters, UpdateImageCenterCallback updateImageCenter);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -99,6 +101,13 @@ public:
         }
     }
 
+    void SetLinearGradientBlockColor(const Gradient& color)
+    {
+        if (blockGradientColor_) {
+            blockGradientColor_->Set(GradientArithmetic(color));
+        }
+    }
+
     void SetBlockColor(Color color)
     {
         if (blockColor_) {
@@ -106,7 +115,7 @@ public:
         }
     }
 
-    void SetBoardColor();
+    void SetBoardColor(const RefPtr<FrameNode>& host);
 
     void SetBackgroundSize(const PointF& start, const PointF& end)
     {
@@ -118,9 +127,9 @@ public:
         }
     }
 
-    void SetSelectSize(const PointF& start, const PointF& end);
+    void SetSelectSize(const PointF& start, const PointF& end, const RefPtr<FrameNode>& host);
 
-    void SetCircleCenter(const PointF& center);
+    void SetCircleCenter(const PointF& center, const RefPtr<FrameNode>& host);
 
     void SetStepRatio(float stepRatio)
     {
@@ -352,7 +361,17 @@ public:
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
+    RSRect GetBlockRect(float radius);
+    RSRect GetShapeCircleBlockRect(const PointF& centerPoint, float drawRadius);
+    RSRect GetShapeEllipseBlockRect(const RectF& drawRect);
+    RSRect GetShapePathBlockRect(const SizeF& shapeSize, const PointF& centerPoint);
+    void CreateDefaultBlockBrush(RSBrush& brush, float& radius);
+    void CreateShapeCircleBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter);
+    void CreateShapeEllipseBlockBrush(RSBrush& brush, const RectF& drawRect);
+    void CreateShapePathBlockBrush(RSBrush& brush, const SizeF& shapeSize, const PointF& blockCenter);
+    void CreateShapeRectBlockBrush(RSBrush& brush, RSRect& rsRect);
     std::vector<GradientColor> GetTrackBackgroundColor() const;
+    std::vector<GradientColor> GetBlockColor() const;
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     void DrawSelectColor(RSBrush& brush, RSRect& rect);
     void DrawBlock(DrawingContext& context);
@@ -363,13 +382,12 @@ private:
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
     void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
     void SetBlockClip(DrawingContext& context);
-    void StopSelectAnimation();
-    void StopCircleCenterAnimation();
+    void StopSelectAnimation(const RefPtr<FrameNode>& host);
+    void StopCircleCenterAnimation(const RefPtr<FrameNode>& host);
     void UpdateSliderEndsPosition();
 
 private:
-    std::function<void(float)> updateImageCenterX_;
-    std::function<void(float)> updateImageCenterY_;
+    UpdateImageCenterCallback updateImageCenterCallback_;
     std::function<void()> updateAccessibilityVirtualNode_;
     WeakPtr<FrameNode> host_;
 
@@ -383,6 +401,7 @@ private:
     RefPtr<AnimatablePropertyFloat> trackThickness_;
     RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyVectorColor> selectGradientColor_;
+    RefPtr<AnimatablePropertyVectorColor> blockGradientColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 

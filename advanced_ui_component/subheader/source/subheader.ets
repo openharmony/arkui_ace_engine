@@ -34,7 +34,6 @@ const DOUBLE_LINE_NUM: number = 2;
 // 资源数值
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 // 左边尺寸常量
-const LEFT_ICON_SIZE: ResourceStr = '16vp';
 const LEFT_ICON_SIZE_NUMBER: number = 16;
 const LEFT_TEXT_NUMBER: number = 8;
 // 右边尺寸常量
@@ -205,6 +204,24 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceI
 RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
 // subheader_title_font_weight: 125834255 700
 RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
+// subheader_left_icon_size: 125835678, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_size', { resourceId: 125835678, defaultValue: 16 });
+// subheader_content_margin_start: 125835679, margin_left, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_start', { resourceId: 125835679, defaultValue: 16 });
+// subheader_content_margin_end: 125835680, margin_right, 16
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_end', { resourceId: 125835680, defaultValue: 16 });
+// subheader_content_padding: 125835681, padding_level4, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_padding', { resourceId: 125835681, defaultValue: 8 });
+// subheader_single_subtitle_padding: 125835682, padding_level6, 12
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_padding', { resourceId: 125835682, defaultValue: 12 });
+// subheader_select_padding: 125835683, padding_level2, 4
+RESOURCE_CACHE_MAP.set('sys.float.subheader_select_padding', { resourceId: 125835683, defaultValue: 4 });
+// subheader_left_icon_end_margin: 125835684, padding_level4, 8
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_end_margin', { resourceId: 125835684, defaultValue: 8 });
+// subheader_subtitle_font_weight: 125835685, regular , 400
+RESOURCE_CACHE_MAP.set('sys.float.subheader_subtitle_font_weight', { resourceId: 125835685, defaultValue: 400 });
+// subheader_titles_space: 125835686, padding_level1, 2
+RESOURCE_CACHE_MAP.set('sys.float.subheader_titles_space', { resourceId: 125835686, defaultValue: 2 });
 
 @Component
 export struct SubHeader {
@@ -230,8 +247,8 @@ export struct SubHeader {
   @Prop contentMargin: LocalizedMargin;
   @Prop contentPadding: LocalizedPadding;
   subHeaderMargin: LocalizedMargin = {
-    start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
-    end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
+    start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
+    end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   isFollowingSystemFontScale: boolean = false;
@@ -253,9 +270,9 @@ export struct SubHeader {
     .padding({
       end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
       top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-        : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+        : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
       bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-        : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+        : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
     })
   }
 
@@ -264,9 +281,9 @@ export struct SubHeader {
     .padding({
       end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
       top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-        : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+        : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
       bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-        : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+        : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
     })
   }
 
@@ -610,13 +627,13 @@ export struct SubHeader {
     if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
       (!this.primaryTitle && this.secondaryTitle))) {
       padding = {
-        start: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
-        end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+        start: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
+        end: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
       }
     } else if (this.select) {
       padding = {
-        top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-        bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+        top: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
+        bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
       }
     }
     return padding;
@@ -673,19 +690,20 @@ export struct SubHeader {
       if (Util.isSymbolResource($$.iconOptions?.icon)) {
         SymbolGlyph($$.iconOptions?.icon)
           .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?
-          Util.symbolFontSize($$.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE)
+          Util.symbolFontSize($$.iconOptions?.symbolicIconOption?.fontSize) :
+            getResourceValue('sys.float.subheader_left_icon_size'))
           .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor])
           .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
           .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
-          .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) })
           .flexShrink(0)
       } else {
         Image($$.iconOptions?.icon)
           .fillColor(this.subHeaderTheme.leftIconColor)
-          .width(LEFT_ICON_SIZE)
-          .height(LEFT_ICON_SIZE)
-          .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) })
+          .width(getResourceValue('sys.float.subheader_left_icon_size'))
+          .height(getResourceValue('sys.float.subheader_left_icon_size'))
+          .margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) })
           .draggable(false)
           .flexShrink(0)
       }
@@ -716,12 +734,12 @@ export struct SubHeader {
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
-          fontWeight: FontWeight.Regular,
+          fontWeight: getResourceValue('sys.float.subheader_subtitle_font_weight'),
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
         .margin({
-          top: getResourceValue('sys.float.padding_level1'),
+          top: getResourceValue('sys.float.subheader_titles_space'),
         })
         .attributeModifier(this.secondaryTitleModifier)
     }
@@ -1203,7 +1221,7 @@ class Util {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-      return 0;
+      return defaultNumber;
     }
   }
 

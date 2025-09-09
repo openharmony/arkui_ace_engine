@@ -530,9 +530,10 @@ void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
     auto interactive = sheetStyle.interactive.value_or(false);
     sheetPattern->SetAnimationProcess(true);
     property->Set(width - std::abs(currentOffset_));
-    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
-        [weak = AceType::WeakClaim(RawPtr(sheetPattern)),
-            renderContext, offsetX, width, interactive]() {
+    auto pipeline = host->GetContextRefPtr();
+    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext, offsetX, width, interactive]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (interactive) {
@@ -541,7 +542,8 @@ void SheetSideObject::ModifyFireSheetTransition(float dragVelocity)
             if (renderContext) {
                 renderContext->UpdateTransformTranslate({ offsetX, 0.0, 0.0f });
             }
-        }, finishCallback);
+        },
+        finishCallback, nullptr, pipeline);
     sheetPattern->SetAnimation(animation);
 }
 
@@ -569,6 +571,14 @@ SheetKeyboardAvoidMode SheetSideObject::GetAvoidKeyboardModeByDefault() const
 void SheetSideObject::BeforeCreateLayoutWrapper()
 {
     AvoidKeyboard(false);
+
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollablePattern = scrollNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetNeedFullSafeArea(false);
 }
 
 void SheetSideObject::AvoidKeyboard(bool forceAvoid)

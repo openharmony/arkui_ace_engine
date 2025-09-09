@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 class PageUrlCheckerOhos : public PageUrlChecker {
-    DECLARE_ACE_TYPE(PageUrlCheckerOhos, PageUrlChecker)
+    DECLARE_ACE_TYPE(PageUrlCheckerOhos, PageUrlChecker);
 
 public:
     explicit PageUrlCheckerOhos(

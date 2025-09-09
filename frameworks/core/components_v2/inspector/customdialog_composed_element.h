@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT CustomDialogComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(CustomDialogComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(CustomDialogComposedElement, InspectorComposedElement);
 
 public:
     explicit CustomDialogComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

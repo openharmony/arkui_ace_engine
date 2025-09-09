@@ -17,21 +17,23 @@ import(
 
 build_component_ng("web_pattern_ng") {
   if (is_arkui_x) {
+    import(
+        "//foundation/appframework/arkui/core/components_ng/pattern/web/arkuix_web.gni")
+
     sources = [
-      "cross_platform/web_delegate_cross.cpp",
-      "cross_platform/web_pattern.cpp",
-      "cross_platform/web_resource.cpp",
       "richtext_model_ng.cpp",
       "web_accessibility_property.cpp",
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",
     ]
+    sources += arkuix_web_source
   } else {
     sources = [
       "richtext_model_ng.cpp",
       "touch_event_listener.cpp",
       "transitional_node_info.cpp",
       "web_accessibility_child_tree_callback.cpp",
+      "web_accessibility_event_report.cpp",
       "web_accessibility_property.cpp",
       "web_accessibility_session_adapter.cpp",
       "web_content_modifier.cpp",

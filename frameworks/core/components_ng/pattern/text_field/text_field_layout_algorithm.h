@@ -180,7 +180,7 @@ private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled);
     static void UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TextFieldLayoutProperty>& layoutPropeerty, TextStyle& textStyle);
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
         TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern);
     static void UpdatePlaceholderTextStyleSetTextColor(

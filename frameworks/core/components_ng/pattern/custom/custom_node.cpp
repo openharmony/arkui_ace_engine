@@ -260,7 +260,7 @@ void CustomNode::DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo)
         DumpLog::GetInstance().AddDesc("decorator:" + decoratorItem->GetValue("decorator")->ToString() + \
                                        " propertyName:" + decoratorItem->GetValue("propertyName")->ToString() + \
                                        " value:" + decoratorItem->GetValue("value")->ToString());
-        DumpLog::GetInstance().AddDesc("stateVariable id: " + decoratorItem->GetValue("id")->ToString());
+        DumpLog::GetInstance().AddDesc("state Variable id: " + decoratorItem->GetValue("id")->ToString());
         DumpLog::GetInstance().AddDesc("inRenderingElementId: " + \
                                         decoratorItem->GetValue("inRenderingElementId")->ToString());
         DumpLog::GetInstance().AddDesc("dependentElementIds: " + \
@@ -308,9 +308,8 @@ void CustomNode::FireRecycleRenderFunc()
         ACE_SCOPED_TRACE("CustomNode:BuildRecycle [%s][self:%d][parent:%d][reuseId:%s][parentCustomNode:%s]",
             GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0,
             reuseId.c_str(), parentInfo.c_str());
+        CustomNodeBase::FireRecycleRenderFunc();
     }
-
-    CustomNodeBase::FireRecycleRenderFunc();
 }
 
 RefPtr<CustomNode> CustomNode::FindParentCustomNode() const

@@ -14,33 +14,36 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
 interop_root = ""
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-action("interop.abc") {
-    script = "gn/command/npm.py"
+npm_cmd("interop_install") {
+    outputs = [
+        "$target_out_dir/interop_install"
+    ]
+    project_path = rebase_path(".")
+    install = true
+}
+
+npm_cmd("interop.abc") {
     outputs = [
         "$target_out_dir/interop.abc"
     ]
-    args = [
-        "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
-        "--arklink-path", rebase_path("${static_linker_build_path}"),
-        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
-        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
-        "--npm-args", "run", "build:interop:gn"
-    ]
+    project_path = rebase_path(".")
+    run_tasks = [ "build:interop" ]
 
     deps = [
-      "${ohos_ets_api_deps}",
-      "${ohos_ets_arkts_deps}",
+        "../ui2abc:fast_arktsc_build"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps
+    ]
 }
 
 group("interop") {

@@ -90,7 +90,7 @@ public:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-    void OnVisibleChangeInner(bool visible);
+    void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;

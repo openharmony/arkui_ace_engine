@@ -152,7 +152,7 @@ void TextAreaDecorationBase::CreateTextField(
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);
@@ -1451,5 +1451,17 @@ HWTEST_F(TextAreaDecorationUXTest, TextAreaToJsonValue034, TestSize.Level1)
      * @tc.expected: check lineHeight in TextArea JSON is 3.00px
      */
     EXPECT_EQ(json->GetString("lineHeight"), "3.00px");
+}
+
+/**
+ * @tc.name: TextCounterFormat
+ * @tc.desc: test get counter format text from resournce manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaDecorationUXTest, TextCounterFormat, TestSize.Level1)
+{
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto counter = textFieldTheme->GetCounterFormatString(10, 100);
+    EXPECT_EQ(counter, "10/100");
 }
 }

@@ -70,6 +70,18 @@ std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
     return ToHtmlStyleFormat("font-weight", index < 0 ? "normal" : table[index].value);
 }
 
+std::string SpanToHtml::StrokeWidthToHtml(const std::optional<Dimension>& value)
+{
+    return ToHtmlStyleFormat("stroke-width", DimensionToString(value.value_or(TEXT_DEFAULT_STROKE_WIDTH)));
+}
+
+std::string SpanToHtml::StrokeColorToHtml(const std::optional<Color>& value)
+{
+    auto color = value.value_or(Color::BLACK).ColorToString();
+    ToHtmlColor(color);
+    return ToHtmlStyleFormat("stroke-color", color);
+}
+
 void SpanToHtml::ToHtmlColor(std::string& color)
 {
     if (color.length() < COLOR_MIN_LENGHT) {
@@ -110,18 +122,6 @@ std::string SpanToHtml::BackgroundColorToHtml(const std::optional<TextBackground
 std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::string>>& value)
 {
     return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));
-}
-
-std::string SpanToHtml::StrokeWidthToHtml(const std::optional<Dimension>& value)
-{
-    return ToHtmlStyleFormat("stroke-width", DimensionToString(value.value_or(TEXT_DEFAULT_STROKE_WIDTH)));
-}
-
-std::string SpanToHtml::StrokeColorToHtml(const std::optional<Color>& value)
-{
-    auto color = value.value_or(Color::BLACK).ColorToString();
-    ToHtmlColor(color);
-    return ToHtmlStyleFormat("stroke-color", color);
 }
 
 std::string SpanToHtml::FontSuperscriptToHtml(const std::optional<SuperscriptStyle>& value)
@@ -199,7 +199,7 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimen
     return ToHtmlStyleFormat(key, DimensionToString(value));
 }
 
-std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
+std::string SpanToHtml::DecorationToHtml(const NG::FontStyle& fontStyle)
 {
     auto types = fontStyle.GetTextDecoration().value_or(
         std::vector<TextDecoration>({TextDecoration::NONE}));
@@ -493,7 +493,7 @@ std::string SpanToHtml::NormalStyleToHtml(
     style += StrokeWidthToHtml(fontStyle.GetStrokeWidth());
     style += StrokeColorToHtml(fontStyle.GetStrokeColor());
     style += FontSuperscriptToHtml(fontStyle.GetSuperscript());
-    style += DeclarationToHtml(fontStyle);
+    style += DecorationToHtml(fontStyle);
     style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());
     style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());
@@ -521,7 +521,7 @@ std::string SpanToHtml::NormalStyleToHtml(const RefPtr<NG::SpanItem>& item)
     style += StrokeWidthToHtml(fontStyle.GetStrokeWidth());
     style += StrokeColorToHtml(fontStyle.GetStrokeColor());
     style += FontSuperscriptToHtml(fontStyle.GetSuperscript());
-    style += DeclarationToHtml(fontStyle);
+    style += DecorationToHtml(fontStyle);
     style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());
     style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());

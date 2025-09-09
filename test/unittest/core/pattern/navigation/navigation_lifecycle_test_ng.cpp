@@ -120,7 +120,7 @@ void NavigationLifecycleTestNg::MockPipelineContextGetTheme()
 void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8_t expectValue,
     const RefPtr<FrameNode>& destinationNode, const RefPtr<MockNavigationStack>& stack)
 {
-    auto eventHub = destinationNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destinationNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
     std::function<void()>&& callback = [stack = stack, expectValue = expectValue]() {
         auto lifecycleIndex = stack->GetLifecycleIndex();
@@ -128,6 +128,13 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
         lifecycleIndex++;
         stack->SetLifecycleIndex(lifecycleIndex);
     };
+    std::function<void(int32_t)>&& showHideCallback = [stack = stack, expectValue = expectValue](int32_t reason) {
+        auto lifecycleIndex = stack->GetLifecycleIndex();
+        EXPECT_EQ(lifecycleIndex, expectValue);
+        lifecycleIndex++;
+        stack->SetLifecycleIndex(lifecycleIndex);
+    };
+
     switch (lifecycle) {
         case NavDestinationLifecycle::ON_WILL_APPEAR: {
             eventHub->SetOnWillAppear(callback);
@@ -142,7 +149,7 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
             break;
         }
         case NavDestinationLifecycle::ON_SHOW: {
-            eventHub->SetOnShown(std::move(callback));
+            eventHub->SetOnShown(std::move(showHideCallback));
             break;
         }
         case NavDestinationLifecycle::ON_WILL_HIDE: {
@@ -150,7 +157,7 @@ void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8
             break;
         }
         case NavDestinationLifecycle::ON_HIDE: {
-            eventHub->SetOnHidden(std::move(callback));
+            eventHub->SetOnHidden(std::move(showHideCallback));
             break;
         }
         case NavDestinationLifecycle::ON_WILL_DISAPPEAR: {
@@ -218,7 +225,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
     pattern->SetNavigationNode(navigationNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
     stack->SetLifecycleIndex(0);
     SetEvent(NavDestinationLifecycle::ON_APPEAR, 0, frameNode, stack);
@@ -406,7 +413,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest004, TestSize.Lev
     const int8_t willShowIndex = 2;
     SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, frameNode, stack);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->FireOnWillAppear();
     stack->Add("pageA", frameNode);
@@ -541,7 +548,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
      */
     stack->Remove();
     stack->Add("B", destinationB);
-    auto eventHub = destinationB->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destinationB->GetEventHub<NavDestinationEventHub>();
     eventHub->FireOnWillAppear();
     stack->UpdateReplaceValue(true);
     navigationPattern->MarkNeedSyncWithJsStack();
@@ -588,7 +595,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest007, TestSize.Lev
     const int8_t willShowIndex = 2;
     SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, frameNode, stack);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->FireOnWillAppear();
     stack->Add("pageA", frameNode);
@@ -722,7 +729,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.
      */
     stack->Remove();
     stack->Add("B", destinationB);
-    auto eventHub = destinationB->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destinationB->GetEventHub<NavDestinationEventHub>();
     eventHub->FireOnWillAppear();
     stack->UpdateReplaceValue(true);
     stack->UpdateAnimatedValue(false);
@@ -1069,7 +1076,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle006, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestinationA, stack);
     SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
     stack->Add("pageB", navDestinationA);
-    auto navDestinationAEventHub = navDestinationA->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationAEventHub = navDestinationA->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationAEventHub == nullptr);
     navDestinationAEventHub->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1091,7 +1098,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle006, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_HIDE, 5, navDestination, stack);
     SetEvent(NavDestinationLifecycle::ON_SHOW, 6, navDestinationC, stack);
     stack->Add("pageB", navDestinationC);
-    auto navDestinationEventHub = navDestinationC->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationC->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationEventHub == nullptr);
     navDestinationEventHub->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1124,7 +1131,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle007, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestination, stack);
     SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestination, stack);
     stack->Add("pageA", navDestination);
-    auto navDestinationEventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationEventHub == nullptr);
     navDestinationEventHub->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1146,7 +1153,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle007, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 1, navDestinationA, stack);
     SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
     stack->Add("pageA", navDestinationA);
-    auto eventHubA = navDestinationA->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHubA = navDestinationA->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHubA == nullptr);
     eventHubA->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1194,7 +1201,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle008, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestination, stack);
     stack->Add("pageA", navDestination);
     stack->UpdateAnimatedValue(false);
-    auto navDestinationEventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationEventHub == nullptr);
     navDestinationEventHub->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1217,7 +1224,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle008, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_SHOW, 2, navDestinationA, stack);
     stack->Add("pageA", navDestinationA);
     stack->UpdateAnimatedValue(false);
-    auto eventHubA = navDestinationA->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHubA = navDestinationA->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHubA == nullptr);
     eventHubA->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1273,10 +1280,10 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle009, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_SHOW, 5, navDestinationB, stack);
     stack->Add("pageA", navDestination);
     stack->Add("pageB", navDestinationB);
-    auto navDestinationEventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationEventHub == nullptr);
     navDestinationEventHub->FireOnWillAppear();
-    auto eventHubB = navDestinationB->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHubB = navDestinationB->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHubB == nullptr);
     eventHubB->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();
@@ -1325,10 +1332,10 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationDialogLifecycle010, TestSize.Level
     SetEvent(NavDestinationLifecycle::ON_SHOW, 3, navDestinationB, stack);
     stack->Add("pageA", navDestination);
     stack->Add("pageB", navDestinationB);
-    auto navDestinationEventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(navDestinationEventHub == nullptr);
     navDestinationEventHub->FireOnWillAppear();
-    auto eventHubB = navDestinationB->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHubB = navDestinationB->GetEventHub<NavDestinationEventHub>();
     EXPECT_FALSE(eventHubB == nullptr);
     eventHubB->FireOnWillAppear();
     pattern->MarkNeedSyncWithJsStack();

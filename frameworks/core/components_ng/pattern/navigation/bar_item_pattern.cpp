@@ -30,7 +30,7 @@ void BarItemPattern::OnModifyDone()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto eventHub = pattern->GetOrCreateEventHub<BarItemEventHub>();
+        auto eventHub = pattern->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireItemAction();
         pattern->UpdateBarItemActiveStatusResource();

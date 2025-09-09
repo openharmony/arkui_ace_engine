@@ -40,6 +40,7 @@ public:
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
             auto wrapper = AceType::MakeRefPtr<TextFieldThemeWrapper>();
+            wrapper->SetThemeConstants(themeConstants);
             auto theme = AceType::DynamicCast<TextFieldTheme>(wrapper);
             if (!themeConstants) {
                 return wrapper;

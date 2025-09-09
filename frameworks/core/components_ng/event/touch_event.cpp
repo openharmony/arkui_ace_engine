@@ -36,11 +36,15 @@ void TouchEventActuator::OnFlushTouchEventsEnd()
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    bool isNeedPropagation = false;
     // if current node is forbidden by monopolize, upper nodes should not response either
     if (!ShouldResponse()) {
+        SetNeedPropagation(isNeedPropagation);
         return false;
     }
-    return TriggerTouchCallBack(point);
+    isNeedPropagation = TriggerTouchCallBack(point);
+    SetNeedPropagation(isNeedPropagation);
+    return isNeedPropagation;
 }
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
@@ -168,6 +172,9 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
     if (lastPoint.tiltY.has_value()) {
         changedInfo.SetTiltY(lastPoint.tiltY.value());
     }
+    if (lastPoint.rollAngle.has_value()) {
+        changedInfo.SetRollAngle(lastPoint.rollAngle.value());
+    }
     changedInfo.SetSourceTool(lastPoint.sourceTool);
     changedInfo.SetOperatingHand(lastPoint.operatingHand);
     return changedInfo;
@@ -203,6 +210,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     if (pointItem.tiltY.has_value()) {
         info.SetTiltY(pointItem.tiltY.value());
     }
+    if (pointItem.rollAngle.has_value()) {
+        info.SetRollAngle(pointItem.rollAngle.value());
+    }
     info.SetSourceTool(pointItem.sourceTool);
     info.SetOperatingHand(pointItem.operatingHand);
     return info;
@@ -237,6 +247,9 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     }
     if (eventItem.tiltY.has_value()) {
         historyInfo.SetTiltY(eventItem.tiltY.value());
+    }
+    if (eventItem.rollAngle.has_value()) {
+        historyInfo.SetRollAngle(eventItem.rollAngle.value());
     }
     historyInfo.SetSourceTool(eventItem.sourceTool);
     historyInfo.SetOperatingHand(eventItem.operatingHand);

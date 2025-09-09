@@ -166,11 +166,9 @@ void SheetWrapperLayoutAlgorithm::MeasureSheetMask(LayoutWrapper* layoutWrapper)
     auto index = host->GetChildIndexById(maskNode->GetId());
     auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(maskWrapper);
-    auto rect = sheetWrapperPattern->GetMainWindowRect();
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     auto constraint = layoutProp->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(rect.Width(), rect.Height());
     maskWrapper->Measure(constraint);
 }
 
@@ -194,13 +192,13 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
     placement_ = sheetStyle.placement.value_or(Placement::BOTTOM);
     sheetPopupInfo_.Reset();    // everytime sheetWrapper changed, we need to reset sheetPopupInfo to default value
     sheetPopupInfo_.finalPlacement = placement_;
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
+#ifndef PREVIEW
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
@@ -217,6 +215,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         auto focusHub = sheetPage->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         auto isFocused = focusHub->IsCurrentFocus();
+        auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
         if (keyboardInset.Length() != 0 && isFocused && needAvoidKeyboard) {
             sheetPopupInfo_.keyboardShow = true;
             height -= keyboardInset.Length() - safeArea.bottom_.Length();
@@ -226,6 +225,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         // windowRect neet to set as origin point, because sheet offset is relative to window rect
         windowGlobalRect_ = Rect(0.f, offsetY, windowGlobalRect_.Width(), height);
     }
+#endif
 }
 
 void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
@@ -1084,24 +1084,21 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
     auto index = host->GetChildIndexById(maskNode->GetId());
     auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(maskWrapper);
-    auto rect = sheetWrapperPattern->GetMainWindowRect();
     auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
     CHECK_NULL_VOID(subContainer);
     auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
     CHECK_NULL_VOID(subWindowContext);
-    auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
-    auto contentOffset = OffsetF(rect.GetX() - subWindowGlobalRect.Left(),
-        rect.GetY() - subWindowGlobalRect.Top());
     auto geometryNode = maskWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(contentOffset);
 
     auto currentId = Container::CurrentId();
     SubwindowManager::GetInstance()->DeleteHotAreas(currentId, maskNode->GetId(), SubwindowType::TYPE_SHEET);
+    // true means that the mask layer takes effect in response to the click event
     if (maskPattern->GetIsMaskInteractive()) {
+        auto maskFrameRect = geometryNode->GetFrameRect();
         std::vector<Rect> rects;
-        auto maskHotRect = Rect(rect.GetX(), rect.GetY(),
-            maskNode->GetGeometryNode()->GetFrameSize().Width(), maskNode->GetGeometryNode()->GetFrameSize().Height());
+        auto maskHotRect =
+            Rect(maskFrameRect.GetX(), maskFrameRect.GetY(), maskFrameRect.Width(), maskFrameRect.Height());
         rects.emplace_back(maskHotRect);
         auto subWindowMgr = SubwindowManager::GetInstance();
         subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_SHEET, maskNode->GetId(), currentId);

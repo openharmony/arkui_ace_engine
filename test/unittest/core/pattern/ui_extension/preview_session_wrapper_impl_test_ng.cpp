@@ -60,6 +60,7 @@
 #include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
+#include "transaction/rs_transaction.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -420,10 +421,12 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg006, Te
      * @tc.steps: step2. test NotifySizeChangeReason
      */
     auto type = OHOS::Ace::WindowSizeChangeReason::UNDEFINED;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction = std::make_shared<Rosen::RSTransaction>();
     sessionWrapper->NotifySizeChangeReason(type, nullptr);
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
+    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
+    type = OHOS::Ace::WindowSizeChangeReason::SNAPSHOT_ROTATION;
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
 #endif
 }
@@ -572,6 +575,9 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg010, Te
     sessionWrapper->NotifyDisplayArea(paintRect);
 
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    sessionWrapper->NotifyDisplayArea(paintRect);
+
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }

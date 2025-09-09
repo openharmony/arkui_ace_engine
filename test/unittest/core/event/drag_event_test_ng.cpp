@@ -335,7 +335,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.steps: step2. Get eventHub and set onDragStart.
      * @tc.expected: eventHub is not nullptr.
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
@@ -2112,5 +2112,22 @@ HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.
     dragEventActuator->isThumbnailCallbackTriggered_ = false;
     dragEventActuator->TryTriggerThumbnailCallback();
     EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
+}
+
+/**
+ * @tc.name: SetDragNodeNeedClean
+ * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    overlayManager->SetDragNodeNeedClean();
+    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
 }
 } // namespace OHOS::Ace::NG

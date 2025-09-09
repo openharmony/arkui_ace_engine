@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { WebviewController, WebviewControllerInternal } from "./arkui-external"
 import { WebviewController as WebviewControllerAni } from "#external"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { Callback_String_Void } from "./gridRow"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -179,8 +179,15 @@ export class FileSelectorParam implements MaterializedBase {
         return TypeChecker.FileSelectorMode_FromNumeric(retval)
     }
     private getAcceptType_serialize(): Array<string> {
-        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -194,8 +201,15 @@ export class FileSelectorParam implements MaterializedBase {
         return retval
     }
     private getMimeTypes_serialize(): Array<string> {
-        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -3114,6 +3128,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    forceEnableZoomAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_forceEnableZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
@@ -3788,6 +3814,7 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
+    forceEnableZoom(value: boolean | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -3915,6 +3942,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions
+    forceEnableZoom_value?: boolean | undefined
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -4295,7 +4323,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     }
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         return this
-        }
+    }
+    public forceEnableZoom(value: boolean | undefined): this {
+        return this
+    }
 }
 export interface SslErrorEvent {
     handler: SslErrorHandler;
@@ -5369,6 +5400,15 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public forceEnableZoom(value: boolean | undefined): this {
+        if (this.checkPriority("forceEnableZoom")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.forceEnableZoomAttribute(value_casted)
+            return this
+        }
+        return this
     }
 }
 /** @memo */

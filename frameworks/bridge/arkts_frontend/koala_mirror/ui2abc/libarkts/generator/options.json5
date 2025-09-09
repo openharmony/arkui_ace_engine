@@ -26,6 +26,8 @@
             "es2panda_Impl",
             "es2panda_Config",
             "es2panda_ExternalSource",
+            "es2panda_OverloadInfo",
+            "es2panda_GlobalContext"
         ],
         "partial": [
             {
@@ -105,6 +107,14 @@
                 interface: "MemberExpression",
                 methods: [
                     "SetExtensionAccessorType" // ETSFunction type ambiguity
+                ]
+            },
+            {
+                interface: "ArkTsConfig",
+                methods: [
+                    "EntriesConst",
+                    "FilesConst",
+                    "Parse",
                 ]
             },
         ]
@@ -235,5 +245,38 @@
                 }
             ]
         },
+        {
+            name: "Program",
+            methods: [
+                {
+                    name: "Ast",
+                    types: ["returnType"]
+                }
+            ]
+        }
+    ],
+    fragments: [
+        {
+            interface: "MethodDefinition",
+            methods: [
+                {
+                    name: "setChildrenParentPtr",
+                    definition: "extension_MethodDefinitionSetChildrenParentPtr",
+                },
+                {
+                    name: "onUpdate",
+                    definition: "extension_MethodDefinitionOnUpdate",
+                },
+            ]
+        },
+        {
+            interface: "ETSModule",
+            methods: [
+                {
+                    name: "getNamespaceFlag",
+                    definition: "extension_ETSModuleGetNamespaceFlag",
+                }
+            ]
+        }
     ],
 }

@@ -40,6 +40,7 @@ template("declarative_frontend") {
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_factory.cpp",
         "ng/page_router_manager_static.cpp",
       ]
     } else {
@@ -47,20 +48,15 @@ template("declarative_frontend") {
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_factory.cpp",
         "ng/page_router_manager_static.cpp",
       ]
     }
 
-    if (ace_engine_feature_enable_split_mode &&
-        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
-      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
-    }
-
-    if (ace_engine_feature_enable_split_mode &&
-        defined(vendor_configs.ace_engine_advanced_split_mode_bridge)) {
-      sources += vendor_configs.ace_engine_advanced_split_mode_bridge
-    } else {
-      sources += [ "ng/page_router_manager_factory.cpp" ]
+    if (ace_engine_feature_enable_split_mode) {
+      sources += [
+        "ng/force_split/parallel_page_router_manager.cpp",
+      ]
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -76,6 +72,12 @@ template("declarative_frontend") {
     ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
+    }
+    if (!build_ohos_sdk) {
+      external_deps += [
+        "c_utils:utils",
+        "ipc:ipc_core",
+      ]
     }
   }
 }

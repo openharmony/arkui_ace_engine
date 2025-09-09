@@ -53,10 +53,6 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
         return nullptr;
     }
 
-    if (targetNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-        return targetNode;
-    }
-
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene start.");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
@@ -141,6 +137,13 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(const RefPtr<FrameNode>&
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        if (focusedFrameNode && focusedFrameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            auto windowScenePattern = focusedFrameNode->GetPattern<SystemWindowScene>();
+            CHECK_NULL_RETURN(windowScenePattern, false);
+            auto window2patternSession = windowScenePattern->GetSession();
+            CHECK_NULL_RETURN(window2patternSession, false);
+            return window2patternSession->GetSCBKeepKeyboardFlag();
+        }
         return false;
     }
 

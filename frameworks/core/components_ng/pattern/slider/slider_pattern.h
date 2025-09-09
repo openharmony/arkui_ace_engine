@@ -46,15 +46,10 @@ public:
         if (!sliderContentModifier_) {
             sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
                 paintParameters,
-                [weak = WeakClaim(this)](float x) {
+                [weak = WeakClaim(this)](const PointF& imageCenter) {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateImagePositionX(x);
-                },
-                [weak = WeakClaim(this)](float y) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->UpdateImagePositionY(y);
+                    pattern->UpdateImagePosition(imageCenter);
                 });
             sliderContentModifier_->SetHost(GetHost());
         }
@@ -63,7 +58,18 @@ public:
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
-
+        if (!sliderTipModifier_ && bubbleFlag_) {
+            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                if (!pattern) {
+                    return std::pair<OffsetF, float>();
+                }
+                auto blockCenter = pattern->GetBlockCenter();
+                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
+                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
+                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
+            });
+        }
         auto textDirection = TextDirection::AUTO;
         auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
         if (layoutProperty) {
@@ -246,31 +252,6 @@ public:
         return sliderContentModifier_;
     }
 
-    bool IsSliderVisible();
-    SliderContentModifier::Parameters UpdateContentParameters();
-    std::pair<OffsetF, float> GetBubbleVertexPosition(
-        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
-    const SizeF& GetBlockSize() const
-    {
-        return blockSize_;
-    }
-
-    float GetTrackThickness() const
-    {
-        return trackThickness_;
-    }
-
-    const bool& GetBubbleFlag() const
-    {
-        return bubbleFlag_;
-    }
-    void CreateTipToMountRoot();
-    void RemoveTipFromRoot();
-    void RefreshTipNode();
-    void OnFinishEventTipSize();
-    void CalculateOffset();
-    void MountToNavigation(RefPtr<FrameNode>& tipNode);
-
     void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
     void UpdateSliderComponentMedia();
     void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
@@ -309,6 +290,7 @@ private:
 
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
 
+    void InitEvent();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -392,6 +374,7 @@ private:
     void HandleCrownAction(double mainDelta);
     void StartVibrateFeedback();
 #endif
+    bool IsSliderVisible();
     void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -400,15 +383,15 @@ private:
 
     void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
-
+    SliderContentModifier::Parameters UpdateContentParameters();
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
     void LayoutImageNode();
-    void UpdateImagePositionX(float centerX);
-    void UpdateImagePositionY(float centerY);
-
+    void UpdateImagePosition(const PointF& imageCenter);
+    std::pair<OffsetF, float> GetBubbleVertexPosition(
+        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
     void UpdateTipState();
     void OnIsFocusActiveUpdate(bool isFocusActive);
@@ -556,10 +539,6 @@ private:
     float accessibilityValue_ = 0.0f;
     bool isEnableHaptic_ = true;
     double slipfactor_ = 0;
-    RefPtr<FrameNode> sliderTipNode_ = nullptr;
-    RefPtr<UINode> navigationNode_ = nullptr;
-    double xLastSlider_ = 0.0f;
-    double yLastSlider_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

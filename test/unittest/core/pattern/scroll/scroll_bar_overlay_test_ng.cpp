@@ -14,6 +14,7 @@
  */
 #include "scroll_test_ng.h"
 #include "base/memory/ace_type.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -165,6 +166,32 @@ HWTEST_F(ScrollBarOverlayTestNg, SetCrossModeOffset002, TestSize.Level1)
     scrollBarOverlayModifier.positionMode_ = PositionMode::RIGHT;
     scrollBarOverlayModifier.SetCrossModeOffset(offset);
     EXPECT_EQ(scrollBarOverlayModifier.barX_, barX);
+}
+
+/**
+ * @tc.name: SetBoundsRect
+ * @tc.desc: Test SetBoundsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, SetBoundsRect, TestSize.Level1)
+{
+    ScrollBarOverlayModifier scrollBarOverlayModifier;
+    Offset offset(0.0, 0.0);
+    Size size(10.0, 200.0);
+    scrollBarOverlayModifier.SetOpacity(AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX));
+    scrollBarOverlayModifier.barColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
+    scrollBarOverlayModifier.barWidth_->Set(size.Height());
+    scrollBarOverlayModifier.barHeight_->Set(size.Width());
+    scrollBarOverlayModifier.barX_->Set(offset.GetX());
+    scrollBarOverlayModifier.barY_->Set(offset.GetY());
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(canvas, AttachBrush).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
+    scrollBarOverlayModifier.onDraw(drawingContext);
+    EXPECT_EQ(
+        scrollBarOverlayModifier.GetBoundsRect(), RectF(offset.GetX(), offset.GetX(), size.Height(), size.Width()));
 }
 
 /**

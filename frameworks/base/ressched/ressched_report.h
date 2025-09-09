@@ -33,17 +33,18 @@ constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
+constexpr int64_t INVALID_DATA = -1;
 }
+
+struct ReportConfig {
+    bool isReportTid = false;
+    uint64_t tid = 0;
+};
 
 struct ResEventInfo {
     TimeStamp timeStamp;
     Offset offset;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-};
-
-struct ReportConfig {
-    bool isReportTid = false;
-    uint64_t tid = 0;
 };
 
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
@@ -58,16 +59,19 @@ ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
 class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
-    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
+    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {},
+        int64_t tid = ResDefine::INVALID_DATA);
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
+    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
         const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
     bool AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
-    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
+    bool AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
@@ -75,6 +79,9 @@ public:
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
+    int64_t GetTid();
+    int64_t GetPid();
+    pthread_t GetPthreadSelf();
 
 private:
     ResSchedReport();

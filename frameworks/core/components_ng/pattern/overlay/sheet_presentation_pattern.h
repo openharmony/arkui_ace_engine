@@ -814,6 +814,8 @@ public:
     void UpdateMaskBackgroundColorRender();
 
     void UpdateTitleTextColor();
+    void UpdateSheetCloseIcon();
+    void UpdateSheetBackgroundColor();
 
     Color GetMaskBackgroundColor() const
     {
@@ -944,6 +946,7 @@ public:
     void OnScrollStartRecursive(
         WeakPtr<NestableScrollContainer> child, float position, float dragVelocity = 0.0f) override;
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
+    void OnScrollDragEndRecursive() override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
@@ -1098,12 +1101,11 @@ public:
     void RegisterTitleRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& mainTitleResObj);
     void RegisterDetentSelectionRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
-    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode);
     void RegisterShadowRes(const RefPtr<FrameNode>& sheetNode);
-    void UpdateBorderWidthOrColor(const RefPtr<ResourceObject>& resObj,
-        const WeakPtr<FrameNode>& sheetNodeWK);
-    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
-        RefPtr<ResourceObject>& resObjWidth);
+    void UpdateBorderWidth(const RefPtr<FrameNode>& sheetNodeWK);
+    void UpdateBorderColor(const RefPtr<FrameNode>& sheetNodeWK);
+    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode);
     void HandleMultiDetentKeyboardAvoid();
 
 protected:

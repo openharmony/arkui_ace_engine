@@ -153,6 +153,7 @@ public:
     static void OnNativeEmbedVisibilityChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void OnNativeEmbedMouseEvent(const JSCallbackInfo& args);
+    static void OnNativeEmbedObjectParamChange(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
@@ -161,6 +162,7 @@ public:
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     static void SetCallbackFromController(const JSRef<JSObject> controller);
+    static void SetForceEnableZoom(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
@@ -211,9 +213,12 @@ public:
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
+    static void OnLoadStarted(const JSCallbackInfo& args);
+    static void OnLoadFinished(const JSCallbackInfo& args);
     static void GestureFocusMode(int32_t gestureFocusMode);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
+    static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

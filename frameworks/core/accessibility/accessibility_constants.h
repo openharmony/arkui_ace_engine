@@ -22,6 +22,7 @@ enum class AccessibilityHoverEventType {
     ENTER,
     MOVE,
     EXIT,
+    CANCEL,
     Count
 };
 

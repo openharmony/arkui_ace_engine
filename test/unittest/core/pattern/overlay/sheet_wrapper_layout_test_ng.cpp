@@ -32,6 +32,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension WINDOW_EDGE_WIDTH = 6.0_vp;
 } // namespace
 class SheetWrapperLayoutTestNg : public testing::Test {
 public:
@@ -264,6 +265,57 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown005, TestS
     sheetWrapperLayoutAlgorithm->DecreaseArrowHeightWhenArrowIsShown(sheetNode);
     EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetHeight_, 1000.0f);
     EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetWidth_, 400.0f);
+    SheetWrapperLayoutTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitParameterTest001
+ * @tc.desc: Branch: if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))
+ *           Condition: host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetWrapperLayoutTestNg, InitParameterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheetnode/sheetwrappernode, set version.
+     */
+    SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get sheetWrapperPattern.
+     */
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    ASSERT_NE(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->SetSheetPageNode(sheetNode);
+
+    /**
+     * @tc.steps: step3. excute InitParameter function.
+     * @tc.expected: windowEdgeWidth_ = WINDOW_EDGE_WIDTH.ConvertToPx().
+     */
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    BorderRadiusProperty borderRadius(5.0_vp);
+    SheetStyle sheetStyle;
+    sheetStyle.radius = borderRadius;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetWrapperNode,
+        sheetWrapperNode->GetGeometryNode(), sheetWrapperNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+    ASSERT_NE(sheetWrapperLayoutAlgorithm, nullptr);
+    sheetWrapperLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->windowEdgeWidth_, WINDOW_EDGE_WIDTH.ConvertToPx());
     SheetWrapperLayoutTestNg::TearDownTestCase();
 }
 

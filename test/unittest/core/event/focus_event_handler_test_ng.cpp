@@ -402,6 +402,48 @@ HWTEST_F(FocusEventHandlerTestNg, HandleCrownEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnKeyPreIme001
+ * @tc.desc: Test the function OnKeyPreIme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusEventHandlerTestNg, OnKeyPreIme001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::DYNAMIC_COMPONENT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps2: create eventHub and focusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    /**
+     * @tc.steps3: call the function OnKeyEvent with FocusType::NODE.
+     * @tc.expected: The return value of OnKeyEvent is true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
+    focusHub->SetIsNodeNeedKey(true);
+
+    bool isExecute = false;
+    auto onKeyEvent = [&isExecute](const KeyEvent& event) mutable -> bool {
+        isExecute = true;
+        return true;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+    KeyEventInfo info(keyEvent);
+    focusHub->OnKeyPreIme(info, keyEvent);
+    EXPECT_TRUE(isExecute);
+}
+
+
+/**
  * @tc.name: HandleCrownEventTest001
  * @tc.desc: test OnClick function.
  * @tc.type: FUNC

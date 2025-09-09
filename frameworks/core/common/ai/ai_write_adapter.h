@@ -44,7 +44,7 @@ struct AIWriteInfo {
     std::string componentType;
     std::string firstHandle;
     std::string secondHandle;
-    PlatformVersion apiVersion = PlatformVersion::VERSION_THIRTEEN;
+    PlatformVersion apiVersion = PlatformVersion::VERSION_TWELVE;
     std::vector<uint8_t> selectBuffer;
     std::vector<uint8_t> sentenceBuffer;
 };

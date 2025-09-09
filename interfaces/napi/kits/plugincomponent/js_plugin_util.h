@@ -169,7 +169,7 @@ napi_value AceGetCallbackErrorValue(napi_env env, int errCode);
  *
  * @return Return a pointer to ACEAsyncJSCallbackInfo on success, nullptr on failure
  */
-ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env);
+ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env, bool checkCurrentThread = false);
 void AceFreeAsyncJSCallbackInfo(ACEAsyncJSCallbackInfo** asyncCallbackInfo);
 
 /**
@@ -211,5 +211,12 @@ void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCal
  * @param asyncCallbackInfo Point to asynchronous processing of data.
  */
 void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo);
+
+/**
+ * @brief Check if the container is in the current thread.
+ * @param containerId The id of container.
+ * @return Return true if the container is in the current thread, otherwise return false.
+ */
+bool IsContainerInCurrentThead(int32_t containerId);
 } // namespace OHOS::Ace::Napi
 #endif // OHOS_NAPI_ACE_PLUGIN_UTIL_H

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class WebPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(WebPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(WebPaintProperty, PaintProperty);
 
 public:
     WebPaintProperty() = default;

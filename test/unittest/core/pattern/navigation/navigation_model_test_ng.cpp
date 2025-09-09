@@ -200,6 +200,54 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetToolBarItems001
+ * @tc.desc: Test SetToolBarItems and cover all conditions outside for loop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetToolBarItems001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    // Make newChildrenSize 1
+    // Mkae newBarItem not NULL
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem newBar1;
+    toolBarItems.push_back(newBar1);
+    // Make prevChildrenSize 1
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
+    // Create an old BarItemNode with different attributes
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto preToolBarNode = navBarNode->GetPreToolBarNode();
+    ASSERT_NE(preToolBarNode, nullptr);
+    preToolBarNode->children_.emplace_back(oldBar1);
+    navigationModel.SetToolBarItems(navigationGroupNode, std::move(toolBarItems));
+
+    // Make newChildrenSize 2 and prevChildrenSize 1
+    NG::BarItem newBar2;
+    toolBarItems.push_back(newBar2);
+    navigationModel.SetToolBarItems(navigationGroupNode, std::move(toolBarItems));
+
+    // Make newChildrenSize 2 and prevChildrenSize 3
+    auto oldBar2 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 102, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto oldBar3 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 103, []() { return AceType::MakeRefPtr<Pattern>(); });
+    preToolBarNode->children_.emplace_back(oldBar2);
+    preToolBarNode->children_.emplace_back(oldBar3);
+    navigationModel.SetToolBarItems(navigationGroupNode, std::move(toolBarItems));
+}
+
+/**
  * @tc.name: SetToolbarConfiguration001
  * @tc.desc: Test SetToolbarConfiguration and cover all conditions of "GetPrevToolBarIsCustom.value_or".
  * @tc.type: FUNC
@@ -504,7 +552,7 @@ HWTEST_F(NavigationModelTestNg, CreateToolbarItemInContainer001, TestSize.Level1
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = true;
     std::vector<NG::BarItem> toolBarItems;
@@ -550,7 +598,7 @@ HWTEST_F(NavigationModelTestNg, CreateToolbarItemInContainer002, TestSize.Level1
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = false;
     std::vector<NG::BarItem> toolBarItems;
@@ -617,7 +665,7 @@ HWTEST_F(NavigationModelTestNg, BuildToolbarMoreItemNode001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = true;
     std::vector<NG::BarItem> toolBarItems;
@@ -940,7 +988,7 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode001, TestSize.Level1)
     ASSERT_NE(titleBarNode, nullptr);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
-    auto navigationEventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
+    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
     ASSERT_NE(navigationEventHub, nullptr);
 
     // Make !IsEnabled return false
@@ -1617,7 +1665,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility001, TestSize.Leve
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationPattern->customNode_ = remainChild;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_FALSE(index == static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
@@ -1646,7 +1694,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility002, TestSize.Leve
     int32_t index = 0;
     size_t destinationSize = 1;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     bool ret = navigationNode->UpdateNavDestinationVisibility(
@@ -1678,7 +1726,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility003, TestSize.Leve
     // Make hasChanged false
     navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
@@ -1720,7 +1768,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility004, TestSize.Leve
     calcSize.height_ = CalcLength("auto");
     calcLayoutConstraint->selfIdealSize = calcSize;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
@@ -1755,7 +1803,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility005, TestSize.Leve
     // Make IsOnAnimation return true
     navDestinationNode->isOnAnimation_ = true;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
@@ -1799,7 +1847,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility006, TestSize.Leve
     // Make GetCustomNode is remainChild
     navDestinationPattern->customNode_ = remainChild;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
@@ -1845,7 +1893,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility007, TestSize.Leve
     // Make GetCustomNode is not remainChild
     navDestinationPattern->customNode_ = nullptr;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
@@ -1888,7 +1936,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility008, TestSize.Leve
     // Make IsOnAnimation return true
     navDestinationNode->isOnAnimation_ = true;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
@@ -1930,7 +1978,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility009, TestSize.Leve
     // Make IsOnAnimation return false
     navDestinationNode->isOnAnimation_ = false;
 
-    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
@@ -2153,6 +2201,89 @@ HWTEST_F(NavigationModelTestNg, SetMinContentWidth003, TestSize.Level1)
     ASSERT_NE(navigationPattern, nullptr);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
     navigationModel.SetMinContentWidth(resObj);
+    std::string key = "navigation.minContentWidth";
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), "");
+    navigationPattern->OnColorModeChange(1);
+    CalcDimension minContentWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), minContentWidth.ToString());
+}
+
+/**
+ * @tc.name: SetMinContentWidth004
+ * @tc.desc: Test SetMinContentWidth and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    navigationModel.SetMinContentWidth(navigationGroupNode, resObj);
+    ASSERT_NE(navigationPattern, nullptr);
+}
+
+/**
+ * @tc.name: SetMinContentWidth005
+ * @tc.desc: Test SetMinContentWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    navigationModel.SetMinContentWidth(navigationGroupNode, resObj);
+    std::string key = "navigation.minContentWidth";
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), "");
+    navigationPattern->OnColorModeChange(1);
+    CalcDimension minContentWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), minContentWidth.ToString());
+}
+
+/**
+ * @tc.name: SetMinContentWidth006
+ * @tc.desc: Test SetMinContentWidth with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth006, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    navigationModel.SetMinContentWidth(navigationGroupNode, resObj);
     std::string key = "navigation.minContentWidth";
     EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), "");
     navigationPattern->OnColorModeChange(1);
@@ -2593,5 +2724,26 @@ HWTEST_F(NavigationModelTestNg, SetEnableToolBarAdaptation, TestSize.Level1)
     EXPECT_TRUE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(true));
     navigationModel.SetEnableToolBarAdaptation(false);
     EXPECT_FALSE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(false));
+}
+
+/**
+ * @tc.name: SetSplitPlaceholder001
+ * @tc.desc: !navigationGroupNode->GetPlaceholderContentNode() true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationModelTestNg, SetSplitPlaceholder001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NG::UINode> splitPlaceholder;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    navigationModel.SetSplitPlaceholder(splitPlaceholder);
+    ASSERT_NE(navigationGroupNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

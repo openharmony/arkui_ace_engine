@@ -278,19 +278,23 @@ std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, {});
     if (dataSourceObj_->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "getAllPathIndex failed, dataSourceObj is empty!");
         return {};
     }
     auto getAllPathIndexFunc = dataSourceObj_->GetProperty("getAllPathIndex");
     if (!getAllPathIndexFunc->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "getAllPathIndex is not a function in dataSourceObj!");
         return {};
     }
     auto func = JSRef<JSFunc>::Cast(getAllPathIndexFunc);
     auto funcArray = func->Call(dataSourceObj_);
     if (!funcArray->IsArray()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "getAllPathIndexFunc return value is not array!");
         return {};
     }
     auto array = JSRef<JSArray>::Cast(funcArray);
     if (array->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "getAllPathIndex return value is empyt!");
         return {};
     }
     std::vector<int32_t> pathIndex;
@@ -1259,8 +1263,9 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     if (!serializedParam->IsString() || serializedParam->ToString().empty()) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
             "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
     return serializedParam->ToString();
 }
 

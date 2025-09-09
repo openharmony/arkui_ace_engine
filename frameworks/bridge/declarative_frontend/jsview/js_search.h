@@ -56,6 +56,10 @@ public:
     static void OnSubmit(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void OnChange(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
+    static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
@@ -82,12 +86,12 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);
-    static void SetId(const JSCallbackInfo& info);
-    static void SetKey(const std::string& key);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetInputFilter(const JSCallbackInfo& info);
     static void SetOnEditChange(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
+    static void SetId(const JSCallbackInfo& info);
+    static void SetKey(const std::string& key);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
@@ -103,16 +107,12 @@ public:
     static void SetCapitalizationMode(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
-    static void SetOnWillChange(const JSCallbackInfo& info);
-    static void SetStrokeWidth(const JSCallbackInfo& info);
-    static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static void SetSearchButtonOptions(const JSCallbackInfo& info);
     static void UnregisterResource(const std::string& key);
-    static void JsMargin(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

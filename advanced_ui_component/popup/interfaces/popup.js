@@ -552,15 +552,10 @@ export class d1 extends ViewPU {
     }
     getMessagePadding() {
         let padding;
-        if (this.title.text !== '' && this.title.text !== void (0)) {
-            padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) };
-        }
-        else {
             padding = {
                 start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
                 end: LengthMetrics.vp(this.theme.i2.margin.end.value)
             };
-        }
         return padding;
     }
     getMessageMaxWeight() {
@@ -834,11 +829,11 @@ export class d1 extends ViewPU {
         return o1;
     }
     getTitleTextAlign() {
-        let l1 = TextAlign.Start;
+        let k2 = TextAlign.Start;
         if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
-            l1 = TextAlign.End;
+            k2 = TextAlign.End;
         }
-        return l1;
+        return k2;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {

@@ -73,6 +73,34 @@ NG::OffsetF Alignment::GetAlignPosition(
     return offset;
 }
 
+NG::OffsetF Alignment::GetAlignPositionWithDirection(const NG::SizeF& parentSize, const NG::SizeF& childSize,
+    const Alignment& alignment, TextDirection direction)
+{
+    Alignment realAlignment = alignment;
+    if (direction == TextDirection::RTL) {
+        if (alignment == Alignment::TOP_LEFT) {
+            realAlignment = Alignment::TOP_RIGHT;
+        } else if (alignment == Alignment::TOP_CENTER) {
+            realAlignment = Alignment::TOP_CENTER;
+        } else if (alignment == Alignment::TOP_RIGHT) {
+            realAlignment = Alignment::TOP_LEFT;
+        } else if (alignment == Alignment::CENTER_LEFT) {
+            realAlignment = Alignment::CENTER_RIGHT;
+        } else if (alignment == Alignment::CENTER) {
+            realAlignment = Alignment::CENTER;
+        } else if (alignment == Alignment::CENTER_RIGHT) {
+            realAlignment = Alignment::CENTER_LEFT;
+        } else if (alignment == Alignment::BOTTOM_LEFT) {
+            realAlignment = Alignment::BOTTOM_RIGHT;
+        } else if (alignment == Alignment::BOTTOM_CENTER) {
+            realAlignment = Alignment::BOTTOM_CENTER;
+        } else if (alignment == Alignment::BOTTOM_RIGHT) {
+            realAlignment = Alignment::BOTTOM_LEFT;
+        }
+    }
+    return GetAlignPosition(parentSize, childSize, realAlignment);
+}
+
 std::string Alignment::GetAlignmentStr(TextDirection direction) const
 {
     std::string result;

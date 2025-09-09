@@ -54,7 +54,7 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         auto toolBarMenuItems = navDestinationPattern->GetToolBarMenuItems();
 
         bool isButtonEnabled = false;
-        auto hub = navDestinationGroupNode->GetOrCreateEventHub<EventHub>();
+        auto hub = navDestinationGroupNode->GetEventHub<EventHub>();
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
@@ -788,7 +788,8 @@ void NavDestinationPattern::StartHideOrShowBarInner(
         ctx.isBarShowing = true;
     }
     NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(nodeBase, barNode, curTranslate, isTitle);
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    AnimationUtils::Animate(
+        option, propertyCallback, finishCallback, nullptr /* repeatCallback */, nodeBase->GetContextRefPtr());
 }
 
 void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle)
@@ -810,7 +811,10 @@ void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, propertyCallback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationUtils::Animate(
+        option, propertyCallback, nullptr /* finishCallback */, nullptr /* repeatCallback */, host->GetContextRefPtr());
     ctx.isBarHiding = false;
 }
 
@@ -825,7 +829,7 @@ void NavDestinationPattern::OnCoordScrollStart()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollStartAction();
 }
@@ -834,9 +838,9 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
-    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
     return 0.0f;
 }
 
@@ -844,7 +848,7 @@ void NavDestinationPattern::OnCoordScrollEnd()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollEndAction();
 }
@@ -995,7 +999,7 @@ void NavDestinationPattern::BeforeCreateLayoutWrapper()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
 }

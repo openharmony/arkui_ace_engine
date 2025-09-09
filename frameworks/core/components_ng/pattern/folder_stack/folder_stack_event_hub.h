@@ -25,7 +25,7 @@ using ChangeEvent = std::function<void(const FolderEventInfo& folderEventInfo)>;
 using HoverStatusChangeEvent = std::function<void(const FolderEventInfo& folderEventInfo)>;
 
 class FolderStackEventHub : public EventHub {
-    DECLARE_ACE_TYPE(FolderStackEventHub, EventHub)
+    DECLARE_ACE_TYPE(FolderStackEventHub, EventHub);
 
 public:
     void SetOnFolderStateChange(ChangeEvent&& changeEvent)

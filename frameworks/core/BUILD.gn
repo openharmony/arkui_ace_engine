@@ -61,11 +61,6 @@ template("ace_core_source_set") {
     platform = invoker.platform
     include_dirs = [ "$ace_root" ]
 
-    if (ace_engine_feature_enable_split_mode &&
-        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
-      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
-    }
-
     if (ace_engine_feature_enable_nav_split_mode &&
         defined(
             vendor_configs.ace_engine_advanced_navigation_split_mode_dirs)) {
@@ -301,6 +296,12 @@ template("ace_core_source_set") {
 
       # force split
       "common/force_split/force_split_utils.cpp",
+
+      # drawable
+      "drawable/animated_drawable_descriptor.cpp",
+      "drawable/drawable_descriptor.cpp",
+      "drawable/layered_drawable_descriptor.cpp",
+      "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {

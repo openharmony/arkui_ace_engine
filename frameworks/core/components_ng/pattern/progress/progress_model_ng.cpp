@@ -71,7 +71,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         CHECK_NULL_VOID(textHost);
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+        eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
             frameNode->RemoveChildAtIndex(0);
@@ -1362,6 +1362,16 @@ void ProgressModelNG::SetCapsuleStyleFontColor(bool value)
 void ProgressModelNG::SetCapsuleStyle(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, CapsuleStyleSetByUser, value);
+}
+
+void ProgressModelNG::SetCapsuleStyle(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, CapsuleStyleSetByUser, value, frameNode);
+}
+
+void ProgressModelNG::SetCapsuleStyleFontColor(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, CapsuleStyleFontColorSetByUser, value, frameNode);
 }
 
 void ProgressModelNG::SetGradientColorByUser(bool value)

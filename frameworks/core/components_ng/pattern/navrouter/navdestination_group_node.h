@@ -34,7 +34,7 @@ class NavigationTransitionProxy;
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
 class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
-    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
+    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase);
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : NavDestinationNodeBase(tag, nodeId, pattern)
@@ -256,7 +256,7 @@ public:
     {
         return isShowInPrimaryPartition_;
     }
-    RefPtr<NavDestinationGroupNode> GetOrCreatePlaceHolder();
+    RefPtr<NavDestinationGroupNode> GetOrCreateProxyNode();
     void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
     {
         primaryNode_ = node;
@@ -266,6 +266,20 @@ public:
         return primaryNode_.Upgrade();
     }
 
+    void SetTitleAnimationElapsedTime(int32_t elapsedTime)
+    {
+        titleAnimationElapsedTime_ = elapsedTime;
+    }
+
+    int32_t GetTitleAnimationElapsedTime() const
+    {
+        return titleAnimationElapsedTime_;
+    }
+
+    bool IsTitleConsumedElapsedTime() const
+    {
+        return isTitleConsumedElapsedTime_;
+    }
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -284,6 +298,12 @@ private:
     std::function<void()> BuildTransitionFinishCallback(
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
     std::function<void()> BuildEmptyFinishCallback();
+
+    bool IsNeedHandleElapsedTime() const
+    {
+        return !isTitleConsumedElapsedTime_ && systemTransitionType_ == NavigationSystemTransitionType::TITLE &&
+            titleAnimationElapsedTime_ > 0 && titleAnimationElapsedTime_ < 450;
+    }
 
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -306,9 +326,11 @@ private:
     float userSetOpacity_ = 1.0f;
 
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
+    bool isTitleConsumedElapsedTime_ = false;
+    int32_t titleAnimationElapsedTime_ = 0;
 
     bool isShowInPrimaryPartition_ = false;
-    RefPtr<NavDestinationGroupNode> placeHolderNode_;
+    RefPtr<NavDestinationGroupNode> proxyNode_;
     WeakPtr<NavDestinationGroupNode> primaryNode_;
 };
 

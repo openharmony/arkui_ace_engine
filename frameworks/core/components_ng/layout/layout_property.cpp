@@ -479,19 +479,31 @@ void LayoutProperty::CalcToString(const CalcSize& calcSize, std::pair<std::vecto
     }
 }
 
-void LayoutProperty::ExpandConstraintWithSafeArea()
+IgnoreLayoutSafeAreaOpts LayoutProperty::GenIgnoreOpts() const
 {
-    auto host = GetHost();
-    if (!host || !IsExpandConstraintNeeded() || (!host->GetIgnoreLayoutProcess() && !host->IsRootMeasureNode())) {
-        return;
-    }
-    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
-    CHECK_NULL_VOID(parent);
     IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
         .edges = NG::LAYOUT_SAFE_AREA_TYPE_NONE };
     if (ignoreLayoutSafeAreaOpts_) {
         options = *ignoreLayoutSafeAreaOpts_;
     }
+    return options;
+}
+
+void LayoutProperty::ExpandConstraintWithSafeArea()
+{
+    auto host = GetHost();
+    bool isExpandNode = host && IsExpandConstraintNeeded();
+    if (!isExpandNode) {
+        return;
+    }
+    bool dependencySatisfied =
+        host->GetIgnoreLayoutProcess() || host->IsRootMeasureNode() || host->GetEscapeDelayForIgnore();
+    if (!dependencySatisfied) {
+        return;
+    }
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parent);
+    IgnoreLayoutSafeAreaOpts options = GenIgnoreOpts();
     auto pattern = parent->GetPattern();
     ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted()
                           ? host->GetAccumulatedSafeAreaExpand(false, options)
@@ -754,6 +766,10 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
     offset.SetY(geometryNode->GetFrameOffset().GetY());
     geometryNode->SetFrameOffset(offset);
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->SavePaintRect();
+    }
     return true;
 }
 
@@ -926,15 +942,18 @@ PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 
 PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
 {
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
         std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
         PaddingPropertyF roundOffFraction;
         AdjustingConstrainAndRoundOff(contentWithSafeArea, roundOffFraction, layoutConstraint_, borderWidth_, padding_);
         PaddingPropertyF truncatedSafeAreaPadding =
             adjustingRound
-                ? ConvertWithResidueToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
+                ? ConvertWithResidueToPaddingPropertyF(safeAreaPadding_, scaleProperty,
                     roundOffFraction, layoutConstraint_->percentReference.Width(), true)
-                : ConvertToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
+                : ConvertToPaddingPropertyF(safeAreaPadding_, scaleProperty,
                     layoutConstraint_->percentReference.Width(), true, true);
         TruncateSafeAreaPadding(
             contentWithSafeArea->selfIdealSize.Height(), truncatedSafeAreaPadding.top, truncatedSafeAreaPadding.bottom);
@@ -946,8 +965,9 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
             isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
         return truncatedSafeAreaPadding;
     }
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     return ConvertToPaddingPropertyF(
-        safeAreaPadding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), true, true);
+        safeAreaPadding_, scaleProperty, rootWidth, true, true);
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadding, bool forceReCreate)
@@ -956,12 +976,13 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
     if (includeSafeAreaPadding) {
         safeAreaPadding = GetOrCreateSafeAreaPadding(forceReCreate);
     }
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
-        auto padding = ConvertToPaddingPropertyF(
-            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        auto borderWidth = ConvertToBorderWidthPropertyF(
-            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        auto host = GetHost();
+        auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
+        auto borderWidth =
+            ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
         if (host) {
             auto pattern = host->GetPattern();
             if (pattern && pattern->BorderUnoccupied()) {
@@ -970,10 +991,10 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
         }
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
     }
-    auto padding = ConvertToPaddingPropertyF(
-        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-    auto borderWidth = ConvertToBorderWidthPropertyF(
-        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
+    auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
+    auto borderWidth =
+        ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
     return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
 }
 
@@ -981,22 +1002,24 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
     float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
 {
     auto safeAreaPadding = GetOrCreateSafeAreaPadding();
-    DefaultPaddingBorderParam defaultParem = { .horizontalPadding = paddingHorizontalDefault,
+    DefaultPaddingBorderParam defaultParam = { .horizontalPadding = paddingHorizontalDefault,
         .verticalPadding = paddingVerticalDefault,
         .horizontalBorder = borderHorizontalDefault,
         .verticalBorder = borderVerticalDefault };
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
-        auto padding = ConvertToPaddingPropertyF(
-            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        auto borderWidth = ConvertToBorderWidthPropertyF(
-            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+        auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
+        auto borderWidth =
+            ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
+        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
-    auto padding = ConvertToPaddingPropertyF(
-        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-    auto borderWidth = ConvertToBorderWidthPropertyF(
-        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
+    auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
+    auto borderWidth =
+        ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
+    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
@@ -1074,11 +1097,10 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
     auto preVisibility = propVisibility_;
-
     // update visibility value.
     propVisibility_ = visible;
-    auto pipeline = host->GetContext();
 
+    auto pipeline = host->GetContext();
     if ((preVisibility != propVisibility_) && pipeline) {
         pipeline->SetIsDisappearChangeNodeMinDepth(host->GetDepth());
     }
@@ -1115,6 +1137,18 @@ void LayoutProperty::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOp
         ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
     }
     if (ignoreLayoutSafeAreaOpts_->NeedUpdateWithCheck(opts)) {
+        bool preValid = (ignoreLayoutSafeAreaOpts_->type != LAYOUT_SAFE_AREA_TYPE_NONE) &&
+                        (ignoreLayoutSafeAreaOpts_->rawEdges != LAYOUT_SAFE_AREA_EDGE_NONE);
+        bool incomingValid = (opts.type != LAYOUT_SAFE_AREA_TYPE_NONE) && (opts.rawEdges != LAYOUT_SAFE_AREA_EDGE_NONE);
+        int inc = (preValid != incomingValid) ? (incomingValid ? 1 : -1) : 0;
+        auto host = GetHost();
+        if (inc && host) {
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE("UpdateIgnoreCount:UpdateIgnoreLayoutSafeAreaOpts[%s][self:%d] updateCount=%d",
+                    host->GetTag().c_str(), host->GetId(), inc);
+            }
+            host->UpdateIgnoreCount(inc);
+        }
         *ignoreLayoutSafeAreaOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
@@ -1282,6 +1316,9 @@ void LayoutProperty::UpdateLayoutWeight(float value)
 
 void LayoutProperty::UpdateChainWeight(const ChainWeightPair& value)
 {
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
     if (flexItemProperty_->UpdateChainWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
@@ -1333,7 +1370,7 @@ void LayoutProperty::UpdateLayoutGravity(Alignment value)
         positionProperty_ = std::make_unique<PositionProperty>();
     }
     if (positionProperty_->UpdateLayoutGravity(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ |  PROPERTY_UPDATE_MEASURE;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }
 
@@ -1796,11 +1833,11 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     const auto& content = contentConstraint_.value();
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
         return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentWidth(preContentConstraint.value()));
+            content.EqualWithoutPercentWidth(preContentConstraint.value()));
     }
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
         return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentHeight(preContentConstraint.value()));
+            content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }
     return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
 }
@@ -2420,16 +2457,6 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
-void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
-{
-    CHECK_NULL_VOID(GetPositionProperty());
-    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
-        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
-        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
-        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
-    }
-}
-
 std::string LayoutProperty::LayoutInfoToString()
 {
     std::stringstream ss;
@@ -2447,9 +2474,20 @@ std::string LayoutProperty::LayoutInfoToString()
     }
     return ss.str();
 }
+
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();
+}
+
+void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
+{
+    CHECK_NULL_VOID(GetPositionProperty());
+    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
+        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
+    }
 }
 
 std::string LayoutProperty::GetAlignmentStringFromLocalized(

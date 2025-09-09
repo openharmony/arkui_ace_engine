@@ -897,7 +897,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
      */
     OnMouseEventFunc onMouseEventFunc2;
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc2));
-    ViewAbstract::SetJSFrameNodeOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onMouseEventFunc2));
+    ViewAbstract::SetFrameNodeCommonOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onMouseEventFunc2));
     ViewAbstract::ClearJSFrameNodeOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER));
     EXPECT_NE(callback, nullptr);
     ViewStackProcessor::GetInstance()->instance = nullptr;
@@ -1688,7 +1688,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAppearByFrameNodeTest, TestSiz
     ASSERT_NE(node, nullptr);
     std::function<void()> onAppearCallback = []() {};
     ViewAbstract::SetOnAppear(AceType::RawPtr(node), std::move(onAppearCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAppear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1722,7 +1722,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnDisAppearByFrameNodeTest, Test
     ASSERT_NE(node, nullptr);
     std::function<void()> onDiaAppearCallback = []() {};
     ViewAbstract::SetOnDisappear(AceType::RawPtr(node), std::move(onDiaAppearCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onDisappear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1758,7 +1758,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAreaChangeByFrameNodeTest, Tes
         onAreaChangeCallback =
             [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     ViewAbstract::SetOnAreaChanged(AceType::RawPtr(node), std::move(onAreaChangeCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAreaChanged_;
     EXPECT_NE(callback, nullptr);
 
@@ -1823,7 +1823,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnSizeChangeByFrameNodeTest, TestSiz
     std::function<void(const RectF& oldRect, const RectF& rect)> onSizeChangeCallback = [](const RectF& oldRect,
                                                                                             const RectF& rect) {};
     ViewAbstract::SetOnSizeChanged(AceType::RawPtr(node), std::move(onSizeChangeCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onSizeChanged_;
     EXPECT_NE(callback, nullptr);
 }
@@ -2188,5 +2188,159 @@ HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges002, TestSize.Le
     ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
     EXPECT_FALSE(edges.left.has_value());
     EXPECT_FALSE(edges.right.has_value());
+}
+
+/**
+ * @tc.name: RegisterRadiusesResObj
+ * @tc.desc: Test RegisterRadiusesResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterRadiusesResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderRadiusProperty borderRadius;
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topLeft", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topRight", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomLeft", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomRight", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterRadiusesResObj("", borderRadius, nullptr);
+    EXPECT_EQ(borderRadius.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterLocationPropsEdgesResObj
+ * @tc.desc: Test RegisterLocationPropsEdgesResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterLocationPropsEdgesResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    EdgesParam edges;
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.top", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.left", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.bottom", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.right", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("", edges, nullptr);
+    EXPECT_EQ(edges.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterEdgesWidthResObj
+ * @tc.desc: Test RegisterEdgesWidthResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterEdgesWidthResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderWidthProperty borderWidth;
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.top", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.left", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.bottom", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.right", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("", borderWidth, nullptr);
+    EXPECT_EQ(borderWidth.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterEdgeMarginsResObj
+ * @tc.desc: Test RegisterEdgeMarginsResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterEdgeMarginsResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::MarginProperty margins;
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("", margins, nullptr);
+    EXPECT_EQ(margins.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterLocalizedBorderColor
+ * @tc.desc: Test RegisterLocalizedBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterLocalizedBorderColor, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderColorProperty borderColors;
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.top", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.start", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.bottom", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.end", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("", borderColors, nullptr);
+    EXPECT_EQ(borderColors.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: backgroundImagePostionCheckDiff
+ * @tc.desc: Test backgroundImagePostionCheckDiff
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, backgroundImagePostionCheckDiff, TestSize.Level1)
+{
+    BackgroundImagePosition backgroundImagePosition1;
+    BackgroundImagePosition backgroundImagePosition2;
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
+    auto animatableDimension = AnimatableDimension(50.0);
+    backgroundImagePosition1.SetPercentX(animatableDimension);
+    EXPECT_FALSE(backgroundImagePosition1 == backgroundImagePosition2);
+    backgroundImagePosition2.SetPercentX(animatableDimension);
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
+    backgroundImagePosition1.SetIsAlign(true);
+    EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
 }
 } // namespace OHOS::Ace::NG

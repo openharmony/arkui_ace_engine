@@ -32,6 +32,7 @@ The output is one JS file:
 The difference between debug build and release build is the removal
 of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the
 release version JS output code.
+
 NOTE: Output folder is one of following (dist, distRelease or distProfile). In ace_engine build distRelease output is copied to
 ```bash
 ./out/rk3568/obj/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/stateMgmt.js
@@ -70,7 +71,7 @@ hdc file send stateMgmt.abc /etc/abc/framework
 hdc shell reboot
 ```
 
-## StateMgmt Profiling
+## StateMgmt Profiler
 
 ### Building
 
@@ -143,7 +144,7 @@ hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -profiler'"
 ```
 
 The output will be like this:
-Total include childrens.
+Total include children.
 
 ```bash
 ============================================================================================================
@@ -203,6 +204,7 @@ hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -in
 ```
 
 ### Important for Profiler and JSDump
+
 PartialUpdateMode MUST be configured for your application. This can be made for example by changing following.
 For API10...\OpenHarmony\Sdk\10\ets\build-tools\ets-loader\main.js and change const partialUpdateConfig = {
   partialUpdateMode: true, // from false

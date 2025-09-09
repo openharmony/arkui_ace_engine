@@ -52,7 +52,6 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
-    localMatrix_.clear();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -212,8 +211,6 @@ void ClickRecognizer::OnAccepted()
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
     bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
-        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     TransformForRecognizer(
         localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
@@ -547,7 +544,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         patternName = frameNode->GetTag();
     }
     info.SetPatternName(patternName.c_str());
-    
+
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -761,7 +758,7 @@ OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
         CHECK_NULL_VOID(recognizer);
         auto node = recognizer->GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(node);
-        node->OnAccessibilityEvent(eventType);
+        node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     };
     return callback;
 }
@@ -775,6 +772,34 @@ void ClickRecognizer::AboutToAddToPendingRecognizers(const TouchEvent& event)
         auto eventManager = pipeline->GetEventManager();
         CHECK_NULL_VOID(eventManager);
         eventManager->AddToMousePendingRecognizers(AceType::WeakClaim(this));
+    }
+}
+
+void ClickRecognizer::SetDistanceThreshold(double distanceThreshold)
+{
+    distanceThreshold_ = Dimension(Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    if (distanceThreshold <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
+        distanceThreshold_ = appTheme->GetClickDistanceThreshold();
+    }
+}
+
+void ClickRecognizer::SetDistanceThreshold(Dimension distanceThreshold)
+{
+    distanceThreshold_ = distanceThreshold;
+    if (distanceThreshold_.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
+        distanceThreshold_ = appTheme->GetClickDistanceThreshold();
     }
 }
 } // namespace OHOS::Ace::NG

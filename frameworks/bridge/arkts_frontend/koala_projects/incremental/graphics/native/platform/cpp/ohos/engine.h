@@ -51,8 +51,8 @@ class Engine {
         }
 
         Event(Kind kind, int count, int* args1, int* args2) : kind(kind), count(count) {
-            memcpy(this->args1, args1, sizeof(int) * count);
-            memcpy(this->args2, args2, sizeof(int) * count);
+            memcpy_s(this->args1, sizeof(this->args1), args1, sizeof(int) * count);
+            memcpy_s(this->args2, sizeof(this->args2), args2, sizeof(int) * count);
         }
     };
     std::deque<Event> _pendingEvents;

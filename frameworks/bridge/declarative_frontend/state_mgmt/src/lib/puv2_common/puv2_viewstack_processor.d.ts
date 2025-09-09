@@ -93,12 +93,12 @@ declare class ViewStackProcessor {
   // get Api version
   public static getApiVersion(): number;
 
-  // get send state info to profiler
-  public static sendStateInfo(stateInfo: string): void;
-
   public static PushPrebuildCompCmd(): void;
 
   public static CheckIsPrebuildTimeout(): boolean;
+
+  // get send state info to profiler
+  public static sendStateInfo(stateInfo: string): void;
   
   public static push(pointer: number): void;
 

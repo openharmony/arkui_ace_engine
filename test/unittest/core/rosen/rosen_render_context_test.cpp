@@ -29,7 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const char* SRC_JPG = "file://data/data/com.example.test/res/exampleAlt.jpg";
+constexpr char SRC_JPG[] = "file://data/data/com.example.test/res/exampleAlt.jpg";
 
 template <typename T>
 bool CompareVector(const std::vector<T>& vec1, const std::vector<T>& vec2)
@@ -775,6 +775,11 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
     rosenRenderContext->InitContext(false, contextParamValue8);
     EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
     rosenRenderContext->rsNode_ = nullptr;
+    contextParam.type = RenderContext::ContextType::COMPOSITE_COMPONENT;
+    std::optional<RenderContext::ContextParam> contextParamValue10 = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(false, contextParamValue10);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    rosenRenderContext->rsNode_ = nullptr;
     contextParam.type = RenderContext::ContextType::EXTERNAL;
     std::optional<RenderContext::ContextParam> contextParamValue9 = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue9);
@@ -1031,7 +1036,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest041, TestSize.Level1)
 
     auto effectTypeParam = static_cast<Rosen::UseEffectType>(effectType);
     rosenRenderContext->rsNode_->SetUseEffectType(effectTypeParam);
-    
+
     bool useEffect = true;
     rosenRenderContext->UpdateUseEffect(useEffect);
     rosenRenderContext->OnUseEffectUpdate(useEffect);
@@ -1056,7 +1061,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest042, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-   
+
     bool isFocused = true;
     rosenRenderContext->UpdateWindowFocusState(isFocused);
 
@@ -1088,6 +1093,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
     const Color value = Color::RED;
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
     OHOS::Rosen::RSColor rsColor;
@@ -1136,7 +1142,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest044, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->HasValidBgImageResizable(), false);
     auto str = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(str, LoadNotifier(nullptr, nullptr, nullptr), true);
-   
+
     rosenRenderContext->bgLoadingCtx_ = ctx;
     auto srcSize = rosenRenderContext->bgLoadingCtx_->GetImageSize();
     auto slice = rosenRenderContext->GetBackgroundImageResizableSliceValue(ImageResizableSlice());
@@ -2305,6 +2311,34 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Lev
 }
 
 /**
+ * @tc.name: ShouldSkipAffineTransformation002
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, -1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, -1.0f, 1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, -1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, -1.0f));
+    rosenRenderContext->paintRect_ = RectT<float>(1.0f, 1.0f, 1.0f, 1.0f);
+    rosenRenderContext->GetPaintRectWithTransform();
+    rosenRenderContext->GetPaintRectWithTransformWithoutDegree();
+    ASSERT_EQ(rosenRenderContext->paintRect_, RectT<float>(1.0f, 1.0f, 1.0f, 1.0f));
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
  * @tc.name: RSUIContext001
  * @tc.desc: Test RSUIContext001 Func.
  * @tc.type: FUNC
@@ -2318,5 +2352,40 @@ HWTEST_F(RosenRenderContextTest, RSUIContext001, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrentContext();
     auto rsUIContext = snapshot.GetRSUIContext(pipeline);
     EXPECT_EQ(rsUIContext, nullptr);
+}
+
+/**
+ * @tc.name: OnZindexUpdate001
+ * @tc.desc: Test OnZindexUpdate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, OnZindexUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Set zIndex.
+     * @tc.expected: step1. zIndex set success.
+     */
+    rosenRenderContext->OnZIndexUpdate(2);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 2);
+
+    /**
+     * @tc.steps: step2. Set Layouting and zIndex.
+     * @tc.expected: step2. zIndex set success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetIsLayouting(true);
+    rosenRenderContext->OnZIndexUpdate(3);
+    pipeline->taskScheduler_->FlushTask();
+    positionZ = stagingProperties.GetPositionZ();
+    EXPECT_EQ(positionZ, 3);
 }
 } // namespace OHOS::Ace::NG

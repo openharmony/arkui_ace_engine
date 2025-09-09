@@ -38,7 +38,7 @@ const InspectorFilter filter;
  * @tc.desc: Test BorderStyleProperty::ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg001, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg001, TestSize.Level0)
 {
     BorderStyleProperty borderStyleProperty;
     borderStyleProperty.multiValued = true;
@@ -87,7 +87,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg001, TestSize.Level1)
  * @tc.desc: Test BorderWidthPropertyT<Dimension>::ToString function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg002, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set SetBorderWidth is 1px and call ToString
@@ -106,7 +106,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg002, TestSize.Level1)
  * @tc.desc: Test BorderWidthPropertyT<Dimension>::ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg003, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg003, TestSize.Level0)
 {
     BorderWidthPropertyT<Dimension> borderWidthProperty;
     borderWidthProperty.multiValued = true;
@@ -153,7 +153,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg003, TestSize.Level1)
  * @tc.desc: Test BorderColorProperty::ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg004, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg004, TestSize.Level0)
 {
     BorderColorProperty borderColorProperty;
     borderColorProperty.multiValued = true;
@@ -201,7 +201,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg004, TestSize.Level1)
  * @tc.desc: Test BorderRadiusPropertyT<Dimension>::ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg005, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg005, TestSize.Level0)
 {
     BorderRadiusPropertyT<Dimension> borderRadiusProperty;
     borderRadiusProperty.multiValued = false;
@@ -236,7 +236,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg005, TestSize.Level1)
  * @tc.desc: Test BorderRadiusPropertyT<Dimension>::UpdateWithCheck function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg006, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg006, TestSize.Level0)
 {
     BorderRadiusPropertyT<Dimension> borderRadiusProperty;
 
@@ -294,7 +294,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg006, TestSize.Level1)
  * @tc.desc: Test BorderRadiusPropertyT<Dimension>::ToString function.
  * @tc.type: FUNC
  */
-HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg007, TestSize.Level1)
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg007, TestSize.Level0)
 {
     BorderColorProperty borderColorProperty;
     string strResult = borderColorProperty.ToString();

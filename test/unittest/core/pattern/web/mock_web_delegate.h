@@ -17,8 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_MOCK_WEB_DELEGATE_H
 
 #include <string>
+#include <memory>
+
+namespace OHOS::NWeb {
+class NWebAccessibilityNodeInfo;
+}
 namespace OHOS::Ace {
 void SetReturnStatus(const std::string& status);
+void SetReturnNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> node);
 void SetComponentType(const std::string& type);
 } // namespace OHOS::Ace
 

@@ -64,6 +64,7 @@ public:
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
+    void SetScrollBarColor(std::optional<Color> value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -104,6 +105,8 @@ public:
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
+    static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
+    static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
 
 private:
     void SetDraggable(bool draggable);

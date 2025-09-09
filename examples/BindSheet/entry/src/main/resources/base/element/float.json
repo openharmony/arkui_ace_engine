@@ -1,0 +1,24 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "shadow_radius",
+      "value": "6"
+    },
+    {
+      "name": "shadow_offsetX",
+      "value": "7"
+    },
+    {
+      "name": "shadow_offsetY",
+      "value": "8"
+    },
+    {
+      "name": "borderWidth1",
+      "value": "6vp"
+    }
+  ]
+}

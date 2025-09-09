@@ -20,13 +20,13 @@
 
 namespace OHOS::Ace::Ani {
 
-ani_object GetHostContext([[maybe_unused]] ani_env* env)
+ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return nullptr;
     }
-    ani_ref* context = modifier->getCommonAniModifier()->getHostContext();
+    ani_ref* context = modifier->getCommonAniModifier()->getHostContext(key);
     if (context) {
         ani_object context_object = reinterpret_cast<ani_object>(*context);
         return context_object;

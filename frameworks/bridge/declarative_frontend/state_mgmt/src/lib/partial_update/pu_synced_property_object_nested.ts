@@ -137,8 +137,8 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         ObservedObject.unregisterPropertyReadCb(this.obsObject_);
       // for interop
       } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.obsObject_ === 'object' &&
-        'removeWatchSubscriber' in this.obsObject_ && typeof (this.obsObject_ as any).removeWatchSubscriber === 'function') {
-          (this.obsObject_ as any).removeWatchSubscriber(this.staticWatchId);
+        'removeWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.removeWatchSubscriber === 'function') {
+          this.obsObject_.removeWatchSubscriber(this.staticWatchId);
       }
     }
 
@@ -154,7 +154,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
       // for interop
       } else if (InteropConfigureStateMgmt.instance.needsInterop() && typeof this.obsObject_ === 'object' &&
-        'addWatchSubscriber' in this.obsObject_ && typeof (this.obsObject_ as any).addWatchSubscriber === 'function') {
+        'addWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.addWatchSubscriber === 'function') {
         const callback = () => {
             this.notifyPropertyHasChangedPU();
         };
@@ -162,9 +162,9 @@ class SynchedPropertyNestedObjectPU<C extends Object>
           this.staticWatchId = InteropExtractorModule.createWatchFunc(callback, this.obsObject_);
         }
       } else {
-        stateMgmtConsole.applicationWarn(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is not
+        stateMgmtConsole.frequentApplicationError(`${this.debugInfoWithoutId()} set/init (method setValueInternal): assigned value is not
           be decorated by @Observed. Value changes will not be observed and UI will not update.`);
-      }
+    }
     }
     return true;
   }

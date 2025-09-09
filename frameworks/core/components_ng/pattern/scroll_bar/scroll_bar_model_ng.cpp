@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
@@ -155,11 +156,57 @@ void ScrollBarModelNG::SetScrollBarColor(FrameNode* frameNode, Color color)
 
 void ScrollBarModelNG::ResetScrollBarColor()
 {
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetScrollBarColor(frameNode);
 }
 
 void ScrollBarModelNG::ResetScrollBarColor(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollBarTheme);
+    Color foregroundColor = scrollBarTheme->GetForegroundColor();
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(foregroundColor);
+}
+
+void ScrollBarModelNG::CreateWithResourceObj(ScrollBarJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    switch (jsResourceType) {
+        case ScrollBarJsResType::SCROLLBAR_COLOR:
+            HandleSetScrollBarColor(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void ScrollBarModelNG::HandleSetScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ScrollBar.SetScrollBarColor");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            ScrollBarModelNG::SetScrollBarColor(AceType::RawPtr(frameNode), result);
+        } else {
+            ScrollBarModelNG::ResetScrollBarColor(AceType::RawPtr(frameNode));
+        }
+    };
+    pattern->AddResObj("ScrollBar.SetScrollBarColor", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

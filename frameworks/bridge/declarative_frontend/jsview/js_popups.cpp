@@ -268,10 +268,10 @@ void SetPopupBorderWidthInfo(
             return;
         }
     }
-
     if (popupBorderWidth.Value() < 0) {
         return;
     }
+
     if (OUTER_BORDER_WIDTH == borderWidthParamFlag) {
         popupParam->SetOutlineWidthObject(widthResObj);
         popupParam->SetOutlineWidth(popupBorderWidth);
@@ -670,6 +670,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetAvoidTarget(static_cast<AvoidanceMode>(avoidTargetNumValue));
         }
     }
+
     SetPopupBorderWidthInfo(popupObj, popupParam, OUTER_BORDER_WIDTH);
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
@@ -680,7 +681,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 {
     ParsePopupCommonParam(info, popupObj, popupParam);
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
-    if (popupParam) {
+    if (popupParam && messageVal->IsString()) {
         popupParam->SetMessage(messageVal->ToString());
     }
 
@@ -1044,8 +1045,15 @@ void JSViewPopups::ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObj
         auto&& updateFunc =
         [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadiusProp) {
             CalcDimension radius;
-            ResourceParseUtils::ParseResDimensionVp(resObj, radius);
-            borderRadiusProp.SetRadius(radius);
+            auto state = ResourceParseUtils::ParseResDimensionVp(resObj, radius);
+            if (state && GreatOrEqual(radius.Value(), 0.0f)) {
+                borderRadiusProp.SetRadius(radius);
+            } else {
+                borderRadiusProp.radiusTopLeft = std::nullopt;
+                borderRadiusProp.radiusTopRight = std::nullopt;
+                borderRadiusProp.radiusBottomLeft = std::nullopt;
+                borderRadiusProp.radiusBottomRight = std::nullopt;
+            }
             borderRadiusProp.multiValued = false;
         };
         menuBorderRadius.AddResource("borderRadius.radius", borderRadiusResObj, std::move(updateFunc));
@@ -1091,7 +1099,14 @@ void JSViewPopups::ParseMenuShowInSubWindowParam(
         }
     }
     if (showInSubWindowValue->IsBoolean()) {
-        menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        bool showInSubBoolean = showInSubWindowValue->ToBoolean();
+#if defined(PREVIEW)
+        if (showInSubBoolean) {
+            LOGI("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+            showInSubBoolean = false;
+        }
+#endif
+        menuParam.isShowInSubWindow = showInSubBoolean;
     }
 }
 
@@ -1372,7 +1387,7 @@ void JSViewPopups::ParseMenuParam(
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
-        JSViewPopups::ParseMenuoffsetParam(offsetObj, menuParam);
+        JSViewPopups::ParseMenuOffsetParam(offsetObj, menuParam);
     }
 
     auto placementValue = menuOptions->GetProperty("placement");
@@ -1513,38 +1528,6 @@ void JSViewPopups::ParseMenuParam(
     }
 }
 
-void JSViewPopups::ParseMenuoffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam)
-{
-    JSRef<JSVal> xVal = offsetObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
-    JSRef<JSVal> yVal = offsetObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
-    CalcDimension dx;
-    CalcDimension dy;
-    RefPtr<ResourceObject> offsetDxResObj;
-    if (JSViewAbstract::ParseJsDimensionVp(xVal, dx, offsetDxResObj)) {
-        menuParam.positionOffset.SetX(dx.ConvertToPx());
-    }
-    RefPtr<ResourceObject> offsetDyResObj;
-    if (JSViewAbstract::ParseJsDimensionVp(yVal, dy, offsetDyResObj)) {
-        menuParam.positionOffset.SetY(dy.ConvertToPx());
-    }
-    if (offsetDxResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MenuParam& menuParam) {
-            CalcDimension dx;
-            ResourceParseUtils::ParseResDimensionVp(resObj, dx);
-            menuParam.positionOffset.SetX(dx.ConvertToPx());
-        };
-        menuParam.AddResource("offset.dx", offsetDxResObj, std::move(updateFunc));
-    }
-    if (offsetDyResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MenuParam& menuParam) {
-            CalcDimension dy;
-            ResourceParseUtils::ParseResDimensionVp(resObj, dy);
-            menuParam.positionOffset.SetY(dy.ConvertToPx());
-        };
-        menuParam.AddResource("offset.dy", offsetDyResObj, std::move(updateFunc));
-    }
-}
-
 void JSViewPopups::InitMenuParamColorMode(NG::MenuParam& menuParam)
 {
     auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1612,7 +1595,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.previewTransition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
         }
         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
-            menuParam.hasPreviewTransitionEffect ||menuParam.hasTransitionEffect ||
+            menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
@@ -1641,6 +1624,38 @@ void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG
     NG::BorderRadiusProperty previewBorderRadius;
     JSViewPopups::ParseMenuPreviewBorderRadius(previewBorderRadiusValue, previewBorderRadius);
     menuParam.previewBorderRadius = previewBorderRadius;
+}
+
+void JSViewPopups::ParseMenuOffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam)
+{
+    JSRef<JSVal> xVal = offsetObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
+    JSRef<JSVal> yVal = offsetObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
+    CalcDimension dx;
+    CalcDimension dy;
+    RefPtr<ResourceObject> offsetDxResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(xVal, dx, offsetDxResObj)) {
+        menuParam.positionOffset.SetX(dx.ConvertToPx());
+    }
+    RefPtr<ResourceObject> offsetDyResObj;
+    if (JSViewAbstract::ParseJsDimensionVp(yVal, dy, offsetDyResObj)) {
+        menuParam.positionOffset.SetY(dy.ConvertToPx());
+    }
+    if (offsetDxResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MenuParam& menuParam) {
+            CalcDimension dx;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dx);
+            menuParam.positionOffset.SetX(dx.ConvertToPx());
+        };
+        menuParam.AddResource("offset.dx", offsetDxResObj, std::move(updateFunc));
+    }
+    if (offsetDyResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MenuParam& menuParam) {
+            CalcDimension dy;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dy);
+            menuParam.positionOffset.SetY(dy.ConvertToPx());
+        };
+        menuParam.AddResource("offset.dy", offsetDyResObj, std::move(updateFunc));
+    }
 }
 
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
@@ -1805,7 +1820,7 @@ PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info
     }
     RefPtr<JsFunction> jsFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillDismiss = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                           node = frameNode](int32_t reason) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3023,10 +3038,9 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
     if (JSViewAbstract::ParseJsDimensionVp(outlineWidthValue, borderWidth, borderWidthResObj)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
             outlineWidth.SetBorderWidth(Dimension { -1 });
-            menuParam.outlineWidth = outlineWidth;
-            return;
+        } else {
+            outlineWidth.SetBorderWidth(borderWidth);
         }
-        outlineWidth.SetBorderWidth(borderWidth);
         ParseMenuOutlineWidthWithResourceObj(borderWidthResObj, outlineWidth);
         menuParam.outlineWidth = outlineWidth;
         return;
@@ -3175,27 +3189,42 @@ void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorV
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
     Color left;
     RefPtr<ResourceObject> leftColorResObj;
+    outlineColor.SetColor(Color::TRANSPARENT);
+    bool isSettingOutlineColor = false;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.leftColor = left;
     }
     Color right;
     RefPtr<ResourceObject> rightColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.rightColor = right;
     }
     Color top;
     RefPtr<ResourceObject> topColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.topColor = top;
     }
     Color bottom;
     RefPtr<ResourceObject> bottomColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.bottomColor = bottom;
+    }
+    if (!isSettingOutlineColor) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(theme);
+        outlineColor.SetColor(theme->GetMenuOutlineColor());
     }
     ParseMenuOutlineColorWithResourceObj(
         leftColorResObj, rightColorResObj, topColorResObj, bottomColorResObj, outlineColor);

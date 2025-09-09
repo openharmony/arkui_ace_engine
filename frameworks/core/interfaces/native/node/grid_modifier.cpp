@@ -153,12 +153,10 @@ void ResetGridScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto* context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
-    GridModelNG::SetScrollBarColor(frameNode, scrollBarTheme->GetForegroundColor());
+    GridModelNG::SetScrollBarColor(frameNode, std::nullopt);
+
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    NodeModifier::CreateWithResourceObjGridScrollBarColor(node, nullptr);
 }
 
 void SetGridCachedCount(ArkUINodeHandle node, int32_t cachedCount)
@@ -607,6 +605,7 @@ const ArkUIGridModifier* GetGridModifier()
         .setOnGridItemDrop = SetOnGridItemDrop,
         .resetOnGridItemDrop = ResetOnGridItemDrop,
         .createWithResourceObjFriction = CreateWithResourceObjGridFriction,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjGridScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -830,6 +829,15 @@ void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj)
     CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     GridModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    GridModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ const std::unordered_set<std::string> PATTERN_NOT_SYNC_LOAD_SET = { THEME_PATTER
     THEME_PATTERN_RICH_EDITOR, THEME_PATTERN_VIDEO, THEME_PATTERN_INDEXER, THEME_PATTERN_APP_BAR,
     THEME_PATTERN_ADVANCED_PATTERN, THEME_PATTERN_SECURITY_COMPONENT, THEME_PATTERN_FORM, THEME_PATTERN_SIDE_BAR,
     THEME_PATTERN_PATTERN_LOCK, THEME_PATTERN_GAUGE, THEME_PATTERN_SHEET, THEME_PATTERN_AGING_ADAPATION_DIALOG,
-    THEME_PATTERN_LINEAR_INDICATOR, THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_SCROLLABLE,
+    THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_SCROLLABLE,
     THEME_PATTERN_APP };
 
 const std::unordered_set<std::string> PATTERN_SYNC_LOAD_SET = { THEME_PATTERN_BUTTON, THEME_PATTERN_CAMERA,
@@ -526,6 +526,25 @@ std::string ResourceAdapterImplV2::GetStringByName(const std::string& resName)
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
+    }
+    return strResult;
+}
+
+std::string ResourceAdapterImplV2::GetStringFormatByName(const char* resName, ...)
+{
+    std::string strResult = "";
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, strResult);
+    va_list args;
+    va_start(args, resName);
+    auto state = manager->GetStringFormatByName(strResult, resName, args);
+    va_end(args);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get format string by name error, resName=%{public}s, errorCode=%{public}d",
+            resName, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId() : -1, resName,
+            "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResult;
 }

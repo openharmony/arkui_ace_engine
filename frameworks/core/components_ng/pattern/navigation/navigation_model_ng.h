@@ -161,7 +161,8 @@ public:
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
     static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
-    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollUpdateAction(
+        FrameNode* frameNode, std::function<void(float, float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
     static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
@@ -176,11 +177,14 @@ public:
     static CalcDimension ParseTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
+    static void SetIsCustomTitleBarSize(FrameNode* frameNode, bool isCustom);
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
     virtual bool UseHomeDestination() const override;
     virtual void SetHomePathInfoWithCallback(
         std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
+    void SetEnableShowHideWithContentCover(bool isEnable) override;
+    static void SetEnableShowHideWithContentCover(FrameNode* frameNode, bool isEnable);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

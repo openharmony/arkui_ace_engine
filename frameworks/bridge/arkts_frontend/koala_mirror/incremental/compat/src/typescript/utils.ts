@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+export function errorAsString(error: Error): string {
+    return error.stack ?? error.toString()
+}
 
 export function unsafeCast<T>(value: unknown): T {
     return value as unknown as T
@@ -29,4 +33,14 @@ export function launchJob(job: () => void): Promise<void> {
             job()
         }, 0)
     )
+}
+
+export class CoroutineLocalValue<T> {
+    private value: T | undefined = undefined
+    get(): T | undefined {
+        return this.value
+    }
+    set(value: T | undefined) {
+        this.value = value
+    }
 }

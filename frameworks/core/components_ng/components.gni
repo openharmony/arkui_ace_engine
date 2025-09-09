@@ -103,6 +103,7 @@ template("build_component_ng") {
       }
       if (is_arkui_x) {
         include_dirs += [
+          "//foundation/appframework/arkui",
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
           "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
           "//foundation/graphic/graphic_2d/rosen/modules",
@@ -134,6 +135,9 @@ template("build_component_ng") {
         external_deps += [ "device_status:devicestatus_client" ]
       }
       external_deps += [ "graphic_2d:librender_service_client" ]
+      if (current_os == "ohos") {
+        external_deps += [ "eventhandler:libeventhandler" ]
+      }
       if (platform == "ohos" || platform == "ohos_ng") {
         external_deps += [
           "graphic_2d:2d_graphics",

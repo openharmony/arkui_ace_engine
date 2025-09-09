@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 
 class RenderSvgTextPath : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgTextPath, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgTextPath, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();

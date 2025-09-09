@@ -55,6 +55,11 @@ public:
         return scrollableDistance_;
     }
 
+    void SetScrollableDistance(float scrollableDistance)
+    {
+        scrollableDistance_ = scrollableDistance;
+    }
+
     /**
      * @return 2D scrollable distance for free mode.
      */

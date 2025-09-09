@@ -21,6 +21,7 @@
 
 #include "data_ability_helper.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/string_utils.h"
 #include "utils.h"
 

@@ -2087,6 +2087,31 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSymbolSpanParagraph003
+ * @tc.desc: test span_node.cpp UpdateSymbolSpanParagraph function for customSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem->unicode = 100;
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    ASSERT_NE(spanItem->textStyle_, std::nullopt);
+    EXPECT_EQ(spanItem->nodeId_, spanItem->textStyle_->GetSymbolUid());
+    EXPECT_TRUE(spanItem->textStyle_->isSymbolGlyph_);
+}
+
+/**
  * @tc.name: UpdateSymbolSpanColor001
  * @tc.desc: test span_node.cpp UpdateSymbolSpanColor function
  * @tc.type: FUNC
@@ -2660,7 +2685,7 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     textFrameNode->draggable_ = true;
-    textFrameNode->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
+    textFrameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     textPattern->copyOption_ = CopyOptions::InApp;
@@ -3325,7 +3350,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)

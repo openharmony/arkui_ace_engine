@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
-#include "core/components_ng/pattern/slider/slider_tip_paint_method.h"
 #include "core/components_ng/render/drawing_mock.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -120,10 +119,6 @@ constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH = 96.0_vp;
 constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT = 56.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
-constexpr float SLIDER_CONTENT_WIDTH_1 = 130.0f;
-constexpr float SLIDER_CONTENT_HEIGHT_1 = 60.0f;
-constexpr float SLIDER_CONTENT_WIDTH_2 = 40.0f;
-constexpr float SLIDER_CONTENT_HEIGHT_2 = 100.0f;
 } // namespace
 class SliderExTestNg : public testing::Test {
 public:
@@ -335,14 +330,12 @@ HWTEST_F(SliderExTestNg, SliderTipModifierTest001, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); },
-            [sliderPattern](){return sliderPattern->OnFinishEventTipSize();});
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier attribute and call onDraw function.
      */
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
-    sliderTipModifier.sizeScale_->Set(1.0);
     auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
@@ -565,7 +558,7 @@ HWTEST_F(SliderExTestNg, SliderLayoutAlgorithmTest002, TestSize.Level1)
     // pattern->GetAnimatableBlockCenter() != OffsetF()
     auto pattern = AceType::DynamicCast<SliderPattern>(host->GetPattern());
     SliderContentModifier::Parameters parameters;
-    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     pattern->sliderContentModifier_->blockCenterX_->Set(POINTF_CENTER.GetX());
     pattern->sliderContentModifier_->blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
@@ -677,7 +670,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
@@ -703,12 +696,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
-    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-    Color color = Color::TRANSPARENT;
-    sliderTheme->blockColor_ = color;
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
-    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
-    sliderPaintMethod.sliderContentModifier_->blockBorderColor_->Set(LinearColor(sliderTheme->GetBlockColor()));
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 
     // call UpdateContentModifier function
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
@@ -722,8 +711,6 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest001, TestSize.Level1)
         static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx()) * HALF);
 
     //change sliderMode
-    sliderPaintMethod.sliderContentModifier_->sliderMode_->Set(static_cast<int>(SliderModelNG::SliderMode::NONE));
-    sliderPaintMethod.sliderContentModifier_->selectedBorderRadius_->Set(0.0f);
     AceType::DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty())
         ->UpdateSliderMode(SliderModelNG::SliderMode::NONE);
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
@@ -747,7 +734,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
@@ -780,13 +767,11 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest002, TestSize.Level1)
     MockParagraphFunction(paragraph, canvas);
 
     // call UpdateOverlayModifier function
-    auto pattern = frameNode->GetPattern<SliderPattern>();
-    SliderTipPaintMethod sliderTipPaintMethod(pattern, tipParameters, sliderTipModifier, parameters);
-    sliderTipPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    sliderPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
     EXPECT_EQ(sliderTipModifier->axis_, Axis::VERTICAL);
 
     AceType::DynamicCast<SliderPaintProperty>(paintWrapper->paintProperty_)->UpdateDirection(Axis::HORIZONTAL);
-    sliderTipPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    sliderPaintMethod.UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
     EXPECT_EQ(sliderTipModifier->axis_, Axis::HORIZONTAL);
 }
 
@@ -808,7 +793,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
      * @tc.steps: step1. create paintWrapper and sliderContentModifier.
      */
     auto sliderContentModifier =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
         SliderPaintMethod::TipParameters(), TextDirection::AUTO);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -826,10 +811,6 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     /**
      * @tc.steps: step2. call UpdateContentModifier function.
      */
-    sliderContentModifier->sliderMode_->Set(static_cast<int>(SliderModelNG::SliderMode::INSET));
-    RectF rectValue;
-    rectValue.SetSize(SizeF(SLIDER_CONTENT_WIDTH_1, SLIDER_CONTENT_HEIGHT_1));
-    sliderPaintMethod.sliderContentModifier_->SetBoundsRect(rectValue);
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper1));
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
@@ -839,12 +820,6 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest003, TestSize.Level1)
     sliderPaintProperty->UpdateSliderMode(SliderModelNG::SliderMode::OUTSET);
     sliderPaintProperty->UpdateDirection(Axis::VERTICAL);
     auto paintWrapper2 = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
-    sliderContentModifier->sliderMode_ =
-        AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderMode::OUTSET));
-    sliderContentModifier->SetDirection(Axis::VERTICAL);
-    RectF rectValue2;
-    rectValue2.SetSize(SizeF(SLIDER_CONTENT_WIDTH_2, SLIDER_CONTENT_HEIGHT_2));
-    sliderPaintMethod.sliderContentModifier_->SetBoundsRect(rectValue2);
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper2));
     EXPECT_EQ(sliderContentModifier->sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     EXPECT_EQ(sliderContentModifier->directionAxis_->Get(), static_cast<int>(Axis::VERTICAL));
@@ -936,7 +911,7 @@ HWTEST_F(SliderExTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
     sliderModelNG.SetOnChangeEvent(std::move(eventOnChange));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto sliderEventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
+    auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
     ASSERT_NE(sliderEventHub, nullptr);
     ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
     sliderEventHub->FireChangeEvent(1.0, 1);
@@ -1048,7 +1023,7 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
     auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
 
     /**
      * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.
@@ -1056,6 +1031,7 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
      */
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     sliderPattern->focusFlag_ = true;
     sliderPattern->OnIsFocusActiveUpdate(true);
     EXPECT_TRUE(sliderPattern->bubbleFlag_);
@@ -1933,6 +1909,45 @@ HWTEST_F(SliderExTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderBlockGradientColor001
+ * @tc.desc: Check "SliderBlockColor" an "GetBlockColor"  API
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderExTestNg, SliderBlockGradientColor001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+
+    Gradient defaultGradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::GREEN));
+    gradientColor1.SetDimension(Dimension(0.0));
+    defaultGradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(1.0));
+    defaultGradient.AddColor(gradientColor2);
+    std::vector<GradientColor> defaultGradientColors = defaultGradient.GetColors();
+    SliderModelNG::ResetBlockColor(Referenced::RawPtr(frameNode));
+    SliderModelNG::SetLinearGradientBlockColor(Referenced::RawPtr(frameNode), defaultGradient);
+    Gradient testGradient = SliderModelNG::GetLinearGradientBlockColor(Referenced::RawPtr(frameNode));
+    std::vector<GradientColor> testGradientColors = testGradient.GetColors();
+
+    EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
+    EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(1).GetLinearColor().ToColor().GetValue(),
+    testGradientColors.at(1).GetLinearColor().ToColor().GetValue());
+    EXPECT_EQ(defaultGradientColors.at(0).GetDimension(), testGradientColors.at(0).GetDimension());
+    EXPECT_EQ(defaultGradientColors.at(1).GetDimension(), testGradientColors.at(1).GetDimension());
+}
+
+/**
  * @tc.name: SliderPaintMethodTest004
  * @tc.desc: Test slider_paint_method UpdateContentModifier
  * @tc.type: FUNC
@@ -1948,7 +1963,7 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
-    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
@@ -1978,8 +1993,6 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     Color color = Color::RED;
     sliderTheme->markerColor_ = color;
-    sliderPaintMethod.sliderContentModifier_->stepColor_ =
-       AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(sliderTheme->markerColor_));
     // call UpdateContentModifier function
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
     EXPECT_EQ(sliderPaintMethod.sliderContentModifier_->stepColor_->Get(), LinearColor(Color::RED));

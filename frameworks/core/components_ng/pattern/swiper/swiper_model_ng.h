@@ -90,6 +90,7 @@ public:
         std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) override;
     void SetBindIndicator(bool bind) override;
     void SetJSIndicatorController(std::function<void()> resetFunc) override;
+    void ResetJSIndicatorController() override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) override;
@@ -202,6 +203,8 @@ public:
     static void CreateDigitWithResourceObj(FrameNode*  frameNode,
         const SwiperDigitalParameters& swiperDigitalParameters);
     static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters);
+    static void CreateArrowWithResourceObj(const SwiperArrowParameters& swiperArrowParameters,
+        FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

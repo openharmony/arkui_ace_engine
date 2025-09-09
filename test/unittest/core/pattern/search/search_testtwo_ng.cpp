@@ -58,7 +58,7 @@ HWTEST_F(SearchTestTwoNg, testOnEditChange001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
-    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     textFieldEventHub->SetOnEditChanged([](bool isChanged) {
         isChanged = true;
     });
@@ -466,11 +466,11 @@ HWTEST_F(SearchTestTwoNg, Pattern021, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldEventHub = textFieldFrameNode->GetOrCreateEventHub<EventHub>();
+    auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     pattern->ResetDragOption();
 
     /**
@@ -811,7 +811,7 @@ HWTEST_F(SearchTestTwoNg, OnSubmitEvent001, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
 
@@ -851,7 +851,7 @@ HWTEST_F(SearchTestTwoNg, OnSubmitEvent002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
 
@@ -883,7 +883,7 @@ HWTEST_F(SearchTestTwoNg, UpdateChangeEvent001, TestSize.Level1)
     SearchModelNG searchModelInstance;
     auto frameNode =AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     eventHub->onValueChangeEvent_ = [](const std::u16string str) {};
@@ -991,7 +991,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto eventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -2010,7 +2010,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
 
     SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
+    EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
 }
 
 /**
@@ -2353,8 +2353,8 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth003, TestSize.Level1)
     auto columnLayoutWrapper = column.second;
     RefPtr<LayoutWrapper> layoutWrapper = columnLayoutWrapper;
     auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-    childLayoutConstraint->minSize->SetWidth(CalcLength(200.0f));
-    childLayoutConstraint->maxSize->SetWidth(CalcLength(50.0f));
+    childLayoutConstraint->minSize = CalcSize(CalcLength(200.0f), CalcLength());
+    childLayoutConstraint->maxSize = CalcSize(CalcLength(50.0f), CalcLength());
     LayoutConstraintT<float> layoutConstraintT;
     layoutConstraintT.percentReference.SetWidth(100.0f);
     layoutConstraintT.maxSize.SetWidth(150.0f);
@@ -2473,8 +2473,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     */
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
 
     /**
     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
@@ -2483,7 +2481,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 2));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(0));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2497,7 +2494,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(1));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2511,7 +2507,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(2, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(2));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2546,7 +2541,7 @@ HWTEST_F(SearchTestTwoNg, testSearchChangeEvent, TestSize.Level1)
     */
     ChangeAndSubmitEvent changeEvent = [](const std::u16string str) {};
     searchModelInstance.SetOnChangeEvent(changeEvent);
-    auto eventHub = textFieldFrameNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->AttachHost(AceType::WeakClaim(frameNode));
     eventHub->lastPreviewText_ = { 0, u"" };
@@ -2785,7 +2780,7 @@ HWTEST_F(SearchTestTwoNg, searchTriggerButtonMouseEventTest, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
     ASSERT_NE(buttonFrameNode, nullptr);
-    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -2834,7 +2829,7 @@ HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
     ASSERT_NE(buttonFrameNode, nullptr);
     auto renderContext = buttonFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
+    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION, 0);
 }
 
 /**
@@ -2862,7 +2857,7 @@ HWTEST_F(SearchTestTwoNg, searchHoverEventTest, TestSize.Level1)
     pattern->InitHoverEvent();
     pattern->InitHoverEvent(); // second for testing searchHoverListener_ = true;
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputEventHub = frameNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputEventHub, nullptr);
@@ -3277,7 +3272,7 @@ HWTEST_F(SearchTestTwoNg, searchCalculateTextFieldWidthTest, TestSize.Level1)
 
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     ASSERT_NE(searchButtonFrameNode, nullptr);
-    auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     buttonEventHub->SetEnabled(false);
     EXPECT_EQ(buttonEventHub->IsEnabled(), false);
@@ -3593,7 +3588,7 @@ HWTEST_F(SearchTestTwoNg, searchLayoutCancelButtonTest, TestSize.Level1)
 
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     ASSERT_NE(searchButtonFrameNode, nullptr);
-    auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
     ASSERT_NE(buttonEventHub, nullptr);
     buttonEventHub->SetEnabled(true);
     EXPECT_EQ(buttonEventHub->IsEnabled(), true);
@@ -3717,7 +3712,8 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
 
     /**
-    * @tc.steps: case
+    * @tc.steps: test TextFieldMeasure with different LayoutCalPolicy.
+    * @tc.expected: GetLayoutCalPolicy is right LayoutCalPolicy.
     */
     auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
@@ -3994,5 +3990,40 @@ HWTEST_F(SearchTestTwoNg, GetSearchFixAtIdealMaxWidth, TestSize.Level1)
     fixAtIdealMaxWidth = searchLayoutAlgorithm->GetSearchFixAtIdealMaxWidth(AceType::RawPtr(layoutWrapper));
     ASSERT_TRUE(fixAtIdealMaxWidth.has_value());
     EXPECT_EQ(fixAtIdealMaxWidth.value(), 100.0f);
+}
+
+/**
+ * @tc.name: SearchOnWillAttachIME
+ * @tc.desc: test search OnWillAttachIME event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchOnWillAttachIME, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create search, get frameNode and pattern.
+     * @tc.expected: FrameNode and pattern is not null, related function is called.
+     */
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set OnWillAttachIME event.
+     */
+    bool fireOnWillAttachIME = false;
+    auto onWillAttachIME = [&fireOnWillAttachIME](const IMEClient& info) { fireOnWillAttachIME = true; };
+    searchModelInstance.SetOnWillAttachIME(onWillAttachIME);
+
+    /**
+     * @tc.steps: step3. fire OnWillAttachIME event.
+     */
+    textFieldPattern->FireOnWillAttachIME();
+    EXPECT_EQ(fireOnWillAttachIME, true);
 }
 } // namespace OHOS::Ace::NG

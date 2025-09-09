@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT BadgeComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(BadgeComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(BadgeComposedElement, InspectorComposedElement);
 
 public:
     explicit BadgeComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

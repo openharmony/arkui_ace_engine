@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 
 // Paragraph is interface for drawing text and text paragraph.
 class TxtParagraph : public Paragraph {
-    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
+    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph);
 
 public:
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
@@ -112,13 +112,6 @@ public:
     {
         return GetParagraphLength() == 0;
     }
-    void SetParagraphId(uint32_t id) override
-    {
-        auto paragraph = GetParagraph();
-        if (paragraph) {
-            paragraph->SetParagraghId(id);
-        }
-    }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     RectF GetPaintRegion(float x, float y) override;
@@ -128,16 +121,18 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
-
     std::shared_ptr<RSParagraph> GetSharedParagraph()
     {
-        std::shared_ptr<RSParagraph> paragraphSharedPtr(paragraph_.get(), [](RSParagraph*) {});
+        std::shared_ptr<RSParagraph> paragraphSharedPtr(paragraph_.get(), [](RSParagraph *) {});
         return paragraphSharedPtr;
     }
 
+    bool DidExceedMaxLinesInner() override;
+    std::string GetDumpInfo() override;
+
 protected:
-    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     ParagraphStyle paraStyle_;
+    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     RSParagraph* GetParagraph();
     Rosen::RSSymbolAnimation rsSymbolAnimation_;
     std::unique_ptr<RSParagraph> paragraph_;

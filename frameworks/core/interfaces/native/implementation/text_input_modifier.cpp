@@ -84,10 +84,10 @@ namespace TextInputModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = TextFieldModelNG::CreateFrameNode(id, u"", u"", false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    return {};
+    auto frameNode = TextFieldModelStatic::CreateTextInputNode(id, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TextInputModifier
 namespace TextInputInterfaceModifier {
@@ -869,9 +869,9 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
         const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
-            auto arkResult = arkCreateMenu.InvokeWithObtainResult<
+            auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
-            return Converter::Convert<std::vector<NG::MenuOptionsParam>>(arkResult);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
     auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
         NG::MenuItemParam menuOptionsParam) -> bool {

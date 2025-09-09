@@ -57,8 +57,6 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto childNode = child->GetHostNode();
-        auto host = layoutWrapper->GetHostNode();
         auto childAlign = align;
         auto childLayoutProperty = child->GetLayoutProperty();
         if (childLayoutProperty && childLayoutProperty->GetPositionProperty() &&
@@ -67,6 +65,8 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 childLayoutProperty->GetPositionProperty()->GetLayoutGravity().value_or(Alignment::CENTER);
             childAlign = Alignment::GetAlignment(layoutDirection, rawChildAlign.GetAlignmentStr(TextDirection::AUTO));
         }
+        auto childNode = child->GetHostNode();
+        auto host = layoutWrapper->GetHostNode();
         if (host && childNode && childNode->GetLayoutProperty() &&
             childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
             IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());

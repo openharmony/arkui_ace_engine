@@ -48,11 +48,9 @@ public:
 
     void OnAttachToFrameNode() override;
 
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThread();
-#endif
 
     bool IsAtomicNode() const override
     {
@@ -178,6 +176,7 @@ private:
     std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
     std::string ImagesToString() const;
+    void CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
     void DisablePreAnimatedImageAnimation(uint32_t index);
@@ -198,6 +197,7 @@ private:
     void ResetFormAnimationStartTime();
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
+    void ShowIndex(int32_t index);
     void UpdateBorderRadius();
     void RegisterVisibleAreaChange();
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
@@ -215,6 +215,7 @@ private:
     bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool showingIndexByStoppedOrPaused_ = false;
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;

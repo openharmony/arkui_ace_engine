@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 using ChangeAndSubmitEvent = std::function<void(const std::u16string)>;
 class SearchEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SearchEventHub, EventHub)
+    DECLARE_ACE_TYPE(SearchEventHub, EventHub);
 
 public:
     SearchEventHub() = default;

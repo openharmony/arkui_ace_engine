@@ -33,7 +33,7 @@ export class ArkUIAniModule {
 
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
 
-    native static _Common_GetHostContext(): common.Context
+    native static _Common_GetHostContext(key: KInt): common.Context
 
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void

@@ -75,7 +75,6 @@ public:
     void ResetFontColor() override {};
     void BackgroundColor(const Color& color) override {};
     void ResetBackgroundColor() override {};
-    void SetMenuOutline(const NG::MenuParam& menuParam) override;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override {};
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override {};
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override {};
@@ -85,6 +84,7 @@ public:
     void ResetShowInSubWindow() override {};
     void SetShowDefaultSelectedIcon(bool show) override {};
     void ResetShowDefaultSelectedIcon() override {};
+    void SetMenuOutline(const NG::MenuParam& menuParam) override;
     void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override {};
     void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override {};
     void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override {};

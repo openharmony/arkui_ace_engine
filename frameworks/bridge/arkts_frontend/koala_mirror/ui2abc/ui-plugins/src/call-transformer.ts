@@ -15,7 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { ApplicationInfo, ComponentTransformerOptions } from "./component-transformer"
-import { Importer } from "./utils"
+import { getComponentPackage, Importer } from "./utils"
 
 export class CallTransformer extends arkts.AbstractVisitor {
 
@@ -68,6 +68,52 @@ export class CallTransformer extends arkts.AbstractVisitor {
         )
     }
 
+    private componentsList = new Map<string, any>([
+        [ "Column", { args: 1 } ],
+        [ "Row",  { args: 1 } ],
+        [ "List",  { args: 1 } ],
+        [ "ListItem",  { args: 1 } ],
+        [ "DatePicker",  { args: 1 } ],
+        [ "Slider",  { args: 1 } ],
+        [ "Tabs",  { args: 1 } ],
+        [ "TextInput",  { args: 1 } ],
+        [ "Toggle",  { args: 1 } ],
+        [ "Progress",  { args: 1 } ],
+        [ "Swiper",  { args: 1, options: "SwiperController" } ],
+        [ "Grid",  { args: 2,  options: "GridLayoutOptions" } ],
+        [ "GridItem",  { args: 1 } ],
+        [ "Scroll",  { args: 1, options: "Scroller" } ],
+
+
+    ])
+    seenComponents = new Set<string>()
+
+    transformComponentCallExpression(node: arkts.CallExpression, nameIdent: arkts.Identifier): arkts.CallExpression {
+        const name = nameIdent.name
+        const component = this.componentsList.get(name)
+        if (!this.seenComponents.has(name)) {
+            this.seenComponents.add(name)
+            this.imports.add(component.options ?? `${name}Options`, getComponentPackage())
+        }
+        node = this.visitEachChild(node) as arkts.CallExpression
+        return arkts.factory.createCallExpression(node.callee,
+            this.insertUndefinedTillTrailing(node.arguments, component.args),
+            node.typeParams,
+            node.isOptional,
+            node.hasTrailingComma,
+            node.trailingBlock
+        )
+    }
+
+    insertUndefinedTillTrailing(params: readonly arkts.Expression[], requestedParams: number): arkts.Expression[] {
+        const result: arkts.Expression[] = []
+        params.forEach(it => result.push(it))
+        while (result.length < requestedParams) {
+            result.push(arkts.factory.createUndefinedLiteral())
+        }
+        return result
+    }
+
     visitor(node: arkts.AstNode): arkts.AstNode {
         if (arkts.isClassDeclaration(node)) {
             this.classNode = node
@@ -80,6 +126,10 @@ export class CallTransformer extends arkts.AbstractVisitor {
                 return this.transformDollarVariableAccess(node)
             }
         } else if (arkts.isCallExpression(node) && arkts.isIdentifier(node.callee)) {
+            // Ugly hack, until Panda 26224 is fixed.
+            if (this.componentsList.get(node.callee.name)) {
+                return this.transformComponentCallExpression(node, node.callee)
+            }
             if (this.whiteList.includes(node.callee.name)) {
                 return this.transformDollarCallExpression(node)
             }

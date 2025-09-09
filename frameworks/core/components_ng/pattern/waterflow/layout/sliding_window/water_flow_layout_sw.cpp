@@ -18,6 +18,7 @@
 #include <cfloat>
 #include <queue>
 
+#include "base/utils/feature_param.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -31,13 +32,17 @@ namespace OHOS::Ace::NG {
 void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 {
     info_->BeginUpdate();
+
+    // Initialize unlayouted items if not layouted
+    InitUnlayoutedItems();
+
     InitEnv(wrapper);
     info_->axis_ = axis_ = props_->GetAxis();
 
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value() ;
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
@@ -66,6 +71,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
 
     if (info_->measureInNextFrame_) {
+        isLayouted_ = false;
         return;
     }
 
@@ -74,6 +80,10 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     } else {
         PreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     }
+
+    measuredStartIndex_ = info_->StartIndex();
+    measuredEndIndex_ = info_->EndIndex();
+    isLayouted_ = false;
 }
 
 void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
@@ -106,6 +116,8 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
     info_->EndCacheUpdate();
 
+    ClearUnlayoutedItems(wrapper);
+
     wrapper->SetCacheCount(cacheCount);
     wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount,
         props_->GetShowCachedItemsValue(false));
@@ -120,6 +132,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
 
     UpdateOverlay(wrapper_);
+    isLayouted_ = true;
 }
 
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
@@ -220,6 +233,11 @@ int32_t WaterFlowLayoutSW::CheckReset()
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
+            // Fix: When transitioning from empty to populated data, startIndex_ is Infinity
+            // but min(Infinity, itemCnt_-1) would start from last item. Return 0 for sequential loading.
+            if (info_->startIndex_ == Infinity<int32_t>() && itemCnt_ > 0) {
+                return 0;
+            }
             return std::min(info_->startIndex_, itemCnt_ - 1);
         }
         info_->jumpForRecompose_ = info_->startIndex_;

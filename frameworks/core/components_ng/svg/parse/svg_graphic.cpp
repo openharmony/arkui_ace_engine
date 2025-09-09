@@ -242,7 +242,9 @@ void SvgGraphic::UpdateFillGradient(const Size& viewPort)
 bool SvgGraphic::GradientHasColors()
 {
     auto& gradient = attributes_.fillState.GetGradient();
-    CHECK_NULL_RETURN(gradient, false);
+    if (!gradient.has_value()) {
+        return false;
+    }
     auto gradientColors = gradient->GetColors();
     if (gradientColors.empty()) {
         LOGW("SvgGraphic::GradientHasColors gradient doesn't has color");
@@ -283,7 +285,14 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
         return;
     }
-    brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
+    if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
+        auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
+        brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
+                       p3Color.GetAlpha() / 255.0 },
+            RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+    } else {
+        brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
+    }
 }
 
 RsLinearGradient SvgGraphic::ConvertToRsLinearGradient(const SvgLinearGradientInfo& linearGradientInfo)
@@ -332,12 +341,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         }
         return SetGradientStyle(curOpacity);
     } else {
-        Color fillColor;
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            fillColor = (color) ? *color : fillState_.GetColor();
-        } else {
-            fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
-        }
+        auto fillColor = (color) ? *color : fillState_.GetColor();
         if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
             auto p3Color = fillColor.BlendOpacity(curOpacity);
             fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
@@ -400,6 +404,9 @@ RSMatrix SvgGraphic::GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
         auto bounds = svgCoordinateSystemContext.GetContainerRect();
         RSMatrix m;
         RSMatrix t;
+        if (!GreatNotEqual(bounds.Width(), 0.0) || !GreatNotEqual(bounds.Height(), 0.0)) {
+            return RSMatrix();
+        }
         m.SetScale(bounds.Width(), bounds.Height());
         t.Translate(bounds.Left(), bounds.Top());
         t.PreConcat(m);

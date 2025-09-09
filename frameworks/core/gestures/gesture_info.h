@@ -170,7 +170,8 @@ public:
     void SetDistance(double distance)
     {
         distance_ = distance;
-        distanceMap_[SourceTool::UNKNOWN] = Dimension(distance_, DimensionUnit::PX);
+        distanceMap_[SourceTool::UNKNOWN] = Dimension(
+            Dimension(distance_, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
         for (const auto& callback : onPanDistanceIds_) {
             (callback.second.GetCallback())(distance);
         }

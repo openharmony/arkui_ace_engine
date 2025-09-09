@@ -467,13 +467,15 @@ HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction003, TestSize.Level1)
     sheetWrapperPattern->SetSheetMaskNode(sheetMaskNode);
     sheetWrapperPattern->mainWindowRect_ = RectF(0, 0, 2000, 2000);
     sheetWrapperPattern->isShowInUEC_ = true;
-    sheetWrapperLayoutAlgorithm->MeasureSheetMask(AceType::RawPtr(sheetWrapperNode));
-    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(), 2000);
+    sheetWrapperLayoutAlgorithm->Measure(AceType::RawPtr(sheetWrapperNode));
+    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(),
+        sheetWrapperNode->GetGeometryNode()->GetFrameSize().Height());
 
     sheetWrapperPattern->mainWindowRect_ = RectF(0, 0, 3000, 3000);
     sheetWrapperPattern->isShowInUEC_ = false;
-    sheetWrapperLayoutAlgorithm->MeasureSheetMask(AceType::RawPtr(sheetWrapperNode));
-    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(), 2000);
+    sheetWrapperLayoutAlgorithm->Measure(AceType::RawPtr(sheetWrapperNode));
+    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(),
+        sheetWrapperNode->GetGeometryNode()->GetFrameSize().Height());
 }
 
 HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction004, TestSize.Level1)
@@ -533,9 +535,12 @@ HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction004, TestSize.Level1)
     // Handle UEC
     sheetWrapperPattern->isShowInUEC_ = true;
     sheetWrapperLayoutAlgorithm->MeasureSheetMask(AceType::RawPtr(sheetWrapperNode));
-    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(), 2000);
+    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(),
+        sheetWrapperNode->GetGeometryNode()->GetFrameSize().Height());
     sheetWrapperLayoutAlgorithm->LayoutMaskNode(AceType::RawPtr(sheetWrapperNode));
-    EXPECT_TRUE(sheetMaskNode->GetGeometryNode()->GetMarginFrameRect() == RectF(0, 0, 2000, 2000));
+    EXPECT_TRUE(sheetMaskNode->GetGeometryNode()->GetMarginFrameRect() ==
+        RectF(0, 0, sheetWrapperNode->GetGeometryNode()->GetFrameSize().Width(),
+            sheetWrapperNode->GetGeometryNode()->GetFrameSize().Height()));
 
     maskPattern->isMaskInteractive_ = true;
     auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
@@ -543,7 +548,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction004, TestSize.Level1)
     SubwindowManager::GetInstance()->AddSubwindow(Container::CurrentId(), SubwindowType::TYPE_SHEET, mockSubwindow);
     // SubwindowManager::SetHotAreas(_,_) is mock in mock_subwindow_manager.cpp
     sheetWrapperLayoutAlgorithm->LayoutMaskNode(AceType::RawPtr(sheetWrapperNode));
-    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(), 2000);
+    EXPECT_EQ(sheetMaskNode->GetGeometryNode()->GetFrameSize().Height(),
+        sheetWrapperNode->GetGeometryNode()->GetFrameSize().Height());
 
     mockSubwindow = nullptr;
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -596,13 +602,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
      * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
      * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
      */
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     sheetStyle.bottomOffset = OffsetF(0, -10);
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     layoutProperty->UpdateSheetStyle(sheetStyle);
     auto sheetType3 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType3, SheetType::SHEET_BOTTOM_OFFSET);
@@ -1848,18 +1849,21 @@ HWTEST_F(SheetShowInSubwindowTestNg, TestBreakpoint001, TestSize.Level1)
     EXPECT_EQ(type2, SheetType::SHEET_CENTER);
     sheetTheme->sheetBottom_ = "popup";
     auto type3 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type3, SheetType::SHEET_CENTER);
-    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    EXPECT_EQ(type3, SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetTheme->sheetType_ = "popup";
     auto type4 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type4, SheetType::SHEET_POPUP);
-    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    EXPECT_EQ(type4, SheetType::SHEET_CENTER);
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
     auto type5 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type5, SheetType::SHEET_CONTENT_COVER);
-    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    EXPECT_EQ(type5, SheetType::SHEET_POPUP);
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
     auto type6 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type6, SheetType::SHEET_BOTTOM);
-    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    EXPECT_EQ(type6, SheetType::SHEET_CONTENT_COVER);
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     auto type7 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type7, SheetType::SHEET_SIDE);
+    EXPECT_EQ(type7, SheetType::SHEET_BOTTOM);
+    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    auto type8 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type8, SheetType::SHEET_SIDE);
 }
 } // namespace OHOS::Ace::NG

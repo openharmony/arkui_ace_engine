@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
+    void Create(ImageInfoConfig& imageInfoConfig) override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
@@ -80,6 +80,8 @@ public:
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
     void SetImageFillSetByUser(bool value) override;
+    void SetSupportSvg2(bool enable) override;
+    void SetContentTransition(ContentTransitionType contentTransition) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -123,6 +125,14 @@ public:
         FrameNode* frameNode, std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
+    static ImageRotateOrientation GetOrientation(FrameNode* frameNode);
+    static std::pair<CalcDimension, CalcDimension> GetImageSourceSize(FrameNode* frameNode);
+    static float GetHdrBrightness(FrameNode* frameNode);
+    static DynamicRangeMode GetDynamicRangeMode(FrameNode* frameNode);
+    static bool GetEnableAnalyzer(FrameNode* frameNode);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static bool GetMatchTextDirection(FrameNode* frameNode);
+    static Matrix4 GetImageMatrix(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
     static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
     static std::vector<float> GetColorFilter(FrameNode* frameNode);
@@ -152,6 +162,11 @@ public:
     static void SetAltResource(FrameNode* frameNode, void* resource);
     static void CreateWithResourceObj(
         FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject);
+    static void SetSupportSvg2(FrameNode* frameNode, bool enable);
+    static void ResetSupportSvg2(FrameNode* frameNode);
+    static bool GetSupportSvg2(FrameNode* frameNode);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
+    static ContentTransitionType GetContentTransition(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

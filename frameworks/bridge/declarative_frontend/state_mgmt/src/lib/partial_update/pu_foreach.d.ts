@@ -43,6 +43,8 @@ declare class RepeatNative {
   static createNewChildFinish(id: string): void;
   static afterAddChild(): void;
   static onMove(handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
+  static reuse(index: number): void;
+  static recycle(index: number): void;
 }
 
 // Repeat.virtualScroll maps to C++ RepeatVirtualScrollNode 
@@ -96,7 +98,8 @@ declare class RepeatVirtualScroll2Native {
     arrLen: number,
     totalCount: number,
     invalidateContainerLayoutFromChildIndex: number,
-    l1rid4index: Array<Array<number>>): void;
+    l1rid4index: Array<Array<number>>,
+    ridNeedToRecycle: Array<number>): void;
 
   // drag and drop
   static onMove(repeatElmtId: number, handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);

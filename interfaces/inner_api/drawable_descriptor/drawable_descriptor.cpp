@@ -972,6 +972,16 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(const char
     return nullptr;
 }
 
+std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(DataInfo& foregroundInfo,
+    DataInfo& backgroundInfo, std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr)
+{
+    UINT8 jsonBuf;
+    drawableType = DrawableDescriptor::DrawableType::LAYERED;
+    auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
+        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo);
+    return layeredDrawableDescriptor;
+}
+
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo, const SharedResourceManager& resourceMgr, RState& state,
     DrawableType& drawableType)
@@ -1042,16 +1052,6 @@ std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(
     HILOGE("unknow resource type: %{public}s", type.c_str());
     state = Global::Resource::INVALID_FORMAT;
     return nullptr;
-}
-
-std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(DataInfo& foregroundInfo,
-    DataInfo& backgroundInfo, std::string& path, DrawableType& drawableType, const SharedResourceManager& resourceMgr)
-{
-    UINT8 jsonBuf;
-    drawableType = DrawableDescriptor::DrawableType::LAYERED;
-    auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
-        std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo);
-    return layeredDrawableDescriptor;
 }
 } // namespace Napi
 } // namespace Ace

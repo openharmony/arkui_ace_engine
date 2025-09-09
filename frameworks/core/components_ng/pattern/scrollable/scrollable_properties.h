@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
 
 namespace OHOS::Ace {
@@ -490,9 +491,12 @@ using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
+using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
+    ScrollFrameResult&, ScrollState, ScrollSource)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
+    GestureEventFunc onPanActionEndEvent;
     OnReachEvent onReachStartEvent;
     OnReachEvent onReachEndEvent;
     OnScrollStartEvent onScrollStartEvent;
@@ -500,6 +504,7 @@ struct ScrollerObserver {
     OnDidScrollEvent onDidScrollEvent;
     OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
     OnWillScrollEventEx onWillScrollEventEx;
+    TwoDimensionOnWillScrollEvent twoDimensionOnWillScrollEvent;
 };
 } // namespace OHOS::Ace
 

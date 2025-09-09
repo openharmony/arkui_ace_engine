@@ -1702,11 +1702,11 @@ HWTEST_F(TimePickerPatternTestUpdate, SetDateTimeOptions001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSecondFormatString001
- * @tc.desc: Test TimePickerPatternTestUpdate GetSecondFormatString.
+ * @tc.name: GetSecondColumnFormatString001
+ * @tc.desc: Test TimePickerPatternTestUpdate GetSecondColumnFormatString.
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestUpdate, GetSecondFormatString001, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestUpdate, GetSecondColumnFormatString001, TestSize.Level1)
 {
     uint32_t second = 0;
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
@@ -1718,7 +1718,8 @@ HWTEST_F(TimePickerPatternTestUpdate, GetSecondFormatString001, TestSize.Level1)
 
     auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
-    timePickerRowPattern->GetSecondFormatString(second);
+    auto secondString = timePickerRowPattern->GetSecondColumnFormatString(second);
+    EXPECT_EQ(secondString, "00");
 }
 
 /**
@@ -2132,6 +2133,10 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest011, TestSize.Level1)
      * @tc.steps: step3. check hour_, minute_ and second_ of current time are set as selected time.
      * @tc.expected: hour_ is 22, minute_ is 50, and second_ is 50.
      */
+    std::unordered_map<uint32_t, std::string> minuteMap;
+    minuteMap[50] = "50";
+    auto children = timePickerRowPattern->GetAllChildNode();
+    timePickerRowPattern->options_[children["minute"]] = minuteMap;
     auto currentTime = timePickerRowPattern->GetCurrentTime();
     EXPECT_EQ(currentTime.hour_, INDEX_HOUR_22);
     EXPECT_EQ(currentTime.minute_, INDEX_MINUTE_50);
@@ -2200,7 +2205,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest012, TestSize.Level1)
      * column's index is 50.
      */
     hourColumnPattern->SetCurrentIndex(INDEX_HOUR_9);
-    timePickerRowPattern->HandleColumnsChangeTimeRange(hourColumn);
+    timePickerRowPattern->HandleColumnsChangeTimeRange(hourColumn, true);
     EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), PM_INDEX);
     EXPECT_EQ(hourColumnPattern->GetCurrentIndex(), INDEX_HOUR_9);
     EXPECT_EQ(minuteColumnPattern->GetCurrentIndex(), INDEX_MINUTE_50);
@@ -2221,7 +2226,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest013, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto changeEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetOnChange(changeEvent);
@@ -2242,7 +2247,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest014, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto changeEvent = [](const BaseEventInfo* info) {};
     TimePickerModelNG::SetOnChange(frameNode, changeEvent);
@@ -2263,7 +2268,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest015, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto selectedAreaEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetOnEnterSelectedArea(selectedAreaEvent);
@@ -2284,7 +2289,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest016, TestSize.Level1)
     CHECK_NULL_VOID(timePickerModelNG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto selectedTimeChangeEvent = [](const BaseEventInfo* info) {};
     timePickerModelNG->SetChangeEvent(selectedTimeChangeEvent);

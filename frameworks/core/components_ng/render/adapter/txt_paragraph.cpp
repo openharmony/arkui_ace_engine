@@ -47,6 +47,7 @@ RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
 void TxtParagraph::SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode)
 {
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
     auto rsNode = context->GetRSNode();
     rsSymbolAnimation_ = RSSymbolAnimation();
     rsSymbolAnimation_.SetNode(rsNode);
@@ -84,21 +85,21 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
     style.lineStyleHalfLeading = paraStyle.halfLeading;
+    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
+    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.locale = paraStyle.fontLocale;
     if (paraStyle.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
-    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.enableAutoSpace = paraStyle.enableAutoSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
-    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =
             paraStyle.isFirstParagraphLineSpacing
                 ? static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_ALL)
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -108,8 +109,8 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_);
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle id:%d", style.GetTextStyleUid());
     if (!builder_) {
         CreateBuilder();
     }
@@ -130,11 +131,11 @@ void TxtParagraph::PopStyle()
 void TxtParagraph::AddText(const std::u16string& text)
 {
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
-    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     builder_->AppendText(text);
 }
 
@@ -231,7 +232,11 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
     }
     Rosen::TypographyStyle style;
     ConvertTypographyStyle(style, paraStyle_);
-    style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    auto bitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    auto size = std::min(bitmap.size(), style.relayoutChangeBitmap.size());
+    for (size_t i = 0; i < size; ++i) {
+        style.relayoutChangeBitmap.set(i, bitmap.test(i));
+    }
     paragraph_->Relayout(width, style, txtStyles);
 }
 
@@ -574,6 +579,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             boxes = getTextRects(extent, end);
         }
     }
+    
     if (boxes.empty()) {
         return false;
     }
@@ -1056,5 +1062,19 @@ bool TxtParagraph::IsIndexAtLineEnd(const Offset& offset, int32_t index)
 {
     LineMetrics lineMetrics;
     return GetLineMetricsByCoordinate(offset, lineMetrics) && (index == lineMetrics.endIndex);
+}
+
+bool TxtParagraph::DidExceedMaxLinesInner()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
+    return !paragrah->CanPaintAllText();
+}
+
+std::string TxtParagraph::GetDumpInfo()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, "");
+    return paragrah->GetDumpInfo();
 }
 } // namespace OHOS::Ace::NG

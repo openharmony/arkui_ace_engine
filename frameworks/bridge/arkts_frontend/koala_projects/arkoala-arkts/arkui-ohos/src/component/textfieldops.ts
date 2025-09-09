@@ -19,7 +19,7 @@
 import { ResourceStr, Length, Padding, LocalizedPadding, BorderOptions, EdgeWidths, LocalizedEdgeWidths, ResourceColor, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, EdgeStyles } from "./units"
 import { LayoutPolicy } from "./common"
 import { BorderStyle, Color } from "./enums"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"

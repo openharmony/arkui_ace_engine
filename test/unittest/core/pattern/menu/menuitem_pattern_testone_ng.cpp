@@ -537,7 +537,7 @@ HWTEST_F(MenuItemPatternTestOneNg, HandleOnChange001, TestSize.Level1)
     EXPECT_TRUE(pattern->isSelected_);
 
     auto host = pattern->GetHost();
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(hub, nullptr);
 
     bool isSelected = true;
@@ -922,7 +922,7 @@ HWTEST_F(MenuItemPatternTestOneNg, MarkIsSelected001, TestSize.Level1)
 
     bool isSelected = true;
     menuItemPattern->isSelected_ = true;
-    auto eventHub = menuItemPattern->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = menuItemPattern->GetEventHub<MenuItemEventHub>();
     auto changeEvent = [&isSelected](bool select) { isSelected = select; };
     eventHub->SetOnChange(changeEvent);
     eventHub->SetSelectedChangeEvent(changeEvent);
@@ -1929,9 +1929,78 @@ HWTEST_F(MenuItemPatternTestOneNg, OnHover002, TestSize.Level1)
     auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetSubMenuDepth(1);
+    subMenuPattern->SetParentMenuItem(menuItemNode);
     
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: OnHover003
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto dummySubMenu = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    dummySubMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetSubMenuDepth(1);
+    auto tmpItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    subMenuPattern->SetParentMenuItem(tmpItemNode);
+    
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: OnHover004
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover004, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetSubMenuDepth(1);
+    subMenuPattern->SetParentMenuItem(menuItemNode);
+    
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->hideTask_.Reset([] {
+    });
     menuItemPattern->OnHover(true);
 
     auto menuWrapper = menuItemPattern->GetMenuWrapper();
@@ -2256,5 +2325,43 @@ HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate004, TestSize.Level
     auto textProperty =
         menuItemPattern->content_ ? menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>() : nullptr;
     EXPECT_EQ(textProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextOverflow001
+ * @tc.desc: Verify UpdateTextOverflow().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, UpdateTextOverflow001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+
+    auto theme =
+        PipelineBase::GetCurrentContext() ? PipelineBase::GetCurrentContext()->GetTheme<SelectTheme>() : nullptr;
+    ASSERT_NE(theme, nullptr);
+    theme = nullptr;
+    MockContainer::Current()->SetApiTargetVersion(99);
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+
+    MockContainer::Current()->SetApiTargetVersion(10);
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+
+    theme =
+        PipelineBase::GetCurrentContext() ? PipelineBase::GetCurrentContext()->GetTheme<SelectTheme>() : nullptr;
+    ASSERT_NE(theme, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(99);
+    theme->expandDisplay_ = true;
+    menuItemPattern->UpdateTextOverflow(textProperty, theme);
+    EXPECT_EQ(textProperty->GetMaxLines(), 1);
+    EXPECT_EQ(textProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
 }
 } // namespace OHOS::Ace::NG

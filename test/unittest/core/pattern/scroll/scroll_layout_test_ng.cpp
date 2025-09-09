@@ -1296,4 +1296,49 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset_004, TestSize.Level1)
     scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 4.0f);
 }
+
+/**
+ * @tc.name: AdjustCurrentOffset_001
+ * @tc.desc: Test adjusting currentOffset when scrollable distance changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustCurrentOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    CreateScroll();
+    CreateContent(500.f);
+    CreateScrollDone();
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = frameNode_;
+    pattern_->currentOffset_ = -80.0f;
+    auto scrollLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+
+    /**
+     * @tc.steps: step2. initial layout
+     */
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -80.0f);
+    EXPECT_EQ(pattern_->scrollableDistance_, 100.0f);
+
+    /**
+     * @tc.steps: step3. reduce content main size, but current offset is still less than scrollable distance
+     * @tc.expected: current offset doesn't change
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(490.0f));
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -80.0f);
+    EXPECT_EQ(pattern_->scrollableDistance_, 90.0f);
+
+    /**
+     * @tc.steps: step4. reduce content main size, but current offset is greater than scrollable distance
+     * @tc.expected: current offset change to be equal scrollable distance
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(450.0f));
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -50.0f);
+    EXPECT_EQ(pattern_->scrollableDistance_, 50.0f);
+}
 } // namespace OHOS::Ace::NG

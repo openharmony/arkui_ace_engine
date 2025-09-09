@@ -176,7 +176,7 @@ void TextInputModifyBase::CreateTextField(
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);
@@ -858,6 +858,17 @@ HWTEST_F(TextFieldModifyTest, DoCallback014, TestSize.Level1)
     pattern_->SetAccessibilityAction();
     accessibilityProperty->actionMoveTextImpl_.operator()(1, true);
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 6);
+
+    auto switchEditableFunc = accessibilityProperty->GetSwitchEditableModeFunc();
+    ASSERT_NE(switchEditableFunc, nullptr);
+    switchEditableFunc(true);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::SWITCH_EDITABLE);
+    pattern_->isCaretTwinkling_ = true;
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetCurrentFocus(true);
+    switchEditableFunc(false);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 
 /**
@@ -1915,6 +1926,7 @@ HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
         model.SetTextFieldText(frameNode, HELLO_TEXT_U16);
         auto textValue = pattern->GetTextValue();
         EXPECT_EQ(textValue, HELLO_TEXT);
+        EXPECT_TRUE(pattern->isTextChangedAtCreation_);
     });
 }
 } // namespace OHOS::Ace::NG

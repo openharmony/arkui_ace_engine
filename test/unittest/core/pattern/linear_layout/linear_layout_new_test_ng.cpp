@@ -32,7 +32,7 @@ class LinearLayoutNewTestNG : public LinearLayoutBaseTestNG {};
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
  */
-HWTEST_F(LinearLayoutNewTestNG, Example, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, Example, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -87,7 +87,7 @@ HWTEST_F(LinearLayoutNewTestNG, Example, TestSize.Level1)
  * @tc.desc: test the measure result when setting layoutPolicy.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     auto column = CreateColumn([this, &column1](ColumnModelNG model) {
@@ -135,7 +135,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest001, TestSize.Level1)
  * @tc.desc: test the measure result when setting layoutPolicy and other layoutConstraint.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> column1, column2, column3;
     auto column = CreateColumn([this, &column1, &column2, &column3](ColumnModelNG model) {
@@ -219,7 +219,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest002, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> columnInner;
     auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
@@ -267,7 +267,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest003, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> columnInner;
     auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
@@ -315,7 +315,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest004, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> columnInner;
     RefPtr<FrameNode> columnOutter;
@@ -380,7 +380,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest005, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> columnInner;
     auto column = CreateColumn([this, &columnInner](ColumnModelNG model) {
@@ -428,7 +428,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest006, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize and parent has constraint.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest007, TestSize.Level0)
 {
     RefPtr<FrameNode> columnInner;
     RefPtr<FrameNode> columnOutter;
@@ -493,7 +493,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest007, TestSize.Level1)
  * @tc.desc: test the measure result when setting layoutPolicy and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest008, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest008, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     auto column = CreateColumn([this, &column1](ColumnModelNG model) {
@@ -544,7 +544,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest008, TestSize.Level1)
  * @tc.desc: test the measure result when setting layoutPolicy and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest009, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest009, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     auto column = CreateColumn([this, &column1](ColumnModelNG model) {
@@ -595,7 +595,7 @@ HWTEST_F(LinearLayoutNewTestNG, LayoutPolicyTest009, TestSize.Level1)
  * @tc.desc: test linear ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea001, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea001, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     RefPtr<FrameNode> row2;
@@ -635,7 +635,7 @@ HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea001, TestSize.Level1)
  * @tc.desc: test linear ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea002, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea002, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     RefPtr<FrameNode> row2;
@@ -675,7 +675,7 @@ HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea002, TestSize.Level1)
  * @tc.desc: test linear ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea003, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea003, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     RefPtr<FrameNode> column2;
@@ -714,7 +714,7 @@ HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea003, TestSize.Level1)
  * @tc.desc: test linear ignoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea004, TestSize.Level1)
+HWTEST_F(LinearLayoutNewTestNG, LinearIgnoreLayoutSafeArea004, TestSize.Level0)
 {
     RefPtr<FrameNode> column1;
     RefPtr<FrameNode> column2;

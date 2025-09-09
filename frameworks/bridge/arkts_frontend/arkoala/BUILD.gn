@@ -66,9 +66,8 @@ action("run_arkoala_build") {
 }
 
 ohos_prebuilt_etc("arkoala_prebuild") {
-  source = "./bin/arkoala.abc"
-  #source = "$target_out_dir/arkoala.abc"
-  #deps = [ ":run_arkoala_build" ]
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":run_arkoala_build" ]
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part

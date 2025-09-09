@@ -95,6 +95,7 @@ void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context
 
 void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    FrameNode::ToJsonValue(json, filter);
     auto titleBarPattern = GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     auto titleBarOptions = titleBarPattern->GetTitleBarOptions();

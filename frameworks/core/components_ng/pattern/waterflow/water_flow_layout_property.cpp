@@ -62,12 +62,12 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
                                                 .c_str());
         jsonConstraintSize->Put("maxWidth", itemLayoutConstraint_->maxSize.value_or(CalcSize())
                                                 .Width()
-                                                .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
+                                                .value_or(CalcLength(LayoutInfinity<float>(), DimensionUnit::VP))
                                                 .ToString()
                                                 .c_str());
         jsonConstraintSize->Put("maxHeight", itemLayoutConstraint_->maxSize.value_or(CalcSize())
                                                 .Height()
-                                                .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
+                                                .value_or(CalcLength(LayoutInfinity<float>(), DimensionUnit::VP))
                                                 .ToString()
                                                 .c_str());
         json->PutExtAttr("itemConstraintSize", jsonConstraintSize->ToString().c_str(), filter);

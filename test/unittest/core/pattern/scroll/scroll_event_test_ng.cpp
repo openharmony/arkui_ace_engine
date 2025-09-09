@@ -1319,7 +1319,7 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
     SizeF viewPortExtent(WIDTH, viewPortLength * 11);
     pattern_->viewPortExtent_ = viewPortExtent;
     pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
-    pattern_->CaleSnapOffsets();
+    pattern_->CaleSnapOffsets(frameNode_);
 
     /**
      * @tc.steps: step2. dragDistance and dragSpeed less than threshold

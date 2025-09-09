@@ -74,7 +74,7 @@ void IndexerTestNg::GetIndexer()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<IndexerPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<IndexerEventHub>();
+    eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();

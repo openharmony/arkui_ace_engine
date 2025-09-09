@@ -924,7 +924,44 @@ typedef enum {
      * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
      * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the overlay attribute, which can be set, reset, and obtained as required through APIs.
      *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: mask text.\n
+     * .value[0]?.i32: position of the overlay relative to the component. Optional.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1]?.f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. Optional. \n
+     * .value[2]?.f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp. Optional.
+     * \n
+     * .value[3]?.i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * In most cases, this parameter should be set to Auto, this allowing the system to handle
+     * the layout direction automatically. If you need to keep a specific direction in any situation, set it to
+     * either LTR (Left-to-Right) or RTL (Right-to-Left). Optional.
+     * \n
+     * .object: the node tree used as the overlay.
+     * The parameter type is {@link ArkUI_NodeHandle}.
+     * The default value is <b>nullptr.</b> \n
+     * this parameter is conflict with .string, and it has lower priority than .string. Optional.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: mask text.\n
+     * .value[0].i32: position of the overlay relative to the component.
+     * The parameter type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START.</b> \n
+     * .value[1].f32: offset of the overlay relative to the upper left corner of itself on the x-axis, in vp. \n
+     * .value[2].f32: offset of the overlay relative to the upper left corner of itself on the y-axis, in vp.
+     * .value[3].i32: the layout direction.
+     * The parameter type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_LTR.</b> \n
+     * .object: the overlay node handle. \n
+     *
+     * @since 21
      */
     NODE_OVERLAY,
     /**
@@ -1221,6 +1258,7 @@ typedef enum {
      *
      */
     NODE_MARK_ANCHOR,
+
     /**
      * @brief Defines the position of the background image in the component, that is, the coordinates relative to
      * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
@@ -1233,6 +1271,28 @@ typedef enum {
      * .value[0].f32: position along the x-axis, in px. \n
      * .value[1].f32: position along the y-axis, in px. \n
      *
+     * @since 12
+     */
+    /**
+     * @brief Defines the position of the background image in the component, that is, the coordinates relative to
+     * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
+     * .value[2].?i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].?i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
+     * .value[2].i32: the alignment mode. The data type is {@link ArkUI_Alignment}.
+     * The default value is <b>ARKUI_ALIGNMENT_TOP_START</b>. \n
+     * .value[3].i32: the direction. The type is {@link ArkUI_Direction}.
+     * The default value is <b>ARKUI_DIRECTION_AUTO</b>. \n
+     *
+     * @since 21
      */
     NODE_BACKGROUND_IMAGE_POSITION,
     /**
@@ -2000,6 +2060,50 @@ typedef enum {
      * @since 20
      */
     NODE_ROTATE_ANGLE = 104,
+    /**
+     * @brief Defines the width attribute with param type LayoutPolicy, which can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: the LayoutPolicy that the width of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: the LayoutPolicy that the width of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * 
+     * @since 21
+     */
+    NODE_WIDTH_LAYOUTPOLICY = 105,
+    /**
+     * @brief Defines the height attribute with param type LayoutPolicy, which can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: the LayoutPolicy that the height of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: the LayoutPolicy that the height of the component follows.\n
+     * The parameter type is {@link ArkUI_LayoutPolicy}. \n
+     *
+     * @since 21
+     */
+    NODE_HEIGHT_LAYOUTPOLICY = 106,
+    /**
+     * @brief Defines the position attribute in param type Edges, which specifies the position of the component
+     * by the distance relative to the parent container's four edges. This attribute can be set, reset, and obtained as
+     * required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object indicates struct of edges for position. The parameter type is {@link ArkUI_PositionEdges}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object indicates struct of edges for position. The parameter type is {@link ArkUI_PositionEdges}. \n
+     *
+     * @since 21
+     */
+    NODE_POSITION_EDGES = 107,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -2492,6 +2596,19 @@ typedef enum {
     NODE_TEXT_VERTICAL_ALIGN = 1035,
 
     /**
+     * @brief 设置文本内容区垂直对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}，默认值：ARKUI_TEXT_CONTENT_ALIGN_TOP \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：文本内容垂直对齐方式{@link ArkUI_TextContentAlign}。 \n
+     *
+     * @since 21
+     */
+     NODE_TEXT_CONTENT_ALIGN = 1036,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -2751,6 +2868,140 @@ typedef enum {
      *
      */
     NODE_IMAGE_SYNC_LOAD = 4012,
+    /**
+     * @brief Defines the image decoding size attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: width of the image decoding, in px.\n
+     * .value[1].i32: height of the image decoding, in px.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: width of the image decoding, in px.\n
+     * .value[1].i32: height of the image decoding, in px.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SOURCE_SIZE = 4013,
+    /**
+     * @brief Defines the display tranformation matrix for an image.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0...15].f32: 16 floating-point numbers.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0...15].f32: 16 floating-point numbers.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_IMAGE_MATRIX = 4014,
+    /**
+     * @brief Defines the image follow text direction attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to follows the text direction.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to follows the text direction.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_MATCH_TEXT_DIRECTION = 4015,
+    /**
+     * @brief Defines the image copy attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_NONE</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_COPY_OPTION = 4016,
+    /**
+     * @brief Defines the image AI analysis enable attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable AI analysis for the image.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable AI analysis for the image.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_ENABLE_ANALYZER = 4017,
+    /**
+     * @brief Defines the image dynamic display range attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode}.
+     * The default value is <b>ARKUI_DYNAMIC_RANGE_MODE_STANDARD</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_DYNAMIC_RANGE_MODE = 4018,
+    /**
+     * @brief Defines the image dynamic display brightness attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: hdr brightness. value range [0, 1]\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: hdr brightness. value range [0, 1]\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_HDR_BRIGHTNESS = 4019,
+    /**
+     * @brief Defines the image display direction attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: orientation {@link ArkUI_Orientation}.
+     * The default value is <b>ARKUI_ORIENTATION_UP</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: orientation {@link ArkUI_Orientation}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_ORIENTATION = 4020,
+    /**
+     * @brief Set the range of SVG parsing capabilities supported through enable switch.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: enable switch.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: enable switch.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SUPPORT_SVG2 = 4021, 
+    /**
+     * @brief Set the animation effect for the image content transformation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     * 
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_CONTENT_TRANSITION = 4022,
     /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -4870,6 +5121,71 @@ typedef enum {
 	 * @since 20
      */
     NODE_SLIDER_SUFFIX,
+
+    /**
+     * @brief Defines the color of the slider block. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_BLOCK_LINEAR_GRADIENT_COLOR,
+
+    /**
+     * @brief Defines the background color of the slider. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_TRACK_LINEAR_GRADIENT_COLOR,
+
+    /**
+     * @brief Defines the color of the selected part of the slider track. This attribute can be set, reset, and obtained
+     * as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 21
+     */
+    NODE_SLIDER_SELECTED_LINEAR_GRADIENT_COLOR,
 
     /**
      * @brief Sets whether the radio button is selected.
@@ -7146,6 +7462,16 @@ typedef enum {
      * @since15
     */
     NODE_ON_HOVER_MOVE = 29,
+ 
+    /**
+     * @brief Defines the size change event.
+     * 
+     * The event will be triggered when the component size changes.
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object. \n
+     * @since 20
+    */
+    NODE_ON_SIZE_CHANGE = 30,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
@@ -9562,6 +9888,22 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index);
 
 /**
+ * @brief Triggers node updates in the current frame.
+ *
+ * When node attributes are modified after the current frame's build phase (i.e., after
+ * the unified processing of dirty nodes), the node updates will be deferred to the next
+ * frame. This function forces immediate node updates within the current frame to
+ * ensure rendering effects are applied synchronously.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.
@@ -9661,8 +10003,8 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
  * @param userData Indicates the custom data used in onLayoutCompleted callback function.
  * @param onLayoutCompleted Indicates the function when layout completed is callback.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
@@ -9676,8 +10018,8 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
  * @param userData Indicates the custom data used in onDrawCompleted callback function.
  * @param onDrawCompleted Indicates the function when draw completed is callback.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
@@ -9688,8 +10030,8 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
  *
  * @param node Indicates the target node.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
@@ -9699,8 +10041,8 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  *
  * @param node Indicates the target node.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
@@ -9919,6 +10261,67 @@ int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, 
  */
 int32_t OH_ArkUI_SetForceDarkConfig(ArkUI_ContextHandle uiContext, bool forceDark, ArkUI_NodeType nodeType,
     uint32_t (*colorInvertFunc)(uint32_t color));
+ 
+/**
+ * @brief Register common event callback of target node.
+ *        This interface is not allowed to be called on a non-main thread.
+ *
+ * @param node The ArkUI-NodeHandle pointer.
+ * @param eventType Indicates the type of event to set.
+ * @param userData Indicates the pointer to the custom data.
+ * @param callback Indicates the event callback function.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function params is invalid.
+ *         Returns {@link ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE} Function parameter eventType is not supported.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_RegisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType,
+    void* userData, void (*callback)(ArkUI_NodeEvent* event));
+
+/**
+ * @brief Unregister common event callback of target node.
+ *        This interface is not allowed to be called on a non-main thread.
+ *
+ * @param node The ArkUI-NodeHandle pointer.
+ * @param eventType Indicates the type of event to set.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function params is invalid.
+ *         Returns {@link ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE} Function parameter eventType is not supported.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_UnregisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType);
+
+/**
+ * @brief Register common visible area approximate change event callback of target node.
+ *        This interface is not allowed to be called on a non-main thread.
+ *
+ * @param node The ArkUI-NodeHandle pointer.
+ * @param ratios Threshold array representing the visible area of the component.
+ * @param size The size of the ratios.
+ * @param expectedUpdateInterval The expected calculation interval for developers.
+ * @param userData Indicates the pointer to the custom data.
+ * @param callback Indicates the event callback function.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function params is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node, float* ratios,
+    int32_t size, float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event));
+
+/**
+ * @brief Unregister common visible area approximate change event callback of target node.
+ *        This interface is not allowed to be called on a non-main thread.
+ *
+ * @param node The ArkUI-NodeHandle pointer.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function params is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
 
 #ifdef __cplusplus
 }

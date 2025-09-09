@@ -17,34 +17,29 @@ import { pointer, KSerializerBuffer, nullptr } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
 import { InteropNativeModule } from "./InteropNativeModule"
 import { Disposable } from "./ResourceManager"
-import { StubFastIntrinsics } from "./StubFastIntrinsics"
+import { Finalizable } from './Finalizable'
 
-// stub wrapper for KInteropBuffer
 export final class NativeBuffer {
-    public data:pointer = 0
-    public length: int64 = 0
-    public resourceId: int32 = 0
-    public hold:pointer = 0
-    public release: pointer = 0
+    public data: pointer
+    public length: int64
+    protected finalizable: Finalizable
 
-    constructor(data:pointer, length: int64, resourceId: int32, hold:pointer, release: pointer) {
+    constructor(length: int64) {
+        this(InteropNativeModule._Malloc(length), length, InteropNativeModule._GetMallocFinalizer())
+    }
+
+    constructor(data: pointer, length: int64, destroy: pointer) {
         this.data = data
         this.length = length
-        this.resourceId = resourceId
-        this.hold = hold
-        this.release = release
+        this.finalizable = new Finalizable(data, destroy)
     }
 
     public readByte(index:int64): int32 {
-        return StubFastIntrinsics.readInt8(this.data + index)
+        return unsafeMemory.readInt8(this.data + index)
     }
 
     public writeByte(index:int64, value: int32): void {
-        StubFastIntrinsics.writeInt8(this.data + index, value as byte)
-    }
-
-    static wrap(data:pointer, length: int64, resourceId: int32, hold:pointer, release: pointer): NativeBuffer {
-        return new NativeBuffer(data, length, resourceId, hold, release)
+        unsafeMemory.writeInt8(this.data + index, value as byte)
     }
 }
 
@@ -79,9 +74,9 @@ export class KBuffer implements Disposable {
     }
 
     public get(index: int64): byte {
-        return StubFastIntrinsics.readInt8(this._buffer + index)
+        return unsafeMemory.readInt8(this._buffer + index)
     }
     public set(index: int64, value: byte): void {
-        StubFastIntrinsics.writeInt8(this._buffer + index, value)
+        unsafeMemory.writeInt8(this._buffer + index, value)
     }
 }

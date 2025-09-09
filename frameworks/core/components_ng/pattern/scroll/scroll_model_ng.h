@@ -47,6 +47,7 @@ public:
     void SetDisplayMode(int displayMode) override;
     void SetScrollBarWidth(const Dimension& dimension) override;
     void SetScrollBarColor(const Color& color) override;
+    void ResetScrollBarColor() override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
@@ -61,6 +62,7 @@ public:
     void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjSnapPaginations(
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) override;
+    void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetMaxZoomScale(float scale) override;
     void SetMinZoomScale(float scale) override;
     void SetZoomScale(float scale) override;
@@ -72,6 +74,7 @@ public:
     void SetOnZoomStop(std::function<void()>&& event) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
@@ -88,10 +91,12 @@ public:
     static void SetAxis(FrameNode* frameNode, Axis axis);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static void ResetScrollBarColor(FrameNode* frameNode);
     static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static int32_t GetEnablePaging(FrameNode* frameNode);
@@ -115,6 +120,7 @@ public:
     static void CreateWithResourceObjIntervalSize(FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
     static void CreateWithResourceObjSnapPaginations(FrameNode* frameNode,
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMaxZoomScale(FrameNode* frameNode, float scale);
     static float GetMaxZoomScale(FrameNode* frameNode);
     static void SetMinZoomScale(FrameNode* frameNode, float scale);

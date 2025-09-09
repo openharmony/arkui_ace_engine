@@ -49,6 +49,11 @@ public:
     MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
     ~MenuItemPattern() override = default;
 
+    bool HasHideTask()
+    {
+        return hideTask_;
+    }
+
     inline bool IsAtomicNode() const override
     {
         return false;
@@ -306,7 +311,10 @@ public:
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetItalicFontStyle(const Ace::FontStyle& value);
-    void SetSelected(int32_t selected);
+    void SetSelected(int32_t selected)
+    {
+        rowSelected_ = selected;
+    }
     void SetBorderColor(const Color& color);
     Color GetBorderColor() const;
     void SetBorderWidth(const Dimension& value);
@@ -409,12 +417,13 @@ public:
     {
         return isExpanded_;
     }
-    void AttachBottomDivider();
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
     }
+    void AttachBottomDivider();
     void RemoveBottomDivider();
+    void CreateBottomDivider();
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
     std::function<void(WeakPtr<NG::FrameNode>)>& GetOptionTextModifier();
@@ -431,16 +440,15 @@ public:
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
-    void CreateBottomDivider();
+    void RegisterAccessibilityClickAction();
     void RegisterOnPress();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
     void InitFocusPadding();
     Dimension focusPadding_ = 0.0_vp;
-    double menuFocusType_ = 0.0;
 
 private:
-    friend class ServiceCollaborationMenuAceHelper;
+friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
@@ -484,7 +492,6 @@ private:
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
     void UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize);
-    void MenuRemoveChild(const RefPtr<FrameNode>& expandableNode, bool isOutFocus);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
@@ -538,6 +545,7 @@ private:
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
+    void OnAttachToMainTree() override;
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -577,6 +585,7 @@ private:
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<ClickEvent> onClickEvent_;
     RefPtr<FrameNode> endRowNode_ = nullptr;
+    std::vector<RefPtr<FrameNode>> expandableItems_;
     bool onTouchEventSet_ = false;
     bool onPressEventSet_ = false;
     bool onHoverEventSet_ = false;

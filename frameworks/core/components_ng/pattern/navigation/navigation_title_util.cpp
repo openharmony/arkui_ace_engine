@@ -46,6 +46,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
 constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
 
@@ -175,7 +176,7 @@ uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
     const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam)
 {
-    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
@@ -410,7 +411,7 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
     }
 
-    auto buttonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
     auto focusHub = buttonNode->GetFocusHub();
@@ -433,7 +434,7 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& b
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
     }
@@ -801,7 +802,7 @@ void NavigationTitleUtil::FoldStatusChangedAnimation(const RefPtr<FrameNode>& ho
                 auto renderNodeContext = weakRenderNodeContext.Upgrade();
                 CHECK_NULL_VOID(renderNodeContext);
                 renderNodeContext->UpdateOpacity(1.0f);
-            });
+            }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
     });
     AnimationUtils::Animate(
         option,
@@ -810,7 +811,7 @@ void NavigationTitleUtil::FoldStatusChangedAnimation(const RefPtr<FrameNode>& ho
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(0.0f);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, titleBar->GetContextRefPtr());
 }
 
 bool NavigationTitleUtil::IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode)
@@ -908,5 +909,24 @@ void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<
 bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
+}
+
+bool NavigationTitleUtil::SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode)
+{
+    auto pushEnterNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(pushEnterNode);
+    CHECK_NULL_RETURN(pushEnterNavDestination, false);
+    if (pushEnterNavDestination->IsTitleConsumedElapsedTime() ||
+        pushEnterNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::TITLE) {
+        return false;
+    }
+    auto elapsedTime = pushEnterNavDestination->GetTitleAnimationElapsedTime();
+    if (elapsedTime <= 0 || elapsedTime > DEFAULT_ANIMATION_DURATION) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "will skip %{public}d ms animation for enter push NavDestination node", elapsedTime);
+    // elapsed time is the TIME to skip
+    option.SetDelay(option.GetDelay() - elapsedTime);
+    return true;
 }
 } // namespace OHOS::Ace::NG

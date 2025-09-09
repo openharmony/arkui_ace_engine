@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 
 class ModelPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ModelPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ModelPaintProperty, PaintProperty);
 
 public:
     ModelPaintProperty()

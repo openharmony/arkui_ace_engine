@@ -45,7 +45,7 @@ struct NavPathInfoUINode {
 };
 
 class JSRouteInfo : public NG::RouteInfo {
-    DECLARE_ACE_TYPE(JSRouteInfo, NG::RouteInfo)
+    DECLARE_ACE_TYPE(JSRouteInfo, NG::RouteInfo);
 public:
     JSRouteInfo() = default;
     ~JSRouteInfo() override = default;
@@ -61,7 +61,7 @@ protected:
 };
 
 class JSNavigationStack : public NG::NavigationStack {
-    DECLARE_ACE_TYPE(JSNavigationStack, NG::NavigationStack)
+    DECLARE_ACE_TYPE(JSNavigationStack, NG::NavigationStack);
 public:
     JSNavigationStack() = default;
     ~JSNavigationStack() override = default;

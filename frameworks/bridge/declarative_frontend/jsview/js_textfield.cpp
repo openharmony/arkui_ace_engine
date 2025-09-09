@@ -389,7 +389,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     auto style = paramObject->GetProperty("style");
-    if (!style->IsNull()) {
+    if (!style->IsNull() && style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
     TextFieldModel::GetInstance()->SetPlaceholderFont(font);
@@ -641,7 +641,7 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
     if (args->IsNumber()) {
-        fontWeight = args->ToString();
+        fontWeight = std::to_string(args->ToNumber<int32_t>());
     } else {
         RefPtr<ResourceObject> resourceObject;
         ParseJsString(args, fontWeight, resourceObject);
@@ -656,11 +656,8 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
 void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale = 0.0;
-    if (info.Length() < 1) {
-        return;
-    }
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsDouble(info[0], minFontScale, resourceObject)) {
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resourceObject)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -682,12 +679,8 @@ void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 void JSTextField::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale = 0.0;
-    if (info.Length() < 1) {
-        return;
-    }
-
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsDouble(info[0], maxFontScale, resourceObject)) {
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resourceObject)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -743,27 +736,21 @@ void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("foregroundColor");
     auto jsValue = info[0];
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(jsValue, strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
-        if (SystemProperties::ConfigChangePerform()) {
-            UnregisterResource("foregroundColor");
-        }
         return;
     }
     Color foregroundColor;
     RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsColor(jsValue, foregroundColor, resourceObject);
-    CHECK_NULL_VOID(ret);
+    if (!ParseJsColor(jsValue, foregroundColor, resourceObject)) {
+        return;
+    }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<Color>("foregroundColor", resourceObject, foregroundColor);
-    } else {
-        UnregisterResource("foregroundColor");
-    }
-    if (!ParseJsColor(jsValue, foregroundColor)) {
-        return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     TextFieldModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -1176,19 +1163,11 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
-        auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
-        NG::BorderRadiusProperty defaultBorderRadius {
-            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
-            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
-        };
-
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
-        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
-        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
-        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -1390,7 +1369,6 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1635,17 +1613,12 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
         bool isVisible = false;
         std::u16string errorText;
         RefPtr<ResourceObject> resourceObject;
-        auto ret = ParseJsString(jsValue, errorText, resourceObject);
-        if (ret) {
+        UnregisterResource("errorString");
+        if (ParseJsString(jsValue, errorText, resourceObject)) {
             isVisible = true;
-            if (SystemProperties::ConfigChangePerform() && resourceObject) {
-                RegisterResource<std::u16string>("errorString", resourceObject, errorText);
-            } else {
-                UnregisterResource("errorString");
-            }
         }
-        if (ParseJsString(jsValue, errorText)) {
-            isVisible = true;
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::u16string>("errorString", resourceObject, errorText);
         }
         TextFieldModel::GetInstance()->SetShowError(errorText, isVisible);
     }
@@ -1656,6 +1629,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     auto jsValue = info[0];
     auto secondJSValue = info[1];
     if ((!jsValue->IsBoolean() && !secondJSValue->IsObject())) {
+        LOGI("The info is wrong, it is supposed to be a boolean");
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
@@ -1669,13 +1643,12 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetShowCounterBorder(isBorderShow);
         }
         auto parameter = paramObject->GetProperty("thresholdPercentage");
-        auto inputNumber = parameter->ToNumber<int32_t>();
-        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
-        if (parameter->IsNull() || parameter->IsUndefined()) {
+        if (parameter->IsNull() || parameter->IsUndefined() || !parameter->IsNumber()) {
             TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
             return;
         }
+        auto inputNumber = parameter->ToNumber<int32_t>();
         if (static_cast<uint32_t>(inputNumber) < MINI_VAILD_VALUE ||
             static_cast<uint32_t>(inputNumber) > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
@@ -1683,6 +1656,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
         return;
     }
@@ -1838,7 +1812,6 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
 {
     UnregisterResource("cancelButtonIconColorDefault");
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        ResetCancelIcon();
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -1902,14 +1875,6 @@ void JSTextField::SetCancelDefaultIcon()
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetCancelIconSize());
     TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
-    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
-    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
-}
-
-void JSTextField::ResetCancelIcon()
-{
-    TextFieldModel::GetInstance()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
-    TextFieldModel::GetInstance()->SetIsShowCancelButton(false);
     TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
     TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
 }
@@ -1989,6 +1954,19 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
 }
 
+void JSTextField::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
+    }
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
 void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsNumber()) {
@@ -2010,6 +1988,7 @@ void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    UnregisterResource("decorationColor");
     if (!tmpInfo->IsObject()) {
         TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
@@ -2031,7 +2010,6 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     }
     Color result = theme->GetTextStyle().GetTextDecorationColor();
     RefPtr<ResourceObject> resourceObject;
-    UnregisterResource("decorationColor");
     ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
     if (resourceObject && SystemProperties::ConfigChangePerform()) {
         RegisterResource<Color>("decorationColor", resourceObject, result);
@@ -2176,19 +2154,6 @@ void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
         auto isOnlyBetweenLines = param->ToBoolean();
         TextFieldModel::GetInstance()->SetIsOnlyBetweenLines(isOnlyBetweenLines);
     }
-}
-
-void JSTextField::SetFontFeature(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto jsValue = info[0];
-    std::string fontFeatureSettings = "";
-    if (jsValue->IsString()) {
-        fontFeatureSettings = jsValue->ToString();
-    }
-    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
@@ -2437,20 +2402,6 @@ void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }
 
-void JSTextField::SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth)
-{
-    if (!jsValue->IsObject()) {
-        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
-        return;
-    }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
-    if (layoutPolicy->IsString()) {
-        auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
-        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, isWidth);
-    }
-}
-
 NG::KeyboardAppearanceConfig JSTextField::ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj)
 {
     NG::KeyboardAppearanceConfig config;
@@ -2511,6 +2462,20 @@ void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     }
     NG::KeyboardAppearanceConfig config = ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
     NG::TextFieldModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
+void JSTextField::SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth)
+{
+    if (!jsValue->IsObject()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+    if (layoutPolicy->IsString()) {
+        auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, isWidth);
+    }
 }
 
 void JSTextField::UnregisterResource(const std::string& key)

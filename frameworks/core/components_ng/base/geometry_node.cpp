@@ -137,6 +137,18 @@ void GeometryNode::SetSelfAdjust(RectF selfAdjust)
     selfAdjust_ = selfAdjust;
 }
 
+SizeF GeometryNode::GetMarginPreFrameSize(bool withSafeArea) const
+{
+    auto size = preFrameSize_;
+    if (withSafeArea) {
+        size += selfAdjust_.GetSize();
+    }
+    if (margin_) {
+        AddPaddingToSize(*margin_, size);
+    }
+    return size;
+}
+
 SizeF GeometryNode::GetMarginFrameSize(bool withSafeArea) const
 {
     auto size = frame_.rect_.GetSize();
@@ -327,5 +339,15 @@ void GeometryNode::UpdatePaddingWithBorder(const PaddingPropertyF& padding)
     if (padding.bottom) {
         padding_->bottom = padding.bottom;
     }
+}
+
+OffsetF GeometryNode::GetIgnoreAdjust() const
+{
+    return ignoreAdjust_;
+}
+
+void GeometryNode::SetIgnoreAdjust(const OffsetF& ignoreAdjust)
+{
+    ignoreAdjust_ = ignoreAdjust;
 }
 } // namespace OHOS::Ace::NG

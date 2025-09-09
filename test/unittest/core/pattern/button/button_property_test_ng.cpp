@@ -66,11 +66,13 @@ const Color BUTTON_TEXT_COLOR_VALUE = Color::RED;
 const Color FONT_COLOR = Color(0XFFFF0000);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
+const int NODE_ID = 10;
 const uint32_t MAX_LINE_VALUE = 10;
 const float MIN_SCALE_VALUE = 0.5f;
 const float MAX_SCALE_VALUE = 3.2f;
 const float NEGATIVE_SCALE_VALUE = -1.0f;
 const float MAX_SCALE_NORMAL = 1.0f;
+const Dimension FONT_SIZE = 10.0_vp;
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
     std::make_optional(true), std::make_optional(BUTTON_TYPE_CAPSULE_VALUE), std::make_optional(true), std::nullopt,
@@ -394,7 +396,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest005, TestSize.Level1)
      */
     auto layoutProperty = pattern->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     EXPECT_EQ(buttonEventHub->GetStateEffect(), STATE_EFFECT);
@@ -428,7 +430,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest006, TestSize.Level1)
      */
     auto layoutProperty = pattern->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     EXPECT_EQ(buttonEventHub->GetStateEffect(), STATE_EFFECT);
@@ -1043,4 +1045,66 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest023, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MAX_SCALE_NORMAL);
 }
+
+/**
+ * @tc.name: ButtonPropertyTest024
+ * @tc.desc: Test SetLabel and GetLabel
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and add text into it.
+     */
+    ButtonModelNG buttonModelNG;
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto frameNode = FrameNode(V2::BUTTON_ETS_TAG, NODE_ID, AceType::MakeRefPtr<ButtonPattern>());
+    auto accessibilityProperty = AceType::MakeRefPtr<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    frameNode.children_.push_back(textNode);
+    frameNode.accessibilityProperty_ = accessibilityProperty;
+    frameNode.layoutProperty_ = buttonLayoutProperty;
+    /**
+     * @tc.steps: step2. try call SetLabel.
+     * @tc.expected: step2. the label is as expected.
+     */
+    const char* label = "button";
+    buttonModelNG.SetLabel(&frameNode, label);
+    EXPECT_EQ(buttonModelNG.GetLabel(&frameNode), "button");
 }
+
+/**
+ * @tc.name: ButtonPropertyTest025
+ * @tc.desc: Test SetFontSize and GetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and add text into it.
+     */
+    ButtonModelNG buttonModelNG;
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textNode->layoutProperty_ = textLayoutProperty;
+    auto frameNode = FrameNode(V2::BUTTON_ETS_TAG, NODE_ID, AceType::MakeRefPtr<ButtonPattern>());
+    auto accessibilityProperty = AceType::MakeRefPtr<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto buttonLayoutProperty = AceType::MakeRefPtr<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    frameNode.children_.push_back(textNode);
+    frameNode.accessibilityProperty_ = accessibilityProperty;
+    frameNode.layoutProperty_ = buttonLayoutProperty;
+    /**
+     * @tc.steps: step2. try call SetFontSize.
+     * @tc.expected: step2. the font size is as expected.
+     */
+    buttonModelNG.SetFontSize(&frameNode, FONT_SIZE);
+    EXPECT_EQ(buttonModelNG.GetFontSize(&frameNode), FONT_SIZE);
+}
+} // namespace OHOS::Ace::NG

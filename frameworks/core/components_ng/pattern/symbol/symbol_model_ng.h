@@ -35,6 +35,7 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetSymbolShadow(const SymbolShadow& symbolShadow) override;
     void SetShaderStyle(const std::vector<SymbolGradient>& style) override;
+    void ResetShaderStyle() override;
 
     void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
         const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) override;
@@ -59,6 +60,7 @@ public:
         const std::int16_t isTxtActiveSource);
     static void SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow);
     static void SetShaderStyle(FrameNode* frameNode, const std::vector<SymbolGradient>& style);
+    static void ResetShaderStyle(FrameNode* frameNode);
     static void RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
         std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
 };

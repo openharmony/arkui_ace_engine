@@ -229,6 +229,8 @@ public:
         layoutInfo_->InvalidatedOffset();
     }
 
+    void OnColorModeChange(uint32_t colorMode) override;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -263,7 +265,7 @@ private:
     RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::TOP_DOWN);
     RefPtr<WaterFlowSections> sections_;
 
-    float prevOffset_ = 0.0f;
+    double prevOffset_ = 0.0;
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;

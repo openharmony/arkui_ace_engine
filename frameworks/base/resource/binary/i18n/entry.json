@@ -619,7 +619,9 @@
         "common":{
             "ok":"موافق",
             "cancel":"إلغاء",
-            "more":"المزيد"
+            "more":"المزيد",
+            "prev":"السابق",
+            "next":"التالي"
         },
         "textoverlay":{
             "paste":"لصق",
@@ -634,8 +636,8 @@
             "last_updated":"آخر تحديث: %s"
         },
         "switch":{
-            "on":"مشغّل",
-            "off":"مغلق"
+            "on":"تشغيل",
+            "off":"إغلاق"
         },
         "stepper":{
             "skip":"تخطي",
@@ -651,6 +653,10 @@
         },
         "datepicker":{
             "lunarSwitch":"إظهار التقويم القمري"
+        },
+        "window":{
+            "leftSide":"إظهار على اليسار",
+            "rightSide":"إظهار على اليمين"
         }
     },
     "es-US":{
@@ -1455,7 +1461,9 @@
         "common":{
             "ok":"Aceptar",
             "cancel":"Cancelar",
-            "more":"Más"
+            "more":"Más",
+            "prev":"Anterior",
+            "next":"Siguiente"
         },
         "textoverlay":{
             "paste":"Pegar",
@@ -1470,13 +1478,13 @@
             "last_updated":"Última actualización: %s"
         },
         "switch":{
-            "on":"Activado",
-            "off":"Desactivado"
+            "on":"Sí",
+            "off":"No"
         },
         "stepper":{
             "skip":"Omitir",
             "next":"Siguiente",
-            "start":"Inicio",
+            "start":"Comenzar",
             "back":"Volver"
         },
         "navigation":{
@@ -1487,6 +1495,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Mostrar calendario lunar"
+        },
+        "window":{
+            "leftSide":"Mostrar a la izquierda",
+            "rightSide":"Mostrar a la derecha"
         }
     },
     "iw":{
@@ -1644,14 +1656,16 @@
         "common":{
             "ok":"OK",
             "cancel":"Отмена",
-            "more":"Еще"
+            "more":"Еще",
+            "prev":"Назад",
+            "next":"Далее"
         },
         "textoverlay":{
             "paste":"Вставить",
             "select_all":"Выбрать все",
             "cut":"Вырезать",
             "copy":"Копировать",
-            "search":"Найти",
+            "search":"Поиск",
             "share":"Отправить",
             "translate":"Перевод"
         },
@@ -1660,7 +1674,7 @@
         },
         "switch":{
             "on":"Включено",
-            "off":"Выключено"
+            "off":"Выклю\\u200bчено"
         },
         "stepper":{
             "skip":"Пропустить",
@@ -1676,13 +1690,19 @@
         },
         "datepicker":{
             "lunarSwitch":"Лунный календарь"
+        },
+        "window":{
+            "leftSide":"Показать слева",
+            "rightSide":"Показать справа"
         }
     },
     "ko":{
         "common":{
             "ok":"확인",
             "cancel":"취소",
-            "more":"더 보기"
+            "more":"더 보기",
+            "prev":"이전",
+            "next":"다음"
         },
         "textoverlay":{
             "paste":"붙여넣기",
@@ -1714,6 +1734,10 @@
         },
         "datepicker":{
             "lunarSwitch":"음력 캘린더 표시"
+        },
+        "window":{
+            "leftSide":"왼쪽에 표시",
+            "rightSide":"오른쪽에 표시"
         }
     },
     "sw":{
@@ -1976,12 +2000,14 @@
         "common":{
             "ok":"OK",
             "cancel":"キャンセル",
-            "more":"その他"
+            "more":"その他",
+            "prev":"前へ",
+            "next":"次へ"
         },
         "textoverlay":{
             "paste":"貼り付け",
             "select_all":"すべて選択",
-            "cut":"切り取り",
+            "cut":"カット",
             "copy":"コピー",
             "search":"検索",
             "share":"共有",
@@ -1991,8 +2017,8 @@
             "last_updated":"最終更新：%s"
         },
         "switch":{
-            "on":"オン",
-            "off":"オフ"
+            "on":"有効",
+            "off":"無効"
         },
         "stepper":{
             "skip":"スキップ",
@@ -2008,6 +2034,10 @@
         },
         "datepicker":{
             "lunarSwitch":"太陰暦を表示"
+        },
+        "window":{
+            "leftSide":"左に表示",
+            "rightSide":"右に表示"
         }
     },
     "ka-GE":{
@@ -2184,11 +2214,13 @@
         "common":{
             "ok":"OK",
             "cancel":"Hủy",
-            "more":"Thêm"
+            "more":"Thêm",
+            "prev":"Trước",
+            "next":"Tiếp"
         },
         "textoverlay":{
             "paste":"Dán",
-            "select_all":"Chọn tất cả",
+            "select_all":"Chọn tất",
             "cut":"Cắt",
             "copy":"Sao chép",
             "search":"Tìm kiếm",
@@ -2200,7 +2232,7 @@
         },
         "switch":{
             "on":"Bật",
-            "off":"Tắt"
+            "off":"Đã tắt"
         },
         "stepper":{
             "skip":"Bỏ qua",
@@ -2216,6 +2248,10 @@
         },
         "datepicker":{
             "lunarSwitch":"Hiển thị lịch âm"
+        },
+        "window":{
+            "leftSide":"Hiển thị bên trái",
+            "rightSide":"Hiển thị bên phải"
         }
     },
     "b+jv+Latn":{
@@ -2492,7 +2528,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Annuler",
-            "more":"Plus"
+            "more":"Plus",
+            "prev":"Précédent",
+            "next":"Suivant"
         },
         "textoverlay":{
             "paste":"Coller",
@@ -2507,23 +2545,27 @@
             "last_updated":"Dernière mise à jour : %s"
         },
         "switch":{
-            "on":"Activé",
-            "off":"Désactivé"
+            "on":"Activer",
+            "off":"Désactiver"
         },
         "stepper":{
             "skip":"Ignorer",
             "next":"Suivant",
-            "start":"Démarrer",
-            "back":"Revenir"
+            "start":"Commencer",
+            "back":"Retour"
         },
         "navigation":{
-            "back":"Revenir"
+            "back":"Retour"
         },
         "sheet":{
             "close":"Fermer"
         },
         "datepicker":{
             "lunarSwitch":"Afficher le calendrier lunaire"
+        },
+        "window":{
+            "leftSide":"Afficher à gauche",
+            "rightSide":"Afficher à droite"
         }
     },
     "zh-HK":{

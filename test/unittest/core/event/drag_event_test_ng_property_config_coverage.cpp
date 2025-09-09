@@ -149,61 +149,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest034, TestSize.Le
 }
 
 /**
- * @tc.name: DragEventActuatorUpdatePreviewAttrTest035
- * @tc.desc: Create DragEventActuator and invoke longPressUpdate callback.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest035, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    DragDropInfo dragDropInfo;
-    frameNode->SetDragPreview(dragDropInfo);
-    frameNode->SetDraggable(true);
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    GestureEventFunc actionStart = [](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = []() {};
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
-        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
-    dragEventActuator->ReplaceDragEvent(dragEvent);
-    dragEventActuator->SetCustomDragEvent(dragEvent);
-    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
-    TouchTestResult finalResult;
-    ResponseLinkResult responseLinkResult;
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    GestureEvent info = GestureEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto manager = pipeline->GetOverlayManager();
-    ASSERT_NE(manager, nullptr);
-    auto childNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(childNode, nullptr);
-    frameNode->AddChild(childNode);
-    ASSERT_NE(childNode->GetRenderContext(), nullptr);
-    auto parentNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(parentNode, nullptr);
-    frameNode->SetParent(parentNode);
-    dragEventActuator->itemParentNode_ = parentNode;
-    manager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
-    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    gestureEventHub->contextMenuShowStatus_ = true;
-    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    Offset offSet;
-    dragEventActuator->previewLongPressRecognizer_->callback_(offSet);
-    gestureEventHub->textDraggable_ = true;
-    dragEventActuator->previewLongPressRecognizer_->callback_(offSet);
-    EXPECT_EQ(gestureEventHub->textDraggable_, true);
-}
-
-/**
  * @tc.name: DragEventActuatorUpdatePreviewAttrTest036
  * @tc.desc: Create DragEventActuator and invoke thumbnail callback.
  * @tc.type: FUNC
@@ -219,7 +164,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest036, TestSize.Le
     dragPreviewInfo.pixelMap = pixelMap;
     frameNode->SetDragPreview(dragPreviewInfo);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
@@ -884,6 +829,33 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest032, TestSize.Leve
     EXPECT_EQ(renderContext->GetPositionValue(tempOffset), tempOffset);
     DragEventActuator::UpdateGatherAnimatePosition(
         gatherNodeChildInfo, { COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY() });
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
+}
+
+/**
+ * @tc.name: DragEventActuatorMountGatherNodeTest033
+ * @tc.desc: Test UpdateGatherAnimatePosition function with FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNodeChildInfo
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateGatherAnimatePosition function with FrameNode.
+     */
+    auto tempOffset = OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f));
+    auto targetOffset = OffsetT<Dimension>(Dimension(COORDINATE_OFFSET.GetX()), Dimension(COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), tempOffset);
+    DragEventActuator::UpdateGatherAnimatePosition(
+        frameNode, { COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY() });
     EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
 }
 

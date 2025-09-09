@@ -204,7 +204,7 @@ struct GridScrollWithSelect {
                 .height(80)
                 .textAlign(TextAlign.Center)
               if (this.canSlideSelect) {
-                Image(this.selectedIndexes.includes(day) ? $r('app.media.gouxuan') :$r('app.media.weigouxuan'))
+                Image(this.selectedIndexes.includes(day) ? $r('app.media.layered_image') :$r('app.media.startIcon'))
                   .width(30)
                   .height(30)
                   .position({right:5,top:5})

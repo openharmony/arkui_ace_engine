@@ -161,9 +161,9 @@ enum class RequestFocusReason {
     MOUSE,
     SYSTEM,
     DRAG_ENTER,
-    DRAG_SELECT
+    DRAG_SELECT,
+    SWITCH_EDITABLE
 };
-
 
 // reason for needToRequestKeyboardInner_ change
 enum class RequestKeyboardInnerChangeReason {
@@ -192,9 +192,21 @@ struct PreviewTextInfo {
     bool isIme;
 };
 
+#if defined(IOS_PLATFORM)
+struct InsertCommandComposeInfo {
+    int32_t start;
+    int32_t end;
+    bool isActive;
+};
+#endif
+
 struct InsertCommandInfo {
     std::u16string insertValue;
     InputReason reason;
+#if defined(IOS_PLATFORM)
+    InsertCommandComposeInfo compose;
+    bool unmarkText;
+#endif
 };
 
 struct InputCommandInfo {
@@ -235,7 +247,6 @@ struct ContentScroller {
     float stepOffset = 0.0f;
     Offset localOffset;
     std::optional<Offset> hotAreaOffset;
-    float updateMagniferEpsilon = 0.5f;
 
     void OnBeforeScrollingCallback(const Offset& localOffset)
     {
@@ -243,6 +254,13 @@ struct ContentScroller {
             beforeScrollingCallback(localOffset);
         }
     }
+};
+
+struct MoveCaretToContentRectData {
+    int32_t index = 0;
+    TextAffinity textAffinity = TextAffinity::UPSTREAM;
+    bool isEditorValueChanged = true;
+    bool moveContent = true;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -280,6 +298,12 @@ public:
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
+    }
+
+    void ClearOperationRecords()
+    {
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
     }
 
     void SetKeyboardAppearance(KeyboardAppearance value)
@@ -332,9 +356,7 @@ public:
     }
 
     void OnModifyDone() override;
-    void OnModifyDoneMultiThread();
-    void OnModifyDoneMultiThreadPart();
-    void OnModifyDoneMultiThreadAddition();
+    void MultiThreadDelayedExecution();
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -998,6 +1020,7 @@ public:
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
+    bool CheckAttachInput();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
@@ -1580,6 +1603,7 @@ public:
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     void DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction);
+    void DeleteByRange(int32_t& start, int32_t& end);
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -1643,7 +1667,7 @@ public:
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
-    void UpdateContentScroller(const Offset& localOffset, float delay = 0.0f);
+    void UpdateContentScroller(const Offset& localOffset, float delay = 0.0f, bool enableScrollOutside = true);
     Offset AdjustAutoScrollOffset(const Offset& offset);
     void SetIsInitTextRect(bool isInitTextRect)
     {
@@ -1714,6 +1738,10 @@ public:
     void ProcessDefaultStyleAndBehaviorsMultiThread();
 
     void ProcessResponseArea();
+    void AddContentScrollingCallback(std::function<void(const Offset&)>&& callback)
+    {
+        contentScroller_.scrollingCallback = std::move(callback);
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1762,6 +1790,7 @@ protected:
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
@@ -2031,8 +2060,10 @@ private:
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
     Offset GetCaretClickLocalOffset(const Offset& offset);
+    void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
+    void UpdateMagnifierWithFloatingCaretPos();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2251,6 +2282,11 @@ private:
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
 
+#if defined(IOS_PLATFORM)
+    TextCompose compose_;
+    bool unmarkText_;
+#endif
+
     // ----- multi thread state variables -----
     bool initSurfacePositionChangedCallbackMultiThread_ = false;
     bool initSurfaceChangedCallbackMultiThread_ = false;
@@ -2266,6 +2302,8 @@ private:
     bool setSelectionFlagMultiThread_ = false;
     bool setCustomKeyboardWithNodeMultiThread_ = false;
     RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    bool moveCaretToContentRectMultiThread_ = false;
+    MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

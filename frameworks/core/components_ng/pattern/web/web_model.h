@@ -171,6 +171,7 @@ public:
     virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedMouseEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNativeEmbedObjectParamChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
@@ -217,6 +218,8 @@ public:
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
+    virtual void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
@@ -224,6 +227,9 @@ public:
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetForceEnableZoom(bool isEnabled) {}
+    virtual void SetSafeBrowsingCheckFinishId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

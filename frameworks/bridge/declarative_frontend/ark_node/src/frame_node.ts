@@ -179,7 +179,8 @@ class FrameNode extends Disposable {
   dispose(): void {
     super.dispose();
     if (this.nodePtr_) {
-      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+          'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);

@@ -179,10 +179,12 @@ class JSBuilderNode extends BaseNode {
         this.parentallowFreeze = false;
         this.isFreeze = false;
         this.__parentViewOfBuildNode = undefined;
+        this.updateParams_ = null;
+        this.activeCount_ = 1;
     }
     findProvidePU__(providePropName) {
         if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
-            return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+            return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
         }
         return undefined;
     }
@@ -313,16 +315,16 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setBuilderNode(this);
         let id = this.frameNode_.getUniqueId();
         if (this.id_ && this.id_ !== id) {
-            this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+            this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
         }
         this.id_ = id;
-        this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+        this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
         FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
     update(param) {
         if (this.isFreeze) {
-            this.params_ = param;
+            this.updateParams_ = param;
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -373,14 +375,21 @@ class JSBuilderNode extends BaseNode {
             this.finishUpdateFunc();
         }
     }
+    isBuilderNodeActive() {
+        return this.activeCount_ > 0;
+    }
     setActiveInternal(active, isReuse = false) {
         stateMgmtProfiler.begin('BuilderNode.setActive');
         if (!isReuse) {
-            if (active && this.isFreeze) {
+            this.activeCount_ += active ? 1 : -1;
+            if (this.isBuilderNodeActive()) {
                 this.isFreeze = false;
-                this.update(this.params_);
-            } else if (!active) {
+            } else {
                 this.isFreeze = this.allowFreezeWhenInactive;
+            }
+            if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
+                this.update(this.updateParams_);
+                this.updateParams_ = null;
             }
         }
         if (this.inheritFreeze) {
@@ -541,10 +550,11 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
-        if (this.nodePtr_) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
-        }
         this.disposable_.dispose();
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+        }
         this.frameNode_?.dispose();
     }
     isDisposed() {
@@ -614,7 +624,8 @@ class NodeAdapter extends Disposable {
     dispose() {
         super.dispose();
         if (this.nativePtr_) {
-            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
+            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
         }
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
@@ -1008,7 +1019,8 @@ class FrameNode extends Disposable {
     dispose() {
         super.dispose();
         if (this.nodePtr_) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
         }
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -1487,6 +1499,12 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
         __JSScopeUtil__.restoreInstanceId();
+    }
+    invalidateAttributes() {
+        if (this.nodePtr_ === undefined || this.nodePtr_ === null) {
+            return;
+        }
+        getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -2905,7 +2923,8 @@ class RenderNode extends Disposable {
     dispose() {
         super.dispose();
         if (this.nodePtr) {
-            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
         }
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
@@ -3162,7 +3181,8 @@ class ComponentContent extends Content {
     }
     dispose() {
         if (this.getNodePtr()) {
-            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+                'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
         }
         this.disposable_.dispose();
         this.detachFromParent();
@@ -3268,7 +3288,7 @@ function __establishConnection__(allow, parentView, builderIds) {
         if (builderNode.getInheritFreeze()) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
-        builderNode.__parentViewOfBuildNode = parentView;
+        builderNode.__parentViewOfBuildNode = new WeakRef(parentView);
         parentView?.addChildBuilderNode(builderNode);
     });
     return true;

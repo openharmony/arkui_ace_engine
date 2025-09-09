@@ -2457,6 +2457,7 @@ HWTEST_F(WebModelStaticTest, SetOnInterceptKeyboardAttach001, TestSize.Level1)
     WebModelStatic::SetOnInterceptKeyboardAttach(AccessibilityManager::RawPtr(frameNode), callback);
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
+    ASSERT_NE(frameNode->GetEventHub(), nullptr);
     webEventHub->propOnInterceptKeyboardAttachEvent_(nullptr);
     EXPECT_NE(callCount, 0);
 #endif
@@ -2484,6 +2485,27 @@ HWTEST_F(WebModelStaticTest, SetAdsBlockedEventId001, TestSize.Level1)
     ASSERT_NE(webEventHub, nullptr);
     webEventHub->propOnAdsBlockedEvent_(nullptr);
     EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetForceEnableZoom001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetForceEnableZoom001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetForceEnableZoom(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckForceEnableZoom(true), true);
 #endif
 }
 } // namespace OHOS::Ace::NG

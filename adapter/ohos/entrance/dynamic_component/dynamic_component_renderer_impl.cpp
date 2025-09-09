@@ -354,6 +354,9 @@ void DynamicComponentRendererImpl::RegisterContainerHandler()
 
 void DynamicComponentRendererImpl::SetUIContentJsContext()
 {
+    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
+        return;
+    }
     CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -409,6 +412,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
     taskExecutor->PostSyncTask(
         [weak = WeakClaim(this), aceLogTag = aceLogTag_, instanceId = uiContent_->GetInstanceId()] {
             auto container = Container::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
             auto frontend = AceType::DynamicCast<OHOS::Ace::FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
             auto delegate = frontend->GetDelegate();
@@ -433,8 +437,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                         CHECK_NULL_VOID(renderer);
                         renderer->HandleCardSizeChangeEvent(size);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged",
-                    TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
             };
             pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
         }, TaskExecutor::TaskType::UI, "ArkUIRegisterSizeChangedCallback");
@@ -491,16 +494,14 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
                         ContainerScope scope(subContainer->GetInstanceId());
                         subContainer->UpdateConfiguration(config, configuration);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged",
-                    TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
             };
 
             auto hostContainer = Platform::AceContainer::GetContainer(hostInstanceId);
             CHECK_NULL_VOID(hostContainer);
             hostContainer->AddOnConfigurationChange(subInstanceId, configChangedCallback);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
 }
 
 void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
@@ -613,11 +614,11 @@ void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MM
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [uiContent = uiContent_, pointerEvent]() {
+            CHECK_NULL_VOID(uiContent);
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessPointerEvent(pointerEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer");
 }
 
 bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
@@ -634,12 +635,11 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
             CHECK_NULL_VOID(uiContent);
             auto subInstanceId = uiContent->GetInstanceId();
             ContainerScope scope(subInstanceId);
-            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent);
+            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent, keyEvent.isPreIme);
             TAG_LOGI(aceLogTag, "send key event: %{public}s, result = %{public}d",
                 keyEvent.ToString().c_str(), result);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
     return result;
 }
 
@@ -660,8 +660,7 @@ void DynamicComponentRendererImpl::TransferFocusState(bool isFocus)
                 uiContent->UnFocus();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusState");
 }
 
 void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
@@ -677,8 +676,7 @@ void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
             TAG_LOGI(aceLogTag, "send focus active event: %{public}d", isFocus);
             uiContent->SetIsFocusActive(isFocus);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent");
 }
 
 SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
@@ -706,6 +704,17 @@ SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
 
 void DynamicComponentRendererImpl::UpdateViewportConfig(
     const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
+{
+    if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        UpdateDynamicViewportConfig(size, density, orientation, animationOpt, offset);
+        return;
+    }
+
+    UpdateIsolatedViewportConfig(size, density, orientation, animationOpt, offset);
+}
+
+void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size, float density,
+    int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
 {
     CHECK_NULL_VOID(uiContent_);
     auto adaptiveSize = ComputeAdaptiveSize(size);
@@ -752,9 +761,59 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task),
-            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
+    }
+}
+
+void DynamicComponentRendererImpl::UpdateIsolatedViewportConfig(const SizeF& size, float density,
+    int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto adaptiveSize = ComputeAdaptiveSize(size);
+    ViewportConfig vpConfig(adaptiveSize.Width(), adaptiveSize.Height(), density);
+    vpConfig.SetPosition(0, 0);
+    vpConfig.SetOrientation(orientation);
+    TAG_LOGI(aceLogTag_, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
+        uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
+
+    auto option = CopyAnimationOption(animationOpt);
+    auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_, offset]() {
+        auto renderer = weak.Upgrade();
+        CHECK_NULL_VOID(renderer);
+        auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
+        CHECK_NULL_VOID(uiContent);
+        ContainerScope scope(uiContent->GetInstanceId());
+        ViewportConfig config(vpConfig.Width(), vpConfig.Height(), vpConfig.Density());
+        config.SetPosition(vpConfig.Left(), vpConfig.Top());
+        config.SetOrientation(vpConfig.Orientation());
+        if (renderer->uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            renderer->UpdateParentOffsetToWindow(offset);
+            config.SetPosition(offset.GetX(), offset.GetY());
+        }
+        if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()
+            && renderer->density_ == config.Density()) {
+            TAG_LOGW(aceLogTag, "card viewport not changed");
+            return;
+        }
+        renderer->viewport_.SetWidth(config.Width());
+        renderer->viewport_.SetHeight(config.Height());
+        renderer->density_ = config.Density();
+        TAG_LOGI(aceLogTag, "update card viewport: [%{public}d x %{public}d]",
+            config.Width(), config.Height());
+        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, *option);
+    };
+    bool contentReady = false;
+    {
+        std::lock_guard<std::mutex> lock(contentReadyMutex_);
+        contentReady = contentReady_;
+        if (!contentReady) {
+            contentReadyCallback_ = std::move(task);
+        }
+    }
+    if (contentReady) {
+        auto taskExecutor = GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
     }
 }
 
@@ -778,8 +837,7 @@ void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& off
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
-        "ArkUIDynamicComponentUpdateParentOffsetToWindow",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        "ArkUIDynamicComponentUpdateParentOffsetToWindow");
 }
 
 void DynamicComponentRendererImpl::DestroyContent()
@@ -808,6 +866,7 @@ void DynamicComponentRendererImpl::OnDestroyContent()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
             ContainerScope scope(uiContent->GetInstanceId());
             TAG_LOGI(aceLogTag, "destroy dynamic UI content");
             uiContent->Destroy();
@@ -819,7 +878,6 @@ void DynamicComponentRendererImpl::AfterDestroyContent()
 {
     if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         DeleteWorkerUsing(runtime_);
-        return;
     }
 }
 

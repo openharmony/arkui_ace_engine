@@ -69,7 +69,7 @@ enum class TipsAnchorType {
 using StateChangeFunc = std::function<void(const std::string&)>;
 using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
-    DECLARE_ACE_TYPE(PopupParam, AceType)
+    DECLARE_ACE_TYPE(PopupParam, AceType);
 
 public:
     PopupParam() = default;
@@ -541,6 +541,7 @@ public:
     {
         return onWillDismiss_;
     }
+
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
@@ -571,6 +572,26 @@ public:
         return isCaretMode_;
     }
 
+    void SetFollowTransformOfTarget (bool followTransformOfTarget)
+    {
+        followTransformOfTarget_ = followTransformOfTarget;
+    }
+
+    bool IsFollowTransformOfTarget() const
+    {
+        return followTransformOfTarget_;
+    }
+
+    StateChangeFunc GetDoubleBindCallback()
+    {
+        return doubleBindCallback_;
+    }
+
+    void SetDoubleBindCallback(StateChangeFunc&& callback)
+    {
+        doubleBindCallback_ = callback;
+    }
+
     void SetKeyBoardAvoidMode (PopupKeyboardAvoidMode keyboardAvoidMode)
     {
         keyboardAvoidMode_ = keyboardAvoidMode;
@@ -585,30 +606,10 @@ public:
     {
         avoidTarget_ = avoidTarget;
     }
-    
+
     std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
-    }
-
-    StateChangeFunc GetDoubleBindCallback()
-    {
-        return doubleBindCallback_;
-    }
-
-    void SetDoubleBindCallback(StateChangeFunc&& callback)
-    {
-        doubleBindCallback_ = callback;
-    }
-
-    void SetFollowTransformOfTarget (bool followTransformOfTarget)
-    {
-        followTransformOfTarget_ = followTransformOfTarget;
-    }
-
-    bool IsFollowTransformOfTarget() const
-    {
-        return followTransformOfTarget_;
     }
 
     std::optional<bool> GetIsPartialUpdate() const
@@ -630,6 +631,7 @@ public:
     {
         return isTips_;
     }
+
     void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
     {
         outlineLinearGradient_ = outlineLinearGradient;
@@ -670,6 +672,16 @@ public:
         return innerBorderWidth_;
     }
 
+    void SetAnchorType(TipsAnchorType anchorType)
+    {
+        anchorType_ = anchorType;
+    }
+
+    TipsAnchorType GetAnchorType() const
+    {
+        return anchorType_;
+    }
+
     void SetTextColorResourceObject(RefPtr<ResourceObject>& obj)
     {
         resourceTextColorObj_ = obj;
@@ -708,16 +720,6 @@ public:
     const RefPtr<ResourceObject>& GetMaskResourceObject()
     {
         return resourceMaskObj_;
-    }
-
-    void SetAnchorType(TipsAnchorType anchorType)
-    {
-        anchorType_ = anchorType;
-    }
-
-    TipsAnchorType GetAnchorType() const
-    {
-        return anchorType_;
     }
 
     void SetWidthResourceObject(RefPtr<ResourceObject>& obj)

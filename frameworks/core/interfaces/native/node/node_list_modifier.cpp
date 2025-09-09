@@ -273,7 +273,17 @@ void ResetListSpace(ArkUINodeHandle node)
     ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
 }
 
-ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(ListModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetListEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -423,6 +433,15 @@ ArkUI_Uint32 GetListScrollBarColor(ArkUINodeHandle node)
     return ListModelNG::GetScrollBarColor(frameNode);
 }
 
+void CreateWithResourceObjScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ListModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
+}
+
 void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     CHECK_NULL_VOID(value);
@@ -435,7 +454,9 @@ void ResetListScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListScrollBarColor(frameNode, "#FF000000");
+    ListModelNG::SetScrollBarColor(frameNode, std::nullopt);
+
+    CreateWithResourceObjScrollBarColor(node, nullptr);
 }
 
 ArkUI_Int32 GetAlignListItem(ArkUINodeHandle node)
@@ -1024,6 +1045,7 @@ const ArkUIListModifier* GetListModifier()
         .parseResObjDividerStartMargin = ParseResObjDividerStartMargin,
         .parseResObjDividerEndMargin = ParseResObjDividerEndMargin,
         .createWithResourceObjLaneConstrain = CreateWithResourceObjLaneConstrain,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1049,7 +1071,7 @@ const CJUIListModifier* GetCJUIListModifier()
         .getSticky = GetSticky,
         .setSticky = SetSticky,
         .resetSticky = ResetSticky,
-        .getListEdgeEffect = GetListEdgeEffect,
+        .getListEdgeEffect = GetListEdgeEffectCJ,
         .setListEdgeEffect = SetListEdgeEffect,
         .resetListEdgeEffect = ResetListEdgeEffect,
         .getListDirection = GetListDirection,

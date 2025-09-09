@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
@@ -104,6 +103,16 @@ public:
     bool IsEnableFix() override
     {
         return IsMultiMenu();
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
     }
 
     bool IsEnabledContentForFixIdeal()
@@ -376,8 +385,8 @@ public:
     RefPtr<FrameNode> GetMenuWrapper() const;
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void SetFirstShow()
     {
         isFirstShow_ = true;
@@ -565,8 +574,6 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
-
     RefPtr<FrameNode> GetLastSelectedItem()
     {
         return lastSelectedItem_;
@@ -580,6 +587,8 @@ public:
     {
         lastPosition_ = lastPosition;
     }
+
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     void UpdateLastPlacement(std::optional<Placement> lastPlacement)
     {
@@ -693,9 +702,9 @@ public:
         originPreviewYForStack_ = tmp;
     }
 
-    void SetDisableMenuBgColorByUser(bool isSetByUser = false)
+    void SetDisableMenuBgColorByUser(bool ret = false)
     {
-        isDisableMenuBgColorByUser_ = isSetByUser;
+        isDisableMenuBgColorByUser_ = ret;
     }
 
     void SetSubMenuDepth(int32_t depth)
@@ -707,6 +716,8 @@ public:
     {
         return subMenuDepth_;
     }
+
+    void AddBuildDividerTask();
 
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
@@ -734,6 +745,7 @@ private:
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
+    void ResetThemeByInnerMenuCount();
 
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
@@ -742,8 +754,6 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
-    void ResetScrollTheme(const RefPtr<FrameNode>& host);
-    void ResetThemeByInnerMenuCount();
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -795,6 +805,9 @@ private:
         AnimationOption& option) const;
     void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+    void OnAttachToMainTree() override;
+    void BuildDivider();
+    RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -829,9 +842,9 @@ private:
     OffsetF endOffset_;
     OffsetF disappearOffset_;
     OffsetF previewOriginOffset_;
+    OffsetF statusOriginOffset_;
     RectF previewRect_;
     SizeF previewIdealSize_;
-    OffsetF statusOriginOffset_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
@@ -854,10 +867,10 @@ private:
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
     bool isDisableMenuBgColorByUser_ = false;
+    bool buildDividerTaskAdded_ = false;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;
-
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 
@@ -891,7 +904,6 @@ private:
     // Record menu's items and groups at first level,
     // use for group header and footer padding
     std::list<WeakPtr<UINode>> itemsAndGroups_;
-
     ACE_DISALLOW_COPY_AND_MOVE(InnerMenuPattern);
 };
 } // namespace OHOS::Ace::NG

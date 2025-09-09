@@ -547,11 +547,13 @@ HWTEST_F(EventManagerTestNg, EventManagerClearHover001, TestSize.Level1)
 
     MouseEvent event;
     TouchTestResult touchTestResults;
+    eventManager->lastMouseEvent_ = event;
     auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
     touchTestResults.push_back(eventTarget);
     eventManager->mouseTestResults_.emplace(event.id, touchTestResults);
     eventManager->CleanHoverStatusForDragBegin();
     EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_EQ(eventManager->lastMouseEvent_.id, event.id);
 }
 
 /**
@@ -846,6 +848,36 @@ HWTEST_F(EventManagerTestNg, TryResampleTouchEvent002, TestSize.Level1)
     current.push_back(touchEvent2);
     ret = eventManager->TryResampleTouchEvent(history, current, resampleTime, resample);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetResamplePointerEvent001
+ * @tc.desc: Test GetResamplePointerEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResamplePointerEvent001, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+    TouchEvent touchEvent1;
+    TouchEvent touchEvent2;
+
+    uint64_t resampleTime1 = 0.5 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    touchEvent1.time = ts1;
+    uint64_t resampleTime2 = 3 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds2(resampleTime2);
+    TimeStamp ts2(nanoseconds2);
+    touchEvent2.time = ts2;
+    events.push_back(touchEvent1);
+    events.push_back(touchEvent2);
+    TouchEvent resample;
+    uint64_t resampleTime = 4 * 1000 * 1000;
+
+    ResamplePoint slope;
+    SystemProperties::debugEnabled_ = true;
+    bool ret = ResampleAlgo::GetResamplePointerEvent(events, resampleTime, resample, slope);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -1171,37 +1203,6 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent0012, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnNonPointerEvent001
- * @tc.desc: Test OnNonPointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    NonPointerEvent event;
-    event.eventType = UIInputEventType::KEY;
-    auto ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event2;
-    event2.eventType = UIInputEventType::FOCUS_AXIS;
-    ret = eventManager->OnNonPointerEvent(event2);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event3;
-    event3.eventType = UIInputEventType::CROWN;
-    ret = eventManager->OnNonPointerEvent(event3);
-    EXPECT_FALSE(ret);
-
-    NonPointerEvent event4;
-    event4.eventType = UIInputEventType::TOUCH;
-    ret = eventManager->OnNonPointerEvent(event4);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: HandleMouseHoverAnimation001
  * @tc.desc: Test HandleMouseHoverAnimation
  * @tc.type: FUNC
@@ -1304,5 +1305,49 @@ HWTEST_F(EventManagerTestNg, UpdateInfoWhenFinishDispatch001, TestSize.Level1)
     eventManager->lastSourceTool_ = SourceTool::UNKNOWN;
     eventManager->UpdateInfoWhenFinishDispatch(event, true);
     EXPECT_EQ(eventManager->lastSourceTool_, SourceTool::FINGER);
+}
+
+/**
+ * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.desc: Test CleanRefereeBeforeTouchTest function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.step2: Set refereeNG_ and touchTestResults_.
+     * @tc.expected: refereeNG_ and touchTestResults_ not null.
+     */
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::NONE }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->OnPending();
+    touchTestResults.push_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(resultId);
+    ASSERT_NE(scope, nullptr);
+    ASSERT_NE(eventManager->refereeNG_, nullptr);
+    eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(resultId, scope));
+    eventManager->lastDownFingerNumber_ = 0;
+    TouchEvent event;
+    event.id = resultId;
+    event.type = TouchType::UP;
+    event.sourceTool = SourceTool::FINGER;
+    event.isFalsified = true;
+
+    /**
+     * @tc.step3: Call CleanRefereeBeforeTouchTest.
+     * @tc.expected: refereeNG_->gestureScopes_.empty() is true.
+     */
+    eventManager->CleanRefereeBeforeTouchTest(event, true);
+    EXPECT_EQ(eventManager->refereeNG_->gestureScopes_.empty(), true);
 }
 } // namespace OHOS::Ace::NG

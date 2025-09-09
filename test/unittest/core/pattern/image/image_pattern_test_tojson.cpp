@@ -179,7 +179,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageInvalidJson, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(src);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetSyncMode(false);
     image.SetDraggable(false);
     image.EnableAnalyzer(false);
@@ -323,7 +324,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitContain, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageFit(ImageFit::CONTAIN);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -362,7 +364,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitFill, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageFit(ImageFit::FILL);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -385,7 +388,6 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitFill, TestSize.Level0)
     EXPECT_EQ(json->GetString("objectFit"), "ImageFit.Fill");
 }
 
-
 /**
  * @tc.name: TestImageJsonObjectFitScaleDown
  * @tc.desc: Test image tojson.
@@ -402,7 +404,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitScaleDown, TestSize.Level
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageFit(ImageFit::SCALE_DOWN);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -441,7 +444,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitBottomStart, TestSize.Lev
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageFit(ImageFit::BOTTOM_START);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -480,7 +484,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitBottomEnd, TestSize.Level
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageFit(ImageFit::BOTTOM_END);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -519,7 +524,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatX, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRepeat(ImageRepeat::REPEAT_X);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -558,7 +564,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatY, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRepeat(ImageRepeat::REPEAT_Y);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -597,7 +604,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatXY, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRepeat(ImageRepeat::REPEAT);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -636,7 +644,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatNO, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRepeat(ImageRepeat::NO_REPEAT);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -675,7 +684,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeOriginal, TestSize.Level
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRenderMode(ImageRenderMode::ORIGINAL);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -714,7 +724,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeTemplate, TestSize.Level
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
     image.SetImageRenderMode(ImageRenderMode::TEMPLATE);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -737,7 +748,6 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeTemplate, TestSize.Level
     EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode.Template");
 }
 
-
 /**
  * @tc.name: TestImageJsonfillColor01
  * @tc.desc: Test image tojson.
@@ -754,7 +764,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor01, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -777,7 +788,6 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor01, TestSize.Level0)
     EXPECT_EQ(json->GetString("fillColor"), "#FF0000FF");
 }
 
-
 /**
  * @tc.name: TestImageJsonfillColor02
  * @tc.desc: Test image tojson.
@@ -794,7 +804,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor02, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -816,7 +827,6 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor02, TestSize.Level0)
     EXPECT_EQ(json->GetString("fillColor"), "#FF000000");
 }
 
-
 /**
  * @tc.name: TestImageJsonfillColor03
  * @tc.desc: Test image tojson.
@@ -833,7 +843,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor03, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -871,7 +882,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor04, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -909,7 +921,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption01, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -947,7 +960,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption02, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -985,7 +999,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption03, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -1023,7 +1038,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption04, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -1061,7 +1077,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless001, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -1099,7 +1116,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless002, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -1137,7 +1155,8 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless003, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -1175,13 +1194,14 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonWidth01, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call ToJsonValue.
      * @tc.expected: as follows
@@ -1196,7 +1216,6 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonWidth01, TestSize.Level0)
      */
     EXPECT_EQ(json->GetString("width"), "-");
 }
-
 
 /**
  * @tc.name: TestImageJsonHeight01
@@ -1214,13 +1233,14 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHeight01, TestSize.Level0)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call ToJsonValue.
      * @tc.expected: as follows

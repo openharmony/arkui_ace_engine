@@ -692,6 +692,14 @@ void WebClientImpl::OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptu
     delegate->OnScreenCaptureRequest(request);
 }
 
+void WebClientImpl::OnContextMenuDismissed()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnContextMenuDismissed();
+}
+
 bool WebClientImpl::RunContextMenu(
     std::shared_ptr<NWeb::NWebContextMenuParams> params,
     std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
@@ -1070,6 +1078,14 @@ void WebClientImpl::OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbe
     delegate->OnNativeEmbedMouseEvent(event);
 }
 
+void WebClientImpl::OnNativeEmbedObjectParamChange(std::shared_ptr<NWeb::NWebNativeEmbedParamDataInfo> paramDataInfo)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnNativeEmbedObjectParamChange(paramDataInfo);
+}
+
 void WebClientImpl::OnRootLayerChanged(int width, int height)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1412,6 +1428,22 @@ bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& 
     return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+void WebClientImpl::OnLoadStarted(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadStarted(url);
+}
+
+void WebClientImpl::OnLoadFinished(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadFinished(url);
+}
+
 void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
     int frame_routing_id, int width, int height)
 {
@@ -1526,5 +1558,37 @@ void WebClientImpl::OnPdfLoadEvent(int32_t result, const std::string& url)
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnPdfLoadEvent(result, url);
+}
+
+void WebClientImpl::OnInsertBlanklessFrameWithSize(const std::string& pathToFrame, uint32_t width, uint32_t height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
+    delegate->CreateSnapshotFrameNode(pathToFrame, width, height);
+}
+
+void WebClientImpl::SetImeShow(bool visible)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebClientImpl::SetImeShow, visible: %{public}d", visible);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->SetImeShow(visible);
+}
+
+bool WebClientImpl::IsShowHandle()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->IsShowHandle();
+}
+
+void WebClientImpl::OnSafeBrowsingCheckFinish(int threat_type)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnSafeBrowsingCheckFinish(threat_type);
 }
 } // namespace OHOS::Ace

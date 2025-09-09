@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 class NavDestinationNodeBase : public GroupNode {
-    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode)
+    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode);
 public:
     NavDestinationNodeBase(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern) {}
@@ -346,7 +346,7 @@ protected:
     // Dialog
     TranslateOptions CalcContentTranslateForDialog(const SizeF& frameSize);
     // slide
-    OffsetF CalcTranslateForSlideTransition(const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd);
+    OffsetF CalcTranslateForSlideTransition(const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd);
 
     OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
 

@@ -50,6 +50,33 @@ public: \
 protected: \
     Action##TYPE action##TYPE##_;
 
+#define DEFINE_TEXT_ACTION_FUNCTIONS(TYPE) \
+public: \
+    void Set##TYPE(const Action##TYPE& action##TYPE) \
+    { \
+        if (!accessibilityTextActionInnerFunction_.has_value()) { \
+            accessibilityTextActionInnerFunction_ = AccessibilityTextActionInnerFunction(); \
+        } \
+        if (!accessibilityTextActionInnerFunction_.has_value()) { \
+            return; \
+        } \
+        accessibilityTextActionInnerFunction_->Set##TYPE(action##TYPE); \
+    } \
+    bool CheckRegister##TYPE() const \
+    { \
+        if (!accessibilityTextActionInnerFunction_.has_value()) { \
+            return false; \
+        } \
+        return accessibilityTextActionInnerFunction_->CheckRegister##TYPE(); \
+    } \
+    Action##TYPE Get##TYPE##Func() const \
+    {  \
+        if (!accessibilityTextActionInnerFunction_.has_value()) { \
+            return nullptr; \
+        } \
+        return accessibilityTextActionInnerFunction_->Get##TYPE##Func(); \
+    }
+
 using ActionNotifyChildAction = std::function<AccessibilityActionResult(const RefPtr<FrameNode>& node,
     NotifyChildActionType childActionType)>;
 
@@ -61,6 +88,24 @@ using ActionAccessibilityTransparentCallback = std::function<void(TouchEventInfo
 using ActionSpecificSupportActionCallback = std::function<void()>;
 
 using ActionSecurityClickAction = std::function<void(const SecCompEnhanceEvent& event)>;
+
+using ActionSwitchEditableMode = std::function<void(bool switchToEditable)>;
+
+/**
+ * @brief maintaining the callbacks for text like components
+ * @details maintaining the callbacks for text like components inner handle in accessibility action or hover
+ * @note
+ * @attention
+ * @since
+ */
+class AccessibilityTextActionInnerFunction {
+    DEFINE_ACTION_FUNCTIONS(SwitchEditableMode);
+
+public:
+    AccessibilityTextActionInnerFunction() = default;
+
+    virtual ~AccessibilityTextActionInnerFunction() = default;
+};
 
 /**
  * @brief maintaining the callbacks for components
@@ -117,10 +162,30 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
      * @attention it will be executed on the UI thread, so be aware of thread safety.
      */
     DEFINE_ACTION_FUNCTIONS(SecurityClickAction);
+
+    /**
+     * @brief the callback used to notify text like components to switch to or exit editable mode
+     *
+     * @details callback function prototype: ActionSwitchEditableMode in AccessibilityTextActionInnerFunction
+     *          register function: SetActionSwitchEditableMode(bool switchToEditable)
+     *          use register function to register callback.
+     *          it will be executed, for example,
+     *          when setting the cursor position requires entering editable mode first
+     * @param [in] switchToEditable switch to or exit editable mode
+     *
+     * @return void
+     *
+     * @attention it will be executed on the UI thread, so be aware of thread safety.
+     */
+    DEFINE_TEXT_ACTION_FUNCTIONS(SwitchEditableMode);
+
 public:
     AccessibilityPropertyInnerFunction() = default;
 
     virtual ~AccessibilityPropertyInnerFunction() = default;
+
+private:
+    std::optional<AccessibilityTextActionInnerFunction>  accessibilityTextActionInnerFunction_;
 };
 
 /**

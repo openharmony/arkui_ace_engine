@@ -116,6 +116,10 @@ void DisposeNodeSafely(ArkUI_NodeHandle nativePtr)
     if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nativePtr->uiNodeHandle)) {
         return;
     }
+    if (!(nativePtr->threadSafeNode)) {
+        DisposeNode(nativePtr);
+        return;
+    }
     if (!CheckIsCNode(nativePtr)) {
         return;
     }

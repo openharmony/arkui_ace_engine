@@ -205,4 +205,10 @@ void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
     apsMonitor_ = apsMonitor;
 }
 
+void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+    PerfInterfaces::ReportSurface(uniqueId, surfaceName, componentName, bundleName, pid);
+}
+
 } // namespace OHOS::Ace

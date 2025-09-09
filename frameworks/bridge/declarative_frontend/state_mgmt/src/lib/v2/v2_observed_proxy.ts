@@ -317,7 +317,7 @@ class SetMapProxyHandler {
         if (key === 'delete') {
             return (prop): boolean => {
                 if (target.has(prop)) {
-                    const res: boolean = target.delete(prop)
+                    const res: boolean = target.delete(prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     return res;

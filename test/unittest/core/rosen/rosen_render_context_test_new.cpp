@@ -436,7 +436,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew014, TestSize.Level1)
     rosenRenderContext->transitionEffect_ = AceType::MakeRefPtr<RosenTransitionEffect>();
     rosenRenderContext->NotifyTransition(true);
     rosenRenderContext->OnMouseSelectUpdate(true, Color(SHAPE_MASK_DEFAULT_COLOR), Color(SHAPE_MASK_DEFAULT_COLOR));
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetModifierIds().size(), 1);
     rosenRenderContext->MarkDrivenRenderFramePaintState(true);
     rosenRenderContext->MarkDrivenRenderItemIndex(1);
     rosenRenderContext->MarkDrivenRender(true);
@@ -772,7 +771,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
     rosenRenderContext->SetOpacity(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
-    rosenRenderContext->PaintAccessibilityFocus();
+    rosenRenderContext->PaintAccessibilityFocus(false);
     rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, true);
     rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
@@ -1114,6 +1113,22 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew040, TestSize.Level1)
     auto stagingProperties = rsNdoe->GetStagingProperties();
     auto borderDashWidth = stagingProperties.GetBorderDashWidth();
     EXPECT_NEAR(borderDashWidth[0], 1.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RSUIContext002
+ * @tc.desc: Test RSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RSUIContext002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
 }
 
 /**

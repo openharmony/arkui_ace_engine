@@ -74,7 +74,7 @@ enum class MouseFormat : int32_t {
 };
 
 class ACE_EXPORT MouseStyle : public AceType {
-    DECLARE_ACE_TYPE(MouseStyle, AceType)
+    DECLARE_ACE_TYPE(MouseStyle, AceType);
 
 public:
     static RefPtr<MouseStyle> CreateMouseStyle();
@@ -97,19 +97,18 @@ enum class MouseStyleChangeReason {
 };
 
 struct MouseStyleChangeLog {
-    int32_t windowId; // the id of window which change mouseStyle
-    int32_t changeNodeId; // the id of node which change mouseStyle
-    MouseFormat beforeMouseStyle; // before this change, the mouseFormat of mouseStyle
-    MouseFormat afterMouseStyle; // after this change, the mouseFormat of mouseStyle
-    MouseStyleChangeReason reason; // the reason of this mouseStyle change
+    int32_t windowId;
+    int32_t changeNodeId;
+    MouseFormat beforeMouseStyle;
+    MouseFormat afterMouseStyle;
+    MouseStyleChangeReason reason;
 };
 
 class ACE_EXPORT MouseStyleManager : public AceType {
-    DECLARE_ACE_TYPE(MouseStyleManager, AceType)
+    DECLARE_ACE_TYPE(MouseStyleManager, AceType);
 
 public:
     MouseStyleManager() = default;
-
     bool SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFormat mouseFormat,
         bool isByPass, MouseStyleChangeReason reason);
     
@@ -142,7 +141,6 @@ public:
         mouseStyleNodeId_.reset();
         return true;
     }
-
     void SetUserSetCursor(bool userSetCursor)
     {
         userSetCursor_ = userSetCursor;

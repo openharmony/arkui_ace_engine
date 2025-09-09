@@ -94,6 +94,7 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);

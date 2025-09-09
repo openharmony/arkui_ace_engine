@@ -276,6 +276,21 @@ enum class NavDestinationActiveReason {
     APP_STATE_CHANGE
 };
 
+enum class NavDestVisibilityChangeReason {
+    TRANSITION = 0,
+    CONTENT_COVER,
+    APP_STATE
+};
+
+union NavDestLifecycleReason {
+    NavDestinationActiveReason activeReason;
+    NavDestVisibilityChangeReason visibilityChangeReason;
+
+    NavDestLifecycleReason(NavDestinationActiveReason activeReason) : activeReason(activeReason) {}
+    NavDestLifecycleReason(NavDestVisibilityChangeReason visibilityChangeReason)
+        : visibilityChangeReason(visibilityChangeReason) {}
+};
+
 enum class NavigationSystemTransitionType {
     NONE = 0,
     TITLE = 1,
@@ -290,7 +305,7 @@ enum class NavigationSystemTransitionType {
 enum class NavDestinationType {
     DETAIL = 0,
     HOME = 1,
-    PLACE_HOLDER = 2,
+    PROXY = 2
 };
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)

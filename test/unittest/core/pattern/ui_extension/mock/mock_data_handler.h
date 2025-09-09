@@ -32,8 +32,7 @@ class MockDataHandler : public IDataHandler {
         return DataHandlerErr::OK;
     }
 
-    DataHandlerErr SendDataAsync(
-        SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
+    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
     {
         return DataHandlerErr::OK;
     }
@@ -43,9 +42,7 @@ class MockDataHandler : public IDataHandler {
         return DataHandlerErr::OK;
     }
 
-    void UnregisterDataConsumer(SubSystemId subSystemId) override
-    {
-    }
+    void UnregisterDataConsumer(SubSystemId subSystemId) override {}
 };
 } // namespace Rosen
 } // namespace OHOS

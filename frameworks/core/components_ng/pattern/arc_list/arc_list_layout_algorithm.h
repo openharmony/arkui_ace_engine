@@ -109,7 +109,7 @@ private:
 
     float CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos);
 
-    static float GetNearScale(float pos);
+    float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
     float GetHeaderAreaSize() const;

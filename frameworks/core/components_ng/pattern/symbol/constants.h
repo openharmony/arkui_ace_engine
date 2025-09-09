@@ -30,8 +30,8 @@ enum class SymbolEffectType {
     BOUNCE,
     PULSE,
     REPLACE,
-    Disable,
-    QuickReplace,
+    DISABLE,
+    QUICK_REPLACE,
 };
 
 enum class CommonSubType {
@@ -55,9 +55,15 @@ enum class SymbolType {
 };
 
 enum class SymbolGradientType {
-    COLOR_SHADER = 0,
+    NONE = 0,
+    COLOR_SHADER,
     RADIAL_GRADIENT,
     LINEAR_GRADIENT,
+};
+
+enum class GradientDefinedStatus {
+    GRADIENT_TYPE = 1,
+    GRADIENT_DEFAULT_COLOR = 2
 };
 
 enum class SDKGradientDirection {
@@ -85,7 +91,8 @@ static const std::unordered_map<SDKGradientDirection, float> GRADIENT_DIRECTION_
 };
 
 struct SymbolGradient {
-    SymbolGradientType type = SymbolGradientType::COLOR_SHADER;
+    SymbolGradientType type = SymbolGradientType::NONE;
+    GradientDefinedStatus gradientType = GradientDefinedStatus::GRADIENT_DEFAULT_COLOR;
     std::vector<Color> symbolColor;
     std::vector<float> symbolOpacities;
     bool repeating = false;
@@ -104,6 +111,7 @@ struct SymbolGradient {
            std::equal(symbolOpacities.begin(), symbolOpacities.end(), other.symbolOpacities.begin(),
                      [](float a, float b) { return NearZero(a - b); }) &&
            repeating == other.repeating &&
+           gradientType == other.gradientType &&
            ((!angle && !other.angle) || (angle && other.angle && NearZero(*angle - *other.angle))) &&
            radius == other.radius;
     }

@@ -20,8 +20,6 @@
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
 #include "core/components/theme/theme.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
@@ -48,8 +46,8 @@ public:
             CHECK_NULL_VOID(themeConstants);
             SetSymbolTheme(themeConstants, theme);
             theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
-            theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
-            theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
+            theme->backResourceId_ = InternalResource::ResourceId::IC_BACK;
+            theme->moreResourceId_ = InternalResource::ResourceId::IC_MORE;
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
             if (pattern) {
                 theme->height_ = pattern->GetAttr<Dimension>("navigation_bar_height", 0.0_vp);

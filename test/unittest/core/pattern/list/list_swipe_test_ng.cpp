@@ -1291,6 +1291,28 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestSetSwipeActionByModifier
+ * @tc.desc: Test SwipeEdgeEffect::None for ListItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, TestSetSwipeActionByModifier, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init ListItem with SwipeEdgeEffect::None
+     */
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    CreateSwipeDone();
+    itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None, AceType::RawPtr(item_));
+
+    /**
+     * @tc.steps: step2. Check SwipeEdgeEffect::None effective
+     * @tc.expected: SwipeEdgeEffect::None is effective
+     */
+    EXPECT_EQ(itemPattern_->GetEdgeEffect(), V2::SwipeEdgeEffect::None);
+}
+
+/**
  * @tc.name: ResetSwipeStatus001
  * @tc.desc: If drag different ListItem, the previous item would be reset.
  * @tc.type: FUNC

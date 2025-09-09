@@ -44,7 +44,7 @@ private:                                                                        
 
 namespace OHOS::Ace::NG {
 class WebEventHub : public EventHub {
-    DECLARE_ACE_TYPE(WebEventHub, EventHub)
+    DECLARE_ACE_TYPE(WebEventHub, EventHub);
 
 public:
     WebEventHub() = default;
@@ -169,14 +169,18 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedVisibilityChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedMouse, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedObjectParamChange, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
     ACE_WEB_EVENT_PROPERTY(OnAdsBlocked, void);
+    ACE_WEB_EVENT_PROPERTY(OnLoadStarted, void);
+    ACE_WEB_EVENT_PROPERTY(OnLoadFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfScrollAtBottom, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
+    ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckFinish, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

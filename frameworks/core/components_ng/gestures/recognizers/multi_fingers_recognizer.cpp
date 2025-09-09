@@ -156,6 +156,7 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     point.originalId = event.originalId;
     touchPoints_[event.id].pointers = { point };
     touchPoints_[event.id].pointerEvent = event.pointerEvent;
+    touchPoints_[event.id].targetDisplayId = event.targetDisplayId;
 }
 
 std::string MultiFingersRecognizer::DumpGestureInfo() const

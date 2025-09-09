@@ -328,9 +328,15 @@ ArkUINativeModuleValue ScrollBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, barcolorArg, color)) {
+    RefPtr<ResourceObject> resObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, barcolorArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(nativeNode);
     } else {
+        if (SystemProperties::ConfigChangePerform()) {
+            GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjScrollBarColor(
+                nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+        }
         GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollBarColor(nativeNode, color.GetValue());
     }
 
@@ -345,6 +351,9 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjScrollBarColor(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -613,9 +622,9 @@ ArkUINativeModuleValue ScrollBridge::SetScrollOnScroll(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
         panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+            vm, static_cast<double>(xOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+            vm, static_cast<double>(yOffset.ConvertToVp()));
         panda::Local<panda::JSValueRef> params[2] = { xOffsetParam, yOffsetParam }; // 2: Array .length
         func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
     };
@@ -700,9 +709,9 @@ ArkUINativeModuleValue ScrollBridge::SetScrollOnDidScroll(ArkUIRuntimeCallInfo* 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
         panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
-            vm, static_cast<double>(xOffset.ConvertToVp()));
+            vm, static_cast<float>(xOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
-            vm, static_cast<double>(yOffset.ConvertToVp()));
+            vm, static_cast<float>(yOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
          // 3: Array length
         panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };

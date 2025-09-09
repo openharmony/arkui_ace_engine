@@ -143,6 +143,28 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
+    void SetOnLoadStartedEventId(const EventMarker& onLoadStartedEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOnLoadStartedEventId(onLoadStartedEventId);
+    }
+
+    const EventMarker& GetOnLoadStartedEventId() const
+    {
+        return declaration_->GetOnLoadStartedEventId();
+    }
+
+    void SetOnLoadFinishedEventId(const EventMarker& onLoadFinishedEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOnLoadFinishedEventId(onLoadFinishedEventId);
+    }
+
+    const EventMarker& GetOnLoadFinishedEventId() const
+    {
+        return declaration_->GetOnLoadFinishedEventId();
+    }
+
     using OnProgressChangeImpl = std::function<void(const BaseEventInfo* info)>;
     void OnProgressChange(const BaseEventInfo* info) const
     {
@@ -1131,6 +1153,17 @@ public:
         return declaration_->GetNativeEmbedGestureEventId();
     }
 
+    void SetNativeEmbedObjectParamChangeId(const EventMarker& embedObjectParamChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedObjectParamChangeId(embedObjectParamChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedObjectParamChangeId() const
+    {
+        return declaration_->GetNativeEmbedObjectParamChangeId();
+    }
+
     void SetRenderProcessNotRespondingId(const EventMarker& renderNotRespondingId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1183,6 +1216,16 @@ public:
     bool GetOptimizeParserBudgetEnabled() const
     {
         return isParserBudgetOptimized_;
+    }
+
+    bool GetForceEnableZoom() const
+    {
+        return isForceEnableZoom_;
+    }
+
+    void SetForceEnableZoom(bool isEnabled)
+    {
+        isForceEnableZoom_ = isEnabled;
     }
 
 private:
@@ -1266,6 +1309,7 @@ private:
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
     bool isParserBudgetOptimized_ = false;
+    bool isForceEnableZoom_ = true;
 };
 
 } // namespace OHOS::Ace

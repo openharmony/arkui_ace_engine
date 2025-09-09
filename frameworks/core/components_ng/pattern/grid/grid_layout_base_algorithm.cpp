@@ -85,7 +85,7 @@ void GridLayoutBaseAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
-    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
+    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize(true));
 }
 
 

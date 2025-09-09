@@ -357,8 +357,10 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
     NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    NavDestinationModelNG.SetOnShown(std::move(builderFunc));
-    NavDestinationModelNG.SetOnHidden(std::move(builderFunc));
+    auto onShownFunction = [](int32_t reason) {};
+    auto onHiddenFunction = [](int32_t reason) {};
+    NavDestinationModelNG.SetOnShown(std::move(onShownFunction));
+    NavDestinationModelNG.SetOnHidden(std::move(onHiddenFunction));
     NavDestinationModelNG.SetOnBackPressed(std::move(onBackPressed));
 
     RefPtr<NG::UINode> customNode;
@@ -407,6 +409,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     ASSERT_TRUE(titleBarLayoutProperty->GetNoPixMap());
     ASSERT_NE(titleBarLayoutProperty->GetBackIconSymbol(), nullptr);
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    EXPECT_TRUE(imageOption.isValidImage);
     ASSERT_EQ(imageSourceInfo.GetSrc(), imageSource);
 }
 

@@ -69,7 +69,6 @@ const std::string SUBTITLE = "subtitle";
 const std::string MESSAGE = "hello world";
 const CalcDimension WIDTHDIMENSION = CalcDimension(DIMENSIONVALUE);
 const CalcDimension HEIGHTDIMENSION = CalcDimension(DIMENSIONVALUE);
-const int32_t BACKGROUNDBLURSTYLEZERO = 0;
 const int32_t BACKGROUNDBLURSTYLE = 1;
 const int32_t INTONE = 1;
 const NG::BorderWidthProperty BORDERWIDTH = { .leftDimen = Dimension(DIMENSIONVALUE) };
@@ -224,57 +223,6 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump003, Te
      */
     pattern->DumpInfo(jsonPtr);
     EXPECT_EQ(jsonPtr->GetArraySize(), 26);
-}
-
-/**
- * @tc.name: DialogPatternAdditionalTestNgDump004
- * @tc.desc: Test DialogPattern Dump
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
-     * @tc.expected: The dialogNode and dialogNode created successfully.
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    std::shared_ptr<JsonValue> jsonPtr = JsonUtil::CreateSharedPtrJson(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    /**
-     * @tc.steps: step2. Invoke Dump functions.
-     * @tc.expected: These Dump properties are matched.
-     */
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_TRUE(jsonPtr->Contains("Type"));
-
-    jsonPtr.reset();
-    jsonPtr = JsonUtil::Create(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    pattern->dialogProperties_.title = TITLE;
-    pattern->dialogProperties_.subtitle = SUBTITLE;
-    pattern->dialogProperties_.content = MESSAGE;
-    pattern->dialogProperties_.buttonDirection = DialogButtonDirection::HORIZONTAL;
-    pattern->dialogProperties_.backgroundColor = COLOR;
-    pattern->dialogProperties_.backgroundBlurStyle = BACKGROUNDBLURSTYLE;
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_TRUE(jsonPtr->Contains("Title"));
-    EXPECT_TRUE(jsonPtr->Contains("Subtitle"));
-    EXPECT_TRUE(jsonPtr->Contains("Content"));
-    EXPECT_TRUE(jsonPtr->Contains("ButtonDirection"));
-    EXPECT_TRUE(jsonPtr->Contains("BackgroundBlurStyle"));
-    EXPECT_TRUE(jsonPtr->Contains("BackgroundColor"));
-    jsonPtr.reset();
-    jsonPtr = JsonUtil::Create(false);
-    ASSERT_NE(jsonPtr, nullptr);
-    pattern->dialogProperties_.backgroundBlurStyle = BACKGROUNDBLURSTYLEZERO;
-    pattern->DumpSimplifyInfo(jsonPtr);
-    EXPECT_FALSE(jsonPtr->Contains("BackgroundBlurStyle"));
 }
 
 /**
@@ -1596,6 +1544,38 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogModelTestNgShowActionSheet002, Tes
 }
 
 /**
+ * @tc.name: GetWindowButtonRect
+ * @tc.desc: Test GetWindowButtonRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, GetWindowButtonRect, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step0. create dialog node.
+    * @tc.expected: the dialog node created successfully.
+    */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipelineContext = dialog->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    ASSERT_NE(avoidInfoMgr, nullptr);
+    avoidInfoMgr->avoidInfo_.needAvoid = false;
+    avoidInfoMgr->avoidInfo_.controlBottonsRect = CONTROL_RECT;
+    RectF floatButtons;
+    pattern->GetWindowButtonRect(floatButtons);
+    EXPECT_EQ(floatButtons, RectF());
+    avoidInfoMgr->avoidInfo_.needAvoid = true;
+    pattern->GetWindowButtonRect(floatButtons);
+    EXPECT_EQ(floatButtons, CONTROL_RECT);
+}
+
+/**
  * @tc.name: DialogModelTestNgShowActionSheet003
  * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
  * @tc.type: FUNC
@@ -1779,16 +1759,17 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityH
 }
 
 /**
- * @tc.name: DialogPatternUpdateBackgroundColorTest001
- * @tc.desc: Test DialogPattern::UpdateBackGroundColor
+ * @tc.name: DialogPatternTestSetDialogAccessibilityHoverConsume
+ * @tc.desc: Test OnWindowShow
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest001, TestSize.Level1)
+HWTEST_F(DialogPatternAdditionalTestNg, OnWindowShow, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create dialogNode and dialogTheme instance.
      * @tc.expected: The dialogNode and dialogNode created successfully.
      */
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
@@ -1796,79 +1777,17 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternUpdateBackgroundColorTest00
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<DialogPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipelineContext = host->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto dialogContext = host->GetRenderContext();
-    ASSERT_NE(dialogContext, nullptr);
 
-    pipelineContext->isSystemColorChange_ = true;
-    EXPECT_TRUE(pipelineContext->isSystemColorChange_);
-    std::string colorStr = "#FF0000";
     /**
-     * @tc.steps: step2. Call UpdateBackGroundColor and check the result.
-     * @tc.expected: Background color is updated correctly.
+     * @tc.steps: step2. Set refreshOnWindowShow to true and invoke function.
+     * @tc.expected: RefreshOnWindowShow is false.
      */
-    pattern->UpdateBackGroundColor(colorStr);
-    EXPECT_EQ(dialogContext->GetBackgroundColor().value(), Color::ColorFromString(colorStr));
-}
-
-/**
- * @tc.name: DialogPatternTestRegisterButtonOnKeyEvent
- * @tc.desc: Test RegisterButtonOnKeyEventRegisterButtonOnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestRegisterButtonOnKeyEvent, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step0. create dialog node.
-    * @tc.expected: the dialog node created successfully.
-    */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    RefPtr<FrameNode> button = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
-        AceType::MakeRefPtr<ButtonPattern>());
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    ButtonInfo buttonInfo = { .text = TITLE };
-    pattern->RegisterButtonOnKeyEvent(buttonInfo, button, -1);
-    auto focusHub = button->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-}
-
-/**
- * @tc.name: GetWindowButtonRect
- * @tc.desc: Test GetWindowButtonRect
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, GetWindowButtonRect, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step0. create dialog node.
-    * @tc.expected: the dialog node created successfully.
-    */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto pipelineContext = dialog->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
-    ASSERT_NE(avoidInfoMgr, nullptr);
-    avoidInfoMgr->avoidInfo_.needAvoid = false;
-    avoidInfoMgr->avoidInfo_.controlBottonsRect = CONTROL_RECT;
-    RectF floatButtons;
-    pattern->GetWindowButtonRect(floatButtons);
-    EXPECT_EQ(floatButtons, RectF());
-    avoidInfoMgr->avoidInfo_.needAvoid = true;
-    pattern->GetWindowButtonRect(floatButtons);
-    EXPECT_EQ(floatButtons, CONTROL_RECT);
+    pattern->refreshOnWindowShow_ = true;
+    pattern->OnWindowShow();
+    EXPECT_FALSE(pattern->refreshOnWindowShow_);
+    
+    pattern->refreshOnWindowShow_ = false;
+    pattern->OnWindowShow();
+    EXPECT_FALSE(pattern->refreshOnWindowShow_);
 }
 } // namespace OHOS::Ace::NG

@@ -62,7 +62,7 @@ void ButtonModelNG::SetStateEffect(const bool stateEffect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect);
 }
@@ -513,7 +513,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
 
 void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
 {
-    CreateWithLabel(para.label.value());
+    CreateWithLabel(para.label.value_or(""));
     SetTypeAndStateEffect(para.type, para.stateEffect);
     SetButtonStyle(para.buttonStyleMode);
     SetControlSize(para.controlSize);
@@ -758,7 +758,7 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
         }
     }
 
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect.value_or(true));
 }
@@ -822,7 +822,7 @@ void ButtonModelNG::SetType(FrameNode* frameNode, const int value)
 void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect);
 }

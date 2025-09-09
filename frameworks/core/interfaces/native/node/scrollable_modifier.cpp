@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
+
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -175,13 +176,14 @@ void ResetOnScrollStopCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnScrollStop(frameNode, nullptr);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     (*values)[0] = ScrollableModelNG::GetEdgeEffect(frameNode);
     (*values)[1] = ScrollableModelNG::GetAlwaysEnabled(frameNode);
-    return 2;
+    (*values)[2] = static_cast<ArkUI_Int32>(ScrollableModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -223,27 +225,6 @@ void GetFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     CHECK_NULL_VOID(frameNode);
     (*values)[0].i32 = static_cast<int32_t>(ScrollableModelNG::GetFadingEdge(frameNode));
     (*values)[1].f32 = ScrollableModelNG::GetFadingEdgeLength(frameNode);
-}
-
-void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
-}
-
-void ResetFlingSpeedLimit(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
-}
-
-float GetFlingSpeedLimit(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, -1.0f);
-    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
 }
 
 void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
@@ -295,6 +276,27 @@ void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
 }
 
+void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
+void ResetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
+}
+
+float GetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1.0f);
+    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
+}
+
 void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -333,6 +335,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnReachStartCallBack = ResetOnReachStartCallBack,
         .setOnReachEndCallBack = SetOnReachEndCallBack,
         .resetOnReachEndCallBack = ResetOnReachEndCallBack,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
+        .getBackToTop = GetBackToTop,
+        .setScrollBarMargin = SetScrollBarMargin,
+        .resetScrollBarMargin = ResetScrollBarMargin,
+        .getScrollBarMargin = GetScrollBarMargin,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setOnWillScrollCallBack = SetOnWillScrollCallBack,
         .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
         .setOnDidScrollCallBack = SetOnDidScrollCallBack,
@@ -343,15 +354,6 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnScrollStartCallBack = ResetOnScrollStartCallBack,
         .setOnScrollStopCallBack = SetOnScrollStopCallBack,
         .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
-        .getFlingSpeedLimit = GetFlingSpeedLimit,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
-        .setBackToTop = SetBackToTop,
-        .resetBackToTop = ResetBackToTop,
-        .getBackToTop = GetBackToTop,
-        .setScrollBarMargin = SetScrollBarMargin,
-        .resetScrollBarMargin = ResetScrollBarMargin,
-        .getScrollBarMargin = GetScrollBarMargin,
         .setOnWillStopDragging = SetOnWillStopDragging,
         .resetOnWillStopDragging = ResetOnWillStopDragging,
     };

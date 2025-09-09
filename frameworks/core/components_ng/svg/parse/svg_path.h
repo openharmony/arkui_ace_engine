@@ -32,7 +32,7 @@ public:
 
     RSRecordingPath AsPath(const Size& viewPort) const override;
     RSRecordingPath AsPath(const SvgLengthScaleRule& /* lengthRule */) override;
-    Rect GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule);
+    RSRecordingPath GetPath(const SvgLengthScaleRule& lengthRule);
 private:
     std::string d_;
 };

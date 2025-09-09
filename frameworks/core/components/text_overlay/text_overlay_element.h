@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class TextOverlayElement : public SoleChildElement, public FocusGroup {
-    DECLARE_ACE_TYPE(TextOverlayElement, SoleChildElement, FocusGroup)
+    DECLARE_ACE_TYPE(TextOverlayElement, SoleChildElement, FocusGroup);
 
 public:
     void PerformBuild() override;

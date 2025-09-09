@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -30,10 +31,10 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -632,6 +633,58 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate002, TestSize.L
 
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::RESIZE_ONLY);
     sheetPattern->AvoidKeyboardBeforeTranslate();
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: AvoidKeyboardBeforeTranslate003
+ * @tc.desc: Branch: if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) => false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "AvoidKeyboardBeforeTranslate".
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto node = FrameNode::CreateFrameNode("Sheet", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    auto pattern = node->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. set keyboardAvoidMode is TRANSLATE_AND_RESIZE, test "AvoidKeyboardBeforeTranslate".
+     */
+    pattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+    EXPECT_NE(pattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::RESIZE_ONLY);
+    auto result = pattern->AvoidKeyboardBeforeTranslate();
+    EXPECT_FALSE(result);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: AvoidKeyboardBeforeTranslate004
+ * @tc.desc: Branch: if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) => true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBeforeTranslate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, before test "AvoidKeyboardBeforeTranslate".
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. set keyboardAvoidMode is RESIZE_ONLY, test "AvoidKeyboardBeforeTranslate".
+     */
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    EXPECT_EQ(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::RESIZE_ONLY);
+    auto result = sheetPattern->AvoidKeyboardBeforeTranslate();
+    EXPECT_TRUE(result);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1614,14 +1667,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset002, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme.
      */
     SetOnBindSheet();
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1748,12 +1794,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     auto sheetType = sheetPattern->GetSheetType();
     EXPECT_NE(sheetType, SheetType::SHEET_BOTTOM_OFFSET);
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
     sheetPattern->InitSheetObject();
@@ -1840,12 +1881,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto sheetType = sheetPattern->GetSheetType();
 
     /**
@@ -1853,6 +1889,47 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
      */
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM_OFFSET);
     EXPECT_EQ(sheetPattern->sheetHeightUp_, 0.0f);
+}
+
+/**
+ * @tc.name: SheetOffset007
+ * @tc.desc: Test SetBottomOffset when in pc mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, SheetOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set up bind sheet and theme.
+     */
+    SetOnBindSheet();
+    SystemProperties::SetDeviceType(DeviceType::TABLET);
+    SystemProperties::isPCMode_ = true;
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. sheet is center style.
+     * @tc.expected: bottom offsets are zero when style is center.
+     */
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    sheetStyle.bottomOffset = { 10.0f, -10.0f };
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheetPattern->SetBottomOffset(sheetStyle);
+    EXPECT_EQ(sheetPattern->bottomOffsetX_, 0.0f);
+    EXPECT_EQ(sheetPattern->bottomOffsetY_, 0.0f);
+
+    /**
+     * @tc.steps: step3. sheet is bottom style.
+     * @tc.expected: bottom offsets are valid when style is Bottom.
+     */
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetPattern->SetBottomOffset(sheetStyle);
+    EXPECT_FLOAT_EQ(sheetPattern->bottomOffsetX_, 10.0f);
+    EXPECT_FLOAT_EQ(sheetPattern->bottomOffsetY_, -10.0f);
 }
 
 /**
@@ -2550,7 +2627,10 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     style.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-    
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. create sheet property and style.
      * @tc.expected: layoutProperty and LayoutAlgorithm are not nullptr.
@@ -2566,7 +2646,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     layoutProperty->propSheetStyle_ = style;
 
     /**
@@ -2574,7 +2653,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
      */
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     manager->keyboardInset_ = KEYBOARD_INSET;
     pipeline->isHalfFoldHoverStatus_ = true;
@@ -2589,8 +2667,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     std::vector<Rect> rects;
-    Rect rect;
-    rect.SetRect(0, 1064, 2294, 171);
+    Rect rect(0, 1064, 2294, 171);
     rects.insert(rects.end(), rect);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);

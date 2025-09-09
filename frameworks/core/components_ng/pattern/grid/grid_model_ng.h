@@ -40,6 +40,7 @@ public:
     void SetGridHeight(const Dimension& value) override;
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
+    void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value, bool show = false) override;
     void SetIsRTL(TextDirection direction) override;
@@ -75,6 +76,7 @@ public:
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -105,9 +107,9 @@ public:
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
-    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
     static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
@@ -124,6 +126,10 @@ public:
     static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
     static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
     static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
+    static bool GetSyncLoad(FrameNode* frameNode);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 
@@ -138,10 +144,8 @@ public:
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
-    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
-    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
-    static bool GetSyncLoad(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

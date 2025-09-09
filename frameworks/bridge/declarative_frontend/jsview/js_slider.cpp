@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,10 +160,14 @@ void JSSlider::Create(const JSCallbackInfo& info)
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         changeEventVal = valueObj->GetProperty("changeEvent");
         auto valueProperty = valueObj->GetProperty("value");
-        value = valueProperty->ToNumber<double>();
+        if (valueProperty->IsNumber()) {
+            value = valueProperty->ToNumber<double>();
+        }
     } else if (paramObject->HasProperty("$value")) {
         changeEventVal = paramObject->GetProperty("$value");
-        value = getValue->ToNumber<double>();
+        if (getValue->IsNumber()) {
+            value = getValue->ToNumber<double>();
+        }
     } else if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
     }
@@ -245,16 +249,23 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    RefPtr<ResourceObject> resObj;
-    if (!ParseJsColor(info[0], colorVal, resObj)) {
-        SliderModel::GetInstance()->ResetBlockColor();
-    } else {
+    NG::Gradient gradient;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
+            SliderModel::GetInstance()->ResetBlockColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+            }
+            return;
+        }
         SliderModel::GetInstance()->SetBlockColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+        }
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
-    }
+    SliderModel::GetInstance()->SetLinearGradientBlockColor(gradient, false);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -264,9 +275,9 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     }
     NG::Gradient gradient;
     bool isResourceColor = false;
+    RefPtr<ResourceObject> resObj;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        RefPtr<ResourceObject> resObj;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
             if (SystemProperties::ConfigChangePerform()) {
@@ -278,12 +289,12 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
-        if (SystemProperties::ConfigChangePerform()) {
-            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
-        }
     }
     // Set track gradient color to NG::SliderModelNG
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+    }
 }
 
 bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)

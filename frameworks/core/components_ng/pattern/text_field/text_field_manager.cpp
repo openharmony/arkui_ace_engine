@@ -79,12 +79,10 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    auto y = std::max(0.0, position.GetY());
-    Offset newPosition = { position.GetX(), y };
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SetClickPosition from %{public}s to %{public}s",
-        position_.ToString().c_str(), newPosition.ToString().c_str());
-    position_ = newPosition;
-    optionalPosition_ = newPosition;
+        position_.ToString().c_str(), position.ToString().c_str());
+    position_ = position;
+    optionalPosition_ = position;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -149,11 +147,10 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
     if (!pipeline->UsingCaretAvoidMode() || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    ScrollTextFieldToSafeArea();
     if (UsingCustomKeyboardAvoid()) {
-        ScrollTextFieldToSafeArea();
         TriggerCustomKeyboardAvoid();
     } else {
-        ScrollTextFieldToSafeArea();
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
         lastKeyboardOffset_ = safeAreaManager->GetKeyboardOffset(true);
         Rect keyboardRect;
@@ -227,14 +224,6 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     if (isShowKeyboard) {
         CHECK_NULL_RETURN(LessNotEqual(scrollableRect.Top(), bottomInset.start), false);
-    }
-
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, false);
-    if (pipeline->UsingCaretAvoidMode()) {
-        scrollableRect.SetTop(scrollableRect.Top() - safeAreaManager->GetKeyboardOffset());
     }
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();

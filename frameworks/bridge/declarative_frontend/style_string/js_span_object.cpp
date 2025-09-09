@@ -34,12 +34,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -135,7 +137,7 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
         Color color;
         if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -147,21 +149,30 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
 {
-    if (obj->HasProperty("fontSize")) {
-        auto context = PipelineBase::GetCurrentContextSafely();
+    if (!obj->HasProperty("fontSize")) {
+        return;
+    }
+    CalcDimension size;
+    bool parseFail = false;
+    auto fontSize = obj->GetProperty("fontSize");
+    if (!fontSize->IsNull() && fontSize->IsObject()) {
+        auto sizeTmp = ParseLengthMetrics(fontSize, false);
+        if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
+            size = sizeTmp;
+        } else {
+            parseFail = true;
+        }
+    } else {
+        parseFail = true;
+    }
+    if (parseFail) {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        auto fontSize = obj->GetProperty("fontSize");
-        CalcDimension size = theme->GetTextStyle().GetFontSize();
-        if (!fontSize->IsNull() && fontSize->IsObject()) {
-            auto sizeTmp = ParseLengthMetrics(fontSize, false);
-            if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
-                size = sizeTmp;
-            }
-        }
-        font.fontSize = size;
+        size = theme->GetTextStyle().GetFontSize();
     }
+    font.fontSize = size;
 }
 
 void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
@@ -177,7 +188,7 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
         if (weight != "") {
             font.fontWeight = ConvertStrToFontWeight(weight);
         } else {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -194,7 +205,7 @@ void JSFontSpan::ParseJsFontFamily(const JSRef<JSObject>& obj, Font& font)
         if (JSViewAbstract::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamiliesNG = fontFamilies;
         } else {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -220,19 +231,30 @@ void JSFontSpan::ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
-    if (obj->HasProperty("strokeWidth")) {
-        auto strokeWidth = obj->GetProperty("strokeWidth");
-        if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
-            auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
-            if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
-                width = strokeWidthTmp;
-            }
+    CalcDimension width;
+    if (!obj->HasProperty("strokeWidth")) {
+        font.strokeWidth = width;
+        return;
+    }
+    auto strokeWidth = obj->GetProperty("strokeWidth");
+    bool parseFail = false;
+    if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
+        auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
+        if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
+            width = strokeWidthTmp;
+        } else {
+            parseFail = true;
         }
+    } else {
+        parseFail = true;
+    }
+
+    if (parseFail) {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        width = theme->GetTextStyle().GetStrokeWidth();
     }
     font.strokeWidth = width;
 }
@@ -455,12 +477,12 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    float lineThicknessScale = 1.0f;
+    std::optional<float> lineThicknessScale;
     JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
     if (thicknessScaleValue->IsNumber()) {
         lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+        lineThicknessScale = LessNotEqual(lineThicknessScale.value_or(-1.0f), 0) ? 1.0f : lineThicknessScale;
     }
-    lineThicknessScale = LessNotEqual(lineThicknessScale, 0) ? 1.0f : lineThicknessScale;
     std::optional<TextDecorationOptions> options;
     if (args.Length() > 1 && args[1]->IsObject()) {
         options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));
@@ -866,6 +888,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
     JSClass<JSImageAttachment>::CustomProperty(
         "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
     JSClass<JSImageAttachment>::CustomProperty(
+        "sizeInVp", &JSImageAttachment::GetImageSizeInVp, &JSImageAttachment::SetImageSizeInVp);
+    JSClass<JSImageAttachment>::CustomProperty(
         "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
     JSClass<JSImageAttachment>::CustomProperty(
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
@@ -890,7 +914,10 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
     ImageSpanOptions options;
     auto container = Container::CurrentSafely();
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(context, options);
+    if (!context) {
+        TAG_LOGW(ACE_TEXT, "StyledString CreateImageOptions Can't Get Context");
+        return options;
+    }
     bool isCard = context->IsFormRender() && container && !container->IsDynamicRender();
 
     std::string imageSrc;
@@ -930,7 +957,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     ImageSpanAttribute imageStyle;
     ParseJsImageSpanSizeAttribute(obj, imageStyle);
     JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull()) {
+    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -1072,15 +1099,34 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
     auto imageSize = JSRef<JSObject>::New();
     auto size = imageAttr->size;
     if (size->width.has_value()) {
-        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+        imageSize->SetProperty<float>("width", size->width->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("width", 0.0);
     }
 
     if (size->height.has_value()) {
-        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
+        imageSize->SetProperty<float>("height", size->height->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
+    }
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageSizeInVp(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    const auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
     }
     info.SetReturnValue(imageSize);
 }
@@ -1342,7 +1388,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             float width = 0;
             if (result->HasProperty("width")) {
                 auto widthObj = result->GetProperty("width");
-                width = widthObj->ToNumber<float>();
+                width = widthObj->IsNumber() ? widthObj->ToNumber<float>() : width;
                 if (LessNotEqual(width, 0.0)) {
                     width = 0;
                 }
@@ -1350,7 +1396,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             std::optional<float> heightOpt;
             if (result->HasProperty("height")) {
                 auto heightObj = result->GetProperty("height");
-                auto height = heightObj->ToNumber<float>();
+                auto height = heightObj->IsNumber() ? heightObj->ToNumber<float>() : -1.0;
                 if (GreatOrEqual(height, 0.0)) {
                     heightOpt = height;
                 }
@@ -1600,7 +1646,8 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
     int32_t value = Infinity<int32_t>();
-    if (args->ToString() != "Infinity") {
+    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
+    if (!isInf) {
         JSContainerBase::ParseJsInt32(args, value);
     }
     if (!args->IsUndefined()) {

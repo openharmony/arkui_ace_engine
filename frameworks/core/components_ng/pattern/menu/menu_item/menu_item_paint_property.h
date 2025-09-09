@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuItemPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(MenuItemPaintProperty, PaintProperty);
 
 public:
     MenuItemPaintProperty(bool isOption = false) : isOption_(isOption) {}

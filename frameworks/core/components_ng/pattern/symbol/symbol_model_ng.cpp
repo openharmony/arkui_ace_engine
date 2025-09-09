@@ -257,4 +257,14 @@ void SymbolModelNG::SetShaderStyle(FrameNode* frameNode, const std::vector<Symbo
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, shaderStyle, frameNode);
 }
+
+void SymbolModelNG::ResetShaderStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle);
+}
+
+void SymbolModelNG::ResetShaderStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ShaderStyle, frameNode);
+}
 } // namespace OHOS::Ace::NG

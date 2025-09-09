@@ -97,7 +97,7 @@ RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm(RefPtr<FrameNode>& frameNode)
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm001, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::optional<CalcSize> selfIdealSize;
@@ -122,7 +122,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm001, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm002, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm002, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::optional<CalcSize> selfIdealSize;
@@ -146,7 +146,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm002, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -181,7 +181,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm004, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm004, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -207,7 +207,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm004, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm005, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm005, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -230,7 +230,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm005, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm006, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm006, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -274,7 +274,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm006, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm007, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm007, TestSize.Level0)
 {
     RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
     auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
@@ -315,7 +315,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm007, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "LEFT", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -343,7 +343,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm009, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm009, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     RelativeContainerLayoutAlgorithm::ChildMeasureWrapper currMeasureWrapper;
@@ -373,7 +373,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm009, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     LayoutConstraintF layoutConstraintF = {
@@ -429,7 +429,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm011, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm011, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::optional<CalcSize> selfIdealSize;
@@ -454,7 +454,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm011, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm012, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm012, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::optional<CalcSize> selfIdealSize;
@@ -479,7 +479,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm012, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -533,7 +533,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm013, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm014, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm014, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -556,7 +556,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm014, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm015, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm015, TestSize.Level0)
 {
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
@@ -579,7 +579,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm015, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm016, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm016, TestSize.Level0)
 {
     RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
     auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
@@ -639,7 +639,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm016, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm017, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm017, TestSize.Level0)
 {
     RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
     auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
@@ -700,7 +700,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm017, TestSi
  * @tc.desc: test RelativeContainerLayout Algorithm IsNodeInChain();.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm018, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm018, TestSize.Level0)
 {
     auto algorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::string nodeName = "testNodeName1";

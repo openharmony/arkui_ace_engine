@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::Framework {
 class JSNavDestinationScrollableProcessor : public NG::NavDestinationScrollableProcessor {
-    DECLARE_ACE_TYPE(JSNavDestinationScrollableProcessor, NG::NavDestinationScrollableProcessor)
+    DECLARE_ACE_TYPE(JSNavDestinationScrollableProcessor, NG::NavDestinationScrollableProcessor);
 public:
     JSNavDestinationScrollableProcessor() = default;
     ~JSNavDestinationScrollableProcessor() = default;

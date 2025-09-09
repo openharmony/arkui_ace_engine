@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod);
 public:
     explicit LoadingProgressPaintMethod(const RefPtr<LoadingProgressModifier>& loadingProgressModifier)
         : loadingProgressModifier_(loadingProgressModifier)

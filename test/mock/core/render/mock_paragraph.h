@@ -37,10 +37,12 @@ public:
     MOCK_METHOD0(GetLineCount, size_t());
     MOCK_METHOD0(GetMaxIntrinsicWidth, float());
     MOCK_METHOD0(DidExceedMaxLines, bool());
+    MOCK_METHOD0(DidExceedMaxLinesInner, bool());
     MOCK_METHOD0(GetLongestLine, float());
     MOCK_METHOD0(GetLongestLineWithIndent, float());
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
+    MOCK_METHOD0(GetDumpInfo, std::string());
     MOCK_METHOD0(GetParagraphText, std::u16string());
     MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
     MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());

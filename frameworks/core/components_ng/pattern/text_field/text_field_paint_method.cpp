@@ -87,7 +87,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             currentTextRectOffsetX += textFieldOffset.GetX();
             currentTextRectOffsetY += textFieldOffset.GetY();
         }
-        auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
         eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
     }
     textFieldContentModifier_->SetContentOffset(contentOffset);
@@ -143,7 +143,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    auto theme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     OffsetF contentOffset = paintWrapper->GetContentOffset();

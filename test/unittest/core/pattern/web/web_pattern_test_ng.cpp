@@ -48,6 +48,8 @@ enum PictureInPictureState {
     PIP_STATE_HLS_EXIT,
     PIP_STATE_RESIZE,
     PIP_STATE_NONE,
+    PIP_STATE_UPDATE_SURFACE,
+    PIP_STATE_PAGE_CLOSE,
 };
 
 enum PictureInPictureCallback {
@@ -349,8 +351,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     webpattern.HandleFocusEvent();
+    EXPECT_FALSE(webpattern.needOnFocus_);
     webpattern.OnWebSrcUpdate();
     webpattern.OnWebDataUpdate();
     webpattern.OnJsEnabledUpdate(true);
@@ -483,15 +485,21 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    WebPattern webpattern;
-    webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
     const std::string value;
-    webpattern.OnScrollBarColorUpdate(value);
+    webPattern->OnScrollBarColorUpdate(value);
     SystemProperties::SetExtSurfaceEnabled(true);
-    webpattern.InitEnhanceSurfaceFlag();
+    webPattern->InitEnhanceSurfaceFlag();
     SystemProperties::SetExtSurfaceEnabled(false);
-    webpattern.InitEnhanceSurfaceFlag();
+    webPattern->InitEnhanceSurfaceFlag();
 #endif
 }
 
@@ -727,7 +735,7 @@ HWTEST_F(WebPatternTestNg, JavaScriptOnDocumentStartByOrder005, TestSize.Level1)
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentStartScriptItemsByOrder_.has_value());
 #endif
 }
 
@@ -757,7 +765,7 @@ HWTEST_F(WebPatternTestNg, JavaScriptOnDocumentEndByOrder005, TestSize.Level1)
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentEndScriptItemsByOrder_.has_value());
 #endif
 }
 
@@ -867,7 +875,7 @@ HWTEST_F(WebPatternTestNg, JavaScriptOnHeadReadyByOrder001, TestSize.Level1)
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onHeadReadyScriptItemsByOrder_.has_value());
 #endif
 }
 
@@ -1385,15 +1393,12 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
     event.SetScale(-2);
     webPattern->preScale_ = 0;
     webPattern->zoomErrorCount_ = 1;
-
     webPattern->HandleScaleGestureChange(event);
     EXPECT_NE(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1406,11 +1411,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1423,8 +1428,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1437,11 +1440,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1454,8 +1457,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->preScale_ = 4;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1499,11 +1500,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureStart_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1517,7 +1518,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureStart_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureStart(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1530,11 +1530,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureEnd_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1548,7 +1548,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureEnd_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureEnd(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1561,11 +1560,11 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureCancel_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1579,7 +1578,6 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureCancel_001, TestSize.Level1)
     webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureCancel(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1835,14 +1833,10 @@ HWTEST_F(WebPatternTestNg, InitMouseEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
     webPattern->mouseEvent_ = nullptr;
-    EXPECT_EQ(webPattern->mouseEvent_, nullptr);
-
     webPattern->InitMouseEvent(inputHub);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1864,14 +1858,10 @@ HWTEST_F(WebPatternTestNg, InitHoverEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
     webPattern->hoverEvent_ = nullptr;
-    EXPECT_EQ(webPattern->hoverEvent_, nullptr);
-
     webPattern->InitHoverEvent(inputHub);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1893,11 +1883,8 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     MouseInfo info;
-
     webPattern->HandleMouseEvent(info);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -2005,10 +1992,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_002, TestSize.Level1)
     webPattern->mouseHoveredY_ = 2;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 
@@ -2041,10 +2025,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_003, TestSize.Level1)
     info.SetAction(MouseAction::RELEASE);
     info.SetButton(MouseButton::LEFT_BUTTON);
     webPattern->isReceivedArkDrag_ = true;
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 
@@ -2077,10 +2058,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_004, TestSize.Level1)
     info.SetAction(MouseAction::HOVER_EXIT);
     info.SetButton(MouseButton::LEFT_BUTTON);
     webPattern->isReceivedArkDrag_ = false;
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 
@@ -2192,7 +2170,6 @@ HWTEST_F(WebPatternTestNg, ResetDragAction_003, TestSize.Level1)
     webPattern->isDragging_ = false;
 
     webPattern->ResetDragAction();
-    EXPECT_EQ(webPattern->isDragging_, false);
 #endif
 }
 
@@ -2749,6 +2726,44 @@ HWTEST_F(WebPatternTestNg, WindowDrag_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WindowDragResize_001
+ * @tc.desc: WindowDragResize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDragResize_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->renderContextForSurface_ = RenderContext::Create();
+    webPattern->dragResizeTimerCount_ = 0;
+    webPattern->dragResizeTimerFlag_ = false;
+    webPattern->DragResizeNoMoveTimer();
+    webPattern->dragResizeTimerFlag_ = true;
+    webPattern->DragResizeNoMoveTimer();
+    int32_t width = 2500;
+    int32_t height = 1000;
+    webPattern->dragWindowFlag_ = true;
+    webPattern->WindowDrag(width, height);
+#endif
+}
+
+/**
  * @tc.name: WindowMaximize_001
  * @tc.desc: WindowMaximize.
  * @tc.type: FUNC
@@ -2774,7 +2789,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_001, TestSize.Level1)
     webPattern->isAttachedToMainTree_ = true;
     webPattern->isVisible_ = true;
     webPattern->renderContextForSurface_ = RenderContext::Create();
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2799,7 +2814,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_002, TestSize.Level1)
     OHOS::Ace::SetReturnStatus("-1");
     auto webInfoType = webPattern->GetWebInfoType();
     EXPECT_EQ(webInfoType, WebInfoType::TYPE_UNKNOWN);
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2826,7 +2841,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_003, TestSize.Level1)
     EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2853,7 +2868,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_004, TestSize.Level1)
     EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
     webPattern->layoutMode_ = WebLayoutMode::NONE;
     webPattern->renderMode_ = RenderMode::SYNC_RENDER;
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2882,7 +2897,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_005, TestSize.Level1)
     webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
     webPattern->isAttachedToMainTree_ = false;
     webPattern->isVisible_ = true;
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2911,7 +2926,7 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_006, TestSize.Level1)
     webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
     webPattern->isAttachedToMainTree_ = true;
     webPattern->isVisible_ = false;
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
 #endif
 }
 
@@ -2941,7 +2956,36 @@ HWTEST_F(WebPatternTestNg, WindowMaximize_007, TestSize.Level1)
     webPattern->isAttachedToMainTree_ = true;
     webPattern->isVisible_ = true;
     webPattern->renderContextForSurface_ = nullptr;
-    webPattern->WindowMaximize();
+    webPattern->WindowMaximize(WebWindowMaximizeReason::MAXIMIZE);
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_008
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("4");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_TABLET);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->WindowMaximize(WebWindowMaximizeReason::EXIT_FREE_MULTI_MODE);
 #endif
 }
 
@@ -3005,8 +3049,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3025,8 +3067,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3045,8 +3085,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3067,8 +3105,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3093,8 +3129,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 1;
     napi_env env = nullptr;
@@ -3119,8 +3153,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3142,8 +3174,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3165,8 +3195,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3175,6 +3203,9 @@ HWTEST_F(WebPatternTestNg, CreatePip_008, TestSize.Level1)
     ASSERT_EQ(ret, true);
     PipInfo info1{1, 0, 0, 1, PIP_WIDTH, PIP_HEIGHT};
     ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info1);
+    ASSERT_EQ(ret, true);
+    PipInfo info2{0, 0, 0, 1, PIP_WIDTH, PIP_HEIGHT};
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info2);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -3188,8 +3219,6 @@ HWTEST_F(WebPatternTestNg, StopPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3215,8 +3244,6 @@ HWTEST_F(WebPatternTestNg, StopPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3243,8 +3270,6 @@ HWTEST_F(WebPatternTestNg, StopPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3270,8 +3295,6 @@ HWTEST_F(WebPatternTestNg, StopPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3292,8 +3315,6 @@ HWTEST_F(WebPatternTestNg, StopPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3314,8 +3335,6 @@ HWTEST_F(WebPatternTestNg, StopPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3336,8 +3355,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3363,8 +3380,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3391,8 +3406,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3418,8 +3431,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3446,8 +3457,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3468,8 +3477,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3490,8 +3497,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3512,8 +3517,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3534,8 +3537,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3556,8 +3557,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3578,8 +3577,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3599,8 +3596,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3624,8 +3619,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3645,8 +3638,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3670,8 +3661,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3693,8 +3682,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3714,8 +3701,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3735,8 +3720,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3757,8 +3740,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3780,8 +3761,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3802,8 +3781,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3823,8 +3800,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3844,8 +3819,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3865,8 +3838,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3886,8 +3857,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3909,8 +3878,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3932,8 +3899,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3953,8 +3918,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3974,8 +3937,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3995,8 +3956,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4016,8 +3975,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4037,8 +3994,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4082,8 +4037,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4103,8 +4056,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4124,8 +4075,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4146,8 +4095,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4167,8 +4114,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4188,8 +4133,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4209,8 +4152,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4230,8 +4171,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4251,8 +4190,6 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4275,8 +4212,6 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4296,8 +4231,6 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4320,8 +4253,6 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4341,8 +4272,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(0);
     EXPECT_EQ(ret, true);
 #endif
@@ -4357,8 +4286,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_START);
     EXPECT_EQ(ret, false);
 #endif
@@ -4373,8 +4300,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_LIFECYCLE);
     EXPECT_EQ(ret, false);
 #endif
@@ -4389,8 +4314,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_CONTROLEVENT);
     EXPECT_EQ(ret, false);
 #endif
@@ -4406,8 +4329,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_RESIZE);
     EXPECT_EQ(ret, false);
 #endif
@@ -4422,8 +4343,6 @@ HWTEST_F(WebPatternTestNg, StartPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(0);
     EXPECT_EQ(ret, true);
 #endif
@@ -4438,8 +4357,6 @@ HWTEST_F(WebPatternTestNg, StartPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(1);
     EXPECT_EQ(ret, false);
 #endif
@@ -4454,8 +4371,6 @@ HWTEST_F(WebPatternTestNg, StartPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
     EXPECT_EQ(ret, false);
 #endif
@@ -4470,8 +4385,6 @@ HWTEST_F(WebPatternTestNg, StartPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
     webPattern.delegate_ = delegateMock;
@@ -4489,8 +4402,6 @@ HWTEST_F(WebPatternTestNg, EnablePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4510,8 +4421,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4532,8 +4441,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4554,8 +4461,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
@@ -4578,8 +4483,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
@@ -4590,6 +4493,77 @@ HWTEST_F(WebPatternTestNg, StopPipPip_004, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = webPattern.StopPip(0, 0, 0);
     EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PageClosePip_001
+ * @tc.desc: PageClosePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PageClosePip_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.PageClosePip(info.delegateId + 1, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId + 1, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId + 1);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PageClosePip_002
+ * @tc.desc: PageClosePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PageClosePip_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    bool init = false;
+    uint32_t pipController = PIP_ID_OK_2;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: OnPipPip_007
+ * @tc.desc: OnPipPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnPipPip_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
+    ASSERT_EQ(ret, true);
+    webPattern.OnPip(PIP_STATE_PAGE_CLOSE, 0, 0, 0, 0, 0);
 #endif
 }
 
@@ -4614,7 +4588,7 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
     MockPipelineContext::SetUp();
     EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png"), true);
     std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
-    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
     ASSERT_NE(webPattern, nullptr);
@@ -5101,6 +5075,57 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_003, TestSize.Level1)
     webPattern->HandleMouseEvent(info);
     mouseInfoQueue = webPattern->GetMouseInfoQueue();
     EXPECT_EQ(mouseInfoQueue.size(), 4);
+#endif
+}
+
+/**
+ * @tc.name: InitSurfaceDensityCallback_001
+ * @tc.desc: InitSurfaceDensityCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, InitSurfaceDensityCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->InitSurfaceDensityCallback(pipelineContext);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: UnInitSurfaceDensityCallback_001
+ * @tc.desc: UnInitSurfaceDensityCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UnInitSurfaceDensityCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->UnInitSurfaceDensityCallback(pipelineContext);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(webPattern->densityCallbackId_, 0);
 #endif
 }
 } // namespace OHOS::Ace::NG

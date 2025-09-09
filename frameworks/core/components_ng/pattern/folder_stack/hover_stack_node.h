@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT HoverStackNode : public GroupNode {
-    DECLARE_ACE_TYPE(HoverStackNode, GroupNode)
+    DECLARE_ACE_TYPE(HoverStackNode, GroupNode);
 public:
     HoverStackNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)

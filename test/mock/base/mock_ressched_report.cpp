@@ -32,7 +32,8 @@ ResSchedReport::ResSchedReport()
 {}
 
 void ResSchedReport::ResSchedDataReport(
-    const char* name , const std::unordered_map<std::string, std::string>& param)
+    const char* name, const std::unordered_map<std::string, std::string>& param,
+    int64_t tid)
 {
     reportDataFunc_ = nullptr;
     if (std::strcmp(ABILITY_OR_PAGE_SWITCH_START, name) == 0 || std::strcmp(ABILITY_OR_PAGE_SWITCH_END, name) == 0) {
@@ -63,4 +64,10 @@ ResSchedReportScope::ResSchedReportScope(
 {}
 
 ResSchedReportScope::~ResSchedReportScope() = default;
+
+bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    return false;
+}
 } // namespace OHOS::Ace

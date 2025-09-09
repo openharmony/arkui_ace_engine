@@ -64,7 +64,6 @@ public:
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
     static RefPtr<FrameNode> CreateMenuItem(OptionParam&& param, const MenuParam& menuParam);
-    static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
     static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         MenuItemFontColorType type);
     static void CreateWithDimensionFpResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,

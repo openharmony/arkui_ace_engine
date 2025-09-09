@@ -38,7 +38,7 @@ export class StateTranslator extends PropertyTranslator implements InitializerCo
         const originalName: string = expectName(this.property.key);
         const newName: string = backingField(originalName);
 
-        this.cacheTranslatedInitializer(newName, originalName); // TODO: need to release cache after some point...
+        this.cacheTranslatedInitializer(newName, originalName); // Improve: need to release cache after some point...
         return this.translateWithoutInitializer(newName, originalName);
     }
 
@@ -54,8 +54,7 @@ export class StateTranslator extends PropertyTranslator implements InitializerCo
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PRIVATE);
         const thisValue: arkts.Expression = generateThisBacking(newName, false, true);
         const thisGet: arkts.CallExpression = generateGetOrSetCall(thisValue, "get");
-        const thisSet: arkts.ExpressionStatement = arkts.factory.createExpressionStatement(
-            generateGetOrSetCall(thisValue, "set"));
+        const thisSet = generateGetOrSetCall(thisValue, "set");
         const getter: arkts.MethodDefinition = this.translateGetter(originalName, this.property.typeAnnotation, thisGet);
         const setter: arkts.MethodDefinition = this.translateSetter(originalName, this.property.typeAnnotation, thisSet);
 
@@ -73,9 +72,9 @@ export class StateTranslator extends PropertyTranslator implements InitializerCo
     translateSetter(
         originalName: string,
         typeAnnotation: arkts.TypeNode | undefined,
-        statement: arkts.AstNode
+        left: arkts.Expression
     ): arkts.MethodDefinition {
-        return createSetter2(originalName, typeAnnotation, statement);
+        return createSetter2(originalName, typeAnnotation, arkts.factory.createExpressionStatement(left));
     }
 
     generateInitializeStruct(

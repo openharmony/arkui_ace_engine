@@ -66,7 +66,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(frameNode_, nullptr);
     context_->rootNode_ = frameNode_;
-    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -79,7 +79,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
      * @tc.steps3: change host_,focusType_,enabled_,
                     focusable_,parentFocusable_,currentFocus_
      */
-    auto eventHub1 = frameNode_1->GetOrCreateEventHub<EventHub>();
+    auto eventHub1 = frameNode_1->GetEventHub<EventHub>();
     eventHub1->host_ = nullptr;
     focusHub->focusType_ = FocusType::NODE;
     eventHub->enabled_ = true;
@@ -165,6 +165,31 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg039, TestSize.Level1)
     auto rt = context_->GetCurrentFrameInfo(DEFAULT_UINT64_1, DEFAULT_UINT64_2);
     context_->DumpPipelineInfo();
     EXPECT_NE(rt, nullptr);
+}
+
+/**
+ * @tc.name: OnTouchEvent
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnTouchEvent001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    TouchEvent event;
+    event.type = TouchType::UP;
+    event.id = 1;
+    event.x = 570;
+    event.y = 680;
+    event.sourceType = SourceType::TOUCH;
+    event.passThrough = true;
+    context_->viewScale_ = 0;
+    context_->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    context_->isEventsPassThrough_ = false;
+    context_->eventManager_->passThroughResult_ = true;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->eventManager_->passThroughResult_, context_->postEventManager_->passThroughResult_);
 }
 
 /**
@@ -743,7 +768,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
     context_->DeleteNavigationNode(std::to_string(childId));
     context_->AddNavigationNode(nodeId, AceType::WeakClaim(AceType::RawPtr(node)));
     context_->RemoveNavigationNode(nodeId, nodeId);
-    context_->FirePageChanged(nodeId, false);
+    context_->FirePageChanged(nodeId, false, true);
     bool isEntry = false;
     EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node, isEntry), nullptr);
 }
@@ -1044,23 +1069,29 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     std::vector<TouchEvent> emptyHistory;
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
-    bool isScreen = true;
-    auto result =
-        ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-            std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+    auto result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::NORMAL);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::SCREEN);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp,
+        CoordinateType::GLOBALDISPLAY);
+    EXPECT_FLOAT_EQ(0.0f, result.x);
+    EXPECT_FLOAT_EQ(0.0f, result.y);
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    emptyCurrent.push_back(TouchEvent {}.SetX(300.0f).SetY(200.0f).SetTime(timeStampThree));
+    auto illegalType = static_cast<CoordinateType>(999);
+    result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, illegalType);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
 }
@@ -1084,14 +1115,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
     auto resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, CoordinateType::SCREEN);
 
     ASSERT_FLOAT_EQ(200.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(300.0f, resampledCoord.y);
 
     SystemProperties::debugEnabled_ = true;
     resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 2500, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 2500, CoordinateType::SCREEN);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.y);
 }
@@ -1858,6 +1889,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UITaskSchedulerTestNg015
+ * @tc.desc: Test FlushAfterModifierTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterModifierTask.
+     */
+    taskScheduler.FlushAfterModifierTask();
+
+    /**
+     * @tc.steps3: Call FlushAfterModifierTask.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddAfterModifierTask([]() {});
+    taskScheduler.AddAfterModifierTask(nullptr);
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushAfterModifierTask.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushAfterModifierTask();
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 0);
+}
+
+/**
  * @tc.name: TestAddIgnoreLayoutSafeAreaBundle
  * @tc.desc: Test AddIgnoreLayoutSafeAreaBundle
  * @tc.type: FUNC
@@ -2144,7 +2208,7 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
     context_->vsyncTime_ = AFTER_VSYNC_TIME;
     context_->eventManager_->idToTouchPoints_.clear();
     bool isAcc = context_->touchAccelarate_;
-    context_->touchAccelarate_ = true;
+    context_->touchAccelarate_ = false;
 
     for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
         context_->resampleTimeStamp_ = testCase.vsyncTime;
@@ -3937,7 +4001,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
-     * @tc.expected: topNavNode->CallAIFunction result is not AI_CALLER_INVALID.
+     * @tc.expected: topNavNode->CallAIFunction result is AI_CALL_SUCCESS.
      */
     std::vector<std::string> params;
     params.push_back("-bindaihelper");
@@ -3968,6 +4032,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     context_->OnDumpBindAICaller(params);
     result = topNavNode->CallAIFunction("Success", "");
     EXPECT_EQ(result, AI_CALLER_INVALID);
+}
+
+/**
+ * @tc.name: OnDumpInfo001
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo.
+     * @tc.expected: Test that the member window_ is empty.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
 }
 } // namespace NG
 } // namespace OHOS::Ace

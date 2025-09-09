@@ -34,7 +34,7 @@ typedef struct Operation {
 } Operation;
 
 class DataChangeListener : virtual public AceType {
-    DECLARE_ACE_TYPE(DataChangeListener, AceType)
+    DECLARE_ACE_TYPE(DataChangeListener, AceType);
 public:
     virtual void OnDataReloaded() = 0;
     virtual void OnDataAdded(size_t index) = 0;

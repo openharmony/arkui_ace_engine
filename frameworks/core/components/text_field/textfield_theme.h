@@ -45,6 +45,7 @@ public:
         RefPtr<TextFieldTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<TextFieldTheme> theme = AceType::MakeRefPtr<TextFieldTheme>();
+            theme->SetThemeConstants(themeConstants);
             if (!themeConstants) {
                 return theme;
             }
@@ -55,7 +56,7 @@ public:
     protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextFieldTheme>& theme) const
         {
-            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
+            theme->height_ = Dimension(40.0, DimensionUnit::VP);
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
@@ -152,7 +153,7 @@ public:
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
             theme->errorTextAlign_ =
-                static_cast<bool>(pattern->GetAttr<double>("textfield_error_text_align", 0.0));
+                static_cast<TextAlign>(pattern->GetAttr<double>("textfield_error_text_align", 0.0));
 
             theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
             theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
@@ -181,6 +182,7 @@ public:
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
+            theme->cursorHeight_ = pattern->GetAttr<Dimension>("cursor_height", 0.0_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->borderRadiusSize_ = Radius(pattern->GetAttr<Dimension>(BORDER_RADIUS_SIZE, 20.0_vp));
@@ -217,11 +219,11 @@ public:
             theme->cancelImageText_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
             theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password", "");
             theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password", "");
-            theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
-            theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("textfield_writting_is_support", "");
+            theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
+            theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
@@ -253,7 +255,6 @@ public:
             }
             theme->autoFillIconPrimaryColor_ = pattern->GetAttr<Color>("auto_fill_icon_primary_color", Color());
             theme->autoFillIconEmphasizeColor_ = pattern->GetAttr<Color>("auto_fill_icon_emphasize_color", Color());
-            theme->counterContent_ = pattern->GetAttr<std::string>("textfield_counter_content", "");
         }
     };
 
@@ -387,6 +388,11 @@ public:
     const Color& GetCursorColor() const
     {
         return cursorColor_;
+    }
+
+    const Dimension& GetCursorHeight() const
+    {
+        return cursorHeight_;
     }
 
     const Dimension& GetCursorRadius() const
@@ -615,6 +621,11 @@ public:
         return draggable_;
     }
 
+    const Dimension& GetInsertCursorOffset() const
+    {
+        return insertCursorOffset_;
+    }
+
     const Color& GetDefaultCounterColor() const
     {
         return defaultCounterColor_;
@@ -643,11 +654,6 @@ public:
     const Color& GetGlassMaskSecondaryColor() const
     {
         return glassMaskSecondaryColor_;
-    }
-
-    const Dimension& GetInsertCursorOffset() const
-    {
-        return insertCursorOffset_;
     }
 
     const Dimension& GetPasswordTypeHeight() const
@@ -725,24 +731,23 @@ public:
         return hidePassword_;
     }
 
-    const std::string& GetHasShowedPassword() const
-    {
-        return hasShowedPassword_;
-    }
-
-    const std::string& GetHasHiddenPassword() const
-    {
-        return hasHiddenPassword_;
-    }
-
     const std::string& GetAIWriteBundleName() const
     {
         return aiWriteBundleName_;
     }
-
     const std::string& GetAIWriteAbilityName() const
     {
         return aiWriteAbilityName_;
+    }
+
+    const std::string& GetHasShowedPassword() const
+    {
+        return hasShowedPassword_;
+    }
+ 
+    const std::string& GetHasHiddenPassword() const
+    {
+        return hasHiddenPassword_;
     }
 
     bool GetTranslateIsSupport() const
@@ -758,6 +763,11 @@ public:
     const std::string& GetAIWriteIsSupport() const
     {
         return aiWriteIsSupport_;
+    }
+
+    TextAlign GetErrorTextAlign() const
+    {
+        return errorTextAlign_;
     }
 
     const Dimension& GetCounterTextTopMargin() const
@@ -855,11 +865,6 @@ public:
         return focusPadding_;
     }
 
-    bool GetErrorTextCenter() const
-    {
-        return errorTextAlign_;
-    }
-
     const Color& GetAutoFillIconPrimaryColor() const
     {
         return autoFillIconPrimaryColor_;
@@ -875,13 +880,23 @@ public:
         return autoFillIconSize_;
     }
 
-    const std::string& GetCounterContent() const
+    std::string GetCounterFormatString(uint32_t textLength, uint32_t maxLength)
     {
-        return counterContent_;
+        auto themeConstants = themeConstants_.Upgrade();
+        auto defaultFormatStr = std::to_string(textLength) + "/" + std::to_string(maxLength);
+        CHECK_NULL_RETURN(themeConstants, defaultFormatStr);
+        auto resourceAdapter = themeConstants->GetResourceAdapter();
+        CHECK_NULL_RETURN(resourceAdapter, defaultFormatStr);
+        auto formatStr = resourceAdapter->GetStringFormatByName("textinput_text_counter", textLength, maxLength);
+        return formatStr.empty() ? defaultFormatStr : formatStr;
     }
 
 protected:
     TextFieldTheme() = default;
+    void SetThemeConstants(const RefPtr<ThemeConstants>& themeConstants)
+    {
+        themeConstants_ = WeakPtr<ThemeConstants>(themeConstants);
+    }
     TextStyle textStyle_;
     Color textColor_;
     Color placeholderColor_;
@@ -891,6 +906,7 @@ protected:
     Color cursorColor_;
     Color symbolColor_;
     Color textColorDisable_;
+    Dimension cursorHeight_;
 
 private:
     Edge padding_;
@@ -961,15 +977,15 @@ private:
     Dimension cancelIconPadding_ = 14.0_vp;
     Dimension passwordIconPadding_ = 10.0_vp;
 
+    // UX::insert cursor offset up by 24vp
+    Dimension insertCursorOffset_ = 24.0_vp;
+
     // Replace image(icon) with symbol
     Dimension symbolSize_;
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     uint32_t autoFillSymbolId_ = 0;
-
-    // UX::insert cursor offset up by 24vp
-    Dimension insertCursorOffset_ = 24.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
@@ -1002,6 +1018,8 @@ private:
     Dimension inlinePaddingRight_ = 0.0_vp;
     Dimension placeholderLineSpacing_ = 0.0_vp;
 
+    TextAlign errorTextAlign_ = TextAlign::START;
+
     Dimension counterTextTopMargin_ = 8.0_vp;
     Dimension counterTextBottomMargin_ = 8.0_vp;
     Dimension standardCounterTextMargin_ = 22.0_vp;
@@ -1014,8 +1032,6 @@ private:
     float errorTextMaxFontScale_ = 2.0f;
     uint32_t counterTextMaxline_ = 1;
     uint32_t errorTextMaxLine_ = 1;
-
-    bool errorTextAlign_ = false;
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;
@@ -1030,7 +1046,7 @@ private:
     Color autoFillIconPrimaryColor_;
     Color autoFillIconEmphasizeColor_;
     Dimension autoFillIconSize_ = 24.0_vp;
-    std::string counterContent_;
+    WeakPtr<ThemeConstants> themeConstants_;
 };
 
 } // namespace OHOS::Ace

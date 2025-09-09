@@ -107,13 +107,12 @@ void BubblePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -142,7 +141,7 @@ void BubblePattern::OnAttachToFrameNode()
             AnimationUtils::Animate(option, [host, context]() {
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 context->FlushUITasks();
-            });
+            }, nullptr, nullptr, host->GetContextRefPtr());
         });
 }
 
@@ -164,7 +163,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -323,6 +322,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
+    CHECK_NULL_VOID(buttonNode);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto theme = GetPopupTheme();
@@ -381,6 +381,7 @@ void BubblePattern::PopBubble(bool tips)
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
+    auto instanceId = pipelineNg->GetInstanceId();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
     if (!popupInfo.isCurrentOnShow || (tips && !popupInfo.isTips)) {
@@ -394,9 +395,9 @@ void BubblePattern::PopBubble(bool tips)
     auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
         if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0, instanceId);
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_, instanceId);
         }
     } else {
         if (isTips) {
@@ -421,12 +422,15 @@ RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 void BubblePattern::Animation(
     RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option = AnimationOption();
     option.SetCurve(curve);
     option.SetDuration(duration);
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(
-        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
+        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); },
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
@@ -530,6 +534,8 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 
 void BubblePattern::StartOffsetEnteringAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionPosition;
     optionPosition.SetDuration(ENTRY_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -543,7 +549,7 @@ void BubblePattern::StartOffsetEnteringAnimation()
             renderContext->UpdateOffset(OffsetT<Dimension>());
             renderContext->SyncGeometryProperties(nullptr);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
@@ -552,8 +558,8 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     optionAlpha.SetDuration(ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
     auto host = GetHost();
-    auto popupId = host->GetId();
     CHECK_NULL_VOID(host);
+    auto popupId = host->GetId();
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -595,7 +601,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             if (finish) {
                 finish();
             }
-        });
+        }, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartExitingAnimation(std::function<void()> finish)
@@ -606,6 +612,8 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
 
 void BubblePattern::StartOffsetExitingAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionPosition;
     optionPosition.SetDuration(EXIT_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -619,11 +627,13 @@ void BubblePattern::StartOffsetExitingAnimation()
             renderContext->UpdateOffset(pattern->GetInvisibleOffset());
             renderContext->SyncGeometryProperties(nullptr);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -647,7 +657,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
             if (finish) {
                 finish();
             }
-        });
+        }, nullptr, host->GetContextRefPtr());
 }
 
 bool BubblePattern::IsOnShow()
@@ -713,18 +723,34 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %{public}d", type);
     switch (type) {
-        case WindowSizeChangeReason::UNDEFINED:
-        case WindowSizeChangeReason::MOVE:
-        case WindowSizeChangeReason::RESIZE:
-        case WindowSizeChangeReason::DRAG_START:
-        case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END:
-        case WindowSizeChangeReason::OCCUPIED_AREA_CHANGE: {
-            break;
-        }
-        default: {
+        case WindowSizeChangeReason::MAXIMIZE:
+        case WindowSizeChangeReason::RECOVER:
+        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::HIDE:
+        case WindowSizeChangeReason::TRANSFORM:
+        case WindowSizeChangeReason::CUSTOM_ANIMATION:
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+        case WindowSizeChangeReason::PIP_START:
+        case WindowSizeChangeReason::PIP_SHOW:
+        case WindowSizeChangeReason::PIP_AUTO_START:
+        case WindowSizeChangeReason::PIP_RATIO_CHANGE:
+        case WindowSizeChangeReason::PIP_RESTORE:
+        case WindowSizeChangeReason::UPDATE_DPI_SYNC:
+        case WindowSizeChangeReason::DRAG_MOVE:
+        case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE:
+        case WindowSizeChangeReason::PAGE_ROTATION:
+        case WindowSizeChangeReason::SPLIT_DRAG_START:
+        case WindowSizeChangeReason::SPLIT_DRAG:
+        case WindowSizeChangeReason::SPLIT_DRAG_END:
+        case WindowSizeChangeReason::RESIZE_BY_LIMIT:
+        case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT:
+        case WindowSizeChangeReason::RECOVER_IN_IMPLICIT: {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             auto pipelineNg = host->GetContextRefPtr();
@@ -741,7 +767,9 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
                 CHECK_NULL_VOID(subwindow);
                 subwindow->HidePopupNG(targetNodeId_);
             }
+            break;
         }
+        default: break;
     }
 }
 
@@ -937,7 +965,7 @@ void BubblePattern::UpdateArrowWidth(const CalcDimension& dimension)
     }
 
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
@@ -950,7 +978,7 @@ void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
         popupLayoutProp->UpdateArrowHeight(dimension);
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateWidth(const CalcDimension& dimension)
@@ -965,7 +993,7 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dimension), std::nullopt));
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateRadius(const CalcDimension& dimension)
@@ -977,7 +1005,7 @@ void BubblePattern::UpdateRadius(const CalcDimension& dimension)
         layoutProps->UpdateRadius(dimension);
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 

@@ -249,10 +249,89 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         return;
     }
     TouchEvent touchEvent;
-    if (!InitTouchEvent(info, touchEvent, true)) {
-        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent params invalid");
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto typeJsVal = obj->GetProperty("type");
+    if (typeJsVal->IsNumber()) {
+        touchEvent.type = static_cast<TouchType>(typeJsVal->ToNumber<int32_t>());
+    }
+    auto sourceJsVal = obj->GetProperty("source");
+    if (sourceJsVal->IsNumber()) {
+        touchEvent.sourceType = static_cast<SourceType>((sourceJsVal->ToNumber<int32_t>()));
+    }
+    auto sourceToolJsVal = obj->GetProperty("sourceTool");
+    if (sourceToolJsVal->IsNumber()) {
+        touchEvent.sourceTool = static_cast<SourceTool>((sourceToolJsVal->ToNumber<int32_t>()));
+    }
+    auto pressureJsVal = obj->GetProperty("pressure");
+    if (pressureJsVal->IsNumber()) {
+        touchEvent.force = sourceToolJsVal->ToNumber<float>();
+    }
+    auto timestampJsVal = obj->GetProperty("timestamp");
+    if (timestampJsVal->IsNumber()) {
+        std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(timestampJsVal->ToNumber<double>()));
+        TimeStamp time(nanoseconds);
+        touchEvent.time = time;
+    }
+    auto deviceIdJsVal = obj->GetProperty("deviceId");
+    if (deviceIdJsVal->IsNumber()) {
+        touchEvent.deviceId = deviceIdJsVal->ToNumber<int32_t>();
+    }
+    auto targetDisplayIdJsVal = obj->GetProperty("targetDisplayId");
+    if (targetDisplayIdJsVal->IsNumber()) {
+        touchEvent.targetDisplayId = targetDisplayIdJsVal->ToNumber<int32_t>();
+    }
+    auto touchesJsVal = obj->GetProperty("touches");
+    if (touchesJsVal->IsArray()) {
+        JSRef<JSArray> touchesArray = JSRef<JSArray>::Cast(touchesJsVal);
+        for (auto index = 0; index < static_cast<int32_t>(touchesArray->Length()); index++) {
+            JSRef<JSVal> item = touchesArray->GetValueAt(index);
+            if (!item->IsObject()) {
+                continue;
+            }
+            JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
+            TouchPoint point;
+            point.id = itemObj->GetPropertyValue<int32_t>("id", 0);
+            point.x = itemObj->GetPropertyValue<float>("x", 0.0f);
+            point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
+            point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
+            point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+            point.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
+            point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
+            touchEvent.pointers.emplace_back(point);
+        }
+    }
+    auto titleXJsVal = obj->GetProperty("tiltX");
+    if (titleXJsVal->IsNumber()) {
+        touchEvent.tiltX = titleXJsVal->ToNumber<float>();
+    }
+    auto titleYJsVal = obj->GetProperty("tiltY");
+    if (titleYJsVal->IsNumber()) {
+        touchEvent.tiltY = titleYJsVal->ToNumber<float>();
+    }
+    auto changedTouchesJsVal = obj->GetProperty("changedTouches");
+    if (changedTouchesJsVal->IsArray()) {
+        JSRef<JSArray> changedTouchesArray = JSRef<JSArray>::Cast(changedTouchesJsVal);
+        if (static_cast<int32_t>(changedTouchesArray->Length()) <= 0) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray is invalid");
+            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+            return;
+        }
+        JSRef<JSVal> item = changedTouchesArray->GetValueAt(0);
+        if (!item->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray item is not an object");
+            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+            return;
+        }
+        JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
+        touchEvent.id = itemObj->GetPropertyValue<int32_t>("id", 0);
+        touchEvent.x = itemObj->GetPropertyValue<float>("x", 0.0f);
+        touchEvent.y = itemObj->GetPropertyValue<float>("y", 0.0f);
+        touchEvent.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
+        touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+        touchEvent.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+        touchEvent.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
+        touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
@@ -460,9 +539,9 @@ bool JSBaseNode::GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEv
         point.force = itemObj->GetPropertyValue<float>("pressure", 0);
         point.width = itemObj->GetPropertyValue<float>("width", 0);
         point.height = itemObj->GetPropertyValue<float>("height", 0);
-        point.operatingHand = itemObj->GetPropertyValue<int32_t>("hand", 0);
         point.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
         point.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
+        point.operatingHand = itemObj->GetPropertyValue<int32_t>("hand", 0);
         auto pressedTimeJsVal = itemObj->GetProperty("pressedTime");
         if (pressedTimeJsVal->IsNumber()) {
             std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeJsVal->ToNumber<double>()));
@@ -728,7 +807,7 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     }
 
     AxisInfo* axisInfo = obj->Unwrap<AxisInfo>();
-    auto pinchAxisScale = obj->GetProperty("pinchAxisScale");
+    auto pinchAxisScale = obj->GetProperty("axisPinch");
     if (pinchAxisScale->IsNumber()) {
         axisEvent.pinchAxisScale = pinchAxisScale->ToNumber<float>();
     } else if (axisInfo) {

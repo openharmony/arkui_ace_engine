@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
@@ -61,15 +62,17 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
 
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     tossAnimationController_->SetPipelineContext(context);
     tossAnimationController_->SetColumn(AceType::WeakClaim(this));
     overscroller_.SetColumn(AceType::WeakClaim(this));
@@ -83,10 +86,26 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 
 void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
     if (hapticController_) {
         hapticController_->Stop();
     }
     UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void TextPickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void TextPickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -458,7 +477,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto columnEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -470,7 +489,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
+    auto eventHub = middleChild->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -487,7 +506,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         param->instance = childNode;
         param->itemIndex = i;
         param->itemTotalCounts = childSize;
-        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = childNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
@@ -536,12 +555,14 @@ void TextPickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     AnimationOption option = AnimationOption();
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
         if (picker) {
             picker->SetButtonBackgroundColor(pressColor);
         }
-    });
+    }, nullptr, nullptr, context);
 }
 
 uint32_t TextPickerColumnPattern::GetShowOptionCount() const
@@ -1519,11 +1540,13 @@ void TextPickerColumnPattern::CreateAnimation(double from, double to)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
     scrollProperty_->Set(from);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->scrollProperty_->Set(to);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void TextPickerColumnPattern::CreateReboundAnimation(double from, double to)

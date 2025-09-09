@@ -63,7 +63,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
-    auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
+    const auto& contentConstraintOps = layoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(contentConstraintOps);
+    auto contentConstraint = contentConstraintOps.value();
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
     auto listItemGroupLayoutProperty =
@@ -80,7 +82,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint().value();
+    const auto& layoutConstraintOps = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraintOps);
+    auto layoutConstraint = layoutConstraintOps.value();
     CalculateLanes(listLayoutProperty_, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
     childLayoutConstraint_ = layoutProperty->CreateChildConstraint();
     isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
@@ -192,7 +196,9 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemGroupMaxWidth(
     columnParent->BuildColumnWidth();
     auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnParent->GetColumns())));
     float paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
-    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + paddingWidth;
+    const auto& parentIdealSizeCrossOps = parentIdealSize.CrossSize(axis_);
+    CHECK_NULL_VOID(parentIdealSizeCrossOps);
+    auto parentWidth = parentIdealSizeCrossOps.value() + paddingWidth;
     auto maxWidth = std::min(parentWidth, maxGridWidth);
     if (LessNotEqual(maxGridWidth, paddingWidth)) {
         TAG_LOGI(AceLogTag::ACE_LIST,
@@ -292,7 +298,7 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
-    headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    headerFooterLayoutConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     RefPtr<LayoutWrapper> headerWrapper = headerIndex_ >= 0 ?
         layoutWrapper->GetOrCreateChildByIndex(headerIndex_) : nullptr;
     RefPtr<LayoutWrapper> footerWrapper = footerIndex_ >= 0 ?
@@ -319,11 +325,16 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
             std::max(itemStartIndex_ + cachedItemPosition_.rbegin()->first - end, 0);
         int32_t cachedCountBackward = cachedItemPosition_.empty() ? 0 :
             std::max(start - itemStartIndex_ - cachedItemPosition_.begin()->first, 0);
+        if (pauseMeasureCacheItem_ != -1 && pauseMeasureCacheItem_ < start) {
+            cachedCountBackward += 1;
+        } else if (pauseMeasureCacheItem_ != -1 && pauseMeasureCacheItem_ > end) {
+            cachedCountForward += 1;
+        }
         layoutWrapper->SetActiveChildRange(start, end, cachedCountBackward, cachedCountForward, show);
         return;
-    } else if (show && !cachedItemPosition_.empty()) {
-        int32_t start = cachedItemPosition_.begin()->first;
-        int32_t end = cachedItemPosition_.rbegin()->first;
+    } else if (show && (!cachedItemPosition_.empty() || pauseMeasureCacheItem_ != -1)) {
+        int32_t start = cachedItemPosition_.empty() ? pauseMeasureCacheItem_ : cachedItemPosition_.begin()->first;
+        int32_t end = cachedItemPosition_.empty() ? pauseMeasureCacheItem_ : cachedItemPosition_.rbegin()->first;
         int32_t count = end - start + 1;
         if (start == 0) {
             layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, count, show);
@@ -347,7 +358,7 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
     LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
+    contentConstraint.maxSize.SetMainSize(LayoutInfinity<float>(), axis_);
     auto crossSizeOptional = selfIdealSize.CrossSize(axis_);
     if (crossSizeOptional.has_value()) {
         float crossSize = crossSizeOptional.value();
@@ -370,6 +381,8 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
 float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
 {
     float maxCrossSize = 0.0f;
+    float crossSize = -laneGutter_;
+    float prevPos = itemPosition_.begin()->second.startPos;
     for (const auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first, false);
         if (!wrapper) {
@@ -379,8 +392,16 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(maxCrossSize, crossSize);
     }
+    crossSize = -laneGutter_;
+    prevPos = cachedItemPosition_.begin()->second.startPos;
     for (const auto& pos : cachedItemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first, false);
         if (!wrapper) {
@@ -390,7 +411,13 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(maxCrossSize, crossSize);
     }
     return maxCrossSize;
 }
@@ -524,8 +551,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         return;
     }
     if (targetIndex_) {
-        startPos_ = -Infinity<float>();
-        endPos_ = Infinity<float>();
+        startPos_ = -LayoutInfinity<float>();
+        endPos_ = LayoutInfinity<float>();
         targetIndex_ = isStackFromEnd_ ? totalItemCount_ - targetIndex_.value() - 1 : targetIndex_.value();
     }
     if (jumpIndex_.has_value()) {
@@ -1478,7 +1505,11 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrap
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex + i < totalItemCount_; i++) {
             auto wrapper = GetListItem(layoutWrapper, curIndex + i, param.show, !param.show);
-            if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
+            if (!wrapper || !wrapper->GetHostNode()) {
+                return;
+            }
+            if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
+                pauseMeasureCacheItem_ = curIndex + i;
                 return;
             }
             cnt++;
@@ -1518,7 +1549,11 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex - i >= 0; i++) {
             auto wrapper = GetListItem(layoutWrapper, curIndex - i, param.show, !param.show);
-            if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
+            if (!wrapper || !wrapper->GetHostNode()) {
+                return;
+            }
+            if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
+                pauseMeasureCacheItem_ = curIndex - i;
                 return;
             }
             cnt++;
@@ -1542,6 +1577,7 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
 
 void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper)
 {
+    pauseMeasureCacheItem_ = -1;
     ListItemGroupCacheParam& param = cacheParam_.value();
     if (param.forward) {
         MeasureCacheForward(layoutWrapper, param);
@@ -1628,7 +1664,8 @@ void ListItemGroupLayoutAlgorithm::LayoutCacheItem(LayoutWrapper* layoutWrapper,
         auto index = isStackFromEnd_ ? totalItemCount_ - pos.first - 1 : pos.first;
         SetListItemIndex(layoutWrapper, wrapper, index);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto host = wrapper->GetHostNode();
+        if (wrapper->CheckNeedForceMeasureAndLayout() && host && !host->IsLayoutComplete()) {
             wrapper->SetActive();
             wrapper->Layout();
             if (!show) {

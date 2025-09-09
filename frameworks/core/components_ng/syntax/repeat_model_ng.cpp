@@ -71,6 +71,22 @@ void RepeatModelNG::CreateNewChildFinish(const std::string& key)
     stack->PopContainer();
 }
 
+void RepeatModelNG::RecycleChild(uint32_t index)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->RecycleChild(index);
+}
+
+void RepeatModelNG::ReuseChild(uint32_t index)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->ReuseChild(index);
+}
+
 void RepeatModelNG::AfterAddChild()
 {
     auto* stack = ViewStackProcessor::GetInstance();

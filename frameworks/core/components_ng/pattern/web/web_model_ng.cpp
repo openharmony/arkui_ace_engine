@@ -16,16 +16,13 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
-#else
-#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
-#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -1194,6 +1191,15 @@ void WebModelNG::SetNativeEmbedMouseEventId(std::function<void(const BaseEventIn
     webEventHub->SetOnNativeEmbedMouseEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetNativeEmbedObjectParamChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedObjectParamChangeEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetLayoutMode(WebLayoutMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1441,6 +1447,13 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
     webPattern->UpdateDataDetectorConfig(config);
 }
 
+void WebModelNG::SetForceEnableZoom(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceEnableZoom(isEnabled);
+}
+
 void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1511,6 +1524,30 @@ void WebModelNG::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWind
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
+void WebModelNG::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadStartedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadFinishedEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -2354,6 +2391,24 @@ void WebModelNG::SetOnDataResubmitted(
     webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
 }
 
+void WebModelNG::SetEnableDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelNG::SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDataDetectorConfig(config);
+}
+
 void WebModelNG::SetGestureFocusMode(GestureFocusMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2461,5 +2516,30 @@ void WebModelNG::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
+}
+
+void WebModelNG::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceEnableZoom(isEnabled);
+}
+
+void WebModelNG::SetSafeBrowsingCheckFinishId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
+
+void WebModelNG::SetOnSafeBrowsingCheckFinish(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinish)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinish));
 }
 } // namespace OHOS::Ace::NG

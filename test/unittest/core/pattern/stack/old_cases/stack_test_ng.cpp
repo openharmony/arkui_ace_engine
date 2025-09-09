@@ -105,7 +105,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> StackTestNg::CreateSmall
  * @tc.desc: Test stack Layout with Alignment
  * @tc.type: FUNC
  */
-HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level1)
+HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create stack and get frameNode.
@@ -175,7 +175,7 @@ HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level1)
  * @tc.desc: Test stack Layout with AlignmentContent
  * @tc.type: FUNC
  */
-HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
+HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create stack and get frameNode.
@@ -235,7 +235,7 @@ HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
  * @tc.desc: Test stack Layout with Alignment and TextDirection is RTL
  * @tc.type: FUNC
  */
-HWTEST_F(StackTestNg, StackTestNgTest003, TestSize.Level1)
+HWTEST_F(StackTestNg, StackTestNgTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create stack and get frameNode.

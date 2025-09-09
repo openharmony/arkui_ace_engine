@@ -27,6 +27,7 @@
 #include "ui_extension_context.h"
 #include "system_ability_definition.h"
 #include "wm_common.h"
+#include "form_ashmem.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
@@ -61,6 +62,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -436,12 +438,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
 {
-    auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
-    taskExecutorImpl->InitPlatformThread(true);
-    taskExecutor_ = taskExecutorImpl;
-    GetSettings().useUIAsJSThread = true;
+    SetUseNewPipeline();
+    InitializeTask();
     GetSettings().usePlatformAsUIThread = true;
-    GetSettings().usingSharedRuntime = true;
+    GetSettings().usingSharedRuntime = false;
 }
 
 AceContainer::~AceContainer()
@@ -610,16 +610,17 @@ void AceContainer::InitializeFrontend()
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
 #endif
-            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
-            RefPtr<Framework::JsEngine> jsEngine;
-            if (GetSettings().usingSharedRuntime) {
-                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-            } else {
-                jsEngine = loader.CreateJsEngine(instanceId_);
-            }
-            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-            auto pageUrlCheckFunc =
-                [id = instanceId_](const std::string& url, const std::function<void()>& callback,
+            if (!IsDialogContainer()) {
+                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+                RefPtr<Framework::JsEngine> jsEngine;
+                if (GetSettings().usingSharedRuntime) {
+                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                } else {
+                    jsEngine = loader.CreateJsEngine(instanceId_);
+                }
+                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+                auto pageUrlCheckFunc = [id = instanceId_](
+                    const std::string& url, const std::function<void()>& callback,
                     const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) {
                     ContainerScope scope(id);
                     auto container = Container::Current();
@@ -628,12 +629,13 @@ void AceContainer::InitializeFrontend()
                     CHECK_NULL_VOID(pageUrlChecker);
                     pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
                 };
-            jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
-            EngineHelper::AddEngine(instanceId_, jsEngine);
-            declarativeFrontend->SetJsEngine(jsEngine);
-            declarativeFrontend->SetPageProfile(pageProfile_);
-            declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-            declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+                jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
+                EngineHelper::AddEngine(instanceId_, jsEngine);
+                declarativeFrontend->SetJsEngine(jsEngine);
+                declarativeFrontend->SetPageProfile(pageProfile_);
+                declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+                declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+            }
         } else {
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
@@ -2817,6 +2819,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::UI, "ArkUIFrameReportInit");
     }
 
+    if (GetSettings().usePlatformAsUIThread) {
+        InputCompatibleManager::GetInstance().LoadProductCompatiblePolicy();
+    } else {
+        taskExecutor_->PostTask([] { InputCompatibleManager::GetInstance().LoadProductCompatiblePolicy(); },
+            TaskExecutor::TaskType::UI, "ArkUITransformInit");
+    }
+
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
     auto initThemeManagerTask = [pipelineContext = pipelineContext_, assetManager = assetManager_,
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
@@ -3148,11 +3157,19 @@ void AceContainer::InitWindowCallback()
         return window->GetWidthBreakpoint(layoutWidthBreakpoints);
     });
 
-    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
         auto windowRect = window->GetRect();
-        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        if (windowRect.IsUninitializedRect()) {
+            auto container = weak.Upgrade();
+            CHECK_NULL_RETURN(container, rect);
+            bool isScb = container->IsSceneBoardWindow();
+            rect.SetRect(isScb ? 0 : container->GetViewPosX(), isScb ? 0 : container->GetViewPosY(),
+                container->GetViewWidth(), container->GetViewHeight());
+        } else {
+            rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        }
         return rect;
     });
 
@@ -3504,7 +3521,8 @@ void AceContainer::UpdateConfiguration(
     if (!abilityLevel) {
         themeManager->UpdateConfig(resConfig);
         if (SystemProperties::GetResourceDecoupling()) {
-            ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+            ResourceManager::GetInstance().UpdateResourceConfig(
+                GetBundleName(), GetModuleName(), instanceId_, resConfig, !parsedConfig.themeTag.empty());
         }
     }
     themeManager->LoadResourceThemes();
@@ -3960,8 +3978,10 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
         MMI::PointerEvent::PointerItem pointerItem;
-        if (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        if (!(currentEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+                currentEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) &&
+            (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
+                pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
             for (const auto& callback : callbacksIter->second) {
                 if (callback) {
                     callback();
@@ -3972,6 +3992,28 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             ++callbacksIter;
         }
     }
+}
+
+bool CheckPointerIsValid(const std::shared_ptr<MMI::PointerEvent> &currentPointerEvent,
+    DragPointerEvent &dragPointerEvent, MMI::PointerEvent::PointerItem &pointerItem)
+{
+    CHECK_NULL_RETURN(currentPointerEvent, false);
+    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+        return false;
+    }
+    if (!pointerItem.IsPressed()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
+        return false;
+    }
+    if (static_cast<int32_t>(PointerAction::CANCEL) == currentPointerEvent->GetPointerAction()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is cancel action, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
+        return false;
+    }
+    return true;
 }
 
 bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
@@ -3985,17 +4027,10 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     }
 
     auto currentPointerEvent = iter->second;
-    CHECK_NULL_RETURN(currentPointerEvent, false);
-    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+    if (!CheckPointerIsValid(currentPointerEvent, dragPointerEvent, pointerItem)) {
         return false;
     }
-    if (!pointerItem.IsPressed()) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
-            dragPointerEvent.pointerId);
-        return false;
-    }
+
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
@@ -4400,7 +4435,8 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetOrientation(newOrientation);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
     SetResourceConfiguration(resConfig);
 }
@@ -4411,7 +4447,8 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
     if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }
 }
 

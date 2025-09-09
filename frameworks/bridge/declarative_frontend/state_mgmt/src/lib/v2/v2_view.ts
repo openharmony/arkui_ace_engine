@@ -645,7 +645,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.monitorIdsDelayedUpdateForAddMonitor_.add(watchId);
     }
 
-    public addDelayedComputedIds(watchId: number) {
+    public addDelayedComputedIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
         this.computedIdsDelayedUpdate.add(watchId);
     }
@@ -803,29 +803,37 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return retVaL;
     }
 
+    public __getDecoratorPropertyName__V2View__Internal(): [string, any][] {
+        const meta = this[ObserveV2.V2_DECO_META];
+        const metaMethod = this[ObserveV2.V2_DECO_METHOD_META];
+        let propertyVariableNames: [string, any][] = [];
+        if (!meta && !metaMethod) {
+            return propertyVariableNames;
+        }
+        if (meta) {
+            propertyVariableNames = Object.entries(meta);
+        }
+        if (metaMethod) {
+            propertyVariableNames = [...propertyVariableNames, ...Object.entries(metaMethod)]
+        }
+        return propertyVariableNames;
+    }
 
     public debugInfoStateVars(): string {
         let retVal: string = `|--${this.constructor.name}[${this.id__()}]\n`;
-        let meta = this[ObserveV2.V2_DECO_META];
-        if (!meta) {
+        const propertyVariableNames: [string, any][] = this.__getDecoratorPropertyName__V2View__Internal();
+
+        if (propertyVariableNames.length === 0) {
             retVal += ' No State Variables';
             return retVal;
         }
-        Object.getOwnPropertyNames(meta)
-            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
-            .forEach((varName) => {
-                const prop: any = Reflect.get(meta, varName);
-                if (prop && typeof prop === 'object') {
-                    if ('deco' in prop) {
-                        retVal += ` ${prop.deco}`; // main decorator
-                    }
-                    if ('deco2' in prop) {
-                        retVal += ` ${prop.deco2}`; // sub decorator like @Once
-                    }
-                    if ('aliasName' in prop) {
-                        retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
-                    }
-                }
+
+        propertyVariableNames
+            .filter((entry) => !entry[0].startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX))
+            .forEach((entry) => {
+                const prop: any = entry[1];
+                const varName: string = entry[0];
+                retVal += ObserveV2.getObserve().parseDecorator(prop);
                 retVal += ` varName: ${varName}`;
 
                 let dependentElmtIds = this[ObserveV2.SYMBOL_REFS]?.[varName];

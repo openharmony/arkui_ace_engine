@@ -126,7 +126,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ;
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
     pattern->customKeyboardBuilder_ = func2;
@@ -146,8 +145,8 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->CanUndo(), false);
@@ -178,6 +177,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
      * @tc.steps: step1. create frameNode and test pattern IsShowHandle
      */
     CreateTextField();
+
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     textFieldNode->SetParent(frameNode_);
@@ -249,8 +249,8 @@ HWTEST_F(TextFieldPatternTest, TextPattern010, TestSize.Level1)
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->dragStatus_ = DragStatus::DRAGGING;
@@ -368,6 +368,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern015, TestSize.Level1)
     GestureEvent info;
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->hasPreviewText_ = true;
@@ -1827,8 +1828,11 @@ HWTEST_F(TextFieldPatternTest, TextPattern079, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    DirtySwapConfig config;
+    pattern->OnSyncGeometryNode(config);
 
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern->OnSyncGeometryNode(config);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
     pattern->ProcNormalInlineStateInBlurEvent();
@@ -2741,7 +2745,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool calledOnCopy = false;

@@ -100,6 +100,9 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
         height -= static_cast<int32_t>(
             2 * CONTAINER_BORDER_WIDTH.ConvertToPx() + (CONTENT_PADDING + CONTAINER_TITLE_HEIGHT).ConvertToPx());
     }
+    if (pipeline) {
+        width = pipeline->CalcPageWidth(width);
+    }
     double aspectRatio = (height != 0) ? (static_cast<double>(width) / height) : 1.0;
     json->Put("width", width);
     json->Put("height", height);

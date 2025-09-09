@@ -378,6 +378,7 @@ void PasswordResponseArea::Refresh()
     if (!IsShowSymbol() && !IsSymbolIcon()) {
         auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
+        CHECK_NULL_VOID(imageLayoutProperty->HasImageSourceInfo());
         auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
         LoadImageSourceInfo();
         auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
@@ -556,7 +557,7 @@ void PasswordResponseArea::LoadImageSourceInfo()
 void PasswordResponseArea::AddImageEventOnError()
 {
     auto imageNode = passwordNode_.Upgrade();
-    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]
         (const LoadImageFailEvent& info) {
@@ -1054,7 +1055,7 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
     textFieldPattern->CleanNodeResponseKeyEvent();
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
 }
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)

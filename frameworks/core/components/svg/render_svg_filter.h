@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class RenderSvgFilter : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgFilter, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgFilter, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();

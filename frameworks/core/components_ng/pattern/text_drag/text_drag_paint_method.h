@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextDragPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TextDragPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(TextDragPaintMethod, NodePaintMethod);
 public:
     TextDragPaintMethod(const WeakPtr<Pattern>& pattern,
         const RefPtr<TextDragOverlayModifier>& textDragOverlayModifier);

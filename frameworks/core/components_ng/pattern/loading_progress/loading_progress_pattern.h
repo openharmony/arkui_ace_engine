@@ -44,7 +44,7 @@ public:
             CHECK_NULL_RETURN(paintProperty, nullptr);
             auto loadingOwner =
                 paintProperty->GetLoadingProgressOwner().value_or(LoadingProgressOwner::SELF);
-            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner);
+            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner, WeakClaim(this));
             loadingProgressModifier_->SetUseContentModifier(UseContentModifier());
             InitThemeValues();
         }
@@ -121,7 +121,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
@@ -129,7 +128,6 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
     void OnModifyDone() override;
     void OnWindowHide() override;
     void OnWindowShow() override;

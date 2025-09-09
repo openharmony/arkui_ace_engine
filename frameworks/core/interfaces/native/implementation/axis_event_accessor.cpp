@@ -68,6 +68,16 @@ Ark_Number GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     double value = event->GetVerticalAxis();
     return Converter::ArkValue<Ark_Number>(value);
 }
+Ark_Number GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    double value = event->GetPinchAxisScale();
+    return Converter::ArkValue<Ark_Number>(value);
+}
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_AxisAction>(AxisAction::NONE);
@@ -276,6 +286,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::GetFinalizerImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,

@@ -18,6 +18,8 @@
 #define private public
 #define protected public
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "test/mock/adapter/mock_uisession_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -36,6 +38,7 @@
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
+
 #undef private
 #undef protected
 
@@ -583,7 +586,7 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
 
     /**
-     * @tc.steps: step4. Call StartTransition.
+     * @tc.steps: step4. Call StartTransition,with route type NONE..
      * @tc.expected: Start Successful.
      */
     stageManager.SetSrcPage(outPageNode);
@@ -591,6 +594,22 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
     EXPECT_EQ(stageManager.destPageNode_, inPageNode);
+
+    /**
+     * @tc.steps: step5. Call StartTransition with route type POP.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPopPage".
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPopPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::POP);
+
+    /**
+     * @tc.steps: step6. Call StartTransition with route type PUSH.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPushPage".
+     */
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPushPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::PUSH);
 }
 
 /**
@@ -911,6 +930,114 @@ HWTEST_F(StageTestNg, StageManagerTest011, TestSize.Level1)
     EXPECT_TRUE(stageManager.InsertPage(thirdNode, false));
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
     EXPECT_EQ(stageNode->GetFirstChild(), thirdNode);
+}
+
+/**
+ * @tc.name: PagePattern FirePageTransitionStart001
+ * @tc.desc: Test the PagePattern Fire Page Transition Start
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePattern_FirePageTransitionStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+    pattern->FirePageTransitionStart();
+
+    /**
+     * @tc.steps: step3. create safeAreaInsets_ .
+     * @tc.expected: create seccuessful.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(0);
+    SafeAreaInsets::Inset insetleft;
+    insetleft.end = 5;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+
+    /**
+     * @tc.steps: step4. test BeforeCreateLayoutWrapper .
+     * @tc.expected: GetInstallationFree is true.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+}
+
+/**
+ * @tc.name: PagePattern FirePageTransitionFinish001
+ * @tc.desc: Test the PagePattern Fire Page Transition Finish
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePattern_FirePageTransitionFinish001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+    pattern->FirePageTransitionFinish();
+
+    /**
+     * @tc.steps: step3. create safeAreaInsets_ .
+     * @tc.expected: create seccuessful.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(0);
+    SafeAreaInsets::Inset insetleft;
+    insetleft.end = 5;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+
+    /**
+     * @tc.steps: step4. test BeforeCreateLayoutWrapper .
+     * @tc.expected: GetInstallationFree is true.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
 }
 
 /**
@@ -1614,8 +1741,8 @@ HWTEST_F(StageTestNg, GetTopPagesWithTransition001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPages = stageManager->GetTopPagesWithTransition();
@@ -1665,13 +1792,49 @@ HWTEST_F(StageTestNg, GetTopPagePaths001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPagePaths = stageManager->GetTopPagePaths();
     ASSERT_EQ(topPagePaths.size(), 1);
     ASSERT_EQ(topPagePaths[0], TEST_PATH);
     ASSERT_EQ(pageUrl, "myUrl");
+}
+
+/**
+ * @tc.name: MovePageToFront
+ * @tc.desc: test animationPage equal srcPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, MovePageToFront, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+    stageManager.PushPage(firstNode);
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    stageManager.srcPageNode_ = thirdNode;
+
+    stageManager.MovePageToFront(firstNode);
+    EXPECT_EQ(stageManager.animationSrcPage_, stageManager.srcPageNode_);
 }
 } // namespace OHOS::Ace::NG

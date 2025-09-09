@@ -90,7 +90,7 @@ struct RouterPageInfo {
 };
 
 class PageRouterManager : public AceType {
-    DECLARE_ACE_TYPE(PageRouterManager, AceType)
+    DECLARE_ACE_TYPE(PageRouterManager, AceType);
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;
@@ -202,6 +202,7 @@ public:
     void GetPageNameAndPath(const std::string& url, std::string& name, std::string& path);
     int32_t GetPageIndex(const WeakPtr<FrameNode>& page);
 
+    std::string GetInitParams() const;
     std::string GetParams() const;
 
     int32_t GetIndexByUrl(const std::string& url) const;

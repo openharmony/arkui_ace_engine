@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CHECKBOXGROUP_NAME = "checkboxGroup";
+constexpr int CHILD_NODE_ID = 100;
 const Color DEFAULT_COLOR = Color::BLACK;
 } // namespace
 
@@ -504,50 +505,291 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
  }
 
 /**
- * @tc.name: OnInjectionEvent001
- * @tc.desc: test OnInjectionEvent
+ * @tc.name: CheckBoxGroupContentModifierTest010
+ * @tc.desc: SetBuilderFunc and get value
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPatternTestNG, OnInjectionEvent001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest010, TestSize.Level1)
 {
-    /*
-     * @tc.steps: step1. Create CheckBoxGroup model.
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxGroupConfiguration
+     */
+    checkBoxGroupModelNG.SetChangeValue(Referenced::RawPtr(frameNode), true);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetGroupName(CHECKBOXGROUP_NAME);
+    eventHub->SetEnabled(true);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(CHECKBOXGROUP_NAME, config.name_);
+        EXPECT_EQ(CheckBoxGroupPaintProperty::SelectStatus::ALL, config.status_);
+        EXPECT_EQ(true, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    EXPECT_EQ(pattern->BuildContentModifierNode(), nullptr);
+    checkBoxGroupModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
+    EXPECT_NE(pattern->BuildContentModifierNode(), nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxGroupContentModifierTest011
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxGroupConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetGroupName(CHECKBOXGROUP_NAME);
+    eventHub->SetEnabled(false);
+    pattern->SetCheckBoxGroupSelect(true);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto makeFunc = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(CHECKBOXGROUP_NAME, config.name_);
+        EXPECT_EQ(CheckBoxGroupPaintProperty::SelectStatus::NONE, config.status_);
+        EXPECT_EQ(false, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(makeFunc);
+    pattern->FireBuilder();
+    EXPECT_NE(pattern->contentModifierNode_, nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxGroupContentModifierTest012
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxGroupConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetGroupName(CHECKBOXGROUP_NAME);
+    eventHub->SetEnabled(true);
+    pattern->OnClick();
+    EXPECT_EQ(pattern->contentModifierNode_, nullptr);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto makeFunc = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(CHECKBOXGROUP_NAME, config.name_);
+        EXPECT_EQ(CheckBoxGroupPaintProperty::SelectStatus::ALL, config.status_);
+        EXPECT_EQ(true, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(makeFunc);
+    pattern->FireBuilder();
+    pattern->OnClick();
+    EXPECT_NE(pattern->contentModifierNode_, nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxGroupContentModifierTest013
+ * @tc.desc: Test CheckBoxGroup pattern method OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
+
+    /**
+     * @tc.steps: step2. Get CheckBoxGroup pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    std::string jsonCommandFalse = R"({"cmd":"selectCheckBoxGroup","selectStatus": false})";
-    int32_t resultfalse = pattern->OnInjectionEvent(jsonCommandFalse);
-    EXPECT_EQ(resultfalse, RET_SUCCESS);
-    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    auto status = paintProperty->GetSelectStatus();
-    bool selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
-    EXPECT_EQ(selectStatus, false);
+    /**
+     * @tc.steps: step3. Set CheckBoxGroup pattern variable and call OnTouchUp
+     * @tc.expected: Check the CheckBoxGroup pattern value
+     */
+    pattern->isHover_ = false;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    pattern->isHover_ = true;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
 
-    std::string jsonCommandTrue = R"({"cmd":"selectCheckBoxGroup","selectStatus": true})";
-    int32_t resultTrue = pattern->OnInjectionEvent(jsonCommandTrue);
-    EXPECT_EQ(resultTrue, RET_SUCCESS);
-    status = paintProperty->GetSelectStatus();
-    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
-    EXPECT_EQ(selectStatus, true);
+    /**
+     * @tc.steps: step4. make builderFunc
+     */
+    auto makeFunc = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(CHECKBOXGROUP_NAME, config.name_);
+        EXPECT_EQ(CheckBoxGroupPaintProperty::SelectStatus::NONE, config.status_);
+        EXPECT_EQ(true, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step5. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(makeFunc);
+    pattern->contentModifierNode_ = pattern->BuildContentModifierNode();
+    pattern->touchHoverType_ = TouchHoverAnimationType::FOCUS;
+    pattern->isHover_ = false;
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::FOCUS);
+}
 
-    std::string jsonCommandUndifine = R"({"cmd":"selectCheckBoxGroup","selectStatus": "undifine"})";
-    int32_t resultUndifine = pattern->OnInjectionEvent(jsonCommandUndifine);
-    EXPECT_EQ(resultUndifine, RET_FAILED);
-    status = paintProperty->GetSelectStatus();
-    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
-    EXPECT_EQ(selectStatus, true);
+/**
+ * @tc.name: CheckBoxGroupContentModifierTest014
+ * @tc.desc: Test CheckBoxGroup pattern method OnTouchDown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
 
-    std::string jsonCommandCheckbox = R"({"cmd":"selectCheckBox","selectStatus": "false"})";
-    int32_t resultCheckbox = pattern->OnInjectionEvent(jsonCommandCheckbox);
-    EXPECT_EQ(resultCheckbox, RET_FAILED);
-    status = paintProperty->GetSelectStatus();
-    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
-    EXPECT_EQ(selectStatus, true);
+    /**
+     * @tc.steps: step2. Get CheckBoxGroup pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set CheckBoxGroup pattern variable and call OnTouchDown
+     * @tc.expected: Check the CheckBoxGroup pattern value
+     */
+    pattern->isHover_ = false;
+    pattern->touchHoverType_ = TouchHoverAnimationType::FOCUS;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    pattern->isHover_ = true;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER_TO_PRESS);
+
+    /**
+     * @tc.steps: step4. make builderFunc
+     */
+    auto makeFunc = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(CHECKBOXGROUP_NAME, config.name_);
+        EXPECT_EQ(CheckBoxGroupPaintProperty::SelectStatus::NONE, config.status_);
+        EXPECT_EQ(true, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step5. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(makeFunc);
+    pattern->contentModifierNode_ = pattern->BuildContentModifierNode();
+    pattern->touchHoverType_ = TouchHoverAnimationType::FOCUS;
+    pattern->isHover_ = false;
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::FOCUS);
+}
+
+/**
+ * @tc.name: CheckBoxGroupContentModifierTest015
+ * @tc.desc: Test CheckBoxGroup pattern method UpdateUIStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupContentModifierTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
+
+    /**
+     * @tc.steps: step2. Get CheckBoxGroup pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set CheckBoxGroup pattern variable and call UpdateUIStatus
+     * @tc.expected: Check the CheckBoxGroup pattern value
+     */
+    pattern->uiStatus_ = UIStatus::ON_TO_OFF;
+    pattern->UpdateUIStatus(true);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
+    EXPECT_EQ(pattern->contentModifierNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. make builderFunc
+     */
+    auto makeFunc = [](CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
+    /**
+     * @tc.steps: step5. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(makeFunc);
+    pattern->contentModifierNode_ = pattern->BuildContentModifierNode();
+
+    pattern->UpdateUIStatus(true);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
+    EXPECT_TRUE(pattern->UseContentModifier());
 }
 } // namespace OHOS::Ace::NG

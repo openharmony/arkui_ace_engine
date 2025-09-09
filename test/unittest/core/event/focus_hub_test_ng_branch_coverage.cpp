@@ -579,4 +579,46 @@ HWTEST_F(FocusHubTestNg, AcceptFocusOfSpecifyChild01, TestSize.Level1)
     auto res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::TAB);
     ASSERT_TRUE(res);
 }
+
+/**
+ * @tc.name: ScrollByOffsetToParent001
+ * @tc.desc: Test the function ScrollByOffsetToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, ScrollByOffsetToParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub.
+     */
+    auto listNode = FrameNodeOnTree::CreateFrameNode(
+        V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    auto listItemGroupNode =
+        FrameNodeOnTree::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto listItemNode = FrameNodeOnTree::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
+    auto buttonNode = FrameNodeOnTree::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(listNode, nullptr);
+    ASSERT_NE(listItemGroupNode, nullptr);
+    ASSERT_NE(listItemPattern, nullptr);
+    ASSERT_NE(listItemNode, nullptr);
+    ASSERT_NE(buttonNode, nullptr);
+    buttonNode->MountToParent(listItemNode);
+    listItemNode->MountToParent(listItemGroupNode);
+    listItemGroupNode->MountToParent(listNode);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    EXPECT_NE(listPattern->targetIndexInGroup_, 0);
+    listItemPattern->indexInListItemGroup_ = 0;
+
+    /**
+     * @tc.steps: step2. Set the corresponding variables to ensure entry into the target branch.
+     */
+    focusHub->ScrollByOffsetToParent(listNode);
+    EXPECT_EQ(listPattern->targetIndexInGroup_, 0);
+}
 } // namespace OHOS::Ace::NG

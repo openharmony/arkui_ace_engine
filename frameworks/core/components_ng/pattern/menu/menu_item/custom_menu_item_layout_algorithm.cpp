@@ -41,12 +41,10 @@ void CustomMenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_CONTINUE(childLayoutProperty);
-        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
-        if (isEnableChildrenMatchParent && layoutPolicy.has_value()) {
-            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
-            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
-            if (widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH ||
-                heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH) {
+        auto childLayoutPolicyProperty = childLayoutProperty->GetLayoutPolicyProperty();
+        if (isEnableChildrenMatchParent && childLayoutPolicyProperty.has_value()) {
+            auto& childLayoutPolicy = childLayoutPolicyProperty.value();
+            if (childLayoutPolicy.IsMatch()) {
                 layoutPolicyChildren_.emplace_back(child);
                 continue;
             }

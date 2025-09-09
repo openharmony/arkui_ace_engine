@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,8 @@ public:
         return ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
 
-    static void setSrcType(ImageSourceInfo& info, SrcType value) {
+    static void setSrcType(ImageSourceInfo& info, SrcType value)
+    {
         info.srcType_ = value;
     };
 
@@ -385,54 +386,6 @@ HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImagePatternOnNotifyMemoryLevelFunction001
- * @tc.desc: Verify that ImagePattern can do different data cleaning operation according to level.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level0)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-        LoadNotifier(nullptr, nullptr, nullptr));
-    imagePattern->altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
-        LoadNotifier(nullptr, nullptr, nullptr));
-    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    /**
-     * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
-     */
-    imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(2);
-    EXPECT_TRUE(imagePattern->isShow_ == false);
-    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    /**
-     * @tc.cases: case2. ImagePattern windowShow and OnNotifyMemoryLevel function will return.
-     */
-    imagePattern->OnWindowShow();
-    imagePattern->OnNotifyMemoryLevel(0);
-    EXPECT_TRUE(imagePattern->isShow_);
-    /**
-     * @tc.cases: case3. After Image load and ImagePattern windowHide, pattern will clean data and reset params.
-     */
-    imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(2);
-    EXPECT_FALSE(imagePattern->isShow_);
-    EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-}
-
-/**
  * @tc.name: ImagePatternCreateNodePaintMethod001
  * @tc.desc: When ImageComponent load successfully, it will Create NodePaintMethod.
  * @tc.type: FUNC
@@ -622,10 +575,11 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -641,10 +595,11 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -670,10 +625,11 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
     image.SetSyncMode(SYNCMODE_DEFAULT);
@@ -727,10 +683,11 @@ HWTEST_F(ImageTestNg, ImageFillColor001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr); // Ensure the FrameNode is created successfully.
@@ -774,10 +731,11 @@ HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr); // Ensure the FrameNode is created successfully.
@@ -821,10 +779,11 @@ HWTEST_F(ImageTestNg, ImageFillColor003, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr); // Ensure the FrameNode is created successfully.
@@ -845,7 +804,7 @@ HWTEST_F(ImageTestNg, ImageFillColor003, TestSize.Level0)
     auto fillColor = Color::BLACK;
     fillColor.SetColorSpace(ColorSpace::SRGB);
     image.SetImageFill(fillColor);
-    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true); // Fill color should be set.
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true);              // Fill color should be set.
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
         ColorSpace::SRGB); // Verify the color space is SRGB.
@@ -897,10 +856,30 @@ HWTEST_F(ImageTestNg, ImageCreator005, TestSize.Level0)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(frameNode, nullptr);
 
-    ImageModelNG::ResetImage(&(*frameNode));
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
 
     auto draggable = frameNode->IsDraggable();
-    EXPECT_EQ(draggable, true);
+    EXPECT_FALSE(draggable);
+}
+
+/**
+ * @tc.name: ImageCreator006
+ * @tc.desc: Verify that CreateFrameNode reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageCreator006, TestSize.Level0)
+{
+    auto nodeId = int32_t(1);
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME, false);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
+
+    auto draggable = frameNode->IsDraggable();
+    EXPECT_TRUE(draggable);
 }
 
 /**
@@ -913,10 +892,11 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     LoadImageSuccessEvent curEvent(
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&curEvent](const LoadImageSuccessEvent& info) { curEvent = info; };
@@ -924,7 +904,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level0)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -945,17 +925,18 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "", {});
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!", {});
     eventHub->FireErrorEvent(loadImageFailEvent);
@@ -974,10 +955,11 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1008,10 +990,11 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1422,8 +1405,8 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
-    ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-    LoadNotifier(nullptr, nullptr, nullptr));
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
 
     CreateNode();
     auto node = GetNode();
@@ -1543,8 +1526,8 @@ HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
-    ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
-    LoadNotifier(nullptr, nullptr, nullptr));
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
 
     CreateNode();
     auto node = GetNode();
@@ -1708,7 +1691,7 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level0)
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     frameNode->MarkModifyDone();
-    EXPECT_TRUE(pattern->loadingCtx_);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1903,7 +1886,7 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level0)
      * @tc.steps: step2. default value
      */
     frameNode->MarkModifyDone();
-    EXPECT_EQ(frameNode->IsDraggable(), true);
+    EXPECT_EQ(frameNode->IsDraggable(), false);
 
     /**
      * @tc.steps: step3. set draggable
@@ -1911,6 +1894,66 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level0)
     frameNode->SetDraggable(false);
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->IsDraggable(), false);
+}
+
+/**
+ * @tc.name: TestEnableAnalyzer001
+ * @tc.desc: Test image enableAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestEnableAnalyzer001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), false);
+
+    /**
+     * @tc.steps: step3. set enableAnalyzer
+     */
+    pattern->EnableAnalyzer(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), true);
+    pattern->EnableAnalyzer(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), false);
+}
+
+/**
+ * @tc.name: TestCopyOptions001
+ * @tc.desc: Test image copyOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestCopyOptions001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::None);
+
+    /**
+     * @tc.steps: step3. set copyOptions
+     */
+    pattern->SetCopyOption(CopyOptions::Local);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::Local);
+    pattern->SetCopyOption(CopyOptions::Distributed);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::Distributed);
 }
 
 /**
@@ -1926,10 +1969,11 @@ HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto [frameNode, layoutProperty, pattern, v3] = GetCompoment();
     auto frameNode_ = RefPtr<FrameNode>(frameNode);
     /**
@@ -1964,10 +2008,11 @@ HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageInfoConfig.isImageSpan = true;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2012,10 +2057,11 @@ HWTEST_F(ImageTestNg, TestImageMatrix001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     imageInfoConfig.isImageSpan = true;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2146,6 +2192,41 @@ HWTEST_F(ImageTestNg, ImageContentModifierOnDraw001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImageContentModifierOnDraw002
+ * @tc.desc: Test ImageContentModifier OnDraw with ImagePaintConfig isSvg_ is true.
+ * @tc.type: FUNC
+ * @tc.require: issueICL7E0
+ */
+HWTEST_F(ImageTestNg, ImageContentModifierOnDraw002, TestSize.Level0)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->MarkModifyDone();
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+    ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
+    auto contentModifier = AceType::MakeRefPtr<ImageContentModifier>(WeakPtr(imagePattern));
+    ASSERT_NE(contentModifier, nullptr);
+
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, WIDTH, HEIGHT };
+    auto canvasImage = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    ImagePaintConfig config;
+    config.isSvg_ = true;
+    canvasImage->SetPaintConfig(config);
+    EXPECT_TRUE(canvasImage->GetPaintConfig().isSvg_);
+    CanvasImageModifierWrapper wrapper;
+    wrapper.SetCanvasImage(canvasImage);
+    contentModifier->SetCanvasImageWrapper(wrapper);
+    ASSERT_NE(contentModifier->canvasImageWrapper_->Get().GetCanvasImage(), nullptr);
+    contentModifier->onDraw(context);
+    EXPECT_FALSE(contentModifier->sensitive_->Get());
+}
+
+/**
  * @tc.name: ImageReset001
  * @tc.desc: Test ImageReset.
  * @tc.type: FUNC
@@ -2155,10 +2236,11 @@ HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level0)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
     imageInfoConfig.src = std::make_shared<std::string>("");
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
+    image.Create(imageInfoConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
@@ -2185,7 +2267,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level0)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModel.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2223,7 +2306,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level0)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModel.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2264,7 +2348,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level0)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModel.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2304,7 +2389,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level0)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageModel.Create(imageInfoConfig, pixMap);
+    imageInfoConfig.pixelMap = pixMap;
+    imageModel.Create(imageInfoConfig);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2399,15 +2485,15 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level0)
 }
 
 /**
-* @tc.name: SetPixelMapMemoryName001
-* @tc.desc: SetPixelMapMemoryName001
-* @tc.type: FUNC
-*/
+ * @tc.name: SetPixelMapMemoryName001
+ * @tc.desc: SetPixelMapMemoryName001
+ * @tc.type: FUNC
+ */
 HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level0)
 {
     /**
-    * @tc.steps: step1. create Image frameNode.
-    */
+     * @tc.steps: step1. create Image frameNode.
+     */
     RefPtr<PixelMap> pixMap = nullptr;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2422,23 +2508,23 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level0)
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_NE(imageLayoutProperty, nullptr);
     /**
-    * @tc.steps: step2. call SetPixelMapMemoryName.
-    * @tc.expected: Returned value is false.
-    */
+     * @tc.steps: step2. call SetPixelMapMemoryName.
+     * @tc.expected: Returned value is false.
+     */
     EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), false);
     EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, false);
 }
 
 /**
-* @tc.name: SetPixelMapMemoryName002
-* @tc.desc: SetPixelMapMemoryName002
-* @tc.type: FUNC
-*/
+ * @tc.name: SetPixelMapMemoryName002
+ * @tc.desc: SetPixelMapMemoryName002
+ * @tc.type: FUNC
+ */
 HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
 {
     /**
-    * @tc.steps: step1. create Image frameNode.
-    */
+     * @tc.steps: step1. create Image frameNode.
+     */
     RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -2454,9 +2540,9 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
     EXPECT_NE(imageLayoutProperty, nullptr);
     frameNode->UpdateInspectorId("123");
     /**
-    * @tc.steps: step2. call SetPixelMapMemoryName.
-    * @tc.expected: Returned value is true.
-    */
+     * @tc.steps: step2. call SetPixelMapMemoryName.
+     * @tc.expected: Returned value is true.
+     */
     EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), true);
     EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, true);
 }
@@ -2870,5 +2956,68 @@ HWTEST_F(ImageTestNg, ImageSafeArea006, TestSize.Level0)
         AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
     EXPECT_EQ(imageFrameSize.Height(), std::nullopt);
     EXPECT_EQ(imageFrameSize.Width(), imageSize->Width());
+}
+
+/**
+ * @tc.name: ImageSafeArea007
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when height and width are set to NO_MATCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea007, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.matchParent)
+     *     .height(LayoutPolicy.matchParent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Height(), 300);
+    EXPECT_EQ(imageFrameSize.Width(), 100);
 }
 } // namespace OHOS::Ace::NG

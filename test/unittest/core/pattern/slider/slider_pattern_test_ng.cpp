@@ -231,7 +231,7 @@ RefPtr<SliderPattern> SliderPatternTestNg::AccessibilityInit(RefPtr<FrameNode>& 
     }
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     CHECK_NULL_RETURN(contentModifier, nullptr);
@@ -281,6 +281,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);
@@ -639,7 +640,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest007, TestSize.Level1)
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 
     sliderPattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
     sliderPattern->direction_ = Axis::HORIZONTAL;
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
@@ -717,7 +718,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
@@ -732,6 +733,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
@@ -767,7 +769,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
@@ -882,7 +884,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
-    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto hub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
     /**
@@ -891,7 +893,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     sliderPattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     GestureEvent info = GestureEvent();
     sliderPattern->InitPanEvent(gestureHub);
 
@@ -954,8 +956,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
     /**
      * @tc.steps: step3. update block center.
      */
-    sliderPattern->sliderContentModifier_->updateImageCenterX_(FRAME_WIDTH);
-    sliderPattern->sliderContentModifier_->updateImageCenterY_(FRAME_HEIGHT);
+    sliderPattern->sliderContentModifier_->updateImageCenterCallback_(PointF(FRAME_WIDTH, FRAME_HEIGHT));
     auto imageGeometryNode = sliderPattern->imageFrameNode_->GetGeometryNode();
     ASSERT_NE(imageGeometryNode, nullptr);
     auto offset = imageGeometryNode->GetMarginFrameOffset();
@@ -1135,7 +1136,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest018, TestSize.Level1)
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     sliderPattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     sliderPattern->sliderContentModifier_->isVisible_ = true;
     sliderPattern->StartAnimation();
     EXPECT_TRUE(sliderPattern->sliderContentModifier_->GetVisible());
@@ -1167,7 +1168,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest019, TestSize.Level1)
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     sliderPattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     sliderPattern->focusFlag_ = true;
     sliderPattern->UpdateTipState();
     /**
@@ -1198,7 +1199,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest020, TestSize.Level1)
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     sliderPattern->sliderContentModifier_ =
-        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     sliderPattern->focusFlag_ = false;
     sliderPattern->OnIsFocusActiveUpdate(true);
     EXPECT_FALSE(sliderPattern->isFocusActive_);
@@ -1231,7 +1232,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
     ASSERT_NE(sliderPaintProperty, nullptr);
     auto host = sliderPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1275,7 +1276,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest001, TestSize.Level1
     ASSERT_NE(parent, nullptr);
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1361,7 +1362,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest003, TestSize.Level1
     ASSERT_NE(parent, nullptr);
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1554,7 +1555,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest007, TestSize.Level1
     geometryNode->SetContentSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1627,7 +1628,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest009, TestSize.Level1
 
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1673,7 +1674,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest010, TestSize.Level1
      */
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1730,7 +1731,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest011, TestSize.Level1
     ASSERT_NE(parent, nullptr);
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1790,7 +1791,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest012, TestSize.Level1
     EXPECT_FALSE(sliderPattern->InitAccessibilityVirtualNode());
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
-            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+            AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     }
     auto contentModifier = sliderPattern->sliderContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1813,7 +1814,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest023, TestSize.Level1)
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
@@ -1870,7 +1871,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest024, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
@@ -1885,6 +1886,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest024, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
  
@@ -1924,7 +1926,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
@@ -1939,6 +1941,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
@@ -2478,7 +2481,7 @@ HWTEST_F(SliderPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
+    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>(frameNode->GetThemeScopeId());
     ASSERT_NE(sliderTheme, nullptr);
 
     /**

@@ -660,6 +660,15 @@ void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEve
     webComponent->SetNativeEmbedGestureEventId(eventMarker);
 }
 
+void WebModelImpl::SetNativeEmbedObjectParamChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetNativeEmbedObjectParamChangeId(eventMarker);
+}
+
 void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -726,5 +735,28 @@ void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetBypassVsyncCondition(condition);
+}
+
+void WebModelImpl::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadStartedEventId(eventMarker);
+}
+
+void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+    webComponent->SetOnLoadFinishedEventId(eventMarker);
+}
+ 
+void WebModelImpl::SetForceEnableZoom(bool isForceEnableZoom)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetForceEnableZoom(isForceEnableZoom);
 }
 } // namespace OHOS::Ace::Framework

@@ -68,7 +68,7 @@ private:
     std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 class GaugePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty);
 
 public:
     GaugePaintProperty() = default;

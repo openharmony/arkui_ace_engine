@@ -29,7 +29,7 @@ using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
 class TextPickerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TextPickerEventHub, EventHub)
+    DECLARE_ACE_TYPE(TextPickerEventHub, EventHub);
 
 public:
     TextPickerEventHub() = default;

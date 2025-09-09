@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,20 +226,20 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
     SetSliderContentModifier(sliderContentModifier);
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set direction FREE
     sliderContentModifier.SetDirection(Axis::FREE);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set animatorStatus default
     sliderContentModifier.SetAnimatorStatus(SliderStatus::DEFAULT);
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set Axis HORIZONTAL
     sliderContentModifier.SetDirection(Axis::HORIZONTAL);
     // set BlockStyleType DEFAULT
@@ -251,6 +251,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::OUTSET);
     sliderContentModifier.SetBlockBorderColor(TEST_COLOR);
     sliderContentModifier.SetBlockBorderWidth(SLIDER_CONTENT_MODIFIER_BLOCK_BORDER_WIDTH);
+    sliderContentModifier.SetLinearGradientBlockColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
@@ -261,6 +262,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
     EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.blockGradientColor_->Get().GetGradient(),
         SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
@@ -286,7 +289,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest002, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -344,7 +347,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest003, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -402,7 +405,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest004, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.selectStart = SELECT_START;
     parameters.selectEnd = SELECT_END;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -461,7 +464,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest005, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -515,7 +518,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest006, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -571,7 +574,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest007, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -627,7 +630,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest008, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -674,7 +677,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest009, TestSize.Level1)
      * @tc.steps: step1. create sliderContentModifier.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. call SetBlockShape function with invalid circle.
      */
@@ -698,7 +701,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest010, TestSize.Level1)
      * @tc.steps: step1. create sliderContentModifier.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. call SetBlockShape function with invalid ellipse.
      */
@@ -724,7 +727,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest011, TestSize.Level1)
      * @tc.steps: step1. create sliderContentModifier.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. call SetBlockShape function with invalid shape.
      */
@@ -752,7 +755,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest012, TestSize.Level1)
      * @tc.steps: step1. create sliderContentModifier.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     sliderContentModifier.isShowStep_->Set(true);
     sliderContentModifier.stepRatio_->Set(.0f);
     /**
@@ -775,7 +778,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest012, TestSize.Level1)
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest013, TestSize.Level1)
 {
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
 
     auto isShowStep = AceType::MakeRefPtr<PropertyBool>(false);
     sliderContentModifier.isShowStep_ = isShowStep;
@@ -799,7 +802,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest014, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
 
     sliderContentModifier.reverse_ = true;
     sliderContentModifier.JudgeNeedAnimate(false);
@@ -814,12 +817,16 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest014, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest015, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     ASSERT_NE(sliderContentModifier.selectEnd_, nullptr);
 
     sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
     EXPECT_EQ(sliderContentModifier.selectEnd_->Get(), POINTF_END - PointF());
 }
 
@@ -830,25 +837,29 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest015, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest016, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     ASSERT_NE(sliderContentModifier.blockCenterX_, nullptr);
     ASSERT_NE(sliderContentModifier.blockCenterY_, nullptr);
 
     sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
 
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
 
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::NONE));
-    sliderContentModifier.SetCircleCenter(PointF(FRAME_WIDTH, FRAME_WIDTH));
+    sliderContentModifier.SetCircleCenter(PointF(FRAME_WIDTH, FRAME_WIDTH), frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_WIDTH);
 }
@@ -860,14 +871,20 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest016, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set image block property.
      */
     SliderContentModifier::Parameters parameters;
     OffsetF value;
-    auto updateImageCenterX = [&value](float x) { value.SetX(x); };
-    auto updateImageCenterY = [&value](float y) { value.SetY(y); };
-    SliderContentModifier sliderContentModifier(parameters, updateImageCenterX, updateImageCenterY);
+    auto updateImageCenter = [&value](PointF imageCenter) {
+        value.SetX(imageCenter.GetX());
+        value.SetY(imageCenter.GetY());
+    };
+    SliderContentModifier sliderContentModifier(parameters, updateImageCenter);
     sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::IMAGE);
 
     /**
@@ -875,18 +892,17 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
      * @tc.cases: case1. when the block center changes.
      */
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
     sliderContentModifier.DrawBlock(context);
     EXPECT_EQ(value.GetY(), FRAME_HEIGHT);
 
-    SliderContentModifier sliderContentModifierPro(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifierPro(parameters, nullptr);
     sliderContentModifierPro.SetBlockType(SliderModelNG::BlockStyleType::IMAGE);
     sliderContentModifierPro.DrawBlock(context);
-    EXPECT_EQ(sliderContentModifierPro.updateImageCenterX_, nullptr);
-    EXPECT_EQ(sliderContentModifierPro.updateImageCenterX_, nullptr);
+    EXPECT_EQ(sliderContentModifierPro.updateImageCenterCallback_, nullptr);
 }
 
 /**
@@ -896,11 +912,15 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set property callback.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     OffsetF value;
     bool set = false;
     auto animatablePropertySetCallback = [&value, &set](const OffsetF& arg) {
@@ -917,19 +937,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     /**
@@ -939,19 +959,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 }
 
@@ -962,11 +982,15 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set property callback.
      */
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     float blockCenterX;
     float blockCenterY;
     bool set = false;
@@ -984,19 +1008,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_START;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_END.GetX());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     /**
@@ -1012,19 +1036,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_START;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_END.GetY());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 }
 
@@ -1045,7 +1069,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest020, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -1120,12 +1144,6 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest021, TestSize.Level1)
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
 
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    ASSERT_NE(sliderPaintProperty, nullptr);
-    Gradient themeGradient = SliderModelNG::CreateSolidGradient(sliderTheme->GetTrackBgColor());
-    sliderPaintProperty->UpdateTrackBackgroundColor(themeGradient);
-    sliderPattern->sliderContentModifier_->trackBackgroundColor_ =
-        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(themeGradient));
     Gradient gradient = sliderPattern->sliderContentModifier_->trackBackgroundColor_->Get().GetGradient();
     std::vector<GradientColor> gradientColors = gradient.GetColors();
 
@@ -1165,7 +1183,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest022, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. Set BackgroundSize call DrawStep function and return.
      */
@@ -1219,7 +1237,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest023, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call DrawDefaultBlock function.
      */
@@ -1266,7 +1284,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest024, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. don't set anything call DrawBlockShape function return.
      */
@@ -1297,7 +1315,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest025, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.selectStart = SELECT_START;
     parameters.selectEnd = SELECT_END;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -1352,7 +1370,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest026, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.selectStart = SELECT_START;
     parameters.selectEnd = SELECT_END;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute.
      */
@@ -1406,7 +1424,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest027, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.selectStart = SELECT_START;
     parameters.selectEnd = SELECT_END;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -1453,7 +1471,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest028, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.selectStart = SELECT_START;
     parameters.selectEnd = SELECT_END;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -1613,11 +1631,11 @@ HWTEST_F(SliderModifierTestNg, SliderTipModifierTest003, TestSize.Level1)
      */
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
-    sliderTipModifier.SetTipFlag(false);
+    sliderTipModifier.SetTipFlag(false, frameNode);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
-    sliderTipModifier.SetTipFlag(true);
+    sliderTipModifier.SetTipFlag(true, frameNode);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 }
 
@@ -1731,7 +1749,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest029, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call DrawDefaultBlock function.
      */
@@ -1777,7 +1795,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest030, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call DrawDefaultBlock function.
      */
@@ -1822,12 +1840,12 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest031, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call SetBoardColor function.
      */
     sliderContentModifier.SetIsHovered(false);
-    sliderContentModifier.SetBoardColor();
+    sliderContentModifier.SetBoardColor(frameNode);
     EXPECT_FALSE(sliderContentModifier.mouseHoverFlag_);
 }
 
@@ -1858,7 +1876,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest032, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     /**
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
@@ -1930,7 +1948,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest033, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
 
     /**
      * @tc.steps: step2. create frameNode and sliderContentModifier.
@@ -1975,7 +1993,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest034, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
 
     /**
      * @tc.steps: step2. create frameNode and sliderContentModifier.
@@ -2019,7 +2037,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest035, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
 
     /**
@@ -2063,7 +2081,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest036, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
 
     /**
@@ -2104,7 +2122,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest037, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
     
     /**
@@ -2143,7 +2161,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest038, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
     sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
 
@@ -2183,7 +2201,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest039, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
 
     /**
@@ -2224,7 +2242,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest040, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
 
     /**
@@ -2258,7 +2276,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest041, TestSize.Level1)
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
-    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
     Testing::MockCanvas canvas;
 
     /**
@@ -2273,5 +2291,126 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest041, TestSize.Level1)
      * @tc.steps: step3. Check the param value.
      */
     ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest042
+ * @tc.desc: TEST gradient block color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor(Color::BLUE));
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    sliderContentModifier.SetLinearGradientBlockColor(gradient);
+
+
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    Gradient gradient3 = sliderContentModifier.blockGradientColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors3 = gradient3.GetColors();
+    EXPECT_EQ(gradientColors.size(), gradientColors3.size());
+    EXPECT_EQ(gradientColors[0].GetLinearColor(), gradientColors3[0].GetLinearColor());
+    EXPECT_EQ(gradientColors[1].GetLinearColor(), gradientColors3[1].GetLinearColor());
+    EXPECT_EQ(gradientColors[2].GetLinearColor(), gradientColors3[2].GetLinearColor());
+    EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors3[0].GetDimension());
+    EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors3[1].GetDimension());
+    EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors3[2].GetDimension());
+}
+
+/**
+ * @tc.name: SliderContentModifierTest043
+ * @tc.desc: TEST slider_content_modifier DrawBlockShapeCircle
+ * direction = HORIZONTAL, blockType = SHAPE, blockShape = CIRCLE, sliderMode = INSET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    parameters.selectStart = SELECT_START;
+    parameters.selectEnd = SELECT_END;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
+     */
+    sliderContentModifier.SetDirection(Axis::HORIZONTAL);
+    sliderContentModifier.SetBlockType(SliderModelNG::BlockStyleType::SHAPE);
+    auto basicShape = AceType::MakeRefPtr<Circle>();
+    basicShape->SetBasicShapeType(BasicShapeType::CIRCLE);
+    sliderContentModifier.SetBlockShape(basicShape);
+    sliderContentModifier.SetSliderMode(SliderModelNG::SliderMode::INSET);
+
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor(Color::BLUE));
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    sliderContentModifier.SetLinearGradientBlockColor(gradient);
+    auto circle = AccessibilityManager::DynamicCast<Circle>(sliderContentModifier.shape_);
+    ASSERT_NE(circle, nullptr);
+    sliderContentModifier.shapeWidth_->Set(1.0f);
+    sliderContentModifier.SetBlockSize(BLOCK_SIZE_F);
+    sliderContentModifier.shapeHeight_->Set(1.0f);
+    sliderContentModifier.DrawBlockShapeCircle(context, circle);
+    Gradient gradient3 = sliderContentModifier.blockGradientColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors3 = gradient3.GetColors();
+    EXPECT_EQ(gradientColors[0].GetLinearColor(), gradientColors3[0].GetLinearColor());
+    EXPECT_EQ(gradientColors[1].GetLinearColor(), gradientColors3[1].GetLinearColor());
+    EXPECT_EQ(gradientColors[2].GetLinearColor(), gradientColors3[2].GetLinearColor());
+    EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors3[0].GetDimension());
+    EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors3[1].GetDimension());
+    EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors3[2].GetDimension());
 }
 } // namespace OHOS::Ace::NG

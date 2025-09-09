@@ -27,7 +27,7 @@
 #include "core/components_ng/svg/parse/svg_circle.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 #include "core/components_ng/svg/svg_dom.h"
-#include "core/components_ng/svg/svg_ulils.h"
+#include "core/components_ng/svg/svg_utils.h"
 #include "include/core/SkStream.h"
 
 using namespace testing;

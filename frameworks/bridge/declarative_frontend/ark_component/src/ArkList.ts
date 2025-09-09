@@ -884,7 +884,7 @@ globalThis.List.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 
-globalThis.List.onWillStopDragging = function (value: (velocity: number) => void) {
+globalThis.List.onWillStopDragging = function (value: (velocity: number) => void): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };

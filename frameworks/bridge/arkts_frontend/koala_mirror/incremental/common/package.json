@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/common",
-    "version": "1.7.3+devel",
+    "version": "1.7.6+devel",
     "description": "",
     "main": "build/lib/src/index.js",
     "types": "./index.d.ts",
@@ -33,6 +33,7 @@
     },
     "scripts": {
         "compile": "ets-tsc -b .",
+        "compile:release": "ets-tsc -b .",
         "clean": "rimraf build",
         "test": "mocha",
         "test:coverage": "nyc mocha",
@@ -43,7 +44,7 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/compat": "1.7.3+devel"
+        "@koalaui/compat": "file:../compat"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

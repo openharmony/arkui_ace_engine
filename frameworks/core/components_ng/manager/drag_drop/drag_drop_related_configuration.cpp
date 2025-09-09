@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "ui/base/utils/utils.h"
 
@@ -32,5 +34,39 @@ void DragDropRelatedConfigurations::SetDragSpringLoadingConfiguration(
 {
     CHECK_NULL_VOID(dragSpringLoadingConfiguration);
     dragSpringLoadingConfiguration_ = std::move(dragSpringLoadingConfiguration);
+}
+
+DragPreviewOption DragDropRelatedConfigurations::GetOrCreateDragPreviewOption()
+{
+    if (previewOption_) {
+        return *previewOption_;
+    }
+    previewOption_ = std::make_unique<DragPreviewOption>();
+    CHECK_NULL_RETURN(previewOption_, DragPreviewOption());
+    return *previewOption_;
+}
+
+void DragDropRelatedConfigurations::SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
+{
+    if (!previewOption_) {
+        previewOption_ = std::make_unique<DragPreviewOption>();
+    }
+    CHECK_NULL_VOID(previewOption_);
+    previewOption_->options = optionsAfterApplied;
+}
+
+void DragDropRelatedConfigurations::SetDragPreviewOption(const DragPreviewOption& previewOption, bool isResetOptions)
+{
+    if (isResetOptions) {
+        previewOption_ = std::make_unique<DragPreviewOption>(previewOption);
+        CHECK_NULL_VOID(previewOption_);
+        previewOption_->onApply = std::move(previewOption.onApply);
+        return;
+    }
+    OptionsAfterApplied options = previewOption_ ? previewOption_->options : OptionsAfterApplied();
+    previewOption_ = std::make_unique<DragPreviewOption>(previewOption);
+    CHECK_NULL_VOID(previewOption_);
+    previewOption_->options = options;
+    previewOption_->onApply = std::move(previewOption.onApply);
 }
 } // namespace OHOS::Ace::NG

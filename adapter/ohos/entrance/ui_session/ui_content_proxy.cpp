@@ -354,16 +354,16 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LOGW("UnregisterComponentChangeEventCallback write interface token failed");
+        LOGW("UnregisterWebUnfocusEventCallback write interface token failed");
         return FAILED;
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
         return FAILED;
     }
-    report_->UnregisterComponentChangeEventCallback();
-    if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
-        LOGW("UnregisterComponentChangeEventCallback send request failed");
+    report_->UnregisterWebUnfocusEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterWebUnfocusEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

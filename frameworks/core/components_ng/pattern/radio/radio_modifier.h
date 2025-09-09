@@ -67,12 +67,13 @@ public:
         }
     }
 
-    void UpdateAnimatableProperty();
-    void UpdateTotalScaleOnAnimatable(
-        bool isCheck, const AnimationOption& delayOption, const AnimationOption& halfDurationOption);
-    void UpdateIsOnAnimatableProperty(bool isCheck);
-    void UpdateIndicatorAnimation(bool isCheck);
-    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
+    void UpdateAnimatableProperty(const RefPtr<FrameNode>& host);
+    void UpdateTotalScaleOnAnimatable(bool isCheck, const AnimationOption& delayOption,
+        const AnimationOption& halfDurationOption, const RefPtr<FrameNode>& host);
+    void UpdateIsOnAnimatableProperty(bool isCheck, const RefPtr<FrameNode>& host);
+    void UpdateIndicatorAnimation(bool isCheck, const RefPtr<FrameNode>& host);
+    void SetBoardColor(
+        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host);
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
     void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;

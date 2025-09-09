@@ -384,6 +384,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
+    isGestureTriggeredLongPress_ = true;
     Start();
 }
 
@@ -570,7 +571,7 @@ void MovingPhotoPattern::RegisterImageEvent(const RefPtr<FrameNode>& imageNode)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto RegisterImageEvent start.");
     CHECK_NULL_VOID(imageNode);
-    auto imageHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
+    auto imageHub = imageNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageHub);
     auto imageCompleteEventCallback = [weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
         auto pattern = weak.Upgrade();
@@ -588,6 +589,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent EightyToHundredAnimation.");
+            notifyTransitionFlag_ = false;
             EightyToHundredAnimation();
         }
     }
@@ -809,14 +811,14 @@ void MovingPhotoPattern::MediaResetToPlay()
 
 void MovingPhotoPattern::FireMediaPlayerImageComplete()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireCompleteEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerStart()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStartEvent();
     if (isFastKeyUp_) {
@@ -827,35 +829,35 @@ void MovingPhotoPattern::FireMediaPlayerStart()
 
 void MovingPhotoPattern::FireMediaPlayerStop()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStopEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerPause()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FirePauseEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerFinish()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireFinishEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerError()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerPrepared()
 {
-    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FirePreparedEvent();
 }
@@ -1427,6 +1429,9 @@ void MovingPhotoPattern::OnMediaPlayerInitialized()
     }
     isAutoChangePlayMode_ = false;
     PrepareSurface();
+    if (cameraPostprocessingEnabled_) {
+        mediaPlayer_->EnableCameraPostprocessing();
+    }
     if (mediaPlayer_->PrepareAsync() != PREPARE_RETURN) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
     }
@@ -1495,12 +1500,6 @@ void MovingPhotoPattern::PreparedToPlay()
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto PreparedToPlay.");
     if (!isVisible_) {
         return;
-    }
-    if (isRepeatChangePlayMode_ && historyAutoAndRepeatLevel_ == PlaybackMode::NONE &&
-        autoAndRepeatLevel_ == PlaybackMode::NONE) {
-        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        isRepeatChangePlayMode_ = false;
     }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
@@ -1810,7 +1809,6 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
-        isRepeatChangePlayMode_ = true;
         Pause();
         auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
         CHECK_NULL_VOID(movingPhoto);
@@ -1838,8 +1836,11 @@ void MovingPhotoPattern::NotifyTransition()
     notifyTransitionFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhoto);
+    auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
+    CHECK_NULL_VOID(image);
+    AddTempNode(image, host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
@@ -1878,7 +1879,6 @@ void MovingPhotoPattern::EightyToHundredAnimation()
         auto movingPhoto = movingPhotoPattern.Upgrade();
         CHECK_NULL_VOID(movingPhoto);
         movingPhoto->DetachFirstImageFromFrameNode();
-        movingPhoto->notifyTransitionFlag_ = false;
     });
     AnimationUtils::Animate(option, [imageRsContext]() {
             imageRsContext->UpdateOpacity(1.0);
@@ -2134,6 +2134,10 @@ void MovingPhotoPattern::Start()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (cameraPostprocessingEnabled_) {
+        mediaPlayer_->SetCameraPostprocessing(isGestureTriggeredLongPress_);
+        isGestureTriggeredLongPress_ = false;
+    }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
@@ -2524,7 +2528,8 @@ void MovingPhotoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& 
         auto padding  = layoutProperty->CreatePaddingAndBorder();
         OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
                                   contentRect_.Top() - padding.top.value_or(0) };
-        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(), contentOffset };
+        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(),
+            { contentOffset.GetX(), contentOffset.GetY() } };
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }

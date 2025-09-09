@@ -897,7 +897,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleOverScroll002, TestSize.Level1)
     scrollablePattern->edgeEffect_ = EdgeEffect::SPRING;
     scrollablePattern->effectEdge_ = EffectEdge::ALL;
     auto result = scrollablePattern->HandleOverScroll(2.0f);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -921,7 +921,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleOverScroll003, TestSize.Level1)
     scrollablePattern->edgeEffect_ = EdgeEffect::SPRING;
     scrollablePattern->effectEdge_ = EffectEdge::ALL;
     auto result = scrollablePattern->HandleOverScroll(2.0f);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1068,7 +1068,7 @@ HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo001, TestSize.Level1)
     RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
     ASSERT_NE(frameNode, nullptr);
-    frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    frameNode->GetEventHub<ScrollableEventHub>();
     scrollablePattern->frameNode_ = frameNode;
     auto json = JsonUtil::Create(true);
     scrollablePattern->GetEventDumpInfo(json);
@@ -1118,7 +1118,7 @@ HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo002, TestSize.Level1)
     ScrollableModelNG::SetOnReachStart(AceType::RawPtr(frameNode), std::move(onReachStart));
     ScrollableModelNG::SetOnReachEnd(AceType::RawPtr(frameNode), std::move(onReachEnd));
 
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetJSFrameNodeOnScrollStart(scrollStart);
     eventHub->SetJSFrameNodeOnScrollStop(scrollStop);
@@ -2080,14 +2080,73 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnWillScrollEventEx, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDVSyncOffset
- * @tc.desc: Test GetDVSyncOffset
+ * @tc.name: CustomizeSafeAreaPadding
+ * @tc.desc: Test CustomizeSafeAreaPadding
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollablePatternTestNg, GetDVSyncOffset, TestSize.Level1)
+HWTEST_F(ScrollablePatternTestNg, CustomizeSafeAreaPadding, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create scrollable pattern, init .
+     */
     RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
-    float dvsyncOffset = scrollablePattern->GetDVSyncOffset();
-    EXPECT_EQ(dvsyncOffset, 0);
+    scrollablePattern->needFullSafeArea_ = true;
+    /**
+     * @tc.steps: step2. set padding and call CustomizeSafeAreaPadding with true.
+     * @tc.expected: safeAreaPadding is PaddingPropertyF{}.
+     */
+    PaddingPropertyF padding {10, 20, 30, 40};
+    auto safeAreaPadding = scrollablePattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(safeAreaPadding, PaddingPropertyF{});
+    /**
+     * @tc.steps: step3. call CustomizeSafeAreaPadding with false.
+     * @tc.expected: safeAreaPadding is equal to padding.
+     */
+    safeAreaPadding = scrollablePattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(safeAreaPadding, padding);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper
+ * @tc.desc: Test AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, AccumulatingTerminateHelper, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scrollable pattern, init.
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    /**
+     * @tc.steps: step2. set needFullSafeArea_ to true and call AccumulatingTerminateHelper.
+     * @tc.expected: the return value is false.
+     */
+    scrollablePattern->needFullSafeArea_ = true;
+    ExpandEdges padding {10, 20, 30, 40};
+    RectF rect {};
+    auto result = scrollablePattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateBorderRadius
+ * @tc.desc: Test UpdateBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, UpdateBorderRadius, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    frameNode->SetLayoutProperty(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_FALSE(renderContext->HasBorderRadius());
+
+    BorderWidthProperty borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    renderContext->UpdateBorderWidth(borderWidth);
+    scrollablePattern->UpdateBorderRadius();
+    EXPECT_FALSE(renderContext->HasBorderRadius());
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

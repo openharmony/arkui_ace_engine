@@ -20,7 +20,7 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
@@ -891,78 +891,6 @@ HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SafeAreaExpand001
- * @tc.desc: When set SafeAreaExpand, layout expands to safeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
-{
-    // "[480.00px x 800.00px]"
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetFooter(GetDefaultHeaderBuilder());
-    for (int i = 0; i < 40; ++i) {
-        CreateItemWithHeight(100.0f);
-    }
-    bool reachEnd = false;
-    model.SetOnReachEnd([&reachEnd]() { reachEnd = true; });
-    CreateDone();
-
-    EXPECT_EQ(layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->ToString(), "[480.00px x 800.00px]");
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
-    EXPECT_EQ(GetChildHeight(frameNode_, 18), 0.0f);
-
-    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(4)
-        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
-    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-
-    FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
-    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 18), 100.0f);
-    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 480, 800)));
-
-    ScrollToIndex(39, false, ScrollAlign::END);
-    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
-    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_EQ(reachEnd, false);
-
-    UpdateCurrentOffset(-50.0f);
-    FlushUITasks();
-    EXPECT_EQ(reachEnd, true);
-}
-
-/**
- * @tc.name: scrollPage001
- * @tc.desc: Test the currentOffset after scrollPage.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
-{
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateWaterFlowItems(30);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
-    pattern_->ScrollPage(false);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
-
-    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
-    pattern_->ScrollPage(false);
-    FlushUITasks();
-    // sw need estimate currentOffset.
-    EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
-}
-
-/**
  * @tc.name: OverScroll002
  * @tc.desc: only have footer, test GetOverScrollOffset.
  * @tc.type: FUNC
@@ -1014,6 +942,31 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: scrollPage001
+ * @tc.desc: Test the currentOffset after scrollPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
+    pattern_->ScrollPage(false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
+    pattern_->ScrollPage(false);
+    FlushUITasks(frameNode_);
+    // sw need estimate currentOffset.
+    EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
+}
+
+/**
  * @tc.name: Delete006
  * @tc.desc: Delete all items, test footer position.
  * @tc.type: FUNC
@@ -1035,6 +988,53 @@ HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: SafeAreaExpand001
+ * @tc.desc: When set SafeAreaExpand, layout expands to safeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
+{
+    // "[480.00px x 800.00px]"
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    for (int i = 0; i < 40; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    bool reachEnd = false;
+    model.SetOnReachEnd([&reachEnd]() { reachEnd = true; });
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->ToString(), "[480.00px x 800.00px]");
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 0.0f);
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(4)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 100.0f);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 480, 800)));
+
+    ScrollToIndex(39, false, ScrollAlign::END);
+    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(reachEnd, false);
+
+    UpdateCurrentOffset(-50.0f);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(reachEnd, true);
 }
 
 /**
@@ -1316,5 +1316,188 @@ HWTEST_F(WaterFlowTestNg, FooterScrollBarTest001, TestSize.Level1) {
     // Verify state after data restoration
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
     EXPECT_TRUE(pattern_->IsScrollable());
+}
+
+/**
+ * @tc.name: EstimateTotalHeightReachEnd001
+ * @tc.desc: Test EstimateTotalHeight when itemEnd is true and repeatDifference is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateTotalHeightReachEnd001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    ASSERT_NE(info, nullptr);
+
+    // Scroll to bottom to reach end
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    // Verify we've reached the end
+    EXPECT_TRUE(info->itemEnd_);
+    EXPECT_EQ(info->repeatDifference_, 0);
+
+    // Test the branch: should return maxHeight_ directly
+    float estimatedHeight = info->EstimateTotalHeight();
+    EXPECT_EQ(estimatedHeight, info->maxHeight_);
+}
+
+/**
+ * @tc.name: WaterFlowReMeasureTest001
+ * @tc.desc: Test WaterFlow TOP_DOWN selective clearing mechanism
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with TOP_DOWN mode
+     * @tc.expected: WaterFlow index range is correct
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Call measure of WaterFlow for first time
+     * @tc.expected: WaterFlow layout range is correct, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<WaterFlowLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    // Record initial index range
+    int32_t initialStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t initialEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    /**
+     * @tc.steps: step3. Change WaterFlow mainSize and call measure for second time
+     * @tc.expected: Check selective clearing mechanism works with new index-based approach
+     */
+    // Modify layout constraints to trigger re-measurement
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(240.f, 200.f);
+    contentConstraint.maxSize = SizeF(240.f, 200.f);
+    contentConstraint.percentReference = SizeF(240.f, 200.f);
+
+    layoutProperty_->UpdateLayoutConstraint(contentConstraint);
+
+    // Verify that prevStartIndex_ and prevEndIndex_ are set correctly before measure
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+
+    // Verify selective clearing mechanism uses final indices correctly
+    int32_t newStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t newEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    // Verify that measuredStartIndex_ and currentEndIndex_ are updated
+    EXPECT_EQ(layoutAlgorithm->measuredStartIndex_, newStartIndex);
+    EXPECT_EQ(layoutAlgorithm->measuredEndIndex_, newEndIndex);
+
+    // The index range should be different after constraint change
+    EXPECT_TRUE(newStartIndex != initialStartIndex || newEndIndex != initialEndIndex);
+
+    // Complete layout to trigger ClearUnlayoutedItems
+    layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(layoutAlgorithm->isLayouted_);
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowTopDown001
+ * @tc.desc: Test LazyVGridLayout basic fast scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown001, TestSize.Level1)
+{
+    // Create WaterFlow with reference to existing test pattern
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    // Create LazyVGridLayout items
+    for (int i = 0; i < 10; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        // Add child items to LazyVGrid
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(50.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    // Verify initial state
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 4);
+
+    // Test fast scrolling scenario
+    UpdateCurrentOffset(-1500.0f);
+
+    // Verify layout state after fast scrolling
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+
+    // Verify position calculations
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= pattern_->layoutInfo_->endIndex_; ++i) {
+        auto rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Top(), (i - 5) * 160.0f);
+        EXPECT_EQ(rect.Bottom(), (i - 5 + 1) * 160.0f);
+        EXPECT_EQ(rect.Height(), 160.0f);
+        EXPECT_EQ(rect.Width(), 480.0f);
+    }
+}
+
+/**
+ * @tc.name: LazyVGridInWaterFlowTopDown002
+ * @tc.desc: Test LazyVGridLayout reverse scrolling stability
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LazyVGridInWaterFlowTopDown002, TestSize.Level1)
+{
+    // Create WaterFlow with reference to existing test pattern
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+
+    // Create LazyVGridLayout items
+    for (int i = 0; i < 10; ++i) {
+        LazyVGridLayoutModel gridModel;
+        gridModel.Create();
+        gridModel.SetColumnsTemplate("1fr 1fr");
+        gridModel.SetRowGap(Dimension(5.0f));
+        gridModel.SetColumnGap(Dimension(5.0f));
+
+        for (int j = 0; j < 6; ++j) {
+            CreateItemWithHeight(50.0f);
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    // Initial fast scroll to set up test state
+    UpdateCurrentOffset(-1500.0f);
+
+    // Test reverse scrolling
+    UpdateCurrentOffset(800.0f);
+
+    // Verify state after reverse scrolling
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 0);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= pattern_->layoutInfo_->endIndex_; ++i) {
+        auto rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Top(),  i * 160.0f);
+        EXPECT_EQ(rect.Bottom(), (i + 1) * 160.0f);
+        EXPECT_EQ(rect.Height(), 160.0f);
+        EXPECT_EQ(rect.Width(), 480.0f);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -52,7 +52,6 @@ public:
 
     void SetLocalOffset(OffsetF localOffset, std::optional<OffsetF> localOffsetWithoutTrans = std::nullopt)
     {
-        localOffsetChanged_ = localOffset != localOffset_;
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
         localOffsetWithoutTrans_ = localOffsetWithoutTrans;
@@ -112,7 +111,6 @@ private:
     OffsetF localOffset_;
     std::optional<OffsetF> localOffsetWithoutTrans_;
     WeakPtr<Pattern> pattern_;
-    bool localOffsetChanged_ = false;
     bool removeFrameNode_ = false;
     bool colorModeChange_ = false;
     bool magnifierNodeExist_ = false;

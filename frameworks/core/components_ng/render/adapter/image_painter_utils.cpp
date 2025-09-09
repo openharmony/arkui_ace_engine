@@ -53,7 +53,8 @@ std::unique_ptr<RSPoint[]> ImagePainterUtils::ToRSRadius(const BorderRadiusArray
     return radii;
 }
 
-void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config)
+void ImagePainterUtils::AddFilter(
+    RSBrush& brush, RSSamplingOptions& options, const ImagePaintConfig& config, bool isHdr)
 {
     switch (config.imageInterpolation_) {
         case ImageInterpolation::LOW: {
@@ -77,7 +78,8 @@ void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, co
     if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
     } else if (config.colorFilter_.colorFilterDrawing_) {
         auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
             config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
@@ -87,7 +89,8 @@ void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, co
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
     }
     brush.SetFilter(filter);
 }

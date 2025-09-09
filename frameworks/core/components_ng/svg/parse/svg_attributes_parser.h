@@ -54,7 +54,7 @@ struct SvgPreserveAspectRatio {
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
-    static bool ParseColor(std::string value, Color& color);
+    static bool ParseColor(std::string value, Color& color, bool featureEnable);
     static bool ParseRGBAMagicColor(const std::string& value, Color& color);
     static std::optional<Color> GetSpecialColor(const std::string& value);
     static LineCapStyle GetLineCapStyle(const std::string& val);
@@ -73,7 +73,7 @@ public:
     static Color GetColorFromHexString(const std::string& value);
     static Color GetColorFrom4HexString(const std::string& value);
     static void StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension);
-    static void ParseDimension(const std::string& value, Dimension& dimension, bool useVp = false);
+    static void ParseDimension(const std::string& value, Dimension& dimension, bool featureEnable, bool useVp = false);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,
@@ -225,6 +225,7 @@ struct SvgBaseAttribute {
     std::string href;
     std::string id;
     SvgClipAttribute clipState;
+    uint32_t usrConfigVersion = 0;
 
     void InheritFromUse(const SvgBaseAttribute& parent)
     {
@@ -278,6 +279,7 @@ struct SvgAnimateAttribute {
 
 struct SvgStopAttribute {
     GradientColor gradientColor;
+    uint32_t usrConfigVersion = 0;
 };
 
 struct SvgRectAttribute {
@@ -296,6 +298,7 @@ struct SvgMaskAttribute {
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
     SvgLengthScaleUnit maskContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     SvgLengthScaleUnit maskUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    bool featureEnable = false;
 };
 
 struct SvgCircleAttribute {
@@ -331,6 +334,7 @@ struct SvgPatternAttribute {
     SvgLengthScaleUnit patternContentUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     std::string patternTransform;
     Rect viewBox;
+    uint32_t usrConfigVersion = 0;
 };
 
 struct SvgImageAttribute {
@@ -348,6 +352,7 @@ struct SvgFilterAttribute {
     Dimension height = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default value
     SvgLengthScaleUnit filterUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
     SvgLengthScaleUnit primitiveUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    bool featureEnable = false;
 };
 
 struct SvgFeCommonAttribute {

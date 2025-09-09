@@ -41,6 +41,7 @@ namespace {
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+constexpr float DEFAULT_BIAS = 0.5f;
 // constexpr int32_t HOVER_IMAGE_INTERRUPT_DURATION = 500;
 // constexpr char KEY_CONTEXT_MENU_HOVER[] = "ContextMenuHover";
 // constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
@@ -1029,7 +1030,9 @@ void ViewAbstractModelStatic::SetPositionEdges(FrameNode* frameNode, const Edges
 void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetPositionLocalizedEdges(frameNode, needLocalized);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
 
@@ -1058,7 +1061,9 @@ void ViewAbstractModelStatic::MarkAnchor(FrameNode* frameNode, const std::option
 void ViewAbstractModelStatic::ResetMarkAnchorStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::ResetMarkAnchorStart(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
 }
 
 void ViewAbstractModelStatic::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -1076,7 +1081,9 @@ void ViewAbstractModelStatic::SetOffsetEdges(FrameNode* frameNode, const EdgesPa
 void ViewAbstractModelStatic::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetOffsetLocalizedEdges(frameNode, needLocalized);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
 }
 
 void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
@@ -1109,14 +1116,14 @@ void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<
 void ViewAbstractModelStatic::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
     const std::optional<float>& vertical)
 {
-    // auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
-    // if (horisontal.has_value()) {
-    //     biasPair.first = horisontal.value();
-    // }
-    // if (vertical.has_value()) {
-    //     biasPair.second = vertical.value();
-    // }
-    // ViewAbstract::SetBias(frameNode, biasPair);
+    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    if (horisontal.has_value()) {
+        biasPair.first = horisontal.value();
+    }
+    if (vertical.has_value()) {
+        biasPair.second = vertical.value();
+    }
+    ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void ViewAbstractModelStatic::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,

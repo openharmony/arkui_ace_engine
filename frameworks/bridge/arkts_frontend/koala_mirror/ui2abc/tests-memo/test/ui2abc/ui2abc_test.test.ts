@@ -15,7 +15,7 @@
 
 import { Assert, suite, test } from "@koalaui/harness"
 import { asArray, int32 } from "@koalaui/common"
-import { TestNode, testRoot, testTick, mutableState, GlobalStateManager, StateContext } from "@koalaui/runtime"
+import { testRoot, testTick, GlobalStateManager } from "@koalaui/runtime"
 import { __id, __key, __context } from "@koalaui/runtime"
 import { assertResultArray, GlobalStateHolder } from "../testUtils"
 
@@ -188,7 +188,7 @@ suite("[ARKTS+MEMO PLUGIN] Functions with receiver", () => {
         )
     })
 
-    test.expectFailure("conditional expectFailure", "Lambda function with receiver", () => {
+    test.expectFailure("TODO: fails in runtime, probably a bug in call AST", "Lambda function with receiver", () => {
         const instance = new TestLambdaWithReceiver()
         const root = testRoot(instance.test)
         assertResultArray(instance.log,

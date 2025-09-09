@@ -458,6 +458,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
+    enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -774,7 +776,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         radius: number | string;
         angle?: number | string;
         direction?: GradientDirection;
-        colors: Array<any>;
+        colors: Array<[ ResourceColor, number ]>;
         repeating?: boolean;
     }): this;
 }
@@ -1613,6 +1615,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     }) => void): this;
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
     onActivateContent(callback: () => void): this;
+    forceEnableZoom(forceEnableZoom: boolean): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -2107,7 +2110,7 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
-    shaderStyle(value: ShaderStyle[]): SymbolGlyphAttribute;
+    shaderStyle(value: (ShaderStyle | undefined)[] | ShaderStyle): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

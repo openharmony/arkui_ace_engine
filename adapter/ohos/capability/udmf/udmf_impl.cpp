@@ -74,7 +74,7 @@ RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParams(napi_env env, nap
         udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
         return udDataLoadParams;
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "convert udmf data load params failed.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "dataLoadParamsNapi convert2NativeValue failed");
     return nullptr;
 }
 
@@ -679,6 +679,7 @@ bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const s
     summary.summary = dragSummaryInfo.summary;
     summary.specificSummary = dragSummaryInfo.detailedSummary;
     summary.summaryFormat = dragSummaryInfo.summaryFormat;
+    summary.version = dragSummaryInfo.version;
     summary.totalSize = dragSummaryInfo.totalSize;
     auto& client = UDMF::UdmfClient::GetInstance();
     std::vector<std::string> allowTypesArr(allowTypes.begin(), allowTypes.end());

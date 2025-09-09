@@ -11,6 +11,14 @@
     {
       "name": "Color_red",
       "value": "#FFFF0000"
+    },
+    {
+      "name": "Color_green",
+      "value": "#FF00FF00"
+    },
+    {
+      "name": "Color_purple",
+      "value": "#FF6C0D94"
     }
   ]
 }

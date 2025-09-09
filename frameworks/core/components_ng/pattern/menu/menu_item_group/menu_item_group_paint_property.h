@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemGroupPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuItemGroupPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(MenuItemGroupPaintProperty, PaintProperty);
 
 public:
     MenuItemGroupPaintProperty() = default;

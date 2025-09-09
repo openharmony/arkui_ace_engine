@@ -16,6 +16,8 @@
 
 #include "interfaces/native/node/list_option.h"
 
+#include "base/error/error_code.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -52,8 +54,8 @@ void SetOptionBuilder(FrameNode* frameNode, ArkUIListItemSwipeActionItemHandle i
                 func(static_cast<int32_t>(swipeActionState), item->onStateChangeUserData);
             }
         };
-        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction, onEnterActionArea,
-            onExitActionArea, onStateChange, length, isStart);
+        ListItemModelNG::SetDeleteArea(frameNode, reinterpret_cast<FrameNode*>(item->node), onAction,
+            onEnterActionArea, onExitActionArea, onStateChange, length, isStart);
     } else {
         CalcDimension length;
         ListItemModelNG::SetDeleteArea(frameNode, nullptr, nullptr, nullptr, nullptr, nullptr, length, isStart);
@@ -150,6 +152,38 @@ void ResetListItemStyle(ArkUINodeHandle node)
     ListItemModelNG::SetStyle(frameNode, V2::ListItemStyle::NONE);
 }
 
+ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return ERROR_CODE_PARAM_ERROR;
+    }
+    if (static_cast<int32_t>(ListItemSwipeActionDirection::START) > direction ||
+        static_cast<int32_t>(ListItemSwipeActionDirection::END) < direction) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    ListItemModelNG::ExpandSwipeAction(frameNode, static_cast<ListItemSwipeActionDirection>(direction));
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 Collapse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return ERROR_CODE_PARAM_ERROR;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    ListItemModelNG::CollapseSwipeAction(frameNode);
+    return ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
@@ -165,6 +199,8 @@ const ArkUIListItemModifier* GetListItemModifier()
         .resetListItemOnSelectCallback = ResetListItemOnSelectCallback,
         .setListItemStyle = SetListItemStyle,
         .resetListItemStyle = ResetListItemStyle,
+        .expand = Expand,
+        .collapse = Collapse,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

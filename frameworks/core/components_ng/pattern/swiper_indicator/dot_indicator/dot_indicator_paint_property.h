@@ -35,7 +35,7 @@ struct DotIndicatorStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IgnoreSize, bool);
 };
 class DotIndicatorPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(DotIndicatorPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(DotIndicatorPaintProperty, PaintProperty);
 
 public:
     DotIndicatorPaintProperty() = default;

@@ -152,7 +152,7 @@ void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
                                                                                                   : "FontStyle.Italic",
         filter);
     json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
-    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = host->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
@@ -297,20 +297,6 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
     }
 }
 
-void ButtonPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    clickedColor_ = buttonTheme->GetClickedColor();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetAlphaOffscreen(true);
-}
-
 bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
 {
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -409,15 +395,11 @@ void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorTy
     CHECK_NULL_VOID(textRenderContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (pipelineContext->IsSystmColorChange()) {
         switch (buttonColorType) {
             case ButtonColorType::FONT_COLOR:
-                layoutProperty->UpdateFontColor(color);
                 textRenderContext->UpdateForegroundColor(color);
-                textNode->MarkModifyDone();
-                textNode->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+                textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 break;
             case ButtonColorType::BACKGROUND_COLOR:
                 renderContext->UpdateBackgroundColor(color);
@@ -650,6 +632,7 @@ void ButtonPattern::InitButtonLabel()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitButtonAlphaOffscreen();
     CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
@@ -660,6 +643,19 @@ void ButtonPattern::OnModifyDone()
     HandleBorderAndShadow();
     HandleFocusStatusStyle();
     HandleFocusActiveStyle();
+}
+
+void ButtonPattern::InitButtonAlphaOffscreen()
+{
+    if (isInitButtonAlphaOffscreen_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
+    isInitButtonAlphaOffscreen_ = true;
 }
 
 void ButtonPattern::CheckLocalizedBorderRadiuses()
@@ -717,7 +713,7 @@ void ButtonPattern::InitTouchEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = host->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     touchListener_ = [weak = WeakClaim(this)](const UIState& state) {
         auto buttonPattern = weak.Upgrade();
@@ -756,7 +752,7 @@ void ButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = host->GetEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEffect = inputHub->GetHoverEffect();
     inputHub->SetHoverEffect(hoverEffect == HoverEffectType::BOARD ? HoverEffectType::AUTO : hoverEffect);
@@ -784,15 +780,15 @@ void ButtonPattern::HandlePressedStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_);
+            renderContext->UpdateBackgroundColor(clickedColor_.value());
             return;
         }
         // for system default
@@ -811,7 +807,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
     if (toggleButtonPattern) {
@@ -819,7 +815,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
@@ -838,7 +834,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -1074,7 +1070,7 @@ void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
     }
 
-    auto eventHub = GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("StateEffect: " + std::string(eventHub->GetStateEffect() ? "true" : "false"));
 }
@@ -1122,7 +1118,7 @@ void ButtonPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1141,7 +1137,7 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -1152,7 +1148,9 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
     AnimationOption option = AnimationOption();
     option.SetDuration(duration);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); });
+    AnimationUtils::Animate(
+        option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); }, nullptr, nullptr,
+        pipeline);
 }
 
 void ButtonPattern::SetButtonPress(double xPos, double yPos)
@@ -1160,7 +1158,7 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
     CHECK_NULL_VOID(contentModifierNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -1227,12 +1225,13 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto label = layoutProperty->GetLabel().value_or("");
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     ButtonConfiguration buttonConfiguration(label, isPress_, enabled);

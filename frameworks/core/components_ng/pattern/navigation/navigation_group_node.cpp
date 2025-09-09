@@ -189,7 +189,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     if (pattern->IsForceSplitSupported(context)) {
         pattern->BackupPrimaryNodes();
         pattern->RecognizeHomePageIfNeeded();
-        pattern->SwapNavDestinationAndPlaceHolder(false);
+        pattern->SwapNavDestinationAndProxyNode(false);
         pattern->SetPrimaryNodesToBeRemoved(std::move(primaryNodesToBeRemoved_));
     }
 }
@@ -223,7 +223,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
-        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         if (eventHub && !eventHub->GetOnStateChange()) {
             auto onStateChangeMap = pattern->GetOnStateChangeMap();
             auto iter = onStateChangeMap.find(uiNode->GetId());
@@ -233,13 +233,13 @@ bool NavigationGroupNode::ReorderNavDestination(
             }
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
-        bool needMovePlaceHolder = false;
-        RefPtr<NavDestinationGroupNode> placeHolderNode = nullptr;
+        bool needMoveProxyNode = false;
+        RefPtr<NavDestinationGroupNode> proxyNode = nullptr;
         if (pattern->IsForceSplitSupported(context) && childIndex < 0 &&
-            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreatePlaceHolder()) {
-            placeHolderNode = navDestination->GetOrCreatePlaceHolder();
-            childIndex = navigationContentNode->GetChildIndex(placeHolderNode);
-            needMovePlaceHolder = placeHolderNode != nullptr && childIndex >= 0;
+            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreateProxyNode()) {
+            proxyNode = navDestination->GetOrCreateProxyNode();
+            childIndex = navigationContentNode->GetChildIndex(proxyNode);
+            needMoveProxyNode = proxyNode != nullptr && childIndex >= 0;
         }
         if (childIndex < 0) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "mountToParent navdestinationId:%{public}d, slot:%{public}d",
@@ -247,8 +247,8 @@ bool NavigationGroupNode::ReorderNavDestination(
             navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
-            if (needMovePlaceHolder) {
-                placeHolderNode->MovePosition(slot);
+            if (needMoveProxyNode) {
+                proxyNode->MovePosition(slot);
             } else {
                 navDestination->MovePosition(slot);
             }
@@ -284,7 +284,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             continue;
         }
         navDestination->SetInCurrentStack(false);
-        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         if (eventHub) {
             eventHub->FireChangeEvent(false);
         }
@@ -329,7 +329,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
                 continue;
             }
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
-            if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+            if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
                 auto primaryNode = navDestination->GetPrimaryNode();
                 if (primaryNode) {
                     primaryNodesToBeRemoved_.push_back(primaryNode);
@@ -454,14 +454,14 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     }
     CHECK_NULL_VOID(backButtonNode);
-    auto backButtonEventHub = backButtonNode->GetOrCreateEventHub<EventHub>();
+    auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination),
                                  navigationWeak = WeakClaim(this)](GestureEvent& /*info*/) -> bool {
         auto navDestination = navDestinationWeak.Upgrade();
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "click navigation back button");
         CHECK_NULL_RETURN(navDestination, false);
-        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         eventHub->SetState(NavDestinationState::ON_BACKPRESS);
         auto navdestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
@@ -705,7 +705,7 @@ void NavigationGroupNode::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPla
     }
     auto spllitPlaceHolderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
     CHECK_NULL_VOID(spllitPlaceHolderFrameNode);
-    const auto& eventHub = spllitPlaceHolderFrameNode->GetOrCreateEventHub<EventHub>();
+    const auto& eventHub = spllitPlaceHolderFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto focusHub = spllitPlaceHolderFrameNode->GetOrCreateFocusHub();
@@ -772,7 +772,7 @@ void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preIn
             if (!preUseCustomTransition) {
                 preNavDestination->SystemTransitionPopEnd(false);
             }
-    }, option.GetOnFinishEvent());
+        }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -891,6 +891,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
     int32_t preAnimationId)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
@@ -946,6 +950,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
+    NavigationTitleUtil::SetTitleAnimationElapsedTime(option, curNode);
     pattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern]() {
@@ -1191,7 +1196,7 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(co
             auto context = weakRender.Upgrade();
             CHECK_NULL_VOID(context);
             context->SetActualForegroundColor(MASK_COLOR);
-        });
+        }, nullptr /* finishCallback */, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 void NavigationGroupNode::TransitionWithReplace(
@@ -1234,7 +1239,7 @@ void NavigationGroupNode::TransitionWithReplace(
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
-        preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+        preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (!navigationNode->CheckAnimationIdValid(preNode, preAnimationId)) {
             return;
         }
@@ -1263,7 +1268,7 @@ void NavigationGroupNode::TransitionWithReplace(
     option.SetDuration(DEFAULT_REPLACE_DURATION);
     option.SetOnFinishEvent(callback);
 
-    preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
+    preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     if (curNavDestination && curNavDestination->IsNeedContentTransition() && !curUseCustomTransition) {
         curNode->GetRenderContext()->UpdateOpacity(0.0f);
@@ -1288,7 +1293,7 @@ void NavigationGroupNode::TransitionWithReplace(
                 curNode->GetRenderContext()->UpdateOpacity(1.0f);
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     isOnAnimation_ = true;
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
@@ -1305,8 +1310,8 @@ void NavigationGroupNode::DealNavigationExit(
     const RefPtr<FrameNode>& preNode, bool isNavBarOrHomeDestination, bool isAnimated)
 {
     CHECK_NULL_VOID(preNode);
-    if (preNode->GetOrCreateEventHub<EventHub>()) {
-        preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+    if (preNode->GetEventHub<EventHub>()) {
+        preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
     }
     if (isNavBarOrHomeDestination && isAnimated) {
         SetNeedSetInvisible(true);
@@ -1390,14 +1395,14 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
     CHECK_NULL_RETURN(navDestination, false);
-    auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (index == static_cast<int32_t>(destinationSize) - 1) {
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
         navDestination->SetJSViewActive(true);
-        navDestination->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
+        navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
         eventHub->FireChangeEvent(true);
         bool hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
@@ -1431,14 +1436,14 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
                 pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE);
-                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
+                pattern->NotifyDestinationLifecycle(
+                    navDestination, NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
             }
         }
         return false;
     }
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
-        !navDestination->IsOnAnimation()) {
+    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
         // if curNode is visible, need remove in hideNodes_.
         hideNodes_.erase(
             std::remove_if(hideNodes_.begin(), hideNodes_.end(),
@@ -1610,7 +1615,8 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
             continue;
         }
         if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
-            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
+            navigationPattern->NotifyDestinationLifecycle(
+                navDestination, NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
         }
     }
 }
@@ -1662,7 +1668,7 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     // remove content child
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-    if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+    if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
         contentNode_->RemoveChild(navDestination, true);
         auto primaryNode = navDestination->GetPrimaryNode();
         CHECK_NULL_VOID(primaryNode);
@@ -1672,7 +1678,8 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
 
     if (navDestinationPattern->GetIsOnShow()) {
         pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE);
-        pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
+        pattern->NotifyDestinationLifecycle(
+            navDestination, NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
         navDestinationPattern->SetIsOnShow(false);
     }
     pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
@@ -1715,7 +1722,8 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
                 CHECK_NULL_VOID(nodeBase);
                 nodeBase->SystemTransitionPopEnd(true);
             }
-    }, option.GetOnFinishEvent());
+        },
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -1819,7 +1827,8 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
                     curDestination->SystemTransitionPushEnd(true);
                 }
             }
-    }, option.GetOnFinishEvent());
+        },
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2005,7 +2014,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
                 }
             }
         },
-    option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2114,7 +2123,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 CHECK_NULL_VOID(preNode);
                 preNode->InitDialogTransition(false);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -2390,7 +2399,7 @@ void NavigationGroupNode::SoftTransitionAnimationPush(const RefPtr<FrameNode>& p
                 CHECK_NULL_VOID(curNavdestination);
                 curNavdestination->StartSoftTransitionPush(true);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2481,7 +2490,7 @@ void NavigationGroupNode::SoftTransitionAnimationPop(const RefPtr<FrameNode>& pr
             if (!preUseCustomTransition) {
                 preNavDestination->StartSoftTransitionPop(false);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -2559,7 +2568,7 @@ void NavigationGroupNode::CreateHomeDestinationIfNeeded()
     CHECK_NULL_VOID(customHomeNode_);
     CHECK_NULL_VOID(destNode);
     SetBackButtonEvent(destNode);
-    auto eventHub = destNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnWillAppear();
     AddChild(destNode, 0);

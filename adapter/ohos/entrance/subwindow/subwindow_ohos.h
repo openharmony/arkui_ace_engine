@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
@@ -48,7 +49,7 @@ class RSUIDirector;
 namespace OHOS::Ace {
 
 class SubwindowOhos : public Subwindow {
-    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow)
+    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow);
 
 public:
     explicit SubwindowOhos(int32_t instanceId);
@@ -198,6 +199,17 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) override;
+    int32_t ShowBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
+        std::function<void()>&& buildtitleNodeFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        int32_t targetId) override;
+    int32_t UpdateBindSheetByUIContext(
+        const RefPtr<NG::FrameNode>& sheetContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate) override;
+    int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode) override;
 
     MenuWindowState GetAttachState() override
     {

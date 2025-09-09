@@ -1806,6 +1806,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    textPickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
@@ -1912,6 +1913,8 @@ bool JSTextPickerDialog::ParseShowDataOptions(
             JSRef<JSArray> getRange = paramObject->GetProperty("range");
             JSTextPickerParser::GenerateCascadeOptions(getRange, param.options);
             attr.isCascade = true;
+
+            JSTextPickerParser::ParseColumnWidths(paramObject, param);
         }
     }
     if (optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
@@ -2033,6 +2036,10 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
     settingData.isEnableHapticFeedback = isEnableHapticFeedback;
+
+    for (auto& item : param.columnWidths) {
+        settingData.columnWidths.emplace_back(item);
+    }
     return true;
 }
 

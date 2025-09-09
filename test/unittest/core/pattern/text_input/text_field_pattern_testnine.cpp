@@ -138,7 +138,7 @@ HWTEST_F(TextFieldPatternTestNine, SetPreviewTextOperation001, TestSize.Level0)
 
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -176,7 +176,7 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -407,7 +407,7 @@ HWTEST_F(TextFieldPatternTestNine, ExecuteInputCommand001, TestSize.Level0)
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateMaxLength(123);
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -688,7 +688,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
     pattern->contentController_->content_ = u"";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
-    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool calledOnCopy = false;
     eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
@@ -787,7 +787,7 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     pattern_->InitDragDropCallBack();
     RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     const std::string extraParams("test");
@@ -807,7 +807,9 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
 
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     layoutProperty->UpdateTextInputType(TextInputType::JS_ENUM_URL);
-    host->previewOption_.enableEdgeAutoScroll = false;
+    auto dragPreviewOption = host->GetDragPreviewOption();
+    dragPreviewOption.enableEdgeAutoScroll = false;
+    host->SetDragPreviewOptions(dragPreviewOption);
     eventHub->onDragMove_(event, extraParams);
     EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
 
@@ -950,6 +952,16 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
 
     eventHub->onDragLeave_(event, extraParams);
     EXPECT_FALSE(pattern_->isCaretTwinkling_);
+
+    // Close the keyboard when dragging enter the textinput/textarea/search from outside it.
+    pattern_->customKeyboardBuilder_ = [] {};
+    pattern_->isCustomKeyboardAttached_ = true;
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
+    pattern_->dragStatus_ = DragStatus::NONE;
+    host->isDisallowDropForcedly_ = false;
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCustomKeyboardAttached_);
 }
 
 /**

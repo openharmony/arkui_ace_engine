@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -23,8 +24,10 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
 void GridItemPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread;
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -35,7 +38,13 @@ void GridItemPattern::OnAttachToFrameNode()
         renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
     }
 }
-
+void GridItemPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
 void GridItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -57,7 +66,7 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
-        auto eventHub = GetOrCreateEventHub<GridItemEventHub>();
+        auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
@@ -150,7 +159,7 @@ void GridItemPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -222,7 +231,7 @@ void GridItemPattern::InitDisableStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -325,24 +334,6 @@ void GridItemPattern::DumpAdvanceInfo()
     }
 }
 
-void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
-{
-    gridItemStyle_ = gridItemStyle;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<GridItemTheme>();
-    CHECK_NULL_VOID(theme);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (gridItemStyle_ == GridItemStyle::PLAIN) {
-        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
-    } else if (gridItemStyle_ == GridItemStyle::NONE) {
-        renderContext->UpdateBorderRadius(BorderRadiusProperty());
-    }
-}
-
 void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     auto property = GetLayoutProperty<GridItemLayoutProperty>();
@@ -377,6 +368,24 @@ void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         default: {
             break;
         }
+    }
+}
+
+void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
+{
+    gridItemStyle_ = gridItemStyle;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+    } else if (gridItemStyle_ == GridItemStyle::NONE) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty());
     }
 }
 

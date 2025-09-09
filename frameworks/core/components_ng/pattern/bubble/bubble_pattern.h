@@ -21,8 +21,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
-#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -50,7 +50,6 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-
 class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
     DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 

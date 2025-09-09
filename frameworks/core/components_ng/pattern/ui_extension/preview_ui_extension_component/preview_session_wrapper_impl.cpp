@@ -688,7 +688,7 @@ void PreviewSessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("PreviewUIExtension DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
         displayArea_.ToString().c_str(), persistentId, reason);
-        if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (reason == Rosen::SizeChangeReason::ROTATION || reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION) {
             if (auto temp = transaction_.lock()) {
                 transaction = temp;
                 transaction_.reset();
@@ -710,7 +710,8 @@ void PreviewSessionWrapperImpl::NotifySizeChangeReason(
     CHECK_NULL_VOID(session_);
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
-    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
+    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION ||
+        type == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         transaction_ = rsTransaction;
     }
 }

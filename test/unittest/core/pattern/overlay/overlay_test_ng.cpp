@@ -1166,7 +1166,7 @@ HWTEST_F(OverlayTestNg, DialogTest002, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -2398,9 +2398,7 @@ HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
 
-    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(std::nullopt);
-    EXPECT_EQ(prevNode1, nullptr);
-    auto nextNode1 = overlayManager->GetBottomOrderFirstNode(std::nullopt);
+    auto nextNode1 = overlayManager->GetNextNodeWithOrder(std::nullopt);
     EXPECT_EQ(nextNode1, nullptr);
 }
 
@@ -2440,10 +2438,8 @@ HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder004, TestSize.Level1)
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
 
     auto overlayNode = frameNode->GetParent();
-    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(std::make_optional(0.0f));
-    EXPECT_EQ(prevNode2->GetId(), overlayNode->GetId());
-    auto nextNode2 = overlayManager->GetBottomOrderFirstNode(std::make_optional(-1.0f));
-    EXPECT_EQ(nextNode2->GetId(), overlayNode->GetId());
+    auto nextNode = overlayManager->GetNextNodeWithOrder(std::make_optional(-1.0f));
+    EXPECT_EQ(nextNode->GetId(), overlayNode->GetId());
 }
 
 /**
@@ -2811,12 +2807,21 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest002, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     topModalPattern->SetEnableSafeArea(true);
     EXPECT_TRUE(topModalPattern->enableSafeArea_);
+    auto host = topModalPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto context = host->GetContext();
+    EXPECT_NE(context, nullptr);
+    auto inset = context->GetSafeAreaWithoutProcess();
+    NG::CalcLength safeAreaPaddingLeft(inset.left_.Length());
+    NG::CalcLength safeAreaPaddingRight(inset.right_.Length());
     topModalPattern->BeforeCreateLayoutWrapper();
     auto modalNodeLayoutProperty = topModalNode->layoutProperty_;
     ASSERT_NE(modalNodeLayoutProperty, nullptr);
     const std::unique_ptr<PaddingProperty>& modalSafeAreaPaddingProp =
         modalNodeLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(modalSafeAreaPaddingProp, nullptr);
+    EXPECT_EQ(modalSafeAreaPaddingProp->left, safeAreaPaddingLeft);
+    EXPECT_EQ(modalSafeAreaPaddingProp->right, safeAreaPaddingRight);
 }
 
 /**

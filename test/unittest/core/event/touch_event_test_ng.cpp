@@ -606,6 +606,32 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StopPass001
+ * @tc.desc: test functions SetNeedPropagation IsNeedPropagation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, StopPass001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call IsNeedPropagation.
+     * @tc.expected: Execute function return value is false.
+     */
+    EXPECT_FALSE(touchEventActuator->IsNeedPropagation());
+
+    /**
+     * @tc.steps: step3. call SetNeedPropagation(true).
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->SetNeedPropagation(true);
+    EXPECT_TRUE(touchEventActuator->IsNeedPropagation());
+}
+
+/**
  * @tc.name: TouchEventOriginalIdTest001
  * @tc.desc: TriggerTouchCallBack.
  * @tc.type: FUNC
@@ -687,5 +713,27 @@ HWTEST_F(TouchEventTestNg, CreateTouchItemInfoTest001, TestSize.Level1)
     for (int32_t i = 0; (i < touchPointExpectTypes.size()) && (i < touchesTypes.size()); i++) {
         EXPECT_EQ(touchesTypes[i], touchPointExpectTypes[i]);
     }
+}
+
+/**
+ * @tc.name: ConvertFromMouseTest001
+ * @tc.desc: TriggerConvertFromMouse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, ConvertFromMouseTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.sourceType = SourceType::NONE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.sourceType = SourceType::MOUSE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::NONE;
+    touchEvent.sourceType = SourceType::NONE;
+    EXPECT_FALSE(touchEvent.ConvertFromMouse());
+    touchEvent.convertInfo.first = UIInputEventType::NONE;
+    touchEvent.sourceType = SourceType::MOUSE;
+    EXPECT_TRUE(touchEvent.ConvertFromMouse());
 }
 } // namespace OHOS::Ace::NG

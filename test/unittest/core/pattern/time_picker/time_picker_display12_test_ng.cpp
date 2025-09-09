@@ -1983,7 +1983,7 @@ HWTEST_F(TimePickerDisplay12TestNg, TimePickerTextDisplayHour12TestNg032, TestSi
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
 

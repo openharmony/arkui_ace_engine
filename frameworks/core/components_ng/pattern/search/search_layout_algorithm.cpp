@@ -165,6 +165,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
 
     UpdateFontFeature(layoutWrapper);
     auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
     auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
 
     auto textFieldWidth = CalculateTextFieldWidth(layoutWrapper, searchWidthMax, searchTheme);
@@ -208,7 +209,7 @@ float SearchLayoutAlgorithm::CalculateTextFieldWidth(
 
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(searchButtonLayoutProperty, 0.0f);
     auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
@@ -373,6 +374,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
+    CHECK_NULL_VOID(layoutProperty->GetLayoutConstraint());
     auto searchWidthMax = CalcSearchWidth(layoutProperty->GetLayoutConstraint().value(), layoutWrapper);
     double searchButtonWidth = searchWidthMax * MAX_SEARCH_BUTTON_RATE;
     double curSearchButtonWidth = buttonGeometryNode->GetFrameSize().Width();
@@ -435,7 +437,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // search button height
     auto buttonNode = searchBtnWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
-    auto searchButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
     auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale_, maxFontScale_);
@@ -452,7 +454,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // cancel button height
     auto cancelButtonNode = cancelBtnLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, 0);
-    auto cancelButtonEvent = cancelButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, 0);
     auto cancelBtnHight = cancelBtnSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale_, maxFontScale_);
@@ -475,6 +477,7 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
@@ -525,9 +528,10 @@ double SearchLayoutAlgorithm::CalcSearchWidth(
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     CHECK_NULL_RETURN(calcLayoutConstraint, searchWidth);
-    auto hasMinSize = calcLayoutConstraint->minSize->Width().has_value();
-    auto hasMaxSize = calcLayoutConstraint->maxSize->Width().has_value();
-    auto hasWidth = calcLayoutConstraint->selfIdealSize->Width().has_value();
+    auto hasMinSize = calcLayoutConstraint->minSize.has_value() && calcLayoutConstraint->minSize->Width().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize.has_value() && calcLayoutConstraint->maxSize->Width().has_value();
+    auto hasWidth =
+        calcLayoutConstraint->selfIdealSize.has_value() && calcLayoutConstraint->selfIdealSize->Width().has_value();
     if (hasMinSize && ((hasMaxSize && searchConstraint.minSize.Width() >= searchConstraint.maxSize.Width())
         || (!hasMaxSize && !hasWidth))) {
         return searchConstraint.minSize.Width();
@@ -871,7 +875,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto cancelButtonHorizontalOffset = 0;
     auto cancelButtonVerticalOffset = (params.searchFrameHeight - cancelButtonFrameHeight) / 2;
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto buttonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);

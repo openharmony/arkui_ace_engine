@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -27,6 +28,8 @@ constexpr int32_t ANGLE_90 = 90;
 constexpr int32_t ANGLE_180 = 180;
 constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
+constexpr int32_t DIGIT_X_REVERSE = 23;
+constexpr int32_t DIGIT_Y_REVERSE = 24;
 
 TouchType ConvertTouchEventType(int32_t originAction)
 {
@@ -178,6 +181,13 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
     touchPoint.height = pointerItem.GetHeight();
+
+    uint32_t longAxis = static_cast<uint32_t>(pointerItem.GetLongAxis());
+    bool hasReverseSignalX = ((longAxis & (1U << DIGIT_X_REVERSE)) != 0);
+    bool hasReverseSignalY = ((longAxis & (1U << DIGIT_Y_REVERSE)) != 0);
+    touchPoint.xReverse = static_cast<int32_t>(hasReverseSignalX);
+    touchPoint.yReverse = static_cast<int32_t>(hasReverseSignalY);
+
     int32_t blobId = pointerItem.GetBlobId();
     if (blobId < 0) {
         touchPoint.operatingHand = 0;
@@ -293,10 +303,12 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)
         .SetSourceType(SourceType::NONE)
-        .SetOperatingHand(touchPoint.operatingHand)
         .SetPressedTime(touchPoint.downTime)
         .SetWidth(touchPoint.width)
-        .SetHeight(touchPoint.height);
+        .SetHeight(touchPoint.height)
+        .SetOperatingHand(touchPoint.operatingHand)
+        .SetXReverse(touchPoint.xReverse)
+        .SetYReverse(touchPoint.yReverse);
     return event;
 }
 
@@ -308,10 +320,24 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     }
 }
 
-void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
     std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
     touchEvent.SetPointerEvent(pointer);
+}
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -444,9 +470,12 @@ void ConvertMouseEvent(
     events.globalDisplayY = item.GetGlobalY();
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
-    GetMouseEventAction(pointerEvent->GetPointerAction(), events, isSceneBoardWindow);
-    events.button = GetMouseEventButton(pointerEvent->GetButtonId());
-    GetEventDevice(pointerEvent->GetSourceType(), events);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetMouseEventAction(orgAction, events, isSceneBoardWindow);
+    int32_t orgButton = pointerEvent->GetButtonId();
+    events.button = GetMouseEventButton(orgButton);
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
@@ -466,10 +495,7 @@ void ConvertMouseEvent(
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
     for (const auto& pressedButton : pressedSet) {
-        auto convertedButton = GetMouseEventButton(pressedButton);
-        if (convertedButton != MouseButton::NONE_BUTTON) {
-            events.pressedButtonsArray.emplace_back(convertedButton);
-        }
+        events.pressedButtonsArray.emplace_back(GetMouseEventButton(pressedButton));
     }
     events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     events.pressedTime = TimeStamp(std::chrono::microseconds(item.GetDownTime()));
@@ -626,7 +652,6 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
     touchPoint.force = FAKE_TOUCH_PRESSURE;
     touchPoint.tiltX = 0.0;
     touchPoint.tiltY = 0.0;
-    touchPoint.rollAngle = 0.0;
     touchPoint.sourceTool = SourceTool::FINGER;
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = 0;
@@ -707,6 +732,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
     event.scrollLock = keyEvent->GetFunctionKey(MMI::KeyEvent::SCROLL_LOCK_FUNCTION_KEY);
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
+    event.targetDisplayId = keyEvent->GetTargetDisplayId();
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
     } else if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_DOWN) {
@@ -899,6 +925,31 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     GetPointerEventAction(orgAction, event);
 }
 
+void LogPointAxisInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    int32_t toolType = MMI::PointerEvent::TOOL_TYPE_MOUSE;
+    if (!GetPointerEventToolType(pointerEvent, toolType)) {
+        return;
+    }
+    if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+        (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+        (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && pointerEvent->GetAxes() != 0)) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "all axis info: horizontalAxis: %{public}f, verticalAxis: %{public}f, pinchAxisScale:%{public}f, "
+            "rotateAxisAngle:%{public}f, scrollStep:%{public}d",
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE),
+            pointerEvent->GetScrollRows());
+    }
+}
+
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
 {
     if (pointerEvent->GetSourceType() != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
@@ -929,6 +980,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
                 "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
                 pointerEvent->GetId(), actionId, pointerEvent->GetPointerAction(),
                 item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+        }
+        if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+            LogPointAxisInfo(pointerEvent);
         }
         auto ids = pointerEvent->GetPointerIds();
         for (auto&& id : ids) {

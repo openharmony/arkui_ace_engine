@@ -257,6 +257,13 @@ typedef struct AbilityBase_Want AbilityBase_Want;
 typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
 
 /**
+ * @brief Define the Edges describing the position of a component by distances to the container's four edges.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -393,6 +400,20 @@ typedef enum {
     /** 顶部对齐。 */
     ARKUI_TEXT_VERTICAL_ALIGNMENT_TOP,
 } ArkUI_TextVerticalAlignment;
+
+/**
+ * @brief 定义文本内容区垂直对齐样式枚举值。
+ *
+ * @since 21
+ */
+typedef enum {
+    /** 顶部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_TOP = 0,
+    /** 居中对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_CENTER,
+    /** 底部对齐。 */
+    ARKUI_TEXT_CONTENT_ALIGN_BOTTOM,
+} ArkUI_TextContentAlign;
 
 /**
  * @brief Enumerates the types of the Enter key for a single-line text box.
@@ -711,6 +732,18 @@ typedef enum {
 } ArkUI_EdgeEffect;
 
 /**
+ * @brief Enumerates the edges for which the effect takes effect when the boundary of the scrollable content is reached.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** Start edge. */
+    ARKUI_EFFECT_EDGE_START = 1,
+    /** End edge. */
+    ARKUI_EFFECT_EDGE_END = 2,
+} ArkUI_EffectEdge;
+
+/**
  * @brief Enumerates the scroll directions for the <b><Scroll></b> component.
  *
  * @since 12
@@ -828,8 +861,6 @@ typedef enum {
     ARKUI_BORDER_STYLE_DASHED,
     /** Dotted border. */
     ARKUI_BORDER_STYLE_DOTTED,
-    /** default border. */
-    ARKUI_BORDER_STYLE_NONE,
 } ArkUI_BorderStyle;
 
 /**
@@ -1370,6 +1401,12 @@ typedef enum {
     ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
     /** Not resized, the image is aligned with the end edge at the bottom of the container. */
     ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
+    /**
+     * Not resized, and is used in conjunction with NODE_IMAGE_IMAGE_MATRIX.
+     *
+     * @since 21
+     */
+    ARKUI_OBJECT_FIT_NONE_MATRIX,
 } ArkUI_ObjectFit;
 
 /**
@@ -1388,6 +1425,45 @@ typedef enum {
     ARKUI_IMAGE_INTERPOLATION_HIGH,
 } ArkUI_ImageInterpolation;
 
+/**
+ * @brief Enumerates the image dynamic range mode.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** high dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_HIGH = 0,
+    /** constraint dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_CONSTRAINT,
+    /** standard dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_STANDARD,
+} ArkUI_DynamicRangeMode;
+
+/**
+ * @brief Enumerates the image rotate orientation.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** Use EXIF metadata for display orientation, with support for rotation and mirroring. */
+    ARKUI_ORIENTATION_AUTO = 0,
+    /** Display original pixel data without transformation. */
+    ARKUI_ORIENTATION_UP,
+    /** Display the image after rotating it 90 degrees clockwise. */
+    ARKUI_ORIENTATION_RIGHT,
+    /** Display the image after rotating it 180 degrees clockwise. */
+    ARKUI_ORIENTATION_DOWN,
+    /** Display the image after rotating it 270 degrees clockwise. */
+    ARKUI_ORIENTATION_LEFT,
+    /** Display the image after flipping it horizontally. */
+    ARKUI_ORIENTATION_UP_MIRRORED,
+    /** Display the image after flipping it horizontally and then rotating it 90 degrees clockwise. */
+    ARKUI_ORIENTATION_RIGHT_MIRRORED,
+    /** Display the image after flipping it vertically. */
+    ARKUI_ORIENTATION_DOWN_MIRRORED,
+    /** Display the image after flipping it horizontally and then rotating it 270 degrees clockwise. */
+    ARKUI_ORIENTATION_LEFT_MIRRORED,
+} ArkUI_ImageRotateOrientation;
 
 /**
  * @brief Enumerates the blend modes.
@@ -2285,6 +2361,11 @@ typedef enum {
     ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
     /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+    /**
+     * @error The node is not support event type.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE = 106110,
     /** The index value is invalid. */
     ARKUI_ERROR_CODE_NODE_INDEX_INVALID = 106200,
     /**  Failed to query route navigation information. */
@@ -2393,6 +2474,11 @@ typedef enum {
      * @since 16
      */
     ARKUI_ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501,
+    /**
+     * @error Parameter error.
+     * @since 21
+     */
+    ARKUI_ERROR_CODE_PARAM_ERROR = 100023,
 } ArkUI_ErrorCode;
 
 /**
@@ -2558,6 +2644,42 @@ typedef enum {
     /** Set bottom right corner derection. */
     ARKUI_CORNER_DIRECTION_BOTTOM_RIGHT,
 } ArkUI_CornerDirection;
+
+/**
+ * @brief Enumerates the LayoutPolicy.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** The component fills its parent, which means its size is as large as its parent */
+    ARKUI_LAYOUTPOLICY_MATCHPARENT = 0,
+    /**
+     * The component fills its content, which means its size is as large as its children but it is constrained
+     * by its parent.
+     */
+    ARKUI_LAYOUTPOLICY_WRAPCONTENT,
+    /** The component fills its content which means its size is as large as its children. */
+    ARKUI_LAYOUTPOLICY_FIXATIDEALSIZE,
+} ArkUI_LayoutPolicy;
+
+/**
+ * @brief Define the direction to expand the swipe action.
+ *
+ * @since 21
+ */
+typedef enum {
+    /**
+     * When the List direction is vertical, it indicates the left in LTR mode and right in RTL mode.
+     * When the List direction is horizontal, it indicates the top.
+     */
+    ARKUI_LIST_ITEM_SWIPE_ACTION_DIRECTION_START = 0,
+    /**
+     * When the List direction is vertical, it indicates the right in LTR mode and left in RTL mode.
+     * When the List direction is horizontal, it indicates the bottom.
+     */
+    ARKUI_LIST_ITEM_SWIPE_ACTION_DIRECTION_END = 1,
+} ArkUI_ListItemSwipeActionDirection;
+
 
 /**
  * @brief Defines parameter used by the system font style callback event.
@@ -3138,6 +3260,22 @@ const char* OH_ArkUI_BarrierOption_GetReferencedId(
  * @since 12
  */
 int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierStyle, int32_t index);
+
+/**
+ * @brief Set the types and parameters related to content transition effects.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_ContentTransitionEffect ArkUI_ContentTransitionEffect;
+
+/**
+ * @brief creates content switching animation effects.
+ *
+ * @param type content transition type: 0-identity, 1-opacity.
+ * @return content transition effect.
+ * @since 21
+ */
+ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type);
 
 /**
  * @brief creates alignment rule information for subcomponents in relative containers.
@@ -5158,6 +5296,140 @@ void OH_ArkUI_EmbeddedComponentOption_SetOnError(
  */
 void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
     ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
+
+/**
+ * @brief Create an edge object for position attribute.
+ *
+ * @return A pointer to the edge object.
+ * @since 21
+ */
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Create();
+
+/**
+ * @brief Creates a deep copy of an edge object for position attribute.
+ *
+ * @param edges A pointer to an edge object.
+ * @return A pointer to the new edge object.
+ * @since 21
+ */
+ArkUI_PositionEdges* OH_ArkUI_PositionEdges_Copy(const ArkUI_PositionEdges* edges);
+
+/**
+ * @brief Dispose an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object to be disposed.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_Dispose(ArkUI_PositionEdges* edges);
+
+/**
+ * @brief Sets the top edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of top edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetTop(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the top edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of top edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetTop(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the left edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of left edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetLeft(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the left edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of left edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetLeft(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the bottom edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetBottom(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the bottom edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of bottom edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetBottom(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Sets the right edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of right edge to the corresponding edge of parent container, in vp.
+ * @since 21
+ */
+void OH_ArkUI_PositionEdges_SetRight(ArkUI_PositionEdges* edges, float value);
+
+/**
+ * @brief Gets the right edge of an edge object for position attribute.
+ *
+ * @param edges Pointer to the edge object.
+ * @param value The distance of right edge to the corresponding edge of parent container, in vp.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value);
+
+/**
+ * @brief Expand the swipe action.
+ *
+ * @param node List Item node.
+ * @param direction expand direction of swipeAction.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_ERROR} The component type of the node is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node not mounted to component tree.
+ * @since 21
+ */
+int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListItemSwipeActionDirection direction);
+
+/**
+ * @brief Collapse the swipe action.
+ *
+ * @param node List Item node.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_ERROR} The component type of the node is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node not mounted to component tree.
+ * @since 21
+ */
+int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node);
 #ifdef __cplusplus
 };
 #endif

@@ -254,13 +254,13 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
         .updateSymbolEffect = UpdateSymbolEffect,
         .setMinFontScale = SetMinFontScale,
         .resetMinFontScale = ResetMinFontScale,
         .setMaxFontScale = SetMaxFontScale,
         .resetMaxFontScale = ResetMaxFontScale,
-        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -283,12 +283,12 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
         .setMinFontScale = SetMinFontScale,
         .resetMinFontScale = ResetMinFontScale,
         .setMaxFontScale = SetMaxFontScale,
         .resetMaxFontScale = ResetMaxFontScale,
-        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -298,10 +298,11 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
 template<typename T>
 void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         pattern->RegisterResource<T>(key, resObj, value);
     } else {

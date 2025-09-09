@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT PatternLockPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(PatternLockPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(PatternLockPaintMethod, NodePaintMethod);
 
 public:
     PatternLockPaintMethod(const OffsetF& cellCenter, bool isMoveEventValid,

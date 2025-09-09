@@ -38,7 +38,7 @@ void RosenRenderList::Update(const RefPtr<Component>& component)
 void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const SkPaint& paint, bool isVertical,
     double startCrossAxis, double mainAxis, double endCrossAxis)
 {
-    rsNode->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE,
+    rsNode->DrawOnNode(Rosen::ModifierNG::RSModifierType::CONTENT_STYLE,
         [isVertical = vertical_, startX = startCrossAxis, startY = mainAxis, endX = endCrossAxis, endY = mainAxis,
             paint](const std::shared_ptr<SkCanvas>& canvas) mutable {
             if (!canvas) {
@@ -56,7 +56,7 @@ void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, c
 void RosenRenderList::DrawDividerOnNode(const std::shared_ptr<RSNode>& rsNode, const RSPen& pen,
     bool isVertical, double startCrossAxis, double mainAxis, double endCrossAxis)
 {
-    rsNode->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE,
+    rsNode->DrawOnNode(Rosen::ModifierNG::RSModifierType::CONTENT_STYLE,
         [isVertical = vertical_, startX = startCrossAxis, startY = mainAxis, endX = endCrossAxis, endY = mainAxis,
             pen](const std::shared_ptr<RSCanvas>& canvas) mutable {
             if (!canvas) {

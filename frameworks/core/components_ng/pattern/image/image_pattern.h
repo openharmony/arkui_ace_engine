@@ -21,7 +21,6 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/offset.h"
-#include "base/image/drawable_descriptor.h"
 #include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
@@ -171,6 +170,11 @@ public:
         copyOption_ = value;
     }
 
+    CopyOptions GetCopyOption()
+    {
+        return copyOption_;
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
@@ -236,6 +240,7 @@ public:
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
     void EnableAnalyzer(bool value);
+    bool IsEnableAnalyzer() const;
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
@@ -384,24 +389,27 @@ public:
     }
     void AddPixelMapToUiManager();
 
-    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
-    {
-        drawable_ = drawable;
-    }
-
     // this method for measure content
     std::optional<SizeF> GetImageSizeForMeasure();
 
     // this method for on complete callback execute after measuring
     void FinishMeasureForOnComplete();
-
-    void DrawDrawable(RSCanvas& canvas);
-
     void OnConfigurationUpdate();
     void UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo);
     void UpdateImageFill(const Color& color);
     void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
     void OnColorModeChange(uint32_t colorMode) override;
+    ContentTransitionType GetContentTransitionParam();
+
+    void SetSupportSvg2(bool enable)
+    {
+        supportSvg2_ = enable;
+    }
+
+    bool GetSupportSvg2()
+    {
+        return supportSvg2_;
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -430,18 +438,12 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
 
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnAttachToFrameNodeMultiThread() {}
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
     void OnModifyDone() override;
-    void OnPixelMapDrawableModifyDone();
-    ImagePaintConfig CreatePaintConfig();
-    void Validate();
-    void RegisterDrawableRedrawCallback();
     void UpdateGestureAndDragWhenModify();
     bool CheckImagePrivacyForCopyOption();
     void UpdateOffsetForImageAnalyzerOverlay();
@@ -461,6 +463,8 @@ private:
     void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
     bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
+    std::string HandleSrcForMemoryName(std::string url);
+    std::string MaskUrl(std::string url);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
@@ -475,6 +479,7 @@ private:
     void InitCopy();
     void HandleCopy();
     void OpenSelectOverlay();
+    void HandleMoveDone(bool isFirst);
     void CloseSelectOverlay();
 
     void TriggerFirstVisibleAreaChange();
@@ -536,6 +541,7 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent(const KeyEvent& event);
+    void InitFromThemeIfNeed();
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -575,20 +581,17 @@ private:
     bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSceneBoardWindow_ = false;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
+    bool isFullyInitializedFromTheme_ = false;
     Color selectedColor_;
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
-
-    // The component has an internal encapsulation class drawable of the image.
-    // The internal drawable has an external raw pointer.
-    RefPtr<DrawableDescriptor> drawable_;
-    bool isRegisterRedrawCallback_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
@@ -617,6 +620,8 @@ private:
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
     bool hasSetPixelMapMemoryName_ = false;
+    bool previousVisibility_ = false;
+    bool supportSvg2_ = false;
 };
 
 } // namespace OHOS::Ace::NG

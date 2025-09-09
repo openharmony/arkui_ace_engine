@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 
 class GroupJsBridge : public virtual AceType {
-    DECLARE_ACE_TYPE(GroupJsBridge, AceType)
+    DECLARE_ACE_TYPE(GroupJsBridge, AceType);
 public:
     virtual void TriggerModuleJsCallback(int32_t callbackId, int32_t code,
         std::vector<uint8_t>&& messageData) = 0;

@@ -140,7 +140,7 @@ void SelectPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
@@ -201,7 +201,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
-    auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto hub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 
     auto onSelect = hub->GetSelectEvent();
@@ -392,7 +392,7 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -414,7 +414,7 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
-    });
+    }, nullptr, nullptr, pipeline);
 }
 
 // change background color when hovered
@@ -462,7 +462,7 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
         auto pattern = weak.Upgrade();
@@ -505,9 +505,12 @@ void SelectPattern::CreateSelectedCallback()
         pattern->SetSelected(index);
         pattern->UpdateText(index);
         pattern->isSelected_ = true;
-        auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+        auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
+        if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
+            return;
+        }
         auto selectChangeEvent = hub->GetSelectChangeEvent();
         if (selectChangeEvent) {
             selectChangeEvent(index);
@@ -530,7 +533,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetOrCreateEventHub<MenuItemEventHub>();
+        auto hub = option->GetEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -1525,10 +1528,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
     json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
-    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
-    json->PutExtAttr("selectedOptionFontColor",
-        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
-
+    ToJsonSelectedOptionFontAndColor(json, filter);
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
         json->PutExtAttr("optionFont", "", filter);
@@ -1559,6 +1559,31 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
+}
+
+void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (textSelectOptionApply_) {
+        if (options_.empty() || options_.size() <= static_cast<size_t>(selected_)) {
+            json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+            json->PutExtAttr("selectedOptionFontColor",
+                selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+            return;
+        }
+        CHECK_NULL_VOID(options_[selected_]);
+        auto optionPattern = options_[selected_]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        json->PutExtAttr("selectedOptionFont", optionPattern->InspectorGetFont().c_str(), filter);
+        json->PutExtAttr("selectedOptionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        return;
+    }
+    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+    json->PutExtAttr(
+        "selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1922,7 +1947,7 @@ void SelectPattern::OnColorConfigurationUpdate()
         optionsPattern->SetFontColor(selectTheme->GetFontColor());
         auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+            optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
         }
 
         child->MarkModifyDone();
@@ -2034,7 +2059,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             pattern->UpdateText(index);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+            auto hub = host->GetEventHub<SelectEventHub>();
             CHECK_NULL_VOID(hub);
             if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
                 return;

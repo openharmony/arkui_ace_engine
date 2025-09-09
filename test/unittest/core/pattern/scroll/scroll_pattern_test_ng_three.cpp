@@ -339,4 +339,31 @@ HWTEST_F(ScrollPatternThreeTestNg, CaleSnapOffsetsByPaginations_004, TestSize.Le
     scrollPattern->CaleSnapOffsetsByPaginations(ScrollSnapAlign::NONE);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 2.0f);
 }
+
+/**
+ * @tc.name: FireObserverOnDidScroll
+ * @tc.desc: Test set and reset zoomScale
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollPatternThreeTestNg, FireObserverOnDidScroll)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set scroller observer with onDidScrollEvent
+     */
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto controller = AceType::MakeRefPtr<ScrollableController>();
+    ScrollerObserver observer;
+    bool isCallback = false;
+    observer.onDidScrollEvent = [&isCallback](Dimension, ScrollSource, bool, bool) { isCallback = true; };
+    controller->SetObserver(observer);
+    pattern_->SetPositionController(controller);
+    /**
+     * @tc.steps: step2. ScrollTo ITEM_MAIN_SIZE
+     * @tc.expected: Trigger onDidScrollEvent
+     */
+    ScrollTo(ITEM_MAIN_SIZE);
+    EXPECT_TRUE(isCallback);
+}
 } // namespace OHOS::Ace::NG

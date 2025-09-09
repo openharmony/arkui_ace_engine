@@ -172,6 +172,7 @@ public:
     void SetCancelButtonStyle(const CancelButtonStyle& cancelButtonStyle);
     void SetCancelIconSize(const Dimension& value);
     void SetCancelIconColor(const Color& color);
+    void ResetCancelButtonColor();
     void InitIconColorSize();
     void InitSearchIconColorSize();
     void InitCancelIconColorSize();
@@ -263,7 +264,7 @@ private:
     std::string SymbolColorToString(std::vector<Color>& colors) const;
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+        int32_t duration, const RefPtr<Curve>& curve, int32_t childId);
     void AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
         int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -320,6 +321,7 @@ private:
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
     void InitMargin(const RefPtr<SearchLayoutProperty>& property);
+    void HandleNotifyChildAction(GestureEvent& info);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -355,6 +357,7 @@ private:
     bool isFocusIconColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
+    bool isNotifyChildAction_ = false;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 

@@ -138,6 +138,8 @@ public:
 
     ~FrameNode() override;
 
+    void OnDelete() override;
+
     int32_t FrameCount() const override
     {
         return 1;
@@ -300,7 +302,7 @@ public:
 
     void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
 
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+    void SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();
 
@@ -377,12 +379,6 @@ public:
 
     template<typename T>
     RefPtr<T> GetEventHub()
-    {
-        return DynamicCast<T>(eventHub_);
-    }
-
-    template<typename T>
-    RefPtr<T> GetOrCreateEventHub()
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);
@@ -595,8 +591,9 @@ public:
     int32_t GetAllDepthChildrenCount();
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
-                                              WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+        AccessibilityEventType eventType,
+        WindowsContentChangeTypes windowsContentChangeType = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID,
+        bool sendByNode = false);
 
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
@@ -620,9 +617,14 @@ public:
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
 
-    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {
         destroyCallbacksMap_[tag] = callback;
+    }
+
+    void RemoveDestroyCallbackWithTag(const std::string& tag)
+    {
+        destroyCallbacksMap_.erase(tag);
     }
 
     void SetConfigurationModeUpdateCallback(
@@ -704,24 +706,23 @@ public:
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        if (isResetOptions) {
-            previewOption_ = previewOption;
-        } else {
-            auto options = previewOption_.options;
-            previewOption_ = previewOption;
-            previewOption_.options = options;
-        }
-        previewOption_.onApply = std::move(previewOption.onApply);
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetDragPreviewOption(previewOption, isResetOptions);
     }
 
     void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
     {
-        previewOption_.options = optionsAfterApplied;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetOptionsAfterApplied(optionsAfterApplied);
     }
 
-    DragPreviewOption GetDragPreviewOption() const
+    DragPreviewOption GetDragPreviewOption()
     {
-        return previewOption_;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_RETURN(dragDropRelatedConfigurations, DragPreviewOption());
+        return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
     }
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
@@ -830,9 +831,9 @@ public:
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
-    double GetPreviewScaleVal() const;
+    double GetPreviewScaleVal();
 
-    bool IsPreviewNeedScale() const;
+    bool IsPreviewNeedScale();
 
     void SetViewPort(RectF viewPort)
     {
@@ -858,13 +859,17 @@ public:
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
 
+    bool EnsureDelayedMeasureBeingOnlyOnce();
+
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
 
     void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
 
-    void PostTaskForIgnore(PipelineContext* pipeline);
+    void PostTaskForIgnore();
+
+    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes);
 
     bool PostponedTaskForIgnore();
 
@@ -879,6 +884,10 @@ public:
     {
         return delayLayoutChildren_;
     }
+
+    void TraverseForIgnore();
+
+    void TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subtreeCollection, int& subtreeRecheck);
 
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
@@ -1111,7 +1120,8 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
+                                bool withClip = false) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1471,6 +1481,9 @@ public:
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
+    void UpdateIgnoreCount(int inc);
+    void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
+        bool addDefaultTransition = false, bool addModalUiextension = false) override;
 
 protected:
     void DumpInfo() override;
@@ -1578,6 +1591,8 @@ private:
     void AddFrameNodeSnapshot(
         bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
+    void UpdateFrameNodeSnapshot(const TouchResult& touchResult, EventTreeType type);
+
     int32_t GetNodeExpectedRate();
 
     void RecordExposureInner();
@@ -1636,6 +1651,7 @@ private:
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
     void UpdateBackground();
+    void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1748,8 +1764,6 @@ private:
     RefPtr<FrameNode> accessibilityFocusPaintNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
-
-    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 

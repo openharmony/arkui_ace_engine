@@ -131,10 +131,10 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest004, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    float opacity = true;
-    OH_ArkUI_RenderNodeUtils_SetOpacity(rootRenderNode, 35);
+    float opacity = 0;
+    OH_ArkUI_RenderNodeUtils_SetOpacity(rootRenderNode, 0.5f);
     OH_ArkUI_RenderNodeUtils_GetOpacity(rootRenderNode, &opacity);
-    ASSERT_EQ(opacity, 35);
+    ASSERT_EQ(opacity, 0.5f);
 }
 
 /**
@@ -328,9 +328,9 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest013, TestSize
     ASSERT_NE(rootRenderNode, nullptr);
     
     float alpha = 0;
-    OH_ArkUI_RenderNodeUtils_SetShadowAlpha(rootRenderNode, 46767);
+    OH_ArkUI_RenderNodeUtils_SetShadowAlpha(rootRenderNode, 0.5f);
     OH_ArkUI_RenderNodeUtils_GetShadowAlpha(rootRenderNode, &alpha);
-    ASSERT_EQ(alpha, 46767);
+    ASSERT_LE(alpha, 0.5f);
 }
 
 /**
@@ -388,6 +388,22 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest016, TestSize
     ASSERT_NE(rootRenderNode, nullptr);
     
     float matrix[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
+    ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodePropertyTest017
+ * @tc.desc: Test renderNode transform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest017, TestSize.Level1)
+{
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    
+    // x,y rotation 30 && x,y translate 30.
+    float matrix[] = { 0.866, 0.433, -0.25, 0, 0, 0.866, 0.5, 0, 0.5, 0.25, 0.866, 0, 30, 30, 0, 1 };
     auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
     ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
 }

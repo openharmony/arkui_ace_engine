@@ -70,6 +70,7 @@ public:
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();
+    void AddPointLight();
     void CallMenuWidthChange(int32_t resId);
     int32_t AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener);
     void RemoveButtonsRectChangeListener(int32_t id);

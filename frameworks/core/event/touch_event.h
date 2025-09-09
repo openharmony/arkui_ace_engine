@@ -53,10 +53,11 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
-    int32_t operatingHand = 0;
     int32_t width;
     int32_t height;
-
+    int32_t operatingHand = 0;
+    int32_t xReverse = 0;
+    int32_t yReverse = 0;
     void CovertId();
     int32_t GetOriginalReCovertId() const;
 };
@@ -66,44 +67,39 @@ struct TouchPoint final {
  */
 struct TouchEvent final : public PointerEvent {
     ~TouchEvent() = default;
+    // historical points
+    std::vector<TouchEvent> history;
+    std::vector<KeyCode> pressedKeyCodes_;
+    std::list<std::string> childTouchTestList;
+    // all points on the touch screen.
+    std::vector<TouchPoint> pointers;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent { nullptr };
+    double size = 0.0;
+    int64_t deviceId = 0;
+    uint64_t modifierKeyState = 0;
+    TimeStamp pressedTime;
+    TouchType type = TouchType::UNKNOWN;
+    TouchType pullType = TouchType::UNKNOWN;
+    std::optional<float> tiltX;
+    std::optional<float> tiltY;
+    std::optional<float> rollAngle;
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
     int32_t id = 0;
-    TouchType type = TouchType::UNKNOWN;
-    TouchType pullType = TouchType::UNKNOWN;
-    double size = 0.0;
     float force = 0.0f;
-    std::optional<float> tiltX;
-    std::optional<float> tiltY;
-    std::optional<float> rollAngle;
-    int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
-    bool isInterpolated = false;
-    bool isMouseTouchTest = false;
-    bool isFalsified = false;
-    // all points on the touch screen.
-    std::vector<TouchPoint> pointers;
-    std::shared_ptr<const MMI::PointerEvent> pointerEvent { nullptr };
-    // historical points
-    std::vector<TouchEvent> history;
-    std::vector<KeyCode> pressedKeyCodes_;
-    std::list<std::string> childTouchTestList;
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0f;
     float localY = 0.0f;
     int32_t originalId = 0;
-    bool isInjected = false;
-    bool isPrivacyMode = false;
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
-    bool isPassThroughMode = false;
-    TimeStamp pressedTime;
     int32_t width = 0;
     int32_t height = 0;
     float targetPositionX = 0.0;
@@ -112,8 +108,14 @@ struct TouchEvent final : public PointerEvent {
     float targetGlobalPositionY = 0.0;
     float widthArea = 0.0;
     float heightArea = 0.0;
-    uint64_t modifierKeyState = 0;
-
+    bool isInterpolated = false;
+    bool isMouseTouchTest = false;
+    bool isFalsified = false;
+    bool isInjected = false;
+    bool isPrivacyMode = false;
+    bool isPassThroughMode = false;
+    int32_t xReverse = 0;
+    int32_t yReverse = 0;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;
@@ -148,10 +150,12 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
     TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
-    TouchEvent& SetOperatingHand(int32_t operatingHand);
     TouchEvent& SetPressedTime(TimeStamp pressedTime);
     TouchEvent& SetWidth(int32_t width);
     TouchEvent& SetHeight(int32_t height);
+    TouchEvent& SetOperatingHand(int32_t operatingHand);
+    TouchEvent& SetXReverse(int32_t xReverse);
+    TouchEvent& SetYReverse(int32_t yReverse);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -168,6 +172,7 @@ struct TouchEvent final : public PointerEvent {
     bool IsPenHoverEvent() const;
     std::shared_ptr<MMI::PointerEvent> GetTouchEventPointerEvent() const;
     int32_t GetEventIdentity() const;
+    bool ConvertFromMouse() const;
 };
 
 namespace Platform {
@@ -194,11 +199,11 @@ struct TouchRestrict final {
     {
         forbiddenType |= gestureType;
     }
+    TouchEvent touchEvent = {};
+    std::list<std::string> childTouchTestList = {};
     SourceType sourceType = SourceType::NONE;
     SourceType hitTestType = SourceType::TOUCH;
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
-    TouchEvent touchEvent = {};
-    std::list<std::string> childTouchTestList = {};
     // use to dump event tree
     NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
 };
@@ -404,18 +409,18 @@ private:
     };
 
 protected:
-    Offset coordinateOffset_;
-    GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
-    Offset subPipelineGlobalOffset_;
-    float viewScale_ = 1.0f;
-    std::string nodeName_ = "NULL";
-    int32_t nodeId_ = -1;
     WeakPtr<NG::FrameNode> node_ = nullptr;
-    Axis direction_ = Axis::NONE;
+    Offset coordinateOffset_;
+    Offset subPipelineGlobalOffset_;
+    GetEventTargetImpl getEventTargetImpl_;
+    std::string nodeName_ = "NULL";
     RefPtr<NG::TargetComponent> targetComponent_;
-    bool isPostEventResult_ = false;
     std::optional<TimeStamp> firstInputTime_;
+    float viewScale_ = 1.0f;
+    int32_t nodeId_ = -1;
+    Axis direction_ = Axis::NONE;
+    bool isPostEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
@@ -467,7 +472,7 @@ private:
 };
 
 class ACE_EXPORT GestureEventResult : public AceType {
-    DECLARE_ACE_TYPE(GestureEventResult, AceType)
+    DECLARE_ACE_TYPE(GestureEventResult, AceType);
 
 public:
     GestureEventResult() = default;

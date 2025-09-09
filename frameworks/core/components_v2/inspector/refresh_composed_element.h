@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT RefreshComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(RefreshComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(RefreshComposedElement, InspectorComposedElement);
 
 public:
     explicit RefreshComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

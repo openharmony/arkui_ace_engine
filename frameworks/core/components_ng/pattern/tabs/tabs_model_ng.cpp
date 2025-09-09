@@ -47,10 +47,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 
 constexpr int32_t SWIPER_Z_INDEX = 0;
 constexpr int32_t DIVIDER_Z_INDEX = 2;
@@ -480,7 +480,7 @@ void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
 }
@@ -618,7 +618,7 @@ void TabsModelNG::Pop()
     auto dividerColor = divider.color;
     auto dividerStrokeWidth = divider.strokeWidth;
 
-    auto dividerHub = dividerNode->GetOrCreateEventHub<EventHub>();
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
 
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -1297,7 +1297,7 @@ void TabsModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& ge
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(gestureSwipe));
 }

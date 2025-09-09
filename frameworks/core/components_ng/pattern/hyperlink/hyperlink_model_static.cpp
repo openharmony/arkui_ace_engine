@@ -64,5 +64,23 @@ void HyperlinkModelStatic::SetTextStyle(
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     frameNode->MarkModifyDone();
     frameNode->MarkDirtyNode();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
+    HyperlinkModelStatic::SetDraggable(frameNode, draggable);
+}
+
+void HyperlinkModelStatic::SetDraggable(FrameNode* frameNode, bool draggable)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (draggable && !frameNode->IsDraggable()) {
+        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
 }
 } // namespace OHOS::Ace::NG

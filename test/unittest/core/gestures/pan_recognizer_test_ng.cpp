@@ -803,6 +803,8 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
     panRecognizer->lastTouchEvent_ = touchEvent;
     panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::END);
+    EXPECT_TRUE(panRecognizer->localMatrix_.empty());
 }
 
 /**

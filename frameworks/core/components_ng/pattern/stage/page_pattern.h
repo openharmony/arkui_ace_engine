@@ -324,6 +324,9 @@ public:
     }
     void CheckIsNeedForceExitWindow(bool result);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType);
+    bool CheckEnableCustomNodeDel() const {
+        return false;
+    }
 
     bool IsNeedCallbackBackPressed();
 
@@ -339,6 +342,7 @@ protected:
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+    void FirePageTransitionStart();
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;

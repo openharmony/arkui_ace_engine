@@ -117,6 +117,7 @@ struct PreparedInfoForDrag {
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
     SourceType deviceType = SourceType::NONE;
+    bool isMenuNotShow = false;
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -135,7 +136,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnDrapDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
+using OnDragDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
@@ -168,7 +169,6 @@ class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;
-
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void ClearGesture();
@@ -186,7 +186,7 @@ public:
     // Set by node container.
     void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
     // Set by JS FrameNode.
-    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc);
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
@@ -204,7 +204,7 @@ public:
     void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
-    void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
+    void SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent);
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
     TouchInterceptFunc GetOnTouchIntercept() const;
@@ -266,6 +266,7 @@ public:
     bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
     static std::string GetHitTestModeStr(const RefPtr<GestureEventHub>& GestureEventHub);
@@ -304,7 +305,7 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+    OnDragCallbackCore GetDragCallback();
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
         const float scale = 1.0f, const RectF& innerRect = RectF()) const;
@@ -329,6 +330,7 @@ public:
     void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
+    void HandleDragEnd(int32_t containerId, const DragNotifyMsgCore& notifyMessage);
     void HandleOnDragCancel();
     void StartLongPressActionForWeb();
     void CancelDragForWeb();
@@ -349,8 +351,8 @@ public:
     void CleanNodeRecognizer();
     void CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub);
     void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
-    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
     bool IsTextCategoryComponent(const std::string& frameTag);
+    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
@@ -401,6 +403,7 @@ public:
     bool IsDragNewFwk() const;
     bool TriggerTouchEvent(const TouchEvent& point);
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
+    void DragNodeDetachFromParent();
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

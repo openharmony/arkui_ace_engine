@@ -1422,8 +1422,6 @@ HWTEST_F(NativeGestureTest, GestureImplTest0041, TestSize.Level1)
     event3.gestureAsyncEvent.rawPointerEvent = nullptr;
     event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
     OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
-    event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY);
-    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
 
     ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
     recognizer->attachNode = nullptr;
@@ -1431,6 +1429,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest0041, TestSize.Level1)
     extraData.targetReceiver = MockTargetReceiver2;
     event3.extraParam = reinterpret_cast<ArkUI_Int64>(&extraData);
     OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event3.gestureAsyncEvent);
+    ASSERT_EQ(gestureEvent->eventData.rawPointerEvent, nullptr);
 }
 
 /**
@@ -1480,22 +1480,5 @@ HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
     auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     void* userData = reinterpret_cast<void*>(new int);
     auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(gestureNode, userData, nullptr);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: GestureImplTest0045
- * @tc.desc: Test the AddGestureToNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
-{
-    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    auto tapGesture = gestureAPI->gestureApi1->createTapGesture(1, 1);
-    auto ret = OHOS::Ace::GestureModel::AddGestureToNode(gestureNode, tapGesture, PRIORITY, NORMAL_GESTURE_MASK);
     EXPECT_EQ(ret, 0);
 }

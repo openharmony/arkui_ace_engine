@@ -75,6 +75,7 @@ public:
     MOCK_METHOD(void*, GetPixelManager, (), (const, override));
     MOCK_METHOD(void*, GetRawPixelMapPtr, (), (const, override));
     MOCK_METHOD(std::string, GetId, (), (override));
+    MOCK_METHOD(uint32_t, GetUniqueId, (), (override));
     MOCK_METHOD(std::string, GetModifyId, (), (override));
     MOCK_METHOD(std::shared_ptr<Media::PixelMap>, GetPixelMapSharedPtr, (), (override));
     MOCK_METHOD(void*, GetWritablePixels, (), (const, override));
@@ -469,7 +470,7 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragEnter, TestSize.Level1)
     auto gestureHub = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webPattern->delegate_ = nullptr;
     webPattern->HandleOnDragEnter(gestureHub);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_FALSE(webPattern->isDragStartFromWeb_);
 #endif
 }
 
@@ -1523,6 +1524,29 @@ HWTEST_F(WebPatternTestHandle, OnDirtyLayoutWrapperSwap008, TestSize.Level1)
     webPattern->isUrlLoaded_ = true;
     webPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     EXPECT_FALSE(webPattern->isKeyboardInSafeArea_);
+#endif
+}
+
+/**
+ * @tc.name: SetImeShow001
+ * @tc.desc: SetImeShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestHandle, SetImeShow001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->SetImeShow(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

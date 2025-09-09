@@ -32,7 +32,7 @@ using CommonEvent = std::function<void()>;
 using TextureRefreshEnVent = std::function<void(uint32_t, uint64_t)>;
 // MediaPlayer is used to show and play meida
 class ACE_FORCE_EXPORT MediaPlayer : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::MediaPlayer, AceType)
+    DECLARE_ACE_TYPE(NG::MediaPlayer, AceType);
 
 public:
     MediaPlayer() = default;
@@ -158,6 +158,14 @@ public:
         return -1;
     }
     virtual int32_t SetPlayRangeUsWithMode(int64_t /*startTime*/, int64_t /*endTime*/, SeekMode /*mode */)
+    {
+        return -1;
+    }
+    virtual int32_t EnableCameraPostprocessing()
+    {
+        return -1;
+    }
+    virtual int32_t SetCameraPostprocessing(bool isOpen)
     {
         return -1;
     }

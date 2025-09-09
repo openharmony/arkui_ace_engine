@@ -37,6 +37,64 @@ void MultiFingersRecognizerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
+
+struct CheckDownFingersTestCase {
+    InputEventType inputEventType_ = InputEventType::AXIS;
+    RefereeState lastRefereeState_ = RefereeState::READY;
+    RefereeState refereeState_ = RefereeState::READY;
+    bool isPostEventResult_ = false;
+    std::vector<int32_t> downFingerIds;
+    std::vector<int32_t> touchPointIds;
+    size_t expectFingerListSize_;
+
+    CheckDownFingersTestCase(InputEventType inputEventType, RefereeState lastRefereeState, RefereeState refereeState,
+        bool isPostEventResult, std::vector<int32_t> downFingerIds, std::vector<int32_t> touchPointIds,
+        size_t expectFingerListSize) : inputEventType_(inputEventType), lastRefereeState_(lastRefereeState),
+        refereeState_(refereeState), isPostEventResult_(isPostEventResult), downFingerIds(std::move(downFingerIds)),
+        touchPointIds(std::move(touchPointIds)), expectFingerListSize_(expectFingerListSize) {}
+};
+
+const std::vector<CheckDownFingersTestCase> CHECK_DOWN_FINGERS_TEST_CASES = {
+    CheckDownFingersTestCase(InputEventType::AXIS, RefereeState::READY,
+        RefereeState::READY, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING,
+        RefereeState::PENDING, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING,
+        RefereeState::PENDING_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING,
+        RefereeState::SUCCEED_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING,
+        RefereeState::READY, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING_BLOCKED,
+        RefereeState::PENDING, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING_BLOCKED,
+        RefereeState::PENDING_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING_BLOCKED,
+        RefereeState::SUCCEED_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::PENDING_BLOCKED,
+        RefereeState::READY, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::SUCCEED_BLOCKED,
+        RefereeState::PENDING, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::SUCCEED_BLOCKED,
+        RefereeState::PENDING_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::SUCCEED_BLOCKED,
+        RefereeState::SUCCEED_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::SUCCEED_BLOCKED,
+        RefereeState::READY, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::PENDING, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::PENDING_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::SUCCEED_BLOCKED, false, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::READY, false, { 1 }, { 0 }, 0),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::READY, true, { 1 }, { 0 }, 1),
+    CheckDownFingersTestCase(InputEventType::TOUCH_SCREEN, RefereeState::READY,
+        RefereeState::READY, false, { 1, 2, 3 }, { 1, 2 }, 2),
+};
+
 /**
  * @tc.name: Test001
  * @tc.desc: Test InitGlobalValue
@@ -249,5 +307,45 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test007, TestSize.Level1)
     fingersRecognizer->currentFingers_ = 1;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();
     EXPECT_EQ(fingersRecognizer->currentFingers_, 1);
+}
+
+/**
+ * @tc.name: Test008
+ * @tc.desc: Test CheckFingerListInDownFingers
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, Test008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pipelineContext and eventManager.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    context->eventManager_ = eventManager;
+    int32_t caseNum = 0;
+    for (const auto& testCase : CHECK_DOWN_FINGERS_TEST_CASES) {
+        /**
+         * @tc.steps: step2. create clickRecognizer.
+         */
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+        clickRecognizer->inputEventType_ = testCase.inputEventType_;
+        clickRecognizer->lastRefereeState_ = testCase.lastRefereeState_;
+        clickRecognizer->refereeState_ = testCase.refereeState_;
+        clickRecognizer->isPostEventResult_ = testCase.isPostEventResult_;
+        eventManager->downFingerIds_.clear();
+        for (auto id : testCase.downFingerIds) {
+            eventManager->downFingerIds_[id] = id;
+        }
+        for (auto id : testCase.touchPointIds) {
+            TouchEvent event;
+            event.id = id;
+            clickRecognizer->touchPoints_[id] = event;
+        }
+        clickRecognizer->UpdateFingerListInfo();
+        EXPECT_EQ(clickRecognizer->fingerList_.size(), testCase.expectFingerListSize_);
+        caseNum++;
+    }
 }
 }; // namespace OHOS::Ace::NG

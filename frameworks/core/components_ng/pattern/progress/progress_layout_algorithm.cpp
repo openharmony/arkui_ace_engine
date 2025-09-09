@@ -83,6 +83,14 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     float width_ = selfIdealWidth.value_or(contentConstraint.percentReference.Width());
     float height_ = selfIdealHeight.value_or(strokeWidth_);
     if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
+        if (layoutPolicy.has_value()) {
+            if (layoutPolicy->IsWidthMatch()) {
+                selfIdealWidth = contentConstraint.parentIdealSize.Width();
+            }
+            if (layoutPolicy->IsHeightMatch()) {
+                selfIdealHeight = contentConstraint.parentIdealSize.Height();
+            }
+        }
         if (!selfIdealHeight) {
             if (!selfIdealWidth) {
                 width_ = diameter;

@@ -481,7 +481,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
      * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is FINGER.
      * @tc.expected: index is reduced.
      */
-    auto eventHub = columnNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = columnNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

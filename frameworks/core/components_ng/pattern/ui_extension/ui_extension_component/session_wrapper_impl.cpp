@@ -1213,8 +1213,10 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     if (window) {
         rsUIDirector = window->GetRSUIDirector();
     }
+    bool isNeedSyncTransaction = reason == Rosen::SizeChangeReason::ROTATION ||
+        reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
     if (!rsUIDirector) {
-        if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (isNeedSyncTransaction) {
             if (transaction_.lock()) {
                 transaction = transaction_.lock();
                 transaction_.reset();
@@ -1228,7 +1230,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     } else {
         auto rsUIContext = rsUIDirector->GetRSUIContext();
-        if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (isNeedSyncTransaction) {
             if (transaction_.lock()) {
                 transaction = transaction_.lock();
                 transaction_.reset();
@@ -1251,7 +1253,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, GetFrameNodeId());
-    UIEXT_LOGD("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
+    UIEXT_LOGI("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
         "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d.",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
         reason, duration, persistentId, GetFrameNodeId());
@@ -1266,7 +1268,8 @@ void SessionWrapperImpl::NotifySizeChangeReason(
     CHECK_NULL_VOID(session_);
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
-    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
+    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION ||
+        type == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         transaction_ = rsTransaction;
     }
 }

@@ -388,7 +388,7 @@ HWTEST_F(DatePickerTestToss, TestFlushCurrentOptionsNormalCase, TestSize.Level1)
 
 /**
  * @tc.name: DatePickerPatternDirty000
- * @tc.desc: test OnDirtyLayoutWrapperSwap
+ * @tc.desc: test OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
@@ -451,5 +451,60 @@ HWTEST_F(DatePickerTestToss, GetDisappearTextStyle001, TestSize.Level1)
     auto curTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
     EXPECT_EQ(curTextStyle.fontStyle.value(), Ace::FontStyle::ITALIC);
     EXPECT_EQ(curTextStyle.textColor.value(), Color::WHITE);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<PickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToMainTreeMultiThread();
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    EXPECT_NE(columnPattern->hapticController_, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromMainTreeMultiThread();
+
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
 }
 } // namespace OHOS::Ace::NG

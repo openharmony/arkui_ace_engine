@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@ import { AnimatedState, ImplicitAnimationProvider, MutableAnimatedState, Paramet
 import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
 import { Easing, EasingCurve } from "./Easing"
 import { AnimationSpec, TimeAnimation, animation, constAnimation, periodicAnimation, transition } from "./TimeAnimation"
-import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * Function allowing to sample particular function with given rate.

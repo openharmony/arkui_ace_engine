@@ -55,6 +55,7 @@ public:
     virtual void SetDisplayMode(int displayMode) = 0;
     virtual void SetScrollBarWidth(const Dimension& dimension) = 0;
     virtual void SetScrollBarColor(const Color& color) = 0;
+    virtual void ResetScrollBarColor() {};
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
@@ -69,6 +70,7 @@ public:
     virtual void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjSnapPaginations(
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetMaxZoomScale(float scale) {};
     virtual void SetMinZoomScale(float scale) {};
     virtual void SetZoomScale(float scale) {};

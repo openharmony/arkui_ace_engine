@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
-#if defined(ACE_STATIC)
 #include "base/utils/multi_thread.h"
-#endif
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image_animator/controlled_animator.h"
@@ -280,12 +278,12 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
         case ControlledAnimator::ControlStatus::PAUSED:
             controlledAnimator_->Pause();
             ResetFormAnimationFlag();
-            SetShowingIndex(index);
+            ShowIndex(index);
             break;
         case ControlledAnimator::ControlStatus::STOPPED:
             controlledAnimator_->Finish();
             ResetFormAnimationFlag();
-            SetShowingIndex(index);
+            ShowIndex(index);
             break;
         default:
             ResetFormAnimationStartTime();
@@ -294,6 +292,14 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
                 return;
             }
             isReverse_ ? controlledAnimator_->Backward() : controlledAnimator_->Forward();
+    }
+}
+
+void ImageAnimatorPattern::ShowIndex(int32_t index)
+{
+    if (showingIndexByStoppedOrPaused_) {
+        SetShowingIndex(index);
+        showingIndexByStoppedOrPaused_ = false;
     }
 }
 
@@ -347,6 +353,8 @@ void ImageAnimatorPattern::OnModifyDone()
     if (firstUpdateEvent_) {
         UpdateEventCallback();
         firstUpdateEvent_ = false;
+        showingIndexByStoppedOrPaused_ = status_ == ControlledAnimator::ControlStatus::PAUSED ||
+                                         status_ == ControlledAnimator::ControlStatus::STOPPED;
         auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         AddImageLoadSuccessEvent(imageFrameNode);
     }
@@ -407,9 +415,7 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-#if defined(ACE_STATIC)
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
@@ -418,18 +424,16 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
-#if defined(ACE_STATIC)
 void ImageAnimatorPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
-#endif
 
 void ImageAnimatorPattern::UpdateEventCallback()
 {
-    auto eventHub = GetOrCreateEventHub<ImageAnimatorEventHub>();
+    auto eventHub = GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     controlledAnimator_->ClearAllListeners();
@@ -495,6 +499,18 @@ std::string ImageAnimatorPattern::ImagesToString() const
     return imageArray->ToString();
 }
 
+void ImageAnimatorPattern::CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto isPolicy = layoutPolicy.has_value();
+    if (isPolicy && !layoutPolicy->IsAllNoMatch()) {
+        bool widthPolicy = layoutPolicy->IsWidthMatch() || layoutPolicy->IsWidthFix() || layoutPolicy->IsWidthWrap();
+        bool heightPolicy =
+            layoutPolicy->IsHeightMatch() || layoutPolicy->IsHeightFix() || layoutPolicy->IsHeightWrap();
+        layoutProperty->ClearUserDefinedIdealSize(widthPolicy, heightPolicy);
+    }
+}
+
 void ImageAnimatorPattern::AdaptSelfSize()
 {
     auto host = GetHost();
@@ -531,13 +547,16 @@ void ImageAnimatorPattern::AdaptSelfSize()
     const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), CalcLength(maxHeight)));
+        CheckClearUserDefinedSize(layoutProperty);
         return;
     }
     if (!layoutConstraint->selfIdealSize->Width()) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+        CheckClearUserDefinedSize(layoutProperty);
         return;
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+    CheckClearUserDefinedSize(layoutProperty);
 }
 
 int32_t ImageAnimatorPattern::GetNextIndex(int32_t preIndex)
@@ -551,7 +570,7 @@ int32_t ImageAnimatorPattern::GetNextIndex(int32_t preIndex)
 void ImageAnimatorPattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode)
 {
     CHECK_NULL_VOID(imageFrameNode);
-    auto eventHub = imageFrameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = imageFrameNode->GetEventHub<ImageEventHub>();
     eventHub->SetOnComplete(
         [weakImage = WeakPtr<FrameNode>(imageFrameNode), weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
             if (info.GetLoadingStatus() != 1) {

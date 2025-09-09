@@ -74,7 +74,7 @@ struct MenuDumpInfo {
 class MenuLayoutProperty;
 class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
+    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm);
 public:
     MenuLayoutAlgorithm(int32_t id, const std::string& tag,
         const std::optional<OffsetF>& lastPosition = std::nullopt);
@@ -142,7 +142,7 @@ private:
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeSecurityPadding();
-    void InitializeParam(LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
+    void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern);
@@ -191,6 +191,7 @@ private:
         LayoutWrapper* layoutWrapper = nullptr);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
+    bool NeedHoldTargetOffset(const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern);
 
     OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&);
     OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&);
@@ -295,9 +296,9 @@ private:
     bool UpdateSelectOverlayMenuColumnInfo(
         const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
     float CalcSubMenuMaxHeightConstraint(LayoutConstraintF& childConstraint, RefPtr<FrameNode> parentItem);
-    float CalcSubMenuMaxHeightWithPreview(RefPtr<FrameNode> parentMenu, LayoutConstraintF& childConstraint,
+    float CalcSubMenuMaxHeightWithPreview(const RefPtr<FrameNode>& parentMenu, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
-    float CalcSubMenuMaxHeightNoPreview(RefPtr<FrameNode> parentItem, LayoutConstraintF& childConstraint,
+    float CalcSubMenuMaxHeightNoPreview(const RefPtr<FrameNode>& parentItem, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
     RefPtr<SelectTheme> GetCurrentSelectTheme(const RefPtr<FrameNode>& frameNode);
 
@@ -334,14 +335,12 @@ private:
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
-
     float top_ = 0.0;
     float bottom_ = 0.0;
     float left_ = 0.0;
     float right_ = 0.0;
     double width_ = 0.0;
     double height_ = 0.0;
-
     OffsetF targetCenterOffset_;
     OffsetF previewOriginOffset_;
     OffsetF previewOffset_;

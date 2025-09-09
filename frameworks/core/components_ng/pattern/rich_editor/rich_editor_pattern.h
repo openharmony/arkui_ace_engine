@@ -545,6 +545,11 @@ public:
         TextPattern::OnAttachToMainTree();
     }
 
+    void OnDetachFromMainTree() override
+    {
+        TextPattern::OnDetachFromMainTree();
+    }
+    
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
@@ -912,6 +917,7 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
+    bool CheckAIPreviewMenuEnable() override;
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1383,15 +1389,21 @@ public:
     const TextEditingValue& GetInputEditingValue() const override;
 #endif
 
-std::optional<float> GetLastCaretPos() const
-{
-    return lastCaretPos_;
-}
+    std::optional<float> GetLastCaretPos() const
+    {
+        return lastCaretPos_;
+    }
 
-void SetLastCaretPos(float lastCaretPos)
-{
-    lastCaretPos_ = lastCaretPos;
-}
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
+    }
+
+    bool IsShortCutBlocked() override { return IsDragging(); }
+    void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
+    void MarkContentNodeForRender();
+    void CreateRichEditorOverlayModifier();
+    RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
 
 protected:
     bool CanStartAITask() const override;
@@ -1410,6 +1422,7 @@ private:
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
+    Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
@@ -1571,10 +1584,13 @@ private:
     bool AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
+    bool HasSameTypingStyle(const RefPtr<SpanItem>& spanItem);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
         std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
         const RefPtr<SpanNode>& spanNode, int32_t spanIndex, bool useTypingParaStyle = false);
+    std::tuple<int32_t, int32_t, RefPtr<SpanItem>> GetTargetSpanInfo(const RichEditorChangeValue& changeValue,
+        int32_t textIndex, bool isCreate, const std::unordered_set<SpanItem*>& allDelspanSet);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
         std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
@@ -1599,8 +1615,8 @@ private:
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
         RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD);
-    RefPtr<SpanItem> GetDelPartiallySpanItem(
-        RichEditorChangeValue& changeValue, std::u16string& originalStr, int32_t& originalPos);
+    std::pair<RefPtr<SpanItem>, std::unordered_set<SpanItem*>> GetDelPartiallySpanItem(
+        const RichEditorChangeValue& changeValue, std::u16string& originalStr, int32_t& originalPos);
     void FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength);
     bool BeforeChangeText(
         RichEditorChangeValue& changeValue, const OperationRecord& record, RecordType type, int32_t delLength = 0);
@@ -1758,7 +1774,9 @@ private:
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void ReportComponentChangeEvent();
-
+    // hostOverlayMod_ is the overlay modifier of rich editor,
+    // while overlayMod_ is the overlay modifier of rich editor content node.
+    RefPtr<TextOverlayModifier> hostOverlayMod_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else

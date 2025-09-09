@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FolderStackGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(FolderStackGroupNode, GroupNode)
+    DECLARE_ACE_TYPE(FolderStackGroupNode, GroupNode);
 public:
     FolderStackGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)

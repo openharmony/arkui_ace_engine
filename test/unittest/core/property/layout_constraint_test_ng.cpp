@@ -43,7 +43,7 @@ public:
  * @tc.desc: Test ApplyAspectRatio.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg001, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg001, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -171,7 +171,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg001, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioToParentIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg002, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg002, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -221,7 +221,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg002, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioByMaxSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg003, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg003, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -273,7 +273,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg003, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioByMaxSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg004, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg004, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -293,7 +293,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg004, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioWithoutCalcSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg005, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg005, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -335,7 +335,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg005, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatio.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg006, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg006, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -392,7 +392,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg006, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioToParentIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(0, 1024);
@@ -426,7 +426,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioWithoutCalcSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg008, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg008, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
@@ -485,7 +485,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg008, TestSize.Level1)
  * @tc.desc: Test ApplyAspectRatioWithoutCalcSize.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg009, TestSize.Level1)
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg009, TestSize.Level0)
 {
     LayoutConstraintF layoutConstraint;
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);

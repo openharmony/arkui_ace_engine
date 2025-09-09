@@ -79,17 +79,9 @@ std::shared_ptr<RSNode> GetRsNodeFromStruct(ArkUIRenderNodeHandle node)
     return nodeStruct->rsNode;
 }
 
-void CheckMainThread()
-{
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-    if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF_ABORT("Render node function doesn't run on UI thread.");
-    }
-}
-
 ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->TotalChildCount() > 0) {
@@ -117,7 +109,7 @@ ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 
 ArkUI_Int32 RemoveRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
@@ -133,7 +125,7 @@ ArkUI_Int32 RemoveRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 
 ArkUI_Int32 ClearRenderNodeChildren(ArkUINodeHandle node)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
@@ -146,7 +138,7 @@ ArkUI_Int32 ClearRenderNodeChildren(ArkUINodeHandle node)
 
 ArkUIRenderNodeHandle CreateNode(int32_t* nodeId)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     std::shared_ptr<RSNode> renderNode;
     auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
     if (SystemProperties::GetMultiInstanceEnabled() && pipelineContext && pipelineContext->GetRSUIDirector()) {
@@ -163,7 +155,7 @@ ArkUIRenderNodeHandle CreateNode(int32_t* nodeId)
 
 ArkUI_Int32 AddChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -199,7 +191,7 @@ int32_t GetRSNodeChildCount(std::shared_ptr<RSNode> node)
 
 ArkUI_Int32 InsertChildAfter(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child, ArkUIRenderNodeHandle sibling)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -217,7 +209,7 @@ ArkUI_Int32 InsertChildAfter(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle c
 
 ArkUI_Int32 RemoveChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -228,7 +220,7 @@ ArkUI_Int32 RemoveChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 
 ArkUI_Int32 ClearChildren(ArkUIRenderNodeHandle node)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     rsNodePtr->ClearChildren();
@@ -337,7 +329,7 @@ ArkUI_Int32 GetChildrenCount(ArkUIRenderNodeHandle node, int32_t* count)
 
 ArkUI_Int32 SetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t backgroundColor)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBackgroundColor(backgroundColor);
@@ -354,7 +346,7 @@ int32_t GetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 
 int32_t SetOpacity(ArkUIRenderNodeHandle handle, float opacity)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetAlpha(opacity);
@@ -371,7 +363,7 @@ int32_t GetOpacity(ArkUIRenderNodeHandle handle, float* opacity)
 
 int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBoundsWidth(width);
@@ -393,7 +385,7 @@ int32_t GetSize(ArkUIRenderNodeHandle handle, int32_t* width, int32_t* height)
 
 int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4f = rsNode->GetStagingProperties().GetBounds();
@@ -416,7 +408,7 @@ int32_t GetPosition(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 
 int32_t SetPivot(ArkUIRenderNodeHandle handle, float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetPivot(x, y);
@@ -435,7 +427,7 @@ int32_t GetPivot(ArkUIRenderNodeHandle handle, float* x, float* y)
 
 int32_t SetScale(ArkUIRenderNodeHandle handle, float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetScale(x, y);
@@ -454,7 +446,7 @@ int32_t GetScale(ArkUIRenderNodeHandle handle, float* x, float* y)
 
 int32_t SetTranslation(ArkUIRenderNodeHandle handle, float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     OHOS::Rosen::Vector2f translate = { x, y };
@@ -474,7 +466,7 @@ int32_t GetTranslation(ArkUIRenderNodeHandle handle, float* x, float* y)
 
 int32_t SetRotation(ArkUIRenderNodeHandle handle, float x, float y, float z)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetRotation(x, y, z);
@@ -491,98 +483,6 @@ int32_t GetRotation(ArkUIRenderNodeHandle handle, float* x, float* y, float* z)
     return ERROR_CODE_NO_ERROR;
 }
 
-#ifndef MODIFIER_NG
-template<typename T>
-bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value)
-{
-    if (property == nullptr) {
-        property = std::make_shared<Rosen::RSAnimatableProperty<T>>(value);
-        return true;
-    }
-    property->Set(value);
-    return false;
-}
-
-void AddOrChangePerspectiveModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSPerspModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>>& property, const Rosen::Vector4f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSPerspModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeTranslateModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSTranslateModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSTranslateModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeScaleModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSScaleModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSScaleModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeQuaternionModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSQuaternionModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>>& property, const Rosen::Quaternion& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSQuaternionModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeSkewModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSSkewModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>>& property, const Rosen::Vector3f& value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSSkewModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeScaleZModifier(std::shared_ptr<RSNode>& rsNode, std::shared_ptr<Rosen::RSScaleZModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSScaleZModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-
-void AddOrChangeTranslateZModifier(std::shared_ptr<RSNode>& rsNode,
-    std::shared_ptr<Rosen::RSTranslateZModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
-{
-    bool isCreate = CreateOrSetModifierValue(property, value);
-    if (isCreate) {
-        CHECK_NULL_VOID(rsNode);
-        modifier = std::make_shared<Rosen::RSTranslateZModifier>(property);
-        rsNode->AddModifier(modifier);
-    }
-}
-#else
 template<typename ModifierName, auto Setter, typename T>
 void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
 {
@@ -590,11 +490,10 @@ void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
     (*modifier.*Setter)(value);
     rsNode->AddModifier(modifier);
 }
-#endif
 
 int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
 
@@ -615,7 +514,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
         static_cast<float>(transform.quaternion.GetW()) };
     Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
     Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[INDEX_2] };
-#if defined(MODIFIER_NG)
+
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
         Rosen::Vector4f>(rsNodeShared, perspectiveValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
@@ -630,36 +529,13 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
         Rosen::Vector3f>(rsNodeShared, skewValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetQuaternion,
         Rosen::Quaternion>(rsNodeShared, quaternion);
-#else
-    std::shared_ptr<Rosen::RSPerspModifier> perspectivePtr;
-    std::shared_ptr<Rosen::RSTranslateModifier> translateXYPtr;
-    std::shared_ptr<Rosen::RSTranslateZModifier> translateZPtr;
-    std::shared_ptr<Rosen::RSScaleModifier> scaleXYPtr;
-    std::shared_ptr<Rosen::RSScaleZModifier> scaleZPtr;
-    std::shared_ptr<Rosen::RSSkewModifier> skewPtr;
-    std::shared_ptr<Rosen::RSQuaternionModifier> quaternionPtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>> perspectiveValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> translateZValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> scaleXYValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> scaleZValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>> skewValuePtr;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>> quaternionValuePtr;
 
-    AddOrChangePerspectiveModifier(rsNodeShared, perspectivePtr, perspectiveValuePtr, perspectiveValue);
-    AddOrChangeTranslateModifier(rsNodeShared, translateXYPtr, translateXYValuePtr, xyTranslateValue);
-    AddOrChangeTranslateZModifier(rsNodeShared, translateZPtr, translateZValuePtr, transform.translate[INDEX_2]);
-    AddOrChangeScaleModifier(rsNodeShared, scaleXYPtr, scaleXYValuePtr, xyScaleValue);
-    AddOrChangeScaleZModifier(rsNodeShared, scaleZPtr, scaleZValuePtr, transform.scale[INDEX_2]);
-    AddOrChangeSkewModifier(rsNodeShared, skewPtr, skewValuePtr, skewValue);
-    AddOrChangeQuaternionModifier(rsNodeShared, quaternionPtr, quaternionValuePtr, quaternion);
-#endif
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetShadowColor(ArkUIRenderNodeHandle handle, uint32_t color)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowColor(color);
@@ -676,7 +552,7 @@ int32_t GetShadowColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 
 int32_t SetShadowOffset(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowOffset(static_cast<float>(x), static_cast<float>(y));
@@ -694,7 +570,7 @@ int32_t GetShadowOffset(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 
 int32_t SetShadowAlpha(ArkUIRenderNodeHandle handle, float alpha)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowAlpha(alpha);
@@ -711,7 +587,7 @@ int32_t GetShadowAlpha(ArkUIRenderNodeHandle handle, float* alpha)
 
 int32_t SetShadowElevation(ArkUIRenderNodeHandle handle, float elevation)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowElevation(elevation);
@@ -728,7 +604,7 @@ int32_t GetShadowElevation(ArkUIRenderNodeHandle handle, float* elevation)
 
 int32_t SetShadowRadius(ArkUIRenderNodeHandle handle, float radius)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowRadius(radius);
@@ -745,7 +621,7 @@ int32_t GetShadowRadius(ArkUIRenderNodeHandle handle, float* radius)
 
 int32_t SetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderStyle(left, top, right, bottom);
@@ -766,7 +642,7 @@ int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
 
 int32_t SetBorderWidth(ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderWidth(left, top, right, bottom);
@@ -787,7 +663,7 @@ int32_t GetBorderWidth(ArkUIRenderNodeHandle handle, float* left, float* top, fl
 
 int32_t SetBorderColor(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderColor(left, top, right, bottom);
@@ -806,35 +682,37 @@ int32_t GetBorderColor(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBorderRadius(ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
+int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
+    float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     OHOS::Rosen::Vector4f vector4f;
-    vector4f.x_ = left;
-    vector4f.y_ = top;
-    vector4f.z_ = right;
-    vector4f.w_ = bottom;
+    vector4f.x_ = topLeft;
+    vector4f.y_ = topRight;
+    vector4f.z_ = bottomRight;
+    vector4f.w_ = bottomLeft;
     rsNode->SetCornerRadius(vector4f);
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t GetBorderRadius(ArkUIRenderNodeHandle handle, float* left, float* top, float* right, float* bottom)
+int32_t GetBorderRadius(ArkUIRenderNodeHandle handle,
+   float* topLeft, float* topRight, float* bottomLeft, float* bottomRight)
 {
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetCornerRadius();
-    *left = vector4.x_;
-    *top = vector4.y_;
-    *right = vector4.z_;
-    *bottom = vector4.w_;
+    *topLeft = vector4.x_;
+    *topRight = vector4.y_;
+    *bottomRight = vector4.z_;
+    *bottomLeft = vector4.w_;
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetMarkNodeGroup(ArkUIRenderNodeHandle handle, int32_t markNodeGroup)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->MarkNodeGroup(markNodeGroup);
@@ -843,10 +721,11 @@ int32_t SetMarkNodeGroup(ArkUIRenderNodeHandle handle, int32_t markNodeGroup)
 
 int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBounds(x, y, width, height);
+    rsNode->SetFrame(x, y, width, height);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -864,7 +743,7 @@ int32_t GetBounds(ArkUIRenderNodeHandle handle, uint32_t* x, uint32_t* y, uint32
 
 int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, float h)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(x, y, w, h);
@@ -874,7 +753,7 @@ int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, f
 
 int32_t SetClipToFrame(ArkUIRenderNodeHandle handle, int32_t clipToFrame)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetClipToFrame(static_cast<bool>(clipToFrame));
@@ -899,7 +778,7 @@ int32_t GetClipToBounds(ArkUIRenderNodeHandle handle, int32_t* clipToBounds)
 
 int32_t SetClipToBounds(ArkUIRenderNodeHandle handle, int32_t clipToBounds)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetClipToBounds(static_cast<bool>(clipToBounds));
@@ -908,7 +787,7 @@ int32_t SetClipToBounds(ArkUIRenderNodeHandle handle, int32_t clipToBounds)
 
 int32_t AttachModifier(ArkUIRenderNodeHandle node, ArkUIRenderModifierHandle modifier)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto* modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
@@ -920,7 +799,7 @@ int32_t AttachModifier(ArkUIRenderNodeHandle node, ArkUIRenderModifierHandle mod
 
 ArkUIRenderModifierHandle CreateModifier()
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto contentModifier = AceType::MakeRefPtr<NodeModifier::RenderContentModifier>([](DrawingContext&) {});
     CHECK_NULL_RETURN(contentModifier, nullptr);
     auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(contentModifier));
@@ -932,7 +811,7 @@ ArkUIRenderModifierHandle CreateModifier()
 
 int32_t AttachProperty(ArkUIRenderModifierHandle modifier, ArkUIPropertyHandle property)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
     CHECK_NULL_RETURN(modifier, ERROR_CODE_PARAM_INVALID);
     auto modifierPtr = ConvertContentModifier(modifierStruct->modifier);
@@ -967,7 +846,7 @@ int32_t AttachProperty(ArkUIRenderModifierHandle modifier, ArkUIPropertyHandle p
 ArkUI_Int32 SetModifierOnDraw(ArkUIRenderModifierHandle modifier, void* userData,
     void (*customRenderDrawFunc)(ArkUIDrawingContext* context, void* userData))
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
     CHECK_NULL_RETURN(modifierStruct, ERROR_CODE_PARAM_INVALID);
     auto renderContentModifier = modifierStruct->modifier;
@@ -992,7 +871,7 @@ void DisposeModifier(ArkUIRenderModifierHandle modifier)
 
 ArkUIPropertyHandle CreateFloatProperty(ArkUI_Float32 value)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSProperty<float>>(value);
     RenderPropertyStruct* propertyStruct =
         new RenderPropertyStruct { .floatProperty = property, .propertyType = ArkUIPropertyType::PROPERTY_FLOAT };
@@ -1001,7 +880,7 @@ ArkUIPropertyHandle CreateFloatProperty(ArkUI_Float32 value)
 
 int32_t SetFloatProperty(ArkUIPropertyHandle property, float value)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_FLOAT) {
@@ -1024,7 +903,7 @@ int32_t GetFloatProperty(ArkUIPropertyHandle property, float* value)
 
 ArkUIPropertyHandle CreateVector2Property(float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSProperty<Rosen::Vector2f>>(Rosen::Vector2f(x, y));
     RenderPropertyStruct* propertyStruct =
         new RenderPropertyStruct { .vector2Property = property, .propertyType = ArkUIPropertyType::PROPERTY_VECTOR2 };
@@ -1033,7 +912,7 @@ ArkUIPropertyHandle CreateVector2Property(float x, float y)
 
 ArkUI_Int32 SetVector2Property(ArkUIPropertyHandle property, float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_VECTOR2) {
@@ -1058,7 +937,7 @@ ArkUI_Int32 GetVector2Property(ArkUIPropertyHandle property, float* x, float* y)
 
 ArkUIPropertyHandle CreateColorProperty(uint32_t color)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSProperty<Rosen::RSColor>>(Rosen::RSColor::FromArgbInt(color));
     RenderPropertyStruct* propertyStruct =
         new RenderPropertyStruct { .colorProperty = property, .propertyType = ArkUIPropertyType::PROPERTY_COLOR };
@@ -1067,7 +946,7 @@ ArkUIPropertyHandle CreateColorProperty(uint32_t color)
 
 ArkUI_Int32 SetColorProperty(ArkUIPropertyHandle property, uint32_t color)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_COLOR) {
@@ -1090,7 +969,7 @@ ArkUI_Int32 GetColorProperty(ArkUIPropertyHandle property, uint32_t* color)
 
 ArkUIPropertyHandle CreateFloatAnimatableProperty(ArkUI_Float32 value)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSAnimatableProperty<float>>(value);
     RenderPropertyStruct* propertyStruct = new RenderPropertyStruct { .floatAnimatableProperty = property,
         .propertyType = ArkUIPropertyType::ANIMATABLE_PROPERTY_FLOAT };
@@ -1099,7 +978,7 @@ ArkUIPropertyHandle CreateFloatAnimatableProperty(ArkUI_Float32 value)
 
 int32_t SetFloatAnimatableProperty(ArkUIPropertyHandle property, float value)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_FLOAT) {
@@ -1122,7 +1001,7 @@ int32_t GetFloatAnimatableProperty(ArkUIPropertyHandle property, float* value)
 
 ArkUIPropertyHandle CreateVector2AnimatableProperty(float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSAnimatableProperty<Rosen::Vector2f>>(Rosen::Vector2f(x, y));
     RenderPropertyStruct* propertyStruct = new RenderPropertyStruct { .vector2AnimatableProperty = property,
         .propertyType = ArkUIPropertyType::ANIMATABLE_PROPERTY_VECTOR2 };
@@ -1131,7 +1010,7 @@ ArkUIPropertyHandle CreateVector2AnimatableProperty(float x, float y)
 
 ArkUI_Int32 SetVector2AnimatableProperty(ArkUIPropertyHandle property, float x, float y)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_VECTOR2) {
@@ -1156,7 +1035,7 @@ ArkUI_Int32 GetVector2AnimatableProperty(ArkUIPropertyHandle property, float* x,
 
 ArkUIPropertyHandle CreateColorAnimatableProperty(uint32_t color)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto property = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(Rosen::RSColor::FromArgbInt(color));
     RenderPropertyStruct* propertyStruct = new RenderPropertyStruct { .colorAnimatableProperty = property,
         .propertyType = ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR };
@@ -1165,7 +1044,7 @@ ArkUIPropertyHandle CreateColorAnimatableProperty(uint32_t color)
 
 ArkUI_Int32 SetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t color)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR) {
@@ -1188,7 +1067,7 @@ ArkUI_Int32 GetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t* c
 
 void DisposeProperty(ArkUIPropertyHandle property)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_VOID(propertyStruct);
     delete propertyStruct;
@@ -1217,7 +1096,7 @@ RSBrush GetRsBrush(uint32_t fillColor)
 
 ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIMaskFill fill)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1233,7 +1112,7 @@ ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 
 ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, ArkUIMaskFill fill)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1249,7 +1128,7 @@ ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, Ar
 
 ArkUI_Int32 SetRoundRectMask(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape, ArkUIMaskFill fill)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRoundRect rsRoundRect;
@@ -1275,7 +1154,7 @@ ArkUI_Int32 SetRoundRectMask(ArkUIRenderNodeHandle node, ArkUIRoundRectShape sha
 
 ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIMaskFill fill)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRect rsRect(shape.left, shape.top, shape.right, shape.bottom);
@@ -1292,7 +1171,7 @@ ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 
 ArkUI_Int32 SetCommandPathMask(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands, ArkUIMaskFill fill)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1308,7 +1187,7 @@ ArkUI_Int32 SetCommandPathMask(ArkUIRenderNodeHandle node, ArkUI_CharPtr command
 
 ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
@@ -1320,7 +1199,7 @@ ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 
 ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRecordingPath rsPath;
@@ -1331,7 +1210,7 @@ ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 
 ArkUI_Int32 SetRoundRectClip(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRoundRect rsRoundRect;
@@ -1352,7 +1231,7 @@ ArkUI_Int32 SetRoundRectClip(ArkUIRenderNodeHandle node, ArkUIRoundRectShape sha
 
 ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
@@ -1364,7 +1243,7 @@ ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 
 ArkUI_Int32 SetCommandPathClip(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands)
 {
-    CheckMainThread();
+    ViewAbstract::CheckMainThread();
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRecordingPath rsPath;

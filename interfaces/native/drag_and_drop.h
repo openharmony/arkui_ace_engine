@@ -1038,7 +1038,7 @@ int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  * @since 20
  */
-ArkUI_ErrorCode OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled);
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled);
 
 #ifdef __cplusplus
 };

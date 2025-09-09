@@ -17,6 +17,7 @@
 
 #include <string>
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -274,7 +275,7 @@ void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -282,7 +283,7 @@ void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 void WaterFlowModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
@@ -370,9 +371,20 @@ void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
     ScrollableModelNG::SetScrollBarColor(value);
 }
 
+void WaterFlowModelNG::SetScrollBarColor(const std::optional<Color>& scrollBarColor)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScrollBarColor(frameNode, scrollBarColor);
+}
+
 void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
 {
     ScrollableModelNG::SetScrollBarColor(frameNode, value);
+}
+
+void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
 }
 
 uint32_t WaterFlowModelNG::GetScrollBarColor(FrameNode* frameNode)
@@ -646,6 +658,12 @@ int32_t WaterFlowModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
+EffectEdge WaterFlowModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    return ScrollableModelNG::GetEffectEdge(frameNode);
+}
+
 Dimension WaterFlowModelNG::GetItemMinWidth(FrameNode* frameNode)
 {
     Dimension value = Dimension(0.0f);
@@ -716,6 +734,8 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -775,6 +795,21 @@ WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
     return pattern->GetLayoutMode();
 }
 
+void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    CHECK_NULL_VOID(footerNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
+}
+
 void WaterFlowModelNG::ParseResObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -799,18 +834,16 @@ void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<Re
     pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }
 
-void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
+void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    RefPtr<NG::UINode> footerNode;
-    if (footer) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        footer();
-        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
-    CHECK_NULL_VOID(footerNode);
-    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->AddFooter(footerNode);
+    ParseResObjScrollBarColor(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

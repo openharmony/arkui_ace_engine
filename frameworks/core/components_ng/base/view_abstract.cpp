@@ -2240,7 +2240,7 @@ void ViewAbstract::DisableOnClick(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragStart();
 }
@@ -2248,7 +2248,7 @@ void ViewAbstract::DisableOnDragStart(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragEnter();
 }
@@ -2256,7 +2256,7 @@ void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragSpringLoading(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragSpringLoading();
     auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
@@ -2267,7 +2267,7 @@ void ViewAbstract::DisableOnDragSpringLoading(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragMove();
 }
@@ -2275,7 +2275,7 @@ void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragLeave(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragLeave();
 }
@@ -2283,7 +2283,7 @@ void ViewAbstract::DisableOnDragLeave(FrameNode* frameNode)
 void ViewAbstract::DisableOnDrop(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDrop();
 }
@@ -2291,7 +2291,7 @@ void ViewAbstract::DisableOnDrop(FrameNode* frameNode)
 void ViewAbstract::DisableOnDragEnd(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearCustomerOnDragEnd();
 }
@@ -2355,28 +2355,28 @@ void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
 
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnAppear();
 }
 
 void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
 }
 
 void ViewAbstract::DisableOnAttach(FrameNode* frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearOnAttach();
 }
 
 void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearOnDetach();
 }
@@ -2384,7 +2384,7 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
 void ViewAbstract::DisableOnPreDrag(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearOnPreDrag();
 }
@@ -2554,7 +2554,7 @@ void ViewAbstract::SetEnabled(bool enabled)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(enabled);
     }
@@ -2735,7 +2735,7 @@ void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, con
 }
 
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
-    const std::vector<double> &ratioList)
+    const std::vector<double> &ratioList, bool isOutOfBoundsAllowed)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2743,6 +2743,10 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(frameNode);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
+    visibleAreaUserCallback.isOutOfBoundsAllowed = isOutOfBoundsAllowed;
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -2853,7 +2857,7 @@ void ViewAbstract::SetOnDragStart(FrameNode* frameNode,
     CHECK_NULL_VOID(gestureHub);
     gestureHub->InitDragDropEvent();
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(onDragStart));
 }
@@ -2862,7 +2866,7 @@ void ViewAbstract::SetOnDragEnter(FrameNode* frameNode,
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
 }
@@ -2871,7 +2875,7 @@ void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
 }
@@ -2888,7 +2892,7 @@ void ViewAbstract::SetOnDragSpringLoading(
     FrameNode* frameNode, std::function<void(const RefPtr<DragSpringLoadingContext>&)>&& onDragSpringLoading)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragSpringLoading(std::move(onDragSpringLoading));
 }
@@ -2916,7 +2920,7 @@ void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
 }
@@ -2931,7 +2935,7 @@ void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)>&& onPre
 void ViewAbstract::SetOnPreDrag(FrameNode* frameNode, std::function<void(const PreDragStatus)>&& onPreDragFunc)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPreDrag(std::move(onPreDragFunc));
 }
@@ -2978,7 +2982,7 @@ void ViewAbstract::SetOnDragEnd(
     FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 }
@@ -2987,7 +2991,7 @@ void ViewAbstract::SetOnDrop(
     FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
@@ -3683,7 +3687,9 @@ void ViewAbstract::BindPopup(
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    if (popupInfo.popupNode) {
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    // Do not need change showInSubWindow to false when targetNode is in subwindow.
+    if (popupInfo.popupNode && container && !container->IsSubContainer()) {
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
@@ -3703,6 +3709,7 @@ void ViewAbstract::BindPopup(
             }
         }
     }
+    param->SetShowInSubWindow(showInSubWindow);
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);
@@ -3800,7 +3807,7 @@ void ViewAbstract::BindPopup(
             SubwindowManager::GetInstance()->ShowPopupNG(
                 targetNode, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            SubwindowManager::GetInstance()->HidePopupNG(targetId, instanceId);
         }
         return;
     }
@@ -3923,7 +3930,7 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(context);
     auto containerId = context->GetInstanceId();
     auto overlayManager = context->GetOverlayManager();
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -4208,7 +4215,7 @@ void ViewAbstract::ShowMenuPreview(
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = targetNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -5524,7 +5531,7 @@ void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& conte
 
 void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY)
+    const std::optional<Dimension>& offsetY, TextDirection direction)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -5542,6 +5549,7 @@ void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNod
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
     layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    layoutProperty->UpdateLayoutDirection(direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -5957,6 +5965,25 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
         height = layoutConstraint->selfIdealSize->Height();
     }
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+}
+
+void ViewAbstract::UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
+        layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+    }
+}
+
+void ViewAbstract::ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+    }
 }
 
 void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -6390,6 +6417,34 @@ void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& g
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
+}
+
+void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const NG::OverlayOptions& overlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    SetOverlay(frameNode, overlay);
+    auto overlayNode = AceType::WeakClaim(node).Upgrade();
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(overlay.align);
+    layoutProperty->SetOverlayOffset(overlay.x, overlay.y);
+    layoutProperty->UpdateLayoutDirection(overlay.direction);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
 }
 
 void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)
@@ -7707,7 +7762,7 @@ void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::C
 void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(enabled);
     }
@@ -7779,7 +7834,7 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     if (value.empty() || keys.empty()) {
@@ -7800,7 +7855,7 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
 void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAppear(std::move(onAppear));
 }
@@ -7808,7 +7863,7 @@ void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onA
 void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(std::move(onDisappear));
 }
@@ -7816,7 +7871,7 @@ void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&
 void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAttach(std::move(onAttach));
 }
@@ -7824,7 +7879,7 @@ void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()> &&onA
 void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDetach(std::move(onDetach));
 }
@@ -8211,6 +8266,13 @@ OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
     return target->GetPositionValue(position);
 }
 
+std::optional<EdgesParam> ViewAbstract::GetPositionEdges(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, std::nullopt);
+    return target->GetPositionEdges();
+}
+
 std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
 {
     Shadow value;
@@ -8562,6 +8624,17 @@ Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
     return value;
 }
 
+LayoutCalPolicy ViewAbstract::GetLayoutPolicy(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_RETURN(frameNode, LayoutCalPolicy::NO_MATCH);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicyProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicy = layoutPolicyProperty->GetLayoutPolicy(isWidth);
+    return layoutPolicy.value_or(LayoutCalPolicy::NO_MATCH);
+}
+
 Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)
 {
     Color value;
@@ -8633,7 +8706,7 @@ std::string ViewAbstract::GetKey(FrameNode* frameNode)
 
 bool ViewAbstract::GetEnabled(FrameNode* frameNode)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     return eventHub->IsEnabled();
 }
@@ -8674,12 +8747,12 @@ float ViewAbstract::GetAspectRatio(FrameNode* frameNode)
     return aspectRatio;
 }
 
-void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    gestureHub->SetFrameNodeCommonOnClick(std::move(clickEventFunc));
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
@@ -8699,12 +8772,12 @@ void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)
     uiNode->SetNodeEventRegistrationState(false);
 }
 
-void ViewAbstract::SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    gestureHub->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnTouch(FrameNode* frameNode)
@@ -8715,34 +8788,34 @@ void ViewAbstract::ClearJSFrameNodeOnTouch(FrameNode* frameNode)
     gestureHub->ClearJSFrameNodeOnTouch();
 }
 
-void ViewAbstract::SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
+void ViewAbstract::SetFrameNodeCommonOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnAppear(std::move(onAppear));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(onAppear));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnAppear(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnAppear();
 }
 
-void ViewAbstract::SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
+void ViewAbstract::SetFrameNodeCommonOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnDisappear(std::move(onDisappear));
+    eventHub->SetFrameNodeCommonOnDisappear(std::move(onDisappear));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnDisappear(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnDisappear();
 }
@@ -8795,12 +8868,12 @@ void ViewAbstract::ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode)
     focusHub->ClearJSFrameNodeOnBlurCallback();
 }
 
-void ViewAbstract::SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    eventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
@@ -8811,12 +8884,12 @@ void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnHover();
 }
 
-void ViewAbstract::SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
+    eventHub->SetFrameNodeCommonOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
@@ -8827,12 +8900,12 @@ void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnHoverMove();
 }
 
-void ViewAbstract::SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouseEventFunc));
+    eventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouseEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
@@ -8851,22 +8924,22 @@ BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
     return target->GetBackBlendApplyTypeValue(value);
 }
 
-void ViewAbstract::SetJSFrameNodeOnSizeChange(
+void ViewAbstract::SetFrameNodeCommonOnSizeChange(
     FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    frameNode->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnSizeChange();
 }
 
-void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+void ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
     int32_t interval)
 {
@@ -9425,7 +9498,7 @@ void ViewAbstract::SetDrawCompleteEvent(
     FrameNode* frameNode, std::function<void()>&& onDraw)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetNDKDrawCompletedCallback(std::move(onDraw));
 }
@@ -9434,7 +9507,7 @@ void ViewAbstract::SetLayoutEvent(
     FrameNode* frameNode, std::function<void()>&& onLayout)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetNDKLayoutCallback(std::move(onLayout));
 }
@@ -9470,7 +9543,7 @@ void ViewAbstract::SetDisableDataPrefetch(bool disableDataPrefetch)
 void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
@@ -9487,7 +9560,7 @@ void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTest
 void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnReachStart(std::move(onReachStart));
@@ -9496,7 +9569,7 @@ void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent
 void ViewAbstract::ClearJSFrameNodeOnReachStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnReachStart();
@@ -9505,7 +9578,7 @@ void ViewAbstract::ClearJSFrameNodeOnReachStart(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnReachEnd(std::move(onReachEnd));
@@ -9514,7 +9587,7 @@ void ViewAbstract::SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&&
 void ViewAbstract::ClearJSFrameNodeOnReachEnd(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnReachEnd();
@@ -9523,7 +9596,7 @@ void ViewAbstract::ClearJSFrameNodeOnReachEnd(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollStart(std::move(onScrollStart));
@@ -9532,7 +9605,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollStart(FrameNode* frameNode, OnScrollSta
 void ViewAbstract::ClearJSFrameNodeOnScrollStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollStart();
@@ -9541,7 +9614,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollStart(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollStop(std::move(onScrollStop));
@@ -9550,7 +9623,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollStop(FrameNode* frameNode, OnScrollStop
 void ViewAbstract::ClearJSFrameNodeOnScrollStop(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollStop();
@@ -9559,7 +9632,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollStop(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollFrameBegin(std::move(onScrollFrameBegin));
@@ -9568,7 +9641,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode, OnScro
 void ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollFrameBegin();
@@ -9577,7 +9650,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnWillScroll(std::move(onWillScroll));
@@ -9586,7 +9659,7 @@ void ViewAbstract::SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScroll
 void ViewAbstract::ClearJSFrameNodeOnWillScroll(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnWillScroll();
@@ -9595,7 +9668,7 @@ void ViewAbstract::ClearJSFrameNodeOnWillScroll(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onDidScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnDidScroll(std::move(onDidScroll));
@@ -9604,7 +9677,7 @@ void ViewAbstract::SetJSFrameNodeOnDidScroll(FrameNode* frameNode, OnScrollEvent
 void ViewAbstract::ClearJSFrameNodeOnDidScroll(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnDidScroll();
@@ -9613,7 +9686,7 @@ void ViewAbstract::ClearJSFrameNodeOnDidScroll(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnListScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnListScrollIndex(std::move(onScrollIndex));
@@ -9622,7 +9695,7 @@ void ViewAbstract::SetJSFrameNodeOnListScrollIndex(FrameNode* frameNode, OnScrol
 void ViewAbstract::ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnListScrollIndex();
@@ -9632,7 +9705,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNo
     OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
@@ -9641,7 +9714,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNo
 void ViewAbstract::ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollVisibleContentChange();
@@ -9650,7 +9723,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frame
 void ViewAbstract::SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollWillScroll(std::move(onWillScroll));
@@ -9659,7 +9732,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, Scroll
 void ViewAbstract::ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollWillScroll();
@@ -9668,7 +9741,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollDidScroll(FrameNode* frameNode, ScrollEventWithState&& onDidScroll)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnScrollDidScroll(std::move(onDidScroll));
@@ -9677,7 +9750,7 @@ void ViewAbstract::SetJSFrameNodeOnScrollDidScroll(FrameNode* frameNode, ScrollE
 void ViewAbstract::ClearJSFrameNodeOnScrollDidScroll(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnScrollDidScroll();
@@ -9686,7 +9759,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollDidScroll(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnGridScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnGridScrollIndex(std::move(onScrollIndex));
@@ -9695,7 +9768,7 @@ void ViewAbstract::SetJSFrameNodeOnGridScrollIndex(FrameNode* frameNode, ScrollI
 void ViewAbstract::ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnGridScrollIndex();
@@ -9704,7 +9777,7 @@ void ViewAbstract::ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetJSFrameNodeOnWaterFlowScrollIndex(std::move(onScrollIndex));
@@ -9713,7 +9786,7 @@ void ViewAbstract::SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, Sc
 void ViewAbstract::ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->ClearJSFrameNodeOnWaterFlowScrollIndex();
@@ -9824,4 +9897,13 @@ void ViewAbstract::ResetResObj(const std::string& key)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
 }
+
+void ViewAbstract::CheckMainThread()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("UI function doesn't run on UI thread.");
+    }
+}
+
 } // namespace OHOS::Ace::NG

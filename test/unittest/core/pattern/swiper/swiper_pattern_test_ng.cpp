@@ -1745,7 +1745,7 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
                   by the user using the changindex interface.
      * @tc.expected: jumpIndexByUser_ is not changed.
      */
-    pattern_->SwipeToWithoutAnimation(1, false);
+    pattern_->SwipeToWithoutAnimation(1);
     EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
 
     /**
@@ -1753,7 +1753,7 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
                   by the user using the changindex interface.
      * @tc.expected: jumpIndexByUser_ is changed.
      */
-    pattern_->SwipeToWithoutAnimation(1, true);
+    pattern_->SwipeToWithoutAnimation(1, 1);
     EXPECT_EQ(pattern_->jumpIndexByUser_, 1);
 
     /**
@@ -1762,6 +1762,37 @@ HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
      */
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+}
+
+/**
+ * @tc.name: SetSwiperEventCallback001
+ * @tc.desc: Branch: if (swiperPattern->isTouchDown_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SetSwiperEventCallback001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step1. Touch down on indicatorNode_
+     * @tc.expected: Animation still running
+     */
+    pattern_->SetSwiperEventCallback(true);
+    pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
+    EXPECT_TRUE(pattern_->isTouchDown_);
+
+    /**
+     * @tc.steps: step2. Touch up
+     * @tc.expected: Animation still running
+     */
+    ASSERT_NE(pattern_->swiperController_, nullptr);
+    const auto& removeSwiperEventCallback = pattern_->swiperController_->GetRemoveSwiperEventCallback();
+    if (removeSwiperEventCallback) {
+        EXPECT_TRUE(pattern_->isTouchDown_);
+        removeSwiperEventCallback();
+        EXPECT_FALSE(pattern_->isTouchDown_);
+    }
 }
 
 /**
@@ -1819,5 +1850,53 @@ HWTEST_F(SwiperPatternTestNg, UpdateDefaultColor001, TestSize.Level1)
     pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
     EXPECT_EQ(pattern_->swiperParameters_->colorVal.value(), Color::RED);
     EXPECT_EQ(pattern_->swiperParameters_->selectedColorVal.value(), Color::RED);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper001
+ * @tc.desc: Test SwiperPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, AccumulatingTerminateHelper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is true.
+     */
+    frameNode->isScrollableAxis_ = true;
+    ExpandEdges padding {0, 5, 10, 15};
+    RectF rect {};
+    auto result = swiperPattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper002
+ * @tc.desc: Test SwiperPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, AccumulatingTerminateHelper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is false.
+     */
+    frameNode->isScrollableAxis_ = false;
+    ExpandEdges padding {15, 10, 5, 0};
+    RectF rect {};
+    auto result = swiperPattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

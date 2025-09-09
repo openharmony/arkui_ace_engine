@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/image_provider/image_utils.h"
 
+#include "base/image/image_task_pool.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace::NG {
@@ -71,9 +72,16 @@ void ImageUtils::PostToUI(
 void ImageUtils::PostToBg(
     std::function<void()>&& task, const std::string& name, const int32_t containerId, PriorityType priorityType)
 {
-    ContainerScope scope(containerId);
-
     CHECK_NULL_VOID(task);
+#if defined(PREVIEW) || defined(CROSS_PLATFORM)
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str(), priorityType);
+#else
+    ImageTaskPool::GetInstance()->PostTask(
+        [task, containerId] {
+            ContainerScope scope(containerId);
+            task();
+        },
+        name);
+#endif
 }
 } // namespace OHOS::Ace::NG

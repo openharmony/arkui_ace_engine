@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+constexpr int32_t HEIGHT_HALF = 2;
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
@@ -79,13 +80,17 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
-
     auto themeScopeId = frameNode->GetThemeScopeId();
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    if (textLayoutProperty->HasFontForegroudGradiantColor()) {
+        textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
+    } else {
+        textStyle.SetFontForegroudGradiantColor(textTheme->GetTextStyle().GetFontForegroudGradiantColor());
+    }
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -101,9 +106,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
-    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
             SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode, textColor);
@@ -117,9 +122,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetParagraphVerticalAlign(
         textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
-    FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
     textStyle.SetTextDirection(ParagraphUtil::GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
 }
@@ -176,7 +183,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
             retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
+        if (radialHorizontalSize.has_value()) {
             retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
         }
     }
@@ -354,7 +361,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
 void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
 {
-    // Determines whether a foreground color is set or inherited.
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
         if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
@@ -491,10 +497,31 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
 
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        contentOffset = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        NG::OffsetF alignPosition;
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        if (textLayoutProperty) {
+            if (textLayoutProperty->HasTextContentAlign()) {
+                auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+                alignPosition = GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align);
+            } else {
+                alignPosition = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
+            }
+        }
+        contentOffset = alignPosition + paddingOffset;
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+NG::OffsetF MultipleParagraphLayoutAlgorithm::GetAlignPosition(const NG::SizeF& parentSize,
+    const NG::SizeF& childSize, const TextContentAlign& textContentAlign, const Alignment& alignment)
+{
+    NG::OffsetF offset;
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / HEIGHT_HALF);
+    }
+    offset.SetY(static_cast<int32_t>(textContentAlign) * (parentSize.Height() - contentHeight_) / HEIGHT_HALF);
+    return offset;
 }
 
 void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
@@ -844,7 +871,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         if (!useParagraphCache_) {
             HandleEmptyParagraph(paragraph, group);
             paragraph->Build();
-            ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle, GetIndentMaxWidth(maxWidth));
             UpdateSymbolSpanEffect(frameNode, paragraph, group);
         }
         if (paraStyle.maxLines != UINT32_MAX) {

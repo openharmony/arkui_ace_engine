@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class ImageSourcePreview : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource)
+    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource);
 
 public:
     std::string GetProperty(const std::string& key) override;
@@ -29,6 +29,7 @@ public:
     RefPtr<PixelMap> CreatePixelMap(
         uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) override;
     RefPtr<PixelMap> CreatePixelMap() override;
+    RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options) override;
     Size GetImageSize() override;
     uint32_t GetFrameCount() override;
     std::string GetEncodedFormat() override;

@@ -127,6 +127,7 @@ public:
     JsAccessibilityManager() = default;
     ~JsAccessibilityManager() override;
 
+    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
@@ -242,6 +243,8 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
         const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
+    void SearchElementInfoBySpecificPropertyInner(const int64_t elementId, const SpecificPropertyParam &param,
+        const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void SearchDefaultFocusByWindowId(const int32_t windowId, int32_t pageId, const int32_t requestId,
@@ -313,7 +316,8 @@ public:
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action,
         const std::map<std::string, std::string>& actionArguments, const RefPtr<NG::WebPattern>& webPattern);
 
-    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
+    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID,
+        const WeakPtr<NG::WebPattern>& webPattern) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
     void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
@@ -371,13 +375,12 @@ public:
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
-    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
-
     AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
     void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
                                            const std::string& nextFocusInspectorKey,
                                            int64_t preAccessibilityId) override;
 
+    void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
     void RegisterUIExtBusinessConsumeCallback();
@@ -387,12 +390,12 @@ public:
     WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId) override;
     void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) override;
     void RemoveWebPatternBySurfaceId(const std::string& surfaceId) override;
+
     void SearchAccessibilityNodeBySpecificProperty(const int64_t elementId,
         const SpecificPropertyParam &param, const int32_t requestId,
         AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
-
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
@@ -404,6 +407,7 @@ public:
         bool releaseAll = false) override;
 
     void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+    bool DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node) override;
     bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) override;
 
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
@@ -414,15 +418,34 @@ public:
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node);
     void ChooseDumpEvent(const std::vector<std::string>& params,
         DumpInfoArgument& argument, uint32_t windowId, bool hasJson);
+
     void SetIsIgnoreAllAction(bool isIgnoreAllAction)
     {
         isIgnoreAllAction_ = isIgnoreAllAction;
     }
-
     bool GetIsIgnoreAllAction() const
     {
         return isIgnoreAllAction_;
     }
+
+    void UpdateAccessibilityNodeInfo(
+        const RefPtr<AccessibilityNode>& node,
+        AccessibilityElementInfo& nodeInfo,
+        const RefPtr<JsAccessibilityManager>& manager,
+        int windowId);
+
+    RefPtr<NG::FrameNode> GetNextFocusNodeByManager(
+        const RefPtr<NG::UINode>& currentNode,
+        const RefPtr<NG::FrameNode>& rootNode);
+    RefPtr<NG::FrameNode> GetPrevFocusNodeByManager(
+        const RefPtr<NG::UINode>& currentNode,
+        const RefPtr<NG::FrameNode>& rootNode,
+        const RefPtr<PipelineBase>& context);
+
+    bool CheckAndGetEmbedWebElementInfo(
+        const RefPtr<NG::FrameNode>& node,
+        AccessibilityElementInfo& elementInfo);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -430,7 +453,6 @@ protected:
     void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false) override;
 
 private:
-    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     mutable std::mutex webPatternMapMutex_;
     std::unordered_map<std::string, WeakPtr<NG::WebPattern>> webPatternMap_;
 
@@ -660,8 +682,8 @@ private:
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);
     void DumpGetCheckListTest(const std::vector<std::string>& params);
-    void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
 
+    void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
     void GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
@@ -679,7 +701,7 @@ private:
         const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateAccessibilityVisible(
-        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+        const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateVirtualNodeInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
         Accessibility::AccessibilityElementInfo& nodeInfo,
@@ -756,15 +778,16 @@ private:
     void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         std::unique_ptr<JsonValue>& json, int32_t childSize);
     bool IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent);
-    void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
-        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
-    void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
-    int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
 
     void RegisterDynamicRenderGetParentRectHandler();
+
+    void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
+    void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
+    int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
 
     void GetCurrentWindowPages(
         const RefPtr<NG::PipelineContext>& ngPipeline,
@@ -774,7 +797,7 @@ private:
         int32_t pageId,
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
-    
+
     bool CheckPageEventValidInCache(int32_t containerId);
     bool CheckPageEventByPageInCache(int32_t containerId, int32_t pageId);
     void ReleaseAllCacheAccessibilityEvent(int32_t containerId);
@@ -785,8 +808,13 @@ private:
     SearchSurfaceIdRet SearchElementInfoBySurfaceId(
         const std::string& surfaceId, const int32_t windowId,
         const SearchSurfaceIdType searchType, std::list<AccessibilityElementInfo>& infos);
+    bool GetWebAccessibilityInfoBySurfaceId(
+        const std::string& surfaceId,
+        AccessibilityElementInfo& elementInfo);
 
     bool CheckWhiteList(const uint32_t& eventType);
+
+    ActionType ConvertAceAction(AceAction aceAction);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -812,6 +840,7 @@ private:
     uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
+    const int32_t shiftBits = 16;
     bool isUseJson_ = false;
     bool reentrantLimit_ = false;
     std::optional<std::string> pageMode_ = std::nullopt;
@@ -821,7 +850,6 @@ private:
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
     std::map<int32_t, std::map<std::string, int64_t>> nextFocusMapWithSubWindow_;
-    mutable std::mutex nextFocusMapWithSubWindowMutex_;
     std::vector<uint32_t> eventWhiteList_;
 
     AccessibilityParentRectInfo uecRectInfo_;

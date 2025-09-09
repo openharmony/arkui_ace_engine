@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 
 // PaintProperty are used to set render properties.
 class BubbleRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(BubbleRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(BubbleRenderProperty, PaintProperty);
 public:
     BubbleRenderProperty() = default;
     ~BubbleRenderProperty() override = default;

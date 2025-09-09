@@ -50,7 +50,7 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
 
     int32_t size = 0;
     reply.ReadInt32(size);
-    if (size < 0) {
+    if (size < 0 || size > INT32_MAX) {
         HILOG_ERROR("Serialized gesture size is not valid!");
     } else {
         auto buffer = static_cast<const char*>(reply.ReadRawData(size));

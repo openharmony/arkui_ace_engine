@@ -33,7 +33,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSCanvasRenderer : public JSRenderingContextBase {
-    DECLARE_ACE_TYPE(JSCanvasRenderer, JSRenderingContextBase)
+    DECLARE_ACE_TYPE(JSCanvasRenderer, JSRenderingContextBase);
 public:
     JSCanvasRenderer();
     ~JSCanvasRenderer() override;

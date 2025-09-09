@@ -26,7 +26,7 @@ import { LengthMetrics } from '@ohos.arkui.node';
 
 @Entry
 @Component
-struct StickyNestedScroll {
+struct NestedScrollBar {
   @State arr: number[] = []
   scroller: Scroller = new Scroller()
   listScroller: Scroller = new Scroller();

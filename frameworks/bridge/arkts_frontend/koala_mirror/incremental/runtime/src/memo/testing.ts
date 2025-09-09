@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-import { int32, KoalaCallsiteKey, uint32 } from "@koalaui/common"
+import { KoalaCallsiteKey, uint32 } from "@koalaui/common"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, State, StateManager } from "../states/State"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { Disposable } from "../states/Disposable"
 import { memoRoot } from "./entry"
 import { NodeAttach } from "./node"
-import { __memo_context_type, __memo_id_type } from "../internals"
 
 /** @internal */
 export class TestNode extends IncrementalNode {

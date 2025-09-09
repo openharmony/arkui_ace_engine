@@ -597,19 +597,13 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
-    uint32_t caretColor;
+    uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!caretColorArg->IsUndefined()) {
         if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
             caretColor = color.GetValue();
-        } else {
-            caretColor = textFieldTheme->GetCursorColor().GetValue();
         }
-    } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaret(
-            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor,
@@ -1774,8 +1768,7 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
         srcStr = "";
     }
 
-    struct ArkUISizeType size = { static_cast<ArkUI_Float32>(iconSize.Value()),
-        static_cast<int8_t>(iconSize.Unit()), nullptr };
+    struct ArkUISizeType size = { iconSize.Value(), static_cast<int8_t>(iconSize.Unit()), nullptr };
     ArkUIImageIconRes cancelButtonImageObj;
     cancelButtonImageObj.sizeObj = AceType::RawPtr(sizeObject);
     cancelButtonImageObj.colorObj = AceType::RawPtr(colorObject);

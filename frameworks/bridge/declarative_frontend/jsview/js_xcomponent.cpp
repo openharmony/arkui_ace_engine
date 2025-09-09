@@ -771,6 +771,8 @@ void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        // for backward compatible, here we activate BlendApplyType only
+        JSViewAbstract::JsBlendApplyType(args);
         return;
     }
 

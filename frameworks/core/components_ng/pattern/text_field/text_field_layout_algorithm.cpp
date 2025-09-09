@@ -1220,6 +1220,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
+    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPlaceholderValue(u"").empty()) {
         if (layoutProperty->HasAdaptMinFontSize()) {
             placeholderTextStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());

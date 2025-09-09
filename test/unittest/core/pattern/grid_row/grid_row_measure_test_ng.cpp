@@ -73,7 +73,7 @@ public:
  * @tc.desc: restColumns = 4, gridCol.offset = 26, gridCol.span = 6
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has four columns left
@@ -123,7 +123,7 @@ HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest01, TestSize.Level1
  * @tc.desc: restColumns = 4, gridCol.offset = 20, gridCol.span = 6
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has four columns left
@@ -172,7 +172,7 @@ HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest02, TestSize.Level1
  * @tc.desc: restColumns = 4, gridCol.offset = 20, gridCol.span = 8
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest03, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest03, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has four columns left
@@ -221,7 +221,7 @@ HWTEST_F(GridRowMeasureTestNG, ParseNewLineForLargeOffsetTest03, TestSize.Level1
  * @tc.desc: case01. restColumns = offset + currentChildSpan
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has ten columns left
@@ -269,7 +269,7 @@ HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest01, TestSize.Level1)
  * @tc.desc: case02. restColumns > offset + currentChildSpan
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has ten columns left
@@ -317,7 +317,7 @@ HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest02, TestSize.Level1)
  * @tc.desc: case03. restColumns < offset + currentChildSpan, restColumns == offset
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest03, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest03, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has ten columns left
@@ -366,7 +366,7 @@ HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest03, TestSize.Level1)
  * @tc.desc: case04. restColumns < offset + currentChildSpan, restColumns > offset
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest04, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest04, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol, the first line has ten columns left
@@ -414,7 +414,7 @@ HWTEST_F(GridRowMeasureTestNG, CalculateOffsetOfNewlineTest04, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::STRETCH
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -482,7 +482,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest01, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::STRETCH
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -542,7 +542,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest02, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::CENTER
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest03, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest03, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -609,7 +609,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest03, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::CENTER
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest04, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest04, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -668,7 +668,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest04, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::FLEX_END
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest05, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest05, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -736,7 +736,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest05, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::FLEX_END
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest06, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest06, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -796,7 +796,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisAlignmentTest06, TestSize.Level1)
  * @tc.desc: Test OnBreakpointChange
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow
@@ -808,7 +808,7 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest01, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(10));
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
     });
-    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = gridRow->GetEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     auto layoutProperty = gridRow->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -851,7 +851,7 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest01, TestSize.Level1)
  * @tc.desc: Test OnBreakpointChange
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow
@@ -863,7 +863,7 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300));
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
     });
-    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = gridRow->GetEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     auto layoutProperty = gridRow->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -902,11 +902,66 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBreakpointChangeTest03
+ * @tc.desc: Test OnBreakpointChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest03, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create GridRow
+     */
+    auto gridRow = CreateGridRow([this](GridRowModelNG model) {
+        V2::BreakPoints breakpoints;
+        breakpoints.reference = V2::BreakPointsReference::ComponentSize;
+        breakpoints.breakpoints.assign({ "100px", "200px", "300px" });
+        ViewAbstract::SetWidth(CalcLength(400));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
+    });
+    auto eventHub = gridRow->GetEventHub<GridRowEventHub>();
+    bool eventTriggerFlag = false;
+    auto layoutProperty = gridRow->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    /**
+     * @tc.steps: step2. Set OnBreakpointChange callback
+     * @tc.expected: breakpoint is changed to lg
+     */
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("lg")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(250), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("md")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xxl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(150), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("sm")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+}
+
+/**
  * @tc.name: MeasureSelfTest
  * @tc.desc: Test MeasureSelf
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, MeasureSelfTest, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, MeasureSelfTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -965,7 +1020,7 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfTest, TestSize.Level1)
  * @tc.desc: Test GetSizeTypeAndMaxSizeTest()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest01, TestSize.Level0)
 {
     auto gridRow = CreateGridRow([this](GridRowModelNG model) {
         V2::BreakPoints breakpoints;
@@ -1042,7 +1097,7 @@ HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest01, TestSize.Level1)
  * @tc.desc: Test GetSizeTypeAndMaxSizeTest()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest02, TestSize.Level0)
 {
     auto gridRow = CreateGridRow([this](GridRowModelNG model) {
         V2::BreakPoints breakpoints;
@@ -1119,7 +1174,7 @@ HWTEST_F(GridRowMeasureTestNG, GetSizeTypeAndMaxSizeTest02, TestSize.Level1)
  * @tc.desc: Test ParseGridRowParams()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest01, TestSize.Level0)
 {
     auto gridRow = CreateGridRow([this](GridRowModelNG model) {
         V2::GridContainerSize columns;
@@ -1171,7 +1226,7 @@ HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest01, TestSize.Level1)
  * @tc.desc: Test ParseGridRowParams()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest02, TestSize.Level0)
 {
     auto gridRow = CreateGridRow([this](GridRowModelNG model) {
         V2::GridContainerSize columns;
@@ -1223,7 +1278,7 @@ HWTEST_F(GridRowMeasureTestNG, ParseGridRowParamsTest02, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::FLEX_START
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -1271,7 +1326,7 @@ HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest01, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::CENTER
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest02, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -1319,7 +1374,7 @@ HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest02, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::FLEX_END
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest03, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest03, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -1367,7 +1422,7 @@ HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest03, TestSize.Level1)
  * @tc.desc: GridRow alignItems is FlexAlign::STRETCH
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest04, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest04, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -1415,7 +1470,7 @@ HWTEST_F(GridRowMeasureTestNG, GetChildAlignmentTest04, TestSize.Level1)
  * @tc.desc: Test CalcCrossAxisOffset()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisOffsetTest, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisOffsetTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create GridRow and GridCol
@@ -1462,7 +1517,7 @@ HWTEST_F(GridRowMeasureTestNG, CalcCrossAxisOffsetTest, TestSize.Level1)
  * @tc.desc: Test MeasureChildren function
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, MeasureChildrenTest, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, MeasureChildrenTest, TestSize.Level0)
 {
     RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
@@ -1527,7 +1582,7 @@ HWTEST_F(GridRowMeasureTestNG, MeasureChildrenTest, TestSize.Level1)
  * @tc.desc: Test InsertIntoGridRowTable function
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, InsertIntoGridRowTableTest, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, InsertIntoGridRowTableTest, TestSize.Level0)
 {
     int32_t currentPosition = 0;
     GridRowLayoutAlgorithm algorithm;
@@ -1568,7 +1623,7 @@ HWTEST_F(GridRowMeasureTestNG, InsertIntoGridRowTableTest, TestSize.Level1)
  * @tc.desc: MeasureChild should measure children correctly according to the layout constraint
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, MeasureChildTest, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, MeasureChildTest, TestSize.Level0)
 {
     RefPtr<FrameNode> gridCol1;
     auto gridRow = CreateGridRow([this, &gridCol1](GridRowModelNG model) {
@@ -1606,7 +1661,7 @@ HWTEST_F(GridRowMeasureTestNG, MeasureChildTest, TestSize.Level1)
  * @tc.desc: Test whether MeasureSelfByLayoutPolicy can return correct policySize
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
+HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level0)
 {
     auto frameNode = CreateGridRow([this](GridRowModelNG model) {});
     ASSERT_NE(frameNode, nullptr);
@@ -1643,7 +1698,7 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
 * @tc.number: ProcessGridSizeType_Test_001
 * @tc.desc  : Test case to verify that ProcessGridSizeType returns UNDEFINED when pipeline is null
 */
-HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull, TestSize.Level1) {
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull, TestSize.Level0) {
     V2::BreakPoints breakpoints;
     breakpoints.reference = V2::BreakPointsReference::WindowSize;
     Size size;
@@ -1659,7 +1714,7 @@ HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_ShouldReturnUndefined_WhenPip
 * @tc.number: ProcessGridSizeType_Test_004
 * @tc.desc  : Test ProcessGridSizeType returns the correct GridSizeType when reference is not WindowSize
 */
-HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize, TestSize.Level1) {
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize, TestSize.Level0) {
     V2::BreakPoints breakpoints;
     breakpoints.reference = V2::BreakPointsReference::ComponentSize;
     Size size(1000, 1000);
@@ -1670,5 +1725,240 @@ HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize,
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
     // Assuming CalcBreakPoint returns 3 for windowWidth = 1000
     EXPECT_EQ(result, V2::GridSizeType::LG);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize01
+ * @tc.desc: Test ProcessGridSizeType Return XS When Window Size is 319
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize01, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 319, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::XS);
+}
+
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize02
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 320
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize02, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 320, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize03
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 321
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize03, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 321, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize04
+ * @tc.desc: Test ProcessGridSizeType Return SM When Window Size is 599
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize04, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 599, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::SM);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize05
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 600
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize05, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 600, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    // Assuming CalcBreakPoint returns 3 for windowWidth = 601
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize06
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 601
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize06, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 601, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize07
+ * @tc.desc: Test ProcessGridSizeType Return MD When Window Size is 839
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize07, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 839, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::MD);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize08
+ * @tc.desc: Test ProcessGridSizeType Return LG When Window Size is 840
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize08, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 840, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::LG);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize09
+ * @tc.desc: Test ProcessGridSizeType Return LG When Window Size is 841
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize09, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 841, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::LG);
+}
+
+/**
+ * @tc.name: ProcessGridSizeType_WindowSize_SelfDefine_01
+ * @tc.desc: Test ProcessGridSizeType Return XL When Window Size is 500 And
+ *           breakpoints.assign({ "100vp", "200vp","300vp", "400vp", "600vp" })
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WindowSize_SelfDefine_01, TestSize.Level0)
+{
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    breakpoints.breakpoints.assign({ "100px", "200px", "300px", "400px", "600px" });
+    breakpoints.userDefine = true;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Rect displayWindowRectInfo = Rect(0, 0, 500, 1000);
+    pipeline->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    auto container = AceType::DynamicCast<Container>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    EXPECT_EQ(result, V2::GridSizeType::XL);
 }
 } // namespace OHOS::Ace::NG

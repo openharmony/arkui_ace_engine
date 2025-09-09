@@ -1239,6 +1239,18 @@ void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vec
     }
 }
 
+std::string FrontendDelegateDeclarative::GetInitParams()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_RETURN(currentId.has_value(), false, "");
+    ContainerScope scope(currentId.value());
+    return pageRouterManager_->GetInitParams();
+}
+
 std::string FrontendDelegateDeclarative::GetParams()
 {
     if (Container::IsCurrentUseNewPipeline()) {

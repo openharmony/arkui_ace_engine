@@ -10374,6 +10374,13 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _WebAttribute_forceEnableZoom(ptr: KPointer, value: KInt): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._WebAttribute_forceEnableZoom(ptr, value)
+        }
+        throw new Error("Not implemented")
+    }
     static _WindowScene_construct(id: KInt, flags: KInt): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -13129,6 +13136,20 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._BaseEvent_setAxisVertical(ptr, axisVertical)
+        }
+        throw new Error("Not implemented")
+    }
+    static _BaseEvent_getAxisPinch(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._BaseEvent_getAxisPinch(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _BaseEvent_setAxisPinch(ptr: KPointer, axisPinch: number): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._BaseEvent_setAxisPinch(ptr, axisPinch)
         }
         throw new Error("Not implemented")
     }

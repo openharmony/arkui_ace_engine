@@ -85,7 +85,7 @@ void OnShownImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
+    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
         arkCallback.Invoke();
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
@@ -100,7 +100,7 @@ void OnHiddenImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) { arkCallback.Invoke(); };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void OnBackPressedImpl(Ark_NativePointer node,
@@ -665,7 +665,7 @@ void IgnoreLayoutSafeAreaImpl(
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     auto typesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaType>(*types) : std::nullopt;
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
     if (typesOpt) {

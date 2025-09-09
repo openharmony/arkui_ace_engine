@@ -54,7 +54,7 @@ void RadioPattern::UpdateGroupStatus(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
 }
@@ -99,14 +99,7 @@ void RadioPattern::UpdateIndicatorType()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
     renderContext->UpdateOpacity(1);
-    if (!radioModifier_) {
-        radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
-    }
-    if (!radioPaintProperty->HasRadioCheck()) {
-        radioPaintProperty->UpdateRadioCheck(false);
-    }
-    if (!radioPaintProperty->GetRadioCheckValue()) {
-        radioModifier_->InitOpacityScale(false);
+    if (!radioPaintProperty->GetRadioCheckValue(false)) {
         SetBuilderState();
     }
 }
@@ -122,7 +115,23 @@ void RadioPattern::OnModifyDone()
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
     if (!makeFunc_.has_value() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateIndicatorType();
+        auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();
+        if (!radioModifier_) {
+            radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+        }
+        if (radioPaintProperty && !radioPaintProperty->HasRadioCheck()) {
+            radioPaintProperty->UpdateRadioCheck(false);
+        }
+        if (radioPaintProperty && !radioPaintProperty->GetRadioCheckValue()) {
+            radioModifier_->InitOpacityScale(false);
+        }
+        auto callback = [weak = WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateIndicatorType();
+            }
+        };
+        pipeline->AddBuildFinishCallBack(callback);
     }
     UpdateState();
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
@@ -213,7 +222,9 @@ void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
     AddIsFocusActiveUpdateEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
@@ -237,16 +248,20 @@ void RadioPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(host, isFocusActiveUpdateEvent_);
 }
 
 void RadioPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(host);
 }
 
 void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
@@ -332,7 +347,7 @@ void RadioPattern::MarkIsSelected(bool isSelected)
         return;
     }
     preCheck_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -356,7 +371,7 @@ void RadioPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetValue(), preCheck_);
 }
@@ -421,7 +436,7 @@ void RadioPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -523,7 +538,7 @@ void RadioPattern::CheckPageNode()
     auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_VOID(pageNode);
     if (pageNode->GetId() != prePageId) {
-        auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+        auto eventHub = host->GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto groupManager = GetGroupManager();
         CHECK_NULL_VOID(groupManager);
@@ -543,7 +558,7 @@ void RadioPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -614,7 +629,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
         startExitAnimation();
     }
     if (preCheck_) {
-        auto radioEventHub = GetOrCreateEventHub<RadioEventHub>();
+        auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
         TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
         radioEventHub->UpdateChangeEvent(false);
@@ -625,11 +640,13 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
 
 void RadioPattern::startEnterAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
 
-    auto pipeline = GetContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -649,7 +666,7 @@ void RadioPattern::startEnterAnimation()
     auto layoutProperty = builderChildNode_->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    auto eventHub = builderChildNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = builderChildNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(true);
     }
@@ -659,7 +676,7 @@ void RadioPattern::startEnterAnimation()
             renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
             renderContext->UpdateOpacity(INDICATOR_MAX_OPACITY);
         },
-        nullptr);
+        nullptr, nullptr, pipeline);
 }
 
 void RadioPattern::startExitAnimation()
@@ -668,7 +685,9 @@ void RadioPattern::startExitAnimation()
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
 
-    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -688,8 +707,8 @@ void RadioPattern::startExitAnimation()
             renderContext->UpdateTransformScale({ INDICATOR_MIN_SCALE, INDICATOR_MIN_SCALE });
             renderContext->UpdateOpacity(INDICATOR_MIN_OPACITY);
         },
-        nullptr);
-    auto eventHub = builderChildNode_->GetOrCreateEventHub<EventHub>();
+        nullptr, nullptr, pipeline);
+    auto eventHub = builderChildNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -799,7 +818,7 @@ void RadioPattern::UpdateGroupCheckStatus(
         }
     }
 
-    auto radioEventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     if (check) {
         groupManager->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
@@ -960,7 +979,7 @@ void RadioPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
@@ -984,7 +1003,7 @@ void RadioPattern::SetRadioChecked(bool check)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -999,7 +1018,7 @@ void RadioPattern::SetRadioChecked(bool check)
 
 void RadioPattern::DumpInfo ()
 {
-    auto eventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("Value: " + eventHub->GetValue());
     DumpLog::GetInstance().AddDesc("Group: " + eventHub->GetGroup());
@@ -1034,6 +1053,7 @@ void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColo
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+
     switch (radioColorType) {
         case RadioColorType::CHECKED_BACKGROUND_COLOR:
             paintProperty->UpdateRadioCheckedBackgroundColor(color);
@@ -1077,7 +1097,7 @@ RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
     CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto value = eventHub->GetValue();
     auto enabled = eventHub->IsEnabled();

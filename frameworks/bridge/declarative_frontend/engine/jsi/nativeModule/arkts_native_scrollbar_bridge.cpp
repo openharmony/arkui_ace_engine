@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue ScrollBarBridge::SetScrollBarEnableNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -61,10 +62,25 @@ ArkUINativeModuleValue ScrollBarBridge::SetScrollBarScrollBarColor(ArkUIRuntimeC
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ParseColorMetricsToColor(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseColorMetricsToColor(vm, secondArg, color, resObj)) {
+            GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
+                nativeNode, nullptr);
+        } else {
+            auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+            ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
+            GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+            GetArkUINodeModifiers()->getScrollBarModifier()->createScrollBarScrollBarColorWithResourceObj(
+                nativeNode, AceType::RawPtr(resObj));
+        }
     } else {
-        GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+        if (!ParseColorMetricsToColor(vm, secondArg, color)) {
+            GetArkUINodeModifiers()->getScrollBarModifier()->resetScrollBarScrollBarColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getScrollBarModifier()->setScrollBarScrollBarColor(nativeNode, color.GetValue());
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }

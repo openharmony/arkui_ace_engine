@@ -41,7 +41,7 @@ public:
     dependence: recordOffsetMap_
     output: MarginFrameOffset of each childnode
  */
-HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2, row3;

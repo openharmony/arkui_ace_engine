@@ -982,6 +982,36 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetActiveChildRange006
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode->GetChildAtIndex(1));
+    EXPECT_NE(repeat, nullptr);
+    EXPECT_EQ(repeat->GetChildren().size(), 5);
+
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->pauseMeasureCacheItem_ = 0;
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(AceType::RawPtr(groupNode), 2, true);
+    EXPECT_EQ(repeat->GetChildren().size(), 2);
+}
+
+/**
  * @tc.name: ModifyReferencePos001
  * @tc.desc: Test ListItemGroupLayoutAlgorithm ModifyReferencePos
  * @tc.type: FUNC

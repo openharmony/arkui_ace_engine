@@ -57,6 +57,20 @@ public:
     void UnregisterArkUIObjectLifecycleCallback() override;
     sptr<IRemoteObject> GetToken() override;
 
+    RefPtr<DisplayInfo> GetDisplayInfo() override;
+    WindowMode GetWindowMode() override;
+    bool GetIsMidScene() override;
+    bool IsAccessibilityEnabled() override;
+
+    int32_t RegisterSurfaceChangedCallback(
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback) override;
+    void UnregisterSurfaceChangedCallback(int32_t callbackId) override;
+    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback) override;
+    void UnRegisterFoldStatusChangedCallback(int32_t callbackId) override;
+    int32_t RegisterRotationEndCallback(std::function<void()>&& callback) override;
+    void UnregisterRotationEndCallback(int32_t callbackId) override;
+    void AddWindowSizeChangeCallback(int32_t nodeId) override;
+
 private:
     NG::PipelineContext* context_ = nullptr;
     RefPtr<OverlayManager> overlayManager_;

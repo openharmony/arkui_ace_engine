@@ -22,11 +22,9 @@
 
 namespace OHOS::Ace {
 
-#if defined(ACE_STATIC)
 struct DecodeOptions {
     PixelFormat desiredFormat = PixelFormat::RGBA_8888;
 };
-#endif
 
 struct PixelMapConfig {
     AIImageQuality imageQuality = AIImageQuality::NONE;
@@ -48,7 +46,7 @@ struct PixelMapConfig {
 class PixelMap;
 
 class ACE_FORCE_EXPORT ImageSource : public AceType {
-    DECLARE_ACE_TYPE(ImageSource, AceType)
+    DECLARE_ACE_TYPE(ImageSource, AceType);
 
 public:
     using Size = std::pair<int32_t, int32_t>;
@@ -58,24 +56,12 @@ public:
     static RefPtr<ImageSource> Create(const std::string& filePath);
     static bool IsAstc(const uint8_t* data, size_t size);
     static Size GetASTCInfo(const uint8_t* data, size_t size);
-
     virtual std::string GetProperty(const std::string& key) = 0;
-
     virtual RefPtr<PixelMap> CreatePixelMap(
         const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(
         uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
-#if defined(ACE_STATIC)
-    /**
-     * @description: only for 1.2
-     * @param options decode options
-     * @return refptr pixelmap
-     */
-    virtual RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options)
-    {
-        return nullptr;
-    }
-#endif
+    virtual RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;

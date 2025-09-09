@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -26,6 +27,7 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -496,10 +498,6 @@ int WebDelegate::GetHitTestResult()
     return false;
 }
 void WebDelegate::GetHitTestValue(HitTestResult& result) {}
-int WebDelegate::GetProgress()
-{
-    return false;
-}
 int WebDelegate::GetPageHeight()
 {
     return false;
@@ -742,6 +740,8 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid) {}
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const {}
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
+void WebDelegate::OnLoadStarted(const std::string &param) {}
+void WebDelegate::OnLoadFinished(const std::string &param) {}
 void WebDelegate::SetPageFinishedState(const bool& state)
 {
     isPageFinished_ = state;
@@ -815,9 +815,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 void WebDelegate::OnAccessibilityEvent(
     int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
 {}
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {}
@@ -853,6 +851,8 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
 {
     return false;
 }
+void WebDelegate::OnContextMenuDismissed()
+{}
 bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 {
     return false;
@@ -903,6 +903,7 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
 void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details) {}
 void WebDelegate::OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details) {}
 void WebDelegate::OnSafeBrowsingCheckResult(int threat_type) {}
+void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type) {}
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) {}
 void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details) {}
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
@@ -923,6 +924,16 @@ void WebDelegate::HandleTouchMove(
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>>& touch_point_infos, bool from_overlay)
 {}
 void WebDelegate::HandleTouchCancel() {}
+void WebDelegate::HandleStylusTouchDown(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& touchPoint, bool from_overlay)
+{}
+void WebDelegate::HandleStylusTouchUp(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& touchPoint, bool from_overlay)
+{}
+void WebDelegate::HandleStylusTouchMove(
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>>& stylus_touch_point_infos,
+    bool from_overlay)
+{}
 void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy) {}
 void WebDelegate::WebHandleTouchpadFlingEvent(
     const double& x, const double& y, const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
@@ -1036,6 +1047,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     auto it = surfaceToWebAccessibilityMap.find(surfaceId);
     if (it != surfaceToWebAccessibilityMap.end()) {
         return it->second;
@@ -1180,6 +1194,9 @@ void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1188,6 +1205,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAc
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1196,6 +1216,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1203,6 +1226,12 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 }
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
 {
+    if (g_setReturnStatus == STATUS_TRUE) {
+        return OHOS::NWeb::NWebPreference::CopyOptionMode::LOCAL_DEVICE;
+    }
+    if (g_setReturnStatus == STATUS_FALSE) {
+        return OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP;
+    }
     return OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
 }
 bool WebDelegate::OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
@@ -1242,7 +1271,7 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 {}
 std::string WebDelegate::GetSelectInfo() const
 {
-    return "";
+    return g_setReturnStatus;
 }
 std::string WebDelegate::GetAllTextInfo() const
 {
@@ -1305,6 +1334,10 @@ void SetReturnStatus(const std::string& status)
 {
     g_setReturnStatus = status;
 }
+void SetReturnNode(std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node)
+{
+    g_customAccessibilityNode = node;
+}
 void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
@@ -1357,8 +1390,14 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 }
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
-void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
-void WebDelegate::SetVisibility(bool isVisible) {}
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height) {}
+void WebDelegate::SetVisibility(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
+void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height) {}
+double WebDelegate::ResizeWidth() const { return 1.0; }
+double WebDelegate::ResizeHeight() const { return 1.0; }
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
@@ -1373,4 +1412,13 @@ bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
+void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
+bool WebDelegate::IsShowHandle() { return false; }
+bool WebDelegate::IsPcMode()
+{
+    return g_setReturnStatus == STATUS_TRUE;
+}
+void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
+void WebDelegate::RegisterFreeMultiWindowListener() {}
+void WebDelegate::UnregisterFreeMultiWindowListener() {}
 } // namespace OHOS::Ace

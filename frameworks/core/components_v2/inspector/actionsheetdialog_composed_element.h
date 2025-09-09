@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ActionSheetDialogComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ActionSheetDialogComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ActionSheetDialogComposedElement, InspectorComposedElement);
 
 public:
     explicit ActionSheetDialogComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

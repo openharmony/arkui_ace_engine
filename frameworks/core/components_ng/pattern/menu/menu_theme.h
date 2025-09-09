@@ -41,6 +41,7 @@ constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
 constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
 constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
 constexpr uint32_t MENU_MASK_COLOR = 0x33182431;
+constexpr uint32_t MENU_OUTLINE_COLOR = 0x19FFFFFF;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -116,13 +117,13 @@ public:
             theme->previewMenuScaleNumber_ = 0.95f;
             std::string hasFilter = pattern->GetAttr<std::string>("menu_has_filter", "true");
             theme->hasFilter_ = (hasFilter == "true");
+            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
+            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
+            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
             theme->bigFontSizeScale_ = MENU_BIG_FONT_SIZE_SCALE;
             theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
             theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
             theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
-            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
-            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
-            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
             theme->enableDirectionalKeyFocus_ = pattern->GetAttr<int>("menu_focus_directional_key_enable", 0);
             theme->menuShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
@@ -134,6 +135,7 @@ public:
                 pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
             theme->menuHapticFeedback_ =
                 pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
+            theme->menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -319,6 +321,21 @@ public:
         return hasFilter_;
     }
 
+    bool GetNormalLayout() const
+    {
+        return normalLayout_;
+    }
+
+    bool GetNormalPlacement() const
+    {
+        return normalPlacement_;
+    }
+
+    bool GetHasBackBlur() const
+    {
+        return hasBackBlur_;
+    }
+
     float GetBigFontSizeScale() const
     {
         return bigFontSizeScale_;
@@ -337,21 +354,6 @@ public:
     int32_t GetTextMaxLines() const
     {
         return textMaxLines_;
-    }
-
-    bool GetNormalLayout() const
-    {
-        return normalLayout_;
-    }
-
-    bool GetNormalPlacement() const
-    {
-        return normalPlacement_;
-    }
-
-    bool GetHasBackBlur() const
-    {
-        return hasBackBlur_;
     }
 
     bool GetEnableDirectionalKeyFocus() const
@@ -388,7 +390,7 @@ public:
     {
         return menuShadowStyle_;
     }
-    
+
     int GetMenuBackgroundBlurStyle() const
     {
         return menuBackGroundBlurStyle_;
@@ -417,6 +419,11 @@ public:
     uint32_t GetStackExpandIconId() const
     {
         return stackExpandIconId_;
+    }
+
+    Color GetMenuOutlineColor() const
+    {
+        return menuOutlineColor_;
     }
 
 protected:
@@ -458,15 +465,15 @@ private:
     double innerBorderWidth_ = 1.0f;
     Dimension innerBorderRadius_;
     Color innerBorderColor_ = Color::TRANSPARENT;
-    uint32_t symbolId_;
     bool hasFilter_ = true;
+    uint32_t symbolId_;
+    bool normalLayout_ = true;
+    bool normalPlacement_ = true;
+    bool hasBackBlur_ = true;
     float bigFontSizeScale_ = 1.75f;
     float largeFontSizeScale_ = 2.0f;
     float maxFontSizeScale_ = 3.2f;
     int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
-    bool normalLayout_ = true;
-    bool normalPlacement_ = true;
-    bool hasBackBlur_ = true;
     bool enableDirectionalKeyFocus_ = false;
     bool hasBackBlurColor_ = false;
     Dimension borderWidth_;
@@ -478,6 +485,7 @@ private:
     std::string menuHapticFeedback_;
     uint32_t embeddedExpandIconId_ = 0;
     uint32_t stackExpandIconId_ = 0;
+    Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
 };
 
 } // namespace OHOS::Ace::NG

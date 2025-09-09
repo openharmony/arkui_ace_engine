@@ -104,6 +104,7 @@ public:
         const std::function<void()>& callback);
     static void SetNavGroupNodeTransAnimationCallback();
     static std::shared_ptr<Rosen::RSUIContext> GetCurrentRSUIContext(RefPtr<PipelineBase> context);
+    static uint64_t GetRSUIContextToken(RefPtr<PipelineBase> context);
 };
 } // namespace OHOS::Ace
 

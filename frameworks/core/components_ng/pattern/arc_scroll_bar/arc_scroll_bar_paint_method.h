@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 class ArcScrollBarPaintMethod : public ScrollBarPaintMethod {
-    DECLARE_ACE_TYPE(ArcScrollBarPaintMethod, ScrollBarPaintMethod)
+    DECLARE_ACE_TYPE(ArcScrollBarPaintMethod, ScrollBarPaintMethod);
 
 public:
     ArcScrollBarPaintMethod() : ScrollBarPaintMethod(false) {}

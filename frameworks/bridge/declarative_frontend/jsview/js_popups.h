@@ -36,9 +36,7 @@ public:
     static void ParseResLayoutRegionMargin(const RefPtr<ResourceObject>& resObj,
         std::optional<CalcDimension>& calcDimension);
     static void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAppearLifeCycleParam(
@@ -46,14 +44,14 @@ public:
     static void ParseMenuDisappearLifeCycleParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex);
+    static void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuHapticFeedbackMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam);
     static void ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam);
-    static void ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static void ParseMenuoffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
+    static void ParseMenuOffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
     static void InitMenuParamColorMode(NG::MenuParam& menuParam);
     static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
 private:
@@ -73,6 +71,8 @@ private:
         const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth);
     static void ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObject>& borderRadiusResObj,
         NG::BorderRadiusProperty& menuBorderRadius);
+    static void ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static bool ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
     static void ParseMenuPreviewBorderRadiusMultiObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
     static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);

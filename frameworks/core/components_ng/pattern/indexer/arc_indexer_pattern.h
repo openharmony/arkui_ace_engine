@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class ArcIndexerPattern : public IndexerPattern {
-    DECLARE_ACE_TYPE(ArcIndexerPattern, IndexerPattern)
+    DECLARE_ACE_TYPE(ArcIndexerPattern, IndexerPattern);
 public:
     ArcIndexerPattern() = default;
     ~ArcIndexerPattern() override = default;

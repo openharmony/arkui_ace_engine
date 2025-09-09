@@ -1,7 +1,7 @@
 
-function main() {}
+function main(): void {}
 
 
-function foo() {}
+function foo(): void {}
 
 

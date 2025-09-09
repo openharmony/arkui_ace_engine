@@ -93,7 +93,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest001, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -133,7 +133,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest002, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     /**
@@ -173,7 +173,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest003, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(1);
     /**
@@ -213,7 +213,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest004, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(0);
     /**
@@ -253,7 +253,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest005, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(-1);
     /**
@@ -293,7 +293,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest006, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -333,7 +333,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest007, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(0);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -373,7 +373,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest008, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(-1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -413,7 +413,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest009, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -453,7 +453,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest010, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     /**
@@ -493,7 +493,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest011, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(1);
     /**
@@ -533,7 +533,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest012, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(0);
     /**
@@ -573,7 +573,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest013, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(-1);
     /**
@@ -613,7 +613,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest014, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -653,7 +653,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest015, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(0);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -693,7 +693,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest016, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(-1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -733,7 +733,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest017, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -773,7 +773,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest018, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     /**
@@ -813,7 +813,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest019, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(1);
     /**
@@ -853,7 +853,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest020, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(0);
     /**
@@ -893,7 +893,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest021, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(-1);
     /**
@@ -933,7 +933,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest022, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -973,7 +973,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest023, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(0);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1013,7 +1013,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest024, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(-1);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1053,7 +1053,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest025, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     /**
@@ -1093,7 +1093,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest026, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     /**
@@ -1133,7 +1133,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest027, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1173,7 +1173,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest028, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1213,7 +1213,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest029, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     /**
@@ -1253,7 +1253,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest030, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     /**
@@ -1293,7 +1293,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest031, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1333,7 +1333,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest032, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1373,7 +1373,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest033, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(BIG_INT);
     /**
@@ -1413,7 +1413,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest034, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
     /**
@@ -1453,7 +1453,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest035, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -1493,7 +1493,7 @@ HWTEST_F(ToggleContentModifierTestNg, ToggleContentModifierTest036, TestSize.Lev
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**

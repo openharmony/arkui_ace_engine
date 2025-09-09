@@ -31,7 +31,7 @@ suite(util.basename(__filename), () => {
 
         let script = arkts.createETSModuleFromSource(sample_in)
 
-        script = arkts.updateETSModuleByStatements(
+        script = arkts.factory.updateETSModule(
             script,
             [
                 script.statements[0],
@@ -56,7 +56,10 @@ suite(util.basename(__filename), () => {
                         undefined,
                     )
                 )
-            ]
+            ],
+            script.ident,
+            script.getNamespaceFlag(),
+            script.program,
         )
 
         util.ARKTS_TEST_ASSERTION(

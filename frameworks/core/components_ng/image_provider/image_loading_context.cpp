@@ -30,10 +30,10 @@
 
 namespace OHOS::Ace::NG {
 
-ImageLoadingContext::ImageLoadingContext(
-    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
+ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
+    bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
-      imageDfxConfig_(imageDfxConfig)
+      isSceneBoardWindow_(isSceneBoardWindow), imageDfxConfig_(imageDfxConfig)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);
@@ -139,7 +139,7 @@ void ImageLoadingContext::OnDataLoading()
     }
     src_.SetContainerId(containerId_);
     src_.SetImageDfxConfig(GetImageDfxConfig());
-    ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
+    ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_, isSceneBoardWindow_);
 }
 
 bool ImageLoadingContext::Downloadable()

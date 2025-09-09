@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
-import { UniqueId, KoalaCallsiteKey } from "@koalaui/common"
+import { assert, suite, test } from "@koalaui/harness"
+import { KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
 import {
     GlobalStateManager,
     Repeat,
@@ -38,7 +38,7 @@ interface Page {
 
 function createPage(name: string): Page {
     return {
-        id: parseInt(new UniqueId().addString(name).compute().slice(0, 10), 16),
+        id: key(name),
         page:
             /** @memo */
             () => memoLifecycle(

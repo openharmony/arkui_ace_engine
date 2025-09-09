@@ -30882,6 +30882,20 @@ void impl_WebAttribute_bindSelectionMenu(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getWebModifier()->setBindSelectionMenu(self, (const Opt_WebElementType*)&elementType_value, (const Opt_CustomNodeBuilder*)&content_value, (const Opt_WebResponseType*)&responseType_value, (const Opt_SelectionMenuOptionsExt*)&options_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_bindSelectionMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_forceEnableZoom(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setForceEnableZoom(self, (const Opt_Boolean*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_forceEnableZoom, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WindowScene_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getWindowSceneModifier()->construct(id, flags);
 }
@@ -33961,6 +33975,11 @@ Ark_String impl_FrameNode_getNodeType(Ark_NativePointer thisPtr) {
         return GetAccessors()->getFrameNodeAccessor()->getNodeType(self);
 }
 KOALA_INTEROP_1(FrameNode_getNodeType, KStringPtr, Ark_NativePointer)
+void impl_FrameNode_applyAttributesFinish(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->applyAttributesFinish(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_applyAttributesFinish, Ark_NativePointer)
 Ark_NativePointer impl_LengthMetrics_getFinalizer() {
         return GetAccessors()->getLengthMetricsAccessor()->getFinalizer();
 }
@@ -35801,6 +35820,25 @@ void impl_BaseEvent_setAxisVertical(Ark_NativePointer thisPtr, KInteropNumber ax
         GetAccessors()->getBaseEventAccessor()->setAxisVertical(self, (const Ark_Number*) (&axisVertical));
 }
 KOALA_INTEROP_DIRECT_V2(BaseEvent_setAxisVertical, Ark_NativePointer, KInteropNumber)
+KInteropReturnBuffer impl_BaseEvent_getAxisPinch(Ark_NativePointer thisPtr) {
+        Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getBaseEventAccessor()->getAxisPinch(self);
+        Serializer _retSerializer {};
+        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
+        retValue_type = runtimeType(retValue);
+        _retSerializer.writeInt8(retValue_type);
+        if ((INTEROP_RUNTIME_UNDEFINED) != (retValue_type)) {
+            const auto retValue_value = retValue.value;
+            _retSerializer.writeNumber(retValue_value);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(BaseEvent_getAxisPinch, KInteropReturnBuffer, Ark_NativePointer)
+void impl_BaseEvent_setAxisPinch(Ark_NativePointer thisPtr, KInteropNumber axisPinch) {
+        Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
+        GetAccessors()->getBaseEventAccessor()->setAxisPinch(self, (const Ark_Number*) (&axisPinch));
+}
+KOALA_INTEROP_DIRECT_V2(BaseEvent_setAxisPinch, Ark_NativePointer, KInteropNumber)
 Ark_Number impl_BaseEvent_getPressure(Ark_NativePointer thisPtr) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         return GetAccessors()->getBaseEventAccessor()->getPressure(self);
@@ -36559,6 +36597,11 @@ Ark_Number impl_AxisEvent_getVerticalAxisValue(Ark_NativePointer thisPtr) {
         return GetAccessors()->getAxisEventAccessor()->getVerticalAxisValue(self);
 }
 KOALA_INTEROP_DIRECT_1(AxisEvent_getVerticalAxisValue, KInteropNumber, Ark_NativePointer)
+Ark_Number impl_AxisEvent_getPinchAxisScaleValue(Ark_NativePointer thisPtr) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        return GetAccessors()->getAxisEventAccessor()->getPinchAxisScaleValue(self);
+}
+KOALA_INTEROP_DIRECT_1(AxisEvent_getPinchAxisScaleValue, KInteropNumber, Ark_NativePointer)
 Ark_Int32 impl_AxisEvent_getAction(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         return GetAccessors()->getAxisEventAccessor()->getAction(self);

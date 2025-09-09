@@ -97,6 +97,7 @@ struct TextDetectConfig {
                 Color colorValue;
                 ResourceParseUtils::ParseResColor(resObj, colorValue);
                 textDetectConfig.entityColor = colorValue;
+                textDetectConfig.entityDecorationColor = colorValue;
             };
             textDetectConfig.AddResource("textDetectConfig.Color", resObj, std::move(updateFunc));
         }
@@ -179,6 +180,8 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
+    virtual void SetTextContentAlign(TextContentAlign value) {};
+    virtual void ReSetTextContentAlign() {};
     virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
@@ -208,13 +211,13 @@ public:
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
-    virtual void SetOptimizeTrailingSpace(bool trim) = 0;
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
+    virtual void SetOptimizeTrailingSpace(bool trim) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
     virtual void SetColorShaderStyle(const Color& value) = 0;
-    virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
     virtual void ResetGradientShaderStyle() = 0;
+    virtual void SetTextVerticalAlign(TextVerticalAlign verticalAlign) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

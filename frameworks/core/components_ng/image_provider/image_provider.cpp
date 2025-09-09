@@ -167,7 +167,7 @@ void ImageProvider::SuccessCallback(
     }
 }
 
-void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
+void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync, bool isSceneBoardWindow)
 {
     const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
     ACE_SCOPED_TRACE("CreateImageObj %s", imageDfxConfig.ToStringWithSrc().c_str());
@@ -202,7 +202,10 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // ImageObject cache is only for saving image size info, clear data to save memory
     cloneImageObj->ClearData();
 
-    CacheImageObject(cloneImageObj);
+    // Only skip caching when the image is SVG and it's SceneBorder
+    if (!src.IsSvg() || !isSceneBoardWindow) {
+        CacheImageObject(cloneImageObj);
+    }
 
     auto ctxs = EndTask(src.GetTaskKey());
 
@@ -393,7 +396,8 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), downLoadConfig.src.GetSrc(), downLoadConfig.sync);
 }
 
-void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync)
+void ImageProvider::CreateImageObject(
+    const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync, bool isSceneBoardWindow)
 {
     if (src.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
         auto ctx = ctxWp.Upgrade();
@@ -426,7 +430,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         return;
     }
     if (sync) {
-        CreateImageObjHelper(src, true);
+        CreateImageObjHelper(src, true, isSceneBoardWindow);
     } else {
         if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in createObj.");
@@ -436,7 +440,8 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         std::scoped_lock lock(std::adopt_lock, taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
+        task.Reset(
+            [src, isSceneBoardWindow] { ImageProvider::CreateImageObjHelper(src, false, isSceneBoardWindow); });
         tasks_[src.GetTaskKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);

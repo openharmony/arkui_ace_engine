@@ -21,15 +21,11 @@ export function createETSParameterExpression(
     identOrSpread: AnnotatedExpression | undefined,
     isOptional: boolean,
     initExpr?: Expression,
-    typeAnnotation?: TypeNode,
     annotations?: readonly AnnotationUsage[]
 ): ETSParameterExpression {
     const res = ETSParameterExpression.createETSParameterExpression(identOrSpread, isOptional)
     if (initExpr) {
         res.setInitializer(initExpr)
-    }
-    if (typeAnnotation) {
-        res.setTypeAnnotation(typeAnnotation)
     }
     if (annotations) {
         res.setAnnotations(annotations)
@@ -42,19 +38,17 @@ export function updateETSParameterExpression(
     identOrSpread: AnnotatedExpression | undefined,
     isOptional: boolean,
     initExpr?: Expression,
-    typeAnnotation?: TypeNode,
     annotations?: readonly AnnotationUsage[],
 ): ETSParameterExpression {
     if ((isSameNativeObject(identOrSpread, original.ident) || isSameNativeObject(identOrSpread, original.restParameter))
         && isSameNativeObject(isOptional, original.isOptional)
         && isSameNativeObject(initExpr, original.initializer)
-        && isSameNativeObject(typeAnnotation, original.typeAnnotation)
         && isSameNativeObject(annotations, original.annotations)
     ) {
         return original
     }
     return updateNodeByNode(
-        createETSParameterExpression(identOrSpread, isOptional, initExpr, typeAnnotation, annotations),
+        createETSParameterExpression(identOrSpread, isOptional, initExpr, annotations),
         original
     )
 }

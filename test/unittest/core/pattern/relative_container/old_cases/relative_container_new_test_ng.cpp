@@ -243,7 +243,7 @@ UITreeCreaterFunction RelativeContainerNewTestNG::GetBasicModel()
  * @tc.desc: Test functionality of relativeContainer cache when alignRules not changed
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RenderListTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RenderListTest001, TestSize.Level0)
 {
     auto frameNode = RelativeContainerNewTestNG::CreateRelativeContainer(RelativeContainerNewTestNG::GetBasicModel());
     ASSERT_EQ(frameNode->GetChildren().size(), 5);
@@ -275,7 +275,7 @@ HWTEST_F(RelativeContainerNewTestNG, RenderListTest001, TestSize.Level1)
  * @tc.desc: Test functionality of relativeContainer cache when alignRules changed
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, RenderListTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, RenderListTest002, TestSize.Level0)
 {
     auto frameNode = RelativeContainerNewTestNG::CreateRelativeContainer(RelativeContainerNewTestNG::GetBasicModel());
     ASSERT_EQ(frameNode->GetChildren().size(), 5);
@@ -312,7 +312,7 @@ HWTEST_F(RelativeContainerNewTestNG, RenderListTest002, TestSize.Level1)
  * @tc.desc: Show an example of creating a test case to test barrier.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -384,7 +384,7 @@ HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
  * @tc.desc: Test functionality of relativeContainer when it has loop dependent nodes.
  * @tc.type: ETS
  */
-HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level0)
 {
     /**
       corresponding ets code:

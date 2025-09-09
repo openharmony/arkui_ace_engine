@@ -265,8 +265,10 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->ClearOptionsHour();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    if (isUseMilitaryTime != timePickerRowPattern->GetCachedHour24()) {
+        timePickerRowPattern->ClearOptionsHour();
+        timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    }
 }
 
 void TimePickerModelNG::SetEnableCascade(bool isEnableCascade)
@@ -286,7 +288,7 @@ void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     if ((timePickerRowPattern->GetPrefixHour() != hourType) ||
         (timePickerRowPattern->GetPrefixMinute() != minuteType) ||
-        (timePickerRowPattern->GetPrefixSecond() != secondType)) {
+        (timePickerRowPattern->GetHasSecond() && timePickerRowPattern->GetPrefixSecond() != secondType)) {
         timePickerRowPattern->SetDateTimeOptionUpdate(true);
     }
     timePickerRowPattern->SetPrefixHour(hourType);
@@ -314,7 +316,7 @@ void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -322,7 +324,7 @@ void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 void TimePickerModelNG::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -331,7 +333,7 @@ void TimePickerModelNG::SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelected
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -471,7 +473,7 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
@@ -591,6 +593,7 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
 {
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetSelectedTime(value);
 }
 
@@ -626,6 +629,7 @@ void TimePickerModelNG::SetDisappearTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
+
 void TimePickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
@@ -652,6 +656,7 @@ void TimePickerModelNG::SetNormalTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
+
 void TimePickerModelNG::SetSelectedTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
@@ -686,6 +691,7 @@ void TimePickerModelNG::SetSelectedTextStyle(
 
 void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme)
 {
+    CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
         ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
@@ -740,8 +746,10 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->ClearOptionsHour();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    if (isUseMilitaryTime != timePickerRowPattern->GetCachedHour24()) {
+        timePickerRowPattern->ClearOptionsHour();
+        timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    }
 }
 
 void TimePickerModelNG::SetEnableCascade(FrameNode* frameNode, bool isEnableCascade)
@@ -884,7 +892,7 @@ int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
 }
 
-int32_t TimePickerModelNG::getTimepickerEnableCascade(FrameNode* frameNode)
+int32_t TimePickerModelNG::GetTimepickerEnableCascade(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsEnableCascadeValue(false);

@@ -344,7 +344,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest008, TestSize.Level1)
      */
     columnPattern_->mouseEvent_ = nullptr;
     columnPattern_->touchListener_ = nullptr;
-    auto columnEventHub = columnNode_->GetOrCreateEventHub<EventHub>();
+    auto columnEventHub = columnNode_->GetEventHub<EventHub>();
     ASSERT_NE(columnEventHub, nullptr);
     auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(columnGesture, nullptr);
@@ -536,7 +536,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest011, TestSize.Level1)
      * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is MOUSE.
      * @tc.expected: animationBreak_ is set false.
      */
-    auto eventHub = columnNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = columnNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

@@ -38,6 +38,8 @@ public:
     void MoveChild(uint32_t fromIndex) override;
     void CreateNewChildStart(const std::string& key) override;
     void CreateNewChildFinish(const std::string& key) override;
+    void RecycleChild(uint32_t index) override;
+    void ReuseChild(uint32_t index) override;
     void AfterAddChild() override;
     
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;

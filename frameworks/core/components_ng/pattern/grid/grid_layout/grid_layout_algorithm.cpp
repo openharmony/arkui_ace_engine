@@ -200,15 +200,16 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
     }
     colLen += (colSpan - 1) * columnsGap_;
 
+    // If RTL, place the item from right.
+    if (rightToLeft_) {
+        positionX = frameSize.Width() - positionX - colLen;
+    }
+
     if (childLayoutWrapper) {
         auto childSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
         OffsetByAlign(childSize, rowLen, colLen, positionX, positionY);
     }
 
-    // If RTL, place the item from right.
-    if (rightToLeft_) {
-        positionX = frameSize.Width() - positionX - colLen;
-    }
     return OffsetF(positionX, positionY);
 }
 
@@ -254,7 +255,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = info_.axis_;
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
-    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
+    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), LayoutInfinity<float>())) {
         idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
         TAG_LOGI(AceLogTag::ACE_GRID, "size of main axis value is infinity, use percent reference");
     }

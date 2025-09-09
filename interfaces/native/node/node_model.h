@@ -44,25 +44,28 @@ struct ArkUI_Node {
     void* eventListeners = nullptr;
     void* barrierOption = nullptr;
     void* guidelineOption = nullptr;
-    void* alignRuleOption = nullptr;  
+    void* alignRuleOption = nullptr;
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
-    void* imageFrameInfos = nullptr;
-    void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
+    void* drawableDescriptor = nullptr;
+    void* imageFrameInfos = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
     void* progressLinearStyle = nullptr;
     void* visibleAreaEventOptions = nullptr;
     bool isBindNative = false;
+    void* commonEventListeners = nullptr;
+    void* extraCommonData = nullptr;
 };
 
 struct ArkUI_Context {
     int32_t id;
 };
 
+constexpr int BASIC_COMPONENT_NUM = 22;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
@@ -109,7 +112,15 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 22;
+struct InnerEventExtraParam {
+    int32_t targetId;
+    ArkUI_NodeHandle nodePtr;
+    void* userData;
+};
+
+struct ExtraData {
+    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
+};
 
 #ifdef __cplusplus
 };
@@ -159,9 +170,13 @@ void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
-int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent);
 void HandleNodeEvent(ArkUI_NodeEvent* event);
 void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet);
+void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent);
+void HandleNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType);
+void TriggerNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType,
+    std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>* commonEventListenersMap);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
@@ -177,5 +192,8 @@ ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
 std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);
 void RegisterBindNativeNode(ArkUI_NodeHandle node);
+bool MakeCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, void* userData,
+    void (*callback)(ArkUI_NodeEvent* event));
+bool ClearCommonEventMap(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

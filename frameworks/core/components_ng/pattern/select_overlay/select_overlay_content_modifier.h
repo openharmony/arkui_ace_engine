@@ -47,7 +47,7 @@ struct PaintHandleParams {
 };
 
 class SelectOverlayContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier);
 
 public:
     SelectOverlayContentModifier(const WeakPtr<Pattern>& pattern);
@@ -163,7 +163,7 @@ public:
         CHECK_NULL_VOID(handleOpacity_);
         handleOpacity_->Set(opacity);
     }
-    
+
     void SetIsUsingMouse(bool value)
     {
         isUsingMouse_ = value;

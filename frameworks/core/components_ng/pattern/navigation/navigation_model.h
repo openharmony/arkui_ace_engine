@@ -140,6 +140,7 @@ public:
     virtual bool UseHomeDestination() const { return false; }
     virtual void SetHomePathInfoWithCallback(
         std::function<void(const RefPtr<NG::NavigationStack>&)>&& setHomePathInfoCallback) {}
+    virtual void SetEnableShowHideWithContentCover(bool isEnable) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

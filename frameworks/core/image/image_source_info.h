@@ -146,6 +146,16 @@ public:
         return srcType_ == SrcType::NETWORK || srcType_ == SrcType::RESOURCE;
     }
 
+    void SetSupportSvg2(bool enable)
+    {
+        supportSvg2_ = enable;
+    }
+
+    bool IsSupportSvg2() const
+    {
+        return supportSvg2_;
+    }
+
 private:
     SrcType ResolveSrcType() const;
 
@@ -173,6 +183,7 @@ private:
     SrcType srcType_ = SrcType::UNSUPPORTED;
 
     ColorMode localColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool supportSvg2_ = false;
 };
 
 } // namespace OHOS::Ace

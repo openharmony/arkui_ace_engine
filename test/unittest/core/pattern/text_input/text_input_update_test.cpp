@@ -452,12 +452,12 @@ HWTEST_F(TextInputUpdateTestNg, MeasureDecorator001, TestSize.Level1)
 
     /**
      * @tc.step: step2. call AddCounterNode and MeasureDecorator
-     * @tc.expected: counterTextNode_ is created and align properties is correct
+     * @tc.expected: counterTextNode_ is created and align properties is correct.
      */
     pattern_->AddCounterNode();
     auto counter = pattern_->GetCounterDecorator();
+    ASSERT_NE(counter, nullptr);
     counter->MeasureDecorator(Infinity<float>(), u"9/10", false);
-    EXPECT_TRUE(counter);
     auto property = frameNode_->GetLayoutProperty();
     EXPECT_TRUE(property);
     auto layoutDirection = property->GetLayoutDirection();
@@ -565,7 +565,7 @@ HWTEST_F(TextInputUpdateTestNg, OnDragStart, TestSize.Level1)
      * @tc.steps: step3. mock drag start.
      */
     auto gestureHub = pattern_->
-        GetHost()->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        GetHost()->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureHub->SetIsTextDraggable(true);
     pattern_->OnDragStart().operator()(dragEvent, "");
     EXPECT_FALSE(pattern_->showSelect_);
@@ -2571,32 +2571,7 @@ HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText001, TestSize.Level1)
     pattern_->AddCounterNode();
     auto counter = pattern_->GetCounterDecorator();
     ASSERT_NE(counter, nullptr);
-    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(
-        "Number of characters entered: %1$d, Maximum number of characters allowed: %2$d", 10, 20);
-    EXPECT_EQ(result, "Number of characters entered: 10, Maximum number of characters allowed: 20");
-}
-
-/**
- * @tc.name: GetAccessibilityText002
- * @tc.desc: test CounterDecorator GetAccessibilityText
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.step: step2. call AddCounterNode
-     */
-    ASSERT_NE(pattern_, nullptr);
-    pattern_->AddCounterNode();
-    auto counter = pattern_->GetCounterDecorator();
-    ASSERT_NE(counter, nullptr);
-    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(
-        "Number of characters entered: %1$d", 10, 20);
+    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(10, 20);
     EXPECT_EQ(result, "");
 }
 } // namespace OHOS::Ace::NG

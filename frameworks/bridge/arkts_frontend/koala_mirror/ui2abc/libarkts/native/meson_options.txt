@@ -35,3 +35,9 @@ option(
     value : 'es2panda',
     description : 'name of shared library'
 )
+option(
+    'cross_compile',
+    type : 'boolean',
+    value : false,
+    description : 'whether to build binaries for all architectures or just for current'
+)

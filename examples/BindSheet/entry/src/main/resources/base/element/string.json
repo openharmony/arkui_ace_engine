@@ -1,0 +1,88 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "SideSheet1",
+      "value": "SideSheet基础显示"
+    },
+    {
+      "name": "SideSheet2",
+      "value": "SideSheet视效1"
+    },
+    {
+      "name": "SideSheet3",
+      "value": "SideSheet视效2"
+    },
+    {
+      "name": "SideSheet4",
+      "value": "SideSheet回调接口测试"
+    },
+    {
+      "name": "SideSheet5",
+      "value": "SideSheet其他能力测试"
+    },
+    {
+      "name": "SideSheet6",
+      "value": "模态在多设备下的形态转换"
+    },
+    {
+      "name": "SideSheet7",
+      "value": "半模态新增Side多态样式"
+    },
+    {
+      "name": "SideSheet8",
+      "value": "半模态无极跟随主窗口拖拽移动"
+    },
+    {
+      "name": "MultiDevice1",
+      "value": "全模态"
+    },
+    {
+      "name": "MultiDevice2",
+      "value": "半模态(直板机)"
+    },
+    {
+      "name": "MultiDevice3",
+      "value": "半模态所在页面是否允许交互(默认值)"
+    },
+    {
+      "name": "MultiDevice4",
+      "value": "半模态所在页面是否允许交互(默认值)(Only全屏)"
+    },
+    {
+      "name": "MultiDevice5",
+      "value": "共享元素转场(一镜到底)"
+    },
+    {
+      "name": "MultiDevice6",
+      "value": "UiContext"
+    },
+    {
+      "name": "MultiDevice7",
+      "value": "半模态(折叠机/平板)"
+    },
+    {
+      "name": "MultiDevice8",
+      "value": "半模态(PC)"
+    },
+    {
+      "name": "MultiDevice9",
+      "value": "键盘避让"
+    },
+    {
+      "name": "MultiDevice10",
+      "value": "内容区域刷新时机"
+    }
+  ]
+}

@@ -179,6 +179,9 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
 static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
+    if (!curveObject) {
+        return 0.0;
+    }
     auto curveString = curveObject->curveString;
     float time = static_cast<float>(fraction);
     time = std::clamp(time, 0.0f, 1.0f);
@@ -225,6 +228,8 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     ani_object curve_object;
 
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(cubicBezierCurve))) {
+        delete cubicBezierCurve;
+        cubicBezierCurve = nullptr;
         return nullptr;
     }
 
@@ -240,6 +245,8 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
 
     ani_object curveNew_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(cubicBezierCurve))) {
+        delete cubicBezierCurve;
+        cubicBezierCurve = nullptr;
         return nullptr;
     }
 
@@ -402,10 +409,14 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     static const char *className = "L@ohos/curves/curves/Curves;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
+        delete springMotion;
+        springMotion = nullptr;
         return nullptr;
     }
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        delete springMotion;
+        springMotion = nullptr;
         return nullptr;
     }
     std::string curveString = GetSpringMotionCurveString(env, response, dampingFraction, overlapDuration);
@@ -416,6 +427,8 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
 
     ani_object curve_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(springMotion))) {
+        delete springMotion;
+        springMotion = nullptr;
         return nullptr;
     }
 
@@ -431,6 +444,8 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
 
     ani_object curveNew_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(springMotion))) {
+        delete springMotion;
+        springMotion = nullptr;
         return nullptr;
     }
     return curveNew_object;
@@ -529,6 +544,8 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
 
     if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(interpolatingCurve))) {
         std::cerr << "New curve object Fail" << std::endl;
+        delete interpolatingCurve;
+        interpolatingCurve = nullptr;
         return nullptr;
     }
 
@@ -545,6 +562,8 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
     ani_object objNew;
     if (ANI_OK != env->Object_New(cls, ctor, &objNew, reinterpret_cast<ani_object>(interpolatingCurve))) {
         std::cerr << "New curve object Fail" << std::endl;
+        delete interpolatingCurve;
+        interpolatingCurve = nullptr;
         return nullptr;
     }
 

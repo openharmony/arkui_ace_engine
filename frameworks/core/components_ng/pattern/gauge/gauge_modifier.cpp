@@ -75,7 +75,9 @@ void GaugeModifier::UpdateValue()
     option.SetDelay(ANIMATION_DELAY);
     option.SetCurve(curve);
     option.SetIteration(ANIMATION_TIMES);
-    AnimationUtils::Animate(option, [&]() { value_->Set(end_); });
+    auto host = pattern->GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
+    AnimationUtils::Animate(option, [&]() { value_->Set(end_); }, nullptr, nullptr, context);
 }
 
 void GaugeModifier::InitProperty()
@@ -103,6 +105,7 @@ void GaugeModifier::InitProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
     indicatorChange_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIndicatorChangeValue(false));
+    gaugeUpdate_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
@@ -188,6 +191,8 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         auto indicatorChange = indicatorChange_->Get();
         indicatorChange_->Set(!indicatorChange);
     }
+
+    gaugeUpdate_->Set(!gaugeUpdate_->Get());
 }
 
 

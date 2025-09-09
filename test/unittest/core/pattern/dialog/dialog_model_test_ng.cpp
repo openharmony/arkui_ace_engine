@@ -123,19 +123,19 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
      * @tc.steps: step2. Create EventHub.
      * @tc.expected: EventHub created successfully.
      */
-    auto eventHub = pattern->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = pattern->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->MarkModifyDone();
     /**
      * @tc.steps: step3. Get EventHub's properties.
-     * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
+     * @tc.expected: These properties are null when GetEventHub functions have not been invoked.
      */
     EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetOnDragStart(), nullptr);
 
     /**
-     * @tc.steps: step4. Invoke GetOrCreateEventHub functions.
+     * @tc.steps: step4. Invoke GetEventHub functions.
      * @tc.expected: These eventHub properties are not null.
      */
     eventHub->GetOrCreateGestureEventHub();
@@ -1235,6 +1235,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
     auto dialogOffset = OffsetF();
     auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
 
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
     auto offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
     EXPECT_EQ(offset.GetY(), OFFSET);
 
@@ -1276,10 +1281,10 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
- 
+
     auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
     auto selfSize = SizeF(CHILD_SIZE_2, CHILD_SIZE_2);
- 
+
     layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
     auto maskRect = layoutAlgorithm->GetMaskRect(dialog);
     EXPECT_FALSE(maskRect.has_value());

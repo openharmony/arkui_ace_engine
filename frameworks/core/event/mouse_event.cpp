@@ -29,7 +29,6 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     if (!onHoverEventCallback_) {
         return false;
     }
-    ACE_SCOPED_TRACE("HandleHoverEvent node:%d/%s isHovered:%d", GetNodeId(), GetNodeName().c_str(), isHovered);
     lastHoverState_ = isHovered;
     HoverInfo hoverInfo;
     auto node = GetAttachedNode().Upgrade();
@@ -40,6 +39,9 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
         auto localY = static_cast<float>(localPoint.GetY());
         hoverInfo.SetLocalLocation(Offset(localX, localY));
     }
+    hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
+    hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
@@ -225,7 +227,6 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
 {
     MouseEvent mouseEvent;
     mouseEvent.x = x - offset.GetX();
-    mouseEvent.x = x - offset.GetX();
     mouseEvent.y = y - offset.GetY();
     mouseEvent.z = z;
     mouseEvent.deltaX = deltaX;
@@ -270,4 +271,5 @@ const RefPtr<MouseEventResult>& NativeEmbeadMouseInfo::GetResult() const
 {
     return result_;
 }
+
 } // namespace OHOS::Ace

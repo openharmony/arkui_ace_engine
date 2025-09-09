@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 class RenderRefreshTarget : public virtual AceType {
-    DECLARE_ACE_TYPE(RenderRefreshTarget, AceType)
+    DECLARE_ACE_TYPE(RenderRefreshTarget, AceType);
 
 public:
     virtual bool HandleRefreshEffect(double delta, int32_t source, double currentOffset);

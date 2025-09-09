@@ -443,6 +443,8 @@ public:
 
     void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
 
+    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -491,6 +493,8 @@ public:
     {
         draggingIndex_ = index;
     }
+
+    void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -564,9 +568,6 @@ protected:
     virtual void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     virtual void FixPredictSnapPos();
     void FixPredictSnapOffsetAlignCenter();
-    bool LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index, bool forward, float &currPos, float crossSize);
-    virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
@@ -583,7 +584,6 @@ protected:
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline,
         ListMainSizeValues listMainSizeValues, bool show);
 
-    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
@@ -637,10 +637,10 @@ protected:
     PositionMap cachedItemPosition_;
     PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
-    float currentOffset_ = 0.0f;
-    float adjustOffset_ = 0.0f;
-    float totalOffset_ = 0.0f;
-    float currentDelta_ = 0.0f;
+    double currentOffset_ = 0.0;
+    double adjustOffset_ = 0.0;
+    double totalOffset_ = 0.0;
+    double currentDelta_ = 0.0;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     std::optional<float> layoutEndMainPos_;
@@ -649,8 +649,6 @@ protected:
     float contentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
-    bool canOverScrollStart_ = false;
-    bool canOverScrollEnd_ = false;
     bool isSpringEffect_ = false;
     bool expandSafeArea_ = false;
 
@@ -691,7 +689,8 @@ private:
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+
+    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -699,6 +698,8 @@ private:
 
     float prevContentStartOffset_ = 0.0f;
     float prevContentEndOffset_ = 0.0f;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool canOverScroll_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;

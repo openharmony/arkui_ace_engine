@@ -165,7 +165,9 @@
                             "ace_forward_compatibility.h",
                             "ai/data_detector_interface.h",
                             "ai/data_url_analyzer.h",
-                            "share/text_share_interface.h"
+                            "share/text_share_interface.h",
+                            "ai/image_analyzer.h",
+                            "ai/image_analyzer_interface.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"
@@ -261,7 +263,9 @@
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/test/unittest:unittest"
+                "//foundation/arkui/ace_engine/test/unittest:unittest",
+                "//foundation/arkui/ace_engine/test/benchmark:benchmark",
+                "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/test/unittest:statemgmt_ut_hap"
             ]
         }
     }

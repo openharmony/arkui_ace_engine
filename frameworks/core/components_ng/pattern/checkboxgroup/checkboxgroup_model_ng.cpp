@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
         V2::CHECKBOXGROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
@@ -44,7 +44,7 @@ void CheckBoxGroupModelNG::SetSelectAll(bool isSelected)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 
@@ -83,7 +83,7 @@ void CheckBoxGroupModelNG::SetOnChange(GroupChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -107,7 +107,7 @@ void CheckBoxGroupModelNG::SetChangeEvent(GroupChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -190,7 +190,7 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxS
 void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
@@ -200,7 +200,7 @@ void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std:
 std::string CheckBoxGroupModelNG::GetCheckboxGroupName(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
     return eventHub->GetGroupName();
 }
@@ -305,7 +305,7 @@ std::string CheckBoxGroupModelNG::ColorTypeToString(const CheckBoxGroupColorType
 
 void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -431,5 +431,21 @@ void CheckBoxGroupModelNG::ResetUnSelectedColor(FrameNode* frameNode)
         CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxGroupMakeCallback&& makeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void CheckBoxGroupModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCheckBoxGroupSelect(value);
 }
 } // namespace OHOS::Ace::NG

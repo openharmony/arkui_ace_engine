@@ -256,7 +256,7 @@ public:
  * @tc.desc: Test TextPickerDialogView Show(column kind is MIXTURE).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level0)
 {
     PickerTextProperties properties;
     properties.disappearTextStyle_.textColor = Color::RED;
@@ -302,7 +302,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(do not set callback).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level0)
 {
     PickerTextProperties properties;
     properties.disappearTextStyle_.textColor = Color::RED;
@@ -343,7 +343,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(do not set properties).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -370,7 +370,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(column kind is TEXT).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -397,7 +397,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(column kind is ICON).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -424,7 +424,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(column kind is invalid).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -451,7 +451,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(Invailid font size).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level0)
 {
     PickerTextProperties properties;
     properties.disappearTextStyle_.textColor = Color::RED;
@@ -492,7 +492,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(Multi Column).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -534,7 +534,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(Cascade Column).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -585,7 +585,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(Cascade Column Supply Zero Child).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level0)
 {
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -639,7 +639,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView Show(rangeVector is empty).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level0)
 {
     TextPickerDialogView::dialogNode_ = nullptr;
     // when rangeVector and multi selection are both empty, dialog will not display
@@ -687,7 +687,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
  * @tc.desc: Test TextPickerPattern OnAttachToFrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGCreateTextPicker001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGCreateTextPicker001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -707,7 +707,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreateTextPicker001, TestSize.Level1
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set Color).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -728,7 +728,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle001, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set FontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -749,7 +749,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle002, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set FontSize 0).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -769,7 +769,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle003, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set FontWeight).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -790,7 +790,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set minFontSize and maxFontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle005, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -814,7 +814,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle005, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set TextOverflow).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle006, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -835,7 +835,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle006, TestSize.L
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set Color).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -856,7 +856,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle001, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set FontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -877,7 +877,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle002, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set FontSize 0).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -897,7 +897,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle003, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set FontWeight).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -918,7 +918,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set minFontSize and maxFontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle005, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -942,7 +942,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle005, TestSize.Leve
 * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set TextOverflow).
 * @tc.type: FUNC
 */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle006, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -963,7 +963,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle006, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set invalid minFontSize and maxFontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle007, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle007, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -987,7 +987,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle007, TestSize.Leve
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set Color).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1008,7 +1008,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle001, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set FontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1029,7 +1029,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle002, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set FontSize 0).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1049,7 +1049,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle003, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set FontWeight).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1070,7 +1070,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set minFontSize and maxFontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle005, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1094,7 +1094,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle005, TestSize.Le
 * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set TextOverflow).
 * @tc.type: FUNC
 */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle006, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1115,7 +1115,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle006, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set invalid minFontSize and maxFontSize).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle007, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle007, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1139,7 +1139,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle007, TestSize.Le
  * @tc.desc: Test TextPickerModelNG SetSelected.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelected001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelected001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1160,7 +1160,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelected001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetRange.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1179,7 +1179,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetRange.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1198,7 +1198,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetRange002, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG Create(DeviceType::PHONE, DeviceOrientation::LANDSCAPE).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1221,7 +1221,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG Create(DeviceType::PHONE, DeviceOrientation::0).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     SystemProperties::SetDeviceType(DeviceType::PHONE);
@@ -1244,7 +1244,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetDefaultAttributes.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -1288,7 +1288,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDefaultAttributes001, TestSize.Le
  * @tc.desc: Test TextPickerModelNG MultiInit.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGMultiInit001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGMultiInit001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1311,7 +1311,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGMultiInit001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetIsCascade.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetIsCascade001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetIsCascade001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1335,7 +1335,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetIsCascade001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetSelecteds.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1364,7 +1364,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetSelecteds.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->MultiInit(theme);
@@ -1418,7 +1418,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetSelecteds.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->MultiInit(theme);
@@ -1463,7 +1463,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetValues.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetValues001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetValues001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1492,7 +1492,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetValues001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetColumns(Multi).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1528,7 +1528,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns001, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetColumns(Cascade).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1573,7 +1573,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns002, TestSize.Level1)
  * @tc.desc: Test TextPickerModelNG SetColumns(Cascade Supply Zero Child).
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1621,7 +1621,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns003, TestSize.Level1)
  * @tc.desc: Test Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1660,7 +1660,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1687,7 +1687,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1718,7 +1718,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1750,7 +1750,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1787,7 +1787,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1820,7 +1820,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     /**
@@ -1865,7 +1865,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1911,7 +1911,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView OnKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level0)
 {
     KeyEvent event;
 
@@ -1945,7 +1945,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level1)
  * @tc.desc: Test SetDefaultPickerItemHeight, SetCanLoop, SetBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest001, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
@@ -1983,7 +1983,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest001, TestSize.Level1)
  * @tc.desc: Test GetSingleRange, GetMultiOptions
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker framenode.
@@ -2028,7 +2028,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
  * @tc.desc: Test SetDivider
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
@@ -2059,7 +2059,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level1)
  * @tc.desc: Test SetTextPickerDialogShow
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker dialog model.
@@ -2091,7 +2091,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
  * @tc.desc: Test SetNormalTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest005, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest005, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker model.
@@ -2125,7 +2125,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest005, TestSize.Level1)
  * @tc.desc: Test SetColumns
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create textpicker model.
@@ -2160,7 +2160,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level1)
  * @tc.desc: Test TextPickerModelTest.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerModelTest007, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerModelTest007, TestSize.Level0)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
@@ -2201,7 +2201,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest007, TestSize.Level1)
  * @tc.desc: Test TextPickerDialogView ConvertFontScaleValue.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue001, TestSize.Level0)
 {
     Dimension fontSizeValue = 50.0_vp;
     Dimension fontSizeLimit = 40.0_vp;
@@ -2215,7 +2215,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue001, TestSiz
  * @tc.desc: Test TextPickerDialogView ConvertFontScaleValue.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue002, TestSize.Level0)
 {
     Dimension fontSizeValue = 20.0_vp;
     Dimension fontSizeLimit = 40.0_vp;
@@ -2229,7 +2229,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontScaleValue002, TestSiz
  * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest001, TestSize.Level0)
 {
     Dimension fontSizeValue(20.0);
     Dimension fontSizeLimit(30.0);
@@ -2243,7 +2243,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest001, Test
  * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest002, TestSize.Level0)
 {
     Dimension fontSizeValue(20.0);
     Dimension fontSizeLimit(30.0);
@@ -2257,7 +2257,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest002, Test
  * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest003, TestSize.Level0)
 {
     Dimension fontSizeValue(40.0);
     Dimension fontSizeLimit(30.0);
@@ -2274,7 +2274,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest003, Test
  * @tc.desc: Test TextPickerDialogView ConvertFontSizeLimit.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest004, TestSize.Level0)
 {
     Dimension fontSizeValue(10.0);
     Dimension fontSizeLimit(30.0);
@@ -2290,7 +2290,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewConvertFontSizeLimitTest004, Test
  * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest001, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest001, TestSize.Level0)
 {
     double fontScale = 1.0f;
     Dimension fontSizeValue(10.0);
@@ -2303,7 +2303,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest001, TestS
  * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest002, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest002, TestSize.Level0)
 {
     double fontScale = 1.75f;
     Dimension fontSizeValue(10.0);
@@ -2316,7 +2316,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest002, TestS
  * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest003, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest003, TestSize.Level0)
 {
     double fontScale = 2.0f;
     Dimension fontSizeValue(10.0);
@@ -2329,7 +2329,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest003, TestS
  * @tc.desc: Test TextPickerDialogView AdjustFontSizeScale.
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest004, TestSize.Level1)
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewGetUserSettingLimitTest004, TestSize.Level0)
 {
     double fontScale = 3.2f;
     Dimension fontSizeValue(10.0);

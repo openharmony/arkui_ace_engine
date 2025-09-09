@@ -46,6 +46,13 @@ void NodeContainerPattern::RemakeNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto newNode = FireMakeFunction();
+    AddBaseNode(newNode);
+}
+
+void NodeContainerPattern::AddBaseNode(const RefPtr<UINode>& newNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto oldChild = host->GetChildAtIndex(0);
     if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
         return;
@@ -193,7 +200,7 @@ RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode) {
-        return frameNode->GetOrCreateEventHub<NodeContainerEventHub>();
+        return frameNode->GetEventHub<NodeContainerEventHub>();
     }
     return nullptr;
 }

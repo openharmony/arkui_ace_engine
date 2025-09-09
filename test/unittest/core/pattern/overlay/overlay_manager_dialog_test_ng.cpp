@@ -685,7 +685,9 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest007, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call ShowDialog.
      * @tc.expected: DialogNode created successfully
      */
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
     auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
     ASSERT_NE(dialog, nullptr);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
@@ -705,6 +707,16 @@ HWTEST_F(OverlayManagerDialogTestNg, DialogTest007, TestSize.Level1)
     ASSERT_NE(transitionEffect, nullptr);
     auto dialogScaleTransition = transitionEffect->GetNext();
     ASSERT_NE(dialogScaleTransition, nullptr);
+
+    /**
+     * @tc.steps: step5. remove dialog from parent.
+     * @tc.expected: dialogMap_ is empty.
+     */
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    root->RemoveChild(root->GetLastChild());
+    root->RemoveChild(root->GetLastChild());
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 /**
  * @tc.name: DialogTest008
@@ -972,7 +984,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest003, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1281,7 +1293,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest009, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);

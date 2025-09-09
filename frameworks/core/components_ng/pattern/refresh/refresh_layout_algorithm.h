@@ -54,6 +54,11 @@ public:
         builderBaseHeight_ = builderBaseHeight;
     }
 
+    void SetIsHighVersion(bool value)
+    {
+        isHighVersion_ = value;
+    }
+
 private:
     bool HasCustomBuilderIndex() const
     {
@@ -67,6 +72,7 @@ private:
     float builderBaseHeight_ = 0.0f;
     float customBuilderOffset_ = 0.0f;
     float scrollOffset_ = 0.0f;
+    bool isHighVersion_ = true;
     std::optional<int32_t> customBuilderIndex_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutAlgorithm);
 };

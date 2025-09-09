@@ -34,7 +34,7 @@ public:
 
 /**
  * @tc.name: TextOverlayModifierTest001
- * @tc.desc: test text_overlay_modifier.cpp.
+ * @tc.desc: test text_overlay_modifier.cpp
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
@@ -781,7 +781,7 @@ HWTEST_F(TextTestTwoNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     host->draggable_ = true;
-    host->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
+    host->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -1476,8 +1476,8 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     info.action_ = MouseAction::RELEASE;
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -1541,7 +1541,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     textModelNG.SetTextDetectEnable(true);
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
-    auto inputHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputHub->mouseEventActuator_->inputEvents_.clear();
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
@@ -1636,7 +1636,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent006, TestSize.Level1)
      * @tc.expect: expect selectedType_ IMAGE when mouse release offset not in textContentRect region.
      */
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 30 });
-    auto inputHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputHub->mouseEventActuator_->inputEvents_.clear();
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
@@ -1757,7 +1757,7 @@ HWTEST_F(TextTestTwoNg, HandleLongPress002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     frameNode->draggable_ = true;
-    frameNode->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
+    frameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->copyOption_ = CopyOptions::InApp;

@@ -1975,10 +1975,10 @@ typedef struct Ark_Literal_Number_surfaceHeight_surfaceWidth Ark_Literal_Number_
 typedef struct Opt_Literal_Number_surfaceHeight_surfaceWidth Opt_Literal_Number_surfaceHeight_surfaceWidth;
 typedef struct Ark_Literal_Object_object__String_name_Array_String_methodList Ark_Literal_Object_object__String_name_Array_String_methodList;
 typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_HorizontalAlignOptions Ark_HorizontalAlignOptions;
-typedef struct Opt_HorizontalAlignOptions Opt_HorizontalAlignOptions;
-typedef struct Ark_VerticalAlignOptions Ark_VerticalAlignOptions;
-typedef struct Opt_VerticalAlignOptions Opt_VerticalAlignOptions;
+typedef struct Ark_HorizontalAlignParam Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam Opt_HorizontalAlignParam;
+typedef struct Ark_VerticalAlignParam Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam Opt_VerticalAlignParam;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Ark_Literal_String_plainText Ark_Literal_String_plainText;
@@ -3121,6 +3121,14 @@ typedef struct Ark_NavigationToolbarOptions Ark_NavigationToolbarOptions;
 typedef struct Opt_NavigationToolbarOptions Opt_NavigationToolbarOptions;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
 typedef struct Opt_PopupOptions Opt_PopupOptions;
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents; 
+typedef struct Ark_SingleLengthDetent Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent Opt_SingleLengthDetent;
+typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
+typedef struct Ark_TripleLengthDetents Ark_TripleLengthDetents;
+typedef struct Opt_TripleLengthDetents Opt_TripleLengthDetents;
 typedef struct Ark_RichEditorImageSpanOptions Ark_RichEditorImageSpanOptions;
 typedef struct Opt_RichEditorImageSpanOptions Opt_RichEditorImageSpanOptions;
 typedef struct Ark_RichEditorImageSpanResult Ark_RichEditorImageSpanResult;
@@ -13018,22 +13026,22 @@ typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList {
     Ark_Tag tag;
     Ark_Literal_Object_object__String_name_Array_String_methodList value;
 } Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_HorizontalAlignOptions {
+typedef struct Ark_HorizontalAlignParam {
     Ark_String anchor;
     Ark_HorizontalAlign align;
-} Ark_HorizontalAlignOptions;
-typedef struct Opt_HorizontalAlignOptions {
+} Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam {
     Ark_Tag tag;
-    Ark_HorizontalAlignOptions value;
-} Opt_HorizontalAlignOptions;
-typedef struct Ark_VerticalAlignOptions {
+    Ark_HorizontalAlignParam value;
+} Opt_HorizontalAlignParam;
+typedef struct Ark_VerticalAlignParam {
     Ark_String anchor;
     Ark_VerticalAlign align;
-} Ark_VerticalAlignOptions;
-typedef struct Opt_VerticalAlignOptions {
+} Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam {
     Ark_Tag tag;
-    Ark_VerticalAlignOptions value;
-} Opt_VerticalAlignOptions;
+    Ark_VerticalAlignParam value;
+} Opt_VerticalAlignParam;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType {
     Ark_String data;
     Ark_String mimeType;
@@ -15510,6 +15518,46 @@ typedef struct Opt_Union_SizeOptions_ImageSize {
     Ark_Tag tag;
     Ark_Union_SizeOptions_ImageSize value;
 } Opt_Union_SizeOptions_ImageSize;
+typedef struct Ark_SingleLengthDetent {
+    Ark_Union_SheetSize_Length value0;
+} Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent {
+    Ark_Tag tag;
+    Ark_SingleLengthDetent value;
+} Opt_SingleLengthDetent;
+
+typedef struct Ark_DoubleLengthDetents {
+    Ark_Union_SheetSize_Length value0;
+    Opt_Union_SheetSize_Length value1;
+} Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents {
+    Ark_Tag tag;
+    Ark_DoubleLengthDetents value;
+} Opt_DoubleLengthDetents;
+
+typedef struct Ark_TripleLengthDetents {
+    Ark_Union_SheetSize_Length value0;
+    Opt_Union_SheetSize_Length value1;
+    Opt_Union_SheetSize_Length value2;
+} Ark_TripleLengthDetents;
+typedef struct Opt_TripleLengthDetents {
+    Ark_Tag tag;
+    Ark_TripleLengthDetents value;
+} Opt_TripleLengthDetents;
+
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_SingleLengthDetent value0;
+        Ark_DoubleLengthDetents value1;
+        Ark_TripleLengthDetents value2;
+    };
+} Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    Ark_Tag tag;
+    Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents value;
+} Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_Union_String_Array_String {
     Ark_Int32 selector;
     union {
@@ -15822,12 +15870,12 @@ typedef struct Opt_AlertDialogButtonOptions {
     Ark_AlertDialogButtonOptions value;
 } Opt_AlertDialogButtonOptions;
 typedef struct Ark_AlignRuleOption {
-    Opt_HorizontalAlignOptions left;
-    Opt_HorizontalAlignOptions right;
-    Opt_HorizontalAlignOptions middle;
-    Opt_VerticalAlignOptions top;
-    Opt_VerticalAlignOptions bottom;
-    Opt_VerticalAlignOptions center;
+    Opt_HorizontalAlignParam left;
+    Opt_HorizontalAlignParam right;
+    Opt_HorizontalAlignParam middle;
+    Opt_VerticalAlignParam top;
+    Opt_VerticalAlignParam bottom;
+    Opt_VerticalAlignParam center;
     Opt_Bias bias;
 } Ark_AlignRuleOption;
 typedef struct Opt_AlignRuleOption {
@@ -18497,7 +18545,7 @@ typedef struct Ark_SheetOptions {
     Opt_Union_SheetSize_Length height;
     Opt_Boolean dragBar;
     Opt_ResourceColor maskColor;
-    Opt_Type_SheetOptions_detents detents;
+    Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents detents;
     Opt_BlurStyle blurStyle;
     Opt_Union_Boolean_Resource showClose;
     Opt_SheetType preferType;
@@ -23071,6 +23119,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_WebResponseType* responseType,
                                  const Opt_SelectionMenuOptionsExt* options);
+    void (*setForceEnableZoom)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {
@@ -23881,6 +23931,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_FrameNode (*createTypedFrameNode)(const Ark_String* type);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
+    void (*applyAttributesFinish)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {
@@ -24402,6 +24453,9 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
     Opt_Number (*getAxisVertical)(Ark_BaseEvent peer);
     void (*setAxisVertical)(Ark_BaseEvent peer,
                             const Ark_Number* axisVertical);
+    Opt_Number (*getAxisPinch)(Ark_BaseEvent peer);
+    void (*setAxisPinch)(Ark_BaseEvent peer,
+                            const Ark_Number* axisPinch);
     Ark_Number (*getPressure)(Ark_BaseEvent peer);
     void (*setPressure)(Ark_BaseEvent peer,
                         const Ark_Number* pressure);
@@ -24591,6 +24645,7 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getHorizontalAxisValue)(Ark_AxisEvent peer);
     Ark_Number (*getVerticalAxisValue)(Ark_AxisEvent peer);
+    Ark_Number (*getPinchAxisScaleValue)(Ark_AxisEvent peer);
     Ark_AxisAction (*getAction)(Ark_AxisEvent peer);
     void (*setAction)(Ark_AxisEvent peer,
                       Ark_AxisAction action);
@@ -26868,7 +26923,9 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
     const GENERATED_ArkUIFlexModifier* (*getFlexModifier)();
     const GENERATED_ArkUIFlowItemModifier* (*getFlowItemModifier)();
+#ifndef ARKUI_WEARABLE
     const GENERATED_ArkUIFolderStackModifier* (*getFolderStackModifier)();
+#endif
     const GENERATED_ArkUIFormComponentModifier* (*getFormComponentModifier)();
     const GENERATED_ArkUIFormLinkModifier* (*getFormLinkModifier)();
     const GENERATED_ArkUIGaugeModifier* (*getGaugeModifier)();

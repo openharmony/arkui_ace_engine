@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TitleBarNode : public FrameNode {
-    DECLARE_ACE_TYPE(TitleBarNode, FrameNode)
+    DECLARE_ACE_TYPE(TitleBarNode, FrameNode);
 public:
     TitleBarNode(const std::string& tag, int32_t nodeId);
     TitleBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)

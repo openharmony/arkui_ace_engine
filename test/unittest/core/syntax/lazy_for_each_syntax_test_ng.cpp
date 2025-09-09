@@ -2173,4 +2173,19 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyCountChangeTest001, TestSiz
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
+/**
+ * @tc.name: LazyForEachNode OnDelete
+ * @tc.desc: LazyForEachNode OnDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNode_OnDelete, TestSize.Level1)
+{
+    auto lazyForEachNode = CreateLazyForEachNode();
+    lazyForEachNode->OnDelete();
+    EXPECT_FALSE(lazyForEachNode->isRegisterListener_);
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->OnDelete();
+    EXPECT_FALSE(lazyForEachNode->isRegisterListener_);
+}
+
 } // namespace OHOS::Ace::NG

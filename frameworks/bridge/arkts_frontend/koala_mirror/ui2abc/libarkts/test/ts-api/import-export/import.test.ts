@@ -17,7 +17,7 @@ import * as util from "../../test-util"
 import * as ts from "../../../src/ts-api"
 import { factory } from "../../../src/ts-api"
 
-// TODO:
+// Improve:
 suite.skip(util.basename(__filename), () => {
     test("sample-1", function() {
         const sample_in =

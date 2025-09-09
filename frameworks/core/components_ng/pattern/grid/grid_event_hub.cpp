@@ -168,7 +168,6 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
-    dragDropManager->SetDragStartPoint(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY());
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [id = Container::CurrentId(), pipeline, info, host, gridItem, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
@@ -360,7 +359,10 @@ void GridEventHub::MoveItems(int32_t itemIndex, int32_t insertIndex) const
     auto curve = MakeRefPtr<SpringCurve>(
         ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
     option.SetCurve(curve);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(
-        option, [pattern, itemIndex, insertIndex]() { pattern->MoveItems(itemIndex, insertIndex); }, nullptr);
+        option, [pattern, itemIndex, insertIndex]() { pattern->MoveItems(itemIndex, insertIndex); }, nullptr,
+        nullptr, context);
 }
 } // namespace OHOS::Ace::NG

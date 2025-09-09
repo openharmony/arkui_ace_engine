@@ -26,7 +26,12 @@ static const std::string ENTRY_SUFFIX = "/__EntryWrapper";
 
 ani_object EntryLoader::GetPageEntryObj()
 {
-    const std::string moduleName = Container::Current()->GetModuleName();
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("EntryLoader GetPageEntryObj failed, container is null");
+        return nullptr;
+    }
+    const std::string moduleName = container->GetModuleName();
     std::string entryPointName;
     entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
     entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);

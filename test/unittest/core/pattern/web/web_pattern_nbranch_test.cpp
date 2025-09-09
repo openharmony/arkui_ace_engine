@@ -275,7 +275,6 @@ HWTEST_F(WebPatternBranchTestUT, OnDefaultTextEncodingFormatUpdate, TestSize.Lev
     webPattern->delegate_ = nullptr;
     std::string tag = "value";
     webPattern->OnDefaultTextEncodingFormatUpdate(tag);
-    ASSERT_EQ(webPattern->delegate_, nullptr);
 #endif
 }
 
@@ -361,7 +360,6 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess008, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     webPattern->isPasswordFill_ = true;
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
-    EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
 }
 

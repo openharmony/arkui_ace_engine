@@ -178,6 +178,7 @@ public:
         const std::vector<std::string>& keyTypes,
         const std::vector<std::string>& issuers) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
+    void OnContextMenuDismissed() override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
     void UpdateClippedSelectionBounds(int x, int y, int w, int h) override;
@@ -239,6 +240,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
     void OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event) override;
+    void OnNativeEmbedObjectParamChange(std::shared_ptr<NWeb::NWebNativeEmbedParamDataInfo> paramDataInfo) override;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
     void OnTooltip(const std::string& tooltip) override;
@@ -312,6 +314,10 @@ public:
 
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
 
+    void OnLoadStarted(const std::string& url) override;
+
+    void OnLoadFinished(const std::string& url) override;
+
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
 
     bool OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result, OHOS::NWeb::SslError error,
@@ -331,6 +337,12 @@ public:
 
     void OnPdfScrollAtBottom(const std::string& url) override;
     void OnPdfLoadEvent(int32_t result, const std::string& url) override;
+    void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
+                                        uint32_t width,
+                                        uint32_t height) override;
+    void SetImeShow(bool visible) override;
+    bool IsShowHandle() override;
+    void OnSafeBrowsingCheckFinish(int threat_type) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

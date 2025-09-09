@@ -97,6 +97,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
     eventObj->SetProperty<double>("axisVertical", 0.0f);
     eventObj->SetProperty<double>("axisHorizontal", 0.0f);
+    eventObj->SetProperty<double>("axisPinch", 0.0f);
     eventObj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     eventObj->SetPropertyObject(

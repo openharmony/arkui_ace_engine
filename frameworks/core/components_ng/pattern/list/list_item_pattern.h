@@ -216,6 +216,8 @@ public:
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+    void ExpandSwipeAction(ListItemSwipeActionDirection direction);
+    void ExpandSwipeActionWithAnimate(ListItemSwipeIndex index);
 
     void FireOnFinishEvent() const
     {
@@ -283,6 +285,9 @@ private:
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
@@ -343,6 +348,7 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
+    std::optional<ListItemSwipeIndex> expandSwipeAction_;
     
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;
 

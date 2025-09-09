@@ -16,7 +16,7 @@
 import * as arkts from "../../../../../src/arkts-api"
 
 class InsertParameterToType extends arkts.AbstractVisitor {
-    visitor(beforeChildren: arkts.ETSModule): arkts.ETSModule
+    visitor(beforeChildren: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isETSFunctionType(node)) {
@@ -24,10 +24,9 @@ class InsertParameterToType extends arkts.AbstractVisitor {
                 node.typeParams,
                 [
                     arkts.factory.createETSParameterExpression(
-                        arkts.factory.createIdentifier("createdParam"),
+                        arkts.factory.createIdentifier("createdParam", arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_BOOLEAN)),
                         false,
                         undefined,
-                        arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_BOOLEAN),
                         undefined
                     ),
                     ...node.params
@@ -43,5 +42,5 @@ class InsertParameterToType extends arkts.AbstractVisitor {
 }
 
 export function insertParameterToType(program: arkts.Program) {
-    return (new InsertParameterToType()).visitor(program.astNode)
+    program.setAst(new InsertParameterToType().visitor(program.ast))
 }

@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/frame_node.h"
@@ -55,16 +56,18 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     info_->firstRepeatCount_ = 0;
     info_->childrenCount_ = 0;
     pattern->GetRepeatCountInfo(host, info_->repeatDifference_, info_->firstRepeatCount_, info_->childrenCount_);
+    info_->axis_ = axis_ = props_->GetAxis();
+    auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     sections_ = pattern->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         info_->isDataValid_ = false;
         return;
     }
 
-    info_->axis_ = axis_ = props_->GetAxis();
-    auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
+    InitUnlayoutedItems();
+
     const float prevOffset = pattern->GetPrevOffset();
-    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
 
@@ -72,16 +75,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
-    if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
-        MeasureOnJump(info_->jumpIndex_);
-        info_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
-    } else if (info_->targetIndex_) {
-        MeasureToTarget(*info_->targetIndex_, std::nullopt);
-        info_->targetIndex_.reset();
-        info_->duringPositionCalc_ = false;
-    } else {
-        MeasureOnOffset();
-    }
+    PerformMeasurement();
 
     if (matchChildren) {
         PostMeasureSelf(idealSize);
@@ -98,6 +92,10 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     } else {
         PreloadItems(wrapper_, info_, cacheCnt);
     }
+
+    measuredStartIndex_ = info_->StartIndex();
+    measuredEndIndex_ = info_->EndIndex();
+    isLayouted_ = false;
 }
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
@@ -138,6 +136,9 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
         cacheCount, props_->GetShowCachedItemsValue(false));
 
     UpdateOverlay(wrapper_);
+
+    ClearUnlayoutedItems(wrapper_);
+
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
 }
@@ -530,7 +531,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     if (itemsCrossSize_[seg].size() == 1 && item->GetLayoutProperty()->GetNeedLazyLayout()) {
         ViewPosReference ref {
             .viewPosStart = 0,
-            .viewPosEnd = info_->duringPositionCalc_ ? Infinity<float>() : mainSize_ + info_->expandHeight_,
+            .viewPosEnd = info_->duringPositionCalc_ ? LayoutInfinity<float>() : mainSize_ + info_->expandHeight_,
             .referencePos = position.second + info_->currentOffset_,
             .referenceEdge = ReferenceEdge::START,
             .axis = axis_,
@@ -640,5 +641,19 @@ bool WaterFlowSegmentedLayout::IsForWard() const
 {
     const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
     return LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
+}
+
+void WaterFlowSegmentedLayout::PerformMeasurement()
+{
+    if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
+        MeasureOnJump(info_->jumpIndex_);
+        info_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
+    } else if (info_->targetIndex_) {
+        MeasureToTarget(*info_->targetIndex_, std::nullopt);
+        info_->targetIndex_.reset();
+        info_->duringPositionCalc_ = false;
+    } else {
+        MeasureOnOffset();
+    }
 }
 } // namespace OHOS::Ace::NG

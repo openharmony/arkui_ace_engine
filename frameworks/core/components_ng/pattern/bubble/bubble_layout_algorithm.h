@@ -129,10 +129,12 @@ public:
     {
         return arrowPlacement_;
     }
+
     std::vector<float>& GetArrowOffsetByClips()
     {
         return arrowOffsetByClips_;
     }
+
     std::string GetClipPath() const
     {
         return clipPath_;
@@ -326,6 +328,8 @@ private:
     OffsetF childOffset_;
     // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;
     SizeF selfSize_;
@@ -333,8 +337,7 @@ private:
     Rect hostWindowRect_;
     SizeF buttonRowSize_;
     OffsetF buttonRowOffset_;
-    // top right bottom left
-    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+
     Edge padding_;
     Edge margin_;
     Border border_;

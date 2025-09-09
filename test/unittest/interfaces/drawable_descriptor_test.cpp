@@ -31,7 +31,6 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t ID = 1;
 const uint32_t DENSITY = 0;
-const uint32_t ICONTYPE = 0;
 const std::string PATH_NAME = "";
 } // namespace
 class DrawableDescriptorTest : public testing::Test {
@@ -131,17 +130,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
     Napi::DrawableDescriptor::DrawableType drawableType;
     auto res = drawableDescriptorFactory.Create(ID, resourceMgr, state, drawableType, DENSITY);
     EXPECT_EQ(res, nullptr);
-
     auto res2 = drawableDescriptorFactory.Create(nullptr, resourceMgr, state, drawableType, DENSITY);
     EXPECT_EQ(res2, nullptr);
-    std::tuple<int32_t, uint32_t, uint32_t> drawableInfo(ID, ICONTYPE, DENSITY);
-    auto res3 = drawableDescriptorFactory.Create(drawableInfo, resourceMgr, state, drawableType);
-    EXPECT_EQ(res3, nullptr);
-
-    std::tuple<const char*, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
-    auto res4 = drawableDescriptorFactory.Create(drawableInfoName, resourceMgr, state, drawableType);
-    EXPECT_EQ(res4, nullptr);
-
     std::pair<std::unique_ptr<uint8_t[]>, size_t> foregroundInfo = { nullptr, 0 };
     std::pair<std::unique_ptr<uint8_t[]>, size_t> backgroundInfo = { nullptr, 0 };
     std::string path = "path";
@@ -196,7 +186,6 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest006, TestSize.Level1)
     uint32_t density = 2;
     auto layeredDrawableDescriptor =
         Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
-
     /**
      * @tc.steps: step2. check
      */

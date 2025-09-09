@@ -16,6 +16,8 @@
 #include "scroll_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 class ScrollControllerTestNg : public ScrollTestNg, public testing::WithParamInterface<bool> {};
@@ -369,5 +371,74 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
     EXPECT_TRUE(IsAtEnd());
     EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -VERTICAL_SCROLLABLE_DISTANCE, WIDTH, CONTENT_MAIN_SIZE)));
+}
+
+/**
+ * @tc.name: CreateWithResourceObjScrollBarColor
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in ScrollModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, CreateWithResourceObjScrollBarColor001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.CreateWithResourceObjScrollBarColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    uint32_t color = ScrollModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(color, Color::BLUE.GetValue());
+
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    color = ScrollModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_));
+    EXPECT_NE(color, Color::RED.GetValue());
+}
+
+/**
+ * @tc.name: CreateWithResourceObjScrollBarColor
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in ScrollModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, CreateWithResourceObjScrollBarColor002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ScrollModelNG::CreateWithResourceObjScrollBarColor(AceType::RawPtr(frameNode_), invalidResObj);
+    model.CreateWithResourceObjScrollBarColor(invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    ScrollModelNG::CreateWithResourceObjScrollBarColor(AceType::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    uint32_t color = ScrollModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(color, Color::BLUE.GetValue());
+
+    model.CreateWithResourceObjScrollBarColor(resObjWithString);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    color = ScrollModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_));
+    EXPECT_NE(color, Color::RED.GetValue());
 }
 } // namespace OHOS::Ace::NG

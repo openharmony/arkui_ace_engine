@@ -27,11 +27,10 @@
 #include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
-#ifdef ACE_STATIC
 #include "base/utils/multi_thread.h"
-#endif
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
@@ -49,7 +48,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
-#include "transaction/rs_interfaces.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "ui/rs_ui_context.h"
@@ -162,9 +160,7 @@ void XComponentPattern::InitXComponent()
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(host, InitSurface, host);
-#endif
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -182,8 +178,9 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -280,9 +277,7 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
-#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
@@ -294,18 +289,26 @@ void XComponentPattern::OnAttachToMainTree()
         if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
             TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
                 "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
-            displaySync_->AddToPipelineOnContainer();
+            WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+            displaySync_->AddToPipeline(pipelineContext);
             needRecoverDisplaySync_ = false;
         }
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
+    CHECK_NULL_VOID(renderSurface_);
+    auto customNode = host->GetParentCustomNode();
+    CHECK_NULL_VOID(customNode);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto bundleName = pipelineContext->GetBundleName();
+    PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
+        customNode->GetJSViewName(), bundleName.c_str(), getpid());
 }
 
 void XComponentPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
-#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     isOnTree_ = false;
@@ -321,6 +324,7 @@ void XComponentPattern::OnDetachFromMainTree()
             needRecoverDisplaySync_ = true;
         }
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
 void XComponentPattern::InitializeRenderContext()
@@ -381,7 +385,7 @@ void XComponentPattern::RequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -489,9 +493,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
-#endif
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -506,7 +508,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
         if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
             OnSurfaceDestroyed();
-            auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+            auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireDestroyEvent(GetId());
             if (id_.has_value()) {
@@ -538,9 +540,7 @@ void XComponentPattern::InitController()
     CHECK_NULL_VOID(xcomponentController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(host, InitController);
-#endif
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -639,9 +639,16 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        pattern->UpdateAnalyzerUIConfig(geometryNode);
+    });
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = paintRect_.GetSize();
@@ -755,7 +762,7 @@ void XComponentPattern::XComponentSizeInit()
         xcomponentController_->SetSurfaceId(surfaceId_);
     }
 #endif
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback",
         GetId().c_str());
@@ -984,7 +991,7 @@ void XComponentPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (id_.has_value()) {
         eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
@@ -1462,14 +1469,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     CHECK_NULL_VOID(range);
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
-    displaySync_->SetExpectedFrameRateRange(frameRateRange);
-#ifdef ENABLE_ROSEN_BACKEND
-    if (frameRateRange.preferred_ != lastFrameRateRange_.preferred_) {
-        Rosen::RSInterfaces::GetInstance().NotifyXComponentExpectedFrameRate(GetId(), frameRateRange.preferred_);
-    }
-    lastFrameRateRange_.Set(range->min, range->max, range->expected);
-#endif
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), isOnTree_, frameRateRange);
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " NotifyXComponentExpectedFrameRate"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
@@ -1487,7 +1488,13 @@ void XComponentPattern::HandleOnFrameEvent()
     });
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
         displaySync_->GetId());
-    displaySync_->AddToPipelineOnContainer();
+    auto host = GetHost();
+    if (host) {
+        WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+        displaySync_->AddToPipeline(pipelineContext);
+    } else {
+        displaySync_->AddToPipelineOnContainer();
+    }
 }
 
 void XComponentPattern::HandleUnregisterOnFrameEvent()
@@ -1702,7 +1709,7 @@ void XComponentPattern::LoadNative()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_.value_or(""), host->GetId());
     OnNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
@@ -1712,7 +1719,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = true;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireLoadEvent(GetId());
 }
@@ -1721,7 +1728,7 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = false;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireDestroyEvent(GetId());
 }
@@ -1746,7 +1753,7 @@ void XComponentPattern::OnSurfaceCreated()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
     }
@@ -1776,7 +1783,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
-        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect, GetId());
     }
@@ -1803,7 +1810,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
             CHECK_NULL_VOID(host);
             frameNode = Referenced::RawPtr(host);
         }
-        auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
     }

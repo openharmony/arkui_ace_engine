@@ -14,11 +14,30 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
+namespace {
+std::string GetErrorMessage(int32_t errorCode)
+{
+    std::string errorMessage;
+    switch (errorCode) {
+        case ERROR_CODE_PARAM_INVALID:
+            errorMessage = "Parameter error.";
+            break;
+        case ERROR_CODE_PARAM_ERROR:
+            errorMessage = "The component type of the node is incorrect.";
+            break;
+        case ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE:
+            errorMessage = "The node not mounted to component tree.";
+            break;
+    }
+    return errorMessage;
+}
+} // namespace
 
 ArkUINativeModuleValue ListItemBridge::SetListItemSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -176,6 +195,41 @@ ArkUINativeModuleValue ListItemBridge::ResetListItemInitialize(ArkUIRuntimeCallI
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemModifier()->resetListItemStyle(nativeNode);
 
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemBridge::Expand(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!directionArg->IsNumber()) {
+        ArkTSUtils::ThrowError(vm, "Parameter error.", ERROR_CODE_PARAM_INVALID);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto direction = directionArg->ToNumber(vm)->Int32Value(vm);
+    int32_t errorCode = GetArkUINodeModifiers()->getListItemModifier()->expand(nativeNode, direction);
+    if (ERROR_CODE_NO_ERROR == errorCode) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkTSUtils::ThrowError(vm, GetErrorMessage(errorCode), errorCode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemBridge::Collapse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    int32_t errorCode = GetArkUINodeModifiers()->getListItemModifier()->collapse(nativeNode);
+    if (ERROR_CODE_NO_ERROR == errorCode) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkTSUtils::ThrowError(vm, GetErrorMessage(errorCode), errorCode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

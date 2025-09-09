@@ -381,7 +381,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::StaticMethod("getTitle", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getWebId", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getDefaultUserAgent", &JSWeb::Mock);
-    JSClass<JSWebController>::StaticMethod("getProgress", &JSWeb::Mock);
     JSClass<JSWebController>::Bind(globalObj);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -529,6 +528,27 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 }
 
 void JSUIExtension::Mock(const JSCallbackInfo& info) {}
+
+void JSPreviewUIExtension::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPreviewUIExtension>::Declare("PreviewUIExtensionComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSPreviewUIExtension>::StaticMethod("create", &JSPreviewUIExtension::Create, opt);
+    JSClass<JSPreviewUIExtension>::StaticMethod("onError", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::StaticMethod("width", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::StaticMethod("height", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSPreviewUIExtension::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("PreviewUIExtensionComponent");
+}
+
+void JSPreviewUIExtension::Mock(const JSCallbackInfo& info) {}
 
 void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
 {

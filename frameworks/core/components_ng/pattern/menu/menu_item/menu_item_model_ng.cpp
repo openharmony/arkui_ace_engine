@@ -366,7 +366,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    SetupMenuItemProperties(menuItem, theme); 
+    SetupMenuItemProperties(menuItem, theme);
 
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
@@ -472,9 +472,7 @@ void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, 
             CHECK_NULL_VOID(menuProperty);
             MenuItemProperties& menuItemPropsValue = const_cast<MenuItemProperties&>(menuItemProps);
             menuItemPropsValue.ReloadResources(menuItemPropsValue);
-            menuProperty->UpdateStartIcon(menuItemPropsValue.startIcon.value_or(ImageSourceInfo("")));
             menuProperty->UpdateContent(menuItemPropsValue.content);
-            menuProperty->UpdateEndIcon(menuItemPropsValue.endIcon.value_or(ImageSourceInfo("")));
             menuProperty->UpdateLabel(menuItemPropsValue.labelInfo.value_or(""));
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -500,7 +498,7 @@ void MenuItemModelNG::SetSelected(bool isSelected)
     auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
-    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }
@@ -535,7 +533,7 @@ void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
 void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -621,7 +619,7 @@ void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
     auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
-    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }

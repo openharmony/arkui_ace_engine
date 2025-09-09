@@ -26,7 +26,6 @@
 #include "test/mock/core/common/mock_image_analyzer_manager.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/base/mock_task_executor.h"
-
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -235,7 +234,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::MOVING_PHOTO_ETS_TAG);
-    auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     EXPECT_TRUE(movingPhotoEventHub != nullptr);
 
     movingPhotoEventHub->FireStartEvent();
@@ -468,7 +467,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     // set MovingPhotoEvent
-    auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
     auto movingPhotoLayoutProperty = pattern->GetLayoutProperty<MovingPhotoLayoutProperty>();
 
@@ -505,7 +504,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest009, TestSize.Level1)
      * @tc.steps: step2. MovingPhoto stop
      * @tc.expected: step3. MovingPhoto stop successfully
      */
-    auto movingPhotoEventHub = pattern->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = pattern->GetEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
     pattern->Stop();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())
@@ -1285,7 +1284,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest027, TestSize.Level1)
 
     /**
      * @tc.steps: step2. DetachFirstImageFromFrameNode
-     * @tc.expected: step2. delete first imageNode
+     * @tc.expected: step2. NotifyTransition add temp node
      */
     pattern->NotifyTransition();
     int32_t childCount = frameNode->GetTotalChildCount();

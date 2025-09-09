@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -38,7 +39,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto eventHub = page->GetOrCreateEventHub<EventHub>();
+    auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
@@ -98,6 +99,18 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     }
     if (destPage) {
         destPage->SetNodeFreeze(false);
+        auto pagePattern = destPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        auto pagePath = pageInfo->GetFullPath();
+        std::string routeType("routerPageChange");
+        if (type == RouteType::PUSH) {
+            routeType = "routerPushPage";
+        } else if (type == RouteType::POP) {
+            routeType = "routerPopPage";
+        }
+        UiSessionManager::GetInstance()->OnRouterChange(pagePath, routeType);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -186,7 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        
+
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -448,7 +461,8 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if (children.empty()) {
         return false;
     }
-    const auto& lastPage = children.back();
+    // srcPageNode_ is last page in pageRouterStack.
+    const auto& lastPage = srcPageNode_.Upgrade();
     if (lastPage == node) {
         return true;
     }
@@ -796,5 +810,4 @@ void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& hom
     ignoreOrientation_ = ignoreOrientation;
     OnForceSplitConfigUpdate();
 }
-
 } // namespace OHOS::Ace::NG

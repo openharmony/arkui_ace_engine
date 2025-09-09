@@ -32,7 +32,7 @@ import { PixelMap } from "./arkui-pixelmap"
 import { SymbolGlyphModifier } from "./arkui-external"
 import { SystemBarStyle } from "./arkui-custom"
 import { Scroller } from "./scroll"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight, Curve } from "./enums"
 

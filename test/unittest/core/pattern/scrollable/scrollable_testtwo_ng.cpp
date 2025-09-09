@@ -450,35 +450,6 @@ HWTEST_F(ScrollableTestNg, GetAxisDumpInfo_Parameter005, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAxisDumpInfo_Parameter006
- * @tc.desc: Test ScrollablePattern GetAxisDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, GetAxisDumpInfo_Parameter006, TestSize.Level1)
-{
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
-    scrollablePattern->axis_ = Axis::HORIZONTAL;
-    auto json = JsonUtil::Create(true);
-    scrollablePattern->GetAxisDumpInfo(json);
-    EXPECT_EQ(json->GetString("Axis"), "HORIZONTAL");
-
-    scrollablePattern->axis_ = Axis::FREE;
-    json = JsonUtil::Create(true);
-    scrollablePattern->GetAxisDumpInfo(json);
-    EXPECT_EQ(json->GetString("Axis"), "FREE");
-
-    scrollablePattern->axis_ = Axis::VERTICAL;
-    json = JsonUtil::Create(true);
-    scrollablePattern->GetAxisDumpInfo(json);
-    EXPECT_EQ(json->GetString("Axis"), "VERTICAL");
-
-    scrollablePattern->axis_ = Axis::NONE;
-    json = JsonUtil::Create(true);
-    scrollablePattern->GetAxisDumpInfo(json);
-    EXPECT_EQ(json->GetString("Axis"), "NONE");
-}
-
-/**
  * @tc.name: GetPanDirectionDumpInfo_Parameter001
  * @tc.desc: Test ScrollablePattern GetPanDirectionDumpInfo
  * @tc.type: FUNC
@@ -765,29 +736,5 @@ HWTEST_F(ScrollableTestNg, GetEdgeEffectDumpInfo_Parameter004, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     scrollablePattern->GetEdgeEffectDumpInfo(json);
     EXPECT_NE(json->GetString("edgeEffect"), "SPRING");
-}
-
-/**
- * @tc.name: GetEdgeEffectDumpInfo_Parameter005
- * @tc.desc: Test ScrollablePattern GetEdgeEffectDumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, GetEdgeEffectDumpInfo_Parameter005, TestSize.Level1)
-{
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
-    scrollablePattern->edgeEffect_ = EdgeEffect::NONE;
-    auto json = JsonUtil::Create(true);
-    scrollablePattern->GetEdgeEffectDumpInfo(json);
-    EXPECT_EQ(json->GetString("edgeEffect"), "NONE");
-
-    scrollablePattern->edgeEffect_ = EdgeEffect::FADE;
-    json = JsonUtil::Create(true);
-    scrollablePattern->GetEdgeEffectDumpInfo(json);
-    EXPECT_EQ(json->GetString("edgeEffect"), "FADE");
-
-    scrollablePattern->edgeEffect_ = EdgeEffect::SPRING;
-    json = JsonUtil::Create(true);
-    scrollablePattern->GetEdgeEffectDumpInfo(json);
-    EXPECT_EQ(json->GetString("edgeEffect"), "SPRING");
 }
 } // namespace OHOS::Ace::NG

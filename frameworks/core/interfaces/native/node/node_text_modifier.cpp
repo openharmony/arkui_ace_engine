@@ -56,6 +56,8 @@ const std::string EMPTY_STRING = "";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
+const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
+    TextContentAlign::BOTTOM };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
@@ -86,7 +88,7 @@ std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 
-FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
+FontWeight ConvertStrToFontWeight(ArkUI_CharPtr weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
@@ -243,6 +245,31 @@ void ResetTextAlign(ArkUINodeHandle node)
     TextModelNG::SetTextAlign(frameNode, OHOS::Ace::TextAlign::START);
 }
 
+void SetTextContentAlign(ArkUINodeHandle node, ArkUI_Uint32 testContentAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (testContentAlign < 0 || testContentAlign >= TEXT_CONTENT_ALIGNS.size()) {
+        return;
+    }
+    TextModelNG::SetTextContentAlign(frameNode, TEXT_CONTENT_ALIGNS[testContentAlign]);
+}
+
+int32_t GetTextContentAlign(ArkUINodeHandle node)
+{
+    auto defaultTextContentAlign = static_cast<int32_t>(OHOS::Ace::TextContentAlign::TOP);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextContentAlign);
+    return static_cast<int32_t>(TextModelNG::GetTextContentAlign(frameNode));
+}
+
+void ResetTextContentAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ReSetTextContentAlign(frameNode);
+}
+
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -373,9 +400,8 @@ void ResetTextTextOverflow(ArkUINodeHandle node)
     TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
 }
 
-void SetTextDecoration(
-    ArkUINodeHandle node, ArkUI_Int32 decoration,
-    ArkUI_Uint32 color, void* colorRawPtr, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, void* colorRawPtr,
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -555,7 +581,7 @@ void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxFontScale(frameNode, number);
-    NodeModifier::ProcessResourceObj<float>(frameNode, "MinFontScale", number, maxFontScaleRawPtr);
+    NodeModifier::ProcessResourceObj<float>(frameNode, "MaxFontScale", number, maxFontScaleRawPtr);
 }
 
 void ResetTextMaxFontScale(ArkUINodeHandle node)
@@ -629,20 +655,22 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
     std::vector<RefPtr<ResourceObject>> colorResArr;
     std::vector<RefPtr<ResourceObject>> offsetXResArr;
     std::vector<RefPtr<ResourceObject>> offsetYResArr;
-    if (radiusResArrs != nullptr) {
-        radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
-    }
-    if (colorResArrs != nullptr) {
-        colorResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
-    }
-    if (offsetXResArrs != nullptr) {
-        offsetXResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
-    }
-    if (offsetYResArrs != nullptr) {
-        offsetYResArr =
-        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+    if (SystemProperties::ConfigChangePerform()) {
+            if (radiusResArrs != nullptr) {
+            radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
+        }
+        if (colorResArrs != nullptr) {
+            colorResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
+        }
+        if (offsetXResArrs != nullptr) {
+            offsetXResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
+        }
+        if (offsetYResArrs != nullptr) {
+            offsetYResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+        }
     }
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
@@ -653,11 +681,13 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
-        RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
-        RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
-        Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
+            RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
+            Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        }
         shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
@@ -681,7 +711,7 @@ void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t
             *(shadow + i) = { static_cast<float>(textShadowVector[i].GetBlurRadius()),
                 static_cast<int32_t>(textShadowVector[i].GetShadowType()), textShadowVector[i].GetColor().GetValue(),
                 textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
-                textShadowVector[i].GetIsFilled() };
+                textShadowVector[i].GetIsFilled()};
         } else {
             *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR), Color::TRANSPARENT.GetValue(), 0.0f, 0.0f,
                 0 };
@@ -911,7 +941,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
-    // set index start
+    //set index start
     uint32_t index = 0;
     for (auto& family : fontFamilies) {
         families += family;
@@ -965,7 +995,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        // set index start
+        //set index start
         std::size_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
@@ -1702,6 +1732,9 @@ ArkUI_Int32 GetTextLinearGradient(
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -1755,14 +1788,16 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     (*values)[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] =
-        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = radialGradient->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_3] = gradient.GetRepeat();
 
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stops)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -1826,6 +1861,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetFontStyle = ResetFontStyle,
         .setTextAlign = SetTextAlign,
         .resetTextAlign = ResetTextAlign,
+        .setTextContentAlign = SetTextContentAlign,
+        .resetTextContentAlign = ResetTextContentAlign,
         .setFontColor = SetFontColor,
         .resetFontColor = ResetFontColor,
         .setTextForegroundColor = SetTextForegroundColor,
@@ -1890,6 +1927,7 @@ const ArkUITextModifier* GetTextModifier()
         .getTextLetterSpacing = GetTextLetterSpacing,
         .getTextMaxLines = GetTextMaxLines,
         .getTextAlign = GetTextAlign,
+        .getTextContentAlign = GetTextContentAlign,
         .getTextTextOverflow = GetTextTextOverflow,
         .getTextTextIndent = GetTextTextIndent,
         .getFontColor = GetFontColor,
@@ -1900,23 +1938,23 @@ const ArkUITextModifier* GetTextModifier()
         .getTextEllipsisMode = GetTextEllipsisMode,
         .setTextFontFeature = SetTextFontFeature,
         .resetTextFontFeature = ResetTextFontFeature,
-        .setTextLineSpacing = SetTextLineSpacing,
-        .getTextLineSpacing = GetTextLineSpacing,
-        .resetTextLineSpacing = ResetTextLineSpacing,
         .getTextFontFeature = GetTextFontFeature,
         .getEnableDataDetector = GetTextDetectEnable,
         .setTextDataDetectorConfig = SetTextDataDetectorConfig,
         .getTextDataDetectorConfig = GetTextDataDetectorConfig,
         .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
-        .setLineBreakStrategy = SetLineBreakStrategy,
-        .resetLineBreakStrategy = ResetLineBreakStrategy,
-        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
+        .setTextLineSpacing = SetTextLineSpacing,
+        .getTextLineSpacing = GetTextLineSpacing,
+        .resetTextLineSpacing = ResetTextLineSpacing,
         .setTextCaretColor = SetTextCaretColor,
         .getTextCaretColor = GetTextCaretColor,
         .resetTextCaretColor = ResetTextCaretColor,
         .setTextSelectedBackgroundColor = SetTextSelectedBackgroundColor,
         .getTextSelectedBackgroundColor = GetTextSelectedBackgroundColor,
         .resetTextSelectedBackgroundColor = ResetTextSelectedBackgroundColor,
+        .setLineBreakStrategy = SetLineBreakStrategy,
+        .resetLineBreakStrategy = ResetLineBreakStrategy,
+        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
         .setTextContentWithStyledString = SetTextContentWithStyledString,
         .resetTextContentWithStyledString = ResetTextContentWithStyledString,
         .setTextSelection = SetTextSelection,
@@ -1929,12 +1967,12 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextOnCopy = ResetTextOnCopy,
         .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
         .resetTextOnTextSelectionChange = ResetTextOnTextSelectionChange,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextMinFontScale = SetTextMinFontScale,
         .resetTextMinFontScale = ResetTextMinFontScale,
         .setTextMaxFontScale = SetTextMaxFontScale,
         .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
-        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextHalfLeading = SetTextHalfLeading,
         .resetTextHalfLeading = ResetTextHalfLeading,
         .getTextHalfLeading = GetTextHalfLeading,
@@ -1944,15 +1982,15 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextResponseRegion = ResetResponseRegion,
         .setTextEnableHapticFeedback = SetTextEnableHapticFeedback,
         .resetTextEnableHapticFeedback = ResetTextEnableHapticFeedback,
+        .setImmutableFontWeight = SetImmutableFontWeight,
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
-        .setImmutableFontWeight = SetImmutableFontWeight,
+        .getLineCount = GetLineCount,
         .setTextOptimizeTrailingSpace = SetTextOptimizeTrailingSpace,
         .resetTextOptimizeTrailingSpace = ResetTextOptimizeTrailingSpace,
         .getTextOptimizeTrailingSpace = GetTextOptimizeTrailingSpace,
-        .getLineCount = GetLineCount,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .setLinearGradient = SetTextLinearGradient,
@@ -1963,9 +2001,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextVerticalAlign = SetTextVerticalAlign,
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
+        .setColorShaderColor = SetColorShaderColor,
         .setTextContentTransition = SetTextContentTransition,
         .resetTextContentTransition = ResetTextContentTransition,
-        .setColorShaderColor = SetColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -2127,10 +2165,11 @@ void ResetOnDetectResultUpdate(ArkUINodeHandle node)
 template<typename T>
 void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         pattern->RegisterResource<T>(key, resObj, value);
     } else {

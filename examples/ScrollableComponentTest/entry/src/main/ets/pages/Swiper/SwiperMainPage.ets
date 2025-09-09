@@ -42,6 +42,8 @@ struct TabsMainPage {
     new TextList(8, 'SwiperNestSwiper', 'pages/Swiper/SwiperNestSwiper'),
     new TextList(9, 'SwiperNestList', 'pages/Swiper/SwiperNestList'),
     new TextList(10, 'ChangeSwiperHeightWithSwipe', 'pages/Swiper/SwiperHeightChangeDemo'),
+    new TextList(11, 'SwiperKeyEvent', 'pages/Swiper/SwiperKeyEvent'),
+    new TextList(12, 'IndicatorCaseTest', 'pages/Swiper/IndicatorCaseTest'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

@@ -433,7 +433,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange001, TestSize.Level1)
     auto stack = ViewStackProcessor::GetInstance();
     auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<TextClockEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -494,7 +494,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange002, TestSize.Level1)
     auto stack = ViewStackProcessor::GetInstance();
     auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<TextClockEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -559,7 +559,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange003, TestSize.Level1)
     auto stack = ViewStackProcessor::GetInstance();
     auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<TextClockEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -1082,5 +1082,38 @@ HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj002, TestSize.Lev
     EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
     Container::Current()->SetApiTargetVersion(backupApiVersion);
     MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockMultiThread001
+ * @tc.desc: Test MultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockMultiThread001, TestSize.Level1)
+{
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    textClockModel.SetFontColorByUser(frameNode, false);
+
+    g_isConfigChangePerform = false;
+    Shadow shadow;
+    shadow.SetBlurRadius(20);
+    shadow.SetOffsetX(100);
+    shadow.SetOffsetY(100);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    std::vector<Shadow> setShadows;
+    setShadows.emplace_back(shadow);
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+    g_isConfigChangePerform = true;
+    textClockModel.SetTextShadow(frameNode, setShadows);
+    textClockModel.SetTextShadow(setShadows);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
 }
 } // namespace OHOS::Ace::NG

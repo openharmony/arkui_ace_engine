@@ -1,0 +1,23 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/showInSubwindow/Index",
+    "pages/multiDeviceConversion/Index",
+    "pages/multiDeviceConversion/Index01",
+    "pages/multiDeviceConversion/Index02",
+    "pages/multiDeviceConversion/Index03",
+    "pages/multiDeviceConversion/Index04",
+    "pages/multiDeviceConversion/Index05",
+    "pages/multiDeviceConversion/Index06",
+    "pages/multiDeviceConversion/Index07",
+    "pages/multiDeviceConversion/Index08",
+    "pages/multiDeviceConversion/Index09",
+    "pages/multiDeviceConversion/Index10",
+    "pages/sidePolymorphicStyle/Index",
+    "pages/sidePolymorphicStyle/SideSheet",
+    "pages/sidePolymorphicStyle/SideSheet1",
+    "pages/sidePolymorphicStyle/SideSheet2",
+    "pages/sidePolymorphicStyle/SideSheet3",
+    "pages/sidePolymorphicStyle/SideSheetCallback"
+  ]
+}

@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiComponentApiBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(JsiComponentApiBridge, AceType)
+    DECLARE_ACE_TYPE(JsiComponentApiBridge, AceType);
 
 public:
     static shared_ptr<JsValue> JsGetScrollOffset(const shared_ptr<JsRuntime>& runtime, NodeId nodeId);

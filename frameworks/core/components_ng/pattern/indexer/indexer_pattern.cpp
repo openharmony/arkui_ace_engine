@@ -1020,7 +1020,7 @@ void IndexerPattern::UpdateBubbleList()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
@@ -1397,7 +1397,7 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
     CHECK_NULL_VOID(listNode);
     if (popupSize > maxItemsSize) {
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
-        auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+        auto listEventHub = listNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
         auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
             auto pattern = weak.Upgrade();
@@ -1685,7 +1685,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     ReportPoupSelectEvent();
@@ -1784,10 +1784,13 @@ void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), selectedBackgroundColor]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(selectedBackgroundColor);
-    });
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId(), selectedBackgroundColor]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(selectedBackgroundColor);
+        },
+        nullptr, nullptr, Claim(pipelineContext));
 }
 
 void IndexerPattern::ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode)
@@ -1798,10 +1801,14 @@ void IndexerPattern::ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode)
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    });
+    auto pipeline = itemNode->GetContextRefPtr();
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        },
+        nullptr, nullptr, pipeline);
 }
 
 void IndexerPattern::IndexerHoverInAnimation()
@@ -1818,10 +1825,13 @@ void IndexerPattern::IndexerHoverInAnimation()
     AnimationOption option;
     option.SetDuration(INDEXER_HOVER_IN_DURATION);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), slipHoverBackgroundColor]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(slipHoverBackgroundColor);
-    });
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId(), slipHoverBackgroundColor]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(slipHoverBackgroundColor);
+        },
+        nullptr, nullptr, Claim(pipelineContext));
 }
 
 void IndexerPattern::IndexerHoverOutAnimation()
@@ -1833,10 +1843,14 @@ void IndexerPattern::IndexerHoverOutAnimation()
     AnimationOption option;
     option.SetDuration(INDEXER_HOVER_OUT_DURATION);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    });
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        },
+        nullptr, nullptr, pipeline);
 }
 
 void IndexerPattern::IndexerPressInAnimation()
@@ -1855,10 +1869,13 @@ void IndexerPattern::IndexerPressInAnimation()
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_IN_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(backgroundColor);
-    });
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId(), backgroundColor]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+        },
+        nullptr, nullptr, Claim(pipelineContext));
 }
 
 void IndexerPattern::IndexerPressOutAnimation()
@@ -1877,19 +1894,25 @@ void IndexerPattern::IndexerPressOutAnimation()
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_OUT_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
-        ContainerScope scope(id);
-        renderContext->UpdateBackgroundColor(backgroundColor);
-    });
+    AnimationUtils::Animate(
+        option,
+        [renderContext, id = Container::CurrentId(), backgroundColor]() {
+            ContainerScope scope(id);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+        },
+        nullptr, nullptr, Claim(pipelineContext));
 }
 
 void IndexerPattern::StartBubbleAppearAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     animationId_ = GenerateAnimationId();
     UpdatePopupVisibility(VisibleType::VISIBLE);
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetDuration(INDEXER_BUBBLE_ENTER_DURATION);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         option,
         [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
@@ -1897,7 +1920,8 @@ void IndexerPattern::StartBubbleAppearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePopupOpacity(1.0f);
-        });
+        },
+        nullptr, nullptr, pipeline);
 }
 
 void IndexerPattern::StartDelayTask(uint32_t duration)
@@ -1938,6 +1962,9 @@ void IndexerPattern::StartBubbleDisappearAnimation()
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetDuration(INDEXER_BUBBLE_EXIT_DURATION);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         option,
         [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
@@ -1956,7 +1983,8 @@ void IndexerPattern::StartBubbleDisappearAnimation()
             if (NearZero(renderContext->GetOpacityValue(0.0f))) {
                 pattern->UpdatePopupVisibility(VisibleType::GONE);
             }
-        });
+        },
+        nullptr, pipeline);
 }
 
 void IndexerPattern::UpdatePopupOpacity(float ratio)
@@ -1996,7 +2024,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = GetActualIndex(selectIndex);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {

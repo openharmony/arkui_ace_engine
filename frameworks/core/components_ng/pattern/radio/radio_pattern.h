@@ -149,7 +149,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto radioEventHub = host->GetOrCreateEventHub<NG::RadioEventHub>();
+        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
         json->PutExtAttr("value", value.c_str(), filter);
@@ -210,6 +210,7 @@ public:
     {
         return indicatorColorByJSRadioTheme_;
     }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -295,6 +296,7 @@ private:
     bool enabled_ = true;
     bool isUserSetMargin_ = false;
     std::optional<RadioMakeCallback> makeFunc_;
+
     RefPtr<RadioModifier> radioModifier_;
     bool focusEventInitialized_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;

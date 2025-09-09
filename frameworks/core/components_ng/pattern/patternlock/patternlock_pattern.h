@@ -64,7 +64,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!patternLockModifier_) {
-            patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+            patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(WeakClaim(this));
         }
         if (!isInitVirtualNode_ && AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
             isInitVirtualNode_ = InitVirtualNode();

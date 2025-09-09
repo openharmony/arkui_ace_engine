@@ -331,7 +331,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
     EXPECT_NE(layoutAlgorithm, nullptr);
     auto paintMethod = bubblePattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
-    auto eventHub = bubblePattern->GetOrCreateEventHub<BubbleEventHub>();
+    auto eventHub = bubblePattern->GetEventHub<BubbleEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -368,7 +368,7 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
      * @tc.steps: step2. set bubble event.
      * @tc.expected: step2. function is called.
      */
-    auto bubbleHub = frameNode->GetOrCreateEventHub<BubbleEventHub>();
+    auto bubbleHub = frameNode->GetEventHub<BubbleEventHub>();
     EXPECT_NE(bubbleHub, nullptr);
     std::string stateChange = STATE;
     auto onStateChange = [&stateChange](const std::string& change) { stateChange = change; };
@@ -2104,11 +2104,11 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: BubbleBorderTest001
- * @tc.desc: Test BubbleBorderOffset
+ * @tc.name: BubbleBorderTest010
+ * @tc.desc: Test BorderOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubbleBorderTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -2121,11 +2121,11 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
     bubblePaintMethod.SetShowArrow(true);
     bubblePaintMethod.enableArrow_ = true;
     auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
-    ASSERT_NE(popupTheme, nullptr);
 
     /**
-     * @tc.steps: step3. Excute function for border offset.
+     * @tc.steps: step3. Excute function to get border offset.
      */
+    ASSERT_NE(popupTheme, nullptr);
     if (popupTheme->GetPopupDoubleBorderEnable()) {
         if (bubblePaintMethod.needPaintOuterBorder_) {
             EXPECT_EQ(bubblePaintMethod.GetBorderOffset(popupTheme), -bubblePaintMethod.outerBorderWidth_);
@@ -2135,6 +2135,51 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
     }
 }
 
+ /**
+  * @tc.name: BubblePatternTest022
+  * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth, Shadow and EnableHoverMode.
+  * @tc.type: FUNC
+  */
+HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set popup value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+    popupParam->setErrorArrowHeight_ = true;
+    popupParam->setErrorArrowWidth_ = true;
+    popupParam->setErrorRadius_ = true;
+    popupParam->childwidth_ = 100.0_px;
+    popupParam->SetEnableHoverMode(true);
+    /**
+     * @tc.steps: step2. create CustomBubbleNode with positon offset
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(rowFrameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    rowFrameNode->AddChild(blankFrameNode);
+    auto popupNode =
+        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    /**
+     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
+     * @tc.expected: check whether GetPositionOffset value is correct.
+     */
+    int32_t settingApiVersion = 13;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    BubbleView::UpdateCommonParam(popupNode->GetId(), popupParam);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+}
 
 /**
  * @tc.name: BorderLinearGradientPointTest001
@@ -2148,7 +2193,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
      */
     BubblePaintMethod bubblePaintMethod;
     /**
-     * @tc.steps: step2. Set condition.
+     * @tc.steps: step1. Set condition.
      */
     bubblePaintMethod.childOffset_ = OffsetF(10.0f, 10.0f);
     bubblePaintMethod.childSize_.SetWidth(10.0f);
@@ -2159,7 +2204,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
     outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
     bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
     /**
-     * @tc.steps: step3. execute BorderLinearGradientPoint function get result.
+     * @tc.steps: step3. Execute the BorderLinearGradientPoint function and get result.
      */
     int popupOuterBorderDirectionInt =
         static_cast<int>(bubblePaintMethod.GetOutlineLinearGradient().popupDirection);
@@ -2172,7 +2217,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
     RSPoint startPoint(childOffsetX + childSizeWidth / half, childOffsetY + childSizeHeight);
     RSPoint endPoint(childOffsetX + childSizeWidth / half, childOffsetY);
     /**
-     * @tc.steps: step4. Compare function return values.
+     * @tc.steps: step1. Compare function result.
      */
     EXPECT_EQ(startPoint.GetX(), points[0].GetX());
     EXPECT_EQ(endPoint.GetY(), points[1].GetY());
@@ -2185,13 +2230,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
  */
 HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create the BubblePaintMethod.
-     */
     BubblePaintMethod bubblePaintMethod;
-    /**
-     * @tc.steps: step2. Set condition.
-     */
     bubblePaintMethod.childOffset_ = OffsetF(10.0f, 10.0f);
     bubblePaintMethod.childSize_.SetWidth(10.0f);
     bubblePaintMethod.childSize_.SetHeight(8.0f);
@@ -2200,9 +2239,6 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
     innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 0.0 });
     innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
     bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
-    /**
-     * @tc.steps: step3. execute BorderLinearGradientPoint function get result.
-     */
     int popupInnerBorderDirectionInt =
         static_cast<int>(bubblePaintMethod.GetInnerBorderLinearGradient().popupDirection);
     std::vector<RSPoint> points = bubblePaintMethod.BorderLinearGradientPoint(popupInnerBorderDirectionInt);
@@ -2213,9 +2249,6 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
     auto childOffsetY = bubblePaintMethod.childOffset_.GetY();
     RSPoint startPoint(childOffsetX + childSizeWidth / half, childOffsetY);
     RSPoint endPoint(childOffsetX + childSizeWidth / half, childOffsetY + childSizeHeight);
-    /**
-     * @tc.steps: step4. Compare function return values.
-     */
     EXPECT_EQ(startPoint.GetX(), points[0].GetX());
     EXPECT_EQ(endPoint.GetY(), points[1].GetY());
 }
@@ -2227,13 +2260,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
  */
 HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create the BubblePaintMethod.
-     */
     BubblePaintMethod bubblePaintMethod;
-    /**
-     * @tc.steps: step2. Set condition.
-     */
     PopupLinearGradientProperties innerBorderLinearGradient;
     innerBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::LEFT;
     innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GREEN, 0.0 });
@@ -2241,16 +2268,10 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
     bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
     std::vector<PopupGradientColor> gradientColors =
         bubblePaintMethod.GetInnerBorderLinearGradient().gradientColors;
-    /**
-     * @tc.steps: step3. execute BorderLinearGradientColors function get result.
-     */
     std::pair<std::vector<uint32_t>, std::vector<float>> colors =
         bubblePaintMethod.BorderLinearGradientColors(gradientColors);
     std::vector<uint32_t> colorQuads = colors.first;
     std::vector<float> positions = colors.second;
-    /**
-     * @tc.steps: step4. Compare function return values.
-     */
     EXPECT_EQ(Color::GREEN.GetValue(), colorQuads[0]);
     EXPECT_EQ(1.0, positions[1]);
 }
@@ -2262,13 +2283,7 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
  */
 HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create the BubblePaintMethod.
-     */
     BubblePaintMethod bubblePaintMethod;
-    /**
-     * @tc.steps: step2. Set condition.
-     */
     PopupLinearGradientProperties outlineLinearGradient;
     outlineLinearGradient.popupDirection = OHOS::Ace::GradientDirection::LEFT;
     outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::BLACK, 0.0 });
@@ -2276,16 +2291,10 @@ HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest002, TestSize.Level1)
     bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
     std::vector<PopupGradientColor> gradientColors =
         bubblePaintMethod.GetOutlineLinearGradient().gradientColors;
-    /**
-     * @tc.steps: step3. execute BorderLinearGradientColors function get result.
-     */
     std::pair<std::vector<uint32_t>, std::vector<float>> colors =
         bubblePaintMethod.BorderLinearGradientColors(gradientColors);
     std::vector<uint32_t> colorQuads = colors.first;
     std::vector<float> positions = colors.second;
-    /**
-     * @tc.steps: step4. Compare function return values.
-     */
     EXPECT_EQ(Color::RED.GetValue(), colorQuads[1]);
     EXPECT_EQ(0.0, positions[0]);
 }
@@ -2391,7 +2400,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest011, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH_CHANGE, BUBBLE_HEIGHT_CHANGE));
-    EXPECT_DOUBLE_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
 
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
@@ -2406,5 +2415,38 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest011, TestSize.Level1)
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
 
     MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: BorderLinearGradientColorsTest003
+ * @tc.desc: Test BorderLinearGradientColors
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    PopupLinearGradientProperties outlineLinearGradient;
+    outlineLinearGradient.popupDirection = OHOS::Ace::GradientDirection::TOP;
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GREEN, 0.1 });
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::BLUE, 0.9 });
+    bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
+    std::vector<PopupGradientColor> gradientColors =
+        bubblePaintMethod.GetOutlineLinearGradient().gradientColors;
+    /**
+     * @tc.steps: step3. execute BorderLinearGradientColors function get result.
+     */
+    std::pair<std::vector<uint32_t>, std::vector<float>> colors =
+        bubblePaintMethod.BorderLinearGradientColors(gradientColors);
+    std::vector<uint32_t> colorQuads = colors.first;
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(Color::BLUE.GetValue(), colorQuads[1]);
 }
 } // namespace OHOS::Ace::NG

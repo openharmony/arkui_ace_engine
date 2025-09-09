@@ -100,7 +100,7 @@ void ProgressTestNg::GetProgress()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ProgressPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<EventHub>();
+    eventHub_ = frameNode_->GetEventHub<EventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ProgressLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ProgressAccessibilityProperty>();
@@ -2203,6 +2203,40 @@ HWTEST_F(ProgressTestNg, ProgressPatternOnColorConfigurationUpdateTest001, TestS
 }
 
 /**
+ * @tc.name: ProgressDefaultFontWeight
+ * @tc.desc: Test ProgressDefaultFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressDefaultFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: get default font weight.
+     * @tc.expected: it should be Normal.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    FontWeight fontWeight = static_cast<FontWeight>(theme->GetFontWeight());
+    EXPECT_EQ(fontWeight, FontWeight::NORMAL);
+
+    /**
+     * @tc.case: case1 call to SetFontWeight with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    model.SetFontWeight(FontWeight::MEDIUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetFontWeight().value(), FontWeight::MEDIUM);
+}
+
+/**
  * @tc.name: ProgressPatternCreateWithResourceObjTest001
  * @tc.desc: Test model ng  CreateWithResourceObj
  * @tc.type: FUNC
@@ -2308,5 +2342,31 @@ HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest002, TestSize.L
     auto theme = pipeline->GetTheme<ProgressTheme>();
     Color testColor = theme->GetBorderColor();
     EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
+}
+
+/**
+ * @tc.name: ProgressModelNGSetCapsuleStyle
+ * @tc.desc: Test ProgressModelNG SetCapsuleStyle &&  SetCapsuleStyleFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelNGSetCapsuleStyle, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: case1 call to  SetCapsuleStyle SetCapsuleStyleFontColor  with  framenode.
+     * @tc.expected: it should be as we set.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    ProgressModelNG::SetCapsuleStyle(Referenced::RawPtr(frameNode), true);
+    ProgressModelNG::SetCapsuleStyleFontColor(Referenced::RawPtr(frameNode), true);
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleSetByUser());
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleFontColorSetByUser());
 }
 } // namespace OHOS::Ace::NG

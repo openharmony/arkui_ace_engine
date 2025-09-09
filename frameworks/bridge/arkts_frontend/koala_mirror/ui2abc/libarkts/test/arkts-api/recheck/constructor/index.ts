@@ -16,7 +16,7 @@
 import * as arkts from "../../../../src/arkts-api"
 
 class ConstructorWithOverload extends arkts.AbstractVisitor {
-    visitor(beforeChildren: arkts.ETSModule): arkts.ETSModule
+    visitor(beforeChildren: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isScriptFunction(node) && node.id?.name == "constructor") {
@@ -48,5 +48,5 @@ class ConstructorWithOverload extends arkts.AbstractVisitor {
 }
 
 export function constructorWithOverload(program: arkts.Program) {
-    return (new ConstructorWithOverload()).visitor(program.astNode)
+    program.setAst(new ConstructorWithOverload().visitor(program.ast))
 }

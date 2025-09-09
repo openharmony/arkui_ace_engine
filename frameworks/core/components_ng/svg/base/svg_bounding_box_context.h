@@ -39,7 +39,6 @@ public:
     {
         SvgLengthScaleUnit scaleUnit = SvgLengthScaleUnit::USER_SPACE_ON_USE;
         if (strScaleUnit == "objectBoundingBox") {
-            return SvgLengthScaleRule(containerRect_, viewPort_, SvgLengthScaleUnit::USER_SPACE_ON_USE);
             scaleUnit = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
         }
         return SvgLengthScaleRule(containerRect_, viewPort_, scaleUnit);

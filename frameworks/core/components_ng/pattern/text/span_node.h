@@ -32,13 +32,13 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/property/accessibility_property.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                          \
 public:                                                                      \
@@ -334,6 +334,7 @@ public:
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     void GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
+    void CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<std::u16string> urlAddress;
     std::function<void()> urlOnRelease;
@@ -730,6 +731,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
@@ -744,8 +747,6 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
@@ -803,8 +804,6 @@ public:
         RequestTextFlushDirty(true);
     }
 
-    void SetPropertyInfoContainer();
-
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
@@ -828,8 +827,8 @@ public:
 
 protected:
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

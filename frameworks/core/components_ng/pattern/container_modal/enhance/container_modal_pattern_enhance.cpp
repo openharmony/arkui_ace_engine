@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_manager.h"
-#include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -356,7 +355,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [floatingContext, height]() {
             auto rect = floatingContext->GetPaintRectWithoutTransform();
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -366,7 +365,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
             buttonsContext->OnTransformTranslateUpdate(
                 { 0.0f, static_cast<float>(height - buttonPopupDistance - rect.GetY()), 0.0f });
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
     }
 
     if (!isShow && CanHideFloatingTitle()) {
@@ -383,9 +382,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 CHECK_NULL_VOID(pattern);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
-            });
+            }, nullptr, GetContextRefPtr());
     }
 }
+
+void ContainerModalPatternEnhance::AddPointLight() {}
 
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
@@ -393,7 +394,7 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    textCtx.textContent = theme->GetWindowScreen(true);
+    textCtx.textContent = theme->GetWindowScreen(false);
 
     textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
     auto textSize = MeasureUtil::MeasureTextSize(textCtx);
@@ -878,6 +879,12 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
 
     auto controlButtonsRow = GetButtonRowByInspectorId();
     CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto controlButtonsRowLayoutProperty = controlButtonsRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsRowLayoutProperty, false);
+    if (controlButtonsRowLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons row failed, buttonRow are hidden");
+        return false;
+    }
     auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
     buttons = buttonRect;
     if (buttons.Width() == 0) {

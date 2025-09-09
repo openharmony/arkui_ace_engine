@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ArcIndexerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ArcIndexerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ArcIndexerPaintMethod, NodePaintMethod);
 public:
     ArcIndexerPaintMethod(float strokeWidth, OffsetF arcCenter, float startAngle, float sweepAngle,
         float arcRadius, float stepAngle, RefPtr<ArcIndexerContentModifier> arcindexerModifier)

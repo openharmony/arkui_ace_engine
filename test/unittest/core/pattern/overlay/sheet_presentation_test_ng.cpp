@@ -319,7 +319,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto eventHub = contentNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = contentNode->GetEventHub<EventHub>();
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     sheetPattern->CheckBuilderChange();
@@ -353,7 +353,7 @@ HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
     auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
     ASSERT_NE(targetNode, nullptr);
     sheetPattern->OnAttachToFrameNode();
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
     ASSERT_NE(innerOnAreaChangeCallback, nullptr);
@@ -812,6 +812,33 @@ HWTEST_F(SheetPresentationTestNg, OnScrollEndRecursive001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollDragEndRecursive001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::OnScrollDragEndRecursive function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->isSheetPosChanged_ = false;
+    sheetPattern->OnScrollDragEndRecursive();
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+
+    sheetObject->isSheetPosChanged_ = true;
+    sheetPattern->OnScrollDragEndRecursive();
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: HandleScrollVelocity001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleScrollVelocity function.
  * @tc.type: FUNC
@@ -974,6 +1001,44 @@ HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
     sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
     sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::RESIZE);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged002
+ * @tc.desc: Test Bottom Sheet when window ROTATION.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged002, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_BOTTOM;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = true;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto builderProp = builder->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(builderProp, nullptr);
+
+    sheetPattern->builderHeight_ = 50.0f;
+    sheetPattern->SetColumnMinSize(false);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    const auto& calcLayoutConstraint = builderProp->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_NE(calcLayoutConstraint->minSize, std::nullopt);
+    EXPECT_EQ(calcLayoutConstraint->minSize->Height().value(), CalcLength(sheetPattern->builderHeight_));
+
+    sheetPattern->keyboardHeight_ = 500;
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    EXPECT_EQ(calcLayoutConstraint->minSize, std::nullopt);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -1544,7 +1609,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-
+    ASSERT_NE(sheetNode, nullptr);
     auto renderContext = sheetNode->GetRenderContext();
 
     /**

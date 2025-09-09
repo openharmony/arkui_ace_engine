@@ -103,6 +103,11 @@ public:
         }
     }
 
+    std::string GetCurrentPageNameCallback()
+    {
+        return "";
+    }
+
     auto Get()
     {
         return this;

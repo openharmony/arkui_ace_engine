@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,11 +153,11 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
-    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
     JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
     JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
 
@@ -197,7 +197,6 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     int32_t value = 0;
     RefPtr<ResourceObject> resObj;
     bool result = ParseJsInteger<int32_t>(info[0], value, resObj);
-
     if (value < -1) {
         value = -1;
     }
@@ -571,7 +570,7 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resObj;
-    bool isValidValue = true;
+    bool isNormal = true;
     if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -579,13 +578,13 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetMenuFontColor();
-            isValidValue = false;
+            isNormal = false;
         } else {
             return;
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetOptionFontColorByUser(isValidValue);
+        SelectModel::GetInstance()->SetOptionFontColorByUser(isNormal);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_FONT_COLOR);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
@@ -898,7 +897,7 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
         menuBackgroundColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetMenuBackgroundColorByUser(true);
+        SelectModel::GetInstance()->SetMenuBackgroundColorByUser();
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::MENU_BACKGROUND_COLOR);
     }
 }
@@ -1048,32 +1047,6 @@ void JSSelect::SetDirection(const std::string& dir)
     SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 
-void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto menuOptionArg = info[0];
-    auto menuTheme = GetTheme<NG::MenuTheme>();
-    NG::MenuParam menuParam;
-    MenuDefaultParam(menuParam);
-    if (!menuOptionArg->IsObject()) {
-        NG::BorderWidthProperty outlineWidth;
-        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
-        menuParam.outlineWidth = outlineWidth;
-        NG::BorderColorProperty outlineColor;
-        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
-        menuParam.outlineColor = outlineColor;
-    } else {
-        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
-        auto outlineWidthValue = menuOptions->GetProperty("width");
-        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
-        auto outlineColorValue = menuOptions->GetProperty("color");
-        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
-    }
-    SelectModel::GetInstance()->SetMenuOutline(menuParam);
-}
-
 void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
 {
     std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
@@ -1117,6 +1090,32 @@ void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
     }
     JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
     SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuOptionArg = info[0];
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (!menuOptionArg->IsObject()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
 }
 
 void JSSelect::SetShowInSubWindow(const JSCallbackInfo& info)

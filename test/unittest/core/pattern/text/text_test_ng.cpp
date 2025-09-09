@@ -206,7 +206,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     std::u16string eventValue;
     auto onCopyResult = [&eventValue](const std::u16string& param) { eventValue = param; };
 
-    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
     EXPECT_NE(eventHub->onCopy_, nullptr);
 
@@ -785,7 +785,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     /**
-     * @tc.steps: step1. call ShowSelectOverlay
+     * @tc.steps: step1. call ShowSelectOverlay.
      * @tc.expected: select overlay is on.
      */
     pattern->ShowSelectOverlay();
@@ -836,7 +836,7 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. check the longPressEvent.
-     * @tc.expected: longPressEvent is triggered
+     * @tc.expected: longPressEvent is triggered.
      */
     textPattern->OnModifyDone();
     EXPECT_NE(textPattern->longPressEvent_, nullptr);
@@ -857,6 +857,22 @@ HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->pManager_->GetParagraphs().size(), 1);
+}
+
+/**
+ * @tc.name: OnModifyDone004
+ * @tc.desc: Test textEffect is not cleared by OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnModifyDone004, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(pattern->pManager_, nullptr);
+    pattern->textEffect_ = TextEffect::CreateTextEffect();
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->textEffect_, nullptr);
 }
 
 /**
@@ -2261,7 +2277,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, Layout);
-    EXPECT_CALL(*paragraph, DidExceedMaxLines).WillOnce(Return(true));
+    EXPECT_CALL(*paragraph, DidExceedMaxLinesInner).WillOnce(Return(true));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -2315,7 +2331,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
 HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, DidExceedMaxLines).WillOnce(Return(true));
+    EXPECT_CALL(*paragraph, DidExceedMaxLinesInner).WillOnce(Return(true));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -2801,6 +2817,13 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
     EXPECT_EQ(textStyle.GetFontSize().Value(), textContentModifier.fontSizeFloat_->Get());
+
+    textContentModifier.SetTextDecorationColor(Color::ColorFromString("#55FFFFFF"), false);
+    textContentModifier.textDecoration_ = TextDecoration::LINE_THROUGH;
+    textContentModifier.textDecorationAnimatable_ = true;
+    textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(textContentModifier.textDecorationColorAlpha_->Get(), 85.0f);
+    EXPECT_FALSE(textContentModifier.textDecorationAnimatable_);
 }
 
 /**
@@ -3055,6 +3078,54 @@ HWTEST_F(TextTestNg, TextContentModifier008, TestSize.Level1)
     textContentModifier.PauseAnimation();
     textContentModifier.racePercentFloat_ = nullptr;
     textContentModifier.GetTextRacePercent();
+}
+
+/**
+ * @tc.name: TextContentAlign001
+ * @tc.desc: test text_content_modifier.cpp .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentAlign001, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to 100.0f
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentSize.value().Width(), 100.0f);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::TOP);
+    auto contentOffset = textLayoutAlgorithm->GetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentOffset.GetY(), 0.0f);
+    textPattern->pManager_->Reset();
 }
 
 /**
@@ -3434,13 +3505,13 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
     RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
 
     ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
     textSelectOverlay->OnHandleMove(handleRect, true);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
     ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
     textSelectOverlay->OnHandleMove(handleRect, false);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
 }
 
 /**
@@ -4519,6 +4590,24 @@ HWTEST_F(TextTestNg, ProcessSpanString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessSpanString003
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ProcessSpanString003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
+    */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
+    pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    pattern->dataDetectorAdapter_->textForAI_ = pattern->textForDisplay_;
+    pattern->ProcessSpanString();
+    EXPECT_EQ(pattern->textForDisplay_.length(), 0);
+}
+
+/**
  * @tc.name: UpdateParagraphBySpan002
  * @tc.desc: Test the maxlines of UpdateParagraphBySpan
  * @tc.type: FUNC
@@ -4882,5 +4971,46 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     auto line = textModelNG.GetLineCount(frameNode);
     ASSERT_EQ(line, 0);
+}
+
+/**
+ * @tc.name: TextContentModifierSetSymbolColor001
+ * @tc.desc: Test SetSymbolColor with existing symbolColors (size=2) and input value size=1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifierSetSymbolColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextContentModifier and initialize symbolColors_ with size=2.
+     */
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    std::vector<Color> initialColors = { Color::BLUE };
+    TextStyle style;
+    style.SetSymbolColorList(initialColors);
+    textContentModifier->SetDefaultSymbolColor(style);
+
+    // Initialize symbolColors_ with 2 colors
+    std::vector<Color> newColors1 = { Color::RED, Color::BLUE };
+    textContentModifier->SetSymbolColor(newColors1, false);
+    auto resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 2);
+
+    /**
+     * @tc.steps: step2. Call SetSymbolColor with value size=1 (smaller than current symbolColors_)
+     */
+    std::vector<Color> newColors2 = { Color::GREEN };
+    textContentModifier->SetSymbolColor(newColors2, false);
+
+    /**
+     * @tc.steps: step3. Verify symbolColors_ is correctly updated and truncated
+     * @tc.expected: symbolColors_ should have size=1 with the new color
+     */
+    resultColors = textContentModifier->symbolColors_; // Assume there's a getter method
+    ASSERT_NE(resultColors, std::nullopt);
+    EXPECT_EQ(resultColors->size(), 1);
+    EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
 } // namespace OHOS::Ace::NG

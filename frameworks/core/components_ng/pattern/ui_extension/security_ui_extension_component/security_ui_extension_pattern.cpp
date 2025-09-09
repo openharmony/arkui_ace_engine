@@ -236,7 +236,6 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     if (sessionWrapper_->IsSessionValid()) {
         auto sessionWant = sessionWrapper_->GetWant();
         if (sessionWant == nullptr) {
-            PLATFORM_LOGW("The sessionWrapper want is nulllptr.");
             return;
         }
         if (sessionWant->IsEquals(want)) {
@@ -355,6 +354,7 @@ void SecurityUIExtensionPattern::InitBusinessDataHandleCallback()
 void SecurityUIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
 {
     CHECK_RUN_ON(UI);
+    ACE_SCOPED_TRACE("OnExtensionEvent[%u]", eventId);
     ContainerScope scope(instanceId_);
     switch (eventId) {
         case UIExtCallbackEventId::ON_AREA_CHANGED:
@@ -484,7 +484,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -538,7 +538,7 @@ void SecurityUIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -638,7 +638,7 @@ void SecurityUIExtensionPattern::FireOnRemoteReadyCallback()
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnRemoteReadyCallback(
         MakeRefPtr<NG::SecurityUIExtensionProxy>(sessionWrapper_, Claim(this)));
@@ -663,7 +663,7 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
 }
@@ -685,7 +685,7 @@ void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& 
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnReceiveCallback(params);
 }
@@ -748,7 +748,7 @@ bool SecurityUIExtensionPattern::GetDensityDpi()
     return densityDpi_;
 }
 
-void SecurityUIExtensionPattern::OnVisibleChangeInner(bool visible)
+void SecurityUIExtensionPattern::OnVisibleChange(bool visible)
 {
     PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
         isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
@@ -786,7 +786,7 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChangeInner(visible);
+        uiExtension->OnVisibleChange(visible);
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1087,7 +1087,7 @@ bool SecurityUIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeIn
 
 void SecurityUIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeGeometryChange(flag))) {
         return;
     }
     TransferAccessibilityRectInfo();

@@ -47,6 +47,8 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetTextContentAlign(TextContentAlign value) override;
+    void ReSetTextContentAlign() override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
     void SetTextIndent(const Dimension& value) override;
@@ -90,13 +92,13 @@ public:
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
-    void SetOptimizeTrailingSpace(bool trim) override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
+    void SetOptimizeTrailingSpace(bool trim) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
-    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
     void ResetGradientShaderStyle() override;
+    void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -109,6 +111,7 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
@@ -163,6 +166,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static TextAlign GetTextAlign(FrameNode* frameNode);
+    static TextContentAlign GetTextContentAlign(FrameNode* frameNode);
     static TextOverflow GetTextOverflow(FrameNode* frameNode);
     static Dimension GetTextIndent(FrameNode* frameNode);
 
@@ -197,12 +201,12 @@ public:
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
-    static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
-    static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
     static size_t GetLineCount(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
+    static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
+    static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
@@ -212,6 +216,7 @@ public:
     static void SetContentTransition(
         FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur);
     static void ResetContentTransition(FrameNode* frameNode);
+    static void ReSetTextContentAlign(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

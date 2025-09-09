@@ -100,7 +100,8 @@ public:
 #ifdef WEB_SUPPORTED
     MOCK_METHOD(bool, RegisterWebInteractionOperationAsChildTree,
         (int64_t accessibilityId, const WeakPtr<NG::WebPattern>& webPattern), (override));
-    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
+    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree,
+        (int32_t treeId, const WeakPtr<NG::WebPattern>& webPattern), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
         int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
@@ -169,6 +170,16 @@ void MockPipelineContext::TearDown()
         pipeline_ = nullptr;
     }
     predictTasks_.clear();
+}
+
+std::string PipelineContext::GetBundleName()
+{
+    return "";
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    return "";
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -595,6 +606,8 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
+void PipelineContext::PostTaskResponseRegion(int32_t delay) {}
+
 void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
@@ -739,6 +752,15 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
     }
 }
 
+void PipelineContext::AddAfterModifierTask(std::function<void()>&& task)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddAfterModifierTask(std::move(task));
+    } else if (task) {
+        task();
+    }
+}
+
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 {
     if (task) {
@@ -834,7 +856,7 @@ void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigati
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 
-void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow, bool isFromWindow) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {
@@ -1292,6 +1314,25 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
 
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    return rootWidth;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    return 0;
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
@@ -1329,6 +1370,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 }
 
 void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
+}
+
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
 {
 }
 
@@ -1439,6 +1484,11 @@ void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
 std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
 {
     return nullptr;
+}
+
+std::string NG::PipelineContext::GetCurrentPageNameCallback()
+{
+    return "";
 }
 
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)

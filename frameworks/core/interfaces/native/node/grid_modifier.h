@@ -37,6 +37,7 @@ void ResetOnGridItemDragLeave(ArkUINodeHandle node);
 void SetOnGridItemDrop(ArkUINodeHandle node, void* extraParam);
 void ResetOnGridItemDrop(ArkUINodeHandle node);
 void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj);
+void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

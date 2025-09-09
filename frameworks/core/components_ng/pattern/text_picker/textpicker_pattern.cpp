@@ -50,7 +50,7 @@ const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
-const int32_t UNOPTION_COUNT = 2;
+const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr uint32_t PRECISION_TWO = 2;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
@@ -130,7 +130,7 @@ void TextPickerPattern::UpdateButtonMargin(
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)
 {
     CHECK_NULL_VOID(buttonNode);
     auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
@@ -138,7 +138,7 @@ void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonN
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    auto pipeline = updateNode->GetContextRefPtr();
+    auto pipeline = updateNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -752,7 +752,7 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireChangeEvent(value, index);
     textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
@@ -794,7 +794,7 @@ void TextPickerPattern::FireScrollStopEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireScrollStopEvent(value, index);
     textPickerEventHub->FireDialogScrollStopEvent(GetSelectedObject(true, 1));
@@ -833,7 +833,7 @@ void TextPickerPattern::FireEnterSelectedAreaEvent(bool refresh)
             value.emplace_back(enterValue);
         }
     }
-    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireEnterSelectedAreaEvent(value, index);
     textPickerEventHub->FireDialogEnterSelectedAreaEvent(GetSelectedObject(true, 1, true));
@@ -843,7 +843,7 @@ void TextPickerPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1437,7 +1437,7 @@ bool TextPickerPattern::ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textP
             break;
 
         case KeyCode::KEY_MOVE_END:
-            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - INVISIBLE_OPTIONS_COUNT);
             if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
@@ -1770,7 +1770,14 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
     auto parentIdealSize = stackLayoutConstraint->parentIdealSize;
     if (parentIdealSize.Width().has_value()) {
         pickerContentSize.SetWidth(parentIdealSize.Width().value());
+    } else {
+        auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy->IsWidthMatch()) {
+            float contentWidth = pickerLayoutConstraint->parentIdealSize.Width().value_or(0);
+            pickerContentSize.SetWidth(contentWidth);
+        }
     }
+
     if (parentIdealSize.Height().has_value()) {
         pickerContentSize.SetHeight(parentIdealSize.Height().value());
     }

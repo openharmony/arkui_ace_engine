@@ -258,6 +258,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level1)
     richEditorNode_->parent_ = frameNode;
     FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     richEditorNode_->changeInfoFlag_ = FRAME_NODE_CHANGE_END_SCROLL;
+    EXPECT_NE(richEditorPattern->selectOverlay_->GetPattern<RichEditorPattern>(), nullptr);
     richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
     EXPECT_NE(richEditorNode_->changeInfoFlag_, FRAME_NODE_CHANGE_INFO_NONE);
 }
@@ -384,6 +385,19 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
     ASSERT_TRUE(secondHandleInfo.has_value());
     EXPECT_FALSE(secondHandleInfo.value().isShow);
     EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    selectOverlay->hasTransform_ = true;
+    selectOverlay->SetUsingMouse(false);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
+
+    selectOverlay->SetUsingMouse(true);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
 }
 
 /**
@@ -1288,6 +1302,8 @@ HWTEST_F(RichEditorSelectOverlayTestNg, ShowHandles001, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);
     EXPECT_EQ(richEditorPattern->caretVisible_, true);
@@ -1431,4 +1447,21 @@ HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.
     richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
 }
 
+/**
+ * @tc.name: ToggleMenu001
+ * @tc.desc: test ToggleMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ToggleMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    WeakPtr<TextBase> textBase;
+    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
+    richEditorPattern->selectOverlay_->isShowMenu_ = false;
+    richEditorPattern->selectOverlay_->needRefreshMenu_ = false;
+    richEditorPattern->selectOverlay_->ToggleMenu();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->isShowMenu_);
+}
 } // namespace OHOS::Ace::NG

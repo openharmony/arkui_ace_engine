@@ -39,7 +39,15 @@ struct IndexPage {
     new TextList(5, 'RecycleView', 'pages/Scroll/RecycleView/Index'),
     new TextList(6, 'ScrollNode', 'pages/Scroll/ScrollNode'),
     new TextList(7, 'ScrollWithLayoutWeight', 'pages/Scroll/ScrollWithLayoutWeight'),
-    new TextList(8, 'FreeScroll', 'pages/Scroll/FreeScroll')
+    new TextList(8, 'FreeScroll', 'pages/Scroll/FreeScroll'),
+    new TextList(9, 'OnDidScrollAndTranslate', 'pages/Scroll/OnDidScrollAndTranslate'),
+    new TextList(10, 'ParentDriveChild', 'pages/Scroll/ParentDriveChild'),
+    new TextList(11, 'NestedScrollTypeOne', 'pages/Scroll/NestedScrollTypeOne'),
+    new TextList(12, 'NestedScrollTypeTwo', 'pages/Scroll/NestedScrollTypeTwo'),
+    new TextList(13, 'friction', 'pages/Scroll/friction'),
+    new TextList(14, 'initialOffsetXOffset', 'pages/Scroll/initialOffsetXOffset'),
+    new TextList(15, 'initialOffsetYOffset', 'pages/Scroll/initialOffsetYOffset'),
+    new TextList(16, 'scrollSnap', 'pages/Scroll/scrollSnap')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

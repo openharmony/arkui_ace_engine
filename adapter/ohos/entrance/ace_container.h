@@ -59,6 +59,9 @@ namespace OHOS::Ace {
 class FontManager;
 }
 
+namespace OHOS::AppExecFwk {
+class FormAshmem;
+}
 namespace OHOS::Ace::Platform {
 class HighContrastObserver;
 

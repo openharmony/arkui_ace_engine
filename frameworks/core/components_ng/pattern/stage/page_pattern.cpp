@@ -104,6 +104,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
+    FirePageTransitionStart();
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_, type]() {
         auto pattern = weak.Upgrade();
@@ -270,7 +271,7 @@ void PagePattern::OnShow(bool isFromWindow)
     }
     NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), true);
+        context->FirePageChanged(pageInfo_->GetPageId(), true, isFromWindow);
         NotifyNavigationLifecycle(true, isFromWindow);
     }
     UpdatePageParam();
@@ -335,7 +336,7 @@ void PagePattern::OnHide(bool isFromWindow)
     CHECK_NULL_VOID(host);
     if (pageInfo_) {
         NotifyNavigationLifecycle(false, isFromWindow);
-        context->FirePageChanged(pageInfo_->GetPageId(), false);
+        context->FirePageChanged(pageInfo_->GetPageId(), false, isFromWindow);
     }
     host->SetJSViewActive(false);
     isOnShow_ = false;
@@ -498,6 +499,15 @@ void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
     }
 }
 
+void PagePattern::FirePageTransitionStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_TRANSITION);
+}
+
 void PagePattern::FirePageTransitionFinish()
 {
     if (pageTransitionFinish_) {
@@ -507,6 +517,12 @@ void PagePattern::FirePageTransitionFinish()
             onFinish();
         }
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
+    pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
 }
 
 void PagePattern::StopPageTransition()
@@ -527,18 +543,16 @@ void PagePattern::StopPageTransition()
 
 void PagePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("[%s][self:%d] SafeArea already applied to AppBar", host->GetTag().c_str(), host->GetId());
         return;
     }
     ContentRootPattern::BeforeCreateLayoutWrapper();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto&& insets = host->GetLayoutProperty()->GetSafeAreaInsets();
     CHECK_NULL_VOID(insets);
     auto manager = pipeline->GetSafeAreaManager();
@@ -547,7 +561,9 @@ void PagePattern::BeforeCreateLayoutWrapper()
 
 bool PagePattern::AvoidKeyboard() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
@@ -857,6 +873,10 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
@@ -893,7 +913,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id is different");
         return;
     }
-    outPage->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
+    outPage->GetEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::EXIT_PUSH && type != PageTransitionType::EXIT_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "current transition type is invalid");
         return;
@@ -934,7 +954,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id in inPage is invalid");
         return;
     }
-    inPage->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
+    inPage->GetEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::ENTER_PUSH && type != PageTransitionType::ENTER_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;

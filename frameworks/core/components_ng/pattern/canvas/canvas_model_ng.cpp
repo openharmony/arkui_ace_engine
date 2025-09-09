@@ -45,7 +45,7 @@ void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto func = onReady;
@@ -83,7 +83,7 @@ void CanvasModelNG::DetachRenderContext()
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReady(std::move(onReady));
 }

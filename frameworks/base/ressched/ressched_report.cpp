@@ -164,10 +164,20 @@ void ResSchedReport::TriggerModuleSerializer()
     taskExecutor->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delay, "TriggerModuleSerializer");
 }
 
-void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
+void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param,
+    int64_t tid)
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[Ressched::NAME] = name;
+#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
+    if (tid == ResDefine::INVALID_DATA) {
+        tid = GetTid();
+    }
+    int64_t pid = GetPid();
+    if (pid != tid) {
+        payload["scrTid"] = std::to_string(static_cast<uint64_t>(GetPthreadSelf()));
+    }
+#endif
     if (!reportDataFunc_) {
         reportDataFunc_ = LoadReportDataFunc();
     }
@@ -287,6 +297,13 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
     std::unordered_map<std::string, std::string>& reply)
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
+}
+
+bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 1, payload, reply);
     return reply["result"] == "\"true\"" ? true : false;
 }
 

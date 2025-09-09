@@ -26,7 +26,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/vector.h"
-#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -402,10 +401,10 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
     CheckIsCard(src, imageInfo);
     RefPtr<PixelMap> pixmap = nullptr;
-
-    if (!srcValid) {
+    ImageType type = ImageType::BASE;
 #ifdef PIXEL_MAP_SUPPORTED
-        auto type = ParseImageType(imageInfo);
+    if (!srcValid) {
+        type = ParseImageType(imageInfo);
         if (type == ImageType::ANIMATED_DRAWABLE) {
             std::vector<RefPtr<PixelMap>> pixelMaps;
             int32_t duration = -1;
@@ -414,33 +413,23 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
-        } else if (type == ImageType::PIXELMAP_DRAWABLE) {
-            auto* address = UnwrapNapiValue(imageInfo);
-            auto drawable = DrawableDescriptor::CreateDrawable(address);
-            if (!drawable) {
-                return;
-            }
-            if (drawable->GetDrawableSrcType() == 1) {
-                pixmap = GetDrawablePixmap(imageInfo);
-            } else {
-                ImageModel::GetInstance()->Create(drawable);
-                ParseImageAIOptions(info);
-                return;
-            }
-        } else if (type == ImageType::LAYERED_DRAWABLE || type == ImageType::DRAWABLE) {
+        } else if (type == ImageType::PIXELMAP_DRAWABLE || type == ImageType::DRAWABLE ||
+                   type == ImageType::LAYERED_DRAWABLE) {
             pixmap = GetDrawablePixmap(imageInfo);
         } else {
             pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
-#endif
     }
+#endif
     ImageInfoConfig config;
+    config.type = type;
     config.src = std::make_shared<std::string>(src);
+    config.pixelMap = pixmap;
     config.bundleName = bundleName;
     config.moduleName = moduleName;
     config.isUriPureNumber = (resId == -1);
     config.isImageSpan = isImageSpan;
-    ImageModel::GetInstance()->Create(config, pixmap);
+    ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
     if (SystemProperties::ConfigChangePerform() && resObj) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
@@ -794,6 +783,8 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
         color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
+    // Fix the svg collision bug with the foreground color placeholder 0x00000001.
+    ViewAbstractModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
 
     if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::FILL_COLOR, resObj);
@@ -1095,6 +1086,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("hdrBrightness", &JSImage::SetHdrBrightness, opt);
     JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
     JSClass<JSImage>::StaticMethod("orientation", &JSImage::SetOrientation, opt);
+    JSClass<JSImage>::StaticMethod("contentTransition", &JSImage::SetContentTransition, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -1120,6 +1112,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
     JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+    JSClass<JSImage>::StaticMethod("supportSvg2", &JSImage::SupportSvg2);
 
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
@@ -1241,4 +1234,48 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetImageAnalyzerConfig(analyzerConfig);
 }
 
+void JSImage::SupportSvg2(const JSCallbackInfo& info)
+{
+    bool enable = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], enable);
+    }
+    ImageModel::GetInstance()->SetSupportSvg2(enable);
+}
+
+bool JSImage::ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || jsValue->IsUndefined() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("contentTransitionType_");
+    if (typeVal.IsEmpty() || !typeVal->IsString()) {
+        return false;
+    }
+    static const std::unordered_map<std::string, ContentTransitionType> contentTransitionTypeMap {
+        { "IDENTITY", ContentTransitionType::IDENTITY },
+        { "OPACITY", ContentTransitionType::OPACITY },
+    };
+    auto it = contentTransitionTypeMap.find(typeVal->ToString());
+    if (it == contentTransitionTypeMap.end()) {
+        return false;
+    }
+    contentTransitionType = it->second;
+    return true;
+}
+
+void JSImage::SetContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetContentTransition(ContentTransitionType::IDENTITY);
+        return;
+    }
+    auto contentTransitionType = ContentTransitionType::IDENTITY;
+    if (ParseContentTransitionEffect(info[0], contentTransitionType)) {
+        ImageModel::GetInstance()->SetContentTransition(contentTransitionType);
+    } else {
+        ImageModel::GetInstance()->SetContentTransition(ContentTransitionType::IDENTITY);
+    }
+}
 } // namespace OHOS::Ace::Framework

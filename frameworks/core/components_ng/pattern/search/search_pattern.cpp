@@ -58,6 +58,7 @@ constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
 constexpr Dimension SYMBOL_ICON_HEIGHT = 16.0_fp;
 constexpr Dimension ICON_MAX_SIZE = 32.0_vp;
 constexpr Dimension SEARCH_TEXTINPUT_BORDER_WIDTH = 0.0_vp;
+constexpr float HOVER_STRAT_OPACITY = 0.0f;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float TOUCH_OPACITY = 0.1f;
 constexpr float MAX_FONT_SCALE = 2.0f;
@@ -143,7 +144,7 @@ void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, in
     CHECK_NULL_VOID(cancelButtonRenderContext);
     auto cancelImageRenderContext = imageHost->GetRenderContext();
     CHECK_NULL_VOID(cancelImageRenderContext);
-    auto cancelButtonEvent = buttonHost->GetOrCreateEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     auto buttonLayoutProperty = buttonHost->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
@@ -164,7 +165,7 @@ void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, in
         imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     }
     if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageEvent = imageHost->GetOrCreateEventHub<ImageEventHub>();
+        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
         CHECK_NULL_VOID(imageEvent);
         imageEvent->SetEnabled(isEventEnabled);
     }
@@ -196,7 +197,7 @@ void SearchPattern::UpdateEnable(bool needToEnable)
     CHECK_NULL_VOID(frameNode);
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(searchButtonFrameNode);
-    auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (needToEnable) {
         buttonEventHub->SetEnabled(true);
@@ -242,7 +243,7 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     auto buttonNode = buttonLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
-    auto searchButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
 
     if (!searchButtonEvent->IsEnabled()) {
@@ -258,7 +259,7 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     auto cancelButtonNode = cancelButtonLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, true);
-    auto cancelButtonEvent = cancelButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, true);
     cancelButtonOffset_ = cancelButtonGeometryNode->GetFrameOffset();
     if (!cancelButtonEvent->IsEnabled()) {
@@ -316,7 +317,7 @@ void SearchPattern::OnModifyDone()
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
 
-    auto searchButtonEvent = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
     isSearchButtonEnabled_ = searchButtonEvent->IsEnabled();
 
     UpdateCancelButton();
@@ -402,6 +403,22 @@ void SearchPattern::SetAccessibilityAction()
         auto index = pattern->HandleGetCaretIndex();
         return index;
     });
+    textAccessibilityProperty->SetNotifyChildAction(
+        [weak = WeakClaim(this)](const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, AccessibilityActionResult::ACTION_ERROR);
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, AccessibilityActionResult::ACTION_ERROR);
+            auto searchGesture = host->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(searchGesture, AccessibilityActionResult::ACTION_ERROR);
+            pattern->isNotifyChildAction_ = true;
+            searchGesture->ActClick();
+            pattern->isNotifyChildAction_ = false;
+            return AccessibilityActionResult::ACTION_OK;
+        });
     SetSearchFieldAccessibilityAction();
     SetSearchButtonAccessibilityAction();
 }
@@ -411,22 +428,6 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    textFieldAccessibilityProperty->SetActionClick([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto gesture = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gesture);
-        auto actuator = gesture->GetUserClickEventActuator();
-        CHECK_NULL_VOID(actuator);
-        auto callBack = actuator->GetClickEvent();
-        CHECK_NULL_VOID(callBack);
-        GestureEvent gestureEvent;
-        callBack(gestureEvent);
-    });
-
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     textAccessibilityProperty->SetActionSetText([weak = WeakClaim(this)](const std::string& value) {
         auto pattern = weak.Upgrade();
@@ -474,11 +475,11 @@ void SearchPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->SetEnabled(searchEventHub->IsEnabled() ? true : false);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -492,7 +493,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto searchGestureHub = searchEventHub->GetGestureEventHub();
     CHECK_NULL_VOID(searchGestureHub);
@@ -505,7 +506,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
     for (int32_t childIndex = TEXTFIELD_INDEX; childIndex <= BUTTON_INDEX; childIndex++) {
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
-        auto childEventHub = childFrameNode->GetOrCreateEventHub<EventHub>();
+        auto childEventHub = childFrameNode->GetEventHub<EventHub>();
         auto childGestureHub = childEventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(childGestureHub);
         childGestureHub->SetTouchable(searchTouchable);
@@ -528,7 +529,7 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
         auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
@@ -545,11 +546,11 @@ void SearchPattern::InitTextFieldDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldEventHub = textFieldFrameNode->GetOrCreateEventHub<EventHub>();
+    auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
 
     textFieldFrameNode->SetDragPreview(host->GetDragPreview());
@@ -813,7 +814,7 @@ void SearchPattern::OnClickButtonAndImage()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<SearchEventHub>();
+    auto searchEventHub = host->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
@@ -853,7 +854,7 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
-    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -952,6 +953,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     // When press '->' or '<-', focus delete button or search button according to whether there is text in the search.
     if (event.code == KeyCode::KEY_DPAD_LEFT || event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            ResetCancelButtonColor();
             focusChoice_ = FocusChoice::SEARCH;
             PaintFocusState();
             return true;
@@ -1004,6 +1006,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return textFieldPattern->OnKeyEvent(event);
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            ResetCancelButtonColor();
             if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
                 (event.code == KeyCode::KEY_DPAD_RIGHT)) {
                 return false; // Go out of Search
@@ -1091,8 +1094,16 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     if (renderContext->GetBackgroundColor().value_or(searchNormalColor_) == searchNormalColor_) {
-        renderContext->UpdateBackgroundColor(searchTheme->GetFocusBgColor());
+        renderContext->UpdateBackgroundColor(
+            searchTheme->GetSearchNormalColor().BlendColor(searchTheme->GetFocusBgColor()));
         isFocusBgColorSet_ = true;
+    }
+    if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+        auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(searchTheme->GetSearchCancelButtonFocusColor());
     }
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
@@ -1193,9 +1204,10 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomLeft = 0.0f;
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
+    float cancelButtonFocusPadding = searchTheme->GetSearchCancelButtonFocusPadding().ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        auto searchTheme = GetTheme();
-        CHECK_NULL_VOID(searchTheme);
         // 分层参数控制是否需要绘制焦点框
         if (searchTheme->NeedFocusBox()) {
             GetSearchFocusPaintRect(paintRect);
@@ -1203,14 +1215,14 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         }
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
-        originX = cancelButtonOffset_.GetX() + focusOffset;
-        originY = cancelButtonOffset_.GetY() + focusOffset;
-        endX = cancelButtonSize_.Width() + originX - DOUBLE * focusOffset;
-        endY = cancelButtonSize_.Height() + originY - DOUBLE * focusOffset;
-        radiusTopLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusTopRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusBottomLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset;
-        radiusBottomRight = cancelButtonSize_.Height() / DOUBLE - focusOffset;
+        originX = cancelButtonOffset_.GetX() + focusOffset - cancelButtonFocusPadding;
+        originY = cancelButtonOffset_.GetY() + focusOffset - cancelButtonFocusPadding;
+        endX = cancelButtonSize_.Width() + originX - DOUBLE * focusOffset + DOUBLE * cancelButtonFocusPadding;
+        endY = cancelButtonSize_.Height() + originY - DOUBLE * focusOffset + DOUBLE * cancelButtonFocusPadding;
+        radiusTopLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusTopRight = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusBottomLeft = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
+        radiusBottomRight = cancelButtonSize_.Height() / DOUBLE - focusOffset + cancelButtonFocusPadding;
     }
     if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
         originX = buttonOffset_.GetX() + focusOffset;
@@ -1258,7 +1270,7 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
     CHECK_NULL_VOID(buttonFrameNode);
     auto gesture = buttonFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStateEffect(false);
     auto touchTask = [weak = WeakClaim(this), childId](const TouchEventInfo& info) {
@@ -1285,7 +1297,7 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
     CHECK_NULL_VOID(host);
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
@@ -1310,9 +1322,10 @@ void SearchPattern::OnButtonTouchDown(int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
-        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+        AnimateTouchAndHover(
+            renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
     } else {
-        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION, childId);
     }
 }
 
@@ -1325,9 +1338,10 @@ void SearchPattern::OnButtonTouchUp(int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+        AnimateTouchAndHover(
+            renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
     } else {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION, childId);
     }
 }
 
@@ -1362,23 +1376,50 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (isHover) {
-        AnimateTouchAndHover(renderContext, 0.0f, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(
+            renderContext, HOVER_STRAT_OPACITY, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION, childId);
     } else {
-        AnimateTouchAndHover(renderContext, HOVER_OPACITY, 0.0f, HOVER_DURATION, Curves::FRICTION);
+        AnimateTouchAndHover(
+            renderContext, HOVER_OPACITY, HOVER_STRAT_OPACITY, HOVER_DURATION, Curves::FRICTION, childId);
     }
 }
 
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-    int32_t duration, const RefPtr<Curve>& curve)
+    int32_t duration, const RefPtr<Curve>& curve, int32_t childId)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto colorMode = context->GetColorMode();
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     if (colorMode == ColorMode::DARK) {
-        touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
-        touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+        if (childId == CANCEL_BUTTON_INDEX) {
+            if (startOpacity == HOVER_STRAT_OPACITY) {
+                //hover
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = searchTheme->GetSearchCancelButtonHoverColor();
+            } else if (endOpacity == HOVER_STRAT_OPACITY) {
+                //non-hover
+                touchColorFrom = searchTheme->GetSearchCancelButtonHoverColor();
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            } else if (startOpacity == HOVER_OPACITY) {
+                //touch down
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = searchTheme->GetSearchCancelButtonPressColor();
+            } else if (endOpacity == HOVER_OPACITY) {
+                //touch up
+                touchColorFrom = searchTheme->GetSearchCancelButtonPressColor();
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            } else {
+                touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+                touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+            }
+        } else {
+            touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+            touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+        }
     }
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
@@ -1387,7 +1428,8 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetDuration(duration);
     option.SetCurve(curve);
     AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); }, nullptr,
+        nullptr, Claim(context));
 }
 
 void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
@@ -1400,7 +1442,8 @@ void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderCont
     option.SetDuration(duration);
     option.SetCurve(curve);
     AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); }, nullptr,
+        nullptr, Claim(GetContext()));
 }
 
 void SearchPattern::ResetDragOption()
@@ -1417,7 +1460,7 @@ void SearchPattern::ClearButtonStyle(int32_t childId)
     CHECK_NULL_VOID(buttonFrameNode);
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP, childId);
 }
 
 void SearchPattern::InitSearchTheme()
@@ -1460,7 +1503,7 @@ void SearchPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = host->GetEventHub<SearchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -1477,7 +1520,7 @@ void SearchPattern::HandleHoverEvent(bool isHover)
     isSearchHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -1525,7 +1568,7 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
     isSearchPress_ = isDown;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = GetOrCreateEventHub<SearchEventHub>();
+    auto searchEventHub = GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto renderContext = host->GetRenderContext();
     auto searchTheme = GetTheme();
@@ -1636,7 +1679,11 @@ void SearchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
+        if (pattern->isNotifyChildAction_) {
+            pattern->HandleNotifyChildAction(info);
+        } else {
+            pattern->HandleClickEvent(info);
+        }
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
@@ -1657,6 +1704,19 @@ void SearchPattern::HandleClickEvent(GestureEvent& info)
         info.GetLocalLocation().GetY() - textFieldFrameRect.GetY());
     info.SetLocalLocation(relTextFieldLocalLocation);
     textFieldPattern->HandleClickEvent(info);
+}
+
+void SearchPattern::HandleNotifyChildAction(GestureEvent& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto actuator = gesture->GetUserClickEventActuator();
+    CHECK_NULL_VOID(actuator);
+    auto callBack = actuator->GetClickEvent();
+    CHECK_NULL_VOID(callBack);
+    callBack(info);
 }
 
 bool SearchPattern::HandleInputChildOnFocus() const
@@ -2320,7 +2380,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     if (isCreateNode) {
         iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = iconFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }
@@ -2352,7 +2412,7 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     if (isCreateNode) {
         iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = iconFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }
@@ -2489,6 +2549,19 @@ void SearchPattern::SetCancelIconColor(const Color& color)
             cancelIconFrameNode->MarkModifyDone();
             cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+    }
+}
+
+void SearchPattern::ResetCancelButtonColor()
+{
+    if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto renderContext = buttonFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
 }
 

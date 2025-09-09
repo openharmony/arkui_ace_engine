@@ -538,7 +538,7 @@ HWTEST_F(RichEditorTouchTestNg, TestRichEditorUpdateSelectionByTouchMove001, Tes
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
     auto richOffset = Offset(40, 30);
     richEditorPattern->UpdateSelectionByTouchMove(richOffset);
-    auto host = richEditorPattern->GetHost();
+    auto host = richEditorPattern->GetContentHost();
     ASSERT_NE(host, nullptr);
     ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
 }
@@ -563,6 +563,38 @@ HWTEST_F(RichEditorTouchTestNg, TestTouchedFingerCount, TestSize.Level1)
     EXPECT_NE(fingerCount, 0);
     richEditorPattern->HandleTouchUp();
     EXPECT_EQ(fingerCount, 0);
+}
+
+/**
+ * @tc.name: HandleUserTouchEvent001
+ * @tc.desc: test HandleUserTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTouchTestNg, HandleUserTouchEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    bool isTouchTrigger = false;
+    firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    TouchEventInfo info = TouchEventInfo("default");
+    TouchLocationInfo locationInfo = TouchLocationInfo(0);
+    locationInfo.SetLocalLocation(Offset(3, 3));
+    info.AddTouchLocationInfo(std::move(locationInfo));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    richEditorPattern->HandleUserTouchEvent(info);
+    EXPECT_TRUE(isTouchTrigger);
 }
 
 }

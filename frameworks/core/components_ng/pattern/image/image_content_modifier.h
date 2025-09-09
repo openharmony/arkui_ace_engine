@@ -32,8 +32,6 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void DrawDrawable(DrawingContext& drawingContext);
-
     void SetSensitive(bool sensitive)
     {
         CHECK_NULL_VOID(sensitive_);
@@ -51,6 +49,8 @@ public:
         CHECK_NULL_VOID(canvasImageWrapper_);
         canvasImageWrapper_->Set(wrapper);
     }
+
+    ContentTransitionType GetContentTransitionParam() override;
 
 private:
     // The same svg resource has only one copy of SVGDOM in the object cache. Therefore

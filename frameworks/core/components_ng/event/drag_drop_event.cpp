@@ -34,22 +34,46 @@ constexpr int32_t PREVIEW_LONG_PRESS_RECOGNIZER = 800;
 constexpr int32_t DEFAULT_DRAG_FINGERS = 1;
 constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 constexpr PanDirection DEFAULT_DRAG_DIRECTION = { PanDirection::ALL };
+
+GestureEvent PostNotifyPanOnActionStart(const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, info);
+    auto newInfo = info;
+    auto globalLocation = info.GetGlobalLocation();
+    auto postEventManager = pipeline->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, info);
+    auto node = postEventManager->GetPostTargetNode();
+    CHECK_NULL_RETURN(node, info);
+    auto offset = node->GetOffsetRelativeToWindow();
+    globalLocation.SetX(globalLocation.GetX() + offset.GetX());
+    globalLocation.SetY(globalLocation.GetY() + offset.GetY());
+    newInfo.SetGlobalLocation(globalLocation);
+    auto screenLocation = info.GetScreenLocation();
+    auto screenOffset = DragDropFuncWrapper::GetFrameNodeOffsetToScreen(node);
+    screenLocation.SetX(screenLocation.GetX() + screenOffset.GetX());
+    screenLocation.SetY(screenLocation.GetY() + screenOffset.GetY());
+    newInfo.SetScreenLocation(screenLocation);
+    return newInfo;
+}
 } // namespace
 
 DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
     : DragEventActuator(gestureEventHub), gestureEventHub_(gestureEventHub)
 {
-    panRecognizer_ =
-        MakeRefPtr<PanRecognizer>(DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
-    panRecognizer_->SetIsForDrag(true);
-    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
+    auto dragPanDistanceTouch = DEFAULT_DRAG_DISTANCE;
     auto appTheme = pipeline->GetTheme<AppTheme>();
     if (appTheme) {
         dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+        dragPanDistanceTouch = appTheme->GetPanDistanceThresholdForDragDrop();
     }
+    panRecognizer_ =
+        MakeRefPtr<PanRecognizer>(DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, dragPanDistanceTouch.ConvertToPx());
+    panRecognizer_->SetIsForDrag(true);
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
     panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     longPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, DEFAULT_DRAG_FINGERS, false, true);
@@ -71,7 +95,12 @@ void DragDropEventActuator::InitPanAction()
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
             CHECK_NULL_VOID(handler);
-            handler->NotifyPanOnActionStart(info);
+            if (!info.GetPassThrough()) {
+                handler->NotifyPanOnActionStart(info);
+                return;
+            }
+            auto newInfo = PostNotifyPanOnActionStart(info);
+            handler->NotifyPanOnActionStart(newInfo);
         });
     panRecognizer_->SetOnActionUpdate(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
@@ -82,7 +111,11 @@ void DragDropEventActuator::InitPanAction()
     panRecognizer_->SetOnActionEnd(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
-            CHECK_NULL_VOID(handler);
+            if (!handler) {
+                TAG_LOGW(AceLogTag::ACE_DRAG, "on action end, frameNode has been destroyed, resetting");
+                DragEventActuator::ResetDragStatus();
+                return;
+            }
             handler->NotifyPanOnActionEnd(info);
         });
     panRecognizer_->SetOnActionCancel(

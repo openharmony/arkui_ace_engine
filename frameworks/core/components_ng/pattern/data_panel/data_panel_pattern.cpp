@@ -32,7 +32,7 @@ bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
 RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
 {
     if (!dataPanelModifier_) {
-        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
+        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>(WeakClaim(this));
     }
     auto paintMethod = MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
     auto host = GetHost();
@@ -120,7 +120,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
         tmpArry.push_back(0.0f);
     }
 
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);

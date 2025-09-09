@@ -360,7 +360,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     ratingScore = (ratingScore < 0.0) ? 0.0 : ratingScore;
     const double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
     // step3.2: Determine whether the old and new ratingScores are same or not.
-    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue(0.0);
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
@@ -395,14 +395,14 @@ void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 
 void RatingPattern::FireChangeEvent()
 {
-    auto ratingEventHub = GetOrCreateEventHub<RatingEventHub>();
+    auto ratingEventHub = GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(ratingEventHub);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     std::stringstream ss;
-    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue(0.0);
     ratingEventHub->FireChangeEvent(ss.str());
-    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
@@ -697,7 +697,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
     if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
-    ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetIsFocus(isFocus, GetHost());
     ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -717,7 +717,7 @@ void RatingPattern::OnBlurEvent()
     RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -744,7 +744,7 @@ void RatingPattern::SetRatingScore(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -769,7 +769,7 @@ void RatingPattern::UpdateRatingScore(double ratingScore)
 void RatingPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!(mouseEvent_ && hoverEvent_));
-    auto eventHub = GetHost()->GetOrCreateEventHub<RatingEventHub>();
+    auto eventHub = GetHost()->GetEventHub<RatingEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
@@ -969,7 +969,20 @@ void RatingPattern::OnModifyDone()
     if (IsNeedFocusStyle()) {
         LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     }
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->InitEvent();
+        }
+    };
+    pipeline->AddBuildFinishCallBack(callback);
+}
+
+void RatingPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -993,7 +1006,7 @@ void RatingPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1147,7 +1160,7 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto isIndicator = IsIndicator();
     auto ratingScore = renderProperty->GetRatingScoreValue(themeRatingScore_);
     auto stepSize = renderProperty->GetStepSizeValue(themeStepSize_);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);

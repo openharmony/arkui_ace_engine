@@ -981,6 +981,8 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade001, TestSize.
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
+    layoutProperty_->UpdateSafeAreaExpandOpts(
+        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -2050,6 +2052,79 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1
 
     dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
     dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    /**
+     * @tc.steps: step3.Call vectorBlackPointCenterX.size is 0
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    vectorBlackPointCenterX.clear();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier014
+ * @tc.desc: Test CalCBoundsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.longPointDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    dotIndicatorModifier.indicatorPadding_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.indicatorMargin_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(5.0f, 5.0f));
+
+    /**
+     * @tc.steps: step2.Call CalCBoundsRect when vectorBlackPointCenterX_ is null
+     */
+    LinearVector<float> itemHalfSizes = {};
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    auto result = dotIndicatorModifier.CalCBoundsRect();
+    float rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    /**
+     * @tc.steps: step3.Call CalCBoundsRect when vectorBlackPointCenterX_ is not null
+     */
+    dotIndicatorModifier.vectorBlackPointCenterX_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float> { 100.0f, 200.0f, 300.0f });
+    itemHalfSizes = {};
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    itemHalfSizes = { 15.0f, 20.0f, 25.0f, 30.0f };
+    dotIndicatorModifier.itemHalfSizes_ = AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(itemHalfSizes);
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
+
+    /**
+     * @tc.steps: step4.Call CalCBoundsRect when axis_ is Axis::VERTICAL
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, -30.0f);
+
+    /**
+     * @tc.steps: step5.Call CalCBoundsRect when targetVectorBlackPointCenterX_ is not null
+     */
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.targetVectorBlackPointCenterX_ = { 120.0f, 220.0f, 320.0f };
+    result = dotIndicatorModifier.CalCBoundsRect();
+    rectLeft = std::get<0>(result);
+    EXPECT_EQ(rectLeft, 0.0f);
 }
 
 /**

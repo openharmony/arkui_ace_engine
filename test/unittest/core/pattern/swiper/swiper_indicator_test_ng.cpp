@@ -569,7 +569,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
     CreateSwiperDone();
     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    auto eventHub = indicatorNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = indicatorNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     indicatorPattern->SetIndicatorInteractive(true);
     EXPECT_TRUE(eventHub->IsEnabled());
@@ -2280,5 +2280,27 @@ HWTEST_F(SwiperIndicatorTestNg, CheckDragAndUpdate003, TestSize.Level1)
         indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_);
     EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_,
         indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_);
+}
+
+/**
+ * @tc.name: SetSwiperNode001
+ * @tc.desc: Test SwiperIndicator SetSwiperNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SetSwiperNode001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto mockIndicatorNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(mockIndicatorNode, nullptr);
+    auto indicatorPattern = mockIndicatorNode->GetPattern<IndicatorPattern>();
+    auto controller = indicatorPattern->GetIndicatorController();
+    controller->SetSwiperNode(frameNode_);
+    EXPECT_EQ(indicatorNode_->GetPattern<IndicatorPattern>(), nullptr);
 }
 } // namespace OHOS::Ace::NG

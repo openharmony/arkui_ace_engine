@@ -22,6 +22,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+
 namespace {
 inline constexpr double NORMAL_START_ANGLE = -30;
 inline constexpr double ACTIVE_START_ANGLE = -60;
@@ -76,10 +77,10 @@ public:
             theme->arcNormalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
             theme->arcActiveScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width",
                 22.0_vp);
-            auto blendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
-                ARC_SCROLL_BAR_FOREGROUND_OPACITY);
+            auto arcBlendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
+            ARC_SCROLL_BAR_FOREGROUND_OPACITY);
             theme->arcForegroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+                Color::TRANSPARENT).BlendOpacity(arcBlendOpacity);
             theme->arcBackgroundColor_ = pattern->GetAttr<Color>("arc_scroll_bar_background_color",
                 Color(ARC_SCROLL_BAR_BACKGROUND_COLOR));
         }

@@ -3824,6 +3824,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BaseEvent_setAxisVertical(ptr: KPointer, axisVertical: number): void
     @ani.unsafe.Direct
+    native static _BaseEvent_getAxisPinch(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _BaseEvent_setAxisPinch(ptr: KPointer, axisPinch: number): void
+    @ani.unsafe.Direct
     native static _BaseEvent_getPressure(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _BaseEvent_setPressure(ptr: KPointer, pressure: number): void

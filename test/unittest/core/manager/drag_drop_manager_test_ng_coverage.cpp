@@ -69,7 +69,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage001, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -219,7 +219,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage006, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -312,7 +312,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage010, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -436,7 +436,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage012, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -499,7 +499,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage013, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<GridPattern>());
     frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
     dragEnterNodes[0] = nullptr;
     dragEnterNodes[1] = frameNode;
@@ -733,7 +733,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage026, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -791,7 +791,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage027, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -1220,10 +1220,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage048, TestSi
     dragDropManager->isDragFwkShow_ = false;
     dragDropManager->isDragWithContextMenu_ = true;
     DragPointerEvent pointerEvent;
+    dragDropManager->info_.isDragController = false;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     pointerEvent.x = 3.0f;
     pointerEvent.y = 4.0f;
     dragDropManager->info_.scale = 0.5f;
+    dragDropManager->info_.isDragController = true;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_NE(frameNode, nullptr);
 }
@@ -1272,7 +1274,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage050, TestSi
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& info) {
@@ -1315,7 +1317,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage051, TestSi
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& info) {
@@ -1357,7 +1359,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage052, TestSi
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& info) {
@@ -1440,7 +1442,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage054, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
     auto childNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1498,7 +1500,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage055, TestSi
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>("parent", frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeNull->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeNull->SetActive(true);
-    auto eventHub = frameNodeNull->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNodeNull->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onDragDrop = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& value) {};
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -1832,7 +1834,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage066, TestSi
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
     container->isSceneBoardWindow_ = true;
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDisableDataPrefetch(true);
     dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNode);
@@ -1980,10 +1982,14 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage070, TestSi
 HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    auto preTargetFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(dragDropManager, nullptr);
+    auto preTargetFrameNode =
+        AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(preTargetFrameNode, nullptr);
-    preTargetFrameNode->tag_ = V2::UI_EXTENSION_COMPONENT_ETS_TAG;
-
+    auto preTargetFrameNodeUec =
+        AceType::MakeRefPtr<FrameNode>(V2::DYNAMIC_COMPONENT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(preTargetFrameNodeUec, nullptr);
+ 
     auto dragFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(dragFrameNode, nullptr);
     DragPointerEvent pointerEvent;
@@ -1996,12 +2002,29 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSi
     Point point = pointerEvent.GetPoint();
     auto ret = dragDropManager->HandleUIExtensionComponentDragCancel(
         preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
-    ASSERT_EQ(ret, false);
-
+    ASSERT_FALSE(ret);
+ 
     dragDropManager->isDragCancel_ = true;
     ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNodeUec, dragFrameNode, true, pointerEvent, point);
+    ASSERT_TRUE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
         preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
-    ASSERT_EQ(ret, false);
+    ASSERT_FALSE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNodeUec, dragFrameNode, false, pointerEvent, point);
+    ASSERT_FALSE(ret);
+ 
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNode, dragFrameNode, false, pointerEvent, point);
+    ASSERT_FALSE(ret);
+ 
+    dragDropManager->isDragCancel_ = true;
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        dragFrameNode, preTargetFrameNodeUec, false, pointerEvent, point);
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -2389,5 +2412,77 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage080, TestSi
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage081
+ * @tc.desc: Test OnDragStart when isSceneBoardWindow_ is false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage081, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step3. set isSceneBoardWindow_ true.
+     * @tc.expected: container is not null.
+     */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    /**
+     * @tc.steps: step4. call OnDragStart with frameNode and point.
+     * @tc.expected: rootNode_ is null.
+     */
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    EXPECT_EQ(dragDropManager->rootNode_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage082
+ * @tc.desc: Test SetDragAnimationPointerEvent func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage082, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pointerEvent.windowX = 1;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, node);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
 }
 } // namespace OHOS::Ace::NG

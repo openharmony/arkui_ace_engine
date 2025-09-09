@@ -51,7 +51,7 @@ struct FadeoutInfo {
 };
 
 class TextContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:
     explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
@@ -114,7 +114,7 @@ public:
     void ContentModifierDump();
     void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
         const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host);
-
+    void SetRacePercentFloat(float value);
 protected:
     OffsetF GetPaintOffset() const
     {
@@ -130,6 +130,7 @@ private:
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultSymbolColor(const TextStyle& textStyle);
+    void SetSymbolColors(const LinearVector<LinearColor>& value);
     LinearVector<LinearColor> Convert2VectorLinearColor(const std::vector<Color>& colorList);
     void SetDefaultTextShadow(const TextStyle& textStyle);
     void AddShadow(const Shadow& shadow);
@@ -192,6 +193,7 @@ private:
         return marqueeState_ == state;
     }
     bool IsMarqueeVisible() const;
+    void UpdateTextDecorationColorAlpha();
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

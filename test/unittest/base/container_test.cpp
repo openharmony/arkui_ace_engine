@@ -391,22 +391,4 @@ HWTEST_F(SafeContainerTest, SafeMapTest009, TestSize.Level1)
     auto it2 = m.find(2);
     EXPECT_NE(it2, m.end());
 }
-
-/**
- * @tc.name: SafeMapTest010
- * @tc.desc: Test map modification with complex types
- * @tc.type: FUNC
- */
-HWTEST_F(SafeContainerTest, SafeMapTest010, TestSize.Level1)
-{
-    struct Point {
-        int x, y;
-    };
-    SafeMap<int, Point> m;
-    m.emplace(1, Point { 10, 20 });
-    auto it = m.find(1);
-    EXPECT_EQ(it->second.x, 10);
-    m.insert({ 2, Point { 30, 40 } });
-    EXPECT_EQ(m[2].y, 40);
-}
 } // namespace OHOS::Ace

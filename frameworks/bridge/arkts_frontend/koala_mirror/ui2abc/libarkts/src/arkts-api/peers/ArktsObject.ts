@@ -20,7 +20,9 @@ export abstract class ArktsObject {
         this.peer = peer
     }
 
-    readonly peer: KNativePointer
+    peer: KNativePointer
+
+    public onUpdate(node: ArktsObject) {}
 }
 
 export function isSameNativeObject<T extends ArktsObject | number | string | boolean | undefined>(

@@ -251,7 +251,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ResourceConfiguration resConfig;
-    ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+    ResourceManager::GetInstance().UpdateResourceConfig("", "", DEFAULT_INSTANCE_ID, resConfig);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 
     /**
@@ -260,7 +260,22 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ColorMode colorMode = ColorMode::DARK;
-    ResourceManager::GetInstance().UpdateColorMode(colorMode);
+    ResourceManager::GetInstance().UpdateColorMode("", "", DEFAULT_INSTANCE_ID, colorMode);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
+}
+
+/**
+ * @tc.name: ResourceManagerTest005
+ * @tc.desc: Test resourceManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set ResourceCacheSize
+     * @tc.expect: capacity_ is equal to the value that was set.
+     */
+    ResourceManager::GetInstance().SetResourceCacheSize(6);
+    EXPECT_EQ(ResourceManager::GetInstance().capacity_, 6);
 }
 } // namespace OHOS::Ace

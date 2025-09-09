@@ -66,9 +66,8 @@ void RotationRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
-        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+        GetAttachedNode(), false, isPostEventResult_ || touchPoint.passThrough, touchPoint.postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
 }
@@ -370,47 +369,57 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
     }
     if (callback && *callback) {
         GestureEvent info;
-        info.SetTimeStamp(time_);
-        UpdateFingerListInfo();
-        info.SetFingerList(fingerList_);
-        info.SetAngle(resultAngle_);
-        info.SetDeviceId(deviceId_);
-        info.SetSourceDevice(deviceType_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetGestureTypeName(GestureTypeName::ROTATION_GESTURE);
-        TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
-        }
-        info.SetForce(touchPoint.force);
-        if (touchPoint.tiltX.has_value()) {
-            info.SetTiltX(touchPoint.tiltX.value());
-        }
-        if (touchPoint.tiltY.has_value()) {
-            info.SetTiltY(touchPoint.tiltY.value());
-        }
-        if (touchPoint.rollAngle.has_value()) {
-            info.SetRollAngle(touchPoint.rollAngle.value());
-        }
-        if (inputEventType_ == InputEventType::AXIS) {
-            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
-            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
-            info.SetSourceTool(lastAxisEvent_.sourceTool);
-            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-            info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
-        } else {
-            info.SetSourceTool(touchPoint.sourceTool);
-            info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
-            info.CopyConvertInfoFrom(touchPoint.convertInfo);
-        }
-        info.SetPointerEvent(lastPointEvent_);
-        info.SetInputEventType(inputEventType_);
+        GetGestureEventInfo(info);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::ROTATION);
         callbackFunction(info);
         HandleReports(info, type);
     }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
+    }
+}
+
+void RotationRecognizer::GetGestureEventInfo(GestureEvent& info)
+{
+    info.SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info.SetFingerList(fingerList_);
+    info.SetAngle(resultAngle_);
+    info.SetDeviceId(deviceId_);
+    info.SetSourceDevice(deviceType_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetGestureTypeName(GestureTypeName::ROTATION_GESTURE);
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    info.SetForce(touchPoint.force);
+    if (touchPoint.tiltX.has_value()) {
+        info.SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info.SetTiltY(touchPoint.tiltY.value());
+    }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
+    if (inputEventType_ == InputEventType::AXIS) {
+        info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetSourceTool(lastAxisEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+        info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info.SetSourceTool(touchPoint.sourceTool);
+        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+        info.CopyConvertInfoFrom(touchPoint.convertInfo);
+        info.SetTargetDisplayId(touchPoint.targetDisplayId);
+    }
+    info.SetPointerEvent(lastPointEvent_);
+    info.SetInputEventType(inputEventType_);
 }
 
 void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -468,6 +477,11 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info->SetTargetDisplayId(touchPoint.targetDisplayId);
+    }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

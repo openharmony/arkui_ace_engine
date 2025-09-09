@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class ACE_EXPORT NavBarNode : public NavDestinationNodeBase {
-    DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase)
+    DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase);
 public:
     NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : NavDestinationNodeBase(tag, nodeId, pattern) {}
@@ -54,6 +54,8 @@ public:
     void InitSoftTransitionPop();
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
     RefPtr<UINode> GetNavigationNode() override;
+
+    std::string ToDumpString();
 };
 
 } // namespace OHOS::Ace::NG

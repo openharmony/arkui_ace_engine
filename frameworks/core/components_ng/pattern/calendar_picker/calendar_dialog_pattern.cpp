@@ -467,7 +467,7 @@ void CalendarDialogPattern::InitEntryChangeEvent()
 {
     auto entryNode = entryNode_.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
@@ -1149,7 +1149,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     CHECK_NULL_VOID(swiperPattern);
     auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
-    auto eventHub = monthNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
 }
@@ -1351,6 +1351,40 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
                     CalendarPaintProperty, WeekFontSize, fontSize * fontSizeScale, monthFrameNode);
             }
         }
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void CalendarDialogPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(TITLE_NODE_INDEX));
+    CHECK_NULL_VOID(titleNode);
+    auto layoutProps = titleNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(scrollNode);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
+    CHECK_NULL_VOID(calendarNode);
+    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+
+    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty, calendarNode);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
+    CHECK_NULL_VOID(swiperNode);
+    for (auto&& child : swiperNode->GetChildren()) {
+        auto monthFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(monthFrameNode);
+        auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+        CHECK_NULL_VOID(monthPattern);
+        CalendarDialogView::UpdatePaintProperties(monthFrameNode, currentSettingData_);
+        monthPattern->UpdateColRowSpace();
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }

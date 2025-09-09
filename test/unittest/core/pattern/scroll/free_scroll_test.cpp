@@ -749,6 +749,43 @@ TEST_F(FreeScrollTest, Animation004)
 }
 
 /**
+ * @tc.name: Animation005
+ * @tc.desc: Test animation BOUNCE animation break by FLING animation
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Animation005)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set initial offset;
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetInitialOffset({ CalcDimension(0), CalcDimension(DELTA_Y) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    /**
+     * @tc.step: step2. HandleOffsetUpdate;
+     * @tc.expected: BOUNCE animation started;
+     */
+    pattern_->freeScroll_->state_ = State::FLING;
+    pattern_->freeScroll_->HandleOffsetUpdate(OffsetF { 0, 100.f });
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::BOUNCE);
+
+    /**
+     * @tc.step: step3. Fling animation break bounce animation;
+     * @tc.expected: state is fling;
+     */
+    pattern_->freeScroll_->state_ = State::FLING;
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
  * @tc.name: Events001
  * @tc.desc: Test scroll events
  * @tc.type: FUNC

@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,7 +54,7 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
         { DOM_SVG_SRC_STOP_COLOR,
             [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attribute.usrConfigVersion)) {
                     attribute.gradientColor.SetColor(color);
                     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
                         SvgAttributesParser::CheckColorAlpha(val, color);
@@ -72,7 +73,7 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
         { SVG_STOP_COLOR,
             [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, attribute.usrConfigVersion)) {
                     attribute.gradientColor.SetColor(color);
                     return;
                 }
@@ -86,6 +87,7 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     };
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
     if (attrIter != -1) {
+        stopAttr_.usrConfigVersion = GetUsrConfigVersion();
         attrs[attrIter].value(value, stopAttr_);
         return true;
     }

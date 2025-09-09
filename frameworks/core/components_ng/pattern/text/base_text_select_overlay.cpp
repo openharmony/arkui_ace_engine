@@ -1070,7 +1070,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
                     overlay->RegisterScrollingListener(scrollingNode.Upgrade());
                 }
             },
-            TaskExecutor::TaskType::UI, "RegisterScrollingListener", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "RegisterScrollingListener");
     } else {
         hasRegisterListener_ = false;
     }
@@ -1644,5 +1644,13 @@ bool BaseTextSelectOverlay::GetDragViewHandleRects(RectF& firstRect, RectF& seco
     firstRect = overlayInfo->firstHandle.localPaintRect + dragParentOffset;
     secondRect = overlayInfo->secondHandle.localPaintRect + dragParentOffset;
     return true;
+}
+
+void BaseTextSelectOverlay::UpdateIsSingleHandle(bool isSingleHandle)
+{
+    SetIsSingleHandle(isSingleHandle);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateIsSingleHandle(isSingleHandle);
 }
 } // namespace OHOS::Ace::NG

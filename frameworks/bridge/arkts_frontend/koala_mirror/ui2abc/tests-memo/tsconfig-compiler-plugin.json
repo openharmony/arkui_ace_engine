@@ -11,6 +11,7 @@
     "references": [
         { "path": "../../incremental/compiler-plugin" },
         { "path": "../../incremental/common" },
+        { "path": "../../incremental/runtime" },
         { "path": "../../incremental/harness" }
     ],
     "compilerOptions": {

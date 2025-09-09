@@ -155,6 +155,33 @@ ArkUINativeModuleValue TextBridge::ResetTextAlign(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetTextContentAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextModifier()->setTextContentAlign(nativeNode, secondArg->ToNumber(vm)->Value());
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextContentAlign(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetTextContentAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextContentAlign(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -681,11 +708,10 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t length;
     if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
         return panda::JSValueRef::Undefined(vm);
     }
-    length = lengthArg->Uint32Value(vm);
+    uint32_t length = lengthArg->Uint32Value(vm);
     auto radiusArray = std::make_unique<double[]>(length);
     auto typeArray = std::make_unique<uint32_t[]>(length);
     auto colorArray = std::make_unique<uint32_t[]>(length);
@@ -697,13 +723,14 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     std::vector<RefPtr<ResourceObject>> colorResArr;
     std::vector<RefPtr<ResourceObject>> offsetXResArr;
     std::vector<RefPtr<ResourceObject>> offsetYResArr;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
         vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(
-        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResArr);
+        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResArr, nodeInfo);
     bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
         vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResArr);
     bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
@@ -1269,7 +1296,7 @@ ArkUINativeModuleValue TextBridge::ResetTextSelectableMode(ArkUIRuntimeCallInfo*
 
 ArkUINativeModuleValue TextBridge::SetCaretColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
+    EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
@@ -1300,7 +1327,7 @@ ArkUINativeModuleValue TextBridge::ResetCaretColor(ArkUIRuntimeCallInfo *runtime
 
 ArkUINativeModuleValue TextBridge::SetSelectedBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
+    EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
@@ -1894,6 +1921,10 @@ ArkUINativeModuleValue TextBridge::SetTextContentTransition(ArkUIRuntimeCallInfo
     auto enableBlur = false;
     if (directionArg->IsNumber()) {
         direction = static_cast<int32_t>(directionArg->Int32Value(vm));
+        if (direction < static_cast<int32_t>(OHOS::Ace::TextFlipDirection::DOWN) ||
+            direction > static_cast<int32_t>(OHOS::Ace::TextFlipDirection::UP)) {
+            direction = static_cast<int32_t>(OHOS::Ace::TextFlipDirection::DOWN);
+        }
     }
     if (enableArg->IsBoolean()) {
         enableBlur = enableArg->BooleaValue(vm);

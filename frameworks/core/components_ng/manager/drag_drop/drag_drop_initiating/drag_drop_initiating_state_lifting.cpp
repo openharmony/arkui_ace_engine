@@ -235,6 +235,8 @@ void DragDropInitiatingStateLifting::SetScaleAnimation(int32_t fingerId)
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_TIME);
     option.SetCurve(motion);
@@ -254,7 +256,7 @@ void DragDropInitiatingStateLifting::SetScaleAnimation(int32_t fingerId)
         [imageContext]() {
             imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropInitiatingStateLifting::SetPixelMap()
@@ -315,6 +317,8 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
 
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     auto params = machine->GetDragDropInitiatingParams();
     frameNode->SetOptionsAfterApplied(params.optionsAfterApplied);
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
@@ -340,7 +344,7 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
             }
             DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragDropInitiatingStateLifting::SetGatherAnimation(const RefPtr<PipelineBase>& context)

@@ -48,7 +48,7 @@ const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
-const int32_t UNOPTION_COUNT = 2;
+const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 const int32_t COLUMNS_SIZE = 3;
 const int32_t COLUMNS_ZERO = 0;
 const int32_t COLUMNS_ONE = 1;
@@ -430,7 +430,7 @@ void DatePickerPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -538,9 +538,21 @@ void DatePickerPattern::UpdateDateOrder()
         dateOrder = orderResult.dateOrder;
     }
     SetDateOrder(dateOrder);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (language == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+        isDirectionSetByAr = true;
+    } else if (isDirectionSetByAr) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+        isDirectionSetByAr = false;
+    }
 }
 
-void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)
 {
     CHECK_NULL_VOID(buttonNode);
     auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
@@ -548,7 +560,7 @@ void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonN
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    auto pipeline = updateNode->GetContextRefPtr();
+    auto pipeline = updateNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -916,7 +928,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_MOVE_END) {
-        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->SetCurrentIndex(totalOptionCount - INVISIBLE_OPTIONS_COUNT);
         pattern->InnerHandleScroll(true, false);
         return true;
     }
@@ -1203,7 +1215,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
         ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
-        auto datePickerEventHub = GetOrCreateEventHub<DatePickerEventHub>();
+        auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);

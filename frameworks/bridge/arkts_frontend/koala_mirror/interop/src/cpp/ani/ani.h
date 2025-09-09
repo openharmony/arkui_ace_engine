@@ -58,78 +58,39 @@ typedef double ani_double;
 
 // Reference types:
 #ifdef __cplusplus
-class __ani_ref
-{
-};
-class __ani_module : public __ani_ref
-{
-};
-class __ani_namespace : public __ani_ref
-{
-};
-class __ani_object : public __ani_ref
-{
-};
-class __ani_fn_object : public __ani_object
-{
-};
-class __ani_enum_item : public __ani_object
-{
-};
-class __ani_error : public __ani_object
-{
-};
-class __ani_tuple_value : public __ani_object
-{
-};
-class __ani_type : public __ani_object
-{
-};
-class __ani_arraybuffer : public __ani_object
-{
-};
-class __ani_string : public __ani_object
-{
-};
-class __ani_class : public __ani_type
-{
-};
-class __ani_enum : public __ani_type
-{
-};
-class __ani_union : public __ani_type
-{
-};
-class __ani_array : public __ani_object
-{
-};
-class __ani_array_boolean : public __ani_array
-{
-};
-class __ani_array_char : public __ani_array
-{
-};
-class __ani_array_byte : public __ani_array
-{
-};
-class __ani_array_short : public __ani_array
-{
-};
-class __ani_array_int : public __ani_array
-{
-};
-class __ani_array_long : public __ani_array
-{
-};
-class __ani_array_float : public __ani_array
-{
-};
-class __ani_array_double : public __ani_array
-{
-};
-class __ani_array_ref : public __ani_array
-{
-};
+class __ani_ref {};
+class __ani_module : public __ani_ref {};
+class __ani_namespace : public __ani_ref {};
+class __ani_object : public __ani_ref {};
+class __ani_fn_object : public __ani_object {};
+class __ani_enum_item : public __ani_object {};
+class __ani_error : public __ani_object {};
+class __ani_tuple_value : public __ani_object {};
+class __ani_type : public __ani_object {};
+class __ani_arraybuffer : public __ani_object {};
+class __ani_string : public __ani_object {};
+class __ani_class : public __ani_type {};
+class __ani_enum : public __ani_type {};
+class __ani_array : public __ani_object {};
+class __ani_array_boolean : public __ani_array {};
+class __ani_array_char : public __ani_array {};
+class __ani_array_byte : public __ani_array {};
+class __ani_array_short : public __ani_array {};
+class __ani_array_int : public __ani_array {};
+class __ani_array_long : public __ani_array {};
+class __ani_array_float : public __ani_array {};
+class __ani_array_double : public __ani_array {};
+class __ani_array_ref : public __ani_array {};
+class __ani_fixedarray : public __ani_object {};
+class __ani_fixedarray_boolean : public __ani_fixedarray {};
+class __ani_fixedarray_char : public __ani_fixedarray {};
+class __ani_fixedarray_byte : public __ani_fixedarray {};
+class __ani_fixedarray_short : public __ani_fixedarray {};
+class __ani_fixedarray_int : public __ani_fixedarray {};
+class __ani_fixedarray_long : public __ani_fixedarray {};
+class __ani_fixedarray_float : public __ani_fixedarray {};
+class __ani_fixedarray_double : public __ani_fixedarray {};
+class __ani_fixedarray_ref : public __ani_fixedarray {};
 typedef __ani_ref *ani_ref;
 typedef __ani_module *ani_module;
 typedef __ani_namespace *ani_namespace;
@@ -143,7 +104,6 @@ typedef __ani_arraybuffer *ani_arraybuffer;
 typedef __ani_string *ani_string;
 typedef __ani_class *ani_class;
 typedef __ani_enum *ani_enum;
-typedef __ani_union *ani_union;
 typedef __ani_array *ani_array;
 typedef __ani_array_boolean *ani_array_boolean;
 typedef __ani_array_char *ani_array_char;
@@ -154,7 +114,17 @@ typedef __ani_array_long *ani_array_long;
 typedef __ani_array_float *ani_array_float;
 typedef __ani_array_double *ani_array_double;
 typedef __ani_array_ref *ani_array_ref;
-#else  // __cplusplus
+typedef __ani_fixedarray *ani_fixedarray;
+typedef __ani_fixedarray_boolean *ani_fixedarray_boolean;
+typedef __ani_fixedarray_char *ani_fixedarray_char;
+typedef __ani_fixedarray_byte *ani_fixedarray_byte;
+typedef __ani_fixedarray_short *ani_fixedarray_short;
+typedef __ani_fixedarray_int *ani_fixedarray_int;
+typedef __ani_fixedarray_long *ani_fixedarray_long;
+typedef __ani_fixedarray_float *ani_fixedarray_float;
+typedef __ani_fixedarray_double *ani_fixedarray_double;
+typedef __ani_fixedarray_ref *ani_fixedarray_ref;
+#else   // __cplusplus
 struct __ani_ref;
 typedef struct __ani_ref *ani_ref;
 typedef ani_ref ani_module;
@@ -169,7 +139,6 @@ typedef ani_object ani_arraybuffer;
 typedef ani_object ani_string;
 typedef ani_type ani_class;
 typedef ani_type ani_enum;
-typedef ani_type ani_union;
 typedef ani_object ani_array;
 typedef ani_array ani_array_boolean;
 typedef ani_array ani_array_char;
@@ -180,7 +149,17 @@ typedef ani_array ani_array_long;
 typedef ani_array ani_array_float;
 typedef ani_array ani_array_double;
 typedef ani_array ani_array_ref;
-#endif // __cplusplus
+typedef ani_object ani_fixedarray;
+typedef ani_fixedarray ani_fixedarray_boolean;
+typedef ani_fixedarray ani_fixedarray_char;
+typedef ani_fixedarray ani_fixedarray_byte;
+typedef ani_fixedarray ani_fixedarray_short;
+typedef ani_fixedarray ani_fixedarray_int;
+typedef ani_fixedarray ani_fixedarray_long;
+typedef ani_fixedarray ani_fixedarray_float;
+typedef ani_fixedarray ani_fixedarray_double;
+typedef ani_fixedarray ani_fixedarray_ref;
+#endif  // __cplusplus
 
 struct __ani_wref;
 typedef struct __ani_wref *ani_wref;
@@ -205,8 +184,6 @@ typedef struct __ani_static_method *ani_static_method;
 
 struct __ani_resolver;
 typedef struct __ani_resolver *ani_resolver;
-
-typedef void (*ani_finalizer)(void *data, void *hint);
 
 typedef union {
     ani_boolean z;
@@ -281,12 +258,12 @@ struct __ani_vm_api {
 extern "C" {
 #endif
 
-    ANI_EXPORT ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result);
-    ANI_EXPORT ani_status ANI_GetCreatedVMs(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
+ANI_EXPORT ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result);
+ANI_EXPORT ani_status ANI_GetCreatedVMs(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
 
-    // Prototypes of exported functions for a shared library.
-    ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result);
-    ANI_EXPORT ani_status ANI_Destructor(ani_vm *vm);
+// Prototypes of exported functions for a shared library.
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result);
+ANI_EXPORT ani_status ANI_Destructor(ani_vm *vm);
 
 #ifdef __cplusplus
 }
@@ -761,7 +738,7 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*DescribeError)(ani_env *env); // NOTE: Print stacktrace for debugging?
+    ani_status (*DescribeError)(ani_env *env);  // NOTE: Print stacktrace for debugging?
 
     /**
      * @brief Aborts execution with a message.
@@ -1361,6 +1338,458 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Array_Get_Ref)(ani_env *env, ani_array_ref array, ani_size index, ani_ref *result);
+
+    /**
+     * @brief Creates a new array
+     *
+     * This function creates a new array of the specified length.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the array to be created.
+     * @param[in] initial_element Element the array will be initialized with
+     * @param[out] result A pointer to store the created array.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Array_New)(ani_env *env, ani_size length, ani_ref initial_element, ani_array *result);
+
+    /**
+     * @brief Sets a value to an array.
+     *
+     * This function sets a value to array from an ani_ref value.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The array to retrieve values from.
+     * @param[in] index The index of element to retrieve.
+     * @param[in] ref Value to set
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Array_Set)(ani_env *env, ani_array array, ani_size index, ani_ref ref);
+
+    /**
+     * @brief Retrieves a value from an array.
+     *
+     * This function retrieves a value from array into an ani_ref pointer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The array to retrieve values from.
+     * @param[in] index The index of element to retrieve.
+     * @param[out] result A pointer to store the retrieved value.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Array_Get)(ani_env *env, ani_array array, ani_size index, ani_ref *result);
+
+    /**
+     * @brief Push a value to the end of array.
+     *
+     * This function pushes value from an ani_ref to the end of array.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The array to retrieve values from.
+     * @param[in] ref Value to set
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Array_Push)(ani_env *env, ani_array array, ani_ref ref);
+
+    /**
+     * @brief Retrieves the last element and erases it from array.
+     *
+     * This function retrieves the last element and erases it from array.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The array whose last element is to be retrieved.
+     * @param[out] result A pointer to store the last element of the array.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*Array_Pop)(ani_env *env, ani_array array, ani_ref *result);
+
+    /**
+     * @brief Retrieves the length of an fixedarray.
+     *
+     * This function retrieves the length of the specified array.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray whose length is to be retrieved.
+     * @param[out] result A pointer to store the length of the fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetLength)(ani_env *env, ani_fixedarray array, ani_size *result);
+
+    /**
+     * @brief Creates a new fixedarray of booleans.
+     *
+     * This function creates a new fixedarray of the specified length for boolean values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Boolean)(ani_env *env, ani_size length, ani_fixedarray_boolean *result);
+
+    /**
+     * @brief Creates a new fixedarray of characters.
+     *
+     * This function creates a new fixedarray of the specified length for character values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Char)(ani_env *env, ani_size length, ani_fixedarray_char *result);
+
+    /**
+     * @brief Creates a new fixedarray of bytes.
+     *
+     * This function creates a new fixedarray of the specified length for byte values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Byte)(ani_env *env, ani_size length, ani_fixedarray_byte *result);
+
+    /**
+     * @brief Creates a new fixedarray of shorts.
+     *
+     * This function creates a new fixedarray of the specified length for short integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Short)(ani_env *env, ani_size length, ani_fixedarray_short *result);
+
+    /**
+     * @brief Creates a new fixedarray of integers.
+     *
+     * This function creates a new fixedarray of the specified length for integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Int)(ani_env *env, ani_size length, ani_fixedarray_int *result);
+
+    /**
+     * @brief Creates a new fixedarray of long integers.
+     *
+     * This function creates a new fixedarray of the specified length for long integer values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Long)(ani_env *env, ani_size length, ani_fixedarray_long *result);
+
+    /**
+     * @brief Creates a new fixedarray of floats.
+     *
+     * This function creates a new fixedarray of the specified length for float values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Float)(ani_env *env, ani_size length, ani_fixedarray_float *result);
+
+    /**
+     * @brief Creates a new fixedarray of doubles.
+     *
+     * This function creates a new fixedarray of the specified length for double values.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[out] result A pointer to store the created fixedarray.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Double)(ani_env *env, ani_size length, ani_fixedarray_double *result);
+
+    /**
+     * @brief Retrieves a region of boolean values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified boolean fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved boolean values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Boolean)(ani_env *env, ani_fixedarray_boolean array, ani_size offset,
+                                               ani_size length, ani_boolean *native_buffer);
+
+    /**
+     * @brief Retrieves a region of character values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified character fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved character values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Char)(ani_env *env, ani_fixedarray_char array, ani_size offset, ani_size length,
+                                            ani_char *native_buffer);
+
+    /**
+     * @brief Retrieves a region of byte values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified byte fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved byte values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Byte)(ani_env *env, ani_fixedarray_byte array, ani_size offset, ani_size length,
+                                            ani_byte *native_buffer);
+
+    /**
+     * @brief Retrieves a region of short values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified short fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved short values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Short)(ani_env *env, ani_fixedarray_short array, ani_size offset, ani_size length,
+                                             ani_short *native_buffer);
+
+    /**
+     * @brief Retrieves a region of integer values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified integer fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved integer values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length,
+                                           ani_int *native_buffer);
+
+    /**
+     * @brief Retrieves a region of long integer values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified long integer fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved long integer values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Long)(ani_env *env, ani_fixedarray_long array, ani_size offset, ani_size length,
+                                            ani_long *native_buffer);
+
+    /**
+     * @brief Retrieves a region of float values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified float fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved float values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Float)(ani_env *env, ani_fixedarray_float array, ani_size offset, ani_size length,
+                                             ani_float *native_buffer);
+
+    /**
+     * @brief Retrieves a region of double values from an fixedarray.
+     *
+     * This function retrieves a portion of the specified double fixedarray into a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to retrieve values from.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to retrieve.
+     * @param[out] native_buffer A buffer to store the retrieved double values.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_GetRegion_Double)(ani_env *env, ani_fixedarray_double array, ani_size offset,
+                                              ani_size length, ani_double *native_buffer);
+
+    /**
+     * @brief Sets a region of boolean values in an fixedarray.
+     *
+     * This function sets a portion of the specified boolean fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the boolean values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Boolean)(ani_env *env, ani_fixedarray_boolean array, ani_size offset,
+                                               ani_size length, const ani_boolean *native_buffer);
+
+    /**
+     * @brief Sets a region of character values in an fixedarray.
+     *
+     * This function sets a portion of the specified character fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the character values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Char)(ani_env *env, ani_fixedarray_char array, ani_size offset, ani_size length,
+                                            const ani_char *native_buffer);
+
+    /**
+     * @brief Sets a region of byte values in an fixedarray.
+     *
+     * This function sets a portion of the specified byte fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the byte values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Byte)(ani_env *env, ani_fixedarray_byte array, ani_size offset, ani_size length,
+                                            const ani_byte *native_buffer);
+
+    /**
+     * @brief Sets a region of short values in an fixedarray.
+     *
+     * This function sets a portion of the specified short fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the short values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Short)(ani_env *env, ani_fixedarray_short array, ani_size offset, ani_size length,
+                                             const ani_short *native_buffer);
+
+    /**
+     * @brief Sets a region of integer values in an fixedarray.
+     *
+     * This function sets a portion of the specified integer fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the integer values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length,
+                                           const ani_int *native_buffer);
+
+    /**
+     * @brief Sets a region of long integer values in an fixedarray.
+     *
+     * This function sets a portion of the specified long integer fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the long integer values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Long)(ani_env *env, ani_fixedarray_long array, ani_size offset, ani_size length,
+                                            const ani_long *native_buffer);
+
+    /**
+     * @brief Sets a region of float values in an fixedarray.
+     *
+     * This function sets a portion of the specified float fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the float values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Float)(ani_env *env, ani_fixedarray_float array, ani_size offset, ani_size length,
+                                             const ani_float *native_buffer);
+
+    /**
+     * @brief Sets a region of double values in an fixedarray.
+     *
+     * This function sets a portion of the specified double fixedarray using a native buffer.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray to set values in.
+     * @param[in] offset The starting offset of the region.
+     * @param[in] length The number of elements to set.
+     * @param[in] native_buffer A buffer containing the double values to set.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_SetRegion_Double)(ani_env *env, ani_fixedarray_double array, ani_size offset,
+                                              ani_size length, const ani_double *native_buffer);
+
+    /**
+     * @brief Creates a new fixedarray of references.
+     *
+     * This function creates a new fixedarray of references, optionally initializing it with an initial_element ref.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] type The type of the elements of the fixedarray.
+     * @param[in] length The length of the fixedarray to be created.
+     * @param[in] initial_element An optional reference to initialize the fixedarray. Can be null.
+     * @param[out] result A pointer to store the created fixedarray of references.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element,
+                                     ani_fixedarray_ref *result);
+
+    /**
+     * @brief Sets a reference at a specific index in an fixedarray.
+     *
+     * This function sets the value of a reference at the specified index in the fixedarray.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The array of references to modify.
+     * @param[in] index The index at which to set the reference.
+     * @param[in] ref The reference to set at the specified index.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_Set_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref ref);
+
+    /**
+     * @brief Retrieves a reference from a specific index in an fixedarray.
+     *
+     * This function retrieves the value of a reference at the specified index in the fixedarray.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] array The fixedarray of references to query.
+     * @param[in] index The index from which to retrieve the reference.
+     * @param[out] result A pointer to store the retrieved reference.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*FixedArray_Get_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref *result);
 
     /**
      * @brief Retrieves an enum item by its name.
@@ -5614,23 +6043,6 @@ struct __ani_interaction_api {
                                     ani_arraybuffer *arraybuffer_result);
 
     /**
-     * @brief Creates a new array buffer using external data.
-     *
-     * This function creates an array buffer that uses external data. The provided finalizer will be called when the
-     * array buffer is no longer needed.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] external_data A pointer to the external data to be used by the array buffer.
-     * @param[in] length The length of the external data in bytes.
-     * @param[in] finalizer A callback function to be called when the array buffer is finalized. Can be nullptr.
-     * @param[in] hint A user-defined hint to be passed to the finalizer. Can be nullptr.
-     * @param[out] result A pointer to store the created array buffer object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*CreateArrayBufferExternal)(ani_env *env, void *external_data, size_t length, ani_finalizer finalizer,
-                                            void *hint, ani_arraybuffer *result);
-
-    /**
      * @brief Retrieves information about an array buffer.
      *
      * This function retrieves the data pointer and length of the specified array buffer.
@@ -5683,118 +6095,6 @@ struct __ani_interaction_api {
      * The `resolver` is freed upon successful completion.
      */
     ani_status (*PromiseResolver_Reject)(ani_env *env, ani_resolver resolver, ani_error rejection);
-
-    /**
-     * @brief Creates a new fixedarray of booleans.
-     *
-     * This function creates a new array of the specified length for boolean values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the fixedarray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Boolean)(ani_env *env, ani_size length, ani_array_boolean *result);
-
-    /**
-     * @brief Creates a new FixedArray of characters.
-     *
-     * This function creates a new FixedArray of the specified length for character values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Char)(ani_env *env, ani_size length, ani_array_char *result);
-
-    /**
-     * @brief Creates a new FixedArray of bytes.
-     *
-     * This function creates a new FixedArray of the specified length for byte values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Byte)(ani_env *env, ani_size length, ani_array_byte *result);
-
-    /**
-     * @brief Creates a new FixedArray of shorts.
-     *
-     * This function creates a new FixedArray of the specified length for short integer values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Short)(ani_env *env, ani_size length, ani_array_short *result);
-
-    /**
-     * @brief Creates a new FixedArray of integers.
-     *
-     * This function creates a new FixedArray of the specified length for integer values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Int)(ani_env *env, ani_size length, ani_array_int *result);
-
-    /**
-     * @brief Creates a new FixedArray of long integers.
-     *
-     * This function creates a new FixedArray of the specified length for long integer values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Long)(ani_env *env, ani_size length, ani_array_long *result);
-
-    /**
-     * @brief Creates a new FixedArray of floats.
-     *
-     * This function creates a new FixedArray of the specified length for float values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Float)(ani_env *env, ani_size length, ani_array_float *result);
-
-    /**
-     * @brief Creates a new FixedArray of doubles.
-     *
-     * This function creates a new FixedArray of the specified length for double values.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[out] result A pointer to store the created FixedArray.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Double)(ani_env *env, ani_size length, ani_array_double *result);
-
-    /**
-     * @brief Creates a new FixedArray of references.
-     *
-     * This function creates a new FixedArray of references, optionally initializing it with an FixedArray of
-     * references.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] type The type of the elements of the FixedArray.
-     * @param[in] length The length of the FixedArray to be created.
-     * @param[in] initial_element An optional reference to initialize the FixedArray. Can be null.
-     * @param[out] result A pointer to store the created FixedArray of references.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element,
-                                     ani_array_ref *result);
 };
 
 // C++ API
@@ -5818,7 +6118,7 @@ struct __ani_vm {
     {
         return c_api->DetachCurrentThread(this);
     }
-#endif // __cplusplus
+#endif  // __cplusplus
 };
 
 struct __ani_env {
@@ -6167,6 +6467,154 @@ struct __ani_env {
     ani_status Array_Get_Ref(ani_array_ref array, ani_size index, ani_ref *result)
     {
         return c_api->Array_Get_Ref(this, array, index, result);
+    }
+    ani_status Array_New(ani_size length, ani_ref initial_element, ani_array *result)
+    {
+        return c_api->Array_New(this, length, initial_element, result);
+    }
+    ani_status Array_Set(ani_array array, ani_size index, ani_ref ref)
+    {
+        return c_api->Array_Set(this, array, index, ref);
+    }
+    ani_status Array_Get(ani_array array, ani_size index, ani_ref *result)
+    {
+        return c_api->Array_Get(this, array, index, result);
+    }
+    ani_status Array_Push(ani_array array, ani_ref ref)
+    {
+        return c_api->Array_Push(this, array, ref);
+    }
+    ani_status Array_Pop(ani_array array, ani_ref *result)
+    {
+        return c_api->Array_Pop(this, array, result);
+    }
+    ani_status FixedArray_GetLength(ani_fixedarray array, ani_size *result)
+    {
+        return c_api->FixedArray_GetLength(this, array, result);
+    }
+    ani_status FixedArray_New_Boolean(ani_size length, ani_fixedarray_boolean *result)
+    {
+        return c_api->FixedArray_New_Boolean(this, length, result);
+    }
+    ani_status FixedArray_New_Char(ani_size length, ani_fixedarray_char *result)
+    {
+        return c_api->FixedArray_New_Char(this, length, result);
+    }
+    ani_status FixedArray_New_Byte(ani_size length, ani_fixedarray_byte *result)
+    {
+        return c_api->FixedArray_New_Byte(this, length, result);
+    }
+    ani_status FixedArray_New_Short(ani_size length, ani_fixedarray_short *result)
+    {
+        return c_api->FixedArray_New_Short(this, length, result);
+    }
+    ani_status FixedArray_New_Int(ani_size length, ani_fixedarray_int *result)
+    {
+        return c_api->FixedArray_New_Int(this, length, result);
+    }
+    ani_status FixedArray_New_Long(ani_size length, ani_fixedarray_long *result)
+    {
+        return c_api->FixedArray_New_Long(this, length, result);
+    }
+    ani_status FixedArray_New_Float(ani_size length, ani_fixedarray_float *result)
+    {
+        return c_api->FixedArray_New_Float(this, length, result);
+    }
+    ani_status FixedArray_New_Double(ani_size length, ani_fixedarray_double *result)
+    {
+        return c_api->FixedArray_New_Double(this, length, result);
+    }
+    ani_status FixedArray_GetRegion_Boolean(ani_fixedarray_boolean array, ani_size offset, ani_size length,
+                                            ani_boolean *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Boolean(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Char(ani_fixedarray_char array, ani_size offset, ani_size length,
+                                         ani_char *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Char(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Byte(ani_fixedarray_byte array, ani_size offset, ani_size length,
+                                         ani_byte *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Byte(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Short(ani_fixedarray_short array, ani_size offset, ani_size length,
+                                          ani_short *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Short(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Int(ani_fixedarray_int array, ani_size offset, ani_size length,
+                                        ani_int *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Int(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Long(ani_fixedarray_long array, ani_size offset, ani_size length,
+                                         ani_long *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Long(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Float(ani_fixedarray_float array, ani_size offset, ani_size length,
+                                          ani_float *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Float(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_GetRegion_Double(ani_fixedarray_double array, ani_size offset, ani_size length,
+                                           ani_double *native_buffer)
+    {
+        return c_api->FixedArray_GetRegion_Double(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Boolean(ani_fixedarray_boolean array, ani_size offset, ani_size length,
+                                            const ani_boolean *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Boolean(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Char(ani_fixedarray_char array, ani_size offset, ani_size length,
+                                         const ani_char *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Char(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Byte(ani_fixedarray_byte array, ani_size offset, ani_size length,
+                                         const ani_byte *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Byte(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Short(ani_fixedarray_short array, ani_size offset, ani_size length,
+                                          const ani_short *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Short(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Int(ani_fixedarray_int array, ani_size offset, ani_size length,
+                                        const ani_int *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Int(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Long(ani_fixedarray_long array, ani_size offset, ani_size length,
+                                         const ani_long *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Long(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Float(ani_fixedarray_float array, ani_size offset, ani_size length,
+                                          const ani_float *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Float(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_SetRegion_Double(ani_fixedarray_double array, ani_size offset, ani_size length,
+                                           const ani_double *native_buffer)
+    {
+        return c_api->FixedArray_SetRegion_Double(this, array, offset, length, native_buffer);
+    }
+    ani_status FixedArray_New_Ref(ani_type type, ani_size length, ani_ref initial_element, ani_fixedarray_ref *result)
+    {
+        return c_api->FixedArray_New_Ref(this, type, length, initial_element, result);
+    }
+    ani_status FixedArray_Set_Ref(ani_fixedarray_ref array, ani_size index, ani_ref ref)
+    {
+        return c_api->FixedArray_Set_Ref(this, array, index, ref);
+    }
+    ani_status FixedArray_Get_Ref(ani_fixedarray_ref array, ani_size index, ani_ref *result)
+    {
+        return c_api->FixedArray_Get_Ref(this, array, index, result);
     }
     ani_status Enum_GetEnumItemByName(ani_enum enm, const char *name, ani_enum_item *result)
     {
@@ -7637,11 +8085,6 @@ struct __ani_env {
     {
         return c_api->CreateArrayBuffer(this, length, data_result, arraybuffer_result);
     }
-    ani_status CreateArrayBufferExternal(void *external_data, size_t length, ani_finalizer finalizer, void *hint,
-                                         ani_arraybuffer *result)
-    {
-        return c_api->CreateArrayBufferExternal(this, external_data, length, finalizer, hint, result);
-    }
     ani_status ArrayBuffer_GetInfo(ani_arraybuffer arraybuffer, void **data_result, size_t *length_result)
     {
         return c_api->ArrayBuffer_GetInfo(this, arraybuffer, data_result, length_result);
@@ -7658,44 +8101,8 @@ struct __ani_env {
     {
         return c_api->PromiseResolver_Reject(this, resolver, rejection);
     }
-    ani_status FixedArray_New_Boolean(ani_size length, ani_array_boolean *result)
-    {
-        return c_api->FixedArray_New_Boolean(this, length, result);
-    }
-    ani_status FixedArray_New_Char(ani_size length, ani_array_char *result)
-    {
-        return c_api->FixedArray_New_Char(this, length, result);
-    }
-    ani_status FixedArray_New_Byte(ani_size length, ani_array_byte *result)
-    {
-        return c_api->FixedArray_New_Byte(this, length, result);
-    }
-    ani_status FixedArray_New_Short(ani_size length, ani_array_short *result)
-    {
-        return c_api->FixedArray_New_Short(this, length, result);
-    }
-    ani_status FixedArray_New_Int(ani_size length, ani_array_int *result)
-    {
-        return c_api->FixedArray_New_Int(this, length, result);
-    }
-    ani_status FixedArray_New_Long(ani_size length, ani_array_long *result)
-    {
-        return c_api->FixedArray_New_Long(this, length, result);
-    }
-    ani_status FixedArray_New_Float(ani_size length, ani_array_float *result)
-    {
-        return c_api->FixedArray_New_Float(this, length, result);
-    }
-    ani_status FixedArray_New_Double(ani_size length, ani_array_double *result)
-    {
-        return c_api->FixedArray_New_Double(this, length, result);
-    }
-    ani_status FixedArray_New_Ref(ani_type type, ani_size length, ani_ref initial_element, ani_array_ref *result)
-    {
-        return c_api->FixedArray_New_Ref(this, type, length, initial_element, result);
-    }
-#endif // __cplusplus
+#endif  // __cplusplus
 };
 
 // NOLINTEND
-#endif // __ANI_H__
+#endif  // __ANI_H__

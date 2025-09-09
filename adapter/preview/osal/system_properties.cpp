@@ -105,6 +105,7 @@ bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
+std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::gridIrregularLayoutEnable_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
@@ -118,11 +119,13 @@ float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
+uint32_t SystemProperties::safeRefactorMode_ = 0;
 double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
@@ -132,6 +135,7 @@ bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE;
 bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
+bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -289,6 +293,11 @@ bool SystemProperties::GetResourceDecoupling()
     return true;
 }
 
+bool SystemProperties::IsPCMode()
+{
+    return false;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return false;
@@ -327,6 +336,11 @@ bool SystemProperties::GetNavigationBlurEnabled()
 bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
 {
     return forceSplitIgnoreOrientationEnabled_;
+}
+
+std::optional<bool> SystemProperties::GetArkUIHookEnabled()
+{
+    return arkUIHookEnabled_;
 }
 
 bool SystemProperties::GetGridCacheEnabled()
@@ -449,6 +463,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsForcibleLandscapeEnabled()
+{
+    return forcibleLandscapeEnabled_;
+}
+
 bool SystemProperties::IsSoftPageTransition()
 {
     return softPagetransition_;
@@ -493,8 +512,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return 0;
 }
 
-std::string SystemProperties::GetMapSearchPrefix()
+int32_t SystemProperties::GetPreviewStatus()
 {
-    return "";
+    return -1;
 }
 } // namespace OHOS::Ace

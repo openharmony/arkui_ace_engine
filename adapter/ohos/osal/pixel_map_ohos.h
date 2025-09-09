@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 class PixelMapOhos : public PixelMap {
-    DECLARE_ACE_TYPE(PixelMapOhos, PixelMap)
+    DECLARE_ACE_TYPE(PixelMapOhos, PixelMap);
 
 public:
     explicit PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(std::move(pixmap)) {}
@@ -48,6 +48,7 @@ public:
     void* GetPixelManager() const override;
     void* GetRawPixelMapPtr() const override;
     std::string GetId() override;
+    uint32_t GetUniqueId() override;
     std::string GetModifyId() override;
     std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
     void* GetWritablePixels() const override;

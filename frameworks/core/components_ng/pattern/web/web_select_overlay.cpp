@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -66,7 +67,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
         pattern->ShowMagnifier(static_cast<int>(pattern->touchPointX), static_cast<int>(pattern->touchPointY));
         return false;
     }
-    if (overlayType == INSERT_OVERLAY) {
+    if (overlayType == INSERT_OVERLAY && !IS_CALLING_FROM_M114()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
     selectTemporarilyHidden_ = false;
@@ -123,7 +124,24 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
     if (!isShowHandle_) {
         if (overlayType == INSERT_OVERLAY) {
-            CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+            if (IS_CALLING_FROM_M114()) {
+                SelectOverlayInfo selectInfo;
+                selectInfo.isSingleHandle = true;
+                selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+                CheckHandles(selectInfo.firstHandle, insertHandle_);
+                selectInfo.secondHandle.isShow = false;
+                selectInfo.menuInfo.menuDisable = true;
+                selectInfo.menuInfo.menuIsShow = false;
+                selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+                SetEditMenuOptions(selectInfo);
+                RegisterSelectOverlayEvent(selectInfo);
+                selectInfo.isHandleLineShow = false;
+                isShowHandle_ = true;
+                webSelectInfo_ = selectInfo;
+                ProcessOverlay({ .animation = true });
+            } else {
+                CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+            }
             return;
         }
     } else {
@@ -349,7 +367,6 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showCopyAll = true;
     }
     bool detectFlag = !isSelectAll_;
-
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
@@ -361,10 +378,10 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     }
     selectInfo.menuInfo.showAIWrite = !(!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
         (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) || !pattern->IsShowAIWrite());
-    // should be the last
-    canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
+    bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
-    canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    selectInfo.menuInfo.showShare = canCopyOut && !queryWord.empty();
+    canShowAIMenu_ = canCopyOut && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) && !queryWord.empty();
     selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     DetectSelectedText(detectFlag ? value : std::string());
 }
@@ -562,6 +579,7 @@ void WebSelectOverlay::QuickMenuIsNeedNewAvoid(
         float selectWidth = params->GetSelectWidth();
         float selectHeight = params->GetSelectXHeight();
         selectInfo.selectArea = RectF(selectX, selectY, selectWidth, selectHeight);
+        selectInfo.selectArea = ComputeSelectAreaRect(selectInfo.selectArea);
     }
 }
 
@@ -701,6 +719,35 @@ RectF WebSelectOverlay::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebT
     paintRect.SetOffset({ x, y });
     paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), edgeHeight });
     return paintRect;
+}
+
+RectF WebSelectOverlay::ComputeSelectAreaRect(RectF& selectArea)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_RETURN(pattern, RectF());
+    RectF selectAreaRect;
+    auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+    auto size = pattern->GetHostFrameSize().value_or(SizeF());
+    float x = selectArea.GetX();
+    float y = selectArea.GetY();
+
+    if (x > size.Width()) {
+        x = offset.GetX() + size.Width();
+    } else {
+        x += offset.GetX();
+    }
+
+    if (y < 0) {
+        y = offset.GetY();
+    } else if (y > size.Height()) {
+        y = offset.GetY() + size.Height();
+    } else {
+        y += offset.GetY();
+    }
+
+    selectAreaRect.SetOffset({ x, y });
+    selectAreaRect.SetSize({ selectArea.Width(), selectArea.Height()});
+    return selectAreaRect;
 }
 
 WebOverlayType WebSelectOverlay::GetTouchHandleOverlayType(
@@ -868,6 +915,11 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
+            pattern->CloseSelectOverlay();
+            SelectCancel();
+            break;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
             pattern->CloseSelectOverlay();
             SelectCancel();
             break;
@@ -1130,7 +1182,14 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     selectInfo.onClick = webSelectInfo_.onClick;
     selectInfo.enableHandleLevel = true;
     selectInfo.enableSubWindowMenu = true;
+    if (IS_CALLING_FROM_M114()) {
+        selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
+    }
     selectInfo.computeMenuOffset = webSelectInfo_.computeMenuOffset;
+
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CopySelectionMenuParams(selectInfo, WebElementType::TEXT, ResponseType::LONG_PRESS);
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(
@@ -1143,7 +1202,7 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() && IsNeedMenuShare())) {
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShare())) {
             info->menuInfo.showShare = !info->menuInfo.showShare;
             manager->NotifyUpdateToolBar(true);
         }
@@ -1245,6 +1304,7 @@ bool WebSelectOverlay::IsSingleHandle()
 
 void WebSelectOverlay::OnHandleIsHidden()
 {
+    isShowHandle_ = false;
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateSingleHandleVisible(false);
@@ -1299,6 +1359,7 @@ bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &
     member.layoutWrapper = layoutWrapper;
     member.windowOffset = windowOffset;
     member.menuHeight = menuRect.Height();
+    member.menuWidth = menuRect.Width();
     member.info = info;
     bool initSuccess = InitMenuAvoidStrategyMember(member);
     if (initSuccess) {

@@ -18,6 +18,7 @@
 
 #include <event_handler.h>
 #include <unordered_set>
+#include <vector>
 
 #include "core/components_ng/base/frame_node.h"
 
@@ -90,6 +91,9 @@ private:
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
     void RemoveAbnormalId();
+    void TraverseTreeFindTransformScene(const RefPtr<FrameNode>& rootNode, uint32_t targetZOrder,
+        std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr);
+    std::shared_ptr<Rosen::RSNode> FindScenePanelRsNodeByZOrder(uint64_t screenId, uint32_t targetZOrder);
     std::unordered_set<uint64_t> abnormalNodeDfxSet_;
     std::unordered_set<uint64_t> windowSceneOnTreeDfxSet_;
     std::unordered_map<uint64_t, WeakPtr<FrameNode>> screenNodeMap_;

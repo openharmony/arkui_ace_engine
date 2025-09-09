@@ -495,9 +495,18 @@ void ConvertGradiantColor(
     }
 }
 
+template<typename Bitmap1, typename Bitmap2>
+inline void ConvertBitmap(const Bitmap1& source, Bitmap2& destination)
+{
+    const auto size = std::min(source.size(), destination.size());
+    for (size_t i = 0; i < size; ++i) {
+        destination.set(i, source.test(i));
+    }
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
-    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
     txtStyle.textStyleUid  = static_cast<unsigned long>(textStyle.GetTextStyleUid());
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
@@ -656,7 +665,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
             retGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient().radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
+        if (radialHorizontalSize.has_value()) {
             retGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialHorizontalSize.value());
         }
     }
@@ -678,7 +687,7 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
         return;
     }
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());
-    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
     auto gradient = textStyle.GetGradient().value();
     GradientType type = gradient.GetType();
     if (type != GradientType::LINEAR && type != GradientType::RADIAL) {
@@ -694,11 +703,10 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
 Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate)
 {
     Rosen::SymbolColor symbolColor;
-    symbolColor.colorType = Rosen::SymbolColorType::GRADIENT_TYPE;
     for (const auto& grad : intermediate) {
-        if (auto nativeGradient = CreateNativeGradient(grad)) {
-            symbolColor.gradients.push_back(nativeGradient);
-        }
+        auto nativeGradient = CreateNativeGradient(grad);
+        symbolColor.colorType = static_cast<Rosen::SymbolColorType>(grad.gradientType);
+        symbolColor.gradients.push_back(nativeGradient);
     }
 
     return symbolColor;

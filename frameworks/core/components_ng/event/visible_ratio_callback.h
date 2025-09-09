@@ -27,6 +27,7 @@ struct VisibleCallbackInfo {
     double visibleRatio = 1.0;
     bool isCurrentVisible = false;
     uint32_t period = 0;
+    bool isOutOfBoundsAllowed = false;
 };
 
 } // namespace OHOS::Ace

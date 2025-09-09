@@ -51,6 +51,11 @@ public:
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
     RefPtr<Paragraph> GetSingleParagraph() const;
 
+    void SetContentHeight(float height)
+    {
+        contentHeight_ = height;
+    }
+
 protected:
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
@@ -111,8 +116,8 @@ protected:
     void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
-    virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     virtual bool IsNeedParagraphReLayout() const
     {
         return false;
@@ -136,6 +141,7 @@ protected:
     bool useParagraphCache_ = false;
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;
+    float contentHeight_ = 0.0f;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
@@ -167,6 +173,8 @@ private:
     void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
     std::optional<OHOS::Ace::Gradient> ToGradient(const NG::Gradient& gradient);
     AnimatableDimension ToAnimatableDimension(const Dimension& dimension);
+    NG::OffsetF GetAlignPosition(const NG::SizeF& parentSize, const NG::SizeF& childSize,
+        const TextContentAlign& textContentAlign, const Alignment& alignment);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };

@@ -21,7 +21,6 @@
 #include "core/components_ng/manager/event/json_report.h"
 
 #include "base/ressched/ressched_report.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 
@@ -181,6 +180,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+        pinchCenter_ = ComputePinchCenter();
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -260,6 +260,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
+        pinchCenter_ = ComputePinchCenter();
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
         }
@@ -424,44 +425,55 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
     if (callback && *callback) {
         GestureEvent info;
-        info.SetTimeStamp(time_);
-        UpdateFingerListInfo();
-        info.SetFingerList(fingerList_);
-        info.SetScale(scale_);
-        info.SetPinchCenter(pinchCenter_);
-        info.SetDeviceId(deviceId_);
-        info.SetSourceDevice(deviceType_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetGestureTypeName(GestureTypeName::PINCH_GESTURE);
-        info.SetForce(lastTouchEvent_.force);
-        if (lastTouchEvent_.tiltX.has_value()) {
-            info.SetTiltX(lastTouchEvent_.tiltX.value());
-        }
-        if (lastTouchEvent_.tiltY.has_value()) {
-            info.SetTiltY(lastTouchEvent_.tiltY.value());
-        }
-        if (lastTouchEvent_.rollAngle.has_value()) {
-            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
-        }
-        if (inputEventType_ == InputEventType::AXIS) {
-            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
-            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
-            info.SetSourceTool(lastAxisEvent_.sourceTool);
-            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-            info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
-        } else {
-            info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
-            info.SetSourceTool(lastTouchEvent_.sourceTool);
-            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-        }
-        info.SetPointerEvent(lastPointEvent_);
-        info.SetInputEventType(inputEventType_);
+        GetGestureEventInfo(info);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::PINCH);
         callbackFunction(info);
         HandleReports(info, type);
     }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
+    }
+}
+
+void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
+{
+    info.SetTimeStamp(time_);
+    UpdateFingerListInfo();
+    info.SetFingerList(fingerList_);
+    info.SetScale(scale_);
+    info.SetPinchCenter(pinchCenter_);
+    info.SetDeviceId(deviceId_);
+    info.SetSourceDevice(deviceType_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetGestureTypeName(GestureTypeName::PINCH_GESTURE);
+    info.SetForce(lastTouchEvent_.force);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info.SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info.SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+    }
+    if (inputEventType_ == InputEventType::AXIS) {
+        info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetPinchAxisScale(lastAxisEvent_.pinchAxisScale);
+        info.SetSourceTool(lastAxisEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+        info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
+    }
+    info.SetPointerEvent(lastPointEvent_);
+    info.SetInputEventType(inputEventType_);
 }
 
 void PinchRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -517,7 +529,9 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputDeviceId(deviceId_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
     if (gestureRecognizerJudgeFunc) {

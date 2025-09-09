@@ -26,7 +26,7 @@ import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ItemDragInfo, Cu
 import { Length } from "./units"
 import { Color, BarState, EdgeEffect } from "./enums"
 import { GridAttribute_onItemDragStart_event_type } from "./type-replacements"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { ScrollState } from "./list"
 import { OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { CallbackKind } from "./peers/CallbackKind"

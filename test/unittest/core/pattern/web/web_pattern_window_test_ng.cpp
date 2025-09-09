@@ -293,7 +293,6 @@ HWTEST_F(WebPatternWindowTestNg, UpdateLocaleTest001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateLocale();
-    EXPECT_EQ(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -1083,6 +1082,8 @@ HWTEST_F(WebPatternWindowTestNg, AdjustRotationRenderFitTest001, TestSize.Level1
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
     auto type = WindowSizeChangeReason::UNDEFINED;
     webPattern->AdjustRotationRenderFit(type);
     type = WindowSizeChangeReason::ROTATION;

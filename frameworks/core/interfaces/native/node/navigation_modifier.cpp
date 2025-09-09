@@ -650,24 +650,42 @@ void SetOnCoordScrollStartAction(ArkUINodeHandle node, void (*onCoordScrollStart
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollStartAction);
         onCoordScrollStartAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
 }
 
+void ResetOnCoordScrollStartAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnCoordScrollStartAction(frameNode, nullptr);
+}
+
 void SetOnCoordScrollUpdateAction(ArkUINodeHandle node,
-    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 offset, ArkUI_Float32 currentOffset))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
-        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float offset, float currentOffset)->void {
             auto frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
             auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-            onCoordScrollUpdateAction(nodeHandle, currentOffset);
+            CHECK_NULL_VOID(onCoordScrollUpdateAction);
+            onCoordScrollUpdateAction(nodeHandle, offset, currentOffset);
         };
     NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void ResetOnCoordScrollUpdateAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, nullptr);
 }
 
 void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
@@ -676,10 +694,19 @@ void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndActi
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollEndAction);
         onCoordScrollEndAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void ResetOnCoordScrollEndAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnCoordScrollEndAction(frameNode, nullptr);
 }
 
 void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -818,6 +845,20 @@ void ResetOnNavBarStateChange(ArkUINodeHandle node)
     NavigationModelNG::SetOnNavBarStateChange(frameNode, nullptr);
 }
 
+void SetIsCustomTitleBarSize(ArkUINodeHandle node, ArkUI_Bool isCustom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetIsCustomTitleBarSize(frameNode, isCustom);
+}
+
+void ResetIsCustomTitleBarSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetIsCustomTitleBarSize(frameNode, false);
+}
+
 void SetBeforeCreateLayoutWrapperCallBack(ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -877,8 +918,11 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setTitleHeight = SetTitleHeight,
         .setTitlebarOptions = SetTitlebarOptions,
         .setOnCoordScrollStartAction = SetOnCoordScrollStartAction,
+        .resetOnCoordScrollStartAction = ResetOnCoordScrollStartAction,
         .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
+        .resetOnCoordScrollUpdateAction = ResetOnCoordScrollUpdateAction,
         .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
+        .resetOnCoordScrollEndAction = ResetOnCoordScrollEndAction,
         .setSystemBarStyle = SetSystemBarStyle,
         .resetSystemBarStyle = ResetSystemBarStyle,
         .setSplitPlaceholder = SetSplitPlaceholder,
@@ -895,6 +939,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .resetToolBar = ResetToolBar,
         .setOnNavBarStateChange = SetOnNavBarStateChange,
         .resetOnNavBarStateChange = ResetOnNavBarStateChange,
+        .setIsCustomTitleBarSize = SetIsCustomTitleBarSize,
+        .resetIsCustomTitleBarSize = ResetIsCustomTitleBarSize,
         .setBeforeCreateLayoutWrapperCallBack = SetBeforeCreateLayoutWrapperCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

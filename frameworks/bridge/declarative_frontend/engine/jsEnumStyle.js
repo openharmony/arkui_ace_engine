@@ -66,6 +66,13 @@ let TextVerticalAlign;
   TextVerticalAlign[TextVerticalAlign.TOP = 3] = 'TOP';
 })(TextVerticalAlign || (TextVerticalAlign = {}));
 
+let TextContentAlign;
+(function (TextContentAlign) {
+  TextContentAlign[TextContentAlign.TOP = 0] = 'TOP';
+  TextContentAlign[TextContentAlign.CENTER = 1] = 'CENTER';
+  TextContentAlign[TextContentAlign.BOTTOM = 2] = 'BOTTOM';
+})(TextContentAlign || (TextContentAlign = {}));
+
 let TextDataDetectorType;
 (function (TextDataDetectorType) {
   TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
@@ -117,6 +124,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
+
+let PreviewDpiFollowStrategy;
+(function (PreviewDpiFollowStrategy) {
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
+})(PreviewDpiFollowStrategy || (PreviewDpiFollowStrategy = {}));
 
 let WindowModeFollowStrategy;
 (function (WindowModeFollowStrategy) {
@@ -778,6 +791,7 @@ let StickyStyle;
   StickyStyle[StickyStyle.None = 0] = 'None';
   StickyStyle[StickyStyle.Header = 1] = 'Header';
   StickyStyle[StickyStyle.Footer = 2] = 'Footer';
+  StickyStyle[StickyStyle.BOTH = 3] = 'BOTH';
 })(StickyStyle || (StickyStyle = {}));
 
 let ScrollSnapAlign;
@@ -1184,6 +1198,13 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
+let VisibilityChangeReason;
+(function (VisibilityChangeReason) {
+  VisibilityChangeReason[VisibilityChangeReason.TRANSITION = 0] = 'TRANSITION';
+  VisibilityChangeReason[VisibilityChangeReason.CONTENT_COVER = 1] = 'CONTENT_COVER';
+  VisibilityChangeReason[VisibilityChangeReason.APP_STATE = 2] = 'APP_STATE';
+}(VisibilityChangeReason || (VisibilityChangeReason = {})));
+
 let NavigationOperation;
 (function (NavigationOperation) {
   NavigationOperation[NavigationOperation.PUSH = 1] = 'PUSH';
@@ -1369,6 +1390,11 @@ let PlaybackSpeed;
   PlaybackSpeed.Speed_Forward_1_25_X = '1.25';
   PlaybackSpeed.Speed_Forward_1_75_X = '1.75';
   PlaybackSpeed.Speed_Forward_2_00_X = '2.00';
+  PlaybackSpeed.SPEED_FORWARD_0_50_X = '0.50';
+  PlaybackSpeed.SPEED_FORWARD_1_50_X = '1.50';
+  PlaybackSpeed.SPEED_FORWARD_3_00_X = '3.00';
+  PlaybackSpeed.SPEED_FORWARD_0_25_X = '0.25';
+  PlaybackSpeed.SPEED_FORWARD_0_125_X = '0.125';
 })(PlaybackSpeed || (PlaybackSpeed = {}));
 
 let MixedMode;
@@ -1604,14 +1630,34 @@ class BounceSymbolEffect extends SymbolEffect {
 }
 
 class ReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
+  constructor(scope, replaceType) {
     super();
     this.type = 'ReplaceSymbolEffect';
     this.scope = scope;
+    this.replaceType_ = replaceType;
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
   }
   scope(value) {
     this.scope = value;
     return this;
+  }
+
+  set replaceType(value) {
+    this.replaceType_ = value;
+    this.type = 'ReplaceSymbolEffect';
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
+  }
+
+  get replaceType() {
+    return this.replaceType_;
   }
 }
 
@@ -1619,30 +1665,6 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = 'PulseSymbolEffect';
-  }
-}
-
-class DisableSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'DisableSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
-  }
-}
-
-class QuickReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'QuickReplaceSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
   }
 }
 
@@ -2332,6 +2354,22 @@ class ColorContent {
 
   static get ORIGIN() {
     return new ColorContent('ORIGIN');
+  }
+}
+
+class ContentTransitionEffect {
+  contentTransitionType_ = '';
+
+  constructor(contentTransitionType) {
+    this.contentTransitionType_ = contentTransitionType;
+  }
+
+  static get IDENTITY() {
+    return new ContentTransitionEffect('IDENTITY');
+  }
+
+  static get OPACITY() {
+    return new ContentTransitionEffect('OPACITY');
   }
 }
 
@@ -3083,7 +3121,7 @@ class NavPathStack {
     }
     try {
       let serializeCount = 0;
-      const MAX_COUNT = 1000;
+      const MAX_COUNT = 10000;
       const serializeFilter = (key, value) => {
         serializeCount++;
         if (serializeCount > MAX_COUNT) {
@@ -4086,11 +4124,13 @@ let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
   WebElementType[WebElementType.LINK = 2] = 'LINK';
+  WebElementType[WebElementType.TEXT = 3] = 'TEXT';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;
 (function (WebResponseType) {
   WebResponseType[WebResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
+  WebResponseType[WebResponseType.RIGHT_CLICK = 2] = 'RIGHT_CLICK';
 })(WebResponseType || (WebResponseType = {}));
 
 class ImageAnalyzerController {
@@ -4287,3 +4327,16 @@ let PdfLoadResult;
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
 })(PdfLoadResult || (PdfLoadResult = {}));
+
+let ReplaceEffectType;
+(function (ReplaceEffectType) {
+  ReplaceEffectType[ReplaceEffectType.SEQUENTIAL = 0] = 'SEQUENTIAL';
+  ReplaceEffectType[ReplaceEffectType.CROSS_FADE = 1] = 'CROSS_FADE';
+  ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
+})(ReplaceEffectType || (ReplaceEffectType = {}));
+
+let ListItemSwipeActionDirection;
+(function (ListItemSwipeActionDirection) {
+  ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
+  ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
+})(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));

@@ -162,15 +162,15 @@ public:
         RefPtr<ResourceObject>& resourceObject);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId,
         RefPtr<ResourceObject>& resourceObject);
@@ -226,8 +226,9 @@ public:
     }
     template <class T>
     static bool ParseArrayWithResObj(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
-        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &)> getValue,
-        std::vector<RefPtr<ResourceObject>>& resObjArray)
+        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &,
+        const std::optional<NodeInfo> &)> getValue,
+        std::vector<RefPtr<ResourceObject>>& resObjArray, const std::optional<NodeInfo>& nodeInfo = std::nullopt)
     {
         CHECK_NULL_RETURN(vm, false);
         CHECK_NULL_RETURN(array, false);
@@ -245,7 +246,7 @@ public:
         for (int32_t i = 0; i < length; i++) {
             RefPtr<ResourceObject> resObj;
             auto value = handle->GetValueAt(vm, arg, i);
-            *(array + i) = getValue(vm, value, resObj);
+            *(array + i) = getValue(vm, value, resObj, nodeInfo);
             resObjArray.emplace_back(resObj);
         }
         return true;
@@ -332,6 +333,8 @@ public:
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextMenuId(const EcmaVM* vm, const std::string& id);
+    static void ParseMenuItemsSymbolId(
+        const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
     static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
         const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
@@ -339,6 +342,7 @@ public:
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
+    static void ThrowBusinessError(const EcmaVM* vm, const std::string& msg, int32_t code);
     static bool CheckKeysPressed(
         const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
     static Local<JSValueRef> GetModifierKeyState(
@@ -346,6 +350,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* info);
 
     template<typename T>
     static panda::Local<panda::JSValueRef> ToJSValueWithVM(const EcmaVM* vm, T val)
@@ -373,6 +378,8 @@ public:
     static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state, const NodeInfo& nodeInfo);
+    static bool ParseContentTransitionEffect(
+        const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

@@ -164,7 +164,7 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
-        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
     });
 }
 
@@ -429,7 +429,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToRoot(node, false, NodeType::HANDLE);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
     } else if (mode == HandleLevelMode::EMBED) {
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
@@ -443,7 +443,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToCaller(node, false);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask");
     }
 }
 
@@ -596,7 +596,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
                 manager->NotifySelectOverlayShow(true);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
 }
 
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
@@ -634,7 +634,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
             }
             manager->NotifySelectOverlayShow(true);
         },
-        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay");
 }
 
 void SelectContentOverlayManager::MountNodeToRoot(
@@ -1221,6 +1221,16 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
 }
 
+void SelectContentOverlayManager::UpdateViewPort()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    shareOverlayInfo_->ancestorViewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 void SelectContentOverlayManager::SetHandleCircleIsShow(bool isFirst, bool isShow)
 {
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
@@ -1495,5 +1505,12 @@ bool SelectContentOverlayManager::IsPasteOption(const RefPtr<UINode>& node)
         return true;
     }
     return false;
+}
+
+void SelectContentOverlayManager::UpdateIsSingleHandle(bool isSingleHandle)
+{
+    if (IsOpen() && shareOverlayInfo_) {
+        shareOverlayInfo_->isSingleHandle = isSingleHandle;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -330,15 +330,6 @@ public:
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
-    void SetPredictLayoutParam(std::optional<ListPredictLayoutParam> param)
-    {
-        predictLayoutParam_ = param;
-    }
-    std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
-    {
-        return predictLayoutParam_;
-    }
-
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
         predictLayoutParamV2_ = param;
@@ -464,11 +455,13 @@ public:
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void UpdateDefaultColor();
+    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
 
     void SetDraggingIndex(int32_t index)
     {
         draggingIndex_ = index;
     }
+    bool LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup);
 
 protected:
     void OnModifyDone() override;
@@ -520,6 +513,7 @@ protected:
     bool isScrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
 
@@ -534,6 +528,7 @@ protected:
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
+    void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -542,8 +537,6 @@ private:
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
-    bool JudgeCanOverScrollStart();
-    bool JudgeCanOverScrollEnd();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -588,7 +581,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
     // focus
-    bool LayoutListForFocus(int32_t nextIndex, int32_t curIndex);
     bool IsLayout(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
     WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
@@ -619,9 +611,6 @@ private:
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
     void CreatePositionInfo(std::unique_ptr<JsonValue>& json);
-    void ReportOnItemListEvent(const std::string& event);
-    void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
-    int32_t OnInjectionEvent(const std::string& command) override;
     bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
@@ -653,7 +642,6 @@ private:
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 
-    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
@@ -676,7 +664,6 @@ private:
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
-    std::optional<ListPredictLayoutParam> predictLayoutParam_;
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;

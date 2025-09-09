@@ -1,5 +1,5 @@
  /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class CheckBoxGroupModifier : public ContentModifier {
@@ -59,39 +60,45 @@ public:
     ~CheckBoxGroupModifier() override = default;
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         PaintCheckBox(context, offset_->Get(), size_->Get());
     }
 
-    void UpdateAnimatableProperty()
+    void UpdateAnimatableProperty(const RefPtr<FrameNode>& host)
     {
         switch (touchHoverType_) {
             case TouchHoverAnimationType::HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION, host);
                 break;
             case TouchHoverAnimationType::PRESS_TO_HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP, host);
                 break;
             case TouchHoverAnimationType::NONE:
-                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION, host);
                 break;
             case TouchHoverAnimationType::HOVER_TO_PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP, host);
                 break;
             case TouchHoverAnimationType::PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION, host);
                 break;
             default:
                 break;
         }
     }
 
-    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    void SetBoardColor(
+        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host)
     {
+        CHECK_NULL_VOID(host);
         if (animateTouchHoverColor_) {
             AnimationOption option = AnimationOption();
-            option.SetDuration(duratuion);
+            option.SetDuration(duration);
             option.SetCurve(curve);
-            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+            AnimationUtils::Animate(
+                option, [&]() { animateTouchHoverColor_->Set(color); }, nullptr, nullptr, host->GetContextRefPtr());
         }
     }
 
@@ -220,6 +227,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetSize(SizeF& size)
     {
         if (size_) {
@@ -249,6 +263,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     HoverEffectType hoverEffectType_ = HoverEffectType::AUTO;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyInt> status_;
     RefPtr<PropertyOffsetF> offset_;

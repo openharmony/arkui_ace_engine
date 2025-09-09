@@ -14,7 +14,6 @@
  */
 #include "node/event_converter.h"
 
-
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
 #include "securec.h"
@@ -177,6 +176,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_FOCUS;
         case NODE_ON_BLUR:
             return ON_BLUR;
+        case NODE_ON_SIZE_CHANGE:
+            return ON_SIZE_CHANGE;
         case NODE_TEXT_INPUT_ON_SUBMIT:
             return ON_TEXT_INPUT_SUBMIT;
         case NODE_REFRESH_STATE_CHANGE:
@@ -413,6 +414,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_EVENT_ON_DISAPPEAR;
         case ON_AREA_CHANGE:
             return NODE_EVENT_ON_AREA_CHANGE;
+        case ON_SIZE_CHANGE:
+            return NODE_ON_SIZE_CHANGE;
         case ON_TEXTAREA_CHANGE:
             return NODE_TEXT_AREA_ON_CHANGE;
         case ON_FOCUS:
@@ -778,6 +781,23 @@ int32_t ConvertToCTouchActionType(int32_t originActionType)
             return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_MOVE);
         case ORIGIN_TOUCH_ACTION_CANCEL:
             return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
+}
+
+int32_t ConvertToOriginTouchActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_TOUCH_EVENT_ACTION_DOWN:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_DOWN);
+        case UI_TOUCH_EVENT_ACTION_UP:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_UP);
+        case UI_TOUCH_EVENT_ACTION_MOVE:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_MOVE);
+        case UI_TOUCH_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_CANCEL);
         default:
             break;
     }

@@ -95,7 +95,9 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
   private isFreeze: boolean;
-  public __parentViewOfBuildNode?: ViewBuildNodeBase;
+  public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
+  private updateParams_: Object;
+  private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
@@ -107,10 +109,12 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.parentallowFreeze = false;
     this.isFreeze = false;
     this.__parentViewOfBuildNode = undefined;
+    this.updateParams_ = null;
+    this.activeCount_ = 1;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
-      return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+      return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
     }
     return undefined;
   }
@@ -217,18 +221,18 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
-    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false; 
+    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false;
     this.params_ = params;
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
     }
     this.updateFuncByElmtId.clear();
-    if(this.bindedViewOfBuilderNode){
-      globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode); 
+    if (this.bindedViewOfBuilderNode) {
+      globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
     }
     this.buildWithNestingBuilder(builder, supportLazyBuild);
-    if(this.bindedViewOfBuilderNode){
-      globalThis.__viewPuStack__?.pop(); 
+    if (this.bindedViewOfBuilderNode) {
+      globalThis.__viewPuStack__?.pop();
     }
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
@@ -240,16 +244,16 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_.setBuilderNode(this);
     let id = this.frameNode_.getUniqueId();
     if (this.id_ && this.id_ !== id) {
-      this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+      this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
     }
     this.id_ = id;
-    this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+    this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
     FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
     __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {
     if (this.isFreeze) {
-      this.params_ = param;
+      this.updateParams_ = param;
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -299,14 +303,22 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     }
   }
 
+  private isBuilderNodeActive(): boolean {
+    return this.activeCount_ > 0;
+  }
+
   public setActiveInternal(active: boolean, isReuse: boolean = false): void {
     stateMgmtProfiler.begin('BuilderNode.setActive');
     if (!isReuse) {
-      if (active && this.isFreeze) {
+      this.activeCount_ += active ? 1 : -1;
+      if (this.isBuilderNodeActive()) {
         this.isFreeze = false;
-        this.update(this.params_);
-      } else if (!active) {
+      } else {
         this.isFreeze = this.allowFreezeWhenInactive;
+      }
+      if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
+        this.update(this.updateParams_);
+        this.updateParams_ = null;
       }
     }
     if (this.inheritFreeze) {

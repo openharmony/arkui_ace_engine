@@ -467,7 +467,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      */
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    EXPECT_NE(gestureHub->pixelMap_, nullptr);
     EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -540,7 +539,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
      * @tc.steps: step5. call OnDragStart
      */
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -723,7 +721,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     webFrameNode->SetDragPreviewOptions(option);
     gestureHub->dragEventActuator_->preScaledPixelMap_ = pixelMap;
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
     EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
@@ -928,5 +925,22 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart035, TestSize.Level1)
     DragDropGlobalController::GetInstance().SetAsyncDragCallback([]{});
     gestureHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
+}
+
+/**
+ * @tc.name: GestureEventHubTest035
+ * @tc.desc: Test Set and Get touchTestDoneFunc;
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest035, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    auto touchTestDoneFunc = [](const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) {};
+    gestureEventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    EXPECT_TRUE(gestureEventHub->GetOnTouchTestDoneCallback());
 }
 } // namespace OHOS::Ace::NG

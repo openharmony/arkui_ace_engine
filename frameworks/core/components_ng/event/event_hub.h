@@ -62,7 +62,7 @@ enum class VisibleAreaChangeTriggerReason : int32_t {
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class ACE_FORCE_EXPORT EventHub : public virtual AceType {
-    DECLARE_ACE_TYPE(EventHub, AceType)
+    DECLARE_ACE_TYPE(EventHub, AceType);
 
 public:
     EventHub() = default;
@@ -88,19 +88,19 @@ public:
     RefPtr<FocusHub> GetOrCreateFocusHub(const FocusPattern& focusPattern);
     RefPtr<FocusHub> GetFocusHub() const;
     void AttachHost(const WeakPtr<FrameNode>& host);
-    void OnAttachContext(PipelineContext* context);
-    void OnDetachContext(PipelineContext* context);
+    void OnAttachContext(PipelineContext *context);
+    void OnDetachContext(PipelineContext *context);
     RefPtr<FrameNode> GetFrameNode() const;
     GetEventTargetImpl CreateGetEventTargetImpl() const;
     void OnContextAttached();
     void ClearUserOnAppear();
     void SetOnAppear(std::function<void()>&& onAppear);
-    void SetJSFrameNodeOnAppear(std::function<void()>&& onAppear);
+    void SetFrameNodeCommonOnAppear(std::function<void()>&& onAppear);
     void ClearJSFrameNodeOnAppear();
     virtual void FireOnAppear();
     void ClearUserOnDisAppear();
     void SetOnDisappear(std::function<void()>&& onDisappear);
-    void SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear);
+    void SetFrameNodeCommonOnDisappear(std::function<void()>&& onDisappear);
     void ClearJSFrameNodeOnDisappear();
     virtual void FireOnDisappear();
     void ClearUserOnAreaChanged();
@@ -117,7 +117,7 @@ public:
     void FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasInnerOnSizeChanged() const;
     void ClearInnerOnSizeChanged();
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
+    void SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
     void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
     void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -126,9 +126,8 @@ public:
     void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc);
     const OnPreDragFunc& GetOnPreDrag() const;
     void SetOnDragStart(OnDragStartFunc&& onDragStart);
-    void SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading);
-    const OnDrapDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
-
+    void SetCustomerOnDragSpringLoading(OnDragDropSpringLoadingFunc&& onDragSpringLoading);
+    const OnDragDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
     const OnDragStartFunc& GetOnDragStart() const
     {
         return onDragStart_;
@@ -148,10 +147,10 @@ public:
     {
         return onDragEnd_;
     }
+
     bool HasOnDragEnter() const;
     bool HasOnDragLeave() const;
     bool HasOnDragEnd() const;
-
     virtual bool HasOnItemDragMove()
     {
         return false;
@@ -236,7 +235,7 @@ public:
     }
 
     const OnNewDragFunc& GetCustomerOnDragEndFunc() const
-        {
+    {
         return customerOnDragEnd_;
     }
 
@@ -258,6 +257,13 @@ public:
     void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
     bool HasImmediatelyVisibleCallback();
+    std::vector<double>& GetThrottledVisibleAreaRatios();
+    VisibleCallbackInfo& GetThrottledVisibleAreaCallback();
+    std::vector<double>& GetVisibleAreaRatios(bool isUser);
+    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
+    void SetVisibleAreaRatiosAndCallback(
+        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
+    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart);
 
     const OnDragStartFunc& GetDefaultOnDragStart() const
@@ -266,13 +272,6 @@ public:
     }
 
     bool HasDefaultOnDragStart() const;
-    std::vector<double>& GetThrottledVisibleAreaRatios();
-    VisibleCallbackInfo& GetThrottledVisibleAreaCallback();
-    std::vector<double>& GetVisibleAreaRatios(bool isUser);
-    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
-    void SetVisibleAreaRatiosAndCallback(
-        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
-    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     bool HasVisibleAreaCallback(bool isUser);
     bool HasThrottledVisibleAreaCallback() const;
     void SetOnAttach(std::function<void()>&& onAttach);
@@ -302,7 +301,7 @@ public:
     void FireUntriggeredInnerOnAreaChanged(
         const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
     void FireDrawCompletedNDKCallback(PipelineContext* pipeline);
-    void FireLayoutNDKCallback(PipelineContext* pipeline);
+    void FireLayoutNDKCallback(const PipelineContext* pipeline);
     void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
     {
         ndkDrawCompletedCallback_ = std::move(callback);
@@ -355,7 +354,7 @@ private:
 
     OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
-    OnDrapDropSpringLoadingFunc customerOnDragSpringLoading_;
+    OnDragDropSpringLoadingFunc customerOnDragSpringLoading_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;
     OnDragFunc customerOnDrop_;
@@ -373,9 +372,9 @@ private:
     VisibleCallbackInfo visibleAreaInnerCallback_;
     std::vector<double> throttledVisibleAreaRatios_;
     VisibleCallbackInfo throttledVisibleAreaCallback_;
+    std::function<void()> enabledFunc_;
     std::function<void()> ndkDrawCompletedCallback_;
     std::function<void()> ndkLayoutCallback_;
-    std::function<void()> enabledFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

@@ -972,7 +972,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
-    auto textPickerEventHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetEventHub<NG::TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     textPickerEventHub->SetOnSelectedChangeEvent(std::move(onSelectedChange));
     textPickerEventHub->SetOnValueChangeEvent(std::move(onValueChange));
@@ -999,7 +999,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerKeyEvent001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1035,7 +1035,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerKeyEvent002, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -1237,7 +1237,7 @@ HWTEST_F(TextPickerExTestNg, TextEventActionsTest001, TestSize.Level1)
      * @tc.steps: step1. Create textPickerColumn.
      */
     InitTextPickerExTestNg();
-    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

@@ -28,12 +28,12 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
 {
     contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
+        contentConstraint.maxSize.SetHeight(LayoutInfinity<float>());
     } else if (axis == Axis::FREE) {
-        contentConstraint.maxSize.SetWidth(Infinity<float>());
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
+        contentConstraint.maxSize.SetWidth(LayoutInfinity<float>());
+        contentConstraint.maxSize.SetHeight(LayoutInfinity<float>());
     } else {
-        contentConstraint.maxSize.SetWidth(Infinity<float>());
+        contentConstraint.maxSize.SetWidth(LayoutInfinity<float>());
     }
 }
 
@@ -45,14 +45,14 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
+    auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     auto isMainFix = false;
     if (layoutPolicy.has_value()) {
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto layoutPolicySize =
-            ConstrainIdealSizeByLayoutPolicy(constraint.value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            constraint.value_or(LayoutConstraintF()), widthLayoutPolicy, heightLayoutPolicy, axis);
         isMainFix = (axis == Axis::VERTICAL && layoutPolicy.value().IsHeightFix()) ||
                     (axis == Axis::HORIZONTAL && layoutPolicy.value().IsWidthFix());
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
@@ -169,12 +169,15 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
     auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID((scrollNode && geometryNode && childWrapper));
+    CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
+
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
@@ -185,6 +188,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float zoomScale = scroll->GetZoomScale();
     auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
+    float lastScrollableDistance = scrollableDistance_;
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
         scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
     } else {
@@ -203,6 +207,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
             currentOffset_ = Positive(currentOffset_) ? 0.0f : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+        }
+    } else if (LessNotEqual(scrollableDistance_, lastScrollableDistance)) {
+        if (GreatOrEqual(scrollableDistance_, 0.f) && LessOrEqual(-currentOffset_, lastScrollableDistance) &&
+            GreatNotEqual(-currentOffset_, scrollableDistance_)) {
+            currentOffset_ = -scrollableDistance_;
         }
     }
     viewPortExtent_ = childSize;
@@ -279,7 +288,7 @@ void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(overlayNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto scrollFrameSize = geometryNode->GetMarginFrameSize();
+    auto scrollFrameSize = geometryNode->GetFrameSize(true);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(scrollFrameSize);

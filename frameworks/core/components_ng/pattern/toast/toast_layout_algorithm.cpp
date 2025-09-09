@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr Dimension LIMIT_SPACING = 8.0_vp;
 } // namespace
-        
+
 void UpdateToastAlign(int32_t& alignment)
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -82,6 +82,12 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         toastProperty->ResetToastOffset();
     }
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(text);
+    auto padding = toastProperty->CreatePaddingAndBorder();
+    OffsetF textOffset = padding.Offset();
+    auto geometryNode = text->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameOffset(textOffset);
     text->Layout();
 }
 
@@ -126,7 +132,10 @@ void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    LayoutConstraintF layoutConstraint;
+    auto toastLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(toastLayoutProperty, layoutConstraint);
+    layoutConstraint = toastLayoutProperty->CreateChildConstraint();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, layoutConstraint);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();

@@ -121,10 +121,6 @@ bool DOMTextarea::SetSpecializedAttr(const std::pair<std::string, std::string>& 
             [](const std::string& val, DOMTextarea& textarea) {
                 textarea.textAreaChild_->SetObscure(StringToBool(val));
             } },
-        { DOM_TEXTAREA_OVERFLOWX,
-            [](const std::string& val, DOMTextarea& textarea) {
-                textarea.textAreaChild_->SetOverflowX(ConvertStrToTextFieldOverflowX(val));
-            } },
         { DOM_TEXTAREA_EXTEND,
             [](const std::string& val, DOMTextarea& textarea) {
                 textarea.textAreaChild_->SetExtend(StringToBool(val));

@@ -47,8 +47,24 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool ignoreOrient
      * the SetForceSplitEnable interface will be called.
      */
     isForceSplitSupported_ = true;
+    if (isForceSplitEnable_ == isForceSplit && ignoreOrientation_ == ignoreOrientation) {
+        return;
+    }
     isForceSplitEnable_ = isForceSplit;
     ignoreOrientation_ = ignoreOrientation;
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto width = context->GetWindowOriginalWidth();
+    if (width > 0) {
+        UpdateIsInForceSplitMode(width);
+        context->ForceUpdateDesignWidthScale(width);
+        auto rootNode = context->GetRootElement();
+        CHECK_NULL_VOID(rootNode);
+        const auto& geometryNode = rootNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->ResetParentLayoutConstraint();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
  
 void ForceSplitManager::UpdateIsInForceSplitMode(int32_t width)
@@ -68,9 +84,9 @@ void ForceSplitManager::UpdateIsInForceSplitMode(int32_t width)
         /**
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application
-         *   3. The application is in landscape mode or ignore orientation
-         *   4. The application is not in split screen mode
-         *   5. width greater than 600vp
+         *   2. The application is in landscape mode or ignore orientation
+         *   3. The application is not in split screen mode
+         *   4. width greater than 600vp
          */
         bool isMainWindow = container->IsMainWindow();
         auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();

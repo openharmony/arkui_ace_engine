@@ -60,12 +60,13 @@ public:
 
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
+    void SetScrollBarColor(const std::optional<Color>& scrollBarColor) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetSyncLoad(bool syncLoad) override;
+    void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
-    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
@@ -103,6 +104,7 @@ public:
     static float GetScrollBarWidth(FrameNode* frameNode);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static Dimension GetItemMinWidth(FrameNode* frameNode);
     static Dimension GetItemMaxWidth(FrameNode* frameNode);
     static Dimension GetItemMinHeight(FrameNode* frameNode);
@@ -116,6 +118,7 @@ public:
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    static void SetScrollToIndexMultiThread(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
@@ -125,10 +128,13 @@ public:
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
-    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);
+    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

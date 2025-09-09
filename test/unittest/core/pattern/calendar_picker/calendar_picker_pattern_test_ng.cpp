@@ -34,6 +34,7 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/icon_theme.h"
@@ -1023,4 +1024,41 @@ HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Le
     EXPECT_EQ(color, expectColor);
 }
 
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate001
+ * @tc.desc: Test CalendarPickerPattern OnFontScaleConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create CalendarPicker.
+    * @tc.expected: step1. Create success.
+    */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    pipelineContext->fontScale_ = AgingAdapationDialogUtil::GetDialogMaxFontSizeScale();
+
+    /**
+    * @tc.steps: step2. Call OnFontScaleConfigurationUpdate function.
+    */
+    pickerPattern->OnFontScaleConfigurationUpdate();
+    auto monthFrameNode = FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    ASSERT_NE(monthFrameNode, nullptr);
+    auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(monthPattern, nullptr);
+    EXPECT_TRUE(monthPattern->IsLargeSize(calendarTheme));
+}
 } // namespace OHOS::Ace::NG

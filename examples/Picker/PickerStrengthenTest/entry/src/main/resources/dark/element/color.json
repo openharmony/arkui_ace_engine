@@ -1,0 +1,16 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#000000"
+    },
+    {
+      "name": "picker_text_style_color",
+      "value": "#FF8358D6"
+    },
+    {
+      "name": "text_picker_divider_color",
+      "value": "#FF8358D6"
+    }
+  ]
+}

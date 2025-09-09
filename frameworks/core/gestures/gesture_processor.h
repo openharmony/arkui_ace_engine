@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 
 class GestureProcessor : public virtual AceType {
-    DECLARE_ACE_TYPE(GestureProcessor, AceType)
+    DECLARE_ACE_TYPE(GestureProcessor, AceType);
 public:
     GestureProcessor() = default;
     ~GestureProcessor() override = default;

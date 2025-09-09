@@ -1352,7 +1352,7 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
     RefPtr<FrameNode>& node, const SecCompEnhanceEvent& event,
-    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback, std::string& message)
 {
     CHECK_NULL_RETURN(node, -1);
     SecCompClickEvent secEvent = {};
@@ -1367,7 +1367,6 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         static_cast<int64_t>(event.time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     secEvent.accessibility.componentId = node->GetId();
 #endif
-    std::string message;
     CheckSecurityComponentClickEvent(node, message);
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback), message);
@@ -1410,7 +1409,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
     RefPtr<FrameNode>& node, const KeyEvent& event,
-    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback, std::string& message)
 {
     SecCompClickEvent secEvent = {};
     secEvent.type = ClickEventType::KEY_EVENT_TYPE;
@@ -1423,7 +1422,6 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    std::string message;
     CheckSecurityComponentClickEvent(node, message);
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback), message);

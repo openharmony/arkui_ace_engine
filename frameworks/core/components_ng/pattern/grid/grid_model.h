@@ -49,6 +49,7 @@ public:
     virtual void SetGridHeight(const Dimension& value) = 0;
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarColor(const std::optional<Color>& scrollBarColor) {};
     virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual void SetCachedCount(int32_t value, bool show = false) = 0;
     virtual void SetIsRTL(TextDirection direction) = 0;
@@ -84,8 +85,9 @@ public:
     virtual void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) = 0;
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
-    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetSyncLoad(bool syncLoad) {}
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

@@ -16,9 +16,15 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 #include <iremote_broker.h>
-#include <pixel_map.h>
+
 #include "ui/base/macros.h"
 
+namespace OHOS {
+namespace Media {
+class PixelMap;
+class ImageSource;
+} // namespace Media
+} // namespace OHOS
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
@@ -49,9 +55,9 @@ public:
         END_WEB_TRANSLATE,
         GET_CURRENT_SHOWING_IMAGE,
         GET_CURRENT_PAGE_NAME,
+        GET_VISIBLE_TREE,
         SENDCOMMAND_ASYNC_EVENT,
         SENDCOMMAND_EVENT,
-        GET_VISIBLE_TREE,
         SEND_COMMAND,
         EXE_APP_AI_FUNCTION,
     };

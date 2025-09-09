@@ -421,7 +421,10 @@ struct custombutton {
   }
 
   setMenuWidth(width: string) {
-    this.menuWidth = (80 + parseInt(width)) + 'vp'
+    let widthNumber = (80 + parseInt(width)) + 'vp'
+    if (widthNumber > this.menuWidth) {
+      this.menuWidth = widthNumber
+    }
   }
 
 
@@ -610,13 +613,14 @@ struct custombutton {
           height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
         })
         .visibility(this.maximizeVisibility)
-        .bindMenu(this.isShowMenu, this.MenuBuilder, {
+        .bindContextMenu(this.isShowMenu, this.MenuBuilder, {
           placement: Placement.BottomRight, aboutToDisappear: () => {
             this.isShowMenu = false;
             this.cancelMenuDisappearTimer();
           }
         })
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
+          this.menuWidth = '224vp'
           this.onMenuWidthChange()
           this.isShowMenu = !this.hideSplit
           this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
@@ -736,6 +740,7 @@ struct custombutton {
         })
       }.id('containerModalButtonRowId')
       .height('100%')
+      .visibility(this.rowVisibility)
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset + 'vp' })
       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)

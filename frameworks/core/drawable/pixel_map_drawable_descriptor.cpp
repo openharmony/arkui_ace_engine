@@ -15,24 +15,14 @@
 
 #include "core/drawable/pixel_map_drawable_descriptor.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
-
-extern "C" ACE_FORCE_EXPORT int32_t OH_ACE_PixelMapDrawableDescriptor_SetRawData(
-    void* object, uint8_t* data, size_t len)
-{
-    auto* drawable = reinterpret_cast<PixelMapDrawableDescriptor*>(object);
-    if (drawable) {
-        std::vector<uint8_t> result(data, data + len);
-        drawable->SetRawData(result);
-        return 1;
-    }
-    return 0;
-}
 
 RefPtr<PixelMap> PixelMapDrawableDescriptor::GetPixelMap()
 {
@@ -45,10 +35,11 @@ RefPtr<PixelMap> PixelMapDrawableDescriptor::GetPixelMap()
 
 void PixelMapDrawableDescriptor::CreatePixelMap()
 {
-    if (rawData_.empty()) {
+    if (rawData_.len == 0 && rawData_.data == nullptr) {
         return;
     }
-    auto imageSource = ImageSource::Create(rawData_.data(), rawData_.size());
+    uint32_t errorCode = 0;
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len, errorCode);
     if (!imageSource) {
         return;
     }

@@ -35,7 +35,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT BubblePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(BubblePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(BubblePaintMethod, NodePaintMethod);
 public:
     BubblePaintMethod() = default;
     ~BubblePaintMethod() override = default;

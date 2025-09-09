@@ -275,21 +275,21 @@ std::string RemoveInvalidUft8Bytes(const std::string& input)
             ++i;
         } else if ((byte & MUTF8_3B_FIRST) == MUTF8_2B_FIRST) {
             if (i + 1 < input.size() && IsContinuationByte(input, i + 1, 1)) {
-                result += input.substr(i, CONST_2);
+                result.append(input, i, CONST_2);
                 i += CONST_2;
             } else {
                 ++i;
             }
         } else if ((byte & MUTF8_4B_FIRST) == MUTF8_3B_FIRST) {
             if (i + CONST_2 < input.size() && IsContinuationByte(input, i + 1, CONST_2)) {
-                result += input.substr(i, CONST_3);
+                result.append(input, i, CONST_3);
                 i += CONST_3;
             } else {
                 ++i;
             }
-        } else if ((byte & MUTF8_4B_FIRST) == MUTF8_3B_FIRST) {
+        } else if ((byte & MUTF8_4B_FIRST_MASK) == MUTF8_4B_FIRST) {
             if (i + CONST_3 < input.size() && IsContinuationByte(input, i + 1, CONST_3)) {
-                result += input.substr(i, CONST_4);
+                result.append(input, i, CONST_4);
                 i += CONST_4;
             } else {
                 ++i;
@@ -318,8 +318,8 @@ void ConvertIllegalStr(std::string& str)
         if (resultLen == utf16Len) {
             DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0);
         } else {
-            TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "resultLen is %{public}d, utf16Len is %{public}d",
-                static_cast<uint16_t>(resultLen), static_cast<uint16_t>(utf16Len));
+            TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "resultLen is %{public}zd, utf16Len is %{public}zd",
+                resultLen, utf16Len);
         }
     } else {
         TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "the str is still not valid utf-8 string");

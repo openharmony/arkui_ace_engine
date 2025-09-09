@@ -446,8 +446,7 @@ ScrollResult SheetObject::HandleScroll(float scrollOffset, int32_t source, Neste
         if (scrollState == ScrollState::SCROLL) {
             return HandleScrollWithSheet(scrollOffset);
         }
-        HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
-        isSheetPosChanged_ = false;
+        dragVelocity_ = scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD;
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
@@ -517,6 +516,14 @@ void SheetObject::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     if (isSheetPosChanged_) {
         HandleDragEnd(velocity.value_or(0.f));
+        isSheetPosChanged_ = false;
+    }
+}
+
+void SheetObject::OnScrollDragEndRecursive()
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(dragVelocity_);
         isSheetPosChanged_ = false;
     }
 }
@@ -600,7 +607,9 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
     }
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
-    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
+    auto pipeline = host->GetContextRefPtr();
+    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(
+        option,
         [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext, offset]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
@@ -608,7 +617,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
                 ref->GetProperty()->Set(ref->GetHeight() + ref->GetSheetHeightUp());
             }
         },
-        finishCallback);
+        finishCallback, nullptr, pipeline);
     sheetPattern->SetAnimation(animation);
 }
 
@@ -672,6 +681,10 @@ void SheetObject::BeforeCreateLayoutWrapper()
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollLayoutProperty);
     scrollLayoutProperty->ResetSafeAreaPadding();
+
+    auto scrollablePattern = scrollNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetNeedFullSafeArea(false);
 }
 
 SheetKeyboardAvoidMode SheetObject::GetAvoidKeyboardModeByDefault() const

@@ -114,8 +114,8 @@ void SetBreakpoints(ArkUINodeHandle node, int32_t reference, const ArkUI_Float32
 
     auto parsedBreakpoints = Referenced::MakeRefPtr<V2::BreakPoints>();
     parsedBreakpoints->reference = static_cast<V2::BreakPointsReference>(reference);
-    if (size >= 0) {
-        parsedBreakpoints->breakpoints.clear();
+    parsedBreakpoints->breakpoints.clear();
+    if (size > 0) {
         double width = -1.0;
         for (int32_t i = 0; i < size; i++) {
             CalcDimension valueDimension = Dimension(pointValues[i], DimensionUnit::VP);
@@ -141,7 +141,7 @@ void SetColumns(ArkUINodeHandle node, int32_t *containerSizeArray, int32_t size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+    if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         auto parsedColumns = Referenced::MakeRefPtr<V2::GridContainerSize>(12);
         InheritGridRowOption(parsedColumns, containerSizeArray, size, 0);
         GridRowModelNG::SetColumns(frameNode, parsedColumns);
@@ -156,7 +156,7 @@ void ResetColumns(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+    if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         auto parsedColumns = Referenced::MakeRefPtr<V2::GridContainerSize>(12);
         GridRowModelNG::SetColumns(frameNode, parsedColumns);
         return;

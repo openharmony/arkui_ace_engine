@@ -14,20 +14,19 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_radio.h"
-
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace {
@@ -82,7 +81,11 @@ void JSRadio::Create(const JSCallbackInfo& info)
         } else {
             group = "";
         }
-        indicator = indicatorTemp->ToNumber<int32_t>();
+        if (indicatorTemp->IsNumber()) {
+            indicator = indicatorTemp->ToNumber<int32_t>();
+        } else {
+            indicator = static_cast<int32_t>(RadioIndicatorType::TICK);
+        }
         ParseIndicator(info, indicator, customBuilderFunc, builderObject);
     }
     RadioModel::GetInstance()->Create(value, group, indicator);
@@ -93,7 +96,8 @@ void JSRadio::Create(const JSCallbackInfo& info)
 void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
     std::function<void()>& customBuilderFunc, JSRef<JSVal>& builderObject)
 {
-    if (indicator.value() == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
+    if (indicator.value_or(static_cast<int32_t>(RadioIndicatorType::TICK)) ==
+        static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         if (builderObject->IsFunction()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
             CHECK_NULL_VOID(builderFunc);
@@ -157,6 +161,7 @@ void JSRadio::Checked(const JSCallbackInfo& info)
         return;
     }
     bool checked = false;
+
     JSRef<JSVal> changeEventVal;
     auto checkedVal = info[0];
     if (checkedVal->IsObject()) {

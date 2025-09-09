@@ -56,7 +56,7 @@ export class Finalizable extends Wrapper {
         const handle = this.createHandle()
 
         if (this.managed) {
-            // TODO: reenable exception.
+            // Improve: reenable exception.
             if (this.ptr == nullptr) return // throw new Error("Can't have nullptr ptr ${}")
             if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
 

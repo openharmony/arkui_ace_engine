@@ -252,6 +252,7 @@ RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateSecurityComponentL
     auto buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, nullptr);
     auto buttonWrapper = CreateLayoutWrapper(buttonNode);
+    CHECK_NULL_RETURN(buttonWrapper, nullptr);
     auto buttonAlgorithm = AceType::MakeRefPtr<MockSecurityComponentButtonLayoutAlgorithm>();
     CHECK_NULL_RETURN(buttonAlgorithm, nullptr);
     buttonWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(buttonAlgorithm));
@@ -302,7 +303,7 @@ void SecurityComponentModelTestNg::CheckSecurityComponentDefaultProp(RefPtr<Fram
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
         0, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
@@ -350,7 +351,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest001
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = PasteButtonModelNG::GetInstance()->CreateNode(
         0, -1, static_cast<int32_t>(ButtonType::CAPSULE), true, 1);
@@ -369,7 +370,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest002
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::LOCATION_BUTTON_ETS_TAG);
@@ -425,7 +426,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
@@ -472,7 +473,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest002,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
         BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
@@ -494,7 +495,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest003,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
     SetLocationUserDefinedPropty();
@@ -552,7 +553,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
     SetLocationUserDefinedPropty();
@@ -610,7 +611,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     LocationButtonModelNG locationSc;
@@ -651,7 +652,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest007, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest007, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::LOCATION_BUTTON_ETS_TAG);
@@ -672,7 +673,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest007,
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
@@ -701,7 +702,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
@@ -720,7 +721,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, 
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -735,7 +736,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
@@ -797,7 +798,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest00
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationAccessibilityPropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
@@ -818,7 +819,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationAccessibilityPro
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::SAVE_BUTTON_ETS_TAG);
@@ -874,7 +875,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
@@ -922,7 +923,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest002, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
         BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
@@ -944,7 +945,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest003, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     SetSaveUserDefinedPropty();
@@ -1002,7 +1003,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     SetSaveUserDefinedPropty();
@@ -1060,7 +1061,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest006, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest006, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
     SaveButtonModelNG saveSc;
@@ -1101,7 +1102,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest006, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::SAVE_BUTTON_ETS_TAG);
@@ -1121,7 +1122,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::SAVE_BUTTON_ETS_TAG);
@@ -1167,7 +1168,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest008, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::SAVE_BUTTON_ETS_TAG);
@@ -1214,7 +1215,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest009, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest010, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest010, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(-1, 1, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::SAVE_BUTTON_ETS_TAG);
@@ -1235,7 +1236,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest010, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
@@ -1264,7 +1265,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest001, Test
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
@@ -1283,7 +1284,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, Test
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1298,7 +1299,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, Test
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveLayoutAlgoTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveLayoutAlgoTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
@@ -1339,7 +1340,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveLayoutAlgoTest001, T
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveAccessibilityPropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
@@ -1360,7 +1361,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveAccessibilityPropert
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::PASTE_BUTTON_ETS_TAG);
@@ -1416,7 +1417,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
@@ -1463,7 +1464,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest002, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
         BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
@@ -1485,7 +1486,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest003, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
     SetPasteUserDefinedPropty();
@@ -1543,7 +1544,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
     SetPasteUserDefinedPropty();
@@ -1601,7 +1602,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest006, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest006, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
     PasteButtonModelNG pasteSc;
@@ -1641,7 +1642,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest006, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest007, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest007, TestSize.Level0)
 {
     CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
         V2::PASTE_BUTTON_ETS_TAG);
@@ -1661,7 +1662,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest007, Te
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1690,7 +1691,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest001, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1709,7 +1710,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, Tes
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1724,7 +1725,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, Tes
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1763,7 +1764,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteAccessibilityPropertyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1784,7 +1785,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteAccessibilityProper
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetIconResourceTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetIconResourceTest001, TestSize.Level0)
 {
     InternalResource::ResourceId id;
     EXPECT_FALSE(LocationButtonModelNG::GetInstance()->GetIconResource(-1, id));
@@ -1801,7 +1802,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetIconResourceTest001, 
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1823,10 +1824,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
 
     KeyEvent key;
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
+        noExistId, invalidFrameNode, key, [] (int32_t) {}, message), -1);
     key.enhanceData = { 0 };
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
+        noExistId, invalidFrameNode, key, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1835,7 +1836,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
@@ -1857,7 +1858,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
@@ -1879,7 +1880,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1901,7 +1902,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1915,7 +1916,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1949,7 +1950,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -1973,7 +1974,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);

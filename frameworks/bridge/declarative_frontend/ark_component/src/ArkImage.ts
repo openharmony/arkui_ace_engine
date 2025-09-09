@@ -531,8 +531,8 @@ class ImageOpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class ImageTransitionModifier extends ModifierWithKey<object> {
-  constructor(value: object) {
+class ImageTransitionModifier extends ModifierWithKey<ArkTransition> {
+  constructor(value: ArkTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('imageTransition');
@@ -540,7 +540,7 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
     if (reset) {
       getUINativeModule().image.resetImageTransition(node);
     } else {
-      getUINativeModule().image.setImageTransition(node, this.value);
+      getUINativeModule().image.setImageTransition(node, this.value.transitionEffect, this.value.callback);
     }
   }
 }
@@ -716,6 +716,39 @@ class ImageOnCompleteModifier extends ModifierWithKey<(event?: {
     }
   }
 }
+class ImageSupportSvg2Modifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('supportSvg2');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetSupportSvg2(node);
+    } else {
+      getUINativeModule().image.setSupportSvg2(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+class ImageContentTransitionModifier extends ModifierWithKey<ContentTransitionEffect> {
+  constructor(value: ContentTransitionEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetContentTransition(node);
+    } else {
+      getUINativeModule().image.setContentTransition(node, this.value!);
+
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -846,8 +879,13 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageOpacityModifier.identity, ImageOpacityModifier, value);
     return this;
   }
-  transition(value: TransitionOptions | TransitionEffect): this {
-    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+  transition(value: TransitionOptions | TransitionEffect, callback: (transitionIn: boolean) => void): this {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, arkTransition);
     return this;
   }
   dynamicRangeMode(value: DynamicRangeMode): this {
@@ -883,6 +921,15 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   resizable(value: ResizableOptions): this {
     modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
+    return this;
+  }
+  supportSvg2(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageSupportSvg2Modifier.identity, ImageSupportSvg2Modifier, value);
+    return this;
+  }
+  contentTransition(value: ContentTransitionEffect): this {
+    modifierWithKey(this._modifiersWithKeys, ImageContentTransitionModifier.identity,
+      ImageContentTransitionModifier, value);
     return this;
   }
 }

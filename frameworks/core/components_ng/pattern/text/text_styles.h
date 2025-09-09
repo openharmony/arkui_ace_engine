@@ -110,6 +110,7 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
+
     bool syncLoad = false;
     std::optional<std::vector<float>> colorFilterMatrix;
     std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
@@ -206,6 +207,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationOptions, TextDecorationOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
@@ -220,15 +223,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
-    
+
     void UpdateColorByResourceId();
 
     TextDecoration GetTextDecorationFirst() const
@@ -265,6 +261,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
 };
 
 struct HandleInfoNG {

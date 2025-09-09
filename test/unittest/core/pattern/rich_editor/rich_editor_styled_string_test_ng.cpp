@@ -47,7 +47,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -1080,6 +1080,48 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToStyledString004
+ * @tc.desc: Test spans to styledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString004, TestSize.Level1)
+{
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. init spans
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_1);
+    style.SetRenderStrategy(RENDER_STRATEGY_SINGLE);
+    style.SetEffectStrategy(EFFECT_STRATEGY_NONE);
+    SymbolSpanOptions symbolOptions;
+    symbolOptions.symbolId = SYMBOL_ID;
+    symbolOptions.style = style;
+    richEditorController->AddSymbolSpan(symbolOptions);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options);
+    options.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(options);
+
+    /**
+     * @tc.steps: step2. test ToStyledString
+     */
+    auto spanString = richEditorPattern->ToStyledString(0, 7);
+    ASSERT_NE(spanString, nullptr);
+    EXPECT_EQ(spanString->GetSpanItems().size(), 1);
+}
+
+/**
  * @tc.name: CreateStyledStringByTextStyle
  * @tc.desc: test CreateStyledStringByTextStyle
  * @tc.type: FUNC
@@ -1433,7 +1475,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString003, TestSize.Le
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextSpanOptions options2;
     options2.value = INIT_VALUE_1;
@@ -1479,6 +1521,8 @@ HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
      */
     richEditorPattern->spans_.clear();
     richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     pasteCallback(arrs, text, isMulitiTypeRecord);
     EXPECT_EQ(2, richEditorPattern->spans_.size());
 }
@@ -1549,6 +1593,29 @@ HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString003, TestSize.Level1)
     richEditorPattern->ProcessStyledString();
 
     EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: ProcessStyledString003
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringCreateTest, TestSize.Level1)
+{
+    RefPtr<RichEditorPattern> pattern;
+    bool isStyledStringMode;
+
+    isStyledStringMode = false;
+    pattern = AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isSpanStringMode_, false);
+    EXPECT_EQ(pattern->styledString_, nullptr);
+
+    isStyledStringMode = true;
+    pattern = AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->isSpanStringMode_, true);
+    EXPECT_NE(pattern->styledString_, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

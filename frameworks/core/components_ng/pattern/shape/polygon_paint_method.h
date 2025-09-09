@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT PolygonPaintMethod : public ShapePaintMethod {
-    DECLARE_ACE_TYPE(PolygonPaintMethod, ShapePaintMethod)
+    DECLARE_ACE_TYPE(PolygonPaintMethod, ShapePaintMethod);
 public:
     PolygonPaintMethod() = default;
     PolygonPaintMethod(

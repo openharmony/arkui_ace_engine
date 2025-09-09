@@ -43,6 +43,7 @@ public:
     virtual void SetListDirection(Axis axis) = 0;
     virtual void SetScrollBar(DisplayMode scrollBar) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
+    virtual void SetScrollBarColor(const std::optional<Color>& scrollBarColor) {};
     virtual void SetScrollBarWidth(const std::string& value) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetEditMode(bool editMode) = 0;
@@ -102,6 +103,7 @@ public:
     virtual void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjLaneConstrain(
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif

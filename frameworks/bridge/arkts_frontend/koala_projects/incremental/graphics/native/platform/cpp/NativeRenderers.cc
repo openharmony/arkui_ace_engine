@@ -129,7 +129,7 @@ static int defaultRendererSendMessage(SkoalaNativeRenderer* renderer, int id, in
     if (id == SkoalaNativeRendererIdPixels) {
         state->mode = SoftMode;
         state->softPixels = asPointer<uint32_t>(data1, data2);
-        memset(state->softPixels, 0, state->width * state->height * 4);
+        memset_s(state->softPixels, state->width * state->height * 4, 0, state->width * state->height * 4);
     }
     return 0;
 }

@@ -101,7 +101,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest018, TestSize.Level1)
 
 /**
  * @tc.name: NavigationPatternTest019
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest019, TestSize.Level1)
@@ -123,12 +123,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest019, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest020
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest020, TestSize.Level1)
@@ -157,12 +157,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest020, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest021
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest021, TestSize.Level1)
@@ -191,12 +191,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest021, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest022
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest022, TestSize.Level1)
@@ -225,12 +225,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest022, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest023
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest023, TestSize.Level1)
@@ -252,12 +252,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest023, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = false;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest024
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest024, TestSize.Level1)
@@ -286,12 +286,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest024, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_HIDE, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest025
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest025, TestSize.Level1)
@@ -320,12 +320,12 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest025, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_HIDE, isFromStandard);
 }
 
 /**
  * @tc.name: NavigationPatternTest026
- * @tc.desc: Test NotifyDialogChange function.
+ * @tc.desc: Test NotifyDialogLifecycle function.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest026, TestSize.Level1)
@@ -354,7 +354,7 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest026, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
     bool isFromStandard = true;
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_HIDE, isFromStandard);
+    navigationPattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_HIDE, isFromStandard);
 }
 
 /**
@@ -901,7 +901,8 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest045, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE,
+        NavDestVisibilityChangeReason::TRANSITION), STANDARD_INDEX);
 }
 
 /**
@@ -928,7 +929,8 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest046, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW,
+        NavDestVisibilityChangeReason::TRANSITION), STANDARD_INDEX);
 }
 
 /**
@@ -958,7 +960,8 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest047, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_SHOW,
+        NavDestVisibilityChangeReason::TRANSITION), STANDARD_INDEX);
 }
 
 /**
@@ -988,7 +991,8 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest048, TestSize.Level1)
     cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
     navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
 
-    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE), STANDARD_INDEX);
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(NavDestinationLifecycle::ON_HIDE,
+        NavDestVisibilityChangeReason::TRANSITION), STANDARD_INDEX);
 }
 
 /**
@@ -1232,6 +1236,41 @@ HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest057, TestSize.Level1)
 
     navigationPattern->realDividerWidth_ = 0.0f;
     navigationPattern->AddDividerHotZoneRect();
+}
+
+/**
+ * @tc.name: NavigationPatternTest058
+ * @tc.desc: Branch: bool isVisible = forceSplitSuccess_ && navBarIsHome_; => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NavigationPatternTest058, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationProperty, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarProperty = navBar->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto newTop = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTop, nullptr);
+
+    navigationPattern->forceSplitSuccess_ = true;
+    navigationPattern->navBarIsHome_ = true;
+    newTop->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navigationPattern->TransitionWithOutAnimation(nullptr, newTop, false, false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
 }
 
 /**
@@ -1536,7 +1575,7 @@ HWTEST_F(NavigationLayoutTestNg, CheckContentNeedMeasure002, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit001
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetOrCreateEventHub return false
+ *               GetEventHub return false
  *               isNavBar is false
  *               shallowBuilder is false
  *               GetContentNode is false
@@ -1569,7 +1608,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit002
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetOrCreateEventHub return true
+ *               GetEventHub return true
  *               isNavBar is true
  *               isAnimated is false
  *               shallowBuilder is true
@@ -1592,7 +1631,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit002, TestSize.Level1)
     preNode->contentNode_ = FrameNode::CreateFrameNode("button", 401, AceType::MakeRefPtr<ButtonPattern>());
     bool isNavBar = true, isAnimated = false;
 
-    EXPECT_NE(preNode->GetOrCreateEventHub<EventHub>(), nullptr);
+    EXPECT_NE(preNode->GetEventHub<EventHub>(), nullptr);
     EXPECT_TRUE(isNavBar && !isAnimated);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -1691,7 +1730,7 @@ HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode002, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit003
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetOrCreateEventHub return true
+ *               GetEventHub return true
  *               isNavBar is true
  *               isAnimated is true
  * @tc.type: FUNC
@@ -1708,7 +1747,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit003, TestSize.Level1)
         "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     bool isNavBar = true, isAnimated = true;
 
-    EXPECT_NE(preNode->GetOrCreateEventHub<EventHub>(), nullptr);
+    EXPECT_NE(preNode->GetEventHub<EventHub>(), nullptr);
     EXPECT_TRUE(isNavBar && isAnimated);
     navigationNode->DealNavigationExit(preNode, isNavBar, isAnimated);
 }

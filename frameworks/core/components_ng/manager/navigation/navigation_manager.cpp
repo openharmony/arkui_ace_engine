@@ -160,7 +160,9 @@ void NavigationManager::OnDumpInfo()
                 DumpLog::GetInstance().Print("----------------------------------------------------------");
             }
         } else if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
-            DumpLog::GetInstance().Print(space + "| [/]{ NavBar }");
+            auto navBar = AceType::DynamicCast<NavBarNode>(curNode);
+            CHECK_NULL_VOID(navBar);
+            DumpLog::GetInstance().Print(space + navBar->ToDumpString());
             DumpLog::GetInstance().Print("----------------------------------------------------------");
         }
         const auto& children = curNode->GetChildren();
@@ -332,6 +334,15 @@ void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string
             listener.second();
         }
     }
+}
+
+bool NavigationManager::GetIgnoreOrientation() const
+{
+    if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation forceSplit ignore Orientation");
+        return true;
+    }
+    return ignoreOrientation_;
 }
 
 void NavigationManager::AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener)

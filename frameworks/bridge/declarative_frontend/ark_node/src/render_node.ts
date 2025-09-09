@@ -135,29 +135,29 @@ class LengthMetrics {
   public value: number;
   public res: Resource;
   constructor(value: number, unit?: LengthUnit, res?: Resource) {
-      if (unit in LengthUnit) {
-          this.unit = unit;
-          this.value = value;
-      } else {
-          this.unit = LengthUnit.VP;
-          this.value = unit === undefined? value : 0;
-      }
-      this.res = res === undefined ? undefined : res;
+    if (unit in LengthUnit) {
+        this.unit = unit;
+        this.value = value;
+    } else {
+        this.unit = LengthUnit.VP;
+        this.value = unit === undefined ? value : 0;
+    }
+    this.res = res === undefined ? undefined : res;
   }
   static px(value: number) {
-      return new LengthMetrics(value, LengthUnit.PX);
+    return new LengthMetrics(value, LengthUnit.PX);
   }
   static vp(value: number) {
-      return new LengthMetrics(value, LengthUnit.VP);
+    return new LengthMetrics(value, LengthUnit.VP);
   }
   static fp(value: number) {
-      return new LengthMetrics(value, LengthUnit.FP);
+    return new LengthMetrics(value, LengthUnit.FP);
   }
   static percent(value: number) {
-      return new LengthMetrics(value, LengthUnit.PERCENT);
+    return new LengthMetrics(value, LengthUnit.PERCENT);
   }
   static lpx(value: number) {
-      return new LengthMetrics(value, LengthUnit.LPX);
+    return new LengthMetrics(value, LengthUnit.LPX);
   }
   static resource(res: Resource) {
     let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
@@ -166,7 +166,6 @@ class LengthMetrics {
 }
 
 declare interface Resource {}
-declare type BusinessError = any
 
 declare enum Color {
   White,
@@ -689,7 +688,7 @@ class RenderNode extends Disposable {
   get translation(): Vector2 {
     return this.translationValue;
   }
-  get lengthMetricsUnit() {
+  get lengthMetricsUnit(): LengthMetricsUnit {
     return this.lengthMetricsUnitValue;
   }
   get markNodeGroup() {
@@ -819,7 +818,8 @@ class RenderNode extends Disposable {
   dispose() {
     super.dispose();
     if (this.nodePtr) {
-      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+          'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
     }
     this._nativeRef?.dispose();
     this.baseNode_?.disposeNode();

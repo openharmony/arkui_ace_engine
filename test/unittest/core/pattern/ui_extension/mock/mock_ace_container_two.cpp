@@ -296,8 +296,7 @@ void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
 void AceContainer::DispatchExtensionDataToHostWindow(
     uint32_t code, const AAFwk::Want& data, int32_t persistentId)
-{
-}
+{}
 
 void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 

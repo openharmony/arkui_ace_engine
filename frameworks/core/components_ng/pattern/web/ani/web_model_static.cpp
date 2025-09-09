@@ -25,7 +25,7 @@
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #else
-#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "nweb_helper.h"
 #endif // ARKUI_CAPI_UNITTEST
@@ -579,12 +579,13 @@ void WebModelStatic::SetSelectionMenuOptions(FrameNode* frameNode, const WebMenu
 }
 
 void WebModelStatic::SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
-    // CHECK_NULL_VOID(webPatternStatic);
-    // webPatternStatic->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEditMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void WebModelStatic::SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle)
@@ -1277,5 +1278,13 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
+void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateForceEnableZoom(isEnabled);
 }
 } // namespace OHOS::Ace::NG

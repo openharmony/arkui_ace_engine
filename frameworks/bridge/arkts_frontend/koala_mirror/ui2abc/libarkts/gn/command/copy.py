@@ -19,6 +19,15 @@ import shutil
 import subprocess
 import sys
 
+def get_compiler_name(os, cpu):
+    if (os == 'mingw' and cpu == 'x86_64'):
+        return 'mingw_x86_64'
+    return 'clang_x64'
+
+def library_ext(os, cpu):
+    if (os == 'mingw' and cpu == 'x86_64'):
+        return 'dll'
+    return 'node'
 
 def copy_files(source_path, dest_path, is_file=False):
     try:
@@ -45,14 +54,27 @@ def run_cmd(cmd, execution_path=None):
 
 def copy_output(options):
 
-    copy_files(os.path.join(options.from_path, 'clang_x64/libes2panda_lib.node'),
-            os.path.join(options.to_path, 'build/native/build/es2panda.node'), True)
+    compiler = get_compiler_name(options.current_os, options.current_cpu)
+    library_extention = library_ext(options.current_os, options.current_cpu)
+
+    from_path = options.from_path
+    to_path = options.to_path
+
+    head_dir, tail_dir = os.path.split(from_path)
+    if (tail_dir == compiler):
+        from_path = head_dir
+
+
+    copy_files(os.path.join(from_path, f'{compiler}/libes2panda_lib.{library_extention}'),
+            os.path.join(to_path, 'build/native/build/es2panda.node'), True)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--from-path', help='path to output')
     parser.add_argument('--to-path', help='path to root out')
+    parser.add_argument('--current-os', help='current OS')
+    parser.add_argument('--current-cpu', help='current CPU')
 
     options = parser.parse_args()
     return options

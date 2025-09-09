@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SheetComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SheetComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SheetComposedElement, InspectorComposedElement);
 
 public:
     explicit SheetComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

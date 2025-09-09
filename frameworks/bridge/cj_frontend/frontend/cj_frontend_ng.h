@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_FORCE_EXPORT CJFrontendNG final : public CJFrontendAbstract {
-    DECLARE_ACE_TYPE(CJFrontendNG, CJFrontendAbstract)
+    DECLARE_ACE_TYPE(CJFrontendNG, CJFrontendAbstract);
 
 protected:
     void InternalInitialize() override;

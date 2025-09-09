@@ -29,20 +29,20 @@ struct DividerOptions {
 }
 }
 namespace OHOS::Ace::NG::Converter {
-// template<>
-// ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
-// {
-//     ItemDivider divider;
-//     auto margin = OptConvert<Dimension>(src.startMargin);
-//     if (margin.has_value()) {
-//         divider.startMargin = margin.value();
-//     }
-//     margin = OptConvert<Dimension>(src.endMargin);
-//     if (margin.has_value()) {
-//         divider.endMargin = margin.value();
-//     }
-//     return divider;
-// }
+template<>
+ColumnSplitDivider Convert(const Ark_ColumnSplitDividerStyle& src)
+{
+    ColumnSplitDivider divider;
+    auto margin = OptConvert<Dimension>(src.startMargin);
+    if (margin.has_value()) {
+        divider.startMargin = margin.value();
+    }
+    margin = OptConvert<Dimension>(src.endMargin);
+    if (margin.has_value()) {
+        divider.endMargin = margin.value();
+    }
+    return divider;
+}
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitModifier {
@@ -77,11 +77,11 @@ void ResizeableImpl(Ark_NativePointer node,
 void DividerImpl(Ark_NativePointer node,
                  const Opt_ColumnSplitDividerStyle* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto divider = Converter::OptConvert<ItemDivider>(*value);
-    // LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<ColumnSplitDivider>(*value);
+    LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()

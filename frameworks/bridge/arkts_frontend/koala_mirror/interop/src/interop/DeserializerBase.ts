@@ -17,6 +17,7 @@ import { Tags, CallbackResource } from "./SerializerBase";
 import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer";
 import { ResourceHolder } from "../arkts/ResourceManager";
+import { InteropNativeModule } from "./InteropNativeModule";
 
 export class DeserializerBase {
     private position = 0
@@ -53,7 +54,7 @@ export class DeserializerBase {
         factory: (args: Uint8Array, length: int32) => T,
         args: Uint8Array, length: int32): T {
 
-        // TBD: Use cache
+        // Improve: Use cache
         return factory(args, length);
     }
 
@@ -122,7 +123,7 @@ export class DeserializerBase {
     }
 
     readFunction(): any {
-        // TODO: not exactly correct.
+        // Improve: not exactly correct.
         const id = this.readInt32()
         return id
     }
@@ -205,8 +206,8 @@ export class DeserializerBase {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
-
-        return NativeBuffer.wrap(data, length, resource.resourceId, resource.hold, resource.release)
+        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
+        return new NativeBuffer(data, length, resource.release)
     }
 }
 

@@ -99,6 +99,13 @@ public:
         return belongTreeId_;
     }
 
+    static void FillNodeConfig(const NodeConfig& config, Accessibility::AccessibilityElementInfo& info);
+
+    static bool FindNativeInfoById(
+        const WeakPtr<AccessibilityProvider>& accessibilityProvider,
+        int64_t splitElementId,
+        std::shared_ptr<ArkUI_AccessibilityElementInfo>& nativeInfo);
+
 private:
     void GetHostRectTranslateInfo(NodeConfig& config);
     void GetNodeConfig(NodeConfig& nodeConfig);

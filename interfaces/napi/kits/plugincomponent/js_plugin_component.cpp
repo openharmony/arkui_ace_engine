@@ -435,7 +435,7 @@ napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSC
 
 static napi_value JSRequest(napi_env env, napi_callback_info info)
 {
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env, true);
     if (asyncCallbackInfo == nullptr) {
         return AceWrapVoidToJS(env);
     }
@@ -536,10 +536,12 @@ napi_value NAPI_JSOnWrap(napi_env env, napi_callback_info info, ACEAsyncJSCallba
 
 static napi_value JSOn(napi_env env, napi_callback_info info)
 {
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
+    ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env, true);
     if (asyncCallbackInfo == nullptr) {
         return AceWrapVoidToJS(env);
     }
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "register on function container id: %{public}d",
+        asyncCallbackInfo->cbInfo.containerId);
 
     napi_value rev = NAPI_JSOnWrap(env, info, asyncCallbackInfo);
     if (rev == nullptr) {

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSCustomDialogController : public virtual AceType {
-    DECLARE_ACE_TYPE(JSCustomDialogController, AceType)
+    DECLARE_ACE_TYPE(JSCustomDialogController, AceType);
 
 public:
     explicit JSCustomDialogController(JSView* ownerView) : ownerView_(ownerView) {}

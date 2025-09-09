@@ -83,6 +83,16 @@ struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveOut_;
 };
 
+enum class ThpNotifyState {
+    // post task immediately
+    DEFAULT,
+    // post task after animation
+    NAVIGATION_TRANSITION,
+    ROUTER_TRANSITION,
+    SCROLL_MOVING,
+};
+constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
+
 struct FontInfo;
 struct FontConfigJsonInfo;
 class Frontend;
@@ -871,10 +881,7 @@ public:
     {
         isArkUIHookEnabled_ = enable;
     }
-    bool IsArkUIHookEnabled() const
-    {
-        return isArkUIHookEnabled_;
-    }
+    bool IsArkUIHookEnabled() const;
 
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {
@@ -918,6 +925,11 @@ public:
     double GetRootHeight() const
     {
         return rootHeight_;
+    }
+
+    int32_t GetWindowOriginalWidth() const
+    {
+        return width_;
     }
 
     void SetWindowModal(WindowModal modal)
@@ -1460,9 +1472,21 @@ public:
         return "";
     };
 
+    virtual void PostTaskResponseRegion(int32_t delay) {};
+
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
     virtual void DisableNotifyResponseRegionChanged() {};
+
+    void SetTHPNotifyState(ThpNotifyState stat)
+    {
+        thpNotifyState_ = stat;
+    }
+
+    ThpNotifyState GetTHPNotifyState()
+    {
+        return thpNotifyState_;
+    }
 
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
@@ -1621,6 +1645,7 @@ public:
     }
 
     void SetUiDVSyncCommandTime(uint64_t vsyncTime);
+    void ForceUpdateDesignWidthScale(int32_t width);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1780,6 +1805,7 @@ protected:
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    ThpNotifyState thpNotifyState_ = ThpNotifyState::DEFAULT;
     uint64_t DVSyncChangeTime_ = 0;
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;

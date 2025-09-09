@@ -73,6 +73,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
     }
     delta = -FireOnWillScroll(-delta);
+    delta = -FireObserverOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
@@ -254,7 +255,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
@@ -563,6 +564,9 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    if (!sections_) {
+        return;
+    }
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
         layoutInfo_->InitSegmentsForKeepPositionMode(
             sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);
@@ -898,14 +902,14 @@ void WaterFlowPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
 }
 
 void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -913,12 +917,12 @@ void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<WaterFlowEventHub>();
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 void WaterFlowPattern::DumpInfoAddSections()
@@ -953,5 +957,19 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
         return {estimatedHeight, viewSize.Height()};
     }
     return {};
+}
+
+void WaterFlowPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

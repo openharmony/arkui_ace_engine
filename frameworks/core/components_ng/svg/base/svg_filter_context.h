@@ -18,7 +18,8 @@
 namespace OHOS::Ace::NG {
 class SvgFilterContext {
 public:
-    SvgFilterContext(Rect effectFilterArea, SvgLengthScaleRule filterRule, SvgLengthScaleRule primitiveRule)
+    SvgFilterContext(const Rect &effectFilterArea, const SvgLengthScaleRule &filterRule,
+                     const SvgLengthScaleRule &primitiveRule)
         : filterArea_(effectFilterArea), filterRule_(filterRule), primitiveRule_(primitiveRule) {}
     SvgFilterContext() = default;
     ~SvgFilterContext() = default;

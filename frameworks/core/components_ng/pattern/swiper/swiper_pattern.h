@@ -260,7 +260,7 @@ public:
     {
         if (!changeEvent_) {
             changeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(changeEvent_);
         } else {
@@ -272,7 +272,7 @@ public:
     {
         if (!onIndexChangeEvent_) {
             onIndexChangeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(onIndexChangeEvent_);
         } else {
@@ -284,7 +284,7 @@ public:
     {
         if (!animationStartEvent_) {
             animationStartEvent_ = std::make_shared<AnimationStartEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationStartEvent(animationStartEvent_);
         } else {
@@ -296,7 +296,7 @@ public:
     {
         if (!animationEndEvent_) {
             animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationEndEvent(animationEndEvent_);
         } else {
@@ -308,7 +308,7 @@ public:
     {
         if (!selectedEvent_) {
             selectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnSlectedEvent(selectedEvent_);
         } else {
@@ -320,7 +320,7 @@ public:
     {
         if (!unselectedEvent_) {
             unselectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+            auto eventHub = GetEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnUnselectedEvent(unselectedEvent_);
         } else {
@@ -330,7 +330,7 @@ public:
 
     void UpdateOnScrollStateChangedEvent(ChangeEvent&& event)
     {
-        auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnScrollStateChangedEvent(std::make_shared<ChangeEvent>(event));
     }
@@ -532,7 +532,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void SwipeToWithoutAnimation(int32_t index, bool byUser = false);
+    void SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex = std::nullopt);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
@@ -795,10 +795,16 @@ public:
 
     void SetJSIndicatorController(std::function<void()> resetFunc)
     {
+        resetFunc_ = resetFunc;
+    }
+
+    void ResetJSIndicatorController()
+    {
         if (resetFunc_) {
             resetFunc_();
+            resetFunc_ = nullptr;
         }
-        resetFunc_ = resetFunc;
+        indicatorController_ = nullptr;
     }
 
     void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
@@ -825,8 +831,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
+
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
-    int32_t OnInjectionEvent(const std::string& command) override;
 
     bool GetMaintainVisibleContentPosition()
     {
@@ -1322,10 +1328,6 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-    int32_t GetNodeId() const;
-    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
-    void ReportComponentChangeEvent(
-        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0f) const;
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
@@ -1467,6 +1469,8 @@ private:
     bool isIndicatorInteractive_ = true;
     bool nextMarginIgnoreBlank_ = false;
     bool prevMarginIgnoreBlank_ = false;
+    bool fastAnimationRunning_ = false;
+    bool fastAnimationChange_ = false;
     float ignoreBlankOffset_ = 0.0f;
     int32_t swiperId_ = -1;
     float animationCurveStiffness_ = SWIPER_CURVE_STIFFNESS;
