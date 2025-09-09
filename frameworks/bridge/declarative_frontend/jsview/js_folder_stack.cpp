@@ -61,27 +61,25 @@ JSRef<JSVal> HoverStatusChangeEventToJSValue(const NG::FolderEventInfo& eventInf
 
 void JSFolderStack::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(info[0]);
-        auto upperId = params->GetProperty("upperItems");
-        if (upperId->IsNull() || upperId->IsUndefined() || !upperId->IsArray()) {
-            FolderStackModel::GetInstance()->Create();
-            return;
-        }
-        auto upperIdParams = JSRef<JSArray>::Cast(upperId);
-        auto upperItemLength = upperIdParams->Length();
-        std::vector<std::string> upperItems(upperItemLength);
-        if (upperId->IsArray()) {
-            for (size_t i = 0; i < upperItemLength; i++) {
-                if (upperIdParams->GetValueAt(i)->IsString()) {
-                    upperItems[i] = upperIdParams->GetValueAt(i)->ToString();
-                }
-            }
-        }
-        FolderStackModel::GetInstance()->Create(upperItems);
-    } else {
+    if (!(info.Length() > 0 && info[0]->IsObject())) {
         FolderStackModel::GetInstance()->Create();
+        return;
     }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(info[0]);
+    auto upperId = params->GetProperty("upperItems");
+    if (upperId->IsNull() || upperId->IsUndefined() || !upperId->IsArray()) {
+        FolderStackModel::GetInstance()->Create();
+        return;
+    }
+    auto upperIdParams = JSRef<JSArray>::Cast(upperId);
+    auto upperItemLength = upperIdParams->Length();
+    std::vector<std::string> upperItems(upperItemLength);
+    for (size_t i = 0; i < upperItemLength; i++) {
+        if (upperIdParams->GetValueAt(i)->IsString()) {
+            upperItems[i] = upperIdParams->GetValueAt(i)->ToString();
+        }
+    }
+    FolderStackModel::GetInstance()->Create(upperItems);
 }
 
 void JSFolderStack::SetAlignContent(const JSCallbackInfo& info)
