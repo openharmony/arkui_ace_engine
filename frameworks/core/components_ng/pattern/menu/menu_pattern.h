@@ -805,6 +805,7 @@ private:
         AnimationOption& option) const;
     void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+    RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
