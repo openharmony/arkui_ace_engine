@@ -23,7 +23,8 @@ import { RenderIdType } from '../decorator';
 
 import { StateMgmtTool } from '#stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { IAniStorage, AniStorage, AreaMode } from './persistentStorage'
+import { IAniStorage, AniStorage, AreaMode } from './persistentStorage';
+import contextConstant from '@ohos.app.ability.contextConstant';
 
 export type StorageDefaultCreator<T> = () => T;
 
@@ -33,11 +34,11 @@ type FixedStringArrayType = FixedArray<StringOrUndefinedType>;
 export type ToJSONType<T> = (value: T) => jsonx.JsonElement;
 export type FromJSONType<T> = (element: jsonx.JsonElement) => T;
 
-export interface IConnectOptions<T extends object> {
-    ttype: Type;
+export interface ConnectOptions<T extends object> {
+    type: Type;
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
-    areaMode?: AreaMode;
+    areaMode?: contextConstant.AreaMode;
 }
 
 const enum PersistError {
@@ -46,7 +47,7 @@ const enum PersistError {
     Unknown = 'unknown'
 };
 
-type PersistErrorCallback = ((key: string, reason: PersistError, message: string) => void) | undefined;
+type PersistenceErrorCallback = ((key: string, reason: PersistError, message: string) => void) | undefined;
 
 const enum MapType {
     NOT_IN_MAP = -1,
@@ -83,7 +84,7 @@ export class PersistenceV2 {
     }
 
     public static globalConnect<T extends object>(
-        connectOptions: IConnectOptions<T>,
+        connectOptions: ConnectOptions<T>,
         toJson: ToJSONType<T>,
         fromJson: FromJSONType<T>): T | undefined {
         return PersistenceV2Impl.instance().globalConnect(connectOptions, toJson, fromJson);
@@ -93,16 +94,18 @@ export class PersistenceV2 {
         return PersistenceV2Impl.instance().keys();
     }
 
-    public static notifyOnError(callback: PersistErrorCallback | undefined): void {
+    public static notifyOnError(callback: PersistenceErrorCallback | undefined): void {
         PersistenceV2Impl.instance().notifyOnError(callback);
     }
 
-    public static remove(keyOrType: string | Type): boolean {
-        return PersistenceV2Impl.instance().remove(keyOrType);
+    public static remove(keyOrType: string | Type): void {
+        PersistenceV2Impl.instance().remove(keyOrType);
+        return;
     }
 
-    public static save(keyOrType: string | Type): boolean {
-        return PersistenceV2Impl.instance().save(keyOrType);
+    public static save(keyOrType: string | Type): void {
+        PersistenceV2Impl.instance().save(keyOrType);
+        return;
     }
 }
 
@@ -298,7 +301,7 @@ export class PersistenceV2Impl {
     private keysSet_: Set<string>;
     private globalKeysArr_: Array<Set<string>>;
     private propertyWriters_: Map<string, () => void>;
-    private errorCB_: PersistErrorCallback = undefined;
+    private errorCB_: PersistenceErrorCallback = undefined;
     private typeMap_: Map<string, Type>;
     private observationInProgress_: boolean = false;
     public static backendUpdateCountForTesting: int = 0;
@@ -397,16 +400,16 @@ export class PersistenceV2Impl {
     }
 
     public globalConnect<T extends object>(
-        connectOptions: IConnectOptions<T>,
+        connectOptions: ConnectOptions<T>,
         toJson: ToJSONType<T>,
         fromJson: FromJSONType<T>): T | undefined {
         return this.doGlobalConnect(connectOptions, toJson, fromJson);
     }
 
-    private doGlobalConnect<T extends object>(connectOptions: IConnectOptions<T>,
+    private doGlobalConnect<T extends object>(connectOptions: ConnectOptions<T>,
         toJson: ToJSONType<T>, fromJson: FromJSONType<T>): T | undefined {
 
-        this.checkTypeIsValidClassObject(connectOptions.ttype);
+        this.checkTypeIsValidClassObject(connectOptions.type);
 
         const key = this.getPersistentKeyOrTypeNameWithChecks(connectOptions);
         if (!key) {
@@ -425,7 +428,7 @@ export class PersistenceV2Impl {
 
         // In memory, return if globalEntriesMap_ exist
         if (this.globalEntriesMap_.has(key)) {
-            StorageHelper.checkTypeByType(key, connectOptions.ttype, this.typeMap_.get(key)!);
+            StorageHelper.checkTypeByType(key, connectOptions.type, this.typeMap_.get(key)!);
             const existingValue = this.globalEntriesMap_.get(key) as StoragePropertyV2<T>;
             return existingValue!.get() as T;
         }
@@ -434,11 +437,11 @@ export class PersistenceV2Impl {
         const areaMode: AreaMode = this.getAreaMode(connectOptions.areaMode);
         this.globalMapAreaMode_.set(key, areaMode);
         if (this.storageBackend_!.has(key, areaMode)) {
-            return this.readValueFromDisk<T>(key, connectOptions.ttype, toJson, fromJson, areaMode);
+            return this.readValueFromDisk<T>(key, connectOptions.type, toJson, fromJson, areaMode);
         }
 
         // Neither in memory or in disk, create new entry
-        let storageProperty = this.createDefaultValue<T>(key, connectOptions.ttype, connectOptions.defaultCreator);
+        let storageProperty = this.createDefaultValue<T>(key, connectOptions.type, connectOptions.defaultCreator);
         if (!storageProperty) {
             return undefined;
         }
@@ -448,19 +451,19 @@ export class PersistenceV2Impl {
             return undefined;
         }
 
-        this.connectNewValue<T>(key, storageProperty, connectOptions.ttype, toJson, true, areaMode);
+        this.connectNewValue<T>(key, storageProperty, connectOptions.type, toJson, true, areaMode);
         return observedValue;
     }
 
     public keys(): Array<string> {
-        const allKeys: Array<string> = new Array<string>();
+        const allKeys: Set<string> = new Set<string>();
         try {
             // add module path key
             if (!this.keysSet_.size) {
                 this.keysSet_ = this.getKeysFromStorage();
             }
             for (const key of this.keysSet_) {
-                allKeys.push(key);
+                allKeys.add(key);
             }
             // add global path key
             for (let i = 0; i < this.globalKeysArr_.length; i++) {
@@ -468,7 +471,7 @@ export class PersistenceV2Impl {
                     this.globalKeysArr_[i] = this.getKeysFromStorage(i as AreaMode);
                 }
                 for (const key of this.globalKeysArr_[i]) {
-                    allKeys.push(key);
+                    allKeys.add(key);
                 }
             }
         } catch (err) {
@@ -478,7 +481,7 @@ export class PersistenceV2Impl {
             }
             throw err;
         }
-        return allKeys;
+        return Array.from(allKeys);
     }
 
     public remove(keyOrType: string | Type): boolean {
@@ -517,7 +520,7 @@ export class PersistenceV2Impl {
         return status;
     }
 
-    public notifyOnError(callback: PersistErrorCallback): void {
+    public notifyOnError(callback: PersistenceErrorCallback): void {
         this.errorCB_ = callback;
     }
 
@@ -622,14 +625,24 @@ export class PersistenceV2Impl {
         })
     }
 
-    private getAreaMode(areaMode?: AreaMode): AreaMode {
+    private getAreaMode(areaMode?: contextConstant.AreaMode): AreaMode {
         if (areaMode === undefined) {
             return AreaMode.EL2;
         }
-        if (areaMode >= AreaMode.EL1 && areaMode <= AreaMode.EL5) {
-            return areaMode;
+        switch (areaMode) {
+            case contextConstant.AreaMode.EL1:
+                return AreaMode.EL1;
+            case contextConstant.AreaMode.EL2:
+                return AreaMode.EL2;
+            case contextConstant.AreaMode.EL3:
+                return AreaMode.EL3;
+            case contextConstant.AreaMode.EL4:
+                return AreaMode.EL4;
+            case contextConstant.AreaMode.EL5:
+                return AreaMode.EL5;
+            default:
+                throw new Error(PersistenceV2Impl.NOT_SUPPORT_AREAMODE_MESSAGE_);
         }
-        throw new Error(PersistenceV2Impl.NOT_SUPPORT_AREAMODE_MESSAGE_);
     }
 
     private getKeyMapType(key: string): MapType {
@@ -896,11 +909,11 @@ export class PersistenceV2Impl {
         return StorageHelper.isKeyValid(key!) ? key : undefined;
     }
 
-    private getPersistentKeyOrTypeNameWithChecks<T extends object>(options: IConnectOptions<T>): string | undefined {
+    private getPersistentKeyOrTypeNameWithChecks<T extends object>(options: ConnectOptions<T>): string | undefined {
         let key = options.key;
         if (!options.key) {
             StateMgmtConsole.log(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
-            key = options.ttype.getName();
+            key = options.type.getName();
         }
 
         if (key === undefined) {
