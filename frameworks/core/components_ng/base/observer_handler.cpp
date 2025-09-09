@@ -173,7 +173,6 @@ void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>
 
 void UIObserverHandler::NotifyDensityChange(double density)
 {
-    CHECK_NULL_VOID(densityHandleFunc_);
     auto container = Container::Current();
     if (!container) {
         LOGW("notify density event failed, current UI instance invalid");
@@ -184,7 +183,12 @@ void UIObserverHandler::NotifyDensityChange(double density)
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    densityHandleFunc_(info, density);
+    if (densityHandleFunc_) {
+        densityHandleFunc_(info, density);
+    }
+    if (densityHandleFuncForAni_) {
+        densityHandleFuncForAni_(info, density);
+    }
 }
 
 void UIObserverHandler::NotifyWillClick(
