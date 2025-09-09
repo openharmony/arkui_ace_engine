@@ -65,6 +65,9 @@ import { ArkToggleComponent, ToggleConfiguration } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { Scene } from "graphics3d.Scene"
 import { Animation, Environment } from "graphics3d.SceneResources"
+import { UIContextUtil } from "arkui/base/UIContextUtil";
+import { UIContextImpl } from "arkui/base/UIContextImpl";
+import { int32 } from "@koalaui/common";
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -238,11 +241,13 @@ export namespace extractors {
   }
 
   export function toUIContextPtr(value: UIContext): KPointer {
-    return 123;
+    let uicontextImpl = value as UIContextImpl;
+    let instanceId = uicontextImpl.instanceId_;
+    return instanceId as KPointer;
   }
   export function fromUIContextPtr(ptr: KPointer): UIContext {
-    const x: Object = {};
-    return x as UIContext;
+    let instanceId: int32 = ptr as (int32);
+    return UIContextUtil.getOrCreateUIContextById(instanceId);
   }
 
   export function toEventHubPtr(value: EventHub): KPointer {
