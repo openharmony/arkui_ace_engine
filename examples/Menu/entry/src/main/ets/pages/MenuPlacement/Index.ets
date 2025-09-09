@@ -11,7 +11,7 @@ struct RotationIndex {
   @State message: string = 'test'
 
   private items : ListCategories[] = [
-    { title: "RightClick",url: "pages/MenuPlacement/RightClick/Index" },
+    { title: 'RightClick',url: 'pages/MenuPlacement/RightClick/Index' },
   ]
 
   build() {

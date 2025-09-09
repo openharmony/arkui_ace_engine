@@ -4,8 +4,8 @@ struct RightClickWidth {
 
   @Builder MenuBuilder() {
     Menu() {
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" })
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' })
     }.width('20%').height('50%')
   }
 

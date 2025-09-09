@@ -4,8 +4,8 @@ struct contextMenuBottomLeft3 {
 
   @Builder MenuBuilder() {
     Menu() {
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" })
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' })
     }
   }
 
