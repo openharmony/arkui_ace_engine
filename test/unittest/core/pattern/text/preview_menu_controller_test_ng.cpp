@@ -411,7 +411,7 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingPreviewNodeTest001, TestSize.Le
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     PreviewMenuController controller(AceType::WeakClaim(AceType::RawPtr(pattern)));
 
-    // Setup theme manager and mock theme
+    // Setup theme manager and mock theme.
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
