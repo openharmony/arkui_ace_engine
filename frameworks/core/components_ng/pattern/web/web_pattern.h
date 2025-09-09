@@ -125,6 +125,11 @@ struct PipInfo {
     int height;
 };
 
+enum class WebWindowMaximizeReason : uint32_t {
+    MAXIMIZE = 0,
+    EXIT_FREE_MULTI_MODE,
+};
+
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
@@ -904,6 +909,7 @@ public:
     std::string GetAllTextInfo() const;
     void GetHandleInfo(SelectOverlayInfo& infoHandle);
     void HandleOnAIWrite();
+    void WindowMaximize(WebWindowMaximizeReason reason);
 
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -1021,7 +1027,6 @@ private:
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void DragResizeNoMoveTimer();
     void WindowDrag(int32_t width, int32_t height);
-    void WindowMaximize();
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);

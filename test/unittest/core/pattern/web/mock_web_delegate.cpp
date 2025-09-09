@@ -1414,4 +1414,11 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 bool WebDelegate::IsShowHandle() { return false; }
+bool WebDelegate::IsPcMode()
+{
+    return g_setReturnStatus == STATUS_TRUE;
+}
+void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
+void WebDelegate::RegisterFreeMultiWindowListener() {}
+void WebDelegate::UnregisterFreeMultiWindowListener() {}
 } // namespace OHOS::Ace
