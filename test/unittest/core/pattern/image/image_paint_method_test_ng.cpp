@@ -375,4 +375,83 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_DfxSetFrameSize, TestSiz
     EXPECT_EQ(width, WIDTH);
     EXPECT_EQ(height, HEIGHT);
 }
+
+/**
+ * @tc.name: ImagePaintMethodTestNg_NeedsContentTransition001
+ * @tc.desc: test NeedsContentTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NeedsContentTransition001, TestSize.Level0)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+
+    auto mockImage = AceType::MakeRefPtr<MockCanvasImage>();
+    EXPECT_CALL(*mockImage, IsStatic()).WillRepeatedly(::testing::Return(true));
+    imagePattern->image_ = mockImage;
+
+    pattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethodConfig imagePaintMethodConfig_;
+    imagePaintMethodConfig_.selected = true;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ =
+        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_NE(imagePaintMethod_, nullptr);
+    RefPtr<ImageRenderProperty> imagePaintProperty_ = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imagePaintProperty_, nullptr);
+    imagePaintProperty_->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    imagePaintProperty_->UpdateNeedBorderRadius(true);
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    RefPtr<PaintWrapper> paintWrapper =
+        AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(), geometryNode, imagePaintProperty_);
+    auto imagePaintWrapper_ = frameNode->CreatePaintWrapper();
+    EXPECT_NE(imagePaintWrapper_, nullptr);
+    EXPECT_NE(imagePaintWrapper_, paintWrapper);
+
+    /**
+     * @tc.steps: step3. call function.
+     */
+    auto&& config = pattern->image_->GetPaintConfig();
+    config.isSvg_ = true;
+    bool needsTransition = imagePaintMethod_->NeedsContentTransition();
+    EXPECT_EQ(needsTransition, true);
+
+    /**
+     * @tc.steps: step4. call function.
+     */
+    EXPECT_CALL(*mockImage, IsStatic()).WillRepeatedly(::testing::Return(false));
+    bool needsTransition1 = imagePaintMethod_->NeedsContentTransition();
+    EXPECT_EQ(needsTransition1, false);
+
+    /**
+     * @tc.steps: step5. call function.
+     */
+    config.isSvg_ = false;
+    config.frameCount_ = 2;
+    bool needsTransition2 = imagePaintMethod_->NeedsContentTransition();
+    EXPECT_EQ(needsTransition2, false);
+
+    /**
+     * @tc.steps: step6. call function.
+     */
+    config.frameCount_ = 1;
+    bool needsTransition3 = imagePaintMethod_->NeedsContentTransition();
+    EXPECT_EQ(needsTransition3, true);
+}
 } // namespace OHOS::Ace::NG

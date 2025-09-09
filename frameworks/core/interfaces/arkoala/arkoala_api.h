@@ -3296,6 +3296,9 @@ struct ArkUIImageModifier {
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
+    void (*setContentTransition)(ArkUINodeHandle node, ArkUI_Int32 contentTransition);
+    ArkUI_Int32 (*getContentTransition)(ArkUINodeHandle node);
+    void (*resetContentTransition)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

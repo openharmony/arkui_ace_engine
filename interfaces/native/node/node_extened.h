@@ -214,6 +214,10 @@ struct ArkUI_VisibleAreaEventOptions {
     int32_t expectedUpdateInterval;
 };
 
+struct ArkUI_ContentTransitionEffect {
+    int32_t contentTransitionType;
+};
+
 #ifdef __cplusplus
 };
 #endif

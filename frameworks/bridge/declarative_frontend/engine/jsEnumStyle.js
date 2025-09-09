@@ -2357,6 +2357,22 @@ class ColorContent {
   }
 }
 
+class ContentTransitionEffect {
+  contentTransitionType_ = '';
+
+  constructor(contentTransitionType) {
+    this.contentTransitionType_ = contentTransitionType;
+  }
+
+  static get IDENTITY() {
+    return new ContentTransitionEffect('IDENTITY');
+  }
+
+  static get OPACITY() {
+    return new ContentTransitionEffect('OPACITY');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 

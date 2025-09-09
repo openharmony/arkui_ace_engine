@@ -378,6 +378,8 @@ public:
     static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state, const NodeInfo& nodeInfo);
+    static bool ParseContentTransitionEffect(
+        const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

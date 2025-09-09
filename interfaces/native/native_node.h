@@ -2990,6 +2990,19 @@ typedef enum {
      */
     NODE_IMAGE_SUPPORT_SVG2 = 4021, 
     /**
+     * @brief Set the animation effect for the image content transformation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     * 
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The parameter type is {@link ArkUI_ContentTransitionEffect}.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_CONTENT_TRANSITION = 4022,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

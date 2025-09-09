@@ -1245,6 +1245,33 @@ int32_t GetSupportSvg2(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return ImageModelNG::GetSupportSvg2(frameNode);
 }
+
+void SetContentTransition(ArkUINodeHandle node, ArkUI_Int32 contentTransition)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentTransitionType = static_cast<ContentTransitionType>(contentTransition);
+    if (contentTransitionType < ContentTransitionType::IDENTITY ||
+        contentTransitionType > ContentTransitionType::OPACITY) {
+        contentTransitionType = ContentTransitionType::IDENTITY;
+    }
+    ImageModelNG::SetContentTransition(frameNode, contentTransitionType);
+}
+
+int32_t GetContentTransition(ArkUINodeHandle node)
+{
+    int32_t defaultContentTransition = static_cast<int32_t>(ContentTransitionType::IDENTITY);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultContentTransition);
+    return static_cast<int32_t>(ImageModelNG::GetContentTransition(frameNode));
+}
+
+void ResetContentTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetContentTransition(frameNode, ContentTransitionType::IDENTITY);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1362,6 +1389,9 @@ const ArkUIImageModifier* GetImageModifier()
         .setSupportSvg2 = SetSupportSvg2,
         .resetSupportSvg2 = ResetSupportSvg2,
         .getSupportSvg2 = GetSupportSvg2,
+        .setContentTransition = SetContentTransition,
+        .getContentTransition = GetContentTransition,
+        .resetContentTransition = ResetContentTransition,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
