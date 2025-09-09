@@ -37419,23 +37419,11 @@ void impl_AxisEvent_setScrollStep(Ark_NativePointer thisPtr, KInteropNumber scro
         GetAccessors()->getAxisEventAccessor()->setScrollStep(self, (const Ark_Number*) (&scrollStep));
 }
 KOALA_INTEROP_DIRECT_V2(AxisEvent_setScrollStep, Ark_NativePointer, KInteropNumber)
-KInteropReturnBuffer impl_AxisEvent_getPropagation(Ark_NativePointer thisPtr) {
+void impl_AxisEvent_propagation(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &retValue = GetAccessors()->getAxisEventAccessor()->getPropagation(self);
-        Serializer _retSerializer {};
-        _retSerializer.writeCallbackResource(retValue.resource);
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        return _retSerializer.toReturnBuffer();
+        GetAccessors()->getAxisEventAccessor()->propagation(self);
 }
-KOALA_INTEROP_1(AxisEvent_getPropagation, KInteropReturnBuffer, Ark_NativePointer)
-void impl_AxisEvent_setPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Void propagation_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getAxisEventAccessor()->setPropagation(self, (const Callback_Void*)&propagation_value);
-}
-KOALA_INTEROP_DIRECT_V3(AxisEvent_setPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(AxisEvent_propagation, Ark_NativePointer)
 Ark_NativePointer impl_PixelMapMock_ctor() {
         return GetAccessors()->getPixelMapMockAccessor()->ctor();
 }
@@ -37762,23 +37750,11 @@ void impl_FocusAxisEvent_setAxisMap(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getFocusAxisEventAccessor()->setAxisMap(self, (const Map_AxisModel_Number*)&axisMap_value);
 }
 KOALA_INTEROP_DIRECT_V3(FocusAxisEvent_setAxisMap, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_FocusAxisEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+void impl_FocusAxisEvent_stopPropagation(Ark_NativePointer thisPtr) {
         Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &retValue = GetAccessors()->getFocusAxisEventAccessor()->getStopPropagation(self);
-        Serializer _retSerializer {};
-        _retSerializer.writeCallbackResource(retValue.resource);
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        return _retSerializer.toReturnBuffer();
+        GetAccessors()->getFocusAxisEventAccessor()->stopPropagation(self);
 }
-KOALA_INTEROP_1(FocusAxisEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
-void impl_FocusAxisEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Void stopPropagation_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getFocusAxisEventAccessor()->setStopPropagation(self, (const Callback_Void*)&stopPropagation_value);
-}
-KOALA_INTEROP_DIRECT_V3(FocusAxisEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(FocusAxisEvent_stopPropagation, Ark_NativePointer)
 Ark_NativePointer impl_ProgressMask_ctor(KInteropNumber value, KInteropNumber total, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 color_value_buf_selector = thisDeserializer.readInt8();
