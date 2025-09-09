@@ -63,6 +63,8 @@ private:
         return layoutInfo_;
     }
 
+    void ReMeasureItems(LayoutWrapper* layoutWrapper);
+
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
