@@ -115,6 +115,7 @@ private:
         void Reset(int32_t id);
         void ResetAll();
         void SetDirection(int32_t directionType);
+        Axis GetDirection();
         const std::map<int32_t, VelocityTracker>& GetVelocityMap() const
         {
             return trackerMap_;

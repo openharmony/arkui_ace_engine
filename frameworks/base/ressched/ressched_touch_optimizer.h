@@ -28,7 +28,7 @@ public:
     void SetSlideAccepted(bool accept);
     void SetLastTpFlush(bool lastTpFlush);
     void SetLastTpFlushCount(uint32_t lastVsyncCount);
-
+    void SetSlideDirection(int32_t direction);
     // TP driven drawing
     bool NeedTpFlushVsync(TouchEvent touchEvent, uint32_t currentVsyncCount);
 
@@ -56,7 +56,7 @@ private:
     bool HandleState2(const TouchEvent& point, const int32_t axis, double& result);
     bool RVSPointCheckWithoutSignal(TouchEvent& touchPoint, const int32_t axis);
     bool RVSPointCheckWithSignal(TouchEvent& touchPoint, const int32_t axis);
-
+    bool RVSDirectionStateCheck(uint32_t rvsDirection);
 
     // revord tp report point and dispatch point;
     std::unordered_map<int32_t, double> dptGapX_;
@@ -85,6 +85,8 @@ private:
     // Dynamic effect chasing
     Offset slideAcceptOffset_{0.0, 0.0};
     float accumulatedDistance_ = 0.0;
+
+    std::atomic<int32_t> slideDirection_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H
