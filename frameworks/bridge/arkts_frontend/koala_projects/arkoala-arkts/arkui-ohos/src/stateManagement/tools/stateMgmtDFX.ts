@@ -36,7 +36,7 @@ class ViewInfo {
 class DecoratorInfo {
     decorator?: string;
     propertyName?: string;
-    value?: NullishType;
+    value?: Any;
 }
 
 export class DumpInfo {
@@ -45,7 +45,7 @@ export class DumpInfo {
 }
 
 export class StateMgmtDFX {
-    static getDecoratedVariableInfo(view: NullishType, dumpInfo: DumpInfo, isV2: boolean): void {
+    static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean): void {
         if (isV2) {
             StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
         } else {
@@ -53,7 +53,7 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV1VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+    static dumpV1VariableInfo(view: Any, dumpInfo: DumpInfo): void {
         if (view instanceof Object) {
             Object.getOwnPropertyNames(view)
                 .filter((varName) => {
@@ -72,7 +72,7 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV2VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+    static dumpV2VariableInfo(view: Any, dumpInfo: DumpInfo): void {
         if (view instanceof Object) {
             Object.getOwnPropertyNames(view)
                 .filter((varName) => {

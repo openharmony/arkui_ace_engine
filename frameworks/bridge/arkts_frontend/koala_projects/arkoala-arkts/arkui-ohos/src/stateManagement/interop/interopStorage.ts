@@ -159,7 +159,7 @@ export class InteropStorageBase extends StorageBase {
 
     // return ArkTS1.1 ObservedPropertyPU object.
     public getStoragePropertyForDynamic(value: string): Any {
-        const storage = super.__getStoragePropUnsafe<NullishType>(value);
+        const storage = super.__getStoragePropUnsafe<Any>(value);
         if (storage === undefined) {
             return undefined;
         }
@@ -168,14 +168,14 @@ export class InteropStorageBase extends StorageBase {
             StateMgmtConsole.log('fail to find createStateVariable');
             return undefined;
         }
-        const state = storage! as StorageProperty<NullishType>;
+        const state = storage! as StorageProperty<Any>;
         if (state.getProxy() === undefined) {
-            const setSource = (value: NullishType): void => {
+            const setSource = (value: Any): void => {
                 state.set(value);
             };
             const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
-            const setProxyValue = (value: NullishType): void => {
+            const setProxyValue = (value: Any): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             };
             state.setProxyValue = setProxyValue;
