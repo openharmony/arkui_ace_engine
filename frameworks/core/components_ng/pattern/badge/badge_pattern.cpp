@@ -30,9 +30,16 @@ void BadgePattern::OnModifyDone()
         return;
     }
 
+    auto needCreateText = false;
     auto lastFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back());
-    CHECK_NULL_VOID(lastFrameNode);
-    if (lastFrameNode->GetId() != textNodeId_) {
+    if (lastFrameNode) {
+        needCreateText = lastFrameNode->GetId() != textNodeId_;
+    } else {
+        auto lastUINode = AceType::DynamicCast<UINode>(frameNode->GetChildren().back());
+        CHECK_NULL_VOID(lastUINode);
+        needCreateText = true;
+    }
+    if (needCreateText) {
         textNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
         lastFrameNode = FrameNode::GetOrCreateFrameNode(
             V2::TEXT_ETS_TAG, textNodeId_, []() { return AceType::MakeRefPtr<TextPattern>(); });

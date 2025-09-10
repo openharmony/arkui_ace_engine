@@ -38,6 +38,8 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 #undef private
 #undef protected
@@ -1242,6 +1244,58 @@ HWTEST_F(BadgeTestNg, UpdateBadgePatternTest009, TestSize.Level1)
     CalcDimension width2(BADGE_FONT_SIZE);
     pattern_->UpdateBorderWidth(width2, false);
     EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
+
+/**
+ * @tc.name: BadgePatternTest011
+ * @tc.desc: test badge pattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level0)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto ifNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto ifNode = IfElseNode::GetOrCreateIfElseNode(ifNodeId);
+    ASSERT_NE(ifNode, nullptr);
+    ifNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // update badge layoutProperty and go to different branch
+    layoutProperty_->UpdateBadgeValue("");
+    pattern_->OnModifyDone();
+
+    layoutProperty_->UpdateBadgeValue("test");
+    pattern_->OnModifyDone();
+
+    layoutProperty_->UpdateBadgeCount(1);
+    pattern_->OnModifyDone();
+
+    layoutProperty_->UpdateBadgeCount(100);
+    pattern_->OnModifyDone();
+
+    layoutProperty_->UpdateBadgeCount(-1);
+    pattern_->OnModifyDone();
+
+    layoutProperty_->UpdateBadgeCount(-0);
+    pattern_->OnModifyDone();
 }
 
 /**
