@@ -410,12 +410,16 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
 
 float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos)
 {
+    auto iter = itemPosition_.find(index);
+    if (iter == itemPosition_.end()) {
+        return prevPredictEndPos;
+    }
     float predictSnapEndPos = prevPredictEndPos;
     float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
-    float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos;
+    float itemHeight = iter->second.endPos - iter->second.startPos;
     float snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
-    float snapLow = itemPosition_[index].startPos + snapSize / FLOAT_TWO;
-    float snapHigh = itemPosition_[index].endPos - snapSize / FLOAT_TWO;
+    float snapLow = iter->second.startPos + snapSize / FLOAT_TWO;
+    float snapHigh = iter->second.endPos - snapSize / FLOAT_TWO;
     predictPos = LessNotEqual(predictPos, snapLow) ? snapLow : predictPos;
     predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
     predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;

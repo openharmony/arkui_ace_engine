@@ -216,10 +216,13 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             break;
         }
     }
-    if (cnt > 0) {
-        startPos = endPos - mainLen;
-        for (int32_t i = 0; i < cnt; i++) {
-            auto wrap = GetListItem(layoutWrapper, currentIndex + i);
+    if (cnt <= 0) {
+        return cnt;
+    }
+    startPos = endPos - mainLen;
+    for (int32_t i = 0; i < cnt; i++) {
+        auto wrap = GetListItem(layoutWrapper, currentIndex + i);
+        if (wrap) {
             int32_t id = wrap->GetHostNode()->GetId();
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }

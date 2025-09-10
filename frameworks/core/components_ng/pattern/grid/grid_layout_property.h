@@ -76,8 +76,7 @@ public:
     {
         bool columnsTemplateValid = propColumnsTemplate_.has_value() && !propColumnsTemplate_.value().empty();
         bool rowsTemplateValid = propRowsTemplate_.has_value() && !propRowsTemplate_.value().empty();
-        return columnsTemplateValid ||
-               (!columnsTemplateValid && !rowsTemplateValid);
+        return columnsTemplateValid || !rowsTemplateValid;
     }
 
     bool IsConfiguredScrollable() const

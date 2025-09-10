@@ -470,7 +470,7 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         return;
     }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
-    currentOffset_ = totalHeight + lines * regularHeight - targetContent;
+    currentOffset_ = totalHeight + static_cast<double>(regularHeight) * lines - targetContent;
     int32_t startIdx = lines * crossCount_ + lastIndex + 1;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
 }
@@ -971,6 +971,9 @@ std::pair<int32_t, float> GridLayoutInfo::FindItemCenter(int32_t startLine, int3
     while (it != lineHeightMap_.end() && LessNotEqual(len + it->second + mainGap, halfLen)) {
         len += it->second + mainGap;
         ++it;
+    }
+    if (it == lineHeightMap_.end()) {
+        return { startLine, halfLen - len };
     }
     return { it->first, halfLen - len };
 }

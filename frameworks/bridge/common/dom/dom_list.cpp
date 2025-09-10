@@ -384,8 +384,10 @@ void DOMList::CreateOrUpdateList()
     if (declaration_) {
         declaration_->SetPositionController(listComponent_->GetPositionController());
     }
-    listComponent_->GetPositionController()->SetInitialIndex(initialIndex_);
-    listComponent_->GetPositionController()->SetInitialOffset(initialOffset_);
+    if (listComponent_->GetPositionController()) {
+        listComponent_->GetPositionController()->SetInitialIndex(initialIndex_);
+        listComponent_->GetPositionController()->SetInitialOffset(initialOffset_);
+    }
 
     if (declaration_ && !GetRotateId().IsEmpty()) {
         listComponent_->SetOnRotateId(GetRotateId());

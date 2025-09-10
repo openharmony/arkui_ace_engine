@@ -254,6 +254,7 @@ void ClipContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     Converter::VisitUnion(*value,
         [frameNode](const Ark_ContentClipMode& arkMode) {
             auto mode = Converter::OptConvert<ContentClipMode>(arkMode);

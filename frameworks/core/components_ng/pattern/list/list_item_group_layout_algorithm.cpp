@@ -713,11 +713,14 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineCenter(LayoutWrapper* layoutWr
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
         cnt++;
     }
-    if (cnt > 0) {
-        auto startPos = (startPos_ + endPos_ - mainLen) / 2; // 2:average
-        auto endPos = startPos + mainLen; // 2:average
-        for (int32_t i = 0; i < cnt; i++) {
-            auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
+    if (cnt <= 0) {
+        return cnt;
+    }
+    auto startPos = (startPos_ + endPos_ - mainLen) / 2; // 2:average
+    auto endPos = startPos + mainLen; // 2:average
+    for (int32_t i = 0; i < cnt; i++) {
+        auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
+        if (wrapper) {
             int32_t id = wrapper->GetHostNode()->GetId();
             itemPosition_[currentIndex + i] = { id, startPos, endPos };
         }
@@ -748,10 +751,13 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineForward(LayoutWrapper* layoutW
         }
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
     }
-    if (cnt > 0) {
-        endPos = startPos + mainLen;
-        for (int32_t i = 0; i < cnt; i++) {
-            auto wrapper = GetListItem(layoutWrapper, currentIndex - i);
+    if (cnt <= 0) {
+        return cnt;
+    }
+    endPos = startPos + mainLen;
+    for (int32_t i = 0; i < cnt; i++) {
+        auto wrapper = GetListItem(layoutWrapper, currentIndex - i);
+        if (wrapper) {
             int32_t id = wrapper->GetHostNode()->GetId();
             itemPosition_[currentIndex - i] = { id, startPos, endPos };
         }
@@ -782,10 +788,13 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineBackward(LayoutWrapper* layout
             break;
         }
     }
-    if (cnt > 0) {
-        startPos = endPos - mainLen;
-        for (int32_t i = 0; i < cnt; i++) {
-            auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
+    if (cnt <= 0) {
+        return cnt;
+    }
+    startPos = endPos - mainLen;
+    for (int32_t i = 0; i < cnt; i++) {
+        auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
+        if (wrapper) {
             int32_t id = wrapper->GetHostNode()->GetId();
             itemPosition_[currentIndex + i] = { id, startPos, endPos };
         }

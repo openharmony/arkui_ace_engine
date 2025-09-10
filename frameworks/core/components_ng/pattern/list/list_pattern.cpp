@@ -2360,7 +2360,7 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     if (res.first >= 0) {
         auto iter = itemPos.lower_bound(res.first);
         // skip same line for lanes
-        if (iter->first == res.first && iter != itemPos.end()) {
+        if (iter != itemPos.end() && iter->first == res.first) {
             do {
                 startPos = iter->second.startPos;
                 iter++;
@@ -2535,7 +2535,7 @@ void ListPattern::SetChainAnimation()
     if (Negative(space)) {
         space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
     }
-    if (!chainAnimation_ || (chainAnimation_ && space != chainAnimation_->GetSpace())) {
+    if (!chainAnimation_ || space != chainAnimation_->GetSpace()) {
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
         if (chainAnimationOptions_.has_value()) {
@@ -2918,7 +2918,7 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         curFrameParentNode = AceType::DynamicCast<FrameNode>(curFrameParent);
     }
     CHECK_NULL_RETURN(curFrameParentNode, listItemGroupPara);
-    if (curFrameParent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+    if (curFrameParentNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
         auto itemGroupPattern = curFrameParentNode->GetPattern<ListItemGroupPattern>();
         CHECK_NULL_RETURN(itemGroupPattern, listItemGroupPara);
         listItemGroupPara.displayEndIndex = itemGroupPattern->GetDisplayEndIndexInGroup();
