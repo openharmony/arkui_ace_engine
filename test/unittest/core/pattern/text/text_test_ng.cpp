@@ -224,7 +224,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
 HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textModelNG and frameNode.
+     * @tc.steps: step1. create textModelNG and frameNode
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
