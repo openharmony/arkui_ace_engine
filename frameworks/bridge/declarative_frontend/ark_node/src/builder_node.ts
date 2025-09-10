@@ -56,6 +56,9 @@ class BuilderNode extends Disposable {
     return ret;
   }
   public dispose(): void {
+    if (this.isDisposed_) {
+      return;
+    }
     super.dispose();
     this._JSBuilderNode.dispose();
   }
