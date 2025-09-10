@@ -158,7 +158,7 @@ void SetDrawCallback(ani_env* env, ani_long ptr, void* fnDrawCallbackFun)
         return;
     }
     auto* drawCallbackFuncPtr =
-        static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawCallbackFun);
+        static_cast<std::function<void(NG::DrawingContext& drawingContext)>*>(fnDrawCallbackFun);
     auto* renderNodePeer = reinterpret_cast<RenderNodePeer*>(ptr);
     CHECK_NULL_VOID(renderNodePeer);
     auto renderNode = renderNodePeer->GetFrameNode();

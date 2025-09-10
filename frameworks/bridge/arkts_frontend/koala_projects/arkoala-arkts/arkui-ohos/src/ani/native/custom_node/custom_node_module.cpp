@@ -291,8 +291,10 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
         return nullptr;
     }
     ArkUINavDestinationInfo info;
-    info.uniqueId = -1;
-    modifier->getCustomNodeAniModifier()->queryNavDestinationInfo1(uniqueId, info);
+    bool isNull = !modifier->getCustomNodeAniModifier()->queryNavDestinationInfo1(uniqueId, info);
+    if (isNull) {
+        return nullptr;
+    }
     ani_object res = {};
     static const char* className = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
     ani_class cls;
@@ -332,8 +334,10 @@ ani_object QueryRouterPageInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_i
         return nullptr;
     }
     ArkUIRouterPageInfo info;
-    modifier->getCustomNodeAniModifier()->queryRouterPageInfo1(uniqueId, info);
-
+    bool isNull = !modifier->getCustomNodeAniModifier()->queryRouterPageInfo1(uniqueId, info);
+    if (isNull) {
+        return nullptr;
+    }
     ani_object res = {};
     static const char* className = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
     ani_class cls;
