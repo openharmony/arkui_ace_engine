@@ -295,6 +295,7 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor();
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
+const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor();
@@ -590,6 +591,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPinchRecognizerAccessor,
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
+        GetPromptActionExtenderAccessor,
         GetPulseSymbolEffectAccessor,
         GetRenderingContextSettingsAccessor,
         GetRenderServiceNodeAccessor,

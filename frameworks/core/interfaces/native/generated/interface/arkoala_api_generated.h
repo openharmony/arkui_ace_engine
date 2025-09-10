@@ -2162,6 +2162,8 @@ typedef struct TabBarSymbolPeer* Ark_TabBarSymbol;
 typedef struct Opt_TabBarSymbol Opt_TabBarSymbol;
 typedef struct Ark_TabContentAnimatedTransition Ark_TabContentAnimatedTransition;
 typedef struct Opt_TabContentAnimatedTransition Opt_TabContentAnimatedTransition;
+typedef struct Ark_TargetInfo Ark_TargetInfo;
+typedef struct Opt_TargetInfo Opt_TargetInfo;
 typedef struct Ark_TextClockOptions Ark_TextClockOptions;
 typedef struct Opt_TextClockOptions Opt_TextClockOptions;
 typedef struct Ark_TextContentControllerOptions Ark_TextContentControllerOptions;
@@ -2951,6 +2953,8 @@ typedef struct PinchGestureEventPeer* Ark_PinchGestureEvent;
 typedef struct Opt_PinchGestureEvent Opt_PinchGestureEvent;
 typedef struct Ark_PlaceholderStyle Ark_PlaceholderStyle;
 typedef struct Opt_PlaceholderStyle Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions Ark_PopupMessageOptions;
 typedef struct Opt_PopupMessageOptions Opt_PopupMessageOptions;
 typedef struct Ark_ResizableOptions Ark_ResizableOptions;
@@ -14168,6 +14172,15 @@ typedef struct Opt_TabContentAnimatedTransition {
     Ark_Tag tag;
     Ark_TabContentAnimatedTransition value;
 } Opt_TabContentAnimatedTransition;
+typedef struct Ark_TargetInfo {
+    /* kind: Interface */
+    Ark_Union_String_Number id;
+    Opt_Number componentId;
+} Ark_TargetInfo;
+typedef struct Opt_TargetInfo {
+    Ark_Tag tag;
+    Ark_TargetInfo value;
+} Opt_TargetInfo;
 typedef struct Ark_TextClockOptions {
     /* kind: Interface */
     Opt_Number timeZoneOffset;
@@ -18478,6 +18491,35 @@ typedef struct Opt_PlaceholderStyle {
     Ark_Tag tag;
     Ark_PlaceholderStyle value;
 } Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions {
+    /* kind: Interface */
+    Opt_Placement placement;
+    Opt_ResourceColor popupColor;
+    Opt_Boolean enableArrow;
+    Opt_Boolean autoCancel;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Length arrowOffset;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_Length targetSpace;
+    Opt_Position offset;
+    Opt_Dimension width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Dimension arrowWidth;
+    Opt_Dimension arrowHeight;
+    Opt_Dimension radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Boolean focusable;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+} Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions {
+    Ark_Tag tag;
+    Ark_PopupCommonOptions value;
+} Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions {
     /* kind: Interface */
     Opt_ResourceColor textColor;
@@ -24543,6 +24585,41 @@ typedef struct GENERATED_ArkUIProgressMaskAccessor {
                                      Ark_Boolean value);
 } GENERATED_ArkUIProgressMaskAccessor;
 
+typedef struct GENERATED_ArkUIPromptActionExtenderAccessor {
+    void (*openPopup)(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer content,
+                      const Ark_TargetInfo* target,
+                      const Opt_PopupCommonOptions* options,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*updatePopup)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Ark_PopupCommonOptions* options,
+                       const Opt_Boolean* partialUpdate,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*closePopup)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*openMenu)(Ark_VMContext vmContext,
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_NativePointer content,
+                     const Ark_TargetInfo* target,
+                     const Opt_MenuOptions* options,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*updateMenu)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Ark_MenuOptions* options,
+                       const Opt_Boolean* partialUpdate,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*closeMenu)(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer content,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+} GENERATED_ArkUIPromptActionExtenderAccessor;
+
 typedef struct GENERATED_ArkUIPulseSymbolEffectAccessor {
     void (*destroyPeer)(Ark_PulseSymbolEffect peer);
     Ark_PulseSymbolEffect (*construct)();
@@ -25781,6 +25858,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPinchRecognizerAccessor* (*getPinchRecognizerAccessor)();
     const GENERATED_ArkUIPixelMapMockAccessor* (*getPixelMapMockAccessor)();
     const GENERATED_ArkUIProgressMaskAccessor* (*getProgressMaskAccessor)();
+    const GENERATED_ArkUIPromptActionExtenderAccessor* (*getPromptActionExtenderAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUIRenderingContextSettingsAccessor* (*getRenderingContextSettingsAccessor)();
     const GENERATED_ArkUIRenderServiceNodeAccessor* (*getRenderServiceNodeAccessor)();

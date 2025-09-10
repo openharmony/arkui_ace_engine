@@ -35387,6 +35387,128 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ProgressMaskAccessor
+    namespace PromptActionExtenderAccessor {
+    void OpenPopupImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Ark_TargetInfo* target,
+                       const Opt_PopupCommonOptions* options,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("openPopup(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, target);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UpdatePopupImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Ark_PopupCommonOptions* options,
+                        const Opt_Boolean* partialUpdate,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("updatePopup(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, partialUpdate);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ClosePopupImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("closePopup(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer content,
+                      const Ark_TargetInfo* target,
+                      const Opt_MenuOptions* options,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("openMenu(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, target);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_NativePointer content,
+                        const Ark_MenuOptions* options,
+                        const Opt_Boolean* partialUpdate,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("updateMenu(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, partialUpdate);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_NativePointer content,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("closeMenu(");
+        WriteToString(&out, content);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // PromptActionExtenderAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -44252,6 +44374,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ProgressMaskPeer {
         virtual ~ProgressMaskPeer() = default;
     };
+    const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor()
+    {
+        static const GENERATED_ArkUIPromptActionExtenderAccessor PromptActionExtenderAccessorImpl {
+            PromptActionExtenderAccessor::OpenPopupImpl,
+            PromptActionExtenderAccessor::UpdatePopupImpl,
+            PromptActionExtenderAccessor::ClosePopupImpl,
+            PromptActionExtenderAccessor::OpenMenuImpl,
+            PromptActionExtenderAccessor::UpdateMenuImpl,
+            PromptActionExtenderAccessor::CloseMenuImpl,
+        };
+        return &PromptActionExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
@@ -45592,6 +45727,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPinchRecognizerAccessor,
             GetPixelMapMockAccessor,
             GetProgressMaskAccessor,
+            GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderServiceNodeAccessor,

@@ -4812,6 +4812,12 @@ export class ArkUIGeneratedNativeModule {
     native static _ProgressMask_updateColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ProgressMask_enableBreathingAnimation(ptr: KPointer, value: KInt): void
+    native static _PromptActionExtender_openPopup(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _PromptActionExtender_updatePopup(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _PromptActionExtender_closePopup(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _PromptActionExtender_openMenu(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _PromptActionExtender_updateMenu(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _PromptActionExtender_closeMenu(content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PulseSymbolEffect_construct(): KPointer
     @ani.unsafe.Direct
