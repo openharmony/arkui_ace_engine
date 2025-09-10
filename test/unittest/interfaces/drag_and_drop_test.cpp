@@ -1702,4 +1702,32 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0057, TestSize.Level1)
     ret = OH_ArkUI_EnableDropDisallowedBadge(uiContext, requestIdentify);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: DragAndDropTest0058
+ * @tc.desc: Test OH_ArkUI_DragEvent_SetData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create and set property.
+     */
+    ArkUIDragEvent dragEvent;
+    OH_UdmfData* data = OH_UdmfData_Create();
+    ASSERT_NE(data, nullptr);
+    dragEvent.unifiedData = data;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+ 
+    auto ret1 = OH_ArkUI_DragEvent_SetData(nullptr, data);
+    auto ret2 = OH_ArkUI_DragEvent_SetData(drag_Event, nullptr);
+    auto ret3 = OH_ArkUI_DragEvent_SetData(drag_Event, data);
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_UdmfData_Destroy(data);
+}
 } // namespace OHOS::Ace

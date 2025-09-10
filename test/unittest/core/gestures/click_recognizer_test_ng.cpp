@@ -2021,4 +2021,87 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Lev
     targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     clickRecognizer->TriggerGestureJudgeCallback();
 }
+
+/*
+ * @tc.name: ResetStatusInHandleOverdueDeadlineTest001
+ * @tc.desc: Test ResetStatusInHandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ResetStatusInHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer and SetResponseLinkRecognizers.
+     */
+    RefPtr<ClickRecognizer> triggerClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::list<RefPtr<NGGestureRecognizer>> responseLinkResult;
+    responseLinkResult.push_back(triggerClickRecognizer);
+    RefPtr<NGGestureRecognizer> targetPtr1 = nullptr;
+    responseLinkResult.push_back(targetPtr1);
+    RefPtr<NGGestureRecognizer> targetPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    responseLinkResult.push_back(targetPtr2);
+    triggerClickRecognizer->SetResponseLinkRecognizers(responseLinkResult);
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+ 
+    /**
+     * @tc.steps: step2. Do ResetStatusInHandleOverdueDeadline.
+     * @tc.expected: responseLinkRecognizer_ is empty().
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->eventManager_ = eventManager;
+    EXPECT_EQ(triggerClickRecognizer->responseLinkRecognizer_.size(), 3);
+    EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 3);
+ 
+    /**
+     * @tc.steps: step3. Do ResetStatusInHandleOverdueDeadline with not QueryAllDone.
+     * @tc.expected: responseLinkRecognizer_ is same as before.
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    ASSERT_NE(gestureScope, nullptr);
+    triggerClickRecognizer->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), triggerClickRecognizer);
+    ASSERT_NE(context->eventManager_, nullptr);
+    ASSERT_NE(context->eventManager_->refereeNG_, nullptr);
+    context->eventManager_->refereeNG_->gestureScopes_.insert(std::make_pair(0, gestureScope));
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+}
+
+/*
+ * @tc.name: SetDistanceThresholdTest001
+ * @tc.desc: Test SetDistanceThreshold
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, SetDistanceThresholdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT, 0);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+    double distanceThreshold = 1.0;
+    double unvailedDistanceThreshold = -1.0;
+ 
+    /**
+     * @tc.steps: step2. call IsPointInRegion function and compare result.
+     * @tc.steps: case1: distanceThreshold is 1.0.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.SetScreenX(DEFAULT_DOUBLE_100);
+    touchEvent.SetScreenY(DEFAULT_DOUBLE_100);
+    clickRecognizer->SetDistanceThreshold(distanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), distanceThreshold);
+    clickRecognizer->SetDistanceThreshold(distanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), distanceThreshold);
+    clickRecognizer->SetDistanceThreshold(std::numeric_limits<double>::infinity());
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(std::numeric_limits<double>::infinity());
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(unvailedDistanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+    clickRecognizer->SetDistanceThreshold(unvailedDistanceThreshold);
+    EXPECT_DOUBLE_EQ(clickRecognizer->GetDistanceThreshold(), std::numeric_limits<double>::infinity());
+}
 } // namespace OHOS::Ace::NG
