@@ -44,12 +44,10 @@ export class RenderNodeTransfer {
         if (borderColorVal) {
             rn.borderColor = borderColorVal as Edges<number>;
         }
-
         let borderRadiusVal = TransferUtil.getPropCornersNoExcept(inVal, 'borderRadiusValue');
         if (borderRadiusVal) {
             rn.borderRadius = borderRadiusVal as Corners<number>;
         }
-
         let maskVal = TransferUtil.getPropShapeMask(inVal, 'shapeMaskValue');
         if (maskVal) {
             rn.shapeMask = maskVal as ShapeMask;
@@ -165,7 +163,6 @@ export class RenderNodeTransfer {
     }
 
     private transferProperty2Dynamic(inRn: RenderNode, outJs: ESValue) {
-        console.log("testTag. 2D prop...");
         // [peer, type, nodePtrVal, nodeId, _nativeRef ] init on constructor, apiTargetVersion not need
         TransferUtil.setPropNumber('lengthMetricsUnitValue', inRn.lengthMetricsUnit, outJs);
 
