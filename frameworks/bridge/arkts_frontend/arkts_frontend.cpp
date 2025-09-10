@@ -348,7 +348,7 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("arkui.handwritten.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
