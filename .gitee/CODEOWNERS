@@ -3204,6 +3204,36 @@ frameworks/core/interfaces/native/implementation/web_resource_response_peer_impl
 frameworks/core/interfaces/native/implementation/webview_controller_accessor.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/web/webview_controller_peer_impl.h @arkwebinarkuireview
 
+[ArkTS static]
+frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/children_main_size_peer.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/flow_item_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/grid_item_ops_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/lazy_grid_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/lazyv_grid_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_scroller_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_scroller_peer_impl.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/refresh_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scroll_bar_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scroll_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scrollable_common_method_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scrollable_target_info_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scrollable_target_info_peer.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/scroller_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scroller_peer_impl.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/scroller_peer_impl.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_scroller_peer_impl.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_sections_accessor_peer_impl.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_sections_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/water_flow_scroller_peer_impl.h @arkuiscroll
+
 [Test source]
 test/mock/base @arkuiframework
 test/mock/core/event/ @arkuievent
@@ -3213,6 +3243,7 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/manager/mock_display_manager.cpp @arkuilayout
 test/mock/core/manager/mock_display_manager.h @arkuilayout
 test/mock/core/svg/ @arkui_image
+test/mock/core/pipeline/ @arkuiframework
 test/mock/interfaces/ @arkui_architecture
 
 test/mock/core/animation/mock_animation_manager.h @arkuiscroll

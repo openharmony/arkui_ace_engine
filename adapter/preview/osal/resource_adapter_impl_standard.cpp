@@ -205,9 +205,9 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
-    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),
-        resConfig->GetScreenDensity(), resConfig->GetDeviceType());
     if (resConfig != nullptr) {
+        LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),
+            resConfig->GetScreenDensity(), resConfig->GetDeviceType());
         resourceManager_->UpdateResConfig(*resConfig);
     }
 }

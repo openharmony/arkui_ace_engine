@@ -101,7 +101,6 @@ void ImageLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(frameNode->GetId());
     pipeline->AddWindowStateChangedCallback(frameNode->GetId());
     LayoutProperty::FromJson(json);
 }

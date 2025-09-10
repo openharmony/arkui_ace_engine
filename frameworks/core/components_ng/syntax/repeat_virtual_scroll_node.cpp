@@ -435,8 +435,8 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     for (const auto& [index, child] : children) {
         if (child) {
             const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
+            children_.emplace_back(child);
         }
-        children_.emplace_back(child);
     }
     return children_;
 }

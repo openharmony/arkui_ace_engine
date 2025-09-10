@@ -76,7 +76,7 @@ RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
     }
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {
-        ApplyTransform(out);
+        ApplyTransform(out, lengthRule);
     }
     return out;
 }

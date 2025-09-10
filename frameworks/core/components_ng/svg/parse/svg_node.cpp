@@ -518,14 +518,14 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
             AdjustContentAreaByViewBox(canvas, svgContext->GetViewPort());
         }
     }
-    if (!transform_.empty() || !animateTransform_.empty()) {
-        OnTransform(canvas, lengthRule);
-    }
     if (!hrefMaskId_.empty()) {
         OnMask(canvas, svgCoordinateSystemContext);
     }
     if (!hrefFilterId_.empty()) {
         OnFilter(canvas, svgCoordinateSystemContext);
+    }
+    if (!transform_.empty() || !animateTransform_.empty()) {
+        OnTransform(canvas, lengthRule);
     }
 
     OnDraw(canvas, lengthRule);

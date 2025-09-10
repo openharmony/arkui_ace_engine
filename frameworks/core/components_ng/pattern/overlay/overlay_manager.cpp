@@ -6983,9 +6983,15 @@ void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode
  * mouse, etc.
  * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
  */
-void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap)
+void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap,
+    const RefPtr<FrameNode>& hostNode)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->CheckNodeOnContainerModalTitle(hostNode)) {
+        rootNode = pipeline->GetContainerModalNode();
+    }
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();

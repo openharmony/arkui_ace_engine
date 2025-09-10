@@ -415,7 +415,8 @@ public:
     void MountPixelMapToWindowScene(
         const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
     void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap = false);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap = false,
+        const RefPtr<FrameNode>& hostNode = nullptr);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);

@@ -5147,4 +5147,45 @@ HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest004, TestS
     EXPECT_NE(result.radiusBottomLeft, defaultRadius.radiusBottomLeft);
     EXPECT_NE(result.radiusBottomRight, defaultRadius.radiusBottomRight);
 }
+
+/**
+ * @tc.name: MountPixelMapToRootNode
+ * @tc.desc: Test MountPixelMapToRootNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MountPixelMapToRootNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rootNode and overlay
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetupRootElement();
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    auto overlayManage = pipeline->overlayManager_;
+    ASSERT_NE(overlayManage, nullptr);
+
+    /**
+     * @tc.steps: step2. call MountPixelMapToRootNode when hostNode is nullptr.
+     * @tc.expected: column->GetParent() is pipeline->rootNode_
+     */
+    auto column =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    overlayManage->MountPixelMapToRootNode(column, false, nullptr);
+    EXPECT_EQ(column->GetParent(), pipeline->rootNode_);
+
+    /**
+     * @tc.steps: step3. call MountPixelMapToRootNode when hostNode is node and parent is toolbarItem.
+     * @tc.expected: column1->GetParent() is ContainerModalNode
+     */
+    auto column1 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto toolbarItem = FrameNode::GetOrCreateFrameNode(
+        V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    toolbarItem->AddChild(hostNode);
+    overlayManage->MountPixelMapToRootNode(column1, false, hostNode);
+    EXPECT_EQ(column1->GetParent(), pipeline->GetContainerModalNode());
+}
 }

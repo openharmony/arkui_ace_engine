@@ -860,4 +860,156 @@ HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest008, TestSize.Level1)
      */
     ASSERT_EQ(stageManager->GetLastPage(), secondNode);
 }
+
+/**
+ * @tc.name: ParallelStageManagerTest009
+ * @tc.desc: Testing OnWindowStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParallelStageManager and some ParallelPagePattern.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    const auto& children = stageNode->GetChildren();
+    auto pipeline = stageNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    auto firstNode = CreatePage();
+
+    /**
+     * @tc.steps: step2. Call OnWindowStateChange with true and false.
+     */
+    stageManager->OnWindowStateChange(false);
+    stageManager->OnWindowStateChange(true);
+    auto lastPage = stageManager->GetLastPage();
+    ASSERT_EQ(lastPage, nullptr);
+
+    /**
+     * @tc.steps: step3. Push firstPage, Call OnWindowStateChange with true and false.
+     */
+    ASSERT_TRUE(stageManager->PushPage(firstNode));
+    ASSERT_EQ(children.size(), 1);
+
+    stageManager->OnWindowStateChange(false);
+    stageManager->OnWindowStateChange(true);
+    lastPage = stageManager->GetLastPage();
+    ASSERT_NE(lastPage, nullptr);
+}
+
+/**
+ * @tc.name: ParallelStageManagerTest010
+ * @tc.desc: Testing FirePageHideOnPopPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParallelStageManager and some ParallelPagePattern.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto pipeline = stageNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto firstNode = CreatePage();
+    auto secondNode = CreatePage();
+    auto thirdNode = CreatePage();
+    auto hideTransitionType = PageTransitionType::NONE;
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    RefPtr<ParallelPagePattern> pagePattern = nullptr;
+
+    /**
+     * @tc.steps: step2. Call FirePageHideOnPopPage with different types.
+     */
+    bool res = stageManager->FirePageHideOnPopPage(firstNode, secondNode, thirdNode, pagePattern, hideTransitionType);
+    ASSERT_EQ(res, true);
+    hideTransitionType = PageTransitionType::ENTER;
+    res = stageManager->FirePageHideOnPopPage(firstNode, secondNode, thirdNode, pagePattern, hideTransitionType);
+    ASSERT_EQ(res, true);
+    hideTransitionType = PageTransitionType::EXIT;
+    res = stageManager->FirePageHideOnPopPage(firstNode, secondNode, thirdNode, pagePattern, hideTransitionType);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: ParallelStageManagerTest011
+ * @tc.desc: Testing PopPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopPage and some ParallelPagePattern.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto pipeline = stageNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    const auto& children = stageNode->GetChildren();
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    auto firstNode = CreatePage();
+    auto secondNode = CreatePage();
+
+    /**
+     * @tc.steps: step2. Call PopPage with different parameters.
+     */
+    bool res = stageManager->PopPage(firstNode, false, false);
+    ASSERT_EQ(res, false);
+
+    ASSERT_TRUE(stageManager->PushPage(firstNode));
+    ASSERT_TRUE(stageManager->PushPage(secondNode));
+    ASSERT_EQ(children.size(), 2);
+
+    res = stageManager->PopPage(firstNode, true, true);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: ParallelStageManagerTest012
+ * @tc.desc: Testing PopPageInSplitMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopPageInSplitMode and some ParallelPagePattern.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    auto firstNode = CreatePage();
+    auto secondNode = CreatePage();
+
+    /**
+     * @tc.steps: step2. Call PopPageInSplitMode with different parameters.
+     */
+    bool res = stageManager->PopPageInSplitMode(false, false);
+    ASSERT_EQ(res, false);
+
+    ASSERT_TRUE(stageManager->PushPage(firstNode));
+    ASSERT_TRUE(stageManager->PushPage(secondNode));
+    const auto& children = stageNode->GetChildren();
+    ASSERT_EQ(children.size(), 2);
+
+    res = stageManager->PopPageInSplitMode(true, true);
+    ASSERT_EQ(res, true);
+}
 } // namespace OHOS::Ace::NG

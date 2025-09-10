@@ -112,6 +112,7 @@ constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+constexpr uint32_t TIMEOUT_SECONDS = 5;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -9169,6 +9170,76 @@ void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetForceEnableZoom(isEnabled);
+}
+
+void WebDelegate::OnExtensionDisconnect(int32_t connectId)
+{
+    auto context = context_.Upgrade();
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), connectId]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto disConnectCallback = webPattern->GetWebNativeMessageDisConnectCallback();
+            CHECK_NULL_VOID(disConnectCallback);
+            disConnectCallback(std::make_shared<WebNativeMessageEvent>(connectId));
+        },
+        "ArkUIWebExtensionDisconnect");
+}
+
+std::string WebDelegate::OnWebNativeMessage(std::shared_ptr<OHOS::NWeb::NWebRuntimeConnectInfo> info,
+    std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> callback)
+{
+    if (!callback) {
+        return std::string("error:-1");
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, std::string("error:-1"));
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(pipelineContext, std::string("error:-1"));
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool isCallbackDone = false;
+    std::string callbackResult;
+    bool isTimeout = false;
+    constexpr auto timeout = std::chrono::seconds(TIMEOUT_SECONDS);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), info, callback, &mtx, &cv, &isCallbackDone, &callbackResult, &isTimeout]() {
+             auto setResultAndNotify = [&](const std::string& result = "") {
+                std::unique_lock<std::mutex> lock(mtx);
+                if (!isTimeout) {
+                    callbackResult = result;
+                    isCallbackDone = true;
+                }
+                cv.notify_one();
+            };
+            auto delegate = weak.Upgrade();
+            if (!delegate) return setResultAndNotify();
+            auto webPattern = delegate->webPattern_.Upgrade();
+            if (!webPattern) return setResultAndNotify();
+            auto webNativeMessageCallback = webPattern->GetWebNativeMessageConnectCallback();
+            if (!webNativeMessageCallback) return setResultAndNotify();
+            auto wrappedCallback = AceType::MakeRefPtr<WebNativeMessageCallbackOhos>(callback);
+            wrappedCallback->SetCompletionHandler([&](const std::string &result) { setResultAndNotify(result); });
+            webNativeMessageCallback(std::make_shared<WebNativeMessageEvent>(info->GetBundleName(),
+                info->GetExtensionOrigin(),
+                info->GetMessageReadPipe(),
+                info->GetMessageWritePipe(),
+                wrappedCallback));
+        }, "ArkUIWebNativeMessage");
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        if (!cv.wait_for(lock, timeout, [&]() { return isCallbackDone; })) {
+            isTimeout = true;
+            callbackResult = "error:4201";
+            return callbackResult;
+        }
+    }
+    return callbackResult;
 }
 
 void WebDelegate::SetImeShow(bool visible)
