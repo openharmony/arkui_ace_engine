@@ -165,6 +165,30 @@ HWTEST_F(RepeatVirtual2TestNg, GetChildren001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetChildren002
+ * @tc.desc: Test node.GetChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, GetChildren002, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->caches_.l1Rid4Index_ = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 4}
+    };
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2003, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    CacheItem cacheItem2 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    cacheItem2->node_ = nullptr;
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem }, { 2, cacheItem }, { 3, cacheItem }, { 4, cacheItem2 }
+    };
+    EXPECT_EQ(repeatNode->GetChildren().size(), 3);
+    repeatNode->caches_.moveFromTo_ = {0, 1};
+    repeatNode->children_.clear();
+    EXPECT_EQ(repeatNode->GetChildren().size(), 3);
+}
+
+/**
  * @tc.name: GetFrameChild001
  * @tc.desc: Test caches.GetFrameChild
  * @tc.type: FUNC
