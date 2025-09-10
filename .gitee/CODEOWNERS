@@ -3213,6 +3213,7 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/manager/mock_display_manager.cpp @arkuilayout
 test/mock/core/manager/mock_display_manager.h @arkuilayout
 test/mock/core/svg/ @arkui_image
+test/mock/core/pipeline/ @arkuiframework
 test/mock/interfaces/ @arkui_architecture
 
 test/mock/core/animation/mock_animation_manager.h @arkuiscroll
