@@ -1745,6 +1745,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage063, TestSi
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
+
     container->isSceneBoardWindow_ = true;
     dragDropManager->OnDragMove(point, EXTRA_INFO, frameNode);
     dragDropManager->isDragged_ = true;
