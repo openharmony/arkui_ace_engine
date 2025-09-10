@@ -289,7 +289,7 @@ struct struct_02_TextSample_04_lineSpacingOnlyBetweenLines {
                 size: 12,
                 weight: FontWeight.Bolder,
                 style: FontStyle.Italic,
-                family: 'HarmonyOS Sans'
+                family: 'Noto Sans Regular'
               })
             Span('I am Overline-DASHED-span')
               .decoration({ type: TextDecorationType.Overline, color: Color.Red, style: TextDecorationStyle.DASHED })
@@ -313,7 +313,7 @@ struct struct_02_TextSample_04_lineSpacingOnlyBetweenLines {
                 size: 12,
                 weight: FontWeight.Bolder,
                 style: FontStyle.Italic,
-                family: 'HarmonyOS Sans'
+                family: 'Noto Sans Regular'
               })
             Span('I am Overline-DASHED-span')
               .decoration({ type: TextDecorationType.Overline, color: Color.Red, style: TextDecorationStyle.DASHED })
