@@ -654,6 +654,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
+    imageDfxConfig_.SetAutoResize(autoResize);
 
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
