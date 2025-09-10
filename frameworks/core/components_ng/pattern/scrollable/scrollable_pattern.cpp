@@ -2746,13 +2746,7 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return true;
     }
-    OnScrollEnd();
-    auto parent = GetNestedScrollParent();
-    auto nestedScroll = GetNestedScroll();
-    if (!result && parent && nestedScroll.NeedParent()) {
-        result = parent->HandleScrollVelocity(velocity, Claim(this));
-    }
-    return result;
+    return false;
 }
 
 bool ScrollablePattern::CanSpringOverScroll() const
@@ -2787,10 +2781,10 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return false;
     }
-    if (parent && InstanceOf<ScrollablePattern>(parent)) {
-        // Components that are not ScrollablePattern do not implement NestedScrollOutOfBoundary and
-        // handleScroll is handled differently, so isolate the implementation of handleOverScroll
-        return HandleScrollableOverScroll(velocity);
+    if (InstanceOf<ScrollablePattern>(parent) && HandleScrollableOverScroll(velocity)) {
+        // Triggers ancestor spring animation that out of boundary, and after ancestor returns to the boundary,
+        // triggers child RemainVelocityToChild
+        return true;
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll.forward == NestedScrollMode::SELF_FIRST)) ||
