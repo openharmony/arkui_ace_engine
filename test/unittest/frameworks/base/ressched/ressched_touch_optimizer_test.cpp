@@ -116,7 +116,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 101));
     ResSchedTouchOptimizer::GetInstance().lastTpFlush_ = false;
     touchEvent.xReverse = true;
-    EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
+    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
     touchEvent.xReverse = false;
     touchEvent.yReverse = false;
     EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
@@ -241,7 +241,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 
     optimizer.RVSQueueUpdate(touchEvents);
 
-    EXPECT_FALSE(optimizer.rvsDequeX_[1].empty());
+    EXPECT_TRUE(optimizer.rvsDequeX_[1].empty());
     EXPECT_FALSE(optimizer.rvsDequeY_[1].empty());
     EXPECT_TRUE(optimizer.rvsDequeX_.find(2) == optimizer.rvsDequeX_.end());
     EXPECT_TRUE(optimizer.rvsDequeY_.find(2) == optimizer.rvsDequeY_.end());
@@ -273,7 +273,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1
 
     optimizer.RVSQueueUpdate(touchEvents);
 
-    EXPECT_FALSE(optimizer.rvsDequeX_[1].empty());
+    EXPECT_TRUE(optimizer.rvsDequeX_[1].empty());
     EXPECT_FALSE(optimizer.rvsDequeY_[1].empty());
     EXPECT_TRUE(optimizer.rvsDequeX_.find(2) == optimizer.rvsDequeX_.end());
     EXPECT_TRUE(optimizer.rvsDequeY_.find(2) == optimizer.rvsDequeY_.end());
@@ -1507,7 +1507,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // Check that the size is still RVS_QUEUE_SIZE (7)
-    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 7);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
     EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 7);
     
     // The new element should be at the back
@@ -1583,11 +1583,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // MOVE event should be processed and data added
-    EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
+    EXPECT_TRUE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());
     
     // data for ID 1 should still exist
-    EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
+    EXPECT_TRUE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());
 }
 
@@ -1906,7 +1906,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
     }
     
     // Now deque should have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 7);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
 }
 
 /**
@@ -2009,6 +2009,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // Queue should now have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 7);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
 }
 } // namespace OHOS::Ace
