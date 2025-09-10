@@ -37,40 +37,23 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
-export class LevelOrderInternal {
-    public static fromPtr(ptr: KPointer): LevelOrder {
-        return new LevelOrder(ptr)
-    }
-}
-export class LevelOrder implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr?: KPointer) {
-        if(!peerPtr) {
-            peerPtr = LevelOrder.construct()
-        }
-        this.peer = new Finalizable(peerPtr!, LevelOrder.getFinalizer())
-    }
-    static construct(): KPointer {
-        throw new Error("No impl");
-    }
-    static getFinalizer(): KPointer {
-        throw new Error("No impl");
-    }
+export class LevelOrder {
+    private order_: number = 0.0;
+    private static ORDER_MIN: number = -100000.0;
+    private static ORDER_MAX: number = 100000.0;
+    constructor() {}
     public static clamp(order: number): LevelOrder {
-        const order_casted = order as (number)
-        return LevelOrder.clamp_serialize(order_casted)
+        let levelOrderImpl = new LevelOrder();
+        levelOrderImpl.setOrder(order);
+        return levelOrderImpl;
     }
     public getOrder(): number {
-        return this.getOrder_serialize()
+        return this.order_;
     }
-    private static clamp_serialize(order: number): LevelOrder {
-        throw new Error("No impl");
-    }
-    private getOrder_serialize(): number {
-        throw new Error("No impl");
+
+    private setOrder(order: number): void {
+        this.order_ = order < LevelOrder.ORDER_MIN ?
+            LevelOrder.ORDER_MIN : (order > LevelOrder.ORDER_MAX ? LevelOrder.ORDER_MAX : order);
     }
 }
 
