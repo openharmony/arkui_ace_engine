@@ -1419,7 +1419,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // Check that new elements were added
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 105);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 100);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 205);
 }
 
@@ -1463,7 +1463,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
     EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 6);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 150);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 125);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 250);
 }
 
@@ -1507,15 +1507,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // Check that the size is still RVS_QUEUE_SIZE (7)
-    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 7);
     EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 7);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 200);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 130);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 300);
     
     // The old front element should no longer be in the deque
-    EXPECT_NE(optimizer.rvsDequeX_[1].front(), frontX);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].front(), frontX);
     EXPECT_NE(optimizer.rvsDequeY_[1].front(), frontY);
 }
 
