@@ -14,8 +14,8 @@
  */
 
 import { ArkBaseNode } from "./ArkBaseNode";
-import { ListItemGroupAttribute, ArkListItemGroupPeer, ListItemGroupOptions, ListDividerOptions, ChildrenMainSize } from "../framework";
-// import { hookListItemGroupNodeChildrenMainSizeImpl } from "../../handwritten"
+import { ListItemGroupAttribute, ArkListItemGroupPeer, ListItemGroupOptions, ListDividerOptions,
+    ChildrenMainSize } from "../framework";
 export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -46,7 +46,7 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
         const value_casted = value as (ChildrenMainSize | undefined)
-        // hookListItemGroupNodeChildrenMainSizeImpl(this, value_casted);
+        this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
         return this
     }
 }

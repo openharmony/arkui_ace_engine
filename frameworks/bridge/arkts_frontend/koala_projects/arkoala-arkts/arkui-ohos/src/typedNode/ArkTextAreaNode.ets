@@ -339,9 +339,4 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    _onChangeEvent_text(callback: (text: ResourceStr) => void): void {
-        // this.getPeer()._onChangeEvent_textAttribute(callback);
-        this.markDirty();
-        return;
-    }
 }

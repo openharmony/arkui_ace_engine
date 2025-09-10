@@ -25,7 +25,6 @@ import { ArkSwiperPeer, SwiperController, SwiperAttribute, AutoPlayOptions, DotI
     SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback,
     ArrowStyle, SwiperAutoFill
 } from "../framework";
-// import { SwiperOpsHandWritten } from "../../handwritten"
 export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
 
     constructParam(...param: Object[]): this {
@@ -59,8 +58,6 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
             this.getPeer()?.setIndexAttribute(value_casted)
             return this
         }
-        // SwiperOpsHandWritten.hookSwiperAttributeIndexImpl(this.getPeer().peer.ptr,
-        //     (value as Bindable<number>));
         return this
     }
     autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
@@ -208,10 +205,5 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
         const ignoreBlank_casted = ignoreBlank as (boolean)
         this.getPeer()?.setNextMarginAttribute(value_casted, ignoreBlank_casted)
         return this
-    }
-    _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void {
-        const callback_casted = callback as (((selected: number | undefined) => void))
-        // this.getPeer()?._onChangeEvent_indexAttribute(callback_casted)
-        return
     }
 }

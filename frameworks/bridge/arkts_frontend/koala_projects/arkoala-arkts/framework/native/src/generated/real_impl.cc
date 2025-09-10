@@ -12380,164 +12380,153 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // FocusControllerAccessor
     namespace FrameNodeExtenderAccessor {
-    void DestroyPeerImpl(Ark_FrameNodeExtender peer)
-    {
-        auto peerImpl = reinterpret_cast<FrameNodeExtenderPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_FrameNodeExtender ConstructImpl()
+    Ark_FrameNode ConstructorFrameNodeImpl()
     {
         return {};
     }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    Ark_Boolean IsModifiableImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    void AppendChildImpl(Ark_FrameNodeExtender peer,
-                         Ark_FrameNode node)
+    void AppendChildImpl(Ark_FrameNode peer,
+                         Ark_FrameNode child)
     {
     }
-    void InsertChildAfterImpl(Ark_FrameNodeExtender peer,
+    void InsertChildAfterImpl(Ark_FrameNode peer,
                               Ark_FrameNode child,
                               Ark_FrameNode sibling)
     {
     }
-    void RemoveChildImpl(Ark_FrameNodeExtender peer,
-                         Ark_FrameNode node)
+    void RemoveChildImpl(Ark_FrameNode peer,
+                         Ark_FrameNode child)
     {
     }
-    void ClearChildrenImpl(Ark_FrameNodeExtender peer)
+    void ClearChildrenImpl(Ark_FrameNode peer)
     {
     }
-    Ark_FrameNode GetChildImpl(Ark_FrameNodeExtender peer,
+    Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
                                const Ark_Number* index,
                                const Ark_Number* expandMode)
     {
         return {};
     }
-    Ark_FrameNode GetFirstChildImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_FrameNode GetNextSiblingImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_FrameNode GetParentImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Int32 GetChildrenCountImpl(Ark_FrameNodeExtender peer)
+    Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    void DisposeImpl(Ark_FrameNodeExtender peer)
+    void DisposeImpl(Ark_FrameNode peer)
     {
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNodeExtender peer)
-    {
-        return {};
-    }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Size GetMeasuredSizeImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNodeExtender peer)
+    Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_String GetIdImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Number GetUniqueIdImpl(Ark_FrameNodeExtender peer)
+    Ark_String GetIdImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_String GetNodeTypeImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Number GetOpacityImpl(Ark_FrameNodeExtender peer)
+    Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Boolean IsVisibleImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetOpacityImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Boolean IsClipToFrameImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Boolean IsAttachedImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsClipToFrameImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Object GetInspectorInfoImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    void InvalidateImpl(Ark_FrameNodeExtender peer)
+    Ark_Object GetInspectorInfoImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    void InvalidateImpl(Ark_FrameNode peer)
     {
     }
-    void DisposeTreeImpl(Ark_FrameNodeExtender peer)
+    void DisposeTreeImpl(Ark_FrameNode peer)
     {
     }
-    void SetCrossLanguageOptionsImpl(Ark_FrameNodeExtender peer,
+    void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                      const Ark_CrossLanguageOptions* options)
     {
     }
-    Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNodeExtender peer)
+    Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    void SetMeasuredSizeImpl(Ark_FrameNodeExtender peer,
+    void SetMeasuredSizeImpl(Ark_FrameNode peer,
                              const Ark_Size* size)
     {
     }
-    void SetLayoutPositionImpl(Ark_FrameNodeExtender peer,
+    void SetLayoutPositionImpl(Ark_FrameNode peer,
                                const Ark_Position* position)
     {
     }
-    void MeasureImpl(Ark_FrameNodeExtender peer,
+    void MeasureImpl(Ark_FrameNode peer,
                      const Ark_LayoutConstraint* constraint)
     {
     }
-    void LayoutImpl(Ark_FrameNodeExtender peer,
+    void LayoutImpl(Ark_FrameNode peer,
                     const Ark_Position* position)
     {
     }
-    void SetNeedsLayoutImpl(Ark_FrameNodeExtender peer)
+    void SetNeedsLayoutImpl(Ark_FrameNode peer)
     {
     }
-    Ark_Position GetPositionToScreenImpl(Ark_FrameNodeExtender peer)
-    {
-        return {};
-    }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -12545,21 +12534,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNodeExtender peer,
-                                    Ark_FrameNode node)
+    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode node)
     {
         return {};
     }
-    void MoveToImpl(Ark_FrameNodeExtender peer,
+    void MoveToImpl(Ark_FrameNode peer,
                     Ark_FrameNode targetParent,
                     const Ark_Number* index)
     {
     }
-    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -12575,10 +12563,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void ReuseImpl(Ark_FrameNodeExtender peer)
+    void ReuseImpl(Ark_FrameNode peer)
     {
     }
-    void RecycleImpl(Ark_FrameNodeExtender peer)
+    void RecycleImpl(Ark_FrameNode peer)
     {
     }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
@@ -12589,17 +12577,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNodeExtender peer,
+    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
                                          Ark_FrameNode pointer)
     {
         return {};
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNodeExtender peer,
+    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
                                    Ark_NativePointer pointer)
     {
         return {};
     }
-    Ark_NativePointer GetCommonEventImpl(Ark_FrameNodeExtender peer)
+    Ark_NativePointer GetCommonEventImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -18556,9 +18544,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
     {
         static const GENERATED_ArkUIFrameNodeExtenderAccessor FrameNodeExtenderAccessorImpl {
-            FrameNodeExtenderAccessor::DestroyPeerImpl,
-            FrameNodeExtenderAccessor::ConstructImpl,
-            FrameNodeExtenderAccessor::GetFinalizerImpl,
+            FrameNodeExtenderAccessor::ConstructorFrameNodeImpl,
             FrameNodeExtenderAccessor::IsModifiableImpl,
             FrameNodeExtenderAccessor::AppendChildImpl,
             FrameNodeExtenderAccessor::InsertChildAfterImpl,
@@ -18615,9 +18601,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &FrameNodeExtenderAccessorImpl;
     }
 
-    struct FrameNodeExtenderPeer {
-        virtual ~FrameNodeExtenderPeer() = default;
-    };
     const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
     {
         static const GENERATED_ArkUIFrictionMotionAccessor FrictionMotionAccessorImpl {

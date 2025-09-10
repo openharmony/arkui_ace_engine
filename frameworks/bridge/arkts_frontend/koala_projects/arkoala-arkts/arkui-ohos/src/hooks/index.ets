@@ -63,6 +63,8 @@ import { ArkTextClockComponent, TextClockConfiguration } from "#generated";
 import { ArkTextTimerComponent, TextTimerConfiguration } from "#generated";
 import { ArkToggleComponent, ToggleConfiguration, ContentModifier, GestureModifier } from "#generated";
 import { pointer } from "@koalaui/interop";
+import { ArkUIAniModule } from "arkui.ani"
+import { InteropNativeModule } from "@koalaui/interop"
 
 export function hookCheckBoxContentModifier(
   receiver: ArkCheckboxComponent,
@@ -109,7 +111,35 @@ export function hookStateStyleImpl(
   value: StateStyles | undefined
 ) {}
 
-export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name: string, value: CustomProperty): void {}
+export class ElementIdToCustomProperties {
+    constructor() { }
+    static instance_: ElementIdToCustomProperties = new ElementIdToCustomProperties();
+    static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
+}
+export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name: string, value: CustomProperty): void {
+    const nodeId = component.getPeer().getId();
+    if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+        ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
+    }
+    const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+    if (customProperties) {
+        customProperties.set(name, value);
+    }
+    const removeCallback: () => void = () => {
+        ElementIdToCustomProperties._elementIdToCustomProperties.delete(nodeId);
+    };
+    const getCallback: (name: string) => string | undefined = (name: string) => {
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            const customPropertiesGet = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (customPropertiesGet) {
+                const propertyValue = customPropertiesGet.get(name);
+                return propertyValue !== undefined ? JSON.stringify(propertyValue) : undefined;
+            }
+        }
+        return undefined;
+    };
+    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback);
+}
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";

@@ -7813,9 +7813,11 @@ export interface CommonMethod {
     overload accessibilityGroup { accessibilityGroupWithValue, accessibilityGroupWithConfig }
     overload accessibilityText { accessibilityTextOfStringType, accessibilityTextOfResourceType }
     overload accessibilityDescription { accessibilityDescriptionOfStringType, accessibilityDescriptionOfResourceType }
-    attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
+    // instructive change begin
+    // attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
+    //     throw new Error("Unimplemented method attributeModifier")
+    // }
+    // instructive change end
     applyAttributesFinish(): void {}
 }
 export class ArkCommonMethodStyle implements CommonMethod {

@@ -65,9 +65,11 @@ import { ArkToggleComponent, ToggleConfiguration } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { Scene } from "graphics3d.Scene"
 import { Animation, Environment } from "graphics3d.SceneResources"
-import { UIContextUtil } from "arkui/base/UIContextUtil";
-import { UIContextImpl } from "arkui/base/UIContextImpl";
-import { int32 } from "@koalaui/common";
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
+import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { int32 } from '@koalaui/common';
+import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
+import { toPeerPtr } from '@koalaui/interop';
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -110,11 +112,14 @@ export namespace extractors {
   }
 
   export function toFrameNodePtr(value: FrameNode): KPointer {
-    return 123;
+    return toPeerPtr(value);
   }
   export function fromFrameNodePtr(ptr: KPointer): FrameNode {
-    const x: Object = {};
-    return x as FrameNode;
+    let node = FrameNodeUtils.searchNodeInRegisterProxy(ptr);
+    if (!node) {
+        node = FrameNodeInternal.fromPtr(ptr);
+    }
+    return node as FrameNode;
   }
 
   // should be investigated and removed

@@ -371,9 +371,6 @@ typedef struct Opt_Float32 Opt_Float32;
 typedef struct Opt_Float64 Opt_Float64;
 typedef struct Ark_FormSize Ark_FormSize;
 typedef struct Opt_FormSize Opt_FormSize;
-typedef struct FrameNodeExtenderPeer FrameNodeExtenderPeer;
-typedef struct FrameNodeExtenderPeer* Ark_FrameNodeExtender;
-typedef struct Opt_FrameNodeExtender Opt_FrameNodeExtender;
 typedef struct FrictionMotionPeer FrictionMotionPeer;
 typedef struct FrictionMotionPeer* Ark_FrictionMotion;
 typedef struct Opt_FrictionMotion Opt_FrictionMotion;
@@ -6827,10 +6824,6 @@ typedef struct Opt_FormSize {
     Ark_Tag tag;
     Ark_FormSize value;
 } Opt_FormSize;
-typedef struct Opt_FrameNodeExtender {
-    Ark_Tag tag;
-    Ark_FrameNodeExtender value;
-} Opt_FrameNodeExtender;
 typedef struct Opt_FrictionMotion {
     Ark_Tag tag;
     Ark_FrictionMotion value;
@@ -23559,77 +23552,76 @@ typedef struct GENERATED_ArkUIFocusControllerAccessor {
 } GENERATED_ArkUIFocusControllerAccessor;
 
 typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
-    void (*destroyPeer)(Ark_FrameNodeExtender peer);
-    Ark_FrameNodeExtender (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_Boolean (*isModifiable)(Ark_FrameNodeExtender peer);
-    void (*appendChild)(Ark_FrameNodeExtender peer,
-                        Ark_FrameNode node);
-    void (*insertChildAfter)(Ark_FrameNodeExtender peer,
-                             Ark_FrameNode child,
-                             Ark_FrameNode sibling);
-    void (*removeChild)(Ark_FrameNodeExtender peer,
-                        Ark_FrameNode node);
-    void (*clearChildren)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getChild)(Ark_FrameNodeExtender peer,
+    Ark_NativePointer (*constructorFrameNode)();
+    Ark_NativePointer (*getDestroy)();
+    void (*destroyPeer)(Ark_FrameNode peer);
+    Ark_Boolean (*isModifiable)(Ark_NativePointer peer);
+    void (*appendChild)(Ark_FrameNode peer,
+                        Ark_FrameNode child);
+    void (*insertChildAfter)(Ark_NativePointer peer,
+                             Ark_NativePointer child,
+                             Ark_NativePointer sibling);
+    void (*removeChild)(Ark_FrameNode peer,
+                        Ark_FrameNode child);
+    void (*clearChildren)(Ark_FrameNode peer);
+    Ark_NativePointer (*getChild)(Ark_FrameNode peer,
                               const Ark_Number* index,
                               const Ark_Number* expandMode);
-    Ark_FrameNode (*getFirstChild)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getNextSibling)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getPreviousSibling)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getParent)(Ark_FrameNodeExtender peer);
-    Ark_Int32 (*getChildrenCount)(Ark_FrameNodeExtender peer);
-    void (*dispose)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToWindow)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToParent)(Ark_FrameNodeExtender peer);
-    Ark_Size (*getMeasuredSize)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getLayoutPosition)(Ark_FrameNodeExtender peer);
-    Ark_String (*getId)(Ark_FrameNodeExtender peer);
-    Ark_Number (*getUniqueId)(Ark_FrameNodeExtender peer);
-    Ark_String (*getNodeType)(Ark_FrameNodeExtender peer);
-    Ark_Number (*getOpacity)(Ark_FrameNodeExtender peer);
-    Ark_Boolean (*isVisible)(Ark_FrameNodeExtender peer);
-    Ark_Boolean (*isClipToFrame)(Ark_FrameNodeExtender peer);
-    Ark_Boolean (*isAttached)(Ark_FrameNodeExtender peer);
-    Ark_Object (*getInspectorInfo)(Ark_FrameNodeExtender peer);
-    void (*invalidate)(Ark_FrameNodeExtender peer);
-    void (*disposeTree)(Ark_FrameNodeExtender peer);
-    void (*setCrossLanguageOptions)(Ark_FrameNodeExtender peer,
-                                    const Ark_CrossLanguageOptions* options);
-    Ark_CrossLanguageOptions (*getCrossLanguageOptions)(Ark_FrameNodeExtender peer);
-    void (*setMeasuredSize)(Ark_FrameNodeExtender peer,
+    Ark_NativePointer (*getFirstChild)(Ark_FrameNode peer);
+    Ark_NativePointer (*getNextSibling)(Ark_FrameNode peer);
+    Ark_NativePointer (*getPreviousSibling)(Ark_FrameNode peer);
+    Ark_NativePointer (*getParent)(Ark_FrameNode peer);
+    Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
+    void (*dispose)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToWindow)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToParent)(Ark_FrameNode peer);
+    Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
+    Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
+    Ark_String (*getId)(Ark_FrameNode peer);
+    Ark_Number (*getUniqueId)(Ark_FrameNode peer);
+    Ark_String (*getNodeType)(Ark_FrameNode peer);
+    Ark_Number (*getOpacity)(Ark_FrameNode peer);
+    Ark_Boolean (*isVisible)(Ark_FrameNode peer);
+    Ark_Boolean (*isClipToFrame)(Ark_FrameNode peer);
+    Ark_Boolean (*isAttached)(Ark_FrameNode peer);
+    Ark_String (*getInspectorInfo)(Ark_FrameNode peer);
+    void (*invalidate)(Ark_FrameNode peer);
+    void (*disposeTree)(Ark_FrameNode peer);
+    void (*setCrossLanguageOptions)(Ark_FrameNode peer,
+                                    Ark_Boolean options);
+    Ark_Boolean (*getCrossLanguageOptions)(Ark_FrameNode peer);
+    void (*setMeasuredSize)(Ark_FrameNode peer,
                             const Ark_Size* size);
-    void (*setLayoutPosition)(Ark_FrameNodeExtender peer,
+    void (*setLayoutPosition)(Ark_FrameNode peer,
                               const Ark_Position* position);
-    void (*measure)(Ark_FrameNodeExtender peer,
+    void (*measure)(Ark_FrameNode peer,
                     const Ark_LayoutConstraint* constraint);
-    void (*layout)(Ark_FrameNodeExtender peer,
+    void (*layout)(Ark_FrameNode peer,
                    const Ark_Position* position);
-    void (*setNeedsLayout)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToScreen)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToParentWithTransform)(Ark_FrameNodeExtender peer);
-    Ark_Position (*getPositionToScreenWithTransform)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
-    Ark_Number (*getIdByFrameNode)(Ark_FrameNodeExtender peer,
-                                   Ark_FrameNode node);
-    void (*moveTo)(Ark_FrameNodeExtender peer,
+    void (*setNeedsLayout)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToScreen)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToParentWithTransform)(Ark_FrameNode peer);
+    Ark_Position (*getPositionToScreenWithTransform)(Ark_FrameNode peer);
+    Ark_NativePointer (*getFrameNodeByKey)(const Ark_String* name);
+    Ark_Number (*getIdByFrameNode)(Ark_NativePointer node);
+    void (*moveTo)(Ark_FrameNode peer,
                    Ark_FrameNode targetParent,
                    const Ark_Number* index);
-    Ark_Number (*getFirstChildIndexWithoutExpand)(Ark_FrameNodeExtender peer);
-    Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNodeExtender peer);
-    Ark_FrameNode (*getAttachedFrameNodeById)(const Ark_String* id);
-    Ark_FrameNode (*getFrameNodeById)(const Ark_Number* id);
-    Ark_FrameNode (*getFrameNodeByUniqueId)(const Ark_Number* id);
-    void (*reuse)(Ark_FrameNodeExtender peer);
-    void (*recycle)(Ark_FrameNodeExtender peer);
+    Ark_Number (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
+    Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
+    Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
+    Ark_NativePointer (*getFrameNodeById)(const Ark_Number* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    void (*reuse)(Ark_FrameNode peer);
+    void (*recycle)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
-    Ark_FrameNode (*createTypedFrameNode)(const Ark_String* type);
-    Ark_NativePointer (*createByRawPtr)(Ark_FrameNodeExtender peer,
+    Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
+    Ark_NativePointer (*createByRawPtr)(Ark_FrameNode peer,
                                         Ark_FrameNode pointer);
-    Ark_FrameNode (*unWrapRawPtr)(Ark_FrameNodeExtender peer,
+    void* (*unWrapRawPtr)(Ark_FrameNode peer,
                                   Ark_NativePointer pointer);
-    Ark_NativePointer (*getCommonEvent)(Ark_FrameNodeExtender peer);
+    Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {
@@ -24396,6 +24388,10 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
 } GENERATED_ArkUINavPathStackAccessor;
 
 typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
+    Ark_NativePointer (*nodeContainerOpsConstruct)(Ark_Int32 id,
+                                                   Ark_Int32 flags);
+    void (*nodeContainerSetNodeContainerOptions)(Ark_NativePointer ptr,
+                                                 Ark_NativePointer controller);
     void (*addNodeContainerRootNode)(Ark_NativePointer self,
                                      Ark_NativePointer child);
     void (*setAboutToAppear)(Ark_NativePointer self,
@@ -25938,12 +25934,14 @@ typedef struct GENERATED_ArkUIGraphicsAPI {
 
 typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_CUSTOM_NODE,
+    GENERATED_ARKUI_ABILITY_COMPONENT,
     GENERATED_ARKUI_ALPHABET_INDEXER,
     GENERATED_ARKUI_ANIMATOR,
     GENERATED_ARKUI_BADGE,
     GENERATED_ARKUI_BASE_SPAN,
     GENERATED_ARKUI_BLANK,
     GENERATED_ARKUI_BUTTON,
+    GENERATED_ARKUI_CALENDAR,
     GENERATED_ARKUI_CALENDAR_PICKER,
     GENERATED_ARKUI_CANVAS,
     GENERATED_ARKUI_CHECKBOX,
@@ -25951,14 +25949,13 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_CIRCLE,
     GENERATED_ARKUI_COLUMN,
     GENERATED_ARKUI_COLUMN_SPLIT,
+    GENERATED_ARKUI_COMMON,
     GENERATED_ARKUI_COMMON_METHOD,
     GENERATED_ARKUI_COMMON_SHAPE_METHOD,
     GENERATED_ARKUI_COMPONENT_3D,
     GENERATED_ARKUI_COMPONENT_ROOT,
     GENERATED_ARKUI_CONTAINER_SPAN,
     GENERATED_ARKUI_COUNTER,
-    GENERATED_ARKUI_CUSTOM_BUILDER_ROOT,
-    GENERATED_ARKUI_CUSTOM_LAYOUT_ROOT,
     GENERATED_ARKUI_DATA_PANEL,
     GENERATED_ARKUI_DATE_PICKER,
     GENERATED_ARKUI_DIVIDER,
@@ -25973,6 +25970,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_GAUGE,
     GENERATED_ARKUI_GRID,
     GENERATED_ARKUI_GRID_COL,
+    GENERATED_ARKUI_GRID_CONTAINER,
     GENERATED_ARKUI_GRID_ITEM,
     GENERATED_ARKUI_GRID_ROW,
     GENERATED_ARKUI_HYPERLINK,
@@ -25980,20 +25978,27 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_IMAGE_ANIMATOR,
     GENERATED_ARKUI_IMAGE_SPAN,
     GENERATED_ARKUI_INDICATOR_COMPONENT,
+    GENERATED_ARKUI_LAZY_GRID_LAYOUT,
+    GENERATED_ARKUI_LAZY_VGRID_LAYOUT,
     GENERATED_ARKUI_LINE,
     GENERATED_ARKUI_LINEAR_INDICATOR,
     GENERATED_ARKUI_LIST,
     GENERATED_ARKUI_LIST_ITEM,
     GENERATED_ARKUI_LIST_ITEM_GROUP,
     GENERATED_ARKUI_LOADING_PROGRESS,
+    GENERATED_ARKUI_LOCATION_BUTTON,
     GENERATED_ARKUI_MARQUEE,
     GENERATED_ARKUI_MEDIA_CACHED_IMAGE,
     GENERATED_ARKUI_MENU,
     GENERATED_ARKUI_MENU_ITEM,
     GENERATED_ARKUI_MENU_ITEM_GROUP,
     GENERATED_ARKUI_NAV_DESTINATION,
+    GENERATED_ARKUI_NAV_ROUTER,
     GENERATED_ARKUI_NAVIGATION,
+    GENERATED_ARKUI_NAVIGATOR,
     GENERATED_ARKUI_NODE_CONTAINER,
+    GENERATED_ARKUI_PANEL,
+    GENERATED_ARKUI_PASTE_BUTTON,
     GENERATED_ARKUI_PATH,
     GENERATED_ARKUI_PATTERN_LOCK,
     GENERATED_ARKUI_PLUGIN_COMPONENT,
@@ -26013,11 +26018,13 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_ROOT_SCENE,
     GENERATED_ARKUI_ROW,
     GENERATED_ARKUI_ROW_SPLIT,
+    GENERATED_ARKUI_SAVE_BUTTON,
     GENERATED_ARKUI_SCREEN,
     GENERATED_ARKUI_SCROLL,
     GENERATED_ARKUI_SCROLL_BAR,
     GENERATED_ARKUI_SCROLLABLE_COMMON_METHOD,
     GENERATED_ARKUI_SEARCH,
+    GENERATED_ARKUI_SECURITY_COMPONENT_METHOD,
     GENERATED_ARKUI_SELECT,
     GENERATED_ARKUI_SHAPE,
     GENERATED_ARKUI_SIDE_BAR_CONTAINER,
@@ -26039,13 +26046,11 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_TEXT_TIMER,
     GENERATED_ARKUI_TIME_PICKER,
     GENERATED_ARKUI_TOGGLE,
-    GENERATED_ARKUI_TOOL_BAR_ITEM,
     GENERATED_ARKUI_UIEXTENSION_COMPONENT,
     GENERATED_ARKUI_VIDEO,
     GENERATED_ARKUI_WATER_FLOW,
     GENERATED_ARKUI_WEB,
     GENERATED_ARKUI_WINDOW_SCENE,
-    GENERATED_ARKUI_WITH_THEME,
     GENERATED_ARKUI_XCOMPONENT
 } GENERATED_Ark_NodeType;
 

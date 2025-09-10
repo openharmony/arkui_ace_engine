@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult, UICommonEvent, UICommonEventInternal } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -678,458 +678,489 @@ export class FocusController {
         return
     }
 }
-export class FrameNodeExtenderInternal {
-    public static fromPtr(ptr: KPointer): FrameNodeExtender {
-        return new FrameNodeExtender(ptr)
-    }
-}
-export class FrameNodeExtender implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, FrameNodeExtender.getFinalizer())
-    }
-    constructor() {
-        this(FrameNodeExtender.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_construct()
+export class FrameNodeExtender {
+    static constructorFrameNode_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
         return retval
     }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._FrameNodeExtender_getFinalizer()
+    static getDestroy_serialize(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getDestroy()
+        return retval
     }
-    static getFrameNodeByKey_serialize(name: string): FrameNode {
+    static destroyPeer_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_destroyPeer(extractors.toFrameNodePtr(peer))
+    }
+    static isModifiable_serialize(peer: KPointer): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isModifiable(peer)
+        return retval
+    }
+    static appendChild_serialize(peer: FrameNode, child: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_appendChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+    }
+    static insertChildAfter_serialize(peer: KPointer, child: KPointer, sibling: KPointer): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_insertChildAfter(peer, child, sibling)
+    }
+    static removeChild_serialize(peer: FrameNode, child: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_removeChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+    }
+    static clearChildren_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_clearChildren(extractors.toFrameNodePtr(peer))
+    }
+    static getChild_serialize(peer: FrameNode, index: number, expandMode: number): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChild(extractors.toFrameNodePtr(peer), index, expandMode)
+        return retval
+    }
+    static getFirstChild_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChild(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getNextSibling_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNextSibling(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getPreviousSibling_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPreviousSibling(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getParent_serialize(peer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getParent(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getChildrenCount_serialize(peer: FrameNode): int32 {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChildrenCount(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static dispose_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_dispose(extractors.toFrameNodePtr(peer))
+    }
+    static getPositionToWindow_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToParent_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParent(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getMeasuredSize_serialize(peer: FrameNode): Size {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getMeasuredSize(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Size = Size_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getLayoutPosition_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLayoutPosition(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getId_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getUniqueId_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUniqueId(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getNodeType_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getOpacity_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getOpacity(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isVisible_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isVisible(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isClipToFrame_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isClipToFrame(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static isAttached_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isAttached(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getInspectorInfo_serialize(peer: FrameNode): string {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getInspectorInfo(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static invalidate_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_invalidate(extractors.toFrameNodePtr(peer))
+    }
+    static disposeTree_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(extractors.toFrameNodePtr(peer))
+    }
+    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
+    }
+    static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static setMeasuredSize_serialize(peer: FrameNode, size: Size): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setMeasuredSize(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setLayoutPosition_serialize(peer: FrameNode, position: Position): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setLayoutPosition(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static measure_serialize(peer: FrameNode, constraint: LayoutConstraint): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LayoutConstraint_serializer.write(thisSerializer, constraint)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_measure(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static layout_serialize(peer: FrameNode, position: Position): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Position_serializer.write(thisSerializer, position)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_layout(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setNeedsLayout_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_setNeedsLayout(extractors.toFrameNodePtr(peer))
+    }
+    static getPositionToScreen_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreen(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToWindowWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToParentWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParentWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getPositionToScreenWithTransform_serialize(peer: FrameNode): Position {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreenWithTransform(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    static getFrameNodeByKey_serialize(name: string): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByKey(name)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
+        return retval
     }
-    static getAttachedFrameNodeById_serialize(id: string): FrameNode {
+    static getIdByFrameNode_serialize(node: KPointer): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNode(node)
+        return retval
+    }
+    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: number): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(targetParent), index)
+    }
+    static getFirstChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getLastChildIndexWithoutExpand_serialize(peer: FrameNode): number {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLastChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    static getAttachedFrameNodeById_serialize(id: string): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getAttachedFrameNodeById(id)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
+        return retval
     }
-    static getFrameNodeById_serialize(id: number): FrameNode {
+    static getFrameNodeById_serialize(id: number): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
+        return retval
     }
-    static getFrameNodeByUniqueId_serialize(id: number): FrameNode {
+    static getFrameNodeByUniqueId_serialize(id: number): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
+        return retval
+    }
+    static reuse_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_reuse(extractors.toFrameNodePtr(peer))
+    }
+    static recycle_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_recycle(extractors.toFrameNodePtr(peer))
     }
     static getFrameNodePtr_serialize(node: FrameNode): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodePtr(extractors.toFrameNodePtr(node))
         return retval
     }
-    static createTypedFrameNode_serialize(type: string): FrameNode {
+    static createTypedFrameNode_serialize(type: string): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type)
+        return retval
+    }
+    static createByRawPtr_serialize(peer: FrameNode, pointer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createByRawPtr(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(pointer))
+        return retval
+    }
+    static unWrapRawPtr_serialize(peer: FrameNode, pointer: KPointer): FrameNode {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_unWrapRawPtr(extractors.toFrameNodePtr(peer), pointer)
         const obj : FrameNode = extractors.fromFrameNodePtr(retval)
         return obj
     }
-    public isModifiable(): boolean {
-        return this.isModifiable_serialize()
+    static getCommonEvent_serialize(peer: FrameNode): UICommonEvent {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCommonEvent(extractors.toFrameNodePtr(peer))
+        const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
+        return obj
     }
-    public appendChild(node: FrameNode): void {
-        const node_casted = node as (FrameNode)
-        this.appendChild_serialize(node_casted)
+    public static constructorFrameNode(): KPointer {
+        return FrameNodeExtender.constructorFrameNode_serialize()
+    }
+    public static getDestroy(): KPointer {
+        return FrameNodeExtender.getDestroy_serialize()
+    }
+    public static destroyPeer(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.destroyPeer_serialize(peer_casted)
         return
     }
-    public insertChildAfter(child: FrameNode, sibling: FrameNode): void {
+    public static isModifiable(peer: KPointer): boolean {
+        const peer_casted = peer as (KPointer)
+        return FrameNodeExtender.isModifiable_serialize(peer_casted)
+    }
+    public static appendChild(peer: FrameNode, child: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
-        const sibling_casted = sibling as (FrameNode)
-        this.insertChildAfter_serialize(child_casted, sibling_casted)
+        FrameNodeExtender.appendChild_serialize(peer_casted, child_casted)
         return
     }
-    public removeChild(node: FrameNode): void {
-        const node_casted = node as (FrameNode)
-        this.removeChild_serialize(node_casted)
+    public static insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): void {
+        const peer_casted = peer as (KPointer)
+        const child_casted = child as (KPointer)
+        const sibling_casted = sibling as (KPointer)
+        FrameNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
         return
     }
-    public clearChildren(): void {
-        this.clearChildren_serialize()
+    public static removeChild(peer: FrameNode, child: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        const child_casted = child as (FrameNode)
+        FrameNodeExtender.removeChild_serialize(peer_casted, child_casted)
         return
     }
-    public getChild(index: number, expandMode: number): FrameNode {
+    public static clearChildren(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.clearChildren_serialize(peer_casted)
+        return
+    }
+    public static getChild(peer: FrameNode, index: number, expandMode: number): KPointer {
+        const peer_casted = peer as (FrameNode)
         const index_casted = index as (number)
         const expandMode_casted = expandMode as (number)
-        return this.getChild_serialize(index_casted, expandMode_casted)
+        return FrameNodeExtender.getChild_serialize(peer_casted, index_casted, expandMode_casted)
     }
-    public getFirstChild(): FrameNode {
-        return this.getFirstChild_serialize()
+    public static getFirstChild(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getFirstChild_serialize(peer_casted)
     }
-    public getNextSibling(): FrameNode {
-        return this.getNextSibling_serialize()
+    public static getNextSibling(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getNextSibling_serialize(peer_casted)
     }
-    public getPreviousSibling(): FrameNode {
-        return this.getPreviousSibling_serialize()
+    public static getPreviousSibling(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPreviousSibling_serialize(peer_casted)
     }
-    public getParent(): FrameNode {
-        return this.getParent_serialize()
+    public static getParent(peer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getParent_serialize(peer_casted)
     }
-    public getChildrenCount(): int32 {
-        return this.getChildrenCount_serialize()
+    public static getChildrenCount(peer: FrameNode): int32 {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getChildrenCount_serialize(peer_casted)
     }
-    public dispose(): void {
-        this.dispose_serialize()
+    public static dispose(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.dispose_serialize(peer_casted)
         return
     }
-    public getPositionToWindow(): Position {
-        return this.getPositionToWindow_serialize()
+    public static getPositionToWindow(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToWindow_serialize(peer_casted)
     }
-    public getPositionToParent(): Position {
-        return this.getPositionToParent_serialize()
+    public static getPositionToParent(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToParent_serialize(peer_casted)
     }
-    public getMeasuredSize(): Size {
-        return this.getMeasuredSize_serialize()
+    public static getMeasuredSize(peer: FrameNode): Size {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getMeasuredSize_serialize(peer_casted)
     }
-    public getLayoutPosition(): Position {
-        return this.getLayoutPosition_serialize()
+    public static getLayoutPosition(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getLayoutPosition_serialize(peer_casted)
     }
-    public getId(): string {
-        return this.getId_serialize()
+    public static getId(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getId_serialize(peer_casted)
     }
-    public getUniqueId(): number {
-        return this.getUniqueId_serialize()
+    public static getUniqueId(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getUniqueId_serialize(peer_casted)
     }
-    public getNodeType(): string {
-        return this.getNodeType_serialize()
+    public static getNodeType(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getNodeType_serialize(peer_casted)
     }
-    public getOpacity(): number {
-        return this.getOpacity_serialize()
+    public static getOpacity(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getOpacity_serialize(peer_casted)
     }
-    public isVisible(): boolean {
-        return this.isVisible_serialize()
+    public static isVisible(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isVisible_serialize(peer_casted)
     }
-    public isClipToFrame(): boolean {
-        return this.isClipToFrame_serialize()
+    public static isClipToFrame(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isClipToFrame_serialize(peer_casted)
     }
-    public isAttached(): boolean {
-        return this.isAttached_serialize()
+    public static isAttached(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isAttached_serialize(peer_casted)
     }
-    public getInspectorInfo(): Object {
-        return this.getInspectorInfo_serialize()
+    public static getInspectorInfo(peer: FrameNode): string {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getInspectorInfo_serialize(peer_casted)
     }
-    public invalidate(): void {
-        this.invalidate_serialize()
+    public static invalidate(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.invalidate_serialize(peer_casted)
         return
     }
-    public disposeTree(): void {
-        this.disposeTree_serialize()
+    public static disposeTree(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.disposeTree_serialize(peer_casted)
         return
     }
-    public setCrossLanguageOptions(options: CrossLanguageOptions): void {
-        const options_casted = options as (CrossLanguageOptions)
-        this.setCrossLanguageOptions_serialize(options_casted)
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): void {
+        const peer_casted = peer as (FrameNode)
+        const options_casted = options as (boolean)
+        FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
         return
     }
-    public getCrossLanguageOptions(): CrossLanguageOptions {
-        return this.getCrossLanguageOptions_serialize()
+    public static getCrossLanguageOptions(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCrossLanguageOptions_serialize(peer_casted)
     }
-    public setMeasuredSize(size: Size): void {
+    public static setMeasuredSize(peer: FrameNode, size: Size): void {
+        const peer_casted = peer as (FrameNode)
         const size_casted = size as (Size)
-        this.setMeasuredSize_serialize(size_casted)
+        FrameNodeExtender.setMeasuredSize_serialize(peer_casted, size_casted)
         return
     }
-    public setLayoutPosition(position: Position): void {
+    public static setLayoutPosition(peer: FrameNode, position: Position): void {
+        const peer_casted = peer as (FrameNode)
         const position_casted = position as (Position)
-        this.setLayoutPosition_serialize(position_casted)
+        FrameNodeExtender.setLayoutPosition_serialize(peer_casted, position_casted)
         return
     }
-    public measure(constraint: LayoutConstraint): void {
+    public static measure(peer: FrameNode, constraint: LayoutConstraint): void {
+        const peer_casted = peer as (FrameNode)
         const constraint_casted = constraint as (LayoutConstraint)
-        this.measure_serialize(constraint_casted)
+        FrameNodeExtender.measure_serialize(peer_casted, constraint_casted)
         return
     }
-    public layout(position: Position): void {
+    public static layout(peer: FrameNode, position: Position): void {
+        const peer_casted = peer as (FrameNode)
         const position_casted = position as (Position)
-        this.layout_serialize(position_casted)
+        FrameNodeExtender.layout_serialize(peer_casted, position_casted)
         return
     }
-    public setNeedsLayout(): void {
-        this.setNeedsLayout_serialize()
+    public static setNeedsLayout(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.setNeedsLayout_serialize(peer_casted)
         return
     }
-    public getPositionToScreen(): Position {
-        return this.getPositionToScreen_serialize()
+    public static getPositionToScreen(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToScreen_serialize(peer_casted)
     }
-    public getPositionToWindowWithTransform(): Position {
-        return this.getPositionToWindowWithTransform_serialize()
+    public static getPositionToWindowWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToWindowWithTransform_serialize(peer_casted)
     }
-    public getPositionToParentWithTransform(): Position {
-        return this.getPositionToParentWithTransform_serialize()
+    public static getPositionToParentWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToParentWithTransform_serialize(peer_casted)
     }
-    public getPositionToScreenWithTransform(): Position {
-        return this.getPositionToScreenWithTransform_serialize()
+    public static getPositionToScreenWithTransform(peer: FrameNode): Position {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getPositionToScreenWithTransform_serialize(peer_casted)
     }
-    public static getFrameNodeByKey(name: string): FrameNode {
+    public static getFrameNodeByKey(name: string): KPointer {
         const name_casted = name as (string)
         return FrameNodeExtender.getFrameNodeByKey_serialize(name_casted)
     }
-    public getIdByFrameNode(node: FrameNode): number {
-        const node_casted = node as (FrameNode)
-        return this.getIdByFrameNode_serialize(node_casted)
+    public static getIdByFrameNode(node: KPointer): number {
+        const node_casted = node as (KPointer)
+        return FrameNodeExtender.getIdByFrameNode_serialize(node_casted)
     }
-    public moveTo(targetParent: FrameNode, index: number): void {
+    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: number): void {
+        const peer_casted = peer as (FrameNode)
         const targetParent_casted = targetParent as (FrameNode)
         const index_casted = index as (number)
-        this.moveTo_serialize(targetParent_casted, index_casted)
+        FrameNodeExtender.moveTo_serialize(peer_casted, targetParent_casted, index_casted)
         return
     }
-    public getFirstChildIndexWithoutExpand(): number {
-        return this.getFirstChildIndexWithoutExpand_serialize()
+    public static getFirstChildIndexWithoutExpand(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getFirstChildIndexWithoutExpand_serialize(peer_casted)
     }
-    public getLastChildIndexWithoutExpand(): number {
-        return this.getLastChildIndexWithoutExpand_serialize()
+    public static getLastChildIndexWithoutExpand(peer: FrameNode): number {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getLastChildIndexWithoutExpand_serialize(peer_casted)
     }
-    public static getAttachedFrameNodeById(id: string): FrameNode {
+    public static getAttachedFrameNodeById(id: string): KPointer {
         const id_casted = id as (string)
         return FrameNodeExtender.getAttachedFrameNodeById_serialize(id_casted)
     }
-    public static getFrameNodeById(id: number): FrameNode {
+    public static getFrameNodeById(id: number): KPointer {
         const id_casted = id as (number)
         return FrameNodeExtender.getFrameNodeById_serialize(id_casted)
     }
-    public static getFrameNodeByUniqueId(id: number): FrameNode {
+    public static getFrameNodeByUniqueId(id: number): KPointer {
         const id_casted = id as (number)
         return FrameNodeExtender.getFrameNodeByUniqueId_serialize(id_casted)
     }
-    public reuse(): void {
-        this.reuse_serialize()
+    public static reuse(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.reuse_serialize(peer_casted)
         return
     }
-    public recycle(): void {
-        this.recycle_serialize()
+    public static recycle(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.recycle_serialize(peer_casted)
         return
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)
         return FrameNodeExtender.getFrameNodePtr_serialize(node_casted)
     }
-    public static createTypedFrameNode(type: string): FrameNode {
+    public static createTypedFrameNode(type: string): KPointer {
         const type_casted = type as (string)
         return FrameNodeExtender.createTypedFrameNode_serialize(type_casted)
     }
-    public createByRawPtr(pointer: FrameNode): KPointer {
+    public static createByRawPtr(peer: FrameNode, pointer: FrameNode): KPointer {
+        const peer_casted = peer as (FrameNode)
         const pointer_casted = pointer as (FrameNode)
-        return this.createByRawPtr_serialize(pointer_casted)
+        return FrameNodeExtender.createByRawPtr_serialize(peer_casted, pointer_casted)
     }
-    public unWrapRawPtr(pointer: KPointer): FrameNode {
+    public static unWrapRawPtr(peer: FrameNode, pointer: KPointer): FrameNode {
+        const peer_casted = peer as (FrameNode)
         const pointer_casted = pointer as (KPointer)
-        return this.unWrapRawPtr_serialize(pointer_casted)
+        return FrameNodeExtender.unWrapRawPtr_serialize(peer_casted, pointer_casted)
     }
-    public getCommonEvent(): KPointer {
-        return this.getCommonEvent_serialize()
-    }
-    isModifiable_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isModifiable(this.peer!.ptr)
-        return retval
-    }
-    appendChild_serialize(node: FrameNode): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_appendChild(this.peer!.ptr, extractors.toFrameNodePtr(node))
-    }
-    insertChildAfter_serialize(child: FrameNode, sibling: FrameNode): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_insertChildAfter(this.peer!.ptr, extractors.toFrameNodePtr(child), extractors.toFrameNodePtr(sibling))
-    }
-    removeChild_serialize(node: FrameNode): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_removeChild(this.peer!.ptr, extractors.toFrameNodePtr(node))
-    }
-    clearChildren_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_clearChildren(this.peer!.ptr)
-    }
-    getChild_serialize(index: number, expandMode: number): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChild(this.peer!.ptr, index, expandMode)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getFirstChild_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChild(this.peer!.ptr)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getNextSibling_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNextSibling(this.peer!.ptr)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getPreviousSibling_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPreviousSibling(this.peer!.ptr)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getParent_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getParent(this.peer!.ptr)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getChildrenCount_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getChildrenCount(this.peer!.ptr)
-        return retval
-    }
-    dispose_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_dispose(this.peer!.ptr)
-    }
-    getPositionToWindow_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getPositionToParent_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParent(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getMeasuredSize_serialize(): Size {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getMeasuredSize(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Size = Size_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getLayoutPosition_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLayoutPosition(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getId_serialize(): string {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(this.peer!.ptr)
-        return retval
-    }
-    getUniqueId_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUniqueId(this.peer!.ptr)
-        return retval
-    }
-    getNodeType_serialize(): string {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(this.peer!.ptr)
-        return retval
-    }
-    getOpacity_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getOpacity(this.peer!.ptr)
-        return retval
-    }
-    isVisible_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isVisible(this.peer!.ptr)
-        return retval
-    }
-    isClipToFrame_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isClipToFrame(this.peer!.ptr)
-        return retval
-    }
-    isAttached_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isAttached(this.peer!.ptr)
-        return retval
-    }
-    getInspectorInfo_serialize(): Object {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getInspectorInfo(this.peer!.ptr)
-        return retval
-    }
-    invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_invalidate(this.peer!.ptr)
-    }
-    disposeTree_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(this.peer!.ptr)
-    }
-    setCrossLanguageOptions_serialize(options: CrossLanguageOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        CrossLanguageOptions_serializer.write(thisSerializer, options)
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    getCrossLanguageOptions_serialize(): CrossLanguageOptions {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : CrossLanguageOptions = CrossLanguageOptions_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    setMeasuredSize_serialize(size: Size): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        Size_serializer.write(thisSerializer, size)
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setMeasuredSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setLayoutPosition_serialize(position: Position): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setLayoutPosition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    measure_serialize(constraint: LayoutConstraint): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        LayoutConstraint_serializer.write(thisSerializer, constraint)
-        ArkUIGeneratedNativeModule._FrameNodeExtender_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    layout_serialize(position: Position): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
-        ArkUIGeneratedNativeModule._FrameNodeExtender_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setNeedsLayout_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setNeedsLayout(this.peer!.ptr)
-    }
-    getPositionToScreen_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreen(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getPositionToWindowWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getPositionToParentWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParentWithTransform(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getPositionToScreenWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToScreenWithTransform(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
-        return returnResult
-    }
-    getIdByFrameNode_serialize(node: FrameNode): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNode(this.peer!.ptr, extractors.toFrameNodePtr(node))
-        return retval
-    }
-    moveTo_serialize(targetParent: FrameNode, index: number): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(this.peer!.ptr, extractors.toFrameNodePtr(targetParent), index)
-    }
-    getFirstChildIndexWithoutExpand_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChildIndexWithoutExpand(this.peer!.ptr)
-        return retval
-    }
-    getLastChildIndexWithoutExpand_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLastChildIndexWithoutExpand(this.peer!.ptr)
-        return retval
-    }
-    reuse_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_reuse(this.peer!.ptr)
-    }
-    recycle_serialize(): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_recycle(this.peer!.ptr)
-    }
-    createByRawPtr_serialize(pointer: FrameNode): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createByRawPtr(this.peer!.ptr, extractors.toFrameNodePtr(pointer))
-        return retval
-    }
-    unWrapRawPtr_serialize(pointer: KPointer): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_unWrapRawPtr(this.peer!.ptr, pointer)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
-    }
-    getCommonEvent_serialize(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCommonEvent(this.peer!.ptr)
-        return retval
+    public static getCommonEvent(peer: FrameNode): UICommonEvent {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCommonEvent_serialize(peer_casted)
     }
 }
 export class GlobalScope_ohos_arkui_componentSnapshot {
@@ -1434,6 +1465,13 @@ export class NavExtender {
     }
 }
 export class NodeContainerOps {
+    static nodeContainerOpsConstruct_serialize(id: int32, flags: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._NodeContainerOps_nodeContainerOpsConstruct(id, flags)
+        return retval
+    }
+    static nodeContainerSetNodeContainerOptions_serialize(ptr: KPointer, controller: KPointer): void {
+        ArkUIGeneratedNativeModule._NodeContainerOps_nodeContainerSetNodeContainerOptions(ptr, controller)
+    }
     static addNodeContainerRootNode_serialize(self: KPointer, child: KPointer): void {
         ArkUIGeneratedNativeModule._NodeContainerOps_addNodeContainerRootNode(self, child)
     }
@@ -1478,6 +1516,17 @@ export class NodeContainerOps {
         }
         ArkUIGeneratedNativeModule._NodeContainerOps_setOnTouchEvent(self, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    public static nodeContainerOpsConstruct(id: int32, flags: int32): KPointer {
+        const id_casted = id as (int32)
+        const flags_casted = flags as (int32)
+        return NodeContainerOps.nodeContainerOpsConstruct_serialize(id_casted, flags_casted)
+    }
+    public static nodeContainerSetNodeContainerOptions(ptr: KPointer, controller: KPointer): void {
+        const ptr_casted = ptr as (KPointer)
+        const controller_casted = controller as (KPointer)
+        NodeContainerOps.nodeContainerSetNodeContainerOptions_serialize(ptr_casted, controller_casted)
+        return
     }
     public static addNodeContainerRootNode(self: KPointer, child: KPointer): void {
         const self_casted = self as (KPointer)
@@ -2759,17 +2808,6 @@ export class CommonShape_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return CommonShapeInternal.fromPtr(ptr)
-    }
-}
-export class FrameNodeExtender_serializer {
-    public static write(buffer: SerializerBase, value: FrameNodeExtender): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): FrameNodeExtender {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return FrameNodeExtenderInternal.fromPtr(ptr)
     }
 }
 export class Offset_componentutils_serializer {

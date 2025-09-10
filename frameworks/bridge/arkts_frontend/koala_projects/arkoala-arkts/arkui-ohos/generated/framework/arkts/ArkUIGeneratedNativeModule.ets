@@ -3818,113 +3818,115 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_construct(): KPointer
+    native static _FrameNodeExtender_constructorFrameNode(): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getFinalizer(): KPointer
+    native static _FrameNodeExtender_getDestroy(): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_isModifiable(ptr: KPointer): boolean
+    native static _FrameNodeExtender_destroyPeer(peer: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_appendChild(ptr: KPointer, node: KPointer): void
+    native static _FrameNodeExtender_isModifiable(peer: KPointer): boolean
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_insertChildAfter(ptr: KPointer, child: KPointer, sibling: KPointer): void
+    native static _FrameNodeExtender_appendChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_removeChild(ptr: KPointer, node: KPointer): void
+    native static _FrameNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_clearChildren(ptr: KPointer): void
+    native static _FrameNodeExtender_removeChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getChild(ptr: KPointer, index: number, expandMode: number): KPointer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getFirstChild(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getNextSibling(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getPreviousSibling(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getParent(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getChildrenCount(ptr: KPointer): int32
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_dispose(ptr: KPointer): void
+    native static _FrameNodeExtender_clearChildren(peer: KPointer): void
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToWindow(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getChild(peer: KPointer, index: number, expandMode: number): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToParent(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getFirstChild(peer: KPointer): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getMeasuredSize(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getNextSibling(peer: KPointer): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getLayoutPosition(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getPreviousSibling(peer: KPointer): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getId(ptr: KPointer): string
+    native static _FrameNodeExtender_getParent(peer: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getUniqueId(ptr: KPointer): number
+    native static _FrameNodeExtender_getChildrenCount(peer: KPointer): int32
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_dispose(peer: KPointer): void
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getNodeType(ptr: KPointer): string
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_getOpacity(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_isVisible(ptr: KPointer): boolean
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_isClipToFrame(ptr: KPointer): boolean
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_isAttached(ptr: KPointer): boolean
+    native static _FrameNodeExtender_getPositionToWindow(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getInspectorInfo(ptr: KPointer): Object
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_invalidate(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_disposeTree(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_setCrossLanguageOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _FrameNodeExtender_getPositionToParent(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getCrossLanguageOptions(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_setMeasuredSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_setLayoutPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_measure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_layout(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_setNeedsLayout(ptr: KPointer): void
+    native static _FrameNodeExtender_getMeasuredSize(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToScreen(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getLayoutPosition(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getId(peer: KPointer): string
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_getUniqueId(peer: KPointer): number
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToParentWithTransform(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getNodeType(peer: KPointer): string
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_getOpacity(peer: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_isVisible(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_isClipToFrame(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_isAttached(peer: KPointer): boolean
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_getPositionToScreenWithTransform(ptr: KPointer): KInteropReturnBuffer
+    native static _FrameNodeExtender_getInspectorInfo(peer: KPointer): string
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_invalidate(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_disposeTree(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: KInt): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_getCrossLanguageOptions(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_setMeasuredSize(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_setLayoutPosition(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_measure(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_layout(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_setNeedsLayout(peer: KPointer): void
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getPositionToScreen(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getPositionToWindowWithTransform(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getPositionToParentWithTransform(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getPositionToScreenWithTransform(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getFrameNodeByKey(name: KStringPtr): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getIdByFrameNode(ptr: KPointer, node: KPointer): number
+    native static _FrameNodeExtender_getIdByFrameNode(node: KPointer): number
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_moveTo(ptr: KPointer, targetParent: KPointer, index: number): void
+    native static _FrameNodeExtender_moveTo(peer: KPointer, targetParent: KPointer, index: number): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getFirstChildIndexWithoutExpand(ptr: KPointer): number
+    native static _FrameNodeExtender_getFirstChildIndexWithoutExpand(peer: KPointer): number
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getLastChildIndexWithoutExpand(ptr: KPointer): number
+    native static _FrameNodeExtender_getLastChildIndexWithoutExpand(peer: KPointer): number
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getAttachedFrameNodeById(id: KStringPtr): KPointer
-    @ani.unsafe.Direct
+    @ani.unsafe.Quick
     native static _FrameNodeExtender_getFrameNodeById(id: number): KPointer
-    @ani.unsafe.Direct
+    @ani.unsafe.Quick
     native static _FrameNodeExtender_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_reuse(ptr: KPointer): void
+    native static _FrameNodeExtender_reuse(peer: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_recycle(ptr: KPointer): void
+    native static _FrameNodeExtender_recycle(peer: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodePtr(node: KPointer): KPointer
     @ani.unsafe.Quick
     native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_createByRawPtr(ptr: KPointer, pointer: KPointer): KPointer
+    native static _FrameNodeExtender_createByRawPtr(peer: KPointer, pointer: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_unWrapRawPtr(ptr: KPointer, pointer: KPointer): KPointer
+    native static _FrameNodeExtender_unWrapRawPtr(peer: KPointer, pointer: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getCommonEvent(ptr: KPointer): KPointer
+    native static _FrameNodeExtender_getCommonEvent(peer: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrictionMotion_construct(friction: number, position: number, velocity: number): KPointer
     @ani.unsafe.Direct
@@ -4628,6 +4630,10 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_getPathStack(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavPathStack_setPathStack(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_nodeContainerOpsConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_nodeContainerSetNodeContainerOptions(ptr: KPointer, controller: KPointer): void
     @ani.unsafe.Direct
     native static _NodeContainerOps_addNodeContainerRootNode(self: KPointer, child: KPointer): void
     @ani.unsafe.Direct

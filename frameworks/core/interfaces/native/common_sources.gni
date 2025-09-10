@@ -13,6 +13,8 @@
 
 common_sources = [
   "common/api_impl.cpp",
+  "common/view_model.cpp",
+  "common/view_model2.cpp",
   "implementation/bind_sheet_utils.cpp",
   "implementation/canvas_path_peer_impl.cpp",
   "implementation/canvas_renderer_peer_impl.cpp",
