@@ -832,7 +832,6 @@ void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
 void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
     const std::vector<Ark_ResourceColor>& colorArray, ani_int colorMode, void* func)
 {
-    int32_t themeScopeIdValue = static_cast<int32_t>(themeScopeId);
     int32_t colorModeValue = static_cast<int32_t>(colorMode);
 
     std::vector<uint32_t> colors;
