@@ -254,12 +254,17 @@ export struct TipsDialog {
         this.checkAction(this.isChecked);
       }
       try {
+        let hostContext: Context | undefined = this.getUIContext()?.getHostContext();
+        let resourceManager: resourceManager.ResourceManager | undefined = hostContext?.resourceManager;
+        let bundleName: string = (hostContext as common.UIAbilityContext)?.abilityInfo?.bundleName ??
+          (hostContext as common.UIExtensionContext)?.extensionAbilityInfo?.bundleName;
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
-          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          bundleName: bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
-          getContext().resourceManager.getStringSync(125833935)
+          textAnnouncedForAccessibility: this.isChecked ?
+            resourceManager?.getStringSync(125833934) :
+            resourceManager?.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.info(`Accessibility send event`)
@@ -800,12 +805,17 @@ export struct ConfirmDialog {
     .onClick(() => {
       this.isChecked = !this.isChecked;
       try {
+        let hostContext: Context | undefined = this.getUIContext()?.getHostContext();
+        let resourceManager: resourceManager.ResourceManager | undefined = hostContext?.resourceManager;
+        let bundleName: string = (hostContext as common.UIAbilityContext)?.abilityInfo?.bundleName ??
+          (hostContext as common.UIExtensionContext)?.extensionAbilityInfo?.bundleName;
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
-          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          bundleName: bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
-          getContext().resourceManager.getStringSync(125833935)
+          textAnnouncedForAccessibility: this.isChecked ?
+            resourceManager?.getStringSync(125833934) :
+            resourceManager?.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.info(`Accessibility send event`)
