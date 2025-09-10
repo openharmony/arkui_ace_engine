@@ -501,7 +501,7 @@ void OHOS::Ace::NG::DragDropInitiatingStateLifting::SetTextAnimation()
         columnRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
     }
     // mount to rootNode
-    manager->MountPixelMapToRootNode(columnNode);
+    manager->MountPixelMapToRootNode(columnNode, false, frameNode);
     auto textDragPattern = dragNode->GetPattern<TextDragPattern>();
     CHECK_NULL_VOID(textDragPattern);
     auto modifier = textDragPattern->GetOverlayModifier();

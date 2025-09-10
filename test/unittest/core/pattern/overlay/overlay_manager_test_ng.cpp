@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -5146,5 +5147,89 @@ HWTEST_F(OverlayManagerTestNg, GetPrepareDragFrameNodeBorderRadiusTest004, TestS
     EXPECT_NE(result.radiusTopRight, defaultRadius.radiusTopRight);
     EXPECT_NE(result.radiusBottomLeft, defaultRadius.radiusBottomLeft);
     EXPECT_NE(result.radiusBottomRight, defaultRadius.radiusBottomRight);
+}
+
+/**
+ * @tc.name: MountPixelMapToRootNode001
+ * @tc.desc: Test MountPixelMapToRootNode when Pattern not is ContainerModalPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MountPixelMapToRootNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ContainerModalNode and overlay
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManage = pipeline->overlayManager_;
+    ASSERT_NE(overlayManage, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    /**
+     * @tc.steps: step2. call MountPixelMapToRootNode when hostNode is nullptr, pipeline->windowModal_ is
+     * WindowModal::NORMAL.
+     * @tc.expected: column->GetParent() is rootNode
+     */
+    pipeline->windowModal_ = WindowModal::NORMAL;
+    auto column =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    overlayManage->MountPixelMapToRootNode(column, false, nullptr);
+    EXPECT_EQ(column->GetParent(), rootNode);
+
+    /**
+     * @tc.steps: step3. call MountPixelMapToRootNode when hostNode is nullptr, pipeline->windowModal_ is
+     * WindowModal::CONTAINER_MODAL.
+     * @tc.expected: column->GetParent() is rootNode
+     */
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    overlayManage->MountPixelMapToRootNode(column, false, nullptr);
+    EXPECT_EQ(column->GetParent(), rootNode);
+    pipeline->windowModal_ = WindowModal::NORMAL;
+}
+
+/**
+ * @tc.name: MountPixelMapToRootNode002
+ * @tc.desc: Test MountPixelMapToRootNode when Pattern is ContainerModalPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, MountPixelMapToRootNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ContainerModalNode and overlay
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManage = pipeline->overlayManager_;
+    ASSERT_NE(overlayManage, nullptr);
+    auto containerModalNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(containerModalNode, 0);
+    /**
+     * @tc.steps: step2. call MountPixelMapToRootNode when hostNode is nullptr, pipeline->windowModal_ is
+     * WindowModal::CONTAINER_MODAL.
+     * @tc.expected: column->GetParent() is rootNode
+     */
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    auto column =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    overlayManage->MountPixelMapToRootNode(column, false, nullptr);
+    EXPECT_EQ(column->GetParent(), rootNode);
+
+    /**
+     * @tc.steps: step3. call MountPixelMapToRootNode when hostNode is node and parent is toolbarItem.
+     * @tc.expected: column->GetParent() is ContainerModalNode
+     */
+    rootNode->RemoveChild(column);
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto toolbarItem = FrameNode::GetOrCreateFrameNode(
+        V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    toolbarItem->AddChild(hostNode);
+    overlayManage->MountPixelMapToRootNode(column, false, hostNode);
+    EXPECT_EQ(column->GetParent(), containerModalNode);
+    rootNode->RemoveChild(containerModalNode);
+    pipeline->windowModal_ = WindowModal::NORMAL;
 }
 }
