@@ -5145,7 +5145,9 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     CHECK_NULL_VOID(layoutProperty);
 #if defined(IOS_PLATFORM)
     if (info.compose.isActive || info.unmarkText) {
-        DeleteByRange(info.compose.start, info.compose.end);
+        auto composeStart = info.compose.start;
+        auto composeEnd = info.compose.end;
+        DeleteByRange(composeStart, composeEnd);
     }
 #endif
     TwinklingByFocus();
