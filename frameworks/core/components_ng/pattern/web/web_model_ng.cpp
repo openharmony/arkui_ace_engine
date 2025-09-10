@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "base/utils/utils.h"
-#include "arkweb_utils.h"
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -27,6 +26,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "nweb_helper.h"
+#include "arkweb_utils.h"
+#else
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
