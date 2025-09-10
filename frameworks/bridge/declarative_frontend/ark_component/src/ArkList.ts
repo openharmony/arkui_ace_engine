@@ -351,6 +351,20 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ListScrollSnapAnimationSpeedModifier extends ModifierWithKey<ScrollSnapAnimationSpeed> {
+  constructor(value: ScrollSnapAnimationSpeed) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listScrollSnapAnimationSpeed');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetScrollSnapAnimationSpeed(node);
+    } else {
+      getUINativeModule().list.setScrollSnapAnimationSpeed(node, this.value);
+    }
+  }
+}
+
 class ListOnScrollIndexModifier extends ModifierWithKey<(start: number, end: number, center: number) => void> {
   constructor(value: (start: number, end: number, center: number) => void) {
     super(value);
@@ -760,6 +774,11 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
+    return this;
+  }
+  scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed): this {
+    modifierWithKey(this._modifiersWithKeys,
+      ListScrollSnapAnimationSpeedModifier.identity, ListScrollSnapAnimationSpeedModifier, value);
     return this;
   }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {

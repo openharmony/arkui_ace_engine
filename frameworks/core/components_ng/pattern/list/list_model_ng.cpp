@@ -751,6 +751,15 @@ void ListModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObjec
     CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 
+void ListModelNG::SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
+}
+
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1541,5 +1550,21 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
 void ListModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ListModelNG::SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
+}
+
+ScrollSnapAnimationSpeed ListModelNG::GetScrollSnapAnimationSpeed(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ScrollSnapAnimationSpeed::NORMAL);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, ScrollSnapAnimationSpeed::NORMAL);
+    return pattern->GetSnapSpeed();
 }
 } // namespace OHOS::Ace::NG

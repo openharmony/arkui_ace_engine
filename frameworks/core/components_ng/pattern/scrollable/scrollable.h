@@ -677,6 +677,16 @@ public:
         return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
     }
 
+    void SetListSnapSpeed(ScrollSnapAnimationSpeed speed)
+    {
+        listSnapSpeed_ = speed;
+    }
+
+    ScrollSnapAnimationSpeed GetListSnapSpeed() const
+    {
+        return listSnapSpeed_;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
@@ -831,6 +841,7 @@ private:
     SnapDirection snapDirection_ = SnapDirection::NONE;
     bool isSlow_ = false;
     std::optional<float> nextStep_;
+    ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

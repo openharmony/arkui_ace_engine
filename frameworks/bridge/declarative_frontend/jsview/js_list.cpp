@@ -579,6 +579,19 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSyncLoad(enabled);
 }
 
+void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
+{
+    ScrollSnapAnimationSpeed speed = ScrollSnapAnimationSpeed::NORMAL;
+    if (args.Length() == 1 && args[0]->IsNumber()) {
+        int32_t num = args[0]->ToNumber<int32_t>();
+        if (num >= static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL) &&
+            num <= static_cast<int32_t>(ScrollSnapAnimationSpeed::SLOW)) {
+            speed = static_cast<ScrollSnapAnimationSpeed>(num);
+        }
+    }
+    ListModel::GetInstance()->SetScrollSnapAnimationSpeed(speed);
+}
+
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
     if (args.Length() <= 0) {
@@ -931,6 +944,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
+    JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);

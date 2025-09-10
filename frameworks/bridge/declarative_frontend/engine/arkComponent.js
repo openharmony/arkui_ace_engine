@@ -34627,6 +34627,19 @@ class ListClipModifier extends ModifierWithKey {
   }
 }
 ListClipModifier.identity = Symbol('listClip');
+class ListScrollSnapAnimationSpeedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetScrollSnapAnimationSpeed(node);
+    } else {
+      getUINativeModule().list.setScrollSnapAnimationSpeed(node, this.value);
+    }
+  }
+}
+ListScrollSnapAnimationSpeedModifier.identity = Symbol('listScrollSnapAnimationSpeed');
 class ListOnScrollIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -35010,6 +35023,11 @@ class ArkListComponent extends ArkScrollable {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
+    return this;
+  }
+  scrollSnapAnimationSpeed(value) {
+    modifierWithKey(this._modifiersWithKeys,
+      ListScrollSnapAnimationSpeedModifier.identity, ListScrollSnapAnimationSpeedModifier, value);
     return this;
   }
   onScroll(event) {

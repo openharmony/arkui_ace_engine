@@ -6067,6 +6067,23 @@ typedef enum {
     NODE_LIST_SYNC_LOAD = 1003016,
 
     /**
+     * @brief Defines the scroll snap animation speed for the <b>List</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     *.value[0].i32: alignment mode for the list snap position.
+     * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}.
+     * Default value: <b>ARKUI_SCROLL_SNAP_ANIMATION_NORMAL</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     *.value[0].i32: alignment mode for the list snap position.
+     * The parameter type is {@link ArkUI_ScrollSnapAnimationSpeed}. \n
+     *
+     * @since 22
+     */
+    NODE_LIST_SCROLL_SNAP_ANIMATION_SPEED = 1003017,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *

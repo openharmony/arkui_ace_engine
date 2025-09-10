@@ -3477,6 +3477,9 @@ struct ArkUIListModifier {
     void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
     void (*resetShowCached)(ArkUINodeHandle node);
     ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
+    void (*setScrollSnapAnimationSpeed)(ArkUINodeHandle node, ArkUI_Int32 speed);
+    void (*resetScrollSnapAnimationSpeed)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollSnapAnimationSpeed)(ArkUINodeHandle node);
     void (*setOnListScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnScrollVisibleContentChange)(ArkUINodeHandle node, void* callback);
     void (*setOnItemMove)(ArkUINodeHandle node, void* callback);

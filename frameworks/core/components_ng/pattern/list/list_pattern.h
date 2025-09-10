@@ -463,6 +463,22 @@ public:
     }
     bool LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup);
 
+    void SetSnapSpeed(ScrollSnapAnimationSpeed speed)
+    {
+        if (scrollable_) {
+            scrollable_->SetListSnapSpeed(speed);
+        }
+        listSnapSpeed_ = speed;
+    }
+
+    ScrollSnapAnimationSpeed GetSnapSpeed() const
+    {
+        if (scrollable_) {
+            return scrollable_->GetListSnapSpeed();
+        }
+        return listSnapSpeed_;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -678,6 +694,7 @@ private:
     bool prevMeasureBreak_ = false;
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
+    ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
 };
 } // namespace OHOS::Ace::NG
 
