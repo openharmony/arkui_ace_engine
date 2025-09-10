@@ -2419,48 +2419,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: SliderPatternTest036
- * @tc.desc: Test Slider OnDetachFromFrameNodeMultiThread.
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest036, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
-    ASSERT_NE(sliderPattern, nullptr);
-    sliderPattern->OnDetachFromFrameNodeMultiThread();
-}
-
-/**
- * @tc.name: SliderPatternTest037
- * @tc.desc: Test Slider OnDetachFromMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest037, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
-    ASSERT_NE(sliderPattern, nullptr);
-    sliderPattern->OnDetachFromMainTree();
-}
-
-/**
- * @tc.name: SliderPatternTest038
- * @tc.desc: Test Slider OnDetachFromMainTreeMultiThread.
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, SliderPatternTest038, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
-    ASSERT_NE(sliderPattern, nullptr);
-    sliderPattern->OnDetachFromMainTreeMultiThread(frameNode);
-}
-
-/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: test OnColorConfigurationUpdate.
  * @tc.type: FUNC
@@ -2517,6 +2475,101 @@ HWTEST_F(SliderPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_TRUE(paintProperty->GetTrackBackgroundIsResourceColor());
     EXPECT_EQ(paintProperty->GetSelectColor(), Color::RED);
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateStepPointsAccessibilityText001
+ * @tc.desc: Test slider_pattern UpdateStepPointsAccessibilityText001
+ * UpdateStepPointsAccessibilityText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, UpdateStepPointsAccessibilityText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    RefPtr<FrameNode> frameNode;
+    auto sliderPattern = AccessibilityInit(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
+    auto parent = sliderPattern->parentAccessibilityNode_;
+    ASSERT_NE(parent, nullptr);
+    /**
+     * @tc.steps: step2. Add Slider virtual node.
+     */
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    /**
+     * @tc.steps: step3. Get accessibility virtual node size.
+     */
+    EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
+    EXPECT_EQ(sliderPattern->pointAccessibilityNodeEventVec_.size(), HORIZONTAL_STEP_POINTS.size());
+    EXPECT_EQ(parent->GetChildren().size(), HORIZONTAL_STEP_POINTS.size());
+    /**
+     * @tc.steps: step4. Update virtual node selected.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto options = OPTIONS_MAP;
+    for (const auto& item : ACCESSIBILITY_STEP_INDEX_DATA) {
+        sliderPaintProperty->UpdateMax(item.first[0]);
+        sliderPaintProperty->UpdateMin(item.first[1]);
+        sliderPaintProperty->UpdateStep(item.first[2]);
+        sliderPaintProperty->UpdateValue(item.first[3]);
+        for (int32_t i = 0; i < sliderPattern->pointAccessibilityNodeVec_.size(); i++) {
+            auto node = sliderPattern->pointAccessibilityNodeVec_[i];
+            ASSERT_NE(node, nullptr);
+            sliderPattern->UpdateStepPointsAccessibilityText(node, i, options);
+            auto pointAccessibilityProperty = node->GetAccessibilityProperty<TextAccessibilityProperty>();
+            ASSERT_NE(pointAccessibilityProperty, nullptr);
+            auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+            ASSERT_NE(pointNodeProperty, nullptr);
+            auto text = options.find(i) != options.end() ?
+                options[i] : StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+            EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityText(), text);
+        }
+    }
+}
+
+/**
+ * @tc.name: SliderPatternTest036
+ * @tc.desc: Test Slider OnDetachFromFrameNodeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest036, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: SliderPatternTest037
+ * @tc.desc: Test Slider OnDetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest037, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: SliderPatternTest038
+ * @tc.desc: Test Slider OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest038, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTreeMultiThread(frameNode);
 }
 
 /**
@@ -2606,59 +2659,6 @@ HWTEST_F(SliderPatternTestNg, UpdateSliderComponentString001, TestSize.Level1)
             pattern->UpdateSliderComponentMedia();
             pattern->UpdateSliderComponentString(true, "test");
             EXPECT_TRUE(paintProperty->GetShowTips());
-        }
-    }
-}
-
-/**
- * @tc.name: UpdateStepPointsAccessibilityText001
- * @tc.desc: Test slider_pattern UpdateStepPointsAccessibilityText001
- * UpdateStepPointsAccessibilityText
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, UpdateStepPointsAccessibilityText001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Slider node.
-     */
-    RefPtr<FrameNode> frameNode;
-    auto sliderPattern = AccessibilityInit(frameNode);
-    ASSERT_NE(frameNode, nullptr);
-    ASSERT_NE(sliderPattern, nullptr);
-    auto parent = sliderPattern->parentAccessibilityNode_;
-    ASSERT_NE(parent, nullptr);
-    /**
-     * @tc.steps: step2. Add Slider virtual node.
-     */
-    sliderPattern->AddStepPointsAccessibilityVirtualNode();
-    /**
-     * @tc.steps: step3. Get accessibility virtual node size.
-     */
-    EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
-    EXPECT_EQ(sliderPattern->pointAccessibilityNodeEventVec_.size(), HORIZONTAL_STEP_POINTS.size());
-    EXPECT_EQ(parent->GetChildren().size(), HORIZONTAL_STEP_POINTS.size());
-    /**
-     * @tc.steps: step4. Update virtual node selected.
-     */
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    ASSERT_NE(sliderPaintProperty, nullptr);
-    auto options = OPTIONS_MAP;
-    for (const auto& item : ACCESSIBILITY_STEP_INDEX_DATA) {
-        sliderPaintProperty->UpdateMax(item.first[0]);
-        sliderPaintProperty->UpdateMin(item.first[1]);
-        sliderPaintProperty->UpdateStep(item.first[2]);
-        sliderPaintProperty->UpdateValue(item.first[3]);
-        for (int32_t i = 0; i < sliderPattern->pointAccessibilityNodeVec_.size(); i++) {
-            auto node = sliderPattern->pointAccessibilityNodeVec_[i];
-            ASSERT_NE(node, nullptr);
-            sliderPattern->UpdateStepPointsAccessibilityText(node, i, options);
-            auto pointAccessibilityProperty = node->GetAccessibilityProperty<TextAccessibilityProperty>();
-            ASSERT_NE(pointAccessibilityProperty, nullptr);
-            auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
-            ASSERT_NE(pointNodeProperty, nullptr);
-            auto text = options.find(i) != options.end() ?
-                options[i] : StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
-            EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityText(), text);
         }
     }
 }
