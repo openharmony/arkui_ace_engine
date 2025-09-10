@@ -136,6 +136,7 @@ const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier();
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier();
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier();
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
+const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier();
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier();
@@ -155,11 +156,13 @@ const GENERATED_ArkUIRootModifier* GetRootModifier();
 const GENERATED_ArkUIRootSceneModifier* GetRootSceneModifier();
 const GENERATED_ArkUIRowModifier* GetRowModifier();
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier();
+const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier();
 const GENERATED_ArkUIScreenModifier* GetScreenModifier();
 const GENERATED_ArkUIScrollModifier* GetScrollModifier();
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier();
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier();
 const GENERATED_ArkUISearchModifier* GetSearchModifier();
+const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier();
 const GENERATED_ArkUISelectModifier* GetSelectModifier();
 const GENERATED_ArkUIShapeModifier* GetShapeModifier();
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier();
@@ -426,6 +429,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetNavDestinationModifier,
         GetNavigationModifier,
         GetNodeContainerModifier,
+        GetPasteButtonModifier,
         GetPathModifier,
         GetPatternLockModifier,
         GetPluginComponentModifier,
@@ -445,11 +449,13 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetRootSceneModifier,
         GetRowModifier,
         GetRowSplitModifier,
+        GetSaveButtonModifier,
         GetScreenModifier,
         GetScrollModifier,
         GetScrollableCommonMethodModifier,
         GetScrollBarModifier,
         GetSearchModifier,
+        GetSecurityComponentMethodModifier,
         GetSelectModifier,
         GetShapeModifier,
         GetSideBarContainerModifier,

@@ -40,11 +40,11 @@ Ark_String GetErrorInfoImpl(Ark_WebResourceError peer)
     result = peer->handler->GetInfo();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
+Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetCode());
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetCode());
 }
 } // WebResourceErrorAccessor
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()

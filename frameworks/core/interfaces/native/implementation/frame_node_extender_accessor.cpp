@@ -771,12 +771,10 @@ Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
     auto returnPeer = FrameNodePeer::Create(frameNode);
     return returnPeer;
 }
-void* UnWrapRawPtrImpl(Ark_FrameNode peer,
+Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
                                Ark_NativePointer pointer)
 {
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    auto frameNodeRaw = Referenced::RawPtr(frameNode);
-    return reinterpret_cast<void*>(frameNodeRaw);
+    return peer;
 }
 Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
 {

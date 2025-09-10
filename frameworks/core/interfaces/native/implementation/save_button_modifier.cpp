@@ -55,15 +55,6 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
         default: LOGE("Unexpected enum value in Ark_SaveDescription: %{public}d", src);
     }
 }
-template<>
-SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
-{
-    SaveButtonStyle style;
-    style.text = OptConvert<SaveButtonSaveDescription>(src.text);
-    style.icon = OptConvert<SaveButtonIconStyle>(src.icon);
-    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
-    return style;
-}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonModifier {
@@ -80,7 +71,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // SaveButtonModifier
 namespace SaveButtonInterfaceModifier {
-void SetSaveButtonOptions0Impl(Ark_NativePointer node)
+void SetSaveButtonOptionsImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -116,14 +107,7 @@ void SetOnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        auto error = Opt_BusinessError{
-            .value = Ark_BusinessError{
-                .name = Converter::ArkValue<Ark_String>("", Converter::FC),
-                .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-                .stack = Converter::ArkValue<Opt_String>("", Converter::FC),
-                .code = Converter::ArkValue<Ark_Number>(code)
-            }
-        };
+        auto error = Converter::ArkValue<Opt_BusinessError>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 

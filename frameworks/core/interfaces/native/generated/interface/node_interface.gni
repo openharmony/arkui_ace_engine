@@ -294,6 +294,7 @@ generated_sources = [
   "implementation/user_data_span_accessor.cpp",
   "implementation/video_controller_accessor.cpp",
   "implementation/video_modifier.cpp",
+  "implementation/view_model_bridge.cpp",
   "implementation/water_flow_modifier.cpp",
   "implementation/water_flow_sections_accessor.cpp",
   "implementation/web_context_menu_param_accessor.cpp",
