@@ -32,6 +32,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -84,13 +85,27 @@ void MenuModelStaticTestNg::TearDown()
  */
 HWTEST_F(MenuModelStaticTestNg, SetExpandingMode001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetExpandingMode(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu subMenuExpandingMode SIDE
+    */
     MenuModelStatic::SetExpandingMode(node, std::optional<SubMenuExpandingMode>(SubMenuExpandingMode::SIDE));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu subMenuExpandingMode is SIDE
+     */
+    EXPECT_EQ(menuProperty->GetExpandingMode(), SubMenuExpandingMode::SIDE);
 }
 
  /**
@@ -100,14 +115,29 @@ HWTEST_F(MenuModelStaticTestNg, SetExpandingMode001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetItemDivider001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetItemDivider(node, std::nullopt, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu DividerMode FLOATING_ABOVE_MENU
+    */
     MenuModelStatic::SetItemDivider(node, std::optional<V2::ItemDivider>(ITEM_DIVIDER),
         std::optional<DividerMode>(DividerMode::FLOATING_ABOVE_MENU));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu DividerMode is FLOATING_ABOVE_MENU
+     */
+    EXPECT_EQ(menuProperty->GetItemDividerMode(), DividerMode::FLOATING_ABOVE_MENU);
+    EXPECT_EQ(menuProperty->GetItemDivider(), ITEM_DIVIDER);
 }
 
  /**
@@ -117,14 +147,29 @@ HWTEST_F(MenuModelStaticTestNg, SetItemDivider001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetItemGroupDivider001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetItemGroupDivider(node, std::nullopt, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu GroupDividerMode FLOATING_ABOVE_MENU
+    */
     MenuModelStatic::SetItemGroupDivider(node, std::optional<V2::ItemDivider>(ITEM_DIVIDER),
         std::optional<DividerMode>(DividerMode::FLOATING_ABOVE_MENU));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu GroupDividerMode is FLOATING_ABOVE_MENU
+     */
+    EXPECT_EQ(menuProperty->GetItemDividerMode(), DividerMode::FLOATING_ABOVE_MENU);
+    EXPECT_EQ(menuProperty->GetItemGroupDivider(), ITEM_DIVIDER);
 }
 
  /**
@@ -134,13 +179,27 @@ HWTEST_F(MenuModelStaticTestNg, SetItemGroupDivider001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetFontColor001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetFontColor(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu Font Color black
+    */
     MenuModelStatic::SetFontColor(node, std::optional<Color>(Color::BLACK));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu Font Color is black
+     */
+    EXPECT_EQ(menuProperty->GetFontColor(), Color::BLACK);
 }
 
  /**
@@ -150,13 +209,27 @@ HWTEST_F(MenuModelStaticTestNg, SetFontColor001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetFontSize001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetFontSize(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu Font size 16fp
+    */
     MenuModelStatic::SetFontSize(node, std::optional<Dimension>(16.0_fp));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu Font size is 16fp
+     */
+    EXPECT_EQ(menuProperty->GetFontSize(), 16.0_fp);
 }
 
  /**
@@ -166,13 +239,27 @@ HWTEST_F(MenuModelStaticTestNg, SetFontSize001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetFontWeight001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetFontWeight(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu Font weight W500
+    */
     MenuModelStatic::SetFontWeight(node, std::optional<FontWeight>(FontWeight::W500));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu Font weight is W500
+     */
+    EXPECT_EQ(menuProperty->GetFontWeight(), FontWeight::W500);
 }
 
  /**
@@ -182,13 +269,27 @@ HWTEST_F(MenuModelStaticTestNg, SetFontWeight001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetFontStyle001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetFontStyle(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu Font Style ITALIC
+    */
     MenuModelStatic::SetFontStyle(node, std::optional<Ace::FontStyle>(Ace::FontStyle::ITALIC));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu Font Style is ITALIC
+     */
+    EXPECT_EQ(menuProperty->GetItalicFontStyle(), Ace::FontStyle::ITALIC);
 }
 
  /**
@@ -198,14 +299,28 @@ HWTEST_F(MenuModelStaticTestNg, SetFontStyle001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetFontFamily001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetFontFamily(node, std::nullopt);
     std::vector<std::string> fontFamilies;
+    /**
+    * @tc.steps: step2. set Menu Font family fontFamilies
+    */
     MenuModelStatic::SetFontFamily(node, std::optional<std::vector<std::string>>(fontFamilies));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu Font family is fontFamilies
+     */
+    EXPECT_EQ(menuProperty->GetFontFamily(), fontFamilies);
 }
 
  /**
@@ -215,13 +330,27 @@ HWTEST_F(MenuModelStaticTestNg, SetFontFamily001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetBorderRadius001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
 
     MenuModelStatic::SetBorderRadius(node, std::nullopt);
+    /**
+    * @tc.steps: step2. set Menu borderRadius 16fp
+    */
     MenuModelStatic::SetBorderRadius(node, std::optional<Dimension>(16.0_fp));
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu borderRadius is 16fp
+     */
+    EXPECT_EQ(menuProperty->GetBorderRadius(), BorderRadiusProperty(16.0_fp));
 }
 
  /**
@@ -231,12 +360,26 @@ HWTEST_F(MenuModelStaticTestNg, SetBorderRadius001, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetBorderRadius002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
-
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    /**
+    * @tc.steps: step2. set Menu borderRadius null
+    */
     MenuModelStatic::SetBorderRadius(node, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu borderRadius.multiValued is true
+     */
+    EXPECT_TRUE(menuProperty->GetBorderRadius().has_value());
+    EXPECT_TRUE(menuProperty->GetBorderRadius().value().multiValued);
 }
 
  /**
@@ -246,11 +389,24 @@ HWTEST_F(MenuModelStaticTestNg, SetBorderRadius002, TestSize.Level1)
  */
 HWTEST_F(MenuModelStaticTestNg, SetWidth001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
     auto frameNode = MenuModelStatic::CreateFrameNode(1);
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
-
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    /**
+    * @tc.steps: step2. set Menu width 16fp
+    */
     MenuModelStatic::SetWidth(node, 16.0_fp);
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. Menu width is 16fp
+     */
+    EXPECT_EQ(menuProperty->GetMenuWidth(), 16.0_fp);
 }
 }
