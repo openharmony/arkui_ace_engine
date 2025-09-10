@@ -2525,4 +2525,21 @@ void WebModelNG::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateForceEnableZoom(isEnabled);
 }
+
+void WebModelNG::SetSafeBrowsingCheckFinishId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
+
+void WebModelNG::SetOnSafeBrowsingCheckFinish(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinish)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinish));
+}
 } // namespace OHOS::Ace::NG

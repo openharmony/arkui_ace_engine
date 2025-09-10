@@ -353,7 +353,7 @@ public:
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
-    void PaintAccessibilityFocus() override;
+    void PaintAccessibilityFocus(bool isRectUpdate = false) override;
 
     void UpdateAccessibilityRoundRect() override;
 

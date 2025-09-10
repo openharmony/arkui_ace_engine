@@ -129,8 +129,10 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest003, Test
      * @tc.steps: step1. Prepare darg data and asyncCtxData.
      */
     int32_t containerId = 100;
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
     bool hasTouchPoint = true;
-    DragPointerEvent dragPointerEvent(100, 100);
+    DragPointerEvent dragPointerEvent(100, 100, 0, 0);
     NG::DragPreviewOption previewOption;
     DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
@@ -154,7 +156,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest003, Test
         NG::DragControllerFuncWrapper::GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     EXPECT_EQ(pixelMapScaledOffset, NG::OffsetF(90, 90));
     auto originNodeOffset = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
-    EXPECT_EQ(originNodeOffset, NG::OffsetF(0, 0));
+    EXPECT_EQ(originNodeOffset, NG::OffsetF(90, 90));
 
     /**
      * @tc.steps: step3. call GetOriginNodeOffset when hasTouchPoint is false.
@@ -167,7 +169,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest003, Test
     pixelMapScaledOffset = NG::DragControllerFuncWrapper::GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     EXPECT_EQ(pixelMapScaledOffset, NG::OffsetF(100, 100));
     originNodeOffset = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
-    EXPECT_EQ(originNodeOffset, NG::OffsetF(0, 0));
+    EXPECT_EQ(originNodeOffset, NG::OffsetF(100, 100));
 }
 
 /**

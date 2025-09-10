@@ -121,7 +121,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_003, Tes
     MessageParcel reply;
     
     EXPECT_EQ(renderDispather->HandleSetAllowUpdate(data, reply), ERR_OK);
-    EXPECT_EQ(renderDispather->HandleDispatchSurfaceChangeEvent(data, reply), ERR_OK);
+    EXPECT_EQ(renderDispather->HandleDispatchSurfaceChangeEvent(data, reply), ERR_INVALID_VALUE);
     EXPECT_EQ(renderDispather->HandleSetObscured(data, reply), ERR_OK);
     EXPECT_EQ(renderDispather->HandleOnAccessibilityChildTreeRegister(data, reply), ERR_OK);
     EXPECT_EQ(renderDispather->HandleOnAccessibilityChildTreeDeregister(data, reply), ERR_OK);

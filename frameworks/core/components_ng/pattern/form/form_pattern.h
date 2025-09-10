@@ -272,6 +272,8 @@ private:
     void enhancesSubContainer(bool hasContainer);
     bool GetFormDumpInfo(std::vector<std::string> &dumpInfo);
     void GetRSUIContext();
+    void GetWantParam(RequestFormInfo& info);
+    void UpdateFormSurface(const RequestFormInfo& info);
 
     RefPtr<RenderContext> externalRenderContext_;
 

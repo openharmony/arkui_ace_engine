@@ -56,6 +56,9 @@ template("ace_core_pipeline_ng_source_set") {
           "graphic_2d:librender_service_base",
           "graphic_2d:librender_service_client",
         ]
+        if (current_os == "ohos") {
+          external_deps += [ "eventhandler:libeventhandler" ]
+        }
         if (ace_use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         }

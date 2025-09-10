@@ -2894,7 +2894,7 @@ bool PipelineContext::OnBackPressed()
 RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -3050,6 +3050,7 @@ void PipelineContext::OnTouchEvent(
         historyPointsById_.erase(scalePoint.id);
     }
     if (scalePoint.type == TouchType::DOWN) {
+        SetTHPNotifyState(ThpNotifyState::DEFAULT);
         DisableNotifyResponseRegionChanged();
         SetUiDvsyncSwitch(false);
         CompensateTouchMoveEventBeforeDown();
@@ -3188,16 +3189,7 @@ void PipelineContext::OnTouchEvent(
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
-        if (thpExtraMgr_ != nullptr) {
-            const uint32_t delay = 800; // 800: ms
-            taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
-            auto task = [weak = WeakClaim(this)]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
-            };
-            taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
-        }
+        PostTaskResponseRegion(DEFAULT_DELAY_THP);
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
@@ -6332,10 +6324,8 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
 
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootNode)
 {
+    CHECK_NULL_VOID(thpExtraMgr_);
     ACE_FUNCTION_TRACE();
-    if (!thpExtraMgr_) {
-        return;
-    }
     std::string responseRegion = GetResponseRegion(rootNode);
     std::string parameters = "thp#Location#" + responseRegion;
     LOGD("THP_UpdateViewsLocation responseRegion = %{public}s", parameters.c_str());
@@ -6353,6 +6343,26 @@ void PipelineContext::DisableNotifyResponseRegionChanged()
 {
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+}
+
+void PipelineContext::PostTaskResponseRegion(int32_t delay)
+{
+    // Prevent continuous clicks, task is unique.
+    DisableNotifyResponseRegionChanged();
+    CHECK_NULL_VOID(taskExecutor_);
+    CHECK_NULL_VOID(thpExtraMgr_);
+    if (delay < 0) {
+        delay = DEFAULT_DELAY_THP;
+    }
+    auto task = [weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline->GetTHPNotifyState() != ThpNotifyState::DEFAULT) {
+            return ;
+        }
+        pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+    };
+    taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
 }
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)

@@ -17,6 +17,7 @@ struct RotationIndex {
     {title: 'PreviewAnimation',url:'pages/PreviewAnimation/Index'},
     {title: 'Dock',url:'pages/Dock/Index'},
     {title: 'MenuUX',url:'pages/MenuUX/Index'},
+    {title: 'MenuPlacement',url:'pages/MenuPlacement/Index'},
   ]
 
   build() {

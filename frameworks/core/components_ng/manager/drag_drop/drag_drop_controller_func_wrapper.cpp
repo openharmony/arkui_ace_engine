@@ -85,16 +85,14 @@ OffsetF DragControllerFuncWrapper::GetOriginNodeOffset(
     PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData)
 {
     CHECK_NULL_RETURN(data.pixelMap, OffsetF());
-    OffsetF pointPosition(static_cast<float>(asyncCtxData.dragPointerEvent.displayX),
-        static_cast<float>(asyncCtxData.dragPointerEvent.displayY));
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-        asyncCtxData.containerId >= MIN_SUBCONTAINER_ID
-            ? SubwindowManager::GetInstance()->GetParentContainerId(asyncCtxData.containerId)
-            : asyncCtxData.containerId,
-        SubwindowType::TYPE_MENU);
-    CHECK_NULL_RETURN(subwindow, OffsetF());
-    auto subwindowOffset = subwindow->GetWindowRect().GetOffset();
-    pointPosition -= subwindowOffset;
+    OffsetF pointPosition(static_cast<float>(asyncCtxData.dragPointerEvent.windowX),
+        static_cast<float>(asyncCtxData.dragPointerEvent.windowY));
+    auto container = AceEngine::Get().GetContainer(asyncCtxData.containerId);
+    CHECK_NULL_RETURN(container, OffsetF());
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto windowOffset = DragDropFuncWrapper::GetCurrentWindowOffset(pipeline);
+    pointPosition += windowOffset;
     auto pixelMapScaledOffset = GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     auto offsetX = pixelMapScaledOffset.GetX() +
         (data.pixelMap->GetWidth() * data.previewScale) / 2.0f -data.pixelMap->GetWidth() / 2.0f;

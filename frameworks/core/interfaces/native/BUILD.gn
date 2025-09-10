@@ -221,6 +221,9 @@ template("ace_core_interfaces_native_node") {
       "napi:ace_napi",
       "runtime_core:ani",
     ]
+    if (current_os == "ohos") {
+      external_deps += [ "eventhandler:libeventhandler" ]
+    }
     if (build_ohos_sdk || is_arkui_x) {
       sources -= [ "$ace_root/frameworks/bridge/arkts_frontend/ani_context_module.cpp" ]
       external_deps -= [ "runtime_core:ani" ]

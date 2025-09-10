@@ -399,6 +399,7 @@ public:
     void UpdateImageFill(const Color& color);
     void UpdateImageAlt(const ImageSourceInfo& sourceInfo);
     void OnColorModeChange(uint32_t colorMode) override;
+    ContentTransitionType GetContentTransitionParam();
 
     void SetSupportSvg2(bool enable)
     {

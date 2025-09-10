@@ -4347,6 +4347,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSupportSvg2));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSupportSvg2"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSupportSvg2));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetContentTransition));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetContentTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

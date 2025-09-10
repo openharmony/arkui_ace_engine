@@ -40,6 +40,8 @@ struct RequestFormInfo {
     int32_t renderingMode = 0;
     uint64_t index = GetNanoseconds();
     float borderWidth = 0.0f;
+    float layoutWidth = 0.0f;
+    float layoutHeight = 0.0f;
     bool obscuredMode = false;
     int32_t shape = -1;
     bool exemptAppLock;
@@ -48,7 +50,7 @@ struct RequestFormInfo {
     {
         std::stringstream paramStream;
         paramStream << bundleName << abilityName << moduleName << cardName << dimension << renderingMode
-            << index << temporary << shape;
+            << index << temporary << shape << layoutWidth << layoutHeight;
         if (wantWrap) {
             paramStream << wantWrap->ToString();
         }
@@ -62,7 +64,8 @@ struct RequestFormInfo {
                temporary == formInfo.temporary && dimension == formInfo.dimension &&
                allowUpdate == formInfo.allowUpdate && width == formInfo.width && height == formInfo.height &&
                renderingMode == formInfo.renderingMode && index == formInfo.index && wantWrap == formInfo.wantWrap &&
-               shape == formInfo.shape;
+               shape == formInfo.shape && NearEqual(layoutWidth, formInfo.layoutWidth) &&
+               NearEqual(layoutHeight, formInfo.layoutHeight);
     }
 };
 

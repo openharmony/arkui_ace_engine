@@ -3069,4 +3069,28 @@ void ArkTSUtils::ParseGradientAngle(
     values.push_back({ .i32 = static_cast<ArkUI_Int32>(angleHasValue) });
     values.push_back({ .f32 = static_cast<ArkUI_Float32>(angleValue) });
 }
+
+bool ArkTSUtils::ParseContentTransitionEffect(
+    const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto obj = value->ToObject(vm);
+    auto typeValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "contentTransitionType_"));
+    if (typeValue.IsEmpty() || !typeValue->IsString(vm)) {
+        return false;
+    }
+    static const std::unordered_map<std::string, ContentTransitionType> contentTransitionTypeMap {
+        { "IDENTITY", ContentTransitionType::IDENTITY },
+        { "OPACITY", ContentTransitionType::OPACITY },
+    };
+    auto typeValueStr = typeValue->ToString(vm)->ToString(vm);
+    auto it = contentTransitionTypeMap.find(typeValueStr);
+    if (it == contentTransitionTypeMap.end()) {
+        return false;
+    }
+    contentTransitionType = it->second;
+    return true;
+}
 } // namespace OHOS::Ace::NG

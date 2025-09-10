@@ -112,18 +112,17 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
-                option.GetDuration());
+                "keyframe inf iteration. dur:%{public}d", option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "%{public}s iteration is infinite. duration:%{public}d, curve:%{public}s",
+                "%{public}s inf iteration. dur:%{public}d, curve:%{public}s",
                 animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
         }
         return;
     }
     if (cnt) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
-            animationInterfaceName, option.ToString().c_str(), cnt.value());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, %{public}s, cnt:%{public}d",
+            animationInterfaceName, option.ToSimpleString().c_str(), cnt.value());
     }
 }
 
@@ -208,7 +207,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
         if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
             TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
-                animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
+                animationInterfaceName, option.ToSimpleString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
             break;
         }

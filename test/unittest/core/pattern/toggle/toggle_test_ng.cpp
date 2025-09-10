@@ -958,6 +958,17 @@ HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->SetDragOffsetX(0.0f);
     switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
+    switchModifier->isCancelAnimation_ = true;
+    switchModifier->isFocusOrBlur_ = true;
+    switchModifier->isSelect_ = AceType::MakeRefPtr<PropertyBool>(true);
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
+    EXPECT_EQ(switchModifier->animatableBoardColor_->Get(), LinearColor(switchTheme->GetActiveColor()));
 }
 
 /**

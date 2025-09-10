@@ -1535,7 +1535,6 @@ HWTEST_F(GridScrollerTestNg, CreateWithResourceObjScrollBarColor001, TestSize.Le
     auto color = props->GetScrollBarColorValue(Color::BLUE);
     EXPECT_EQ(color, Color::BLUE);
 
-    model.CreateWithResourceObjScrollBarColor(nullptr);
     pattern_->resourceMgr_->ReloadResources();
     color = props->GetScrollBarColorValue(Color::BLUE);
     EXPECT_EQ(color, Color::BLUE);

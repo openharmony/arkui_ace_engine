@@ -1583,4 +1583,12 @@ bool WebClientImpl::IsShowHandle()
     CHECK_NULL_RETURN(delegate, false);
     return delegate->IsShowHandle();
 }
+
+void WebClientImpl::OnSafeBrowsingCheckFinish(int threat_type)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnSafeBrowsingCheckFinish(threat_type);
+}
 } // namespace OHOS::Ace

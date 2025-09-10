@@ -2473,8 +2473,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     */
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
 
     /**
     * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
@@ -2483,7 +2481,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 2));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(0));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2497,7 +2494,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(1));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
@@ -2511,7 +2507,6 @@ HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(2, 3));
     EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
     EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
-    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(2));
     EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);

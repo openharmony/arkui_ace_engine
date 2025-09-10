@@ -2782,6 +2782,7 @@ frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
 frameworks/core/interfaces/arkoala/arkoala_api.h @arkui_architecture
+frameworks/core/interfaces/native/common/ @arkuiframework
 frameworks/core/interfaces/native/BUILD.gn @arkui_architecture
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.cpp @arkui_superman
 frameworks/core/interfaces/native/node/alphabet_indexer_modifier.h @arkui_superman
@@ -3153,6 +3154,7 @@ interfaces/napi/kits/utils/ @arkuiframework
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/client_authentication_handler_accessor.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/client_authentication_handler_peer_impl.h @arkwebinarkuireview
+frameworks/core/interfaces/native/implementation/component_root_modifier.cpp  @arkuiframework
 frameworks/core/interfaces/native/implementation/console_message_accessor.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/console_message_peer_impl.h @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/controller_handler_accessor.cpp @arkwebinarkuireview
@@ -3211,6 +3213,7 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/manager/mock_display_manager.cpp @arkuilayout
 test/mock/core/manager/mock_display_manager.h @arkuilayout
 test/mock/core/svg/ @arkui_image
+test/mock/core/pipeline/ @arkuiframework
 test/mock/interfaces/ @arkui_architecture
 
 test/mock/core/animation/mock_animation_manager.h @arkuiscroll

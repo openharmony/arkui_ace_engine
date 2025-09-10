@@ -83,6 +83,16 @@ struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveOut_;
 };
 
+enum class ThpNotifyState {
+    // post task immediately
+    DEFAULT,
+    // post task after animation
+    NAVIGATION_TRANSITION,
+    ROUTER_TRANSITION,
+    SCROLL_MOVING,
+};
+constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
+
 struct FontInfo;
 struct FontConfigJsonInfo;
 class Frontend;
@@ -893,6 +903,11 @@ public:
         return viewScale_;
     }
 
+    void SetViewScale(float viewScale)
+    {
+        viewScale_ = viewScale;
+    }
+
     void SetIsCurrentInForceSplitMode(bool split)
     {
         isCurrentInForceSplitMode_ = split;
@@ -1462,9 +1477,21 @@ public:
         return "";
     };
 
+    virtual void PostTaskResponseRegion(int32_t delay) {};
+
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
     virtual void DisableNotifyResponseRegionChanged() {};
+
+    void SetTHPNotifyState(ThpNotifyState stat)
+    {
+        thpNotifyState_ = stat;
+    }
+
+    ThpNotifyState GetTHPNotifyState()
+    {
+        return thpNotifyState_;
+    }
 
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
@@ -1783,6 +1810,7 @@ protected:
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    ThpNotifyState thpNotifyState_ = ThpNotifyState::DEFAULT;
     uint64_t DVSyncChangeTime_ = 0;
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;

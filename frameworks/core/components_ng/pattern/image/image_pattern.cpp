@@ -1440,9 +1440,7 @@ void ImagePattern::OnAttachToFrameNode()
         renderCtx->SetClipToBounds(false);
         renderCtx->SetUsingContentRectForRenderFrame(true);
 
-        // register image frame node to pipeline context to receive memory level notification and window state change
-        // notification
-        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+        // register image frame node to pipeline context to receive window state change notification
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
 }
@@ -1456,7 +1454,6 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
 void ImagePattern::OnAttachToMainTree()
@@ -2947,5 +2944,16 @@ void ImagePattern::OnColorModeChange(uint32_t colorMode)
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+ContentTransitionType ImagePattern::GetContentTransitionParam()
+{
+    CHECK_NULL_RETURN(imagePaintMethod_, ContentTransitionType::IDENTITY);
+    bool needsContentTransition = imagePaintMethod_->NeedsContentTransition();
+    CHECK_NULL_RETURN(needsContentTransition, ContentTransitionType::IDENTITY);
+    auto paintProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ContentTransitionType::IDENTITY);
+    auto contentTransition = paintProperty->GetContentTransition().value_or(ContentTransitionType::IDENTITY);
+    return contentTransition;
 }
 } // namespace OHOS::Ace::NG

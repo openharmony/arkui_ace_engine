@@ -228,6 +228,8 @@ public:
     virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
     virtual void SetForceEnableZoom(bool isEnabled) {}
+    virtual void SetSafeBrowsingCheckFinishId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

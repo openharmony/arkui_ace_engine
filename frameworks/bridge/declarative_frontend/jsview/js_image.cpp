@@ -1086,6 +1086,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("hdrBrightness", &JSImage::SetHdrBrightness, opt);
     JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
     JSClass<JSImage>::StaticMethod("orientation", &JSImage::SetOrientation, opt);
+    JSClass<JSImage>::StaticMethod("contentTransition", &JSImage::SetContentTransition, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -1240,5 +1241,41 @@ void JSImage::SupportSvg2(const JSCallbackInfo& info)
         ParseJsBool(info[0], enable);
     }
     ImageModel::GetInstance()->SetSupportSvg2(enable);
+}
+
+bool JSImage::ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || jsValue->IsUndefined() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("contentTransitionType_");
+    if (typeVal.IsEmpty() || !typeVal->IsString()) {
+        return false;
+    }
+    static const std::unordered_map<std::string, ContentTransitionType> contentTransitionTypeMap {
+        { "IDENTITY", ContentTransitionType::IDENTITY },
+        { "OPACITY", ContentTransitionType::OPACITY },
+    };
+    auto it = contentTransitionTypeMap.find(typeVal->ToString());
+    if (it == contentTransitionTypeMap.end()) {
+        return false;
+    }
+    contentTransitionType = it->second;
+    return true;
+}
+
+void JSImage::SetContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetContentTransition(ContentTransitionType::IDENTITY);
+        return;
+    }
+    auto contentTransitionType = ContentTransitionType::IDENTITY;
+    if (ParseContentTransitionEffect(info[0], contentTransitionType)) {
+        ImageModel::GetInstance()->SetContentTransition(contentTransitionType);
+    } else {
+        ImageModel::GetInstance()->SetContentTransition(ContentTransitionType::IDENTITY);
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
-#include <cmath>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -222,7 +221,7 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 
     if (args->IsNumber()) {
-        fontWeight = std::to_string(args->ToNumber<int32_t>());
+        fontWeight = args->ToString();
     } else {
         ParseJsString(args, fontWeight);
     }
@@ -468,8 +467,7 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
-    auto isInf = args->IsNumber() && std::isinf(args->ToNumber<float>());
-    if (!isInf) {
+    if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
     TextModel::GetInstance()->SetMaxLines(value);
@@ -533,9 +531,12 @@ void JSText::SetTextContentAlign(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    if (index >= 0 && index < TEXT_CONTENT_ALIGNS.size()) {
-        TextModel::GetInstance()->SetTextContentAlign(TEXT_CONTENT_ALIGNS[index]);
+    auto isNormalValue = index >= 0 && index < TEXT_CONTENT_ALIGNS.size();
+    if (!isNormalValue) {
+        TextModel::GetInstance()->ReSetTextContentAlign();
+        return;
     }
+    TextModel::GetInstance()->SetTextContentAlign(TEXT_CONTENT_ALIGNS[index]);
 }
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)

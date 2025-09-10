@@ -261,7 +261,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        auto rect = DragDropFuncWrapper::GetPaintRectToScreen(frameNode) -
+        auto rect = DragDropFuncWrapper::GetPaintRectToScreenWithoutRotate(frameNode) -
             DragDropFuncWrapper::GetCurrentWindowOffset(PipelineContext::GetCurrentContextSafelyWithCheck());
         frameNodeOffset_ = rect.GetOffset();
         frameNodeSize_ = rect.GetSize();
@@ -279,7 +279,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
 
     // use menuPreview's size and offset for drag framework.
     if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
-        (GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f) ||
+        (DragAnimationHelper::ShouldSetOffsetForMenuDrag() ||
             frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {

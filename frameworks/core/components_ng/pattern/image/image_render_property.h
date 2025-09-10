@@ -43,6 +43,7 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SmoothEdge, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HdrBrightness, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ContentTransition, ContentTransitionType);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         /* no fixed attr below, just return */
@@ -69,6 +70,12 @@ struct ImagePaintStyle {
         }
         json->PutExtAttr("colorFilter", colorFilter.c_str(), filter);
         json->PutExtAttr("hdrBrightness", propHdrBrightness.value_or(RenderConstants::DEFAULT_HDR_BRIGHTNESS), filter);
+        static const char* CONTENTTRANSITIONVALUE[] = { "ContentTransitionEffect.IDENTITY",
+            "ContentTransitionEffect.OPACITY" };
+        json->PutExtAttr("contentTransition",
+            CONTENTTRANSITIONVALUE[static_cast<int32_t>(
+                propContentTransition.value_or(ContentTransitionType::IDENTITY))],
+            filter);
     }
 };
 
@@ -120,6 +127,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, HdrBrightness, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ImagePaintStyle, ImageResizableSlice, ImageResizableSlice, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        ImagePaintStyle, ContentTransition, ContentTransitionType, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);

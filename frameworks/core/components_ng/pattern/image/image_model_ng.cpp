@@ -1390,5 +1390,24 @@ bool ImageModelNG::GetSupportSvg2(FrameNode* frameNode)
     CHECK_NULL_RETURN(imagePattern, false);
     return imagePattern->GetSupportSvg2();
 }
+
+void ImageModelNG::SetContentTransition(ContentTransitionType contentTransition)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition);
+}
+
+void ImageModelNG::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
+}
+
+ContentTransitionType ImageModelNG::GetContentTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ContentTransitionType::IDENTITY);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ContentTransitionType::IDENTITY);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ContentTransitionType::IDENTITY);
+    return paintProperty->GetImagePaintStyle()->GetContentTransition().value_or(ContentTransitionType::IDENTITY);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

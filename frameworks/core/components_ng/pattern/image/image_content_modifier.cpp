@@ -75,4 +75,11 @@ void ImageContentModifier::UpdateSvgColorFilter(const RefPtr<CanvasImage>& canva
         }
     }
 }
+
+ContentTransitionType ImageContentModifier::GetContentTransitionParam()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, ContentTransitionType::IDENTITY);
+    return pattern->GetContentTransitionParam();
+}
 } // namespace OHOS::Ace::NG

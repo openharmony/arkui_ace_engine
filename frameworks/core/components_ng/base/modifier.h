@@ -25,6 +25,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/animation/gradient_arithmetic.h"
 #include "core/components_ng/base/linear_vector.h"
@@ -351,6 +352,11 @@ public:
     }
 
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler);
+
+    virtual ContentTransitionType GetContentTransitionParam()
+    {
+        return ContentTransitionType::IDENTITY;
+    }
 
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;

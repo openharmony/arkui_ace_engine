@@ -971,13 +971,11 @@ void WaterFlowLayoutSW::MeasureLazyChild(
     const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const
 {
     int32_t seg = info_->GetSegment(idx);
-    float referencePos = forward ? info_->GetDistanceToTop(idx, lane, mainGaps_[seg])
-        : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]);
-    referencePos = std::max(0.0f, referencePos);
     ViewPosReference ref {
         .viewPosStart = 0,
         .viewPosEnd = mainLen_ + info_->expandHeight_,
-        .referencePos = referencePos,
+        .referencePos = forward ? info_->GetDistanceToTop(idx, lane, mainGaps_[seg])
+                                : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = Axis::VERTICAL,
     };

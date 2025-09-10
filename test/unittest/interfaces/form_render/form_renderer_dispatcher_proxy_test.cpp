@@ -84,10 +84,11 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSi
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
-    float width = 0.0;
-    float height = 0.0;
-    float borderWidth = 0.0;
-    proxy->DispatchSurfaceChangeEvent(width, height, borderWidth);
+    OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
+    formSurfaceInfo.width = 0.0;
+    formSurfaceInfo.height = 0.0;
+    formSurfaceInfo.borderWidth = 0.0;
+    proxy->DispatchSurfaceChangeEvent(formSurfaceInfo);
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 

@@ -179,6 +179,45 @@ HWTEST_F(ImagePatternTestNg, OnSensitiveStyleChange001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnNotifyMemoryLevel001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnNotifyMemoryLevel001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(imageNode, nullptr);
+    RefPtr<ImageRenderProperty> layoutProperty1 = imageNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(layoutProperty1, nullptr);
+
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(ALT_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnNotifyMemoryLevel.
+     * @tc.expected: image_ is not changed.
+     */
+    imagePattern->OnNotifyMemoryLevel(1);
+    EXPECT_NE(imagePattern->image_, nullptr);
+}
+
+/**
  * @tc.name: SetDuration001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
@@ -2926,5 +2965,88 @@ HWTEST_F(ImagePatternTestNg, TestImageLoadingCtxCreate, TestSize.Level0)
      * @tc.expected: isSceneBoardWindow_ is false.
      */
     EXPECT_FALSE(loadingCtx2->isSceneBoardWindow_);
+}
+
+/**
+ * @tc.name: GetContentTransitionParam001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetContentTransitionParam001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetContentTransitionParam.
+     */
+    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
+}
+
+/**
+ * @tc.name: GetContentTransitionParam002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetContentTransitionParam002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto mockImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_ = mockImage;
+    imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(imagePattern->imagePaintMethod_, nullptr);
+    EXPECT_NE(imagePattern->contentMod_, nullptr);
+    ImageModelNG image;
+    image.SetContentTransition(ContentTransitionType::IDENTITY);
+    RefPtr<ImageRenderProperty> paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetContentTransitionParam.
+     */
+    EXPECT_EQ(paintProperty->GetContentTransition().value_or(ContentTransitionType::IDENTITY),
+        ContentTransitionType::IDENTITY);
+    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
+    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::IDENTITY);
+}
+
+/**
+ * @tc.name: GetContentTransitionParam003
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetContentTransitionParam003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto mockImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_ = mockImage;
+    imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(imagePattern->imagePaintMethod_, nullptr);
+    EXPECT_NE(imagePattern->contentMod_, nullptr);
+    ImageModelNG::SetContentTransition(AceType::RawPtr(frameNode), ContentTransitionType::OPACITY);
+
+    /**
+     * @tc.steps: step2. call GetContentTransitionParam.
+     */
+    EXPECT_EQ(ImageModelNG::GetContentTransition(AceType::RawPtr(frameNode)), ContentTransitionType::OPACITY);
+    EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::OPACITY);
+    EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::OPACITY);
 }
 } // namespace OHOS::Ace::NG

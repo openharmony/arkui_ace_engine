@@ -1258,6 +1258,11 @@ enum class ListItemSwipeActionDirection {
     START = 0,
     END = 1,
 };
+
+enum class ContentTransitionType : int32_t {
+    IDENTITY = 0,
+    OPACITY = 1,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

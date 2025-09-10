@@ -2657,4 +2657,36 @@ HWTEST_F(SearchTestNg, SetAutoCapitalizationMode001, TestSize.Level1)
     searchModelInstance.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
     EXPECT_EQ(AutoCapitalizationMode::NONE, pattern->GetAutoCapitalizationMode());
 }
+
+/**
+ * @tc.name: HandleNotifyChildAction
+ * @tc.desc: test HandleNotifyChildAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, HandleNotifyChildAction, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(searchPattern, nullptr);
+    searchPattern->InitClickEvent();
+    searchPattern->SetAccessibilityAction();
+    auto searchTextAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(searchTextAccessibilityProperty, nullptr);
+    auto notifyFunc = searchTextAccessibilityProperty->GetNotifyChildActionFunc();
+    ASSERT_NE(notifyFunc, nullptr);
+    auto searchGestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(searchGestureHub, nullptr);
+    bool userClicked = false;
+    searchGestureHub->SetUserOnClick([&](GestureEvent& info) {
+        userClicked = true;
+    });
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    notifyFunc(textFieldFrameNode, NotifyChildActionType::ACTION_CLICK);
+    EXPECT_TRUE(userClicked);
+}
 } // namespace OHOS::Ace::NG

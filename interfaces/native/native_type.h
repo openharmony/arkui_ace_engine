@@ -3262,6 +3262,22 @@ const char* OH_ArkUI_BarrierOption_GetReferencedId(
 int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierStyle, int32_t index);
 
 /**
+ * @brief Set the types and parameters related to content transition effects.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_ContentTransitionEffect ArkUI_ContentTransitionEffect;
+
+/**
+ * @brief creates content switching animation effects.
+ *
+ * @param type content transition type: 0-identity, 1-opacity.
+ * @return content transition effect.
+ * @since 21
+ */
+ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type);
+
+/**
  * @brief creates alignment rule information for subcomponents in relative containers.
  *
  * @return Alignment rule information.

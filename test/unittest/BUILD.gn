@@ -868,7 +868,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/checkbox/checkboxgroup_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",

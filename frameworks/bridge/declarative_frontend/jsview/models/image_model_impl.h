@@ -80,6 +80,7 @@ public:
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override {};
     void SetImageFillSetByUser(bool value) override {};
     void SetSupportSvg2(bool enable) override {};
+    void SetContentTransition(ContentTransitionType contentTransition) override {};
 };
 
 } // namespace OHOS::Ace::Framework

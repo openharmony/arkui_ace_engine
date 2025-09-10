@@ -517,7 +517,7 @@ public:
 
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
-    virtual void PaintAccessibilityFocus() {};
+    virtual void PaintAccessibilityFocus(bool isRectUpdate = false) {};
 
     virtual void UpdateAccessibilityRoundRect() {};
 

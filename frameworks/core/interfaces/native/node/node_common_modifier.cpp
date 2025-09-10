@@ -5657,6 +5657,145 @@ void SetClipShape(
     }
 }
 
+void SetClipRectShapeWithObject(FrameNode* frameNode, const ArkUIRectShape* object, ArkUI_Int32 unit)
+{
+    auto shape = AceType::MakeRefPtr<ShapeRect>();
+    auto width = Dimension(GreatNotEqual(object->right, object->left) ? (object->right - object->left) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(GreatNotEqual(object->bottom, object->top) ? (object->bottom - object->top) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetWidth(width);
+    shape->SetHeight(height);
+    auto offsetX = Dimension(object->left, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto offsetY = Dimension(object->top, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetOffset(DimensionOffset(offsetX, offsetY));
+    ViewAbstract::SetClipShape(frameNode, shape);
+}
+
+void SetClipCircleShapeWithObject(FrameNode* frameNode, const ArkUICircleShape* object, ArkUI_Int32 unit)
+{
+    auto shape = AceType::MakeRefPtr<Circle>();
+    auto width = Dimension(
+        GreatNotEqual(object->radius, 0) ? 2 * object->radius : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(
+        GreatNotEqual(object->radius, 0) ? 2 * object->radius : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetWidth(width);
+    shape->SetHeight(height);
+    auto offsetX = Dimension(GreatNotEqual(object->radius, 0) ? (object->centerX - object->radius) : object->centerX,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto offsetY = Dimension(GreatNotEqual(object->radius, 0) ? (object->centerY - object->radius) : object->centerY,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetOffset(DimensionOffset(offsetX, offsetY));
+    ViewAbstract::SetClipShape(frameNode, shape);
+}
+
+void SetClipRoundRectShapeWithObject(FrameNode* frameNode, const ArkUIRoundRectShape* object, ArkUI_Int32 unit)
+{
+    auto shape = AceType::MakeRefPtr<ShapeRect>();
+    auto width = Dimension(GreatNotEqual(object->right, object->left) ? (object->right - object->left) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(GreatNotEqual(object->bottom, object->top) ? (object->bottom - object->top) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetWidth(width);
+    shape->SetHeight(height);
+    auto offsetX = Dimension(object->left, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto offsetY = Dimension(object->top, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetOffset(DimensionOffset(offsetX, offsetY));
+
+    auto topLeftX = Dimension(
+        GreatNotEqual(object->topLeftX, 0) ? object->topLeftX : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto topLeftY = Dimension(
+        GreatNotEqual(object->topLeftY, 0) ? object->topLeftY : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetTopLeftRadius(Radius(topLeftX, topLeftY));
+    auto topRightX = Dimension(
+        GreatNotEqual(object->topRightX, 0) ? object->topRightX : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto topRightY = Dimension(
+        GreatNotEqual(object->topRightY, 0) ? object->topRightY : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetTopRightRadius(Radius(topRightX, topRightY));
+    auto bottomLeftX = Dimension(
+        GreatNotEqual(object->bottomLeftX, 0) ? object->bottomLeftX : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto bottomLeftY = Dimension(
+        GreatNotEqual(object->bottomLeftY, 0) ? object->bottomLeftY : 0, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetBottomLeftRadius(Radius(bottomLeftX, bottomLeftY));
+    auto bottomRightX = Dimension(GreatNotEqual(object->bottomRightX, 0) ? object->bottomRightX : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto bottomRightY = Dimension(GreatNotEqual(object->bottomRightY, 0) ? object->bottomRightY : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetBottomRightRadius(Radius(bottomRightX, bottomRightY));
+    ViewAbstract::SetClipShape(frameNode, shape);
+}
+
+void SetClipOvalShapeWithObject(FrameNode* frameNode, const ArkUIRectShape* object, ArkUI_Int32 unit)
+{
+    auto shape = AceType::MakeRefPtr<Ellipse>();
+    auto width = Dimension(GreatNotEqual(object->right, object->left) ? (object->right - object->left) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(GreatNotEqual(object->bottom, object->top) ? (object->bottom - object->top) : 0,
+        static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetWidth(width);
+    shape->SetHeight(height);
+    auto offsetX = Dimension(object->left, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto offsetY = Dimension(object->top, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetOffset(DimensionOffset(offsetX, offsetY));
+    ViewAbstract::SetClipShape(frameNode, shape);
+}
+
+void SetClipPathWithObject(FrameNode* frameNode, const char* commands)
+{
+    auto path = AceType::MakeRefPtr<Path>();
+    std::string pathCommands(commands);
+    path->SetValue(StringUtils::TrimStr(pathCommands));
+    ViewAbstract::SetClipShape(frameNode, path);
+}
+
+ArkUI_Bool SetClipShapeWithObject(
+    ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUIRenderNodeClipOption* object, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "clipShape");
+    switch (object->type) {
+        case ArkUIRenderShape::RECT_SHAPE: {
+            if (std::strcmp(type, "rect") != 0) {
+                return false;
+            }
+            SetClipRectShapeWithObject(frameNode, &object->rect, unit);
+            break;
+        }
+        case ArkUIRenderShape::CIRCLE_SHAPE: {
+            if (std::strcmp(type, "circle") != 0) {
+                return false;
+            }
+            SetClipCircleShapeWithObject(frameNode, &object->circle, unit);
+            break;
+        }
+        case ArkUIRenderShape::ROUND_RECT_SHAPE: {
+            if (std::strcmp(type, "rect") != 0) {
+                return false;
+            }
+            SetClipRoundRectShapeWithObject(frameNode, &object->roundRect, unit);
+            break;
+        }
+        case ArkUIRenderShape::OVAL_SHAPE: {
+            if (std::strcmp(type, "ellipse") != 0) {
+                return false;
+            }
+            SetClipOvalShapeWithObject(frameNode, &object->oval, unit);
+            break;
+        }
+        case ArkUIRenderShape::COMMANDS: {
+            if (std::strcmp(type, "path") != 0) {
+                return false;
+            }
+            SetClipPathWithObject(frameNode, object->commands);
+            break;
+        }
+        default:
+            return false;
+    }
+    return true;
+}
+
 void SetClipPath(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands,
     ArkUI_Int32 unit)
 {
@@ -7045,6 +7184,26 @@ void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options, ArkUI_In
             //bottomRightRadius
             options->bottomRightRadius =
                 shapeRect->GetBottomRightRadius().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //offsetX
+            options->offsetX = shapeRect->GetOffset().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //offsetY
+            options->offsetY = shapeRect->GetOffset().GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
+            break;
+        }
+        case BasicShapeType::CIRCLE: {
+            auto circleShape = AceType::DynamicCast<Circle>(basicShape);
+            //offsetX
+            options->offsetX = circleShape->GetOffset().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //offsetY
+            options->offsetY = circleShape->GetOffset().GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
+            break;
+        }
+        case BasicShapeType::ELLIPSE: {
+            auto ellipseShape = AceType::DynamicCast<Ellipse>(basicShape);
+            //offsetX
+            options->offsetX = ellipseShape->GetOffset().GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+            //offsetY
+            options->offsetY = ellipseShape->GetOffset().GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
             break;
         }
         default:
@@ -9785,6 +9944,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPointLightBloom = ResetPointLightBloom,
         .setClip = SetClip,
         .setClipShape = SetClipShape,
+        .setClipShapeWithObject = SetClipShapeWithObject,
         .setClipPath = SetClipPath,
         .resetClip = ResetClip,
         .setTransitionCenter = SetTransitionCenter,

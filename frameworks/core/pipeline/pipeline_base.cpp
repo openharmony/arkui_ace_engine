@@ -1179,7 +1179,9 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
         return;
     }
     if (GetIsDeclarative()) {
-        viewScale_ = DEFAULT_VIEW_SCALE;
+        if (!IsFormRender()) {
+            viewScale_ = DEFAULT_VIEW_SCALE;
+        }
         double pageWidth = width;
         if (IsContainerModalVisible()) {
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
