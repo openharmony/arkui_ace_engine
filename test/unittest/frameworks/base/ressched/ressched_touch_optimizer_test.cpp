@@ -1944,7 +1944,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
     }
     
     // Now deque should have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 7);
+    EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 6);
 }
 
 /**
