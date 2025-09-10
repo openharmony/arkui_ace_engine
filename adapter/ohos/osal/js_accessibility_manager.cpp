@@ -5428,17 +5428,36 @@ RetError JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAcc
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_RETURN(jsAccessibilityManager, RET_OK);
+    std::list<AccessibilityElementInfo> infos;
+    if (!jsAccessibilityManager) {
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+        return RET_OK;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_RETURN(context, RET_OK);
+    if (!context) {
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+        return RET_OK;
+    }
     auto windowId = windowId_;
     auto web = webPattern_;
     context->GetTaskExecutor()->PostTask(
-        [weak = GetHandler(), splitElementId, requestId, &callback, realMode, windowId, web]() {
+        [weak = GetHandler(), splitElementId, requestId, &callback, realMode, windowId, web, infos]() {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             auto webPattern = web.Upgrade();
-            CHECK_NULL_VOID(webPattern);
+            if (!webPattern) {
+                callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("SearchWebElementInfoByAccessibilityId");
             jsAccessibilityManager->SearchWebElementInfoByAccessibilityId(
                 splitElementId, requestId, callback, realMode, windowId, webPattern);
@@ -5476,17 +5495,39 @@ void JsAccessibilityManager::WebInteractionOperation::FindFocusedElementInfo(con
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        AccessibilityElementInfo info;
+        callback.SetFindFocusedElementInfoResult(info, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetFindFocusedElementInfoResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        AccessibilityElementInfo info;
+        callback.SetFindFocusedElementInfoResult(info, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetFindFocusedElementInfoResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto windowId = windowId_;
     auto web = webPattern_;
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, focusType, requestId, &callback, windowId, web]() {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                AccessibilityElementInfo info;
+                callback.SetFindFocusedElementInfoResult(info, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetFindFocusedElementInfoResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             auto webPattern = web.Upgrade();
-            CHECK_NULL_VOID(webPattern);
+            if (!webPattern) {
+                AccessibilityElementInfo info;
+                callback.SetFindFocusedElementInfoResult(info, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetFindFocusedElementInfoResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("FindWebFocusedElementInfo");
             jsAccessibilityManager->FindWebFocusedElementInfo(
                 splitElementId, focusType, requestId, callback, windowId, webPattern);
@@ -5504,17 +5545,39 @@ void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearch(const int6
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        AccessibilityElementInfo info;
+        callback.SetFocusMoveSearchResult(info, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetFocusMoveSearchResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        AccessibilityElementInfo info;
+        callback.SetFocusMoveSearchResult(info, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetFocusMoveSearchResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto windowId = windowId_;
     auto web = webPattern_;
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, direction, requestId, &callback, windowId, web] {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                AccessibilityElementInfo info;
+                callback.SetFocusMoveSearchResult(info, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetFocusMoveSearchResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             auto webPattern = web.Upgrade();
-            CHECK_NULL_VOID(webPattern);
+            if (!webPattern) {
+                AccessibilityElementInfo info;
+                callback.SetFocusMoveSearchResult(info, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetFocusMoveSearchResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("FocusMoveSearch");
             jsAccessibilityManager->WebFocusMoveSearch(splitElementId, direction, requestId, callback,
                 windowId, webPattern);
@@ -5532,9 +5595,17 @@ void JsAccessibilityManager::WebInteractionOperation::ExecuteAction(const int64_
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        callback.SetExecuteActionResult(false, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetExecuteActionResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        callback.SetExecuteActionResult(false, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetExecuteActionResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto actionInfo = static_cast<ActionType>(action);
     ActionParam param { actionInfo, actionArguments };
     auto windowId = windowId_;
@@ -5542,9 +5613,19 @@ void JsAccessibilityManager::WebInteractionOperation::ExecuteAction(const int64_
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId, web] {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                callback.SetExecuteActionResult(false, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetExecuteActionResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             auto webPattern = web.Upgrade();
-            CHECK_NULL_VOID(webPattern);
+            if (!webPattern) {
+                callback.SetExecuteActionResult(false, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetExecuteActionResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("ExecuteAction");
             jsAccessibilityManager->ExecuteWebAction(splitElementId, param, requestId, callback, windowId, webPattern);
         },
@@ -5567,16 +5648,34 @@ void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    if (!jsAccessibilityManager) {
+        callback.SetCursorPositionResult(0, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        callback.SetCursorPositionResult(0, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto web = webPattern_;
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), splitElementId, requestId, &callback, web]() {
             auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager) {
+                callback.SetCursorPositionResult(0, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             auto webPattern = web.Upgrade();
-            CHECK_NULL_VOID(webPattern);
+            if (!webPattern) {
+                callback.SetCursorPositionResult(0, requestId);
+                TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d",
+                    requestId);
+                return;
+            }
             ACE_SCOPED_TRACE("GetWebCursorPosition");
             jsAccessibilityManager->GetWebCursorPosition(splitElementId, requestId, callback, webPattern);
         },
@@ -6820,9 +6919,17 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
     std::list<AccessibilityElementInfo> infos;
 
     auto pipeline = GetPipelineByWindowId(windowId);
-    CHECK_NULL_VOID(pipeline);
+    if (!pipeline) {
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
+    if (!ngPipeline) {
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+        return;
+    }
 
     if (!ngPipeline->GetOnFocus() && (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE)) {
         TAG_LOGD(AceLogTag::ACE_WEB,
@@ -6832,7 +6939,11 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
         SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId, true);
         return;
     }
-    CHECK_NULL_VOID(webPattern);
+    if (!webPattern) {
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
+        return;
+    }
 
     if (elementId == -1) {
         auto webNode = webPattern->GetHost();
@@ -8727,9 +8838,17 @@ bool JsAccessibilityManager::OnDumpChildInfoForThird(
 void JsAccessibilityManager::GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern)
 {
-    CHECK_NULL_VOID(webPattern);
+    if (!webPattern) {
+        callback.SetCursorPositionResult(0, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d", requestId);
+        return;
+    }
     auto node = webPattern->GetTransitionalNodeById(elementId);
-    CHECK_NULL_VOID(node);
+    if (!node) {
+        callback.SetCursorPositionResult(0, requestId);
+        TAG_LOGD(AceLogTag::ACE_WEB, "SetCursorPositionResult, requestId: %{public}d", requestId);
+        return;
+    }
 
     callback.SetCursorPositionResult(node->GetSelectionStart(), requestId);
 }

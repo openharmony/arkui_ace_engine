@@ -67,6 +67,12 @@ build_component_ng("web_pattern_ng") {
       "window_manager:libpip_ndk",
       "window_manager:libwm",
     ]
+    if (defined(global_parts_info) &&
+      defined(global_parts_info.web_webview)) {
+      external_deps += [
+        "webview:libarkweb_utils",
+      ]
+    }
 
     standard_input_deps = [ "imf:inputmethod_client" ]
   }

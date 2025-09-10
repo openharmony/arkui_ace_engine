@@ -38,7 +38,6 @@
 #include "page_node_info.h"
 
 #include "adapter/ohos/capability/html/span_to_html.h"
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
@@ -49,7 +48,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
+#include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
@@ -3750,6 +3749,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     InitConfigChangeCallback(pipelineContext);
     InitializeAccessibility();
     InitSurfaceDensityCallback(pipelineContext);
+    pipeline_ = WeakClaim(context);
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
@@ -3784,6 +3784,7 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
         }
         tooltipId_ = -1;
     }
+    pipeline_.Reset();
 }
 
 void WebPattern::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
@@ -8181,6 +8182,9 @@ void WebPattern::UninitializeAccessibility()
     CHECK_NULL_VOID(frameNode);
     int64_t accessibilityId = frameNode->GetAccessibilityId();
     auto pipeline = PipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        pipeline = pipeline_.Upgrade();
+    }
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -8227,6 +8231,9 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
 {
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        pipeline = pipeline_.Upgrade();
+    }
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);

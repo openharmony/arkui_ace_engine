@@ -55,5 +55,11 @@ build_component("web") {
       "webview:ohos_base_glue_source",
       "window_manager:libwm",
     ]
+    if (defined(global_parts_info) &&
+      defined(global_parts_info.web_webview)) {
+      external_deps += [
+        "webview:libarkweb_utils",
+      ]
+    }
   }
 }
