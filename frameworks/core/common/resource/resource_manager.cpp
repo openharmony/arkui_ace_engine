@@ -32,6 +32,7 @@ ResourceManager& ResourceManager::GetInstance()
 
 RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject)
 {
+    CHECK_NULL_RETURN(resourceObject, nullptr);
     int32_t instanceId = resourceObject->GetInstanceId();
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
