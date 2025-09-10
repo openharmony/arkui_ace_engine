@@ -672,9 +672,6 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setKeyboardShortcutAttribute(value, keys,action);
         return this
     }
-    public attributeModifier<T>(value: AttributeModifier<T>): this {
-        return this
-    }
     width(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().setWidthAttribute(value as Length);

@@ -283,9 +283,4 @@ export class ArkSearchNode extends ArkBaseNode  implements SearchAttribute  {
         this.markDirty();
         return this;
     }
-    _onChangeEvent_value(callback: (breakpoints: string) => void): void {
-        // this.getPeer()._onChangeEvent_valueAttribute(callback);
-        this.markDirty();
-        return;
-    }
 }

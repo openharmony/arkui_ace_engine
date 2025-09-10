@@ -62,7 +62,7 @@ import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeseri
 import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
-import { PromptActionExtender } from '../framework';
+import { PromptActionExtender, FrameNodeExtender } from '../framework';
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -1216,19 +1216,64 @@ export class UIContextImpl extends UIContext {
         
     }
     public getFrameNodeById(id: string): FrameNode | null {
-        throw new Error("no impl");
+        const id_casted = id as (string);
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = FrameNodeExtender.getFrameNodeByKey(id_casted);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
     public getSharedLocalStorage(): LocalStorage | undefined {
         return  ArkUIAniModule._Common_GetSharedLocalStorage();
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
-        throw new Error("no impl");
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = FrameNodeExtender.getAttachedFrameNodeById(id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
     getFrameNodeByNodeId(id: number): FrameNode | null {
-        throw new Error("no impl");
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = FrameNodeExtender.getFrameNodeById(id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
     getFrameNodeByUniqueId(id: number): FrameNode | null {
-        throw new Error("no impl");
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = FrameNodeExtender.getFrameNodeByUniqueId(id);
+        if (retval === nullptr) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return null;
+        }
+        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
+        if (!node) {
+            node = FrameNodeUtils.createFrameNode(this, retval);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);

@@ -16,7 +16,6 @@
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 import { ArkBaseNode } from "./ArkBaseNode";
 import { ListItemAttribute, ArkListItemPeer, ListItemOptions, Bindable, SwipeActionOptions } from "../framework";
-// import { ListItemOpsHandWritten } from "../../handwritten"
 export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -52,8 +51,6 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
         }
-        // ListItemOpsHandWritten.hookListItemAttributeSelectedImpl(this.getPeer().peer.ptr,
-        //     (value as Bindable<boolean>));
         return this
     }
     swipeAction(value: SwipeActionOptions | undefined): this {
@@ -65,10 +62,5 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
         const value_casted = value as (((isVisible: boolean) => void) | undefined)
         this.getPeer()?.setOnSelectAttribute(value_casted)
         return this
-    }
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
-        const callback_casted = callback as (((select: boolean | undefined) => void))
-        // this.getPeer()?._onChangeEvent_selectedAttribute(callback_casted)
-        return
     }
 }

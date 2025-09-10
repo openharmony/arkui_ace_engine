@@ -66,18 +66,11 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
         }
-        // GridItemOpsHandWritten.hookGridItemAttributeSelectedImpl(this.getPeer().peer.ptr,
-        //     (value as Bindable<boolean>));
         return this
     }
     onSelect(value: ((isVisible: boolean) => void) | undefined): this {
         const value_casted = value as (((isVisible: boolean) => void) | undefined)
         this.getPeer()?.setOnSelectAttribute(value_casted)
         return this
-    }
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
-        const callback_casted = callback as (((select: boolean | undefined) => void))
-        // this.getPeer()?._onChangeEvent_selectedAttribute(callback_casted)
-        return
     }
 }

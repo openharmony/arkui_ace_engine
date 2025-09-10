@@ -28371,65 +28371,46 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // FocusControllerAccessor
     namespace FrameNodeExtenderAccessor {
-    void DestroyPeerImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode ConstructorFrameNodeImpl()
     {
         if (!needGroupedLog(1))
         {
-            return;
+            return reinterpret_cast<Ark_FrameNode>(300);
         }
-        string out("destroyPeer(");
+        string out("constructorFrameNode(");
         out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_FrameNodeExtender ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_FrameNodeExtender>(100);
-        }
-        string out("new FrameNodeExtender(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_FrameNodeExtender>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_FrameNodeExtender>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    Ark_Boolean IsModifiableImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return 0;
         }
         string out("isModifiable(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
     }
-    void AppendChildImpl(Ark_FrameNodeExtender peer,
-                         Ark_FrameNode node)
+    void AppendChildImpl(Ark_FrameNode peer,
+                         Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("appendChild(");
-        WriteToString(&out, node);
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, child);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void InsertChildAfterImpl(Ark_FrameNodeExtender peer,
+    void InsertChildAfterImpl(Ark_FrameNode peer,
                               Ark_FrameNode child,
                               Ark_FrameNode sibling)
     {
@@ -28438,35 +28419,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("insertChildAfter(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, child);
         out.append(", ");
         WriteToString(&out, sibling);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void RemoveChildImpl(Ark_FrameNodeExtender peer,
-                         Ark_FrameNode node)
+    void RemoveChildImpl(Ark_FrameNode peer,
+                         Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("removeChild(");
-        WriteToString(&out, node);
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, child);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ClearChildrenImpl(Ark_FrameNodeExtender peer)
+    void ClearChildrenImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("clearChildren(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_FrameNode GetChildImpl(Ark_FrameNodeExtender peer,
+    Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
                                const Ark_Number* index,
                                const Ark_Number* expandMode)
     {
@@ -28475,6 +28461,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("getChild(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, index);
         out.append(", ");
         WriteToString(&out, expandMode);
@@ -28483,241 +28471,261 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_FrameNode GetFirstChildImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("getFirstChild(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_FrameNode GetNextSiblingImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("getNextSibling(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("getPreviousSibling(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_FrameNode GetParentImpl(Ark_FrameNodeExtender peer)
+    Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("getParent(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_Int32 GetChildrenCountImpl(Ark_FrameNodeExtender peer)
+    Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return 0;
         }
         string out("getChildrenCount(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
     }
-    void DisposeImpl(Ark_FrameNodeExtender peer)
+    void DisposeImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("dispose(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToWindow(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToParent(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Size GetMeasuredSizeImpl(Ark_FrameNodeExtender peer)
+    Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getMeasuredSize(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getLayoutPosition(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_String GetIdImpl(Ark_FrameNodeExtender peer)
+    Ark_String GetIdImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getId(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetUniqueIdImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {42};
         }
         string out("getUniqueId(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {42}] \n");
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_String GetNodeTypeImpl(Ark_FrameNodeExtender peer)
+    Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getNodeType(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetOpacityImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetOpacityImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {42};
         }
         string out("getOpacity(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {42}] \n");
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Boolean IsVisibleImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return 0;
         }
         string out("isVisible(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Boolean IsClipToFrameImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsClipToFrameImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return 0;
         }
         string out("isClipToFrame(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Boolean IsAttachedImpl(Ark_FrameNodeExtender peer)
+    Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return 0;
         }
         string out("isAttached(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Object GetInspectorInfoImpl(Ark_FrameNodeExtender peer)
+    Ark_Object GetInspectorInfoImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getInspectorInfo(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void InvalidateImpl(Ark_FrameNodeExtender peer)
+    void InvalidateImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("invalidate(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void DisposeTreeImpl(Ark_FrameNodeExtender peer)
+    void DisposeTreeImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("disposeTree(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetCrossLanguageOptionsImpl(Ark_FrameNodeExtender peer,
+    void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                      const Ark_CrossLanguageOptions* options)
     {
         if (!needGroupedLog(1))
@@ -28725,23 +28733,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setCrossLanguageOptions(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNodeExtender peer)
+    Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getCrossLanguageOptions(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void SetMeasuredSizeImpl(Ark_FrameNodeExtender peer,
+    void SetMeasuredSizeImpl(Ark_FrameNode peer,
                              const Ark_Size* size)
     {
         if (!needGroupedLog(1))
@@ -28749,11 +28760,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setMeasuredSize(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, size);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetLayoutPositionImpl(Ark_FrameNodeExtender peer,
+    void SetLayoutPositionImpl(Ark_FrameNode peer,
                                const Ark_Position* position)
     {
         if (!needGroupedLog(1))
@@ -28761,11 +28774,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setLayoutPosition(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, position);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void MeasureImpl(Ark_FrameNodeExtender peer,
+    void MeasureImpl(Ark_FrameNode peer,
                      const Ark_LayoutConstraint* constraint)
     {
         if (!needGroupedLog(1))
@@ -28773,11 +28788,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("measure(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, constraint);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void LayoutImpl(Ark_FrameNodeExtender peer,
+    void LayoutImpl(Ark_FrameNode peer,
                     const Ark_Position* position)
     {
         if (!needGroupedLog(1))
@@ -28785,63 +28802,70 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("layout(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, position);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetNeedsLayoutImpl(Ark_FrameNodeExtender peer)
+    void SetNeedsLayoutImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("setNeedsLayout(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToScreenImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToScreen(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToWindowWithTransform(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToParentWithTransform(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNodeExtender peer)
+    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToScreenWithTransform(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -28860,8 +28884,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNodeExtender peer,
-                                    Ark_FrameNode node)
+    Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode node)
     {
         if (!needGroupedLog(1))
         {
@@ -28874,7 +28897,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    void MoveToImpl(Ark_FrameNodeExtender peer,
+    void MoveToImpl(Ark_FrameNode peer,
                     Ark_FrameNode targetParent,
                     const Ark_Number* index)
     {
@@ -28883,31 +28906,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("moveTo(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, targetParent);
         out.append(", ");
         WriteToString(&out, index);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {42};
         }
         string out("getFirstChildIndexWithoutExpand(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {42}] \n");
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNodeExtender peer)
+    Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {42};
         }
         string out("getLastChildIndexWithoutExpand(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {42}] \n");
         appendGroupedLog(1, out);
@@ -28952,23 +28979,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    void ReuseImpl(Ark_FrameNodeExtender peer)
+    void ReuseImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("reuse(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void RecycleImpl(Ark_FrameNodeExtender peer)
+    void RecycleImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("recycle(");
+        WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -28998,7 +29027,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNodeExtender peer,
+    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
                                          Ark_FrameNode pointer)
     {
         if (!needGroupedLog(1))
@@ -29006,13 +29035,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return nullptr;
         }
         string out("createByRawPtr(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, pointer);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNodeExtender peer,
+    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
                                    Ark_NativePointer pointer)
     {
         if (!needGroupedLog(1))
@@ -29020,19 +29051,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return reinterpret_cast<Ark_FrameNode>(300);
         }
         string out("unWrapRawPtr(");
+        WriteToString(&out, peer);
+        out.append(", ");
         WriteToString(&out, pointer);
         out.append(") \n");
         out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_FrameNode>(300);
     }
-    Ark_NativePointer GetCommonEventImpl(Ark_FrameNodeExtender peer)
+    Ark_NativePointer GetCommonEventImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return nullptr;
         }
         string out("getCommonEvent(");
+        WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
@@ -43253,9 +43287,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
     {
         static const GENERATED_ArkUIFrameNodeExtenderAccessor FrameNodeExtenderAccessorImpl {
-            FrameNodeExtenderAccessor::DestroyPeerImpl,
-            FrameNodeExtenderAccessor::ConstructImpl,
-            FrameNodeExtenderAccessor::GetFinalizerImpl,
+            FrameNodeExtenderAccessor::ConstructorFrameNodeImpl,
             FrameNodeExtenderAccessor::IsModifiableImpl,
             FrameNodeExtenderAccessor::AppendChildImpl,
             FrameNodeExtenderAccessor::InsertChildAfterImpl,
@@ -43312,9 +43344,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &FrameNodeExtenderAccessorImpl;
     }
 
-    struct FrameNodeExtenderPeer {
-        virtual ~FrameNodeExtenderPeer() = default;
-    };
     const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
     {
         static const GENERATED_ArkUIFrictionMotionAccessor FrictionMotionAccessorImpl {

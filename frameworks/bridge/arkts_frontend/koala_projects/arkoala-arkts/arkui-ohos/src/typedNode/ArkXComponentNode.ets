@@ -27,11 +27,9 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
         return this.peer as ArkXComponentPeer
     }
     initializeXComponentParameter(value: XComponentParameters): this {
-        // setXComponentParametersANI(this.getPeer(), value);
         return this;
     }
     initializeXComponentOptions(value: XComponentOptions): this {
-        // setXComponentOptionsANI(this.getPeer(), value);
         return this;
     }
     initializeNativeXComponentParameters(value: NativeXComponentParameters): this {

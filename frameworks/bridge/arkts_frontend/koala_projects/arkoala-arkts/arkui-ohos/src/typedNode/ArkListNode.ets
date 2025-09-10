@@ -20,7 +20,6 @@ import { ListAttribute, ArkListPeer, ListOptions, ListItemAlign, Axis, BarState,
     OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback, LengthConstrain, Dimension, EdgeEffect, EdgeEffectOptions
 } from "../framework";
 import { Resource } from "global.resource"
-// import { hookListNodeChildrenMainSizeImpl } from "../../handwritten"
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -143,7 +142,7 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
         const value_casted = value as (ChildrenMainSize | undefined)
-        // hookListNodeChildrenMainSizeImpl(this, value_casted);
+        this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
         return this
     }
     maintainVisibleContentPosition(value: boolean | undefined): this {

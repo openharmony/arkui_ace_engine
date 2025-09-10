@@ -19,7 +19,6 @@ import { ColumnAttribute, HorizontalAlign, FlexAlign, PointLightStyle, ArkColumn
 import { ArkBaseNode } from './ArkBaseNode';
 
 export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
-
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
             throw new Error('more than 1 parameters');

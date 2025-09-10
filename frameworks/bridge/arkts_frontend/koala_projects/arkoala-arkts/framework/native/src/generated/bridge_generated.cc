@@ -27782,231 +27782,193 @@ void impl_FocusController_requestFocus(const KStringPtr& key) {
         GetAccessors()->getFocusControllerAccessor()->requestFocus((const Ark_String*) (&key));
 }
 KOALA_INTEROP_V1(FocusController_requestFocus, KStringPtr)
-Ark_NativePointer impl_FrameNodeExtender_construct() {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->construct();
+Ark_NativePointer impl_FrameNodeExtender_constructorFrameNode() {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->constructorFrameNode();
 }
-KOALA_INTEROP_DIRECT_0(FrameNodeExtender_construct, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getFinalizer() {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getFinalizer();
+KOALA_INTEROP_DIRECT_0(FrameNodeExtender_constructorFrameNode, Ark_NativePointer)
+Ark_NativePointer impl_FrameNodeExtender_getDestroy() {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getDestroy();
 }
-KOALA_INTEROP_DIRECT_0(FrameNodeExtender_getFinalizer, Ark_NativePointer)
-Ark_Boolean impl_FrameNodeExtender_isModifiable(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->isModifiable(self);
+KOALA_INTEROP_DIRECT_0(FrameNodeExtender_getDestroy, Ark_NativePointer)
+void impl_FrameNodeExtender_destroyPeer(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->destroyPeer(static_cast<Ark_FrameNode>(peer));
+}
+KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_destroyPeer, Ark_NativePointer)
+Ark_Boolean impl_FrameNodeExtender_isModifiable(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->isModifiable(peer);
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isModifiable, Ark_Boolean, Ark_NativePointer)
-void impl_FrameNodeExtender_appendChild(Ark_NativePointer thisPtr, Ark_NativePointer node) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->appendChild(self, static_cast<Ark_FrameNode>(node));
+void impl_FrameNodeExtender_appendChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->appendChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
 }
 KOALA_INTEROP_DIRECT_V2(FrameNodeExtender_appendChild, Ark_NativePointer, Ark_NativePointer)
-void impl_FrameNodeExtender_insertChildAfter(Ark_NativePointer thisPtr, Ark_NativePointer child, Ark_NativePointer sibling) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->insertChildAfter(self, static_cast<Ark_FrameNode>(child), static_cast<Ark_FrameNode>(sibling));
+void impl_FrameNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_NativePointer child, Ark_NativePointer sibling) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->insertChildAfter(peer, child, sibling);
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_insertChildAfter, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-void impl_FrameNodeExtender_removeChild(Ark_NativePointer thisPtr, Ark_NativePointer node) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->removeChild(self, static_cast<Ark_FrameNode>(node));
+void impl_FrameNodeExtender_removeChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->removeChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
 }
 KOALA_INTEROP_DIRECT_V2(FrameNodeExtender_removeChild, Ark_NativePointer, Ark_NativePointer)
-void impl_FrameNodeExtender_clearChildren(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->clearChildren(self);
+void impl_FrameNodeExtender_clearChildren(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->clearChildren(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_clearChildren, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getChild(Ark_NativePointer thisPtr, KInteropNumber index, KInteropNumber expandMode) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getChild(self, (const Ark_Number*) (&index), (const Ark_Number*) (&expandMode));
+Ark_NativePointer impl_FrameNodeExtender_getChild(Ark_NativePointer peer, KInteropNumber index, KInteropNumber expandMode) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getChild(static_cast<Ark_FrameNode>(peer), (const Ark_Number*) (&index), (const Ark_Number*) (&expandMode));
 }
 KOALA_INTEROP_DIRECT_3(FrameNodeExtender_getChild, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_FrameNodeExtender_getFirstChild(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChild(self);
+Ark_NativePointer impl_FrameNodeExtender_getFirstChild(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChild(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFirstChild, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getNextSibling(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getNextSibling(self);
+Ark_NativePointer impl_FrameNodeExtender_getNextSibling(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getNextSibling(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getNextSibling, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getPreviousSibling(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getPreviousSibling(self);
+Ark_NativePointer impl_FrameNodeExtender_getPreviousSibling(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getPreviousSibling(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getPreviousSibling, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getParent(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getParent(self);
+Ark_NativePointer impl_FrameNodeExtender_getParent(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getParent(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getParent, Ark_NativePointer, Ark_NativePointer)
-Ark_Int32 impl_FrameNodeExtender_getChildrenCount(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getChildrenCount(self);
+Ark_Int32 impl_FrameNodeExtender_getChildrenCount(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getChildrenCount(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getChildrenCount, Ark_Int32, Ark_NativePointer)
-void impl_FrameNodeExtender_dispose(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->dispose(self);
+void impl_FrameNodeExtender_dispose(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->dispose(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_dispose, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindow(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindow(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindow(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindow(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToWindow, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToParent(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToParent(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToParent(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToParent(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToParent, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getMeasuredSize(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getMeasuredSize(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getMeasuredSize(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getMeasuredSize(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Size_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getMeasuredSize, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getLayoutPosition(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getLayoutPosition(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getLayoutPosition(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getLayoutPosition(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getLayoutPosition, KInteropReturnBuffer, Ark_NativePointer)
-Ark_String impl_FrameNodeExtender_getId(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getId(self);
+Ark_String impl_FrameNodeExtender_getId(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getId(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_1(FrameNodeExtender_getId, KStringPtr, Ark_NativePointer)
-Ark_Number impl_FrameNodeExtender_getUniqueId(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getUniqueId(self);
+Ark_Number impl_FrameNodeExtender_getUniqueId(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getUniqueId(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getUniqueId, KInteropNumber, Ark_NativePointer)
-Ark_String impl_FrameNodeExtender_getNodeType(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getNodeType(self);
+Ark_String impl_FrameNodeExtender_getNodeType(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getNodeType(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_1(FrameNodeExtender_getNodeType, KStringPtr, Ark_NativePointer)
-Ark_Number impl_FrameNodeExtender_getOpacity(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getOpacity(self);
+Ark_Number impl_FrameNodeExtender_getOpacity(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getOpacity(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getOpacity, KInteropNumber, Ark_NativePointer)
-Ark_Boolean impl_FrameNodeExtender_isVisible(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->isVisible(self);
+Ark_Boolean impl_FrameNodeExtender_isVisible(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->isVisible(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isVisible, Ark_Boolean, Ark_NativePointer)
-Ark_Boolean impl_FrameNodeExtender_isClipToFrame(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->isClipToFrame(self);
+Ark_Boolean impl_FrameNodeExtender_isClipToFrame(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->isClipToFrame(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isClipToFrame, Ark_Boolean, Ark_NativePointer)
-Ark_Boolean impl_FrameNodeExtender_isAttached(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->isAttached(self);
+Ark_Boolean impl_FrameNodeExtender_isAttached(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->isAttached(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isAttached, Ark_Boolean, Ark_NativePointer)
-void impl_FrameNodeExtender_getInspectorInfo(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->getInspectorInfo(self);
+Ark_String impl_FrameNodeExtender_getInspectorInfo(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getInspectorInfo(static_cast<Ark_FrameNode>(peer));
 }
-KOALA_INTEROP_V1(FrameNodeExtender_getInspectorInfo, Ark_NativePointer)
-void impl_FrameNodeExtender_invalidate(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->invalidate(self);
+KOALA_INTEROP_1(FrameNodeExtender_getInspectorInfo, KStringPtr, Ark_NativePointer)
+void impl_FrameNodeExtender_invalidate(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->invalidate(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_invalidate, Ark_NativePointer)
-void impl_FrameNodeExtender_disposeTree(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->disposeTree(self);
+void impl_FrameNodeExtender_disposeTree(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->disposeTree(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_disposeTree, Ark_NativePointer)
-void impl_FrameNodeExtender_setCrossLanguageOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_CrossLanguageOptions optionsValueTemp = CrossLanguageOptions_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->setCrossLanguageOptions(self, static_cast<Ark_CrossLanguageOptions*>(&optionsValueTemp));
+void impl_FrameNodeExtender_setCrossLanguageOptions(Ark_NativePointer peer, Ark_Boolean options) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->setCrossLanguageOptions(static_cast<Ark_FrameNode>(peer), options);
 }
-KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_setCrossLanguageOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_FrameNodeExtender_getCrossLanguageOptions(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getCrossLanguageOptions(self);
-        SerializerBase _retSerializer {};
-        CrossLanguageOptions_serializer::write(_retSerializer, retValue);
-        return _retSerializer.toReturnBuffer();
+KOALA_INTEROP_DIRECT_V2(FrameNodeExtender_setCrossLanguageOptions, Ark_NativePointer, Ark_Boolean)
+Ark_Boolean impl_FrameNodeExtender_getCrossLanguageOptions(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getCrossLanguageOptions(static_cast<Ark_FrameNode>(peer));
 }
-KOALA_INTEROP_1(FrameNodeExtender_getCrossLanguageOptions, KInteropReturnBuffer, Ark_NativePointer)
-void impl_FrameNodeExtender_setMeasuredSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getCrossLanguageOptions, Ark_Boolean, Ark_NativePointer)
+void impl_FrameNodeExtender_setMeasuredSize(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Size sizeValueTemp = Size_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->setMeasuredSize(self, static_cast<Ark_Size*>(&sizeValueTemp));
+        GetAccessors()->getFrameNodeExtenderAccessor()->setMeasuredSize(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Size*>(&sizeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_setMeasuredSize, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_FrameNodeExtender_setLayoutPosition(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
+void impl_FrameNodeExtender_setLayoutPosition(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Position positionValueTemp = Position_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->setLayoutPosition(self, static_cast<Ark_Position*>(&positionValueTemp));
+        GetAccessors()->getFrameNodeExtenderAccessor()->setLayoutPosition(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Position*>(&positionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_setLayoutPosition, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_FrameNodeExtender_measure(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
+void impl_FrameNodeExtender_measure(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_LayoutConstraint constraintValueTemp = LayoutConstraint_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->measure(self, static_cast<Ark_LayoutConstraint*>(&constraintValueTemp));
+        GetAccessors()->getFrameNodeExtenderAccessor()->measure(static_cast<Ark_FrameNode>(peer), static_cast<Ark_LayoutConstraint*>(&constraintValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_measure, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_FrameNodeExtender_layout(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
+void impl_FrameNodeExtender_layout(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Position positionValueTemp = Position_serializer::read(thisDeserializer);;
-        GetAccessors()->getFrameNodeExtenderAccessor()->layout(self, static_cast<Ark_Position*>(&positionValueTemp));
+        GetAccessors()->getFrameNodeExtenderAccessor()->layout(static_cast<Ark_FrameNode>(peer), static_cast<Ark_Position*>(&positionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_layout, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_FrameNodeExtender_setNeedsLayout(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->setNeedsLayout(self);
+void impl_FrameNodeExtender_setNeedsLayout(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->setNeedsLayout(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_setNeedsLayout, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreen(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreen(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreen(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreen(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToScreen, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindowWithTransform(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindowWithTransform(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindowWithTransform(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindowWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToWindowWithTransform, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToParentWithTransform(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToParentWithTransform(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToParentWithTransform(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToParentWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToParentWithTransform, KInteropReturnBuffer, Ark_NativePointer)
-KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreenWithTransform(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreenWithTransform(self);
+KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreenWithTransform(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToScreenWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
         Position_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
@@ -28016,24 +27978,20 @@ Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByKey(const KStringPtr& nam
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNodeExtender_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
-Ark_Number impl_FrameNodeExtender_getIdByFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getIdByFrameNode(self, static_cast<Ark_FrameNode>(node));
+Ark_Number impl_FrameNodeExtender_getIdByFrameNode(Ark_NativePointer node) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getIdByFrameNode(node);
 }
-KOALA_INTEROP_DIRECT_2(FrameNodeExtender_getIdByFrameNode, KInteropNumber, Ark_NativePointer, Ark_NativePointer)
-void impl_FrameNodeExtender_moveTo(Ark_NativePointer thisPtr, Ark_NativePointer targetParent, KInteropNumber index) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->moveTo(self, static_cast<Ark_FrameNode>(targetParent), (const Ark_Number*) (&index));
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getIdByFrameNode, KInteropNumber, Ark_NativePointer)
+void impl_FrameNodeExtender_moveTo(Ark_NativePointer peer, Ark_NativePointer targetParent, KInteropNumber index) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->moveTo(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(targetParent), (const Ark_Number*) (&index));
 }
 KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_moveTo, Ark_NativePointer, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_FrameNodeExtender_getFirstChildIndexWithoutExpand(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChildIndexWithoutExpand(self);
+Ark_Number impl_FrameNodeExtender_getFirstChildIndexWithoutExpand(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChildIndexWithoutExpand(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFirstChildIndexWithoutExpand, KInteropNumber, Ark_NativePointer)
-Ark_Number impl_FrameNodeExtender_getLastChildIndexWithoutExpand(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getLastChildIndexWithoutExpand(self);
+Ark_Number impl_FrameNodeExtender_getLastChildIndexWithoutExpand(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getLastChildIndexWithoutExpand(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getLastChildIndexWithoutExpand, KInteropNumber, Ark_NativePointer)
 Ark_NativePointer impl_FrameNodeExtender_getAttachedFrameNodeById(const KStringPtr& id) {
@@ -28048,14 +28006,12 @@ Ark_NativePointer impl_FrameNodeExtender_getFrameNodeByUniqueId(KInteropNumber i
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodeByUniqueId((const Ark_Number*) (&id));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFrameNodeByUniqueId, Ark_NativePointer, KInteropNumber)
-void impl_FrameNodeExtender_reuse(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->reuse(self);
+void impl_FrameNodeExtender_reuse(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->reuse(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_reuse, Ark_NativePointer)
-void impl_FrameNodeExtender_recycle(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        GetAccessors()->getFrameNodeExtenderAccessor()->recycle(self);
+void impl_FrameNodeExtender_recycle(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->recycle(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_recycle, Ark_NativePointer)
 Ark_NativePointer impl_FrameNodeExtender_getFrameNodePtr(Ark_NativePointer node) {
@@ -28066,19 +28022,16 @@ Ark_NativePointer impl_FrameNodeExtender_createTypedFrameNode(const KStringPtr& 
         return GetAccessors()->getFrameNodeExtenderAccessor()->createTypedFrameNode((const Ark_String*) (&type));
 }
 KOALA_INTEROP_1(FrameNodeExtender_createTypedFrameNode, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_FrameNodeExtender_createByRawPtr(Ark_NativePointer thisPtr, Ark_NativePointer pointer) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->createByRawPtr(self, static_cast<Ark_FrameNode>(pointer));
+Ark_NativePointer impl_FrameNodeExtender_createByRawPtr(Ark_NativePointer peer, Ark_NativePointer pointer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->createByRawPtr(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(pointer));
 }
 KOALA_INTEROP_DIRECT_2(FrameNodeExtender_createByRawPtr, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_unWrapRawPtr(Ark_NativePointer thisPtr, Ark_NativePointer pointer) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->unWrapRawPtr(self, pointer);
+Ark_NativePointer impl_FrameNodeExtender_unWrapRawPtr(Ark_NativePointer peer, Ark_NativePointer pointer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->unWrapRawPtr(static_cast<Ark_FrameNode>(peer), pointer);
 }
 KOALA_INTEROP_DIRECT_2(FrameNodeExtender_unWrapRawPtr, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_getCommonEvent(Ark_NativePointer thisPtr) {
-        Ark_FrameNodeExtender self = reinterpret_cast<Ark_FrameNodeExtender>(thisPtr);
-        return GetAccessors()->getFrameNodeExtenderAccessor()->getCommonEvent(self);
+Ark_NativePointer impl_FrameNodeExtender_getCommonEvent(Ark_NativePointer peer) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->getCommonEvent(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getCommonEvent, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_FrictionMotion_construct(KInteropNumber friction, KInteropNumber position, KInteropNumber velocity) {
@@ -30999,6 +30952,14 @@ void impl_NavPathStack_setPathStack(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getNavPathStackAccessor()->setPathStack(self, static_cast<Array_NavPathInfo*>(&pathStackValueTemp), static_cast<Opt_Boolean*>(&animatedValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavPathStack_setPathStack, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_NodeContainerOps_nodeContainerOpsConstruct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getNodeContainerOpsAccessor()->nodeContainerOpsConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(NodeContainerOps_nodeContainerOpsConstruct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_NodeContainerOps_nodeContainerSetNodeContainerOptions(Ark_NativePointer ptr, Ark_NativePointer controller) {
+        GetAccessors()->getNodeContainerOpsAccessor()->nodeContainerSetNodeContainerOptions(ptr, controller);
+}
+KOALA_INTEROP_DIRECT_V2(NodeContainerOps_nodeContainerSetNodeContainerOptions, Ark_NativePointer, Ark_NativePointer)
 void impl_NodeContainerOps_addNodeContainerRootNode(Ark_NativePointer self, Ark_NativePointer child) {
         GetAccessors()->getNodeContainerOpsAccessor()->addNodeContainerRootNode(self, child);
 }
