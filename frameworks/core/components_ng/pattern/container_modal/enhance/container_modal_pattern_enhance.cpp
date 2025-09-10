@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/select/select_theme.h"
 #include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -325,6 +326,20 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
+}
+
+void ContainerModalPatternEnhance::InitMenuDefaultRadius()
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto pipeline = containerNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto customButtonNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customButtonNode);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto defaultRadius = theme->GetMenuDefaultRadius().Value();
+    customButtonNode->FireCustomCallback(EVENT_NAME_BUTTON_MENU_DEFAULT_RADIUS, std::to_string(defaultRadius));
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -943,6 +958,7 @@ void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
     CalcDimension widthDimension(textSize.Width(), DimensionUnit::PX);
     auto width = widthDimension.ConvertToVp();
     TAG_LOGI(AceLogTag::ACE_APPBAR, "GetMenuWidth width = %{public}f", width);
+    InitMenuDefaultRadius();
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
 }
 

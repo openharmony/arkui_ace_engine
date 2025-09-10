@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/select/select_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -920,5 +921,33 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceGetCont
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
     auto  context = containerPattern->GetContextRefPtr();
     EXPECT_NE(context, nullptr);
+}
+
+/**
+ * @tc.name: InitMenuDefaultRadius
+ * @tc.desc: Test InitMenuDefaultRadius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, InitMenuDefaultRadius, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 2, AceType::MakeRefPtr<ButtonPattern>()));
+    auto cloumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto titleResult = false;
+    auto callback = [&titleResult](const std::string& eventName, const std::string& param) { titleResult = true; };
+    auto customTitleNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    customTitleNode->SetCustomCallback(callback);
+    cloumn->AddChild(customTitleNode);
+    containerModalNode->AddChild(cloumn);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->InitMenuDefaultRadius();
+    EXPECT_TRUE(titleResult);
 }
 } // namespace OHOS::Ace::NG
