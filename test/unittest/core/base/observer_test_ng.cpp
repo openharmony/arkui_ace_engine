@@ -164,9 +164,13 @@ HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
 HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
 {
     auto targetDensity = DEFAULT_DENSITY;
+    UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
+    
     UIObserverHandler::GetInstance().densityHandleFunc_ = [](AbilityContextInfo& context, double density) -> void {
         EXPECT_EQ(density, DEFAULT_DENSITY);
     };
+    UIObserverHandler::GetInstance().densityHandleFuncForAni_ =
+        [](AbilityContextInfo& context, double density) -> void { EXPECT_EQ(density, DEFAULT_DENSITY); };
     UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
 }
 
