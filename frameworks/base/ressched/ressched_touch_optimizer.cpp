@@ -164,6 +164,8 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(TouchEvent touchEvent, uint32_t cu
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "reversed and need tp flush");
         ACE_SCOPED_TRACE("reversed and need tp flush");
         return true;
+    } else {
+        lastTpFlushCount_ = 0;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
