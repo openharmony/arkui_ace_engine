@@ -62,7 +62,7 @@ const std::vector<DragDropInitiatingStateMovingTestCase> DRAG_DROP_INITIATING_ST
     DragDropInitiatingStateMovingTestCase(
         DragDropInitiatingReceivedInput::TransDragWindowToFwk, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
     DragDropInitiatingStateMovingTestCase(
-        DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
+        DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
 };
 
 void DragDropInitiatingStateMovingTestNG::SetUpTestCase()
