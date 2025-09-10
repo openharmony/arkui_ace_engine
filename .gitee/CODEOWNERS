@@ -3221,9 +3221,9 @@ test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
 
-test/unittest/base/frame_node_test_ng.cpp @arkuiframework
 test/unittest/core/accessibility/ @arkuiabilitygroup
 test/unittest/core/animation/ @arkui_superman
+test/unittest/core/base/frame_node_test_ng.cpp @arkuiframework
 test/unittest/core/common/ace_engine/ @arkuiframework
 test/unittest/core/common/asset/ @arkuiframework
 test/unittest/core/common/clipboard/ @huawei_g_five
