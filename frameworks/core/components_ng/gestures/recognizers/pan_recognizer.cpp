@@ -149,7 +149,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 void PanRecognizer::OnAccepted()
 {
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
-    ResSchedTouchOptimizer::SetSlideDirection(static_cast<int32_t>(panVenlocity_.GetDirection()));
+    ResSchedTouchOptimizer::GetInstance().SetSlideDirection(static_cast<int32_t>(panVelocity_.GetDirection()));
     int64_t acceptTime = GetSysTimestamp();
     int64_t inputTime = acceptTime;
     if (firstInputTime_.has_value()) {

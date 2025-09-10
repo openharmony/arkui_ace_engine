@@ -2643,5 +2643,264 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
     context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
     EXPECT_EQ(context_->dvsyncTimeUpdate_, false);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg_TpFlushBranchTest001
+ * @tc.desc: Test the new TP flush branch condition - NeedTpFlushVsync returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, TpFlushBranchTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.expected: All pointers are non-null
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Mock the ResSchedTouchOptimizer to return true for NeedTpFlushVsync
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideAccepted_ = false; // This will make NeedTpFlushVsync return true
+    
+    // Create a touch event
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    // Add the touch event to touchEvents_ list
+    context_->touchEvents_.clear();
+    context_->touchEvents_.push_back(touchEvent);
+    
+    // Add history points for the touch event ID
+    PointerEvent pointerEvent;
+    pointerEvent.pointerId = 1;
+    pointerEvent.x = 100;
+    pointerEvent.y = 200;
+    pointerEvent.time = GetSysTimestamp();
+    
+    context_->historyPointsById_.clear();
+    context_->historyPointsById_[1].push_back(pointerEvent);
+    
+    // Mock window functions
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Expect FlushVsync to be called
+    EXPECT_CALL(*mockWindow, FlushTasks(_)).Times(AnyNumber());
+    EXPECT_CALL(*mockWindow, RecordFrameTime(_, _)).Times(AnyNumber());
+    
+    // Save original state
+    bool originalLastTpFlush = optimizer.lastTpFlush_;
+    uint32_t originalLastTpFlushCount = optimizer.lastTpFlushCount_;
+    
+    /**
+     * @tc.steps: 2. Call FlushVsync and check if the new branch is executed
+     * @tc.expected: FlushVsync is called and TP flush flags are updated
+     */
+    context_->FlushVsync(GetSysTimestamp(), 100);
+    
+    // Verify that the TP flush flags were updated
+    EXPECT_TRUE(optimizer.lastTpFlush_); // Should be set to true
+    EXPECT_EQ(optimizer.lastTpFlushCount_, 100); // Should be set to current frame count
+    
+    // Restore original state
+    optimizer.lastTpFlush_ = originalLastTpFlush;
+    optimizer.lastTpFlushCount_ = originalLastTpFlushCount;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TpFlushBranchTest002
+ * @tc.desc: Test the new TP flush branch condition - NeedTpFlushVsync returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, TpFlushBranchTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.expected: All pointers are non-null
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Mock the ResSchedTouchOptimizer to return false for NeedTpFlushVsync
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = false; // This will make NeedTpFlushVsync return false
+    
+    // Create a touch event
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    // Add the touch event to touchEvents_ list
+    context_->touchEvents_.clear();
+    context_->touchEvents_.push_back(touchEvent);
+    
+    // Add history points for the touch event ID
+    PointerEvent pointerEvent;
+    pointerEvent.pointerId = 1;
+    pointerEvent.x = 100;
+    pointerEvent.y = 200;
+    pointerEvent.time = GetSysTimestamp();
+    
+    context_->historyPointsById_.clear();
+    context_->historyPointsById_[1].push_back(pointerEvent);
+    
+    // Mock window functions
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Expect FlushVsync to be called
+    EXPECT_CALL(*mockWindow, FlushTasks(_)).Times(AnyNumber());
+    EXPECT_CALL(*mockWindow, RecordFrameTime(_, _)).Times(AnyNumber());
+    
+    // Save original state
+    bool originalLastTpFlush = optimizer.lastTpFlush_;
+    uint32_t originalLastTpFlushCount = optimizer.lastTpFlushCount_;
+    
+    /**
+     * @tc.steps: 2. Call FlushVsync and check that the new branch is not executed
+     * @tc.expected: TP flush flags remain unchanged
+     */
+    context_->FlushVsync(GetSysTimestamp(), 100);
+    
+    // Verify that the TP flush flags were NOT updated
+    EXPECT_EQ(optimizer.lastTpFlush_, originalLastTpFlush); // Should remain unchanged
+    EXPECT_EQ(optimizer.lastTpFlushCount_, originalLastTpFlushCount); // Should remain unchanged
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TpFlushBranchTest003
+ * @tc.desc: Test the new TP flush branch condition - historyPointsById_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, TpFlushBranchTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.expected: All pointers are non-null
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Mock the ResSchedTouchOptimizer to return true for NeedTpFlushVsync
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideAccepted_ = false; // This will make NeedTpFlushVsync return true
+    
+    // Create a touch event
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    // Add the touch event to touchEvents_ list
+    context_->touchEvents_.clear();
+    context_->touchEvents_.push_back(touchEvent);
+    
+    // Keep historyPointsById_ empty - this should prevent the branch from executing fully
+    
+    // Mock window functions
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Expect FlushVsync to be called
+    EXPECT_CALL(*mockWindow, FlushTasks(_)).Times(AnyNumber());
+    EXPECT_CALL(*mockWindow, RecordFrameTime(_, _)).Times(AnyNumber());
+    
+    // Save original state
+    bool originalLastTpFlush = optimizer.lastTpFlush_;
+    uint32_t originalLastTpFlushCount = optimizer.lastTpFlushCount_;
+    
+    /**
+     * @tc.steps: 2. Call FlushVsync and check that the new branch is not fully executed
+     * @tc.expected: TP flush flags remain unchanged because historyPointsById_ is empty
+     */
+    context_->FlushVsync(GetSysTimestamp(), 100);
+    
+    // Verify that the TP flush flags were NOT updated because historyPointsById_ is empty
+    EXPECT_EQ(optimizer.lastTpFlush_, originalLastTpFlush); // Should remain unchanged
+    EXPECT_EQ(optimizer.lastTpFlushCount_, originalLastTpFlushCount); // Should remain unchanged
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TpFlushBranchTest004
+ * @tc.desc: Test the new TP flush branch with touch event ID not in historyPointsById_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, TpFlushBranchTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.expected: All pointers are non-null
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Mock the ResSchedTouchOptimizer to return true for NeedTpFlushVsync
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideAccepted_ = false; // This will make NeedTpFlushVsync return true
+    
+    // Create a touch event with ID=1
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    // Add the touch event to touchEvents_ list
+    context_->touchEvents_.clear();
+    context_->touchEvents_.push_back(touchEvent);
+    
+    // Add history points for a different ID (ID=2) - this should prevent the branch from executing fully
+    PointerEvent pointerEvent;
+    pointerEvent.pointerId = 2; // Different ID
+    pointerEvent.x = 100;
+    pointerEvent.y = 200;
+    pointerEvent.time = GetSysTimestamp();
+    
+    context_->historyPointsById_.clear();
+    context_->historyPointsById_[2].push_back(pointerEvent); // Different ID
+    
+    // Mock window functions
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Expect FlushVsync to be called
+    EXPECT_CALL(*mockWindow, FlushTasks(_)).Times(AnyNumber());
+    EXPECT_CALL(*mockWindow, RecordFrameTime(_, _)).Times(AnyNumber());
+    
+    // Save original state
+    bool originalLastTpFlush = optimizer.lastTpFlush_;
+    uint32_t originalLastTpFlushCount = optimizer.lastTpFlushCount_;
+    
+    /**
+     * @tc.steps: 2. Call FlushVsync and check that the new branch is not fully executed
+     * @tc.expected: TP flush flags remain unchanged because touch event ID not found in historyPointsById_
+     */
+    context_->FlushVsync(GetSysTimestamp(), 100);
+    
+    // Verify that the TP flush flags were NOT updated because touch event ID not found in historyPointsById_
+    EXPECT_EQ(optimizer.lastTpFlush_, originalLastTpFlush); // Should remain unchanged
+    EXPECT_EQ(optimizer.lastTpFlushCount_, originalLastTpFlushCount); // Should remain unchanged
+}
 } // namespace NG
 } // namespace OHOS::Ace
