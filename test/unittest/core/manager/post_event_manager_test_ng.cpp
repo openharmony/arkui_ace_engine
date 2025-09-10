@@ -1112,4 +1112,37 @@ HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTest001, TestSize.Level1)
     postEventManager_->ClearPostInputActions(UInode, touchUpEvent.id);
     EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
 }
+
+/**
+ * @tc.name: PostMouseEventTest002
+ * @tc.desc: test PostMouseEvent func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. test PostMouseEvent.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    MouseEvent mouseEvent;
+    mouseEvent.touchEventId = 1;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+    postEventManager_->passThroughResult_ = true;
+    postEventManager_->PostMouseEvent(uiNode, std::move(mouseEvent));
+    pipelineContext->eventManager_->isDragCancelPending_ = true;
+    MouseEvent mouseEventEx;
+    mouseEventEx.touchEventId = 2;
+    postEventManager_->PostMouseEvent(uiNode, std::move(mouseEventEx));
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
 } // namespace OHOS::Ace::NG

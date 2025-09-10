@@ -101,7 +101,11 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     CHECK_NULL_RETURN(pipelineContext, false);
     mouseEvent.passThrough = true;
     passThroughResult_ = false;
-    pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    if (!eventManager->IsDragCancelPending()) {
+        pipelineContext->OnMouseEvent(mouseEvent, frameNode);
+    }
     mouseEvent.passThrough = false;
     targetNode_.Reset();
     return passThroughResult_;
