@@ -448,6 +448,56 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback_;
 };
 
+class WebNativeMessageCallbackOhos : public WebNativeMessageCallback {
+    DECLARE_ACE_TYPE(WebNativeMessageCallbackOhos, WebNativeMessageCallback);
+
+public:
+    explicit WebNativeMessageCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> &callback)
+        : callback_(callback)
+    {}
+    using CompletionHandler = std::function<void(const std::string &)>;
+
+    void OnConnect(int connectionId) override
+    {
+        if (callback_) {
+            callback_->OnConnect(connectionId);
+        }
+        OnCallbackComplete("success:" + std::to_string(connectionId));
+    }
+
+    void OnDisconnect(int connectionId) override
+    {
+        if (callback_) {
+            callback_->OnDisconnect(connectionId);
+        }
+        OnCallbackComplete("disconnect:" + std::to_string(connectionId));
+    }
+    void OnFailed(int code) override
+    {
+        if (callback_) {
+            callback_->OnFailed(code);
+        }
+        OnCallbackComplete("error:" + std::to_string(code));
+    }
+
+    void SetCompletionHandler(CompletionHandler handler)
+    {
+        completionHandler_ = std::move(handler);
+    }
+
+    // Call this function to notify waiting thread
+    void OnCallbackComplete(const std::string &result)
+    {
+        if (completionHandler_) {
+            completionHandler_(result);
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> callback_;
+    CompletionHandler completionHandler_;
+};
+
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted);
 
@@ -1386,7 +1436,9 @@ public:
     void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
     bool IsFileSelectorShow() { return isFileSelectorShow_; }
 
-
+    void OnExtensionDisconnect(int32_t connectId);
+    std::string OnWebNativeMessage(std::shared_ptr<OHOS::NWeb::NWebRuntimeConnectInfo> info,
+        std::shared_ptr<OHOS::NWeb::NWebNativeMessageCallback> callback);
     bool ShowMagnifier();
     bool HideMagnifier();
     void UpdateSingleHandleVisible(bool isVisible);

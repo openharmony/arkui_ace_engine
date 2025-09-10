@@ -1182,4 +1182,43 @@ HWTEST_F(TextTestNineNg, MeasureWithFixAtIdealSize, TestSize.Level1)
     textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(80.0f, 80.0f));
 }
+
+/**
+ * @tc.name: GetContainerModalRoot
+ * @tc.desc: Test GetContainerModalRoot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, GetContainerModalRoot, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create function
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetupRootElement();
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    auto hostNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto holder = AceType::MakeRefPtr<TextSelectOverlay>(hostNode->GetPattern<TextBase>());
+    manager->selectOverlayHolder_ = holder;
+
+    /**
+     * @tc.steps: step2: call GetContainerModalRoot when hostNode is nullptr
+     * @tc.expected: root is  pipeline->rootNode_
+     */
+    auto root = manager->GetContainerModalRoot();
+    EXPECT_EQ(root, pipeline->rootNode_);
+
+    /**
+     * @tc.steps: step3: call GetContainerModalRoot when hostNode parent is toolbarItem
+     * @tc.expected: root is  containerModalNode
+     */
+    auto toolbarItem = FrameNode::GetOrCreateFrameNode(
+        V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    toolbarItem->AddChild(hostNode);
+    root = manager->GetContainerModalRoot();
+    EXPECT_EQ(root, pipeline->GetContainerModalNode());
+}
 } // namespace OHOS::Ace::NG

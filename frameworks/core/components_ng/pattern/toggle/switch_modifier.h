@@ -71,6 +71,8 @@ public:
                 animatableBoardColor_->Set(isSelect_->Get() ?
                     LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
             }, nullptr, nullptr, host->GetContextRefPtr());
+        } else {
+            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
         }
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);

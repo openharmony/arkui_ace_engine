@@ -481,6 +481,11 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
         auto previewPattern = weak.Upgrade();
         CHECK_NULL_VOID(previewPattern);
         previewPattern->SetIsHoverImagePreviewScalePlaying(false);
+        auto menuWrapper = previewPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetDragMenuLiftAnimationFinishState(true);
     });
 
     auto endWidth = previewPattern->GetStackAfterScaleActualWidth();
@@ -1314,6 +1319,7 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
     if (isShowHoverImage) {
         auto hoverImageStackNode = menuWrapperPattern->GetHoverImageStackNode();
         auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
+        menuWrapperPattern->SetDragMenuLiftAnimationFinishState(false);
         ShowHoverImageAnimationProc(hoverImageStackNode, previewNode, imageContext, menuWrapperPattern);
     } else {
         ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);

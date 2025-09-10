@@ -821,20 +821,24 @@ HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreviewMenuAnimationRate001
- * @tc.desc: Test GetPreviewMenuAnimationRate
+ * @tc.name: ShouldSetOffsetForMenuDrag001
+ * @tc.desc: Test ShouldSetOffsetForMenuDrag
  * @tc.type: FUNC
  */
-HWTEST_F(DragAnimationHelperTestNg, GetPreviewMenuAnimationRate001, TestSize.Level1)
+HWTEST_F(DragAnimationHelperTestNg, ShouldSetOffsetForMenuDrag001, TestSize.Level1)
 {
     auto pipelineContext = MockPipelineContext::GetCurrent();
     auto dragDropManager = pipelineContext->GetDragDropManager();
     auto frameNode = FrameNode::CreateFrameNode(
         V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     dragDropManager->SetMenuWrapperNode(frameNode);
-
-    auto getsize = DragAnimationHelper::GetPreviewMenuAnimationRate();
-    EXPECT_EQ(getsize, -1);
+    auto ret1 = DragAnimationHelper::ShouldSetOffsetForMenuDrag();
+    EXPECT_TRUE(ret1);
+    auto menuWrapperPattern = frameNode->GetPattern<MenuWrapperPattern>();
+    EXPECT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->dragMenuLiftAnimationFinish_ = false;
+    auto ret2 = DragAnimationHelper::ShouldSetOffsetForMenuDrag();
+    EXPECT_FALSE(ret2);
 }
 
 

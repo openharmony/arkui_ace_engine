@@ -2894,7 +2894,7 @@ bool PipelineContext::OnBackPressed()
 RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -5787,6 +5787,21 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     }
     CHECK_NULL_RETURN(rootNode_, nullptr);
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+bool PipelineContext::CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto containerNode = GetContainerModalNode();
+    CHECK_NULL_RETURN(containerNode, false);
+    auto parent = node->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::TOOLBARITEM_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParent();
+    }
+    return false;
 }
 
 void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig,

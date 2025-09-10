@@ -747,8 +747,6 @@ void FormPattern::HandleFormComponent(RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
-            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
@@ -826,14 +824,15 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
         return;
     }
-#if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(pipeline, info, formInfo);
-#else
-    formManagerBridge_->AddForm(pipeline, info);
-#endif
-
     bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
     bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
+    cardInfo_.obscuredMode |= isFormBundleForbidden || isFormProtected;
+#if OHOS_STANDARD_SYSTEM
+    formManagerBridge_->AddForm(pipeline, cardInfo_, formInfo);
+#else
+    formManagerBridge_->AddForm(pipeline, cardInfo_);
+#endif
+
     if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden))  {
         auto newFormSpecialStyle = formSpecialStyle_;
         newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
