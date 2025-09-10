@@ -3402,6 +3402,7 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
+test/unittest/core/base/observer_test_ng.cpp @arkuiframework
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
