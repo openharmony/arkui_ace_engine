@@ -75,13 +75,8 @@ struct KStringPtrImpl {
         if (!_owned) return;
         // Ignore old content.
         if (_value && _owned) free(_value);
-        void* rawMem = malloc(size + 1);
-        if (rawMem) {
-            _value = reinterpret_cast<char*>(rawMem);
-            _value[size] = 0;
-        } else {
-            _value = nullptr;
-        }
+        _value = reinterpret_cast<char*>(malloc(size + 1));
+        _value[size] = 0;
     }
 
     void assign(const char* data) {
