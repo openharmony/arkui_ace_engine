@@ -20,5 +20,6 @@ ace_unittest("checkboxgroup_test_ng") {
     "checkboxgroup_paint_property_test_ng.cpp",
     "checkboxgroup_pattern_test_ng.cpp",
     "checkboxgroup_test_ng.cpp",
+    "checkboxgroup_model_static_test_ng.cpp",
   ]
 }
