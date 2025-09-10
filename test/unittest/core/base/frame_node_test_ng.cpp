@@ -2817,4 +2817,36 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
      */
     EXPECT_EQ(frameNode->CallAIFunction("OTHERFunction", "params1: 1"), AI_CALL_FUNCNAME_INVALID);
 }
+
+
+/**
+ * @tc.name: FrameNodeOnDelteTest
+ * @tc.desc: Test FrameNode OnDelteTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnDelteTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("page", 1,  AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create kitNode_ is not nullptr.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto kitNode = AceType::MakeRefPtr<Kit::FrameNodeImpl>(frameNode);
+    frameNode->SetKitNode(kitNode);
+    EXPECT_NE(kitNode, nullptr);
+    /**
+     * @tc.steps: step3. call frameNode OnDelete()
+     * @tc.expected: expect GetAceNodePtr is nullptr after OnDelete has been called.
+     */
+    EXPECT_NE(kitNode->GetAceNodePtr(), nullptr);
+    frameNode->OnDelete();
+    EXPECT_EQ(kitNode->GetAceNodePtr(), nullptr);
+}
 } // namespace OHOS::Ace::NG

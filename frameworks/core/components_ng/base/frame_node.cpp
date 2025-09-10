@@ -479,6 +479,9 @@ void FrameNode::OnDelete()
 {
     frameProxy_.reset();
     nodeAnimatablePropertyMap_.clear();
+    if (kitNode_) {
+        kitNode_->Reset();
+    }
     UINode::OnDelete();
 }
 
