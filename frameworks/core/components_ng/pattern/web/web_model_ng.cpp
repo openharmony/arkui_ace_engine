@@ -1289,6 +1289,24 @@ void WebModelNG::SetOpenAppLinkFunction(std::function<void(const std::shared_ptr
     webPattern->SetOnOpenAppLinkCallback(std::move(jsCallback));
 }
 
+void WebModelNG::SetWebNativeMessageConnectFunction(
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetWebNativeMessageConnectCallback(std::move(jsCallback));
+}
+
+void WebModelNG::SetWebNativeMessageDisconnectFunction(
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetWebNativeMessageDisConnectCallback(std::move(jsCallback));
+}
+
 void WebModelNG::SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
