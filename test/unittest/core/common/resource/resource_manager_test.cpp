@@ -278,4 +278,20 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest005, TestSize.Level1)
     ResourceManager::GetInstance().SetResourceCacheSize(6);
     EXPECT_EQ(ResourceManager::GetInstance().capacity_, 6);
 }
+
+/**
+ * @tc.name: ResourceManagerTest006
+ * @tc.desc: Test GetOrCreateResourceAdapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetOrCreateResourceAdapter with nullptr
+     * @tc.expect: return nullptr.
+     */
+    RefPtr<ResourceObject> resourceObject;
+    auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    EXPECT_EQ(resAdapter, nullptr);
+}
 } // namespace OHOS::Ace
