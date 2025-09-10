@@ -531,9 +531,12 @@ void JSText::SetTextContentAlign(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    if (index >= 0 && index < TEXT_CONTENT_ALIGNS.size()) {
-        TextModel::GetInstance()->SetTextContentAlign(TEXT_CONTENT_ALIGNS[index]);
+    auto isNormalValue = index >= 0 && index < TEXT_CONTENT_ALIGNS.size();
+    if (!isNormalValue) {
+        TextModel::GetInstance()->ReSetTextContentAlign();
+        return;
     }
+    TextModel::GetInstance()->SetTextContentAlign(TEXT_CONTENT_ALIGNS[index]);
 }
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)
