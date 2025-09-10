@@ -409,6 +409,10 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest007, TestSize.Level1)
     napi_status status = napi_create_string_utf8(napi_env(engine), testStr.c_str(), testStr.length(), &napiTestStr);
     EXPECT_EQ(status, napi_ok);
 
+    // 100000 indicates that the length of a long string is too long
+    status = napi_create_string_utf8(napi_env(engine), testStr.c_str(), 100000, &napiTestStr);
+    EXPECT_EQ(status, napi_ok);
+
     /**
      * @tc.steps: step2. Call GetStringFromValueUtf8
      * @tc.expected: Return value equals raw string

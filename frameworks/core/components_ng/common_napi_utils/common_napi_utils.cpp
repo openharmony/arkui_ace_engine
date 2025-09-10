@@ -155,7 +155,6 @@ napi_value CommonNapiUtils::CreateStringUtf8(napi_env env, const std::string& st
 
 std::string CommonNapiUtils::GetStringFromValueUtf8(napi_env env, napi_value value)
 {
-    static constexpr size_t max_length = 2048;
     if (GetValueType(env, value) != napi_string) {
         return {};
     }
@@ -163,16 +162,11 @@ std::string CommonNapiUtils::GetStringFromValueUtf8(napi_env env, napi_value val
     std::string result;
     size_t stringLength = 0;
     NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, nullptr, 0, &stringLength), result);
-    if (stringLength == 0 || stringLength > max_length) {
+    if (stringLength == 0) {
         return result;
     }
 
-    auto deleter = [](char* s) { free(reinterpret_cast<void*>(s)); };
-    char* strTmp = static_cast<char*>(malloc(stringLength + 1));
-    if (strTmp == nullptr) {
-        return result;
-    }
-    std::unique_ptr<char, decltype(deleter)> str(strTmp, deleter);
+    std::unique_ptr<char[]> str = std::make_unique<char[]>(stringLength + 1);
     if (memset_s(str.get(), stringLength + 1, 0, stringLength + 1) != EOK) {
         return result;
     }
