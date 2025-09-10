@@ -74,7 +74,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
         canvas.DetachBrush();
-        SetBoundsRect(RectF { barX, barY, barX + barWidth, barY + barHeight });
+        SetBoundsRect(RectF { barX, barY, barWidth, barHeight });
     }
 }
 
