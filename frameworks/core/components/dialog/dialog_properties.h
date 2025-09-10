@@ -264,6 +264,10 @@ struct DialogProperties {
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<int32_t> controllerId;
+    bool hasCustomMaskColor = false;
+    bool hasCustomShadowColor = false;
+    bool hasCustomBackgroundColor = false;
+    bool hasCustomBorderColor = false;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>

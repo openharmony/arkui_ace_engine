@@ -368,7 +368,7 @@ void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
             outerColorProp.SetColor(dialogTheme->GetDialogOuterBorderColor());
             contentRenderContext->UpdateOuterBorderColor(outerColorProp);
         } else {
-            borderColor.SetColor(dialogTheme->GetBackgroudBorderColor());
+            borderColor.SetColor(dialogTheme->GetBackgroundBorderColor());
         }
         contentRenderContext->UpdateBorderColor(borderColor);
         BorderColorProperty outerColorProp;
@@ -1338,6 +1338,9 @@ void DialogPattern::HandleBlurEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    if (InvertShadowColor()) {
+        return;
+    }
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
     contentRenderContext_->UpdateBackShadow(
         dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff, host)));
@@ -1348,9 +1351,34 @@ void DialogPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    if (InvertShadowColor()) {
+        return;
+    }
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
     contentRenderContext_->UpdateBackShadow(
         dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn, host)));
+}
+
+bool DialogPattern::InvertShadowColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(contentRenderContext_, false);
+    CHECK_NULL_RETURN(dialogProperties_.hasCustomShadowColor, false);
+    if (SystemProperties::ConfigChangePerform() && dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        Color shadowColor = shadow.GetColor();
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto colorMode = pipeline->GetColorMode();
+        if (colorMode == ColorMode::DARK) {
+            auto result = ColorInverter::Invert(shadowColor, host->GetInstanceId(), host->GetTag());
+            shadow.SetColor(result);
+        }
+        contentRenderContext_->UpdateBackShadow(shadow);
+        return true;
+    }
+    return false;
 }
 
 // XTS inspector

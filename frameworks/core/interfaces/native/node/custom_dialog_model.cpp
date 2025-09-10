@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
 
 #include "interfaces/native/node/dialog_model.h"
@@ -222,6 +223,7 @@ void ParseDialogMask(DialogProperties& dialogProperties, ArkUIDialogHandle contr
     if (!controllerHandler->maskRect) {
         return;
     }
+    dialogProperties.hasCustomMaskColor = controllerHandler->hasCustomMaskColor;
     DimensionRect maskRect;
     maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
         Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
@@ -338,6 +340,7 @@ void ParseDialogBorderColor(DialogProperties& dialogProperties, ArkUIDialogHandl
     if (!controllerHandler->borderColors) {
         return;
     }
+    dialogProperties.hasCustomBorderColor = controllerHandler->hasCustomBorderColor;
     NG::BorderColorProperty color;
     color.topColor = Color(controllerHandler->borderColors->top);
     color.rightColor = Color(controllerHandler->borderColors->right);
@@ -398,6 +401,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
+    dialogProperties.hasCustomBackgroundColor = controllerHandler->hasCustomBackgroundColor;
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
     dialogProperties.dialogLevelMode = static_cast<LevelMode>(controllerHandler->levelMode);
@@ -410,6 +414,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
+        dialogProperties.hasCustomShadowColor= controllerHandler->hasCustomShadowColor;
     }
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
@@ -672,6 +677,7 @@ ArkUI_Int32 SetDialogMask(ArkUIDialogHandle controllerHandler, ArkUI_Uint32 mask
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->maskColor = maskColor;
+    controllerHandler->hasCustomMaskColor = true;
     if (rect) {
         controllerHandler->maskRect = new ArkUIRect({ .x = rect->x, .y = rect->y,
             .width = rect->width, .height = rect->height });
@@ -683,6 +689,7 @@ ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle controllerHandler, ArkUI_
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->backgroundColor = backgroundColor;
+    controllerHandler->hasCustomBackgroundColor = true;
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -943,6 +950,7 @@ ArkUI_Int32 SetDialogBorderColor(
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->borderColors =
         new ArkUIBorderColor({ .top = top, .right = right, .bottom = bottom, .left = left });
+    controllerHandler->hasCustomBorderColor = true;
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -998,6 +1006,7 @@ ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
         Shadow shadows;
         GetShadowFromTheme(static_cast<OHOS::Ace::ShadowStyle>(shadow), shadows);
         controllerHandler->customShadow = shadows;
+        controllerHandler->hasCustomShadowColor= false;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1036,6 +1045,7 @@ ArkUI_Int32 SetDialogCustomShadow(
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
     controllerHandler->customShadow = shadow;
+    controllerHandler->hasCustomShadowColor= true;
     return ERROR_CODE_NO_ERROR;
 }
 

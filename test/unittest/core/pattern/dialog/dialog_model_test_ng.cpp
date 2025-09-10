@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -616,6 +617,172 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg015, TestSize.Level1)
     EXPECT_EQ(dialogLayoutProp->GetGridCount(), props.gridCount);
     EXPECT_EQ(dialogLayoutProp->GetHeight(), props.height);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DialogModelTestNg042
+ * @tc.desc: Test DialogView's CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
+{
+    g_isConfigChangePerform = false;
+
+    Shadow shadow;
+    shadow.SetColor(Color::BLUE);
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLUE);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.inactiveColor = Color::BLUE;
+    EffectOption effectOption;
+    effectOption.color = Color::BLUE;
+    effectOption.inactiveColor = Color::BLUE;
+    DialogProperties props {
+        .maskColor = Color::BLUE,
+        .shadow = shadow,
+        .borderColor = borderColor,
+        .backgroundColor = Color::BLUE,
+        .blurStyleOption = blurStyleOption,
+        .effectOption = effectOption,
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
+    };
+
+    /**
+     * @tc.steps: step1. Create a custom node
+     */
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialog = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialog, nullptr);
+
+    g_isConfigChangePerform = true;
+    /**
+     * @tc.steps: step2. Create dialog and layoutWrapper.
+     * @tc.expected: The dialog node created successfully.
+     */
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    
+    auto renderContext = dialogNode->GetRenderContext();
+    auto resMaskColor = renderContext->GetBackgroundColor();
+    EXPECT_EQ(resMaskColor->ColorToString(), props.maskColor->ColorToString());
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+
+    auto resShadow = contentColumnRenderContext->GetBackShadow();
+    EXPECT_EQ(resShadow->GetColor().ColorToString(), props.shadow->GetColor().ColorToString());
+
+    auto resBgColor = contentColumnRenderContext->GetBackgroundColor();
+    EXPECT_EQ(resBgColor->ColorToString(), props.backgroundColor->ColorToString());
+
+    auto resBorderColor = contentColumnRenderContext->GetBorderColor();
+    EXPECT_EQ(resBorderColor->topColor->ColorToString(), props.borderColor->topColor->ColorToString());
+
+    
+    auto resBlurStyleOption = contentColumnRenderContext->GetBackBlurStyle();
+    EXPECT_EQ(resBlurStyleOption->inactiveColor.ColorToString(), props.blurStyleOption->inactiveColor.ColorToString());
+
+    auto resEffectOption = contentColumnRenderContext->GetBackgroundEffect();
+    EXPECT_EQ(resEffectOption->color.ColorToString(), props.effectOption->color.ColorToString());
+    EXPECT_EQ(resEffectOption->inactiveColor.ColorToString(), props.effectOption->inactiveColor.ColorToString());
+
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+}
+/**
+ * @tc.name: DialogModelTestNg043
+ * @tc.desc: Test DialogView's CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg043, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+
+    DialogProperties props {
+        .customStyle = true,
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
+    };
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentRenderContext = contentColumn->GetRenderContext();
+    auto resBgColor = contentRenderContext->GetBackgroundColor();
+    EXPECT_EQ(resBgColor->ColorToString(), "#00000000");
+
+    auto resBorderColor = contentRenderContext->GetBorderColor();
+    EXPECT_EQ(resBorderColor->topColor->ColorToString(), "#00000000");
+
+    
+    auto resBlurStyleOption = contentRenderContext->GetBackBlurStyle();
+    EXPECT_EQ(resBlurStyleOption->inactiveColor.ColorToString(), "#00000000");
+
+    auto resEffectOption = contentRenderContext->GetBackgroundEffect();
+    EXPECT_EQ(resEffectOption->color.ColorToString(), "#00000000");
+    EXPECT_EQ(resEffectOption->inactiveColor.ColorToString(), "#00000000");
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg044
+ * @tc.desc: Test DialogView's CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg044, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+
+    DialogProperties props {
+        .hasCustomMaskColor = true,
+        .hasCustomShadowColor = true,
+        .hasCustomBackgroundColor = true,
+        .hasCustomBorderColor = true,
+    };
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto renderContext = dialogNode->GetRenderContext();
+    auto resMaskColor = renderContext->GetBackgroundColor();
+    auto theme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_EQ(resMaskColor->ColorToString(), theme->GetMaskColorEnd().ColorToString());
+    
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentRenderContext = contentColumn->GetRenderContext();
+
+    auto resShadow = contentRenderContext->GetBackShadow();
+    EXPECT_EQ(resShadow->GetColor().ColorToString(), "#FF000000");
+
+    
+    auto resBgColor = contentRenderContext->GetBackgroundColor();
+    EXPECT_EQ(resBgColor->ColorToString(), theme->GetBackgroundColor().ColorToString());
+
+    auto resBorderColor = contentRenderContext->GetBorderColor();
+    EXPECT_EQ(resBorderColor->topColor->ColorToString(), theme->GetBackgroundBorderColor().ColorToString());
+
+    
+    auto resBlurStyleOption = contentRenderContext->GetBackBlurStyle();
+    EXPECT_EQ(resBlurStyleOption->inactiveColor.ColorToString(), "#00000000");
+
+    auto resEffectOption = contentRenderContext->GetBackgroundEffect();
+    EXPECT_EQ(resEffectOption->color.ColorToString(), "#00000000");
+    EXPECT_EQ(resEffectOption->inactiveColor.ColorToString(), "#00000000");
+    g_isConfigChangePerform = isConfigChangePerform;
 }
 
 /**

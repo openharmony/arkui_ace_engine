@@ -72,6 +72,10 @@ struct _ArkUIDialog {
     ArkUI_Int32 focusable;
     ArkUI_Int32* dialogState;
     std::vector<void*> historyDialogHandle;
+    bool hasCustomMaskColor;
+    bool hasCustomBackgroundColor;
+    bool hasCustomShadowColor;
+    bool hasCustomBorderColor;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
