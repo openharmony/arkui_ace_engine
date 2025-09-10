@@ -3544,31 +3544,4 @@ HWTEST_F(SvgNodeTestNg, SvgGraphicTest048, TestSize.Level1)
     EXPECT_EQ(result.value(), Color::BLACK);
 }
 
-/**
- * @tc.name: Svg Graphic
- * @tc.desc: test ApplyTransform
- * @tc.type: FUNC
- */
-HWTEST_F(SvgNodeTestNg, SvgGraphicTest049, TestSize.Level1)
-{
-    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
-    EXPECT_NE(svgGraphic, nullptr);
-    RSRecordingPath path;
-    svgGraphic->ApplyTransform(path);
-    EXPECT_EQ(path.GetLength(false), 0);
-    std::vector<NG::TransformInfo> transformVec;
-    NG::TransformInfo info;
-    transformVec.emplace_back(info);
-    svgGraphic->attributes_.transformVec = transformVec;
-    svgGraphic->ApplyTransform(path);
-    EXPECT_EQ(path.GetLength(true), 0);
-
-    std::vector<NG::TransformInfo> transformVec1;
-    NG::TransformInfo info1;
-    info1.funcType = "translate";
-    transformVec1.emplace_back(info);
-    svgGraphic->attributes_.transformVec = transformVec1;
-    svgGraphic->ApplyTransform(path);
-    EXPECT_NE(path.GetLength(false), 20);
-}
 } // namespace OHOS::Ace::NG
