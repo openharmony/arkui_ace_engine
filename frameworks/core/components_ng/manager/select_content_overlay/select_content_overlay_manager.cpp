@@ -1334,6 +1334,11 @@ RefPtr<FrameNode> SelectContentOverlayManager::GetContainerModalRoot()
         CHECK_NULL_RETURN(context, nullptr);
         auto windowModal = context->GetWindowModal();
         if (windowModal == WindowModal::CONTAINER_MODAL) {
+            auto isOnDecor = context->CheckNodeOnContainerModalTitle(
+                selectOverlayHolder_ ? selectOverlayHolder_->GetOwner() : nullptr);
+            if (isOnDecor) {
+                return context->GetContainerModalNode();
+            }
             auto overlayManager = context->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, nullptr);
             auto overlayRoot = overlayManager->GetRootNode();
