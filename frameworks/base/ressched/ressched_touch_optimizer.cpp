@@ -211,7 +211,8 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
         }
 
         // Process X-axis data
-        if (!(rvsDequeX_[iter.id].size() >= 1 && rvsDequeX_[iter.id].back() == iter.x)) {
+        if (slideDirection_ == SLIDE_DIRECTION::HORIZONTAL &&
+            !(rvsDequeX_[iter.id].size() >= 1 && rvsDequeX_[iter.id].back() == iter.x)) {
             rvsDequeX_[iter.id].push_back(iter.x);
             if (rvsDequeX_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeX_[iter.id].pop_front();
@@ -221,7 +222,8 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
         }
 
         // Process Y-axis data
-        if (!(rvsDequeY_[iter.id].size() >= 1 && rvsDequeY_[iter.id].back() == iter.y)) {
+        if (slideDirection_ == SLIDE_DIRECTION::VERTICAL &&
+            !(rvsDequeY_[iter.id].size() >= 1 && rvsDequeY_[iter.id].back() == iter.y)) {
             rvsDequeY_[iter.id].push_back(iter.y);
             if (rvsDequeY_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeY_[iter.id].pop_front();
