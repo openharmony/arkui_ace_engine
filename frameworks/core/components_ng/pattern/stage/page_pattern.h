@@ -316,8 +316,6 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-
     void SetIsNeedRemove(bool isNeedRemove)
     {
         isNeedRemove_ = isNeedRemove;

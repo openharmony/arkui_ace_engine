@@ -241,21 +241,6 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
-void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
-{
-    if (type != WindowSizeChangeReason::ROTATION) {
-        return;
-    }
-    if (!isPageInTransition_) {
-        return;
-    }
-    auto page = GetHost();
-    CHECK_NULL_VOID(page);
-    auto renderContext = page->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->RemoveClipWithRRect();
-}
-
 void PagePattern::OnShow(bool isFromWindow)
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
