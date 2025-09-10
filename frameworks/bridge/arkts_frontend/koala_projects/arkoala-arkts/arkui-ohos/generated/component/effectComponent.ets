@@ -65,6 +65,9 @@ export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements Eff
 
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
     getPeer(): ArkEffectComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkEffectComponentPeer)
     }
     public setEffectComponentOptions(): this {
@@ -94,8 +97,10 @@ export function EffectComponentImpl(
     const receiver = remember<ArkEffectComponentComponent>((): ArkEffectComponentComponent => {
         return new ArkEffectComponentComponent()
     })
-    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer): void => {
+    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (peer: ArkEffectComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

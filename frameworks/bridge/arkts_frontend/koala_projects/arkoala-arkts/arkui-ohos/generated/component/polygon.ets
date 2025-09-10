@@ -132,6 +132,9 @@ export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements Polygo
 
 export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements PolygonAttribute {
     getPeer(): ArkPolygonPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkPolygonPeer)
     }
     public setPolygonOptions(options?: PolygonOptions): this {
@@ -170,8 +173,10 @@ export function PolygonImpl(
     const receiver = remember<ArkPolygonComponent>((): ArkPolygonComponent => {
         return new ArkPolygonComponent()
     })
-    NodeAttach<ArkPolygonPeer>((): ArkPolygonPeer => ArkPolygonPeer.create(receiver), (_: ArkPolygonPeer): void => {
+    NodeAttach<ArkPolygonPeer>((): ArkPolygonPeer => ArkPolygonPeer.create(receiver), (peer: ArkPolygonPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

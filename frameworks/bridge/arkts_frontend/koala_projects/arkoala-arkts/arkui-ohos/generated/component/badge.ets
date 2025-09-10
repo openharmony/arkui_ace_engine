@@ -108,6 +108,9 @@ export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribut
 
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
     getPeer(): ArkBadgePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkBadgePeer)
     }
     public setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
@@ -138,8 +141,10 @@ export function BadgeImpl(
     const receiver = remember<ArkBadgeComponent>((): ArkBadgeComponent => {
         return new ArkBadgeComponent()
     })
-    NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer): void => {
+    NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (peer: ArkBadgePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

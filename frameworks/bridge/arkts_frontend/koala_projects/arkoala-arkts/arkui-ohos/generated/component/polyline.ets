@@ -132,6 +132,9 @@ export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements Polyl
 
 export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements PolylineAttribute {
     getPeer(): ArkPolylinePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkPolylinePeer)
     }
     public setPolylineOptions(options?: PolylineOptions): this {
@@ -170,8 +173,10 @@ export function PolylineImpl(
     const receiver = remember<ArkPolylineComponent>((): ArkPolylineComponent => {
         return new ArkPolylineComponent()
     })
-    NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (_: ArkPolylinePeer): void => {
+    NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (peer: ArkPolylinePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

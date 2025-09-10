@@ -520,6 +520,22 @@ void SetOnPageBeginImpl(Ark_NativePointer node,
     WebModelStatic::SetOnPageStart(frameNode, onPageBegin);
 #endif // WEB_SUPPORTED
 }
+void SetOnLoadStartedImpl(Ark_NativePointer node,
+                          const Opt_Callback_OnLoadStartedEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetOnLoadStarted(frameNode, convValue);
+}
+void SetOnLoadFinishedImpl(Ark_NativePointer node,
+                           const Opt_Callback_OnLoadFinishedEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // WebModelNG::SetSetOnLoadFinished(frameNode, convValue);
+}
 void SetOnProgressChangeImpl(Ark_NativePointer node,
                              const Opt_Callback_OnProgressChangeEvent_Void* value)
 {
@@ -2346,6 +2362,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetMetaViewportImpl,
         WebAttributeModifier::SetOnPageEndImpl,
         WebAttributeModifier::SetOnPageBeginImpl,
+        WebAttributeModifier::SetOnLoadStartedImpl,
+        WebAttributeModifier::SetOnLoadFinishedImpl,
         WebAttributeModifier::SetOnProgressChangeImpl,
         WebAttributeModifier::SetOnTitleReceiveImpl,
         WebAttributeModifier::SetOnGeolocationHideImpl,

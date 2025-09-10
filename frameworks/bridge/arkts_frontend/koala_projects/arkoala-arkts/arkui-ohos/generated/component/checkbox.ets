@@ -251,6 +251,9 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
 
 export class ArkCheckboxComponent extends ArkCommonMethodComponent implements CheckboxAttribute {
     getPeer(): ArkCheckboxPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCheckboxPeer)
     }
     public setCheckboxOptions(options?: CheckboxOptions): this {
@@ -335,8 +338,10 @@ export function CheckboxImpl(
     const receiver = remember<ArkCheckboxComponent>((): ArkCheckboxComponent => {
         return new ArkCheckboxComponent()
     })
-    NodeAttach<ArkCheckboxPeer>((): ArkCheckboxPeer => ArkCheckboxPeer.create(receiver), (_: ArkCheckboxPeer): void => {
+    NodeAttach<ArkCheckboxPeer>((): ArkCheckboxPeer => ArkCheckboxPeer.create(receiver), (peer: ArkCheckboxPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

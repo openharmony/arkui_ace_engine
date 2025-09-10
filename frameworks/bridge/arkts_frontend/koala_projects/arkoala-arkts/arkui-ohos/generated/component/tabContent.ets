@@ -279,6 +279,9 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
 
 export class ArkTabContentComponent extends ArkCommonMethodComponent implements TabContentAttribute {
     getPeer(): ArkTabContentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTabContentPeer)
     }
     public setTabContentOptions(): this {
@@ -332,8 +335,10 @@ export function TabContentImpl(
     const receiver = remember<ArkTabContentComponent>((): ArkTabContentComponent => {
         return new ArkTabContentComponent()
     })
-    NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (_: ArkTabContentPeer): void => {
+    NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (peer: ArkTabContentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -177,6 +177,9 @@ export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttri
 
 export class ArkLineComponent extends ArkCommonShapeMethodComponent implements LineAttribute {
     getPeer(): ArkLinePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkLinePeer)
     }
     public setLineOptions(options?: LineOptions): this {
@@ -223,8 +226,10 @@ export function LineImpl(
     const receiver = remember<ArkLineComponent>((): ArkLineComponent => {
         return new ArkLineComponent()
     })
-    NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (_: ArkLinePeer): void => {
+    NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (peer: ArkLinePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

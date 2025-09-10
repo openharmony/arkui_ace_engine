@@ -283,6 +283,9 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
 
 export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
     getPeer(): ArkDataPanelPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkDataPanelPeer)
     }
     public setDataPanelOptions(options: DataPanelOptions): this {
@@ -359,8 +362,10 @@ export function DataPanelImpl(
     const receiver = remember<ArkDataPanelComponent>((): ArkDataPanelComponent => {
         return new ArkDataPanelComponent()
     })
-    NodeAttach<ArkDataPanelPeer>((): ArkDataPanelPeer => ArkDataPanelPeer.create(receiver), (_: ArkDataPanelPeer): void => {
+    NodeAttach<ArkDataPanelPeer>((): ArkDataPanelPeer => ArkDataPanelPeer.create(receiver), (peer: ArkDataPanelPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

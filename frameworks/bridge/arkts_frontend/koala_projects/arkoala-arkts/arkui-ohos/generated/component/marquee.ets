@@ -298,6 +298,9 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
 
 export class ArkMarqueeComponent extends ArkCommonMethodComponent implements MarqueeAttribute {
     getPeer(): ArkMarqueePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkMarqueePeer)
     }
     public setMarqueeOptions(options: MarqueeOptions): this {
@@ -400,8 +403,10 @@ export function MarqueeImpl(
     const receiver = remember<ArkMarqueeComponent>((): ArkMarqueeComponent => {
         return new ArkMarqueeComponent()
     })
-    NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (_: ArkMarqueePeer): void => {
+    NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (peer: ArkMarqueePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

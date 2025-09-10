@@ -146,6 +146,9 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
 
 export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttribute {
     getPeer(): ArkRowPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRowPeer)
     }
     public setRowOptions(options?: RowOptions | RowOptionsV2): this {
@@ -200,8 +203,10 @@ export function RowImpl(
     const receiver = remember<ArkRowComponent>((): ArkRowComponent => {
         return new ArkRowComponent()
     })
-    NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (_: ArkRowPeer): void => {
+    NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (peer: ArkRowPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

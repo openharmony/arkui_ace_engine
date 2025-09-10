@@ -811,6 +811,9 @@ export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttrib
 
 export class ArkCanvasComponent extends ArkCommonMethodComponent implements CanvasAttribute {
     getPeer(): ArkCanvasPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCanvasPeer)
     }
     public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
@@ -858,8 +861,10 @@ export function CanvasImpl(
     const receiver = remember<ArkCanvasComponent>((): ArkCanvasComponent => {
         return new ArkCanvasComponent()
     })
-    NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer): void => {
+    NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (peer: ArkCanvasPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

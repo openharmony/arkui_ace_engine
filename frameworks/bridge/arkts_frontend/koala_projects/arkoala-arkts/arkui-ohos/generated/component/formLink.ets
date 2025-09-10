@@ -76,6 +76,9 @@ export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAt
 
 export class ArkFormLinkComponent extends ArkCommonMethodComponent implements FormLinkAttribute {
     getPeer(): ArkFormLinkPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkFormLinkPeer)
     }
     public setFormLinkOptions(options: FormLinkOptions): this {
@@ -106,8 +109,10 @@ export function FormLinkImpl(
     const receiver = remember<ArkFormLinkComponent>((): ArkFormLinkComponent => {
         return new ArkFormLinkComponent()
     })
-    NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (_: ArkFormLinkPeer): void => {
+    NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (peer: ArkFormLinkPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

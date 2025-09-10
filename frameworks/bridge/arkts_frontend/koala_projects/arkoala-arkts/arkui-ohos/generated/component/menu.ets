@@ -224,6 +224,9 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
 
 export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAttribute {
     getPeer(): ArkMenuPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkMenuPeer)
     }
     public setMenuOptions(): this {
@@ -301,8 +304,10 @@ export function MenuImpl(
     const receiver = remember<ArkMenuComponent>((): ArkMenuComponent => {
         return new ArkMenuComponent()
     })
-    NodeAttach<ArkMenuPeer>((): ArkMenuPeer => ArkMenuPeer.create(receiver), (_: ArkMenuPeer): void => {
+    NodeAttach<ArkMenuPeer>((): ArkMenuPeer => ArkMenuPeer.create(receiver), (peer: ArkMenuPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

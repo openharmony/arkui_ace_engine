@@ -212,6 +212,9 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
 
 export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements SymbolSpanAttribute {
     getPeer(): ArkSymbolSpanPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSymbolSpanPeer)
     }
     public setSymbolSpanOptions(value: Resource): this {
@@ -282,8 +285,10 @@ export function SymbolSpanImpl(
     const receiver = remember<ArkSymbolSpanComponent>((): ArkSymbolSpanComponent => {
         return new ArkSymbolSpanComponent()
     })
-    NodeAttach<ArkSymbolSpanPeer>((): ArkSymbolSpanPeer => ArkSymbolSpanPeer.create(receiver), (_: ArkSymbolSpanPeer): void => {
+    NodeAttach<ArkSymbolSpanPeer>((): ArkSymbolSpanPeer => ArkSymbolSpanPeer.create(receiver), (peer: ArkSymbolSpanPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

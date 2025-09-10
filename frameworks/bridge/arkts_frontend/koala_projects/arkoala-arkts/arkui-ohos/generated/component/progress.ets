@@ -272,6 +272,9 @@ export interface ProgressConfiguration extends CommonConfiguration<ProgressConfi
 
 export class ArkProgressComponent extends ArkCommonMethodComponent implements ProgressAttribute {
     getPeer(): ArkProgressPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkProgressPeer)
     }
     public setProgressOptions(options: ProgressOptions): this {
@@ -340,8 +343,10 @@ export function ProgressImpl(
     const receiver = remember<ArkProgressComponent>((): ArkProgressComponent => {
         return new ArkProgressComponent()
     })
-    NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (_: ArkProgressPeer): void => {
+    NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (peer: ArkProgressPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

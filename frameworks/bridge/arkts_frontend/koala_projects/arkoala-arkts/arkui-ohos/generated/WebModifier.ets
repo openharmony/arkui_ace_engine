@@ -19,7 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
+import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
 import { CopyOptions } from "./component/enums"
@@ -80,6 +80,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onPageEnd_0_0value?: ((value0: OnPageEndEvent) => void) | undefined
     _onPageBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPageBegin_0_0value?: ((value0: OnPageBeginEvent) => void) | undefined
+    _onLoadStarted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onLoadStarted_0_0value?: ((value0: OnLoadStartedEvent) => void) | undefined
+    _onLoadFinished_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onLoadFinished_0_0value?: ((value0: OnLoadFinishedEvent) => void) | undefined
     _onProgressChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onProgressChange_0_0value?: ((value0: OnProgressChangeEvent) => void) | undefined
     _onTitleReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -671,6 +675,42 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 default: {
                     this._onPageBegin_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnPageBeginAttribute((undefined as ((value0: OnPageBeginEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onLoadStarted_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onLoadStarted_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnLoadStartedAttribute((this._onLoadStarted_0_0value as ((value0: OnLoadStartedEvent) => void) | undefined));
+                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnLoadStartedAttribute((undefined as ((value0: OnLoadStartedEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onLoadFinished_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onLoadFinished_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnLoadFinishedAttribute((this._onLoadFinished_0_0value as ((value0: OnLoadFinishedEvent) => void) | undefined));
+                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnLoadFinishedAttribute((undefined as ((value0: OnLoadFinishedEvent) => void) | undefined));
                 }
             }
         }
@@ -2691,6 +2731,32 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._onLoadStarted_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onLoadStarted_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onLoadStarted(modifier._onLoadStarted_0_0value);
+                    break;
+                }
+                default: {
+                    this.onLoadStarted((undefined as ((value0: OnLoadStartedEvent) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onLoadFinished_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onLoadFinished_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onLoadFinished(modifier._onLoadFinished_0_0value);
+                    break;
+                }
+                default: {
+                    this.onLoadFinished((undefined as ((value0: OnLoadFinishedEvent) => void) | undefined));
+                }
+            }
+        }
         if (modifier._onProgressChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onProgressChange_0_flag) {
@@ -4179,6 +4245,28 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onPageBegin_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
+        if (((this._onLoadStarted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onLoadStarted_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onLoadStarted_0_0value = value
+        } else
+        {
+            this._onLoadStarted_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
+        if (((this._onLoadFinished_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onLoadFinished_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onLoadFinished_0_0value = value
+        } else
+        {
+            this._onLoadFinished_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -1051,6 +1051,9 @@ export type NavDestinationTransitionDelegate = (operation: NavigationOperation, 
 
 export class ArkNavDestinationComponent extends ArkCommonMethodComponent implements NavDestinationAttribute {
     getPeer(): ArkNavDestinationPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkNavDestinationPeer)
     }
     public setNavDestinationOptions(): this {
@@ -1352,8 +1355,10 @@ export function NavDestinationImpl(
     const receiver = remember<ArkNavDestinationComponent>((): ArkNavDestinationComponent => {
         return new ArkNavDestinationComponent()
     })
-    NodeAttach<ArkNavDestinationPeer>((): ArkNavDestinationPeer => ArkNavDestinationPeer.create(receiver), (_: ArkNavDestinationPeer): void => {
+    NodeAttach<ArkNavDestinationPeer>((): ArkNavDestinationPeer => ArkNavDestinationPeer.create(receiver), (peer: ArkNavDestinationPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

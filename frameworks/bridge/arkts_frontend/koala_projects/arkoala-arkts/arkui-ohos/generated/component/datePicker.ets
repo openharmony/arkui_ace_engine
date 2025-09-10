@@ -288,6 +288,9 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
 
 export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
     getPeer(): ArkDatePickerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkDatePickerPeer)
     }
     public setDatePickerOptions(options?: DatePickerOptions): this {
@@ -374,8 +377,10 @@ export function DatePickerImpl(
     const receiver = remember<ArkDatePickerComponent>((): ArkDatePickerComponent => {
         return new ArkDatePickerComponent()
     })
-    NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (_: ArkDatePickerPeer): void => {
+    NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (peer: ArkDatePickerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

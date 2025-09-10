@@ -210,6 +210,9 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
 
 export class ArkToggleComponent extends ArkCommonMethodComponent implements ToggleAttribute {
     getPeer(): ArkTogglePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTogglePeer)
     }
     public setToggleOptions(options: ToggleOptions): this {
@@ -278,8 +281,10 @@ export function ToggleImpl(
     const receiver = remember<ArkToggleComponent>((): ArkToggleComponent => {
         return new ArkToggleComponent()
     })
-    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (_: ArkTogglePeer): void => {
+    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (peer: ArkTogglePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

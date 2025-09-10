@@ -228,6 +228,9 @@ export interface ImageLoadResult {
 
 export class ArkImageSpanComponent extends ArkBaseSpanComponent implements ImageSpanAttribute {
     getPeer(): ArkImageSpanPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkImageSpanPeer)
     }
     public setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
@@ -306,8 +309,10 @@ export function ImageSpanImpl(
     const receiver = remember<ArkImageSpanComponent>((): ArkImageSpanComponent => {
         return new ArkImageSpanComponent()
     })
-    NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer): void => {
+    NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (peer: ArkImageSpanPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

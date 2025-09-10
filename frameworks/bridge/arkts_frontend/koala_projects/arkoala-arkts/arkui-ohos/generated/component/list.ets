@@ -693,6 +693,9 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
 
 export class ArkListComponent extends ArkScrollableCommonMethodComponent implements ListAttribute {
     getPeer(): ArkListPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkListPeer)
     }
     public setListOptions(options?: ListOptions): this {
@@ -941,8 +944,10 @@ export function ListImpl(
     const receiver = remember<ArkListComponent>((): ArkListComponent => {
         return new ArkListComponent()
     })
-    NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (_: ArkListPeer): void => {
+    NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (peer: ArkListPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

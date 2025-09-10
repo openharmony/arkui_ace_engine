@@ -78,6 +78,9 @@ export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements Ellips
 
 export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements EllipseAttribute {
     getPeer(): ArkEllipsePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkEllipsePeer)
     }
     public setEllipseOptions(options?: EllipseOptions): this {
@@ -108,8 +111,10 @@ export function EllipseImpl(
     const receiver = remember<ArkEllipseComponent>((): ArkEllipseComponent => {
         return new ArkEllipseComponent()
     })
-    NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (_: ArkEllipsePeer): void => {
+    NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (peer: ArkEllipsePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

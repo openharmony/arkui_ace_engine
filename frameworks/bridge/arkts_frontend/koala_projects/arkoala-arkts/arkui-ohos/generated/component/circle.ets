@@ -78,6 +78,9 @@ export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleA
 
 export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements CircleAttribute {
     getPeer(): ArkCirclePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCirclePeer)
     }
     public setCircleOptions(options?: CircleOptions): this {
@@ -108,8 +111,10 @@ export function CircleImpl(
     const receiver = remember<ArkCircleComponent>((): ArkCircleComponent => {
         return new ArkCircleComponent()
     })
-    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (_: ArkCirclePeer): void => {
+    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (peer: ArkCirclePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -121,6 +121,9 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
 
 export class ArkBlankComponent extends ArkCommonMethodComponent implements BlankAttribute {
     getPeer(): ArkBlankPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkBlankPeer)
     }
     public setBlankOptions(min?: number | string): this {
@@ -159,8 +162,10 @@ export function BlankImpl(
     const receiver = remember<ArkBlankComponent>((): ArkBlankComponent => {
         return new ArkBlankComponent()
     })
-    NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (_: ArkBlankPeer): void => {
+    NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (peer: ArkBlankPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

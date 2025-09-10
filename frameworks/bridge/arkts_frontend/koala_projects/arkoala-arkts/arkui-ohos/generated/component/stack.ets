@@ -97,6 +97,9 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
 
 export class ArkStackComponent extends ArkCommonMethodComponent implements StackAttribute {
     getPeer(): ArkStackPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkStackPeer)
     }
     public setStackOptions(options?: StackOptions): this {
@@ -135,8 +138,10 @@ export function StackImpl(
     const receiver = remember<ArkStackComponent>((): ArkStackComponent => {
         return new ArkStackComponent()
     })
-    NodeAttach<ArkStackPeer>((): ArkStackPeer => ArkStackPeer.create(receiver), (_: ArkStackPeer): void => {
+    NodeAttach<ArkStackPeer>((): ArkStackPeer => ArkStackPeer.create(receiver), (peer: ArkStackPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -92,6 +92,9 @@ export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowS
 
 export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements WindowSceneAttribute {
     getPeer(): ArkWindowScenePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkWindowScenePeer)
     }
     public setWindowSceneOptions(persistentId: number): this {
@@ -131,8 +134,10 @@ export function WindowSceneImpl(
     const receiver = remember<ArkWindowSceneComponent>((): ArkWindowSceneComponent => {
         return new ArkWindowSceneComponent()
     })
-    NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (_: ArkWindowScenePeer): void => {
+    NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (peer: ArkWindowScenePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

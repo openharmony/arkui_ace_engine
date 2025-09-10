@@ -146,6 +146,9 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
 
 export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements RelativeContainerAttribute {
     getPeer(): ArkRelativeContainerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRelativeContainerPeer)
     }
     public setRelativeContainerOptions(): this {
@@ -191,8 +194,10 @@ export function RelativeContainerImpl(
     const receiver = remember<ArkRelativeContainerComponent>((): ArkRelativeContainerComponent => {
         return new ArkRelativeContainerComponent()
     })
-    NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer): void => {
+    NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (peer: ArkRelativeContainerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

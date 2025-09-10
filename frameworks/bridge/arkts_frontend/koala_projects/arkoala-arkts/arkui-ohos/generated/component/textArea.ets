@@ -1444,6 +1444,9 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
 
 export class ArkTextAreaComponent extends ArkCommonMethodComponent implements TextAreaAttribute {
     getPeer(): ArkTextAreaPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextAreaPeer)
     }
     public setTextAreaOptions(value?: TextAreaOptions): this {
@@ -1957,8 +1960,10 @@ export function TextAreaImpl(
     const receiver = remember<ArkTextAreaComponent>((): ArkTextAreaComponent => {
         return new ArkTextAreaComponent()
     })
-    NodeAttach<ArkTextAreaPeer>((): ArkTextAreaPeer => ArkTextAreaPeer.create(receiver), (_: ArkTextAreaPeer): void => {
+    NodeAttach<ArkTextAreaPeer>((): ArkTextAreaPeer => ArkTextAreaPeer.create(receiver), (peer: ArkTextAreaPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -774,6 +774,9 @@ export interface ResizableOptions {
 
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
     getPeer(): ArkImagePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkImagePeer)
     }
     public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
@@ -1021,8 +1024,10 @@ export function ImageImpl(
     const receiver = remember<ArkImageComponent>((): ArkImageComponent => {
         return new ArkImageComponent()
     })
-    NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
+    NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (peer: ArkImagePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

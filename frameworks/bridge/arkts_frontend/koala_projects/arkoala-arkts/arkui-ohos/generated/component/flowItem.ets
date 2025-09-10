@@ -65,6 +65,9 @@ export class ArkFlowItemStyle extends ArkCommonMethodStyle implements FlowItemAt
 
 export class ArkFlowItemComponent extends ArkCommonMethodComponent implements FlowItemAttribute {
     getPeer(): ArkFlowItemPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkFlowItemPeer)
     }
     public setFlowItemOptions(): this {
@@ -94,8 +97,10 @@ export function FlowItemImpl(
     const receiver = remember<ArkFlowItemComponent>((): ArkFlowItemComponent => {
         return new ArkFlowItemComponent()
     })
-    NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (_: ArkFlowItemPeer): void => {
+    NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (peer: ArkFlowItemPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

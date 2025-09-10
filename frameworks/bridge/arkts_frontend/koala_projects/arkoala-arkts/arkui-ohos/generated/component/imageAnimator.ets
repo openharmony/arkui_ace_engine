@@ -329,6 +329,9 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
 
 export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements ImageAnimatorAttribute {
     getPeer(): ArkImageAnimatorPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkImageAnimatorPeer)
     }
     public setImageAnimatorOptions(): this {
@@ -462,8 +465,10 @@ export function ImageAnimatorImpl(
     const receiver = remember<ArkImageAnimatorComponent>((): ArkImageAnimatorComponent => {
         return new ArkImageAnimatorComponent()
     })
-    NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (_: ArkImageAnimatorPeer): void => {
+    NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (peer: ArkImageAnimatorPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

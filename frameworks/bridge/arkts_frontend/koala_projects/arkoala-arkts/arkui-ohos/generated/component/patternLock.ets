@@ -486,6 +486,9 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
 
 export class ArkPatternLockComponent extends ArkCommonMethodComponent implements PatternLockAttribute {
     getPeer(): ArkPatternLockPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkPatternLockPeer)
     }
     public setPatternLockOptions(controller?: PatternLockController): this {
@@ -620,8 +623,10 @@ export function PatternLockImpl(
     const receiver = remember<ArkPatternLockComponent>((): ArkPatternLockComponent => {
         return new ArkPatternLockComponent()
     })
-    NodeAttach<ArkPatternLockPeer>((): ArkPatternLockPeer => ArkPatternLockPeer.create(receiver), (_: ArkPatternLockPeer): void => {
+    NodeAttach<ArkPatternLockPeer>((): ArkPatternLockPeer => ArkPatternLockPeer.create(receiver), (peer: ArkPatternLockPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -252,6 +252,9 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
 
 export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent implements IndicatorComponentAttribute {
     getPeer(): ArkIndicatorComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkIndicatorComponentPeer)
     }
     public setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
@@ -330,8 +333,10 @@ export function IndicatorComponentImpl(
     const receiver = remember<ArkIndicatorComponentComponent>((): ArkIndicatorComponentComponent => {
         return new ArkIndicatorComponentComponent()
     })
-    NodeAttach<ArkIndicatorComponentPeer>((): ArkIndicatorComponentPeer => ArkIndicatorComponentPeer.create(receiver), (_: ArkIndicatorComponentPeer): void => {
+    NodeAttach<ArkIndicatorComponentPeer>((): ArkIndicatorComponentPeer => ArkIndicatorComponentPeer.create(receiver), (peer: ArkIndicatorComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

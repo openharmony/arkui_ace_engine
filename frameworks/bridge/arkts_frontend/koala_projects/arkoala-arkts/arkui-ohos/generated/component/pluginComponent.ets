@@ -121,6 +121,9 @@ export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements Plu
 
 export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements PluginComponentAttribute {
     getPeer(): ArkPluginComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkPluginComponentPeer)
     }
     public setPluginComponentOptions(options: PluginComponentOptions): this {
@@ -167,8 +170,10 @@ export function PluginComponentImpl(
     const receiver = remember<ArkPluginComponentComponent>((): ArkPluginComponentComponent => {
         return new ArkPluginComponentComponent()
     })
-    NodeAttach<ArkPluginComponentPeer>((): ArkPluginComponentPeer => ArkPluginComponentPeer.create(receiver), (_: ArkPluginComponentPeer): void => {
+    NodeAttach<ArkPluginComponentPeer>((): ArkPluginComponentPeer => ArkPluginComponentPeer.create(receiver), (peer: ArkPluginComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

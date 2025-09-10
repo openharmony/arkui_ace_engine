@@ -102,6 +102,9 @@ export class ArkMediaCachedImageStyle extends ArkImageStyle implements MediaCach
 
 export class ArkMediaCachedImageComponent extends ArkImageComponent implements MediaCachedImageAttribute {
     getPeer(): ArkMediaCachedImagePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkMediaCachedImagePeer)
     }
     public setMediaCachedImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
@@ -132,8 +135,10 @@ export function MediaCachedImageImpl(
     const receiver = remember<ArkMediaCachedImageComponent>((): ArkMediaCachedImageComponent => {
         return new ArkMediaCachedImageComponent()
     })
-    NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (_: ArkMediaCachedImagePeer): void => {
+    NodeAttach<ArkMediaCachedImagePeer>((): ArkMediaCachedImagePeer => ArkMediaCachedImagePeer.create(receiver), (peer: ArkMediaCachedImagePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

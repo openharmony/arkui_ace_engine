@@ -485,6 +485,9 @@ export interface TextPickerDialogOptions extends TextPickerOptions {
 
 export class ArkTextPickerComponent extends ArkCommonMethodComponent implements TextPickerAttribute {
     getPeer(): ArkTextPickerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextPickerPeer)
     }
     public setTextPickerOptions(options?: TextPickerOptions): this {
@@ -635,8 +638,10 @@ export function TextPickerImpl(
     const receiver = remember<ArkTextPickerComponent>((): ArkTextPickerComponent => {
         return new ArkTextPickerComponent()
     })
-    NodeAttach<ArkTextPickerPeer>((): ArkTextPickerPeer => ArkTextPickerPeer.create(receiver), (_: ArkTextPickerPeer): void => {
+    NodeAttach<ArkTextPickerPeer>((): ArkTextPickerPeer => ArkTextPickerPeer.create(receiver), (peer: ArkTextPickerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -167,6 +167,9 @@ export interface RadioConfiguration extends CommonConfiguration<RadioConfigurati
 
 export class ArkRadioComponent extends ArkCommonMethodComponent implements RadioAttribute {
     getPeer(): ArkRadioPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRadioPeer)
     }
     public setRadioOptions(options: RadioOptions): this {
@@ -227,8 +230,10 @@ export function RadioImpl(
     const receiver = remember<ArkRadioComponent>((): ArkRadioComponent => {
         return new ArkRadioComponent()
     })
-    NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (_: ArkRadioPeer): void => {
+    NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (peer: ArkRadioPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

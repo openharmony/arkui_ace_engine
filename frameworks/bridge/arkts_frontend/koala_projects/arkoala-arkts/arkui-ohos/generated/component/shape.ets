@@ -446,6 +446,9 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
 
 export class ArkShapeComponent extends ArkCommonMethodComponent implements ShapeAttribute {
     getPeer(): ArkShapePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkShapePeer)
     }
     public setShapeOptions(value?: image.PixelMap): this {
@@ -582,8 +585,10 @@ export function ShapeImpl(
     const receiver = remember<ArkShapeComponent>((): ArkShapeComponent => {
         return new ArkShapeComponent()
     })
-    NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (_: ArkShapePeer): void => {
+    NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (peer: ArkShapePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

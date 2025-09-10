@@ -141,6 +141,9 @@ export interface LoadingProgressConfiguration extends CommonConfiguration<Loadin
 
 export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implements LoadingProgressAttribute {
     getPeer(): ArkLoadingProgressPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkLoadingProgressPeer)
     }
     public setLoadingProgressOptions(): this {
@@ -192,8 +195,10 @@ export function LoadingProgressImpl(
     const receiver = remember<ArkLoadingProgressComponent>((): ArkLoadingProgressComponent => {
         return new ArkLoadingProgressComponent()
     })
-    NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (_: ArkLoadingProgressPeer): void => {
+    NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (peer: ArkLoadingProgressPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

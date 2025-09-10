@@ -323,6 +323,9 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
 
 export class ArkFormComponentComponent extends ArkCommonMethodComponent implements FormComponentAttribute {
     getPeer(): ArkFormComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkFormComponentPeer)
     }
     public setFormComponentOptions(value: FormInfo): this {
@@ -441,8 +444,10 @@ export function FormComponentImpl(
     const receiver = remember<ArkFormComponentComponent>((): ArkFormComponentComponent => {
         return new ArkFormComponentComponent()
     })
-    NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (_: ArkFormComponentPeer): void => {
+    NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (peer: ArkFormComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

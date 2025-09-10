@@ -23,7 +23,7 @@ import { unsafeCast } from "@koalaui/common"
 export class ComponentBase implements UICommonBase {
     protected peer?: PeerNode
     protected isFirstBuild: boolean = true
-    setPeer(peer: PeerNode) {
+    setPeer(peer: PeerNode | undefined) {
         this.peer = peer
     }
     protected checkPriority(name: string): boolean {

@@ -82,6 +82,9 @@ export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuI
 
 export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implements MenuItemGroupAttribute {
     getPeer(): ArkMenuItemGroupPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkMenuItemGroupPeer)
     }
     public setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
@@ -112,8 +115,10 @@ export function MenuItemGroupImpl(
     const receiver = remember<ArkMenuItemGroupComponent>((): ArkMenuItemGroupComponent => {
         return new ArkMenuItemGroupComponent()
     })
-    NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (_: ArkMenuItemGroupPeer): void => {
+    NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (peer: ArkMenuItemGroupPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

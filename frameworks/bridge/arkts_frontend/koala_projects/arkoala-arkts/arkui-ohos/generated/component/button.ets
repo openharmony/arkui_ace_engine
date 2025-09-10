@@ -456,6 +456,9 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
 
 export class ArkButtonComponent extends ArkCommonMethodComponent implements ButtonAttribute {
     getPeer(): ArkButtonPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkButtonPeer)
     }
     public setButtonOptions(label: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
@@ -597,8 +600,10 @@ export function ButtonImpl(
     const receiver = remember<ArkButtonComponent>((): ArkButtonComponent => {
         return new ArkButtonComponent()
     })
-    NodeAttach<ArkButtonPeer>((): ArkButtonPeer => ArkButtonPeer.create(receiver), (_: ArkButtonPeer): void => {
+    NodeAttach<ArkButtonPeer>((): ArkButtonPeer => ArkButtonPeer.create(receiver), (peer: ArkButtonPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

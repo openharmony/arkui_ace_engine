@@ -70,6 +70,9 @@ export class ArkRootSceneStyle extends ArkCommonMethodStyle implements RootScene
 
 export class ArkRootSceneComponent extends ArkCommonMethodComponent implements RootSceneAttribute {
     getPeer(): ArkRootScenePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRootScenePeer)
     }
     public setRootSceneOptions(session: RootSceneSession): this {
@@ -100,8 +103,10 @@ export function RootSceneImpl(
     const receiver = remember<ArkRootSceneComponent>((): ArkRootSceneComponent => {
         return new ArkRootSceneComponent()
     })
-    NodeAttach<ArkRootScenePeer>((): ArkRootScenePeer => ArkRootScenePeer.create(receiver), (_: ArkRootScenePeer): void => {
+    NodeAttach<ArkRootScenePeer>((): ArkRootScenePeer => ArkRootScenePeer.create(receiver), (peer: ArkRootScenePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

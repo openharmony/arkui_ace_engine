@@ -16,38 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CrossLanguageOptions, FrameNode, LayoutConstraint } from "arkui.FrameNode"
+import { extractors } from "#handwritten"
+import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { extractors } from "#handwritten"
 import { Size_serializer } from "./Graphics"
 import { Size } from "arkui.Graphics"
-export class CrossLanguageOptions_serializer {
-    public static write(buffer: SerializerBase, value: CrossLanguageOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForAttributeSetting  = value.attributeSetting
-        if (valueHolderForAttributeSetting !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAttributeSettingTmpValue  = valueHolderForAttributeSetting!
-            valueSerializer.writeBoolean(valueHolderForAttributeSettingTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): CrossLanguageOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const attributeSettingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let attributeSettingTmpBuf : boolean | undefined = undefined
-        if ((attributeSettingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            attributeSettingTmpBuf = valueDeserializer.readBoolean()
-        }
-        const attributeSettingTmpResult : boolean | undefined = attributeSettingTmpBuf
-        let value : CrossLanguageOptions = ({attributeSetting: attributeSettingTmpResult} as CrossLanguageOptions)
-        return value
-    }
-}
 export class FrameNode_serializer {
     public static write(buffer: SerializerBase, value: FrameNode): void {
         let valueSerializer : SerializerBase = buffer

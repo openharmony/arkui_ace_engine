@@ -759,6 +759,9 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
 
 export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implements AlphabetIndexerAttribute {
     getPeer(): ArkAlphabetIndexerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkAlphabetIndexerPeer)
     }
     public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
@@ -998,8 +1001,10 @@ export function AlphabetIndexerImpl(
     const receiver = remember<ArkAlphabetIndexerComponent>((): ArkAlphabetIndexerComponent => {
         return new ArkAlphabetIndexerComponent()
     })
-    NodeAttach<ArkAlphabetIndexerPeer>((): ArkAlphabetIndexerPeer => ArkAlphabetIndexerPeer.create(receiver), (_: ArkAlphabetIndexerPeer): void => {
+    NodeAttach<ArkAlphabetIndexerPeer>((): ArkAlphabetIndexerPeer => ArkAlphabetIndexerPeer.create(receiver), (peer: ArkAlphabetIndexerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

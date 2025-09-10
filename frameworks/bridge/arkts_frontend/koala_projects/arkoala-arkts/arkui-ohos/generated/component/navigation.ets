@@ -2054,6 +2054,9 @@ export interface NavContentInfo {
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
     getPeer(): ArkNavigationPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkNavigationPeer)
     }
     public setNavigationOptions(pathInfos?: NavPathStack): this {
@@ -2323,8 +2326,10 @@ export function NavigationImpl(
     const receiver = remember<ArkNavigationComponent>((): ArkNavigationComponent => {
         return new ArkNavigationComponent()
     })
-    NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer): void => {
+    NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (peer: ArkNavigationPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

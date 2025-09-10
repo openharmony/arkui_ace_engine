@@ -131,6 +131,9 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
 
 export class ArkStepperItemComponent extends ArkCommonMethodComponent implements StepperItemAttribute {
     getPeer(): ArkStepperItemPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkStepperItemPeer)
     }
     public setStepperItemOptions(): this {
@@ -184,8 +187,10 @@ export function StepperItemImpl(
     const receiver = remember<ArkStepperItemComponent>((): ArkStepperItemComponent => {
         return new ArkStepperItemComponent()
     })
-    NodeAttach<ArkStepperItemPeer>((): ArkStepperItemPeer => ArkStepperItemPeer.create(receiver), (_: ArkStepperItemPeer): void => {
+    NodeAttach<ArkStepperItemPeer>((): ArkStepperItemPeer => ArkStepperItemPeer.create(receiver), (peer: ArkStepperItemPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

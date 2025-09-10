@@ -65,6 +65,9 @@ export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttrib
 
 export class ArkScreenComponent extends ArkCommonMethodComponent implements ScreenAttribute {
     getPeer(): ArkScreenPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkScreenPeer)
     }
     public setScreenOptions(screenId: number): this {
@@ -95,8 +98,10 @@ export function ScreenImpl(
     const receiver = remember<ArkScreenComponent>((): ArkScreenComponent => {
         return new ArkScreenComponent()
     })
-    NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (_: ArkScreenPeer): void => {
+    NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (peer: ArkScreenPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -458,6 +458,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
 
 export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements WaterFlowAttribute {
     getPeer(): ArkWaterFlowPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkWaterFlowPeer)
     }
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
@@ -585,8 +588,10 @@ export function WaterFlowImpl(
     const receiver = remember<ArkWaterFlowComponent>((): ArkWaterFlowComponent => {
         return new ArkWaterFlowComponent()
     })
-    NodeAttach<ArkWaterFlowPeer>((): ArkWaterFlowPeer => ArkWaterFlowPeer.create(receiver), (_: ArkWaterFlowPeer): void => {
+    NodeAttach<ArkWaterFlowPeer>((): ArkWaterFlowPeer => ArkWaterFlowPeer.create(receiver), (peer: ArkWaterFlowPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

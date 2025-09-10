@@ -169,6 +169,9 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
 
 export class ArkDividerComponent extends ArkCommonMethodComponent implements DividerAttribute {
     getPeer(): ArkDividerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkDividerPeer)
     }
     public setDividerOptions(): this {
@@ -230,8 +233,10 @@ export function DividerImpl(
     const receiver = remember<ArkDividerComponent>((): ArkDividerComponent => {
         return new ArkDividerComponent()
     })
-    NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (_: ArkDividerPeer): void => {
+    NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (peer: ArkDividerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

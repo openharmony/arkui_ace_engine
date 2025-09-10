@@ -688,6 +688,9 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
 
 export class ArkSliderComponent extends ArkCommonMethodComponent implements SliderAttribute {
     getPeer(): ArkSliderPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSliderPeer)
     }
     public setSliderOptions(options?: SliderOptions): this {
@@ -885,8 +888,10 @@ export function SliderImpl(
     const receiver = remember<ArkSliderComponent>((): ArkSliderComponent => {
         return new ArkSliderComponent()
     })
-    NodeAttach<ArkSliderPeer>((): ArkSliderPeer => ArkSliderPeer.create(receiver), (_: ArkSliderPeer): void => {
+    NodeAttach<ArkSliderPeer>((): ArkSliderPeer => ArkSliderPeer.create(receiver), (peer: ArkSliderPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }
