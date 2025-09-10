@@ -34,8 +34,6 @@ void ImagePattern::OnAttachToMainTreeMultiThread()
     } else {
         renderCtx->SetClipToBounds(false);
         renderCtx->SetUsingContentRectForRenderFrame(true);
-
-        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
     auto textTheme = pipeline->GetTheme<TextTheme>();
@@ -62,6 +60,5 @@ void ImagePattern::OnDetachFromMainTreeMultiThread()
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 } // namespace OHOS::Ace::NG
