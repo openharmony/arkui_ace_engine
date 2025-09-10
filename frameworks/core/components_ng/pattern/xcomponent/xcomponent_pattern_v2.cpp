@@ -102,7 +102,8 @@ void XComponentPatternV2::OnAttachToMainTree()
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
-    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+    CHECK_NULL_VOID(displaySync_);
+    if (needRecoverDisplaySync_  && !displaySync_->IsOnPipeline()) {
         TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
             "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
         displaySync_->AddToPipelineOnContainer();
@@ -222,7 +223,8 @@ void XComponentPatternV2::OnDetachFromMainTree()
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
     }
-    if (displaySync_ && displaySync_->IsOnPipeline()) {
+    CHECK_NULL_VOID(displaySync_);
+    if (displaySync_->IsOnPipeline()) {
         TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
             "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
         displaySync_->DelFromPipelineOnContainer();

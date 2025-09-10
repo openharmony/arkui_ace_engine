@@ -65,9 +65,7 @@ public:
         }
         return [shapePaintProperty, paintWrapper](RSCanvas& canvas) {
                     PathPainter::DrawPath(canvas, *shapePaintProperty);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

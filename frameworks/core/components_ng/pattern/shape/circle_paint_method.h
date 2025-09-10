@@ -64,9 +64,7 @@ public:
             [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty, paintWrapper](
                 RSCanvas& canvas) {
                     CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

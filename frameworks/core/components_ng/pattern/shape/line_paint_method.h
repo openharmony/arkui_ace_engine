@@ -56,9 +56,7 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         return [linePaintProperty, offset, paintWrapper](RSCanvas& canvas) {
                     LinePainter::DrawLine(canvas, *linePaintProperty, offset);
-                    if (paintWrapper) {
-                        paintWrapper->FlushOverlayModifier();
-                    }
+                    paintWrapper->FlushOverlayModifier();
                 };
     }
 

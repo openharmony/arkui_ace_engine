@@ -484,7 +484,7 @@ void VideoPattern::ResetMediaPlayer()
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
 #ifndef OHOS_PLATFORM
     PrepareSurface();
-    if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
+    if (mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
     }
 #endif
@@ -1239,18 +1239,16 @@ void VideoPattern::UpdatePreviewImage()
         return;
     }
 
-    if (image) {
-        image->SetDraggable(false);
-        auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(posterLayoutProperty);
-        posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
-        if (EXPORT_IMAGEFIT_SUPPORT_TYPES.find(imageFit) == EXPORT_IMAGEFIT_SUPPORT_TYPES.end()) {
-            imageFit = ImageFit::COVER;
-        }
-        posterLayoutProperty->UpdateImageFit(imageFit);
-        image->MarkModifyDone();
+    image->SetDraggable(false);
+    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(posterLayoutProperty);
+    posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+    if (EXPORT_IMAGEFIT_SUPPORT_TYPES.find(imageFit) == EXPORT_IMAGEFIT_SUPPORT_TYPES.end()) {
+        imageFit = ImageFit::COVER;
     }
+    posterLayoutProperty->UpdateImageFit(imageFit);
+    image->MarkModifyDone();
 }
 
 void VideoPattern::UpdateControllerBar()
