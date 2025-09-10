@@ -37,6 +37,7 @@ constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
 constexpr int32_t GATHER_COUNT = 2;
+constexpr int32_t MIN_EFFECTIVE_PIXELMAP_COUNT = 2;
 }
 
 OffsetF DragControllerFuncWrapper::GetUpdateDragMovePosition(int32_t containerId)
@@ -259,13 +260,8 @@ bool DragControllerFuncWrapper::TryDoDragStartAnimation(const RefPtr<Subwindow>&
 
     // create gatherNode
     auto originGatherNode = overlayManager->GetGatherNode();
-    OffsetF positionToWindow = originGatherNode ? originGatherNode->GetPositionToWindowWithTransform() : OffsetF();
     std::vector<GatherNodeChildInfo> childrenInfo;
     auto gatherNode = GetOrCreateGatherNode(overlayManager, childrenInfo, data, asyncCtxData);
-    auto gatherNodeOffset = isExpandDisplay
-            ? DragDropManager::GetTouchOffsetRelativeToSubwindow(pipelineContext->GetInstanceId()) + positionToWindow
-            : positionToWindow;
-    UpdateGatherAnimatePosition(childrenInfo, gatherNodeOffset);
 
     // mount node
     auto subWindowOverlayManager = subWindow->GetOverlayManager();
@@ -275,6 +271,7 @@ bool DragControllerFuncWrapper::TryDoDragStartAnimation(const RefPtr<Subwindow>&
         subWindowOverlayManager, data, data.imageNode, textNode, true);
 
     // update position
+    DragDropManager::UpdateGatherNodePosition(subWindowOverlayManager, data.imageNode);
     UpdateBadgeTextNodePosition(textNode, data, asyncCtxData,
         data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
@@ -352,8 +349,13 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
     gatherNodeChildrenInfo.clear();
     int iterationCount = GATHER_COUNT;
     auto frameOffset = GetOriginNodeOffset(data, asyncCtxData);
-    for (auto it = asyncCtxData.pixelMapList.begin(); it != asyncCtxData.pixelMapList.end() && iterationCount > 0;
-         ++it) {
+    // ignore first pixmap
+    if (asyncCtxData.pixelMapList.size() < MIN_EFFECTIVE_PIXELMAP_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Create empty gather node success");
+        return stackNode;
+    }
+    for (auto it = std::next(asyncCtxData.pixelMapList.begin(), 1);
+         it != asyncCtxData.pixelMapList.end() && iterationCount > 0; ++it) {
         CHECK_NULL_RETURN(*it, nullptr);
         auto refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&(*it)));
         CHECK_NULL_RETURN(refPixelMap, nullptr);
@@ -369,7 +371,7 @@ RefPtr<FrameNode> DragControllerFuncWrapper::CreateGatherNode(std::vector<Gather
             offset + DragDropFuncWrapper::GetCurrentWindowOffset(pipeline), width, height, width / 2.0f, height / 2.0f,
             nullptr };
         stackNode->AddChild(imageNode);
-        gatherNodeChildrenInfo.push_back(gatherNodeChildInfo);
+        gatherNodeChildrenInfo.insert(gatherNodeChildrenInfo.begin(), gatherNodeChildInfo);
         --iterationCount;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Create gather node success, count %{public}d",
