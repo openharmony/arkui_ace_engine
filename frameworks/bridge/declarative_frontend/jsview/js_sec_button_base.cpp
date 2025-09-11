@@ -392,7 +392,7 @@ void JSSecButtonBase::SetMaxLines(const JSCallbackInfo& info)
     }
     JSRef<JSVal> args = info[0];
     auto value = Infinity<int32_t>();
-    if (args->IsString() && args->ToString() != "Infinity") {
+    if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
     if (value <= 0) {
