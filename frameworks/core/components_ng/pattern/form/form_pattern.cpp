@@ -313,9 +313,10 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
                 formPattern->RemoveFrsNode();
                 formPattern->ReleaseRenderer();
                 formPattern->UnregisterAccessibility();
-                isSnapshot_ = true;
-                needSnapshotAgain_ = false;
-            }, "ArkUIFormRemoveFrsNode");
+                formPattern->isSnapshot_ = true;
+                formPattern->needSnapshotAgain_ = false;
+            },
+            "ArkUIFormRemoveFrsNode");
             return;
         }
     }
