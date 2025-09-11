@@ -31,6 +31,22 @@ public:
     {
         fingers_ = fingers;
         direction_ = direction;
+        speed_ = Dimension(speed, DimensionUnit::VP);
+        isLimitFingerCount_ = limitFingerCount;
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::SWIPE_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
+        } else {
+            gestureInfo_ =
+                MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE, GestureTypeName::SWIPE_GESTURE, false);
+        }
+    };
+
+    SwipeGesture(
+        int32_t fingers, const SwipeDirection& direction, const Dimension& speed, bool limitFingerCount = false)
+    {
+        fingers_ = fingers;
+        direction_ = direction;
         speed_ = speed;
         isLimitFingerCount_ = limitFingerCount;
         if (gestureInfo_) {
@@ -47,7 +63,7 @@ public:
 #ifdef ARKUI_CAPI_UNITTEST
     double GetSpeed()
     {
-        return speed_;
+        return speed_.ConvertToPx();
     }
 
     SwipeDirection GetDirection()
@@ -60,7 +76,7 @@ protected:
 
 private:
     SwipeDirection direction_;
-    double speed_ = 0.0;
+    Dimension speed_ = Dimension(0.0, DimensionUnit::VP);
 };
 
 } // namespace OHOS::Ace::NG

@@ -112,7 +112,7 @@ void PanGestureModelImpl::SetPanGestureOption(const RefPtr<PanGestureOption>& pa
 }
 
 void SwipeGestureModelImpl::Create(
-    int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount)
+    int32_t fingersNum, const SwipeDirection& slideDirection, const Dimension& speedNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();

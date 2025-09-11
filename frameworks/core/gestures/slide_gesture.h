@@ -27,6 +27,13 @@ class ACE_EXPORT SwipeGesture : public Gesture {
     DECLARE_ACE_TYPE(SwipeGesture, Gesture);
 
 public:
+    SwipeGesture(int32_t fingers, const SwipeDirection& direction, const Dimension& speed)
+    {
+        fingers_ = fingers;
+        direction_ = direction;
+        speed_ = speed.ConvertToVp();
+    };
+
     SwipeGesture(int32_t fingers, const SwipeDirection& direction, double speed)
     {
         fingers_ = fingers;

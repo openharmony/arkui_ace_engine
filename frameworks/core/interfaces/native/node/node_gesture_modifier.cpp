@@ -144,7 +144,9 @@ ArkUIGesture* createSwipeGesture(
     if (static_cast<uint32_t>(directions) & ArkUI_GESTURE_DIRECTION_VERTICAL) {
         swipeDirection.type += SwipeDirection::VERTICAL;
     }
-    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed, limitFingerCount);
+    auto speedDimension = Dimension(speed, DimensionUnit::PX);
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(
+        fingers, swipeDirection, speedDimension, limitFingerCount);
     swipeGestureObject->SetUserData(userData);
     swipeGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
@@ -171,7 +173,9 @@ ArkUIGesture* createSwipeGestureByModifier(
             swipeDirection.type = SwipeDirection::NONE;
             break;
     }
-    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed, limitFingerCount);
+    auto speedDimension = Dimension(speed, DimensionUnit::VP);
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(
+        fingers, swipeDirection, speedDimension, limitFingerCount);
     swipeGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
 }

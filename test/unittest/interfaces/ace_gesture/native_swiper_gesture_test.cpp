@@ -150,7 +150,7 @@ HWTEST_F(NativeSwiperGestureTest, NativeSwiperGestureTest003, TestSize.Level1)
 
         Ace::NG::SwipeGesture* swipeGesture = reinterpret_cast<Ace::NG::SwipeGesture*>
             (swiperGestureRecognizer->gesture);
-        EXPECT_EQ(swipeGesture->speed_, expectedSpeed);
+        EXPECT_EQ(swipeGesture->speed_, Dimension(expectedSpeed, DimensionUnit::VP));
 
         NATIVE_GESTURE_API->dispose(swiperGestureRecognizer);
     }

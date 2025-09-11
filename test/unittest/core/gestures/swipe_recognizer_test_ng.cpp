@@ -689,7 +689,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      */
     swipeRecognizer->fingers_ = swipeRecognizerPtr->fingers_;
     swipeRecognizer->direction_.type = swipeRecognizerPtr->direction_.type;
-    swipeRecognizer->speed_ = 1;
+    swipeRecognizer->speed_ = Dimension(1, DimensionUnit::PX);
     result = swipeRecognizer->ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, false);
 }
@@ -855,21 +855,21 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureTest001, TestSize.Level1)
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
     SwipeGestureModelNG swipeGestureModelNG;
-    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum);
+    swipeGestureModelNG.Create(fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX));
 
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto swipeGestureNG = AceType::DynamicCast<NG::SwipeRecognizer>(gestureProcessor->TopGestureNG());
 
-    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum);
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX));
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
      */
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
@@ -882,7 +882,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureTest001, TestSize.Level1)
     swipeGesture.onActionEndId_ = std::move(onActionEndId);
     swipeGesture.onActionCancelId_ = std::move(onActionCancelId);
     swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 }
 
 /**
@@ -898,21 +898,21 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureCreateRecognizerTest001, TestSize.Le
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
     SwipeGestureModelNG swipeGestureModelNG;
-    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum);
+    swipeGestureModelNG.Create(fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX));
 
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto swipeGestureNG = AceType::DynamicCast<NG::SwipeRecognizer>(gestureProcessor->TopGestureNG());
 
-    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum);
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX));
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
      */
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
@@ -927,7 +927,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureCreateRecognizerTest001, TestSize.Le
     auto onActionStart = [](GestureEvent& info) { return true; };
     swipeGesture.SetOnActionId(onActionStart);
     swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
 }
 
 /**
@@ -1199,7 +1199,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, Tes
      * @tc.expected: step2. result equals REJECT.
      */
     swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
-    swipeRecognizerPtr->speed_ = -1;
+    swipeRecognizerPtr->speed_ = Dimension(-1, DimensionUnit::PX);
     swipeRecognizerPtr->fingers_ = 1;
     swipeRecognizerPtr->HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
@@ -1223,7 +1223,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest001, TestSize.Level1)
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
     SwipeGestureModelNG swipeGestureModelNG;
-    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum, IS_LIMIT_FINGER_COUNT);
+    swipeGestureModelNG.Create(
+        fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX), IS_LIMIT_FINGER_COUNT);
 
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
@@ -1231,8 +1232,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest001, TestSize.Level1)
     EXPECT_EQ(swipeGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
     
 
-    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum, IS_LIMIT_FINGER_COUNT);
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    SwipeGesture swipeGesture = SwipeGesture(
+        fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX), IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
     EXPECT_EQ(swipeGesture.isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
 
     /**
@@ -1278,7 +1280,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
     SwipeGestureModelNG swipeGestureModelNG;
-    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum, IS_NOT_LIMIT_FINGER_COUNT);
+    swipeGestureModelNG.Create(
+        fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX), IS_NOT_LIMIT_FINGER_COUNT);
 
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
@@ -1286,8 +1289,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
     EXPECT_EQ(swipeGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
     
 
-    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum, IS_NOT_LIMIT_FINGER_COUNT);
-    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+    SwipeGesture swipeGesture = SwipeGesture(
+        fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX), IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(swipeGesture.speed_, Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::PX));
     EXPECT_EQ(swipeGesture.isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 
     /**

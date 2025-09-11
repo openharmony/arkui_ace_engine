@@ -180,10 +180,11 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     std::chrono::duration<double> duration = event.time - touchDownTime_;
     auto seconds = duration.count();
     resultSpeed_ = LessOrEqual(seconds, 0.0) ? 0.0 : offset.GetDistance() / seconds;
-    if (resultSpeed_ < speed_) {
+    auto speed = speed_.ConvertToPx();
+    if (resultSpeed_ < speed) {
         if (currentFingers_ - 1 + static_cast<int32_t>(matchedTouch_.size()) < fingers_) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "The result speed %{public}f is less than duration %{public}f",
-                resultSpeed_, speed_);
+                resultSpeed_, speed);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     } else {
@@ -239,7 +240,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         resultSpeed_ = LessOrEqual(duration_ms.count(), 0.0)
                            ? 0.0
                            : axisOffset_.GetDistance() / duration_ms.count() * RATIO_MS_TO_S;
-        if (resultSpeed_ < speed_) {
+        auto speed = speed_.ConvertToPx();
+        if (resultSpeed_ < speed) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         } else {
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
@@ -457,7 +459,7 @@ void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
     swipeReport.SetId(frameNode->GetId());
     swipeReport.SetSwipeDirection(static_cast<int32_t>(direction_.type));
     swipeReport.SetTouchEvents(downEvents_);
-    swipeReport.SetSpeed(speed_);
+    swipeReport.SetSpeed(speed_.ConvertToPx());
     swipeReport.SetActualSpeed(resultSpeed_);
     swipeReport.SetFingerList(info.GetFingerList());
     Reporter::GetInstance().HandleUISessionReporting(swipeReport);
@@ -531,7 +533,8 @@ bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         return false;
     }
 
-    if (curr->fingers_ != fingers_ || (curr->direction_.type != direction_.type) || !NearZero(curr->speed_ - speed_) ||
+    if (curr->fingers_ != fingers_ || (curr->direction_.type != direction_.type) ||
+        !NearZero((curr->speed_).ConvertToPx() - speed_.ConvertToPx()) ||
         priorityMask_ != curr->priorityMask_) {
         ResetStatus();
         return false;
@@ -548,7 +551,7 @@ RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
     oss << "direction: " << direction_.type << ", "
-        << "speed: " << speed_ << ", "
+        << "speed: " << speed_.ConvertToPx() << ", "
         << "fingers: " << fingers_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();

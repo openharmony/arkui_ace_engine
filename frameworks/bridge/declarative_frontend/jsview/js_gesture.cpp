@@ -479,7 +479,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
-    double speedNum = DEFAULT_SLIDE_SPEED;
+    Dimension speedNum = Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::VP);
     SwipeDirection slideDirection;
     bool isLimitFingerCount = false;
 
@@ -500,7 +500,9 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     }
     if (speed->IsNumber()) {
         double speedNumber = speed->ToNumber<double>();
-        speedNum = LessOrEqual(speedNumber, 0.0) ? DEFAULT_SLIDE_SPEED : speedNumber;
+        speedNum = LessOrEqual(speedNumber, 0.0) ?
+            Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::VP) :
+            Dimension(speedNumber, DimensionUnit::VP);
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();

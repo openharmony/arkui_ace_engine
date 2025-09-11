@@ -152,8 +152,8 @@ HWTEST_F(TapGestureTestNg, GestureTest001, TestSize.Level1)
     fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
-    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum);
+    swipeGestureModelNG.Create(fingersNum, slideDirection, Dimension(speedNum, DimensionUnit::PX));
     auto swipeGestureNG = AceType::DynamicCast<NG::SwipeGesture>(gestureProcessor->TopGestureNG());
-    EXPECT_EQ(swipeGestureNG->speed_, speedNum);
+    EXPECT_EQ(swipeGestureNG->speed_, Dimension(speedNum, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG
