@@ -21,6 +21,7 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
 {
     CheckSkipEnableProperty();
     displaySyncRange_->Reset();
+    displaySyncRange_->type_ = UNKNOWN_FRAME_RATE_TYPE;
 
     if (uiDisplaySyncMap_.empty()) {
         if (sourceVsyncRate_ > 0) {
@@ -163,6 +164,11 @@ int32_t UIDisplaySyncManager::GetDisplaySyncRate() const
 {
     int32_t displaySyncRate = displaySyncRange_->preferred_;
     return displaySyncRate;
+}
+
+uint32_t UIDisplaySyncManager::GetDisplaySyncType() const
+{
+    return displaySyncRange_->type_;
 }
 
 IdToDisplaySyncMap UIDisplaySyncManager::GetUIDisplaySyncMap() const

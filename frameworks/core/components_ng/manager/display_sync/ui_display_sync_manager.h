@@ -49,6 +49,7 @@ public:
     bool SetRefreshRateMode(int32_t refreshRateMode);
     int32_t GetRefreshRateMode() const;
     int32_t GetDisplaySyncRate() const;
+    uint32_t GetDisplaySyncType() const;
     IdToDisplaySyncMap GetUIDisplaySyncMap() const;
     void CheckSkipEnableProperty();
     bool IsSupportSkip() const;

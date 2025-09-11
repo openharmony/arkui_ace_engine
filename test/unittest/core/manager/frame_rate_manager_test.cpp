@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/animation/frame_rate_range.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,11 +63,11 @@ HWTEST_F(FrameRateRangeTest, NodeRateTest, TestSize.Level1)
     int32_t rate2 = 120;
     FrameRateManager frameRageManager;
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
-    frameRageManager.AddNodeRate(nodeId, rate1);
+    frameRageManager.AddNodeRate(nodeId, "", rate1);
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
-    frameRageManager.AddNodeRate(nodeId, rate2);
+    frameRageManager.AddNodeRate(nodeId, "", rate2);
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
@@ -98,12 +99,12 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     EXPECT_EQ(0, expectedRate1);
     EXPECT_EQ(0, expectedRateType1);
     EXPECT_EQ(0, frameRageManager.GetDisplaySyncRate());
-    frameRageManager.SetDisplaySyncRate(displaySyncRate);
+    frameRageManager.SetDisplaySyncRate(displaySyncRate, 0);
     EXPECT_EQ(displaySyncRate, frameRageManager.GetDisplaySyncRate());
     EXPECT_EQ(true, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
-    frameRageManager.SetDisplaySyncRate(displaySyncRate);
+    frameRageManager.SetDisplaySyncRate(displaySyncRate, 0);
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
     frameRageManager.SetIsRateChanged(false);
@@ -113,9 +114,32 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     frameRageManager.SetAnimateRate(animateRate, false);
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
-    frameRageManager.AddNodeRate(nodeId, rate);
+    frameRageManager.AddNodeRate(nodeId, "refresh_drag_scene", rate);
     auto [expectedRate2, expectedRateType2] = frameRageManager.GetExpectedRate();
     EXPECT_EQ(rate, expectedRate2);
-    EXPECT_EQ(ACE_COMPONENT_FRAME_RATE_TYPE, expectedRateType2);
+    EXPECT_EQ(REFRESH_DRAG_FRAME_RATE_TYPE & expectedRateType2, REFRESH_DRAG_FRAME_RATE_TYPE);
+}
+
+/**
+ * @tc.name: GetExpectedRateTest
+ * @tc.desc: test GetExpectedRate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameRateRangeTest, GetExpectedRateTest, TestSize.Level1)
+{
+    FrameRateManager frameRageManager;
+    frameRageManager.AddNodeRate(1, "", 0);
+    frameRageManager.SetDisplaySyncRate(0, 1);
+    frameRageManager.SetDisplaySyncRate(0, 0);
+    EXPECT_EQ(true, frameRageManager.IsRateChanged());
+    frameRageManager.SetAnimateRate(0, true);
+    auto [expectedRate, expectedRateType] = frameRageManager.GetExpectedRate();
+    EXPECT_EQ(UI_ANIMATION_FRAME_RATE_TYPE & expectedRateType, UI_ANIMATION_FRAME_RATE_TYPE);
+
+    int32_t rate = 120;
+    frameRageManager.AddNodeRate(2, "refresh2_drag_scene", rate);
+    auto [expectedRate2, expectedRateType2] = frameRageManager.GetExpectedRate();
+    EXPECT_EQ(rate, expectedRate2);
+    EXPECT_EQ(REFRESH_DRAG_FRAME_RATE_TYPE & expectedRateType2, REFRESH_DRAG_FRAME_RATE_TYPE);
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,28 @@
 #include "ui/base/ace_type.h"
 
 namespace OHOS::Ace {
+constexpr uint32_t UNKNOWN_FRAME_RATE_TYPE = 0;
+// ace scene
+constexpr uint32_t REFRESH_DRAG_FRAME_RATE_TYPE = (1 << 0);
+constexpr uint32_t SWIPER_DRAG_FRAME_RATE_TYPE = (1 << 1);
+constexpr uint32_t SCROLLABLE_DRAG_FRAME_RATE_TYPE = (1 << 2);
+constexpr uint32_t SCROLLBAR_DRAG_FRAME_RATE_TYPE = (1 << 3);
+constexpr uint32_t SPLIT_DRAG_FRAME_RATE_TYPE = (1 << 4);
+constexpr uint32_t PICKER_DRAG_FRAME_RATE_TYPE = (1 << 5);
+constexpr uint32_t SCROLLABLE_MULTI_TASK_FRAME_RATE_TYPE = (1 << 6);
+constexpr uint32_t ACE_COMPONENT_FRAME_RATE_TYPE = 0b1111111;
+// animator
+constexpr uint32_t ANIMATION_STATE_FIRST_FRAME = (1 << 12);
+constexpr uint32_t RS_ANIMATION_FRAME_RATE_TYPE = (1 << 13);
+constexpr uint32_t UI_ANIMATION_FRAME_RATE_TYPE = (1 << 14);
+constexpr uint32_t ANIMATION_FRAME_RATE_TYPE = (0b111 << 12);
+// developer's voter
+constexpr uint32_t DISPLAY_SOLOIST_FRAME_RATE_TYPE = (1 << 20);
+constexpr uint32_t NATIVE_VSYNC_FRAME_RATE_TYPE = (1 << 21);
+constexpr uint32_t XCOMPONENT_FRAME_RATE_TYPE = (1 << 22);
+constexpr uint32_t ANIMATOR_DISPLAY_SYNC_FRAME_RATE_TYPE = (1 << 23);
+constexpr uint32_t OTHER_DISPLAY_SYNC_FRAME_RATE_TYPE = (1 << 24);
+constexpr uint32_t DISPLAY_SYNC_FRAME_RATE_TYPE = (0b111 << 22);
 
 class FrameRateRange : public AceType {
     DECLARE_ACE_TYPE(FrameRateRange, AceType);
@@ -61,10 +83,19 @@ public:
         this->preferred_ = preferred;
     }
 
+    void Set(int min, int max, int preferred, uint32_t type)
+    {
+        Set(min, max, preferred);
+        this->type_ = type;
+    }
+
     void Merge(const FrameRateRange& other)
     {
         if (this->preferred_ < other.preferred_) {
             this->Set(other.min_, other.max_, other.preferred_);
+        }
+        if (other.IsValid()) {
+            type_ |= other.type_;
         }
     }
 
@@ -84,6 +115,7 @@ public:
     int max_ = 0;
     int preferred_ = 0;
     int componentScene_ = 0;
+    uint32_t type_ = 0;
     const int32_t rangeMaxRefreshrate = 144;
 };
     

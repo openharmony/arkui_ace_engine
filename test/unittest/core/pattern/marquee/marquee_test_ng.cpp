@@ -1681,11 +1681,11 @@ HWTEST_F(MarqueeTestNg, MarqueeTest025, TestSize.Level1)
     auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
     int32_t nodeId = frameNode.GetId();
     frameRateManager->isRateChanged_ = false;
-    frameRateManager->AddNodeRate(nodeId, expectedRate);
+    frameRateManager->AddNodeRate(nodeId, "", expectedRate);
     auto iter = frameRateManager->nodeRateMap_.find(nodeId);
     EXPECT_NE(iter, frameRateManager->nodeRateMap_.end());
     if (iter != frameRateManager->nodeRateMap_.end()) {
-        EXPECT_EQ(iter->second, expectedRate);
+        EXPECT_EQ(iter->second.second, expectedRate);
         EXPECT_TRUE(frameRateManager->isRateChanged_);
     }
 }

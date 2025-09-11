@@ -15,6 +15,24 @@
 #include "frame_rate_manager.h"
 
 namespace OHOS::Ace::NG {
+uint32_t GetRateTypeOfScene(const std::string& scene)
+{
+    static const std::unordered_map<std::string, uint32_t> sceneRateTypeMap = {
+        { "refresh_drag_scene", REFRESH_DRAG_FRAME_RATE_TYPE },
+        { "swiper_drag_scene", SWIPER_DRAG_FRAME_RATE_TYPE },
+        { "scrollable_drag_scene", SCROLLABLE_DRAG_FRAME_RATE_TYPE },
+        { "scrollBar_drag_scene", SCROLLBAR_DRAG_FRAME_RATE_TYPE },
+        { "split_drag_scene", SPLIT_DRAG_FRAME_RATE_TYPE },
+        { "picker_drag_scene", PICKER_DRAG_FRAME_RATE_TYPE },
+        { "scrollable_multi_task_scene", SCROLLABLE_MULTI_TASK_FRAME_RATE_TYPE },
+    };
+    auto iter = sceneRateTypeMap.find(scene);
+    if (iter != sceneRateTypeMap.end()) {
+        return iter->second;
+    }
+    return UNKNOWN_FRAME_RATE_TYPE;
+}
+
 bool FrameRateManager::IsRateChanged()
 {
     return isRateChanged_;
@@ -25,9 +43,9 @@ void FrameRateManager::SetIsRateChanged(bool isChanged)
     isRateChanged_ = isChanged;
 }
 
-void FrameRateManager::AddNodeRate(int32_t nodeId, int32_t rate)
+void FrameRateManager::AddNodeRate(int32_t nodeId, const std::string& scene, int32_t rate)
 {
-    auto [iter, success] = nodeRateMap_.try_emplace(nodeId, rate);
+    auto [iter, success] = nodeRateMap_.try_emplace(nodeId, std::pair<std::string, int32_t>(scene, rate));
     if (success) {
         isRateChanged_ = true;
     }
@@ -43,8 +61,8 @@ void FrameRateManager::RemoveNodeRate(int32_t nodeId)
 
 void FrameRateManager::UpdateNodeRate(int32_t nodeId, int32_t rate)
 {
-    if (auto iter = nodeRateMap_.find(nodeId); iter != nodeRateMap_.end() && iter->second != rate) {
-        iter->second = rate;
+    if (auto iter = nodeRateMap_.find(nodeId); iter != nodeRateMap_.end() && iter->second.second != rate) {
+        iter->second.second = rate;
         isRateChanged_ = true;
     }
 }
@@ -58,10 +76,11 @@ void FrameRateManager::SetAnimateRate(int32_t rate, bool hasFirstFrameAnimation)
     }
 }
 
-void FrameRateManager::SetDisplaySyncRate(int32_t displaySyncRate)
+void FrameRateManager::SetDisplaySyncRate(int32_t displaySyncRate, uint32_t displaySyncType)
 {
-    if (displaySyncRate_ != displaySyncRate) {
+    if (displaySyncRate_ != displaySyncRate || displaySyncType_ != displaySyncType) {
         displaySyncRate_ = displaySyncRate;
+        displaySyncType_ = displaySyncType;
         isRateChanged_ = true;
     }
 }
@@ -74,32 +93,31 @@ int32_t FrameRateManager::GetDisplaySyncRate() const
 std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
 {
     int32_t expectedRate = 0;
-    int32_t rateType = 0;
-    if (!nodeRateMap_.empty()) {
-        auto maxIter = std::max_element(
-            nodeRateMap_.begin(), nodeRateMap_.end(), [](auto a, auto b) { return a.second < b.second; });
-        expectedRate = maxIter->second;
-        rateType = dragScene_ == 1 ? DRAG_SCENE_FRAME_RATE_TYPE : ACE_COMPONENT_FRAME_RATE_TYPE;
+    int32_t rateType = UNKNOWN_FRAME_RATE_TYPE;
+    for (const auto& [_, sceneRate] : nodeRateMap_) {
+        const auto& [scene, rate] = sceneRate;
+        if (rate <= 0) {
+            continue;
+        }
+        expectedRate = std::max(expectedRate, rate);
+        rateType |= GetRateTypeOfScene(scene);
     }
-    if (displaySyncRate_ > expectedRate) {
-        expectedRate = displaySyncRate_;
-        rateType = DISPLAY_SYNC_FRAME_RATE_TYPE;
+
+    expectedRate = std::max(expectedRate, displaySyncRate_);
+    if (displaySyncRate_ > 0) {
+        rateType |= displaySyncType_;
     }
-    if (animateRate_ > expectedRate) {
-        expectedRate = animateRate_;
-        rateType = UI_ANIMATION_FRAME_RATE_TYPE;
+
+    expectedRate = std::max(expectedRate, animateRate_);
+    if (animateRate_ > 0) {
+        rateType |= UI_ANIMATION_FRAME_RATE_TYPE;
     }
     if (hasFirstFrameAnimation_) {
         if (expectedRate == 0) {
-            rateType = UI_ANIMATION_FRAME_RATE_TYPE;
+            rateType |= UI_ANIMATION_FRAME_RATE_TYPE;
         }
         rateType |= ANIMATION_STATE_FIRST_FRAME;
     }
     return {expectedRate, rateType};
-}
-
-void FrameRateManager::SetDragScene(int32_t status)
-{
-    dragScene_ = status;
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,20 @@
 #endif
 
 namespace OHOS::Ace {
+uint32_t DisplaySyncType2FrameRateType(UIObjectType displaySyncType)
+{
+    static const std::unordered_map<UIObjectType, uint32_t> convertMap = {
+        { UIObjectType::DISPLAYSYNC_OTHERS, OTHER_DISPLAY_SYNC_FRAME_RATE_TYPE },
+        { UIObjectType::DISPLAYSYNC_ANIMATOR, ANIMATOR_DISPLAY_SYNC_FRAME_RATE_TYPE },
+        { UIObjectType::DISPLAYSYNC_XCOMPONENT, XCOMPONENT_FRAME_RATE_TYPE },
+    };
+    auto iter = convertMap.find(displaySyncType);
+    if (iter != convertMap.end()) {
+        return iter->second;
+    }
+    return OTHER_DISPLAY_SYNC_FRAME_RATE_TYPE;
+}
+
 void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
 {
     SetVsyncRate(vsyncRate);
@@ -327,9 +341,10 @@ UIDisplaySync::UIDisplaySync(UIObjectType uiObjectType)
 {
     TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync, Type: %{public}d",
         static_cast<int32_t>(uiObjectType_));
+    data_->rateRange_->type_ = DisplaySyncType2FrameRateType(uiObjectType_);
 }
 
-UIDisplaySync::UIDisplaySync() {}
+UIDisplaySync::UIDisplaySync() : UIDisplaySync(UIObjectType::DISPLAYSYNC_OTHERS) {}
 
 UIDisplaySync::~UIDisplaySync() noexcept {}
 
