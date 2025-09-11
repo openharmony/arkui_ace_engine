@@ -805,8 +805,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
         JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
         JSRef<JSVal> jsColumn = jsViewExtraInfo->GetProperty("col");
-        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
+        if (jsPage->IsString() && jsLine->IsNumber() && jsColumn->IsNumber()) {
+            info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
             .col = jsColumn->ToNumber<int32_t>()};
+        }
     }
     
     if (isTitleNode) {
@@ -1325,7 +1327,13 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     // Get js view name by this.constructor.name
     JSRef<JSObject> constructor = thisObj->GetProperty("constructor");
     JSRef<JSVal> jsViewName = constructor->GetProperty("name");
-    auto viewName = jsViewName->ToString();
+    std::string viewName;
+    if (!jsViewName->IsString()) {
+        LOGE("constructor name invalid");
+        viewName = "";
+    } else {
+        viewName = jsViewName->ToString();
+    }
     auto* instance = new JSViewPartialUpdate(thisObj);
 
     auto context = info.GetExecutionContext();
