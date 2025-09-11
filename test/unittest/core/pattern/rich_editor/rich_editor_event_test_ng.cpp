@@ -585,7 +585,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level1)
     RichEditorAbstractSpanResult result;
     FONT_FEATURES_LIST fontFeature;
     RefPtr<ResourceObject> valueResource;
-    SymbolSpanStyle symbolSpanStyle;
+    SymbolSpanStyle symbolSpanStyle = SymbolSpanStyle(TEXT_STYLE_1);
 
     result.SetSpanRangeEnd(1);
     result.SetFontFeature(fontFeature);
@@ -609,6 +609,7 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level1)
     EXPECT_EQ(result.GetValueResource(), valueResource);
     EXPECT_EQ(result.GetValueString(), TEST_STR);
     EXPECT_EQ(result.GetSymbolSpanStyle().lineHeight, 0.0);
+    EXPECT_EQ(result.GetSymbolSpanStyle(), SymbolSpanStyle(TEXT_STYLE_1));
     EXPECT_EQ(result.GetFontWeight(), 0);
     EXPECT_EQ(result.GetFontFamily(), "");
     EXPECT_EQ(result.GetTextDecoration(), TextDecoration::UNDERLINE);
