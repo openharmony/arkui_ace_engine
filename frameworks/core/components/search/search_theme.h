@@ -72,6 +72,8 @@ public:
             theme->rightPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_right", 0.0_vp);
             theme->rightPaddingWithoutButton_ =
                 pattern->GetAttr<Dimension>("search_text_field_right_padding_without_button", 12.0_vp);
+            theme->rightPaddingWithButton_ =
+                pattern->GetAttr<Dimension>("search_text_field_right_padding_with_button", 0.0_vp);
             theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
             theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
@@ -311,6 +313,11 @@ public:
         return rightPaddingWithoutButton_;
     }
 
+    const Dimension& GetRightPaddingWithButton() const
+    {
+        return rightPaddingWithButton_;
+    }
+
     const Color& GetBorderColor() const
     {
         return borderColor_;
@@ -405,6 +412,7 @@ private:
     uint32_t cancelSymbolId_ = 0;
     Dimension symbolIconHeight_;
     Dimension rightPaddingWithoutButton_;
+    Dimension rightPaddingWithButton_;
     Color borderColor_;
     Dimension borderWidth_;
     Color focusBgColor_;
