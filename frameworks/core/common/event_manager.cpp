@@ -1046,6 +1046,7 @@ void EventManager::CleanHoverStatusForDragBegin()
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
+    isDragCancelPending_ = true;
     TAG_LOGD(AceLogTag::ACE_DRAG, "Clean mouse status for drag begin.");
     MouseEvent falsifyEvent = lastMouseEvent_;
     TouchTestResult testResult;
@@ -1056,6 +1057,7 @@ void EventManager::CleanHoverStatusForDragBegin()
     DispatchMouseHoverAnimationNG(falsifyEvent);
     mouseTestResults_.clear();
     pressMouseTestResultsMap_[{ lastMouseEvent_.id, lastMouseEvent_.button }].clear();
+    isDragCancelPending_ = false;
 }
 
 void EventManager::RegisterDragTouchEventListener(
@@ -1619,7 +1621,8 @@ bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
 void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
     MouseTestResult& handledResults, bool& isStopPropagation)
 {
-    for (const auto& mouseTarget : targetResults) {
+    auto targetPressResults = targetResults;
+    for (const auto& mouseTarget : targetPressResults) {
         if (!mouseTarget) {
             continue;
         }
