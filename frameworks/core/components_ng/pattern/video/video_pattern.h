@@ -288,6 +288,8 @@ public:
     void SetVideoController(const RefPtr<VideoControllerV2>& videoController);
     RefPtr<VideoControllerV2> GetVideoController();
 
+    void SetContentTransition(ContentTransitionType contentTransition);
+
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
 
@@ -400,6 +402,8 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
+    void UpdateBackgroundColor();
+    void SetTransparentBackgroundColor();
 
     void OnKeySpaceEvent();
     void MoveByStep(int32_t step);
@@ -450,6 +454,10 @@ private:
     Rect lastBoundsRect_;
     Rect contentRect_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+
+    ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
+    Color surfaceBgColor_ = Color::BLACK;
+    Color bgColor_ = Color::BLACK;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
