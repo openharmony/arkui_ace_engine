@@ -898,7 +898,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
-        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity
+
     };
     return &impl;
 }
