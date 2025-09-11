@@ -3874,22 +3874,25 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     // fire removed navDestination lifecycle
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     FirePrePrimaryNodesOnWillDisappear(std::move(filterNodes));
-    FirePrimaryNodesOnShowAndActive();
-    FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_SHOW);
-    FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_ACTIVE);
     if (!isAnimated) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
+        pipelineContext->AddAfterLayoutTask([weakNavigationPattern = WeakClaim(this),
             weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination)]() {
-            auto navigation = weakNavigation.Upgrade();
-            CHECK_NULL_VOID(navigation);
+            auto pattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
             auto topDestination = weakTopDestination.Upgrade();
-            navigation->NotifyDialogLifecycle(
+            pattern->FirePrimaryNodesOnShowAndActive();
+            pattern->FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_SHOW);
+            pattern->FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_ACTIVE);
+            pattern->NotifyDialogLifecycle(
                 NavDestinationLifecycle::ON_SHOW, true, NavDestVisibilityChangeReason::TRANSITION);
-            navigation->NotifyDestinationLifecycle(topDestination, NavDestinationLifecycle::ON_ACTIVE);
+            pattern->NotifyDestinationLifecycle(topDestination, NavDestinationLifecycle::ON_ACTIVE);
         });
     } else {
+        FirePrimaryNodesOnShowAndActive();
+        FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_SHOW);
+        FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle::ON_ACTIVE);
         NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, true, NavDestVisibilityChangeReason::TRANSITION);
         NotifyDestinationLifecycle(topDestination, NavDestinationLifecycle::ON_ACTIVE);
     }
