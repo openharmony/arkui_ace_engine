@@ -873,9 +873,10 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+    auto isNeedAvoidBottom = !container->IsSceneBoardEnabled() || SystemProperties::GetDeviceType() == DeviceType::CAR;
     if (GreatNotEqual(keyboardHeight, 0)) {
         auto tipsMarginKeyBoard = followCursor_ ? KEYBOARD_SPACE.ConvertToPx() : .0f;
-        auto wrapperHeight =  container->IsSceneBoardEnabled() ? wrapperSize_.Height() - keyboardHeight :
+        auto wrapperHeight = !isNeedAvoidBottom ? wrapperSize_.Height() - keyboardHeight :
             wrapperSize_.Height() - keyboardHeight - marginBottom_ + tipsMarginKeyBoard;
         wrapperSize_.SetHeight(wrapperHeight);
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
@@ -886,7 +887,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         CHECK_NULL_VOID(currentSafeAreaManager);
         auto currentKeyboardHeight = currentSafeAreaManager->GetKeyboardInset().Length();
         if (GreatNotEqual(currentKeyboardHeight, 0)) {
-            auto wrapperHeight =  container->IsSceneBoardEnabled() ? wrapperSize_.Height() - currentKeyboardHeight :
+            auto wrapperHeight = !isNeedAvoidBottom ? wrapperSize_.Height() - currentKeyboardHeight :
                 wrapperSize_.Height() - currentKeyboardHeight - marginBottom_;
             wrapperSize_.SetHeight(wrapperHeight);
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
