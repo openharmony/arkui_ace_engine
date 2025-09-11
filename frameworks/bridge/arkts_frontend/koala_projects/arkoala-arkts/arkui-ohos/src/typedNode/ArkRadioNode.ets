@@ -25,6 +25,7 @@ export class ArkRadioNode extends ArkBaseNode implements RadioAttribute {
         } 
         let options_casted: RadioOptions = param[0] as (RadioOptions);
         this.getPeer()?.setRadioOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     getPeer(): ArkRadioPeer {
@@ -33,11 +34,7 @@ export class ArkRadioNode extends ArkBaseNode implements RadioAttribute {
     initialize(options: RadioOptions): this {
         const options_casted = options as (RadioOptions);
         this.getPeer()?.setRadioOptionsAttribute(options_casted);
-        return this;
-    }
-    setRadioOptions(options: RadioOptions): this {
-        const options_casted = options as (RadioOptions);
-        this.getPeer()?.setRadioOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     checked(value: boolean | Bindable<boolean> | undefined): this {
@@ -45,22 +42,27 @@ export class ArkRadioNode extends ArkBaseNode implements RadioAttribute {
         if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
             const value_casted = value as (boolean | undefined);
             this.getPeer()?.setCheckedAttribute(value_casted);
+            this.markDirty();
             return this;
         }
+        this.markDirty();
         return this;
     }
     onChange(value: ((isVisible: boolean) => void) | OnRadioChangeCallback | undefined): this {
         const value_casted = value as (((isVisible: boolean) => void) | OnRadioChangeCallback | undefined);
         this.getPeer()?.setOnChangeAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     radioStyle(value: RadioStyle | undefined): this {
         const value_casted = value as (RadioStyle | undefined);
         this.getPeer()?.setRadioStyleAttribute(value_casted);        
+        this.markDirty();
         return this;
     }
     contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<RadioConfiguration> | undefined);
+        this.markDirty();
         return this;
     }
 }

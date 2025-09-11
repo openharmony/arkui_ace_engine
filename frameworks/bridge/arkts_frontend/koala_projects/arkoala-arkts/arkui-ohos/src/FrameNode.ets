@@ -1264,8 +1264,8 @@ export namespace typeNode {
         createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
         createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,
-        createImageNode, createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createSelectNode,
-        createSliderNode, createToggleNode
+        createImageNode, createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createRatingNode,
+        createSelectNode, createSliderNode, createToggleNode
     }
 
     // @ts-ignore
@@ -1736,7 +1736,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createToggleNode(context: UIContext, type: string, options: ToggleOptions): ToggleFrameNode {
+    export function createToggleNode(context: UIContext, type: string, options?: ToggleOptions): ToggleFrameNode {
         let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
             let arknode = new ArkToggleNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
