@@ -193,7 +193,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/base/UIContextImpl.ets",
   "arkui-preprocessed/arkui/base/UIContextUtil.ets",
   "arkui-preprocessed/arkui/base/base.ets",
-  "arkui-preprocessed/arkui/base/extendableComponent.d.ets",
   "arkui-preprocessed/arkui/base/index.ets",
   "arkui-preprocessed/arkui/component/actionSheet.ets",
   "arkui-preprocessed/arkui/component/alertDialog.ets",
