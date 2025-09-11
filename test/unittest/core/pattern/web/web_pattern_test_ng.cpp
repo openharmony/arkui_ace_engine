@@ -5128,4 +5128,40 @@ HWTEST_F(WebPatternTestNg, UnInitSurfaceDensityCallback_001, TestSize.Level1)
     EXPECT_EQ(webPattern->densityCallbackId_, 0);
 #endif
 }
+
+/**
+ * @tc.name: OnRootLayerChanged_001
+ * @tc.desc: OnRootLayerChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnRootLayerChanged_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->SetLayoutMode(WebLayoutMode::NONE);
+    webPattern->OnRootLayerChanged(1000, 1000);
+    EXPECT_EQ(webPattern->GetRootLayerWidth(), 1000);
+    EXPECT_EQ(webPattern->GetRootLayerHeight(), 1000);
+    webPattern->OnRootLayerChanged(1000, 2000);
+    EXPECT_EQ(webPattern->GetRootLayerHeight(), 2000);
+    webPattern->OnRootLayerChanged(2000, 2000);
+    EXPECT_EQ(webPattern->GetRootLayerWidth(), 2000);
+    webPattern->OnRootLayerChanged(2000, 2000);
+    webPattern->SetLayoutMode(WebLayoutMode::FIT_CONTENT);
+    webPattern->OnRootLayerChanged(3000, 3000);
+    EXPECT_EQ(webPattern->GetRootLayerWidth(), 3000);
+    EXPECT_EQ(webPattern->GetRootLayerHeight(), 3000);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,7 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto drawSize = SizeF(frameWidth, rootLayerHeight);
         TAG_LOGD(AceLogTag::ACE_WEB, "WebLayoutAlgorithm::Measure,drawSize : %{public}s", drawSize.ToString().c_str());
         layoutWrapper->GetGeometryNode()->SetFrameSize(drawSize);
+        layoutWrapper->GetGeometryNode()->SetContentSize(drawSize);
     }
 }
 
