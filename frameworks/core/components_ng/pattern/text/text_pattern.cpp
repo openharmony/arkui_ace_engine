@@ -320,22 +320,22 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     if (IsSelected() && LocalOffsetInRange(localOffset, textSelector_.GetTextStart(), textSelector_.GetTextEnd())) {
         return;
     }
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
-        auto range = pManager_->GetEllipsisTextRange();
-        if (LocalOffsetInRange(localOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
-            return;
-        }
+    if (PressOnEllipsisTextRange(localOffset)) {
+        return;
     }
     int32_t start = 0;
     int32_t end = 0;
     bool isAiSpan = false;
     if (GetDataDetectorAdapter()) {
-        auto aiSpanIter = dataDetectorAdapter_->aiSpanMap_.upper_bound(extend);
-        if (aiSpanIter != dataDetectorAdapter_->aiSpanMap_.begin()) {
-            --aiSpanIter;
+        std::map<int32_t, AISpan>::iterator aiSpanIter = dataDetectorAdapter_->aiSpanMap_.end();
+        for (auto it = dataDetectorAdapter_->aiSpanMap_.begin(); it != dataDetectorAdapter_->aiSpanMap_.end(); ++it) {
+            const AISpan& span = it->second;
+            if (extend >= span.start && extend < span.end &&
+                (aiSpanIter == dataDetectorAdapter_->aiSpanMap_.end() || span.start < aiSpanIter->second.start)) {
+                aiSpanIter = it;
+            }
         }
+        CHECK_NULL_VOID(aiSpanIter != dataDetectorAdapter_->aiSpanMap_.end());
         start = aiSpanIter->second.start;
         end = aiSpanIter->second.end;
         if (extend >= start && extend < end && LocalOffsetInRange(localOffset, start, end)) {
@@ -348,6 +348,19 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     }
     TAG_LOGI(AceLogTag::ACE_TEXT, "InitAiSelection[id:%{public}d][extend:%{public}d][start:%{public}d][end:%{public}d]",
         host->GetId(), extend, textSelector_.aiStart.value_or(-1), textSelector_.aiEnd.value_or(-1));
+}
+
+bool TextPattern::PressOnEllipsisTextRange(const Offset& localOffset)
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, true);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
+        auto range = pManager_->GetEllipsisTextRange();
+        if (LocalOffsetInRange(localOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextPattern::IsAiSelected()

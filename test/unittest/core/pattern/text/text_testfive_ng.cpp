@@ -2087,6 +2087,31 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSymbolSpanParagraph003
+ * @tc.desc: test span_node.cpp UpdateSymbolSpanParagraph function for customSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem->unicode = 100;
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    ASSERT_NE(spanItem->textStyle_, std::nullopt);
+    EXPECT_EQ(spanItem->nodeId_, spanItem->textStyle_->GetSymbolUid());
+    EXPECT_TRUE(spanItem->textStyle_->isSymbolGlyph_);
+}
+
+/**
  * @tc.name: UpdateSymbolSpanColor001
  * @tc.desc: test span_node.cpp UpdateSymbolSpanColor function
  * @tc.type: FUNC
