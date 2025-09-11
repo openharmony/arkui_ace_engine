@@ -1186,6 +1186,51 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollSnapAlignWhenHeightEqual
+ * @tc.desc: Test snap scroll when the height of the list is equal to the height of items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlignWhenHeightEqual, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Make ListHeight equal to ListItemsHeight, set ScrollSnapAlign to ScrollSnapAlign::START.
+     */
+    bool isScrollStartCalled = false;
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    model.SetOnScrollStart(scrollStart);
+    CreateListItems(4);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 0 offset.
+     * @tc.expected: Snap animation not started.
+     */
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+    SnapAnimationOptions snapAnimationOptions;
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    FlushUITasks(frameNode_);
+    EXPECT_FALSE(isScrollStartCalled);
+
+    /**
+     * @tc.steps: step3. Set ScrollSnapAlign to ScrollSnapAlign::END.
+     */
+    isScrollStartCalled = false;
+    ListModelNG::SetScrollSnapAlign(AceType::RawPtr(frameNode_), ScrollSnapAlign::END);
+    FlushUITasks(frameNode_);
+
+    /**
+     * @tc.steps: step4. StartSnapAnimation with 0 offset.
+     * @tc.expected: Snap animation not started.
+     */
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    FlushUITasks(frameNode_);
+    EXPECT_FALSE(isScrollStartCalled);
+}
+
+/**
  * @tc.name: StartSnapAnimation001
  * @tc.desc: Test start snap align by mouse wheel.
  * @tc.type: FUNC
