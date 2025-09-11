@@ -803,8 +803,7 @@ void ListItemGroupPattern::UpdateDefaultColor()
     auto listItemLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(listItemLayoutProperty);
     if (!listItemLayoutProperty->HasDividerColorSetByUser() ||
-        (listItemLayoutProperty->HasDividerColorSetByUser() &&
-            !listItemLayoutProperty->GetDividerColorSetByUserValue())) {
+        !listItemLayoutProperty->GetDividerColorSetByUserValue()) {
         V2::ItemDivider value;
         ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListItemGroupLayoutProperty, Divider, value, host, value);
         value.color = theme->GetDividerColor();

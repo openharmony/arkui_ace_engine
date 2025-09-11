@@ -63,8 +63,8 @@ void ListModelStatic::SetListScrollBar(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(frameNode);
     int32_t displayNumber;
 
-    if (!barState.has_value() || (barState.has_value() &&
-        (barState.value() < 0 || barState.value() >= static_cast<int32_t>(DISPLAY_MODE.size())))) {
+    if (!barState.has_value() ||
+        (barState.value() < 0 || barState.value() >= static_cast<int32_t>(DISPLAY_MODE.size()))) {
         displayNumber = static_cast<int32_t>(DisplayMode::AUTO);
     } else {
         displayNumber = barState.value();
