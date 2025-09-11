@@ -612,13 +612,17 @@ export class TipsDialog extends ViewPU {
                     this.checkAction(this.isChecked);
                 }
                 try {
+                    let hostContext = this.getUIContext()?.getHostContext();
+                    let resourceManager = hostContext?.resourceManager;
+                    let bundleName = hostContext?.abilityInfo?.bundleName ??
+                        hostContext?.extensionAbilityInfo?.bundleName;
                     let eventInfo = ({
                         type: 'announceForAccessibility',
-                        bundleName: getContext()?.abilityInfo?.bundleName,
+                        bundleName: bundleName,
                         triggerAction: 'common',
                         textAnnouncedForAccessibility: this.isChecked ?
-                        getContext().resourceManager.getStringSync(125833934) :
-                        getContext().resourceManager.getStringSync(125833935)
+                            resourceManager?.getStringSync(125833934) :
+                            resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                     });
@@ -1787,13 +1791,17 @@ export class ConfirmDialog extends ViewPU {
             Row.onClick(() => {
                 this.isChecked = !this.isChecked;
                 try {
+                    let hostContext = this.getUIContext()?.getHostContext();
+                    let resourceManager = hostContext?.resourceManager;
+                    let bundleName = hostContext?.abilityInfo?.bundleName ??
+                        hostContext?.extensionAbilityInfo?.bundleName;
                     let eventInfo = ({
                         type: 'announceForAccessibility',
-                        bundleName: getContext()?.abilityInfo?.bundleName,
+                        bundleName: bundleName,
                         triggerAction: 'common',
                         textAnnouncedForAccessibility: this.isChecked ?
-                        getContext().resourceManager.getStringSync(125833934) :
-                        getContext().resourceManager.getStringSync(125833935)
+                            resourceManager?.getStringSync(125833934) :
+                            resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                     });

@@ -324,12 +324,17 @@ export class TipsDialogV2 extends ViewV2 {
       Row.onClick(() => {
         this.checkedInner = !this.checkedInner;
         try {
+          let hostContext = this.getUIContext()?.getHostContext();
+          let resourceManager = hostContext?.resourceManager;
+          let bundleName = hostContext?.abilityInfo?.bundleName ??
+            hostContext?.extensionAbilityInfo?.bundleName;
           let eventInfo = ({
             type: 'announceForAccessibility',
-            bundleName: getContext()?.abilityInfo?.bundleName,
+            bundleName: bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
-            getContext().resourceManager.getStringSync(125833935)
+            textAnnouncedForAccessibility: this.checkedInner ?
+              resourceManager?.getStringSync(125833934) :
+              resourceManager?.getStringSync(125833935)
           });
           accessibility.sendAccessibilityEvent(eventInfo);
         }
@@ -1216,12 +1221,17 @@ export class ConfirmDialogV2 extends ViewV2 {
       Row.onClick(() => {
         this.checkedInner = !this.checkedInner;
         try {
+          let hostContext = this.getUIContext()?.getHostContext();
+          let resourceManager = hostContext?.resourceManager;
+          let bundleName = hostContext?.abilityInfo?.bundleName ??
+            hostContext?.extensionAbilityInfo?.bundleName;
           let eventInfo = ({
             type: 'announceForAccessibility',
-            bundleName: getContext()?.abilityInfo?.bundleName,
+            bundleName: bundleName,
             triggerAction: 'common',
-            textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
-            getContext().resourceManager.getStringSync(125833935)
+            textAnnouncedForAccessibility: this.checkedInner ?
+              resourceManager?.getStringSync(125833934) :
+              resourceManager?.getStringSync(125833935)
           });
           accessibility.sendAccessibilityEvent(eventInfo);
         }
