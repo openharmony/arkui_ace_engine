@@ -1454,7 +1454,7 @@ class ACE_EXPORT RefreshAccessedHistoryEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(RefreshAccessedHistoryEvent, BaseEventInfo);
 
 public:
-    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed, bool isMainFrame)
+    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed, bool isMainFrame = false)
         : BaseEventInfo("RefreshAccessedHistoryEvent"),
         url_(url), isRefreshed_(isRefreshed), isMainFrame_(isMainFrame)
     {}
