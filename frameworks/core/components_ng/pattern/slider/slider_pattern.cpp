@@ -1951,8 +1951,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
-    parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
-    parameters.blockGradientColor = paintProperty->GetBlockGradientColor().value_or(Gradient());
+    parameters.blockColor = paintProperty->GetBlockColor();
+    parameters.blockGradientColor = paintProperty->GetBlockGradientColor();
     UpdateParameters();
     GetSelectPosition(parameters, centerWidth, contentOffset);
     GetBackgroundPosition(parameters, centerWidth, contentOffset);
@@ -2693,6 +2693,14 @@ void SliderPattern::DumpInfo()
     }
     if (paintProperty->HasBlockColor()) {
         DumpLog::GetInstance().AddDesc("BlockColor: " + paintProperty->GetBlockColor().value().ToString());
+    }
+    if (paintProperty->HasBlockGradientColor()) {
+        std::vector<GradientColor> gradientColors = paintProperty->GetBlockGradientColor().value().GetColors();
+        std::ostringstream oss;
+        for (const auto& gradientColor : gradientColors) {
+            oss << gradientColor.GetLinearColor().ToColor().ToString() << " ";
+        }
+        DumpLog::GetInstance().AddDesc("BlockLinearGradientColor: " + oss.str());
     }
     if (paintProperty->HasTrackBackgroundColor()) {
         std::vector<GradientColor> gradientColors = paintProperty->GetTrackBackgroundColor().value().GetColors();

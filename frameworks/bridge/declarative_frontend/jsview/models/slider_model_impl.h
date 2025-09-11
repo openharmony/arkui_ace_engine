@@ -27,7 +27,7 @@ public:
     void SetDirection(Axis value) override;
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
-    void SetLinearGradientBlockColor(const NG::Gradient& value, bool isResourceColor = false) override {};
+    void SetLinearGradientBlockColor(const NG::Gradient& value) override {};
     void SetTrackBackgroundColor(const Color& value) override;
     void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetSelectColor(const Color& value) override;

@@ -138,7 +138,6 @@ void SliderPatternTwoTestNg::SetSliderContentModifier(SliderContentModifier& sli
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
     sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
-    sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
 }
@@ -1180,5 +1179,27 @@ HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest047, TestSize.Level1)
     sliderPattern->frameNode_ = std::move(frameNode);
     sliderPattern->UpdateStepPointsAccessibilityVirtualNodeSelected();
     EXPECT_FALSE(accessibilityNodeOne->accessibilityProperty_->isSelected_);
+}
+
+/**
+ * @tc.name: SliderPatternTwoTest048
+ * @tc.desc: Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTwoTestNg, SliderPatternTwoTest048, TestSize.Level1)
+{
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, FRAMENODE_ID, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    Gradient gradient;
+    GradientColor color(Color::BLACK);
+    gradient.AddColor(color);
+    sliderPaintProperty->UpdateBlockGradientColor(gradient);
+    sliderPattern->frameNode_ = std::move(frameNode);
+    sliderPattern->DumpInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.back(), "BlockLinearGradientColor: #00000000 \n");
 }
 } // namespace OHOS::Ace::NG

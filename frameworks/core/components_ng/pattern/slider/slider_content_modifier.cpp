@@ -44,15 +44,15 @@ SliderContentModifier::SliderContentModifier(
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
     selectGradientColor_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.selectGradientColor));
-    blockGradientColor_ =
-        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.blockGradientColor));
-    blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
+    blockGradientColor_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(parameters.blockGradientColor.value_or(Gradient())));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
     selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
     stepSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1);
     blockBorderWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0);
     stepColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT);
-    blockBorderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
+    blockBorderColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor.value_or(Color())));
     blockSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(parameters.blockSize);
     // non-animatable property
     stepRatio_ = AceType::MakeRefPtr<PropertyFloat>(parameters.stepRatio);
@@ -81,7 +81,6 @@ SliderContentModifier::SliderContentModifier(
     AttachProperty(trackBackgroundColor_);
     AttachProperty(selectGradientColor_);
     AttachProperty(blockGradientColor_);
-    AttachProperty(blockColor_);
     AttachProperty(boardColor_);
     AttachProperty(trackBorderRadius_);
     AttachProperty(selectedBorderRadius_);
@@ -390,6 +389,7 @@ std::vector<GradientColor> SliderContentModifier::GetBlockColor() const
 
 void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radius)
 {
+    brush.SetAntiAlias(true);
     auto blockSize = blockSize_->Get();
     auto borderWidth = blockBorderWidth_->Get();
     if (GreatOrEqual(borderWidth * HALF, radius)) {
@@ -397,18 +397,12 @@ void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radiu
         return;
     }
     std::vector<GradientColor> gradientColors = GetBlockColor();
-    if (gradientColors.empty()) {
-        radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-        return;
-    }
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
-    brush.SetAntiAlias(true);
     radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
     float drawRadius = isEnlarge_ ? radius * scaleValue_ : radius;
     RSRect blockRect = GetBlockRect(drawRadius);
@@ -778,18 +772,14 @@ void SliderContentModifier::DrawBlockShape(DrawingContext& context)
 
 void SliderContentModifier::CreateShapeCircleBlockBrush(RSBrush& brush, float drawRadius, const PointF& drawCenter)
 {
+    brush.SetAntiAlias(true);
     std::vector<GradientColor> gradientColors = GetBlockColor();
-    if (gradientColors.empty()) {
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-        return;
-    }
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
-    brush.SetAntiAlias(true);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSRect blockRect = GetShapeCircleBlockRect(drawCenter, drawRadius);
     RSPoint startPoint;
@@ -848,18 +838,14 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
 
 void SliderContentModifier::CreateShapeEllipseBlockBrush(RSBrush& brush, const RectF& drawRect)
 {
+    brush.SetAntiAlias(true);
     std::vector<GradientColor> gradientColors = GetBlockColor();
-    if (gradientColors.empty()) {
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-        return;
-    }
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
-    brush.SetAntiAlias(true);
     RSRect blockRect = GetShapeEllipseBlockRect(drawRect);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
@@ -918,18 +904,14 @@ void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPt
 
 void SliderContentModifier::CreateShapePathBlockBrush(RSBrush& brush, const SizeF& shapeSize, const PointF& blockCenter)
 {
+    brush.SetAntiAlias(true);
     std::vector<GradientColor> gradientColors = GetBlockColor();
-    if (gradientColors.empty()) {
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-        return;
-    }
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
-    brush.SetAntiAlias(true);
     RSRect blockRect = GetShapePathBlockRect(shapeSize, blockCenter);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
@@ -1003,18 +985,14 @@ void SliderContentModifier::SetShapeRectRadius(RSRoundRect& roundRect, float bor
 
 void SliderContentModifier::CreateShapeRectBlockBrush(RSBrush& brush, RSRect& rsRect)
 {
+    brush.SetAntiAlias(true);
     std::vector<GradientColor> gradientColors = GetBlockColor();
-    if (gradientColors.empty()) {
-        brush.SetColor(ToRSColor(blockColor_->Get()));
-        return;
-    }
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
-    brush.SetAntiAlias(true);
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
     RSPoint endPoint;

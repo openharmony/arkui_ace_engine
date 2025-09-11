@@ -264,8 +264,9 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         if (SystemProperties::ConfigChangePerform()) {
             SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
         }
+        return;
     }
-    SliderModel::GetInstance()->SetLinearGradientBlockColor(gradient, false);
+    SliderModel::GetInstance()->SetLinearGradientBlockColor(gradient);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)

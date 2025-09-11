@@ -75,8 +75,21 @@ void SliderPaintMethod::SetAttrParameters(const RefPtr<FrameNode>& host)
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter, host);
     sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
     sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
-    sliderContentModifier_->SetBlockColor(parameters_.blockColor);
-    sliderContentModifier_->SetLinearGradientBlockColor(parameters_.blockGradientColor);
+    if (parameters_.blockColor.has_value()) {
+        sliderContentModifier_->SetLinearGradientBlockColor(
+            SliderModelNG::CreateSolidGradient(parameters_.blockColor.value()));
+    } else if (parameters_.blockGradientColor.has_value()) {
+        sliderContentModifier_->SetLinearGradientBlockColor(parameters_.blockGradientColor.value());
+    } else {
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        CHECK_NULL_VOID(sliderTheme);
+        sliderContentModifier_->SetLinearGradientBlockColor(
+            SliderModelNG::CreateSolidGradient(sliderTheme->GetBlockColor()));
+    }
+
     sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
     sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
 }

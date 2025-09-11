@@ -162,7 +162,6 @@ void SliderExTestNg::SetSliderContentModifier(SliderContentModifier& sliderConte
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
     sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
-    sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
 }
@@ -1910,7 +1909,7 @@ HWTEST_F(SliderExTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
 
 /**
  * @tc.name: SliderBlockGradientColor001
- * @tc.desc: Check "SliderBlockColor" an "GetBlockColor"  API
+ * @tc.desc: Check "SetLinearGradientBlockColor" and "GetLinearGradientBlockColor"  API
  * @tc.type: FUNC
  */
 HWTEST_F(SliderExTestNg, SliderBlockGradientColor001, TestSize.Level1)

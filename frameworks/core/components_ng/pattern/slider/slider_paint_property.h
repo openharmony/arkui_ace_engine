@@ -262,7 +262,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColorSetByUser, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
