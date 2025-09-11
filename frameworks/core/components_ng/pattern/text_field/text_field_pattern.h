@@ -192,21 +192,9 @@ struct PreviewTextInfo {
     bool isIme;
 };
 
-#if defined(IOS_PLATFORM)
-struct InsertCommandComposeInfo {
-    int32_t start;
-    int32_t end;
-    bool isActive;
-};
-#endif
-
 struct InsertCommandInfo {
     std::u16string insertValue;
     InputReason reason;
-#if defined(IOS_PLATFORM)
-    InsertCommandComposeInfo compose;
-    bool unmarkText;
-#endif
 };
 
 struct InputCommandInfo {
@@ -1603,7 +1591,6 @@ public:
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     void DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction);
-    void DeleteByRange(int32_t& start, int32_t& end);
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -2281,11 +2268,6 @@ private:
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
-
-#if defined(IOS_PLATFORM)
-    TextCompose compose_;
-    bool unmarkText_;
-#endif
 
     // ----- multi thread state variables -----
     bool initSurfacePositionChangedCallbackMultiThread_ = false;
