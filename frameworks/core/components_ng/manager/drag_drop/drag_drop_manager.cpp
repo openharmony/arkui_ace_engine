@@ -1068,11 +1068,10 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     SetIsWindowConsumed(false);
-    if (isDragFwkShow_) {
+    if (isDragFwkShow_ && !(container->IsSceneBoardWindow() && rootNode_ != node)) {
         auto menuWrapper = GetMenuWrapperNodeFromDrag();
         if (menuWrapper) {
-            OffsetF menuPosition(
-                static_cast<float>(pointerEvent.GetDisplayX()), static_cast<float>(pointerEvent.GetDisplayY()));
+            auto menuPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(point);
             SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(
                 menuPosition, 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
         }
