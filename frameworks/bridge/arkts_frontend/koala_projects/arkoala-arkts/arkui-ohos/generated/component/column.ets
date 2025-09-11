@@ -148,6 +148,9 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
 
 export class ArkColumnComponent extends ArkCommonMethodComponent implements ColumnAttribute {
     getPeer(): ArkColumnPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkColumnPeer)
     }
     public setColumnOptions(options?: ColumnOptions | ColumnOptionsV2): this {
@@ -202,8 +205,10 @@ export function ColumnImpl(
     const receiver = remember<ArkColumnComponent>((): ArkColumnComponent => {
         return new ArkColumnComponent()
     })
-    NodeAttach<ArkColumnPeer>((): ArkColumnPeer => ArkColumnPeer.create(receiver), (_: ArkColumnPeer): void => {
+    NodeAttach<ArkColumnPeer>((): ArkColumnPeer => ArkColumnPeer.create(receiver), (peer: ArkColumnPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

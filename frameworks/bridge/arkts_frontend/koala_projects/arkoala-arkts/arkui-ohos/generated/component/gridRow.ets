@@ -158,6 +158,9 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
 
 export class ArkGridRowComponent extends ArkCommonMethodComponent implements GridRowAttribute {
     getPeer(): ArkGridRowPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkGridRowPeer)
     }
     public setGridRowOptions(option?: GridRowOptions): this {
@@ -204,8 +207,10 @@ export function GridRowImpl(
     const receiver = remember<ArkGridRowComponent>((): ArkGridRowComponent => {
         return new ArkGridRowComponent()
     })
-    NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (_: ArkGridRowPeer): void => {
+    NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (peer: ArkGridRowPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -81,6 +81,9 @@ export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements Remote
 
 export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements RemoteWindowAttribute {
     getPeer(): ArkRemoteWindowPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRemoteWindowPeer)
     }
     public setRemoteWindowOptions(target: WindowAnimationTarget): this {
@@ -111,8 +114,10 @@ export function RemoteWindowImpl(
     const receiver = remember<ArkRemoteWindowComponent>((): ArkRemoteWindowComponent => {
         return new ArkRemoteWindowComponent()
     })
-    NodeAttach<ArkRemoteWindowPeer>((): ArkRemoteWindowPeer => ArkRemoteWindowPeer.create(receiver), (_: ArkRemoteWindowPeer): void => {
+    NodeAttach<ArkRemoteWindowPeer>((): ArkRemoteWindowPeer => ArkRemoteWindowPeer.create(receiver), (peer: ArkRemoteWindowPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

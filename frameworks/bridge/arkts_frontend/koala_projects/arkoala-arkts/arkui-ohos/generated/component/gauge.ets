@@ -339,6 +339,9 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
 
 export class ArkGaugeComponent extends ArkCommonMethodComponent implements GaugeAttribute {
     getPeer(): ArkGaugePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkGaugePeer)
     }
     public setGaugeOptions(options: GaugeOptions): this {
@@ -447,8 +450,10 @@ export function GaugeImpl(
     const receiver = remember<ArkGaugeComponent>((): ArkGaugeComponent => {
         return new ArkGaugeComponent()
     })
-    NodeAttach<ArkGaugePeer>((): ArkGaugePeer => ArkGaugePeer.create(receiver), (_: ArkGaugePeer): void => {
+    NodeAttach<ArkGaugePeer>((): ArkGaugePeer => ArkGaugePeer.create(receiver), (peer: ArkGaugePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

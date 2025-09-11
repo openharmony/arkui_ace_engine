@@ -1189,6 +1189,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
 
 export class ArkSearchComponent extends ArkCommonMethodComponent implements SearchAttribute {
     getPeer(): ArkSearchPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSearchPeer)
     }
     public setSearchOptions(options?: SearchOptions): this {
@@ -1598,8 +1601,10 @@ export function SearchImpl(
     const receiver = remember<ArkSearchComponent>((): ArkSearchComponent => {
         return new ArkSearchComponent()
     })
-    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (_: ArkSearchPeer): void => {
+    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (peer: ArkSearchPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -1823,6 +1823,9 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
 
 export class ArkTextInputComponent extends ArkCommonMethodComponent implements TextInputAttribute {
     getPeer(): ArkTextInputPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextInputPeer)
     }
     public setTextInputOptions(value?: TextInputOptions): this {
@@ -2424,8 +2427,10 @@ export function TextInputImpl(
     const receiver = remember<ArkTextInputComponent>((): ArkTextInputComponent => {
         return new ArkTextInputComponent()
     })
-    NodeAttach<ArkTextInputPeer>((): ArkTextInputPeer => ArkTextInputPeer.create(receiver), (_: ArkTextInputPeer): void => {
+    NodeAttach<ArkTextInputPeer>((): ArkTextInputPeer => ArkTextInputPeer.create(receiver), (peer: ArkTextInputPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

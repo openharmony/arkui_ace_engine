@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult, UICommonEvent, UICommonEventInternal } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -40,8 +40,8 @@ import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
 import { Size_serializer, Frame_serializer } from "./../Graphics"
-import { CrossLanguageOptions_serializer, LayoutConstraint_serializer } from "./../FrameNode"
-import { FrameNode, CrossLanguageOptions, LayoutConstraint } from "arkui.FrameNode"
+import { LayoutConstraint_serializer } from "./../FrameNode"
+import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
 import { Size, Frame } from "arkui.Graphics"
 import { default as image } from "@ohos.multimedia.image"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
@@ -2708,6 +2708,9 @@ export interface TransformationMatrix {
 }
 export class ArkRootComponent extends ComponentBase implements Root {
     getPeer(): ArkRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRootPeer)
     }
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
@@ -2721,6 +2724,9 @@ export class ArkRootComponent extends ComponentBase implements Root {
 }
 export class ArkComponentRootComponent extends ComponentBase implements ComponentRoot {
     getPeer(): ArkComponentRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkComponentRootPeer)
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
@@ -2734,6 +2740,9 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
 }
 export class ArkCustomBuilderRootComponent extends ComponentBase implements CustomBuilderRoot {
     getPeer(): ArkCustomBuilderRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCustomBuilderRootPeer)
     }
     public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
@@ -2747,6 +2756,9 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
 }
 export class ArkCustomLayoutRootComponent extends ComponentBase implements CustomLayoutRoot {
     getPeer(): ArkCustomLayoutRootPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCustomLayoutRootPeer)
     }
     public subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {

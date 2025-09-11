@@ -438,6 +438,9 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
 
 export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements BaseSpan {
     getPeer(): ArkBaseSpanPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkBaseSpanPeer)
     }
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
@@ -467,6 +470,9 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
 }
 export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttribute {
     getPeer(): ArkSpanPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSpanPeer)
     }
     public setSpanOptions(value: string | Resource): this {
@@ -585,8 +591,10 @@ export function SpanImpl(
     const receiver = remember<ArkSpanComponent>((): ArkSpanComponent => {
         return new ArkSpanComponent()
     })
-    NodeAttach<ArkSpanPeer>((): ArkSpanPeer => ArkSpanPeer.create(receiver), (_: ArkSpanPeer): void => {
+    NodeAttach<ArkSpanPeer>((): ArkSpanPeer => ArkSpanPeer.create(receiver), (peer: ArkSpanPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

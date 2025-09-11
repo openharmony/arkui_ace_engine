@@ -129,6 +129,9 @@ export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements Hyperlink
 
 export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements HyperlinkAttribute {
     getPeer(): ArkHyperlinkPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkHyperlinkPeer)
     }
     public setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
@@ -168,8 +171,10 @@ export function HyperlinkImpl(
     const receiver = remember<ArkHyperlinkComponent>((): ArkHyperlinkComponent => {
         return new ArkHyperlinkComponent()
     })
-    NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer): void => {
+    NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (peer: ArkHyperlinkPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

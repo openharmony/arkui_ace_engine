@@ -168,6 +168,9 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
 
 export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
     getPeer(): ArkGridColPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkGridColPeer)
     }
     public setGridColOptions(option?: GridColOptions): this {
@@ -222,8 +225,10 @@ export function GridColImpl(
     const receiver = remember<ArkGridColComponent>((): ArkGridColComponent => {
         return new ArkGridColComponent()
     })
-    NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (_: ArkGridColPeer): void => {
+    NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (peer: ArkGridColPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

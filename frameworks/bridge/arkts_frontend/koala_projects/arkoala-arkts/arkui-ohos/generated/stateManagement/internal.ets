@@ -69,7 +69,7 @@ export class PersistentStorageBackend {
         const retval  = ArkUIGeneratedNativeModule._PersistentStorageBackend_get(key)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : string | undefined
+        let buffer : string | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readString() as string)
         }

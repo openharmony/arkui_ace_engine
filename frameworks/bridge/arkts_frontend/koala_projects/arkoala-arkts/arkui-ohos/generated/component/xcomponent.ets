@@ -366,6 +366,9 @@ export interface XComponentParameters {
 
 export class ArkXComponentComponent extends ArkCommonMethodComponent implements XComponentAttribute {
     getPeer(): ArkXComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkXComponentPeer)
     }
     public setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
@@ -436,8 +439,10 @@ export function XComponentImpl(
     const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
         return new ArkXComponentComponent()
     })
-    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
+    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (peer: ArkXComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -89,6 +89,9 @@ export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute 
 
 export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAttribute {
     getPeer(): ArkFlexPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkFlexPeer)
     }
     public setFlexOptions(value?: FlexOptions): this {
@@ -119,8 +122,10 @@ export function FlexImpl(
     const receiver = remember<ArkFlexComponent>((): ArkFlexComponent => {
         return new ArkFlexComponent()
     })
-    NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (_: ArkFlexPeer): void => {
+    NodeAttach<ArkFlexPeer>((): ArkFlexPeer => ArkFlexPeer.create(receiver), (peer: ArkFlexPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

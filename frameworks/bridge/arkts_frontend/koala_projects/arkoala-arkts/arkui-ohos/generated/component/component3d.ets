@@ -286,6 +286,9 @@ export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Compone
 
 export class ArkComponent3DComponent extends ArkCommonMethodComponent implements Component3DAttribute {
     getPeer(): ArkComponent3DPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkComponent3DPeer)
     }
     public setComponent3DOptions(sceneOptions?: SceneOptions): this {
@@ -373,8 +376,10 @@ export function Component3DImpl(
     const receiver = remember<ArkComponent3DComponent>((): ArkComponent3DComponent => {
         return new ArkComponent3DComponent()
     })
-    NodeAttach<ArkComponent3DPeer>((): ArkComponent3DPeer => ArkComponent3DPeer.create(receiver), (_: ArkComponent3DPeer): void => {
+    NodeAttach<ArkComponent3DPeer>((): ArkComponent3DPeer => ArkComponent3DPeer.create(receiver), (peer: ArkComponent3DPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

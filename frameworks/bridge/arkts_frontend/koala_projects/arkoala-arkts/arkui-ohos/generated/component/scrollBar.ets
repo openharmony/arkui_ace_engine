@@ -100,6 +100,9 @@ export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBar
 
 export class ArkScrollBarComponent extends ArkCommonMethodComponent implements ScrollBarAttribute {
     getPeer(): ArkScrollBarPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkScrollBarPeer)
     }
     public setScrollBarOptions(value: ScrollBarOptions): this {
@@ -138,8 +141,10 @@ export function ScrollBarImpl(
     const receiver = remember<ArkScrollBarComponent>((): ArkScrollBarComponent => {
         return new ArkScrollBarComponent()
     })
-    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (_: ArkScrollBarPeer): void => {
+    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (peer: ArkScrollBarPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

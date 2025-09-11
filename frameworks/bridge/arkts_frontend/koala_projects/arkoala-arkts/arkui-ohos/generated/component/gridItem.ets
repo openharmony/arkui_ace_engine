@@ -222,6 +222,9 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
 
 export class ArkGridItemComponent extends ArkCommonMethodComponent implements GridItemAttribute {
     getPeer(): ArkGridItemPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkGridItemPeer)
     }
     public setGridItemOptions(value?: GridItemOptions): this {
@@ -308,8 +311,10 @@ export function GridItemImpl(
     const receiver = remember<ArkGridItemComponent>((): ArkGridItemComponent => {
         return new ArkGridItemComponent()
     })
-    NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (_: ArkGridItemPeer): void => {
+    NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (peer: ArkGridItemPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

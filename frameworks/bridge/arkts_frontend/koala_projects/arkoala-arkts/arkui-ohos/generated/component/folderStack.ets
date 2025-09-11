@@ -186,6 +186,9 @@ export interface HoverEventParam {
 
 export class ArkFolderStackComponent extends ArkCommonMethodComponent implements FolderStackAttribute {
     getPeer(): ArkFolderStackPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkFolderStackPeer)
     }
     public setFolderStackOptions(options?: FolderStackOptions): this {
@@ -256,8 +259,10 @@ export function FolderStackImpl(
     const receiver = remember<ArkFolderStackComponent>((): ArkFolderStackComponent => {
         return new ArkFolderStackComponent()
     })
-    NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (_: ArkFolderStackPeer): void => {
+    NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (peer: ArkFolderStackPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -177,6 +177,9 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
 
 export class ArkRatingComponent extends ArkCommonMethodComponent implements RatingAttribute {
     getPeer(): ArkRatingPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRatingPeer)
     }
     public setRatingOptions(options?: RatingOptions): this {
@@ -245,8 +248,10 @@ export function RatingImpl(
     const receiver = remember<ArkRatingComponent>((): ArkRatingComponent => {
         return new ArkRatingComponent()
     })
-    NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (_: ArkRatingPeer): void => {
+    NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (peer: ArkRatingPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

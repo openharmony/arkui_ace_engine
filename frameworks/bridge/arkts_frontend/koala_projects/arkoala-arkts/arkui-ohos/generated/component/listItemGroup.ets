@@ -127,6 +127,9 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
 
 export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements ListItemGroupAttribute {
     getPeer(): ArkListItemGroupPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkListItemGroupPeer)
     }
     public setListItemGroupOptions(options?: ListItemGroupOptions): this {
@@ -173,8 +176,10 @@ export function ListItemGroupImpl(
     const receiver = remember<ArkListItemGroupComponent>((): ArkListItemGroupComponent => {
         return new ArkListItemGroupComponent()
     })
-    NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer): void => {
+    NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (peer: ArkListItemGroupPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

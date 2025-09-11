@@ -875,6 +875,9 @@ export interface TabContentAnimatedTransition {
 
 export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
     getPeer(): ArkTabsPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTabsPeer)
     }
     public setTabsOptions(options?: TabsOptions): this {
@@ -1132,8 +1135,10 @@ export function TabsImpl(
     const receiver = remember<ArkTabsComponent>((): ArkTabsComponent => {
         return new ArkTabsComponent()
     })
-    NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer): void => {
+    NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (peer: ArkTabsPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

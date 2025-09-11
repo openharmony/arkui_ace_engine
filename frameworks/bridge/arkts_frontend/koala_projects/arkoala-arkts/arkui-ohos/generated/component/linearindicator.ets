@@ -216,6 +216,9 @@ export type OnLinearIndicatorChangeCallback = (index: number, progress: number) 
 
 export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implements LinearIndicatorAttribute {
     getPeer(): ArkLinearIndicatorPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkLinearIndicatorPeer)
     }
     public setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this {
@@ -271,8 +274,10 @@ export function LinearIndicatorImpl(
     const receiver = remember<ArkLinearIndicatorComponent>((): ArkLinearIndicatorComponent => {
         return new ArkLinearIndicatorComponent()
     })
-    NodeAttach<ArkLinearIndicatorPeer>((): ArkLinearIndicatorPeer => ArkLinearIndicatorPeer.create(receiver), (_: ArkLinearIndicatorPeer): void => {
+    NodeAttach<ArkLinearIndicatorPeer>((): ArkLinearIndicatorPeer => ArkLinearIndicatorPeer.create(receiver), (peer: ArkLinearIndicatorPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

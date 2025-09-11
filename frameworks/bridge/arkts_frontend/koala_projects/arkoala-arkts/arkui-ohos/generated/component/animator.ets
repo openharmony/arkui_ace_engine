@@ -441,6 +441,9 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
 
 export class ArkAnimatorComponent extends ArkCommonMethodComponent implements AnimatorAttribute {
     getPeer(): ArkAnimatorPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkAnimatorPeer)
     }
     public setAnimatorOptions(value: string): this {
@@ -583,8 +586,10 @@ export function AnimatorImpl(
     const receiver = remember<ArkAnimatorComponent>((): ArkAnimatorComponent => {
         return new ArkAnimatorComponent()
     })
-    NodeAttach<ArkAnimatorPeer>((): ArkAnimatorPeer => ArkAnimatorPeer.create(receiver), (_: ArkAnimatorPeer): void => {
+    NodeAttach<ArkAnimatorPeer>((): ArkAnimatorPeer => ArkAnimatorPeer.create(receiver), (peer: ArkAnimatorPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

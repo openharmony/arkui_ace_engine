@@ -175,6 +175,9 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
 
 export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCodeAttribute {
     getPeer(): ArkQRCodePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkQRCodePeer)
     }
     public setQRCodeOptions(value: ResourceStr): this {
@@ -229,8 +232,10 @@ export function QRCodeImpl(
     const receiver = remember<ArkQRCodeComponent>((): ArkQRCodeComponent => {
         return new ArkQRCodeComponent()
     })
-    NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (_: ArkQRCodePeer): void => {
+    NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (peer: ArkQRCodePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

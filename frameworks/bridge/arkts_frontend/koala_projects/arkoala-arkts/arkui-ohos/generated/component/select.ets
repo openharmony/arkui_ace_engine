@@ -847,6 +847,9 @@ export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfi
 
 export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSelectPeer)
     }
     public setSelectOptions(options: Array<SelectOption>): this {
@@ -1108,8 +1111,10 @@ export function SelectImpl(
     const receiver = remember<ArkSelectComponent>((): ArkSelectComponent => {
         return new ArkSelectComponent()
     })
-    NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (_: ArkSelectPeer): void => {
+    NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (peer: ArkSelectPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

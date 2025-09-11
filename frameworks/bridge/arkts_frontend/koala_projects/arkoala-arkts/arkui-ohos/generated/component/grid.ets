@@ -752,6 +752,9 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
 
 export class ArkGridComponent extends ArkScrollableCommonMethodComponent implements GridAttribute {
     getPeer(): ArkGridPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkGridPeer)
     }
     public setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
@@ -1033,8 +1036,10 @@ export function GridImpl(
     const receiver = remember<ArkGridComponent>((): ArkGridComponent => {
         return new ArkGridComponent()
     })
-    NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (_: ArkGridPeer): void => {
+    NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (peer: ArkGridPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

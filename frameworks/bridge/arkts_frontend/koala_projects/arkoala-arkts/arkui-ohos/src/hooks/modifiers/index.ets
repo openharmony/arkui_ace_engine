@@ -249,6 +249,9 @@ import { ArkHyperlinkPeer } from  '../../framework';
 import { ArkSearchPeer, SearchOptions } from  '../../framework';
 import { ArkTextInputPeer, TextInputOptions } from  '../../framework';
 import { RuntimeType, runtimeType } from "@koalaui/interop"
+import { ArkPasteButtonComponent, PasteButtonAttribute } from "./../../component/pasteButton"
+import { ArkSaveButtonComponent, SaveButtonAttribute } from "./../../component/saveButton"
+import { ArkSecurityComponentMethodComponent, SecurityComponentMethod } from "./../../component/securityComponent"
 
 export function hookAlphabetIndexerAttributeModifier(componenet: ArkAlphabetIndexerComponent, value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
@@ -316,6 +319,9 @@ export function hookComponentRootAttributeModifier(componenet: ArkComponentRootC
 export function hookCustomBuilderRootAttributeModifier(componenet: ArkCustomBuilderRootComponent, value: AttributeModifier<CustomBuilderRoot> | undefined):void {}
 export function hookCustomLayoutRootAttributeModifier(componenet: ArkCustomLayoutRootComponent, value: AttributeModifier<CustomLayoutRoot> | undefined):void {}
 export function hookFormComponentAttributeModifier(component: ArkFormComponentComponent, value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined) {}
+export function hookPasteButtonAttributeModifier(componenet: ArkPasteButtonComponent, value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined):void {}
+export function hookSaveButtonAttributeModifier(componenet: ArkSaveButtonComponent, value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined):void {}
+export function hookSecurityComponentMethodAttributeModifier(componenet: ArkSecurityComponentMethodComponent, value: AttributeModifier<SecurityComponentMethod> | undefined):void {}
 
 export function hookMenuItemGroupAttributeModifier(component: ArkMenuItemGroupComponent, modifier: AttributeModifier<MenuItemGroupAttribute>
     | AttributeModifier<CommonMethod> | undefined): void {

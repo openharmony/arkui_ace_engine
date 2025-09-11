@@ -352,9 +352,6 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
     _onSizeChange_0_0value?: SizeChangeCallback | undefined
     _accessibilityFocusDrawLevel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
-    _customProperty_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customProperty_0_0value?: string
-    _customProperty_0_1value?: CustomProperty
     _expandSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
     _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
@@ -8317,9 +8314,6 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
             this._accessibilityFocusDrawLevel_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
-    }
-    customProperty(name: string, value: CustomProperty): this {
-        throw new Error("Not implemented")
     }
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
         if (((this._expandSafeArea_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))

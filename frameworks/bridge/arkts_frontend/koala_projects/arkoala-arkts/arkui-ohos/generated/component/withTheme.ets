@@ -73,6 +73,9 @@ export class ArkWithThemeStyle implements WithThemeAttribute {
 
 export class ArkWithThemeComponent extends ComponentBase implements WithThemeAttribute {
     getPeer(): ArkWithThemePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkWithThemePeer)
     }
     public setWithThemeOptions(options: WithThemeOptions): this {
@@ -103,8 +106,10 @@ export function WithThemeImpl(
     const receiver = remember<ArkWithThemeComponent>((): ArkWithThemeComponent => {
         return new ArkWithThemeComponent()
     })
-    NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (_: ArkWithThemePeer): void => {
+    NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (peer: ArkWithThemePeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

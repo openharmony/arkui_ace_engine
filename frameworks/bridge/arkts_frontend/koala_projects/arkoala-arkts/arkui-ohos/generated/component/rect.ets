@@ -224,6 +224,9 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
 
 export class ArkRectComponent extends ArkCommonShapeMethodComponent implements RectAttribute {
     getPeer(): ArkRectPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRectPeer)
     }
     public setRectOptions(options?: RectOptions | RoundedRectOptions): this {
@@ -278,8 +281,10 @@ export function RectImpl(
     const receiver = remember<ArkRectComponent>((): ArkRectComponent => {
         return new ArkRectComponent()
     })
-    NodeAttach<ArkRectPeer>((): ArkRectPeer => ArkRectPeer.create(receiver), (_: ArkRectPeer): void => {
+    NodeAttach<ArkRectPeer>((): ArkRectPeer => ArkRectPeer.create(receiver), (peer: ArkRectPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

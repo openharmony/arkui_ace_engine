@@ -350,6 +350,9 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
 
 export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements SymbolGlyphAttribute {
     getPeer(): ArkSymbolGlyphPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSymbolGlyphPeer)
     }
     public setSymbolGlyphOptions(value?: Resource): this {
@@ -445,8 +448,10 @@ export function SymbolGlyphImpl(
     const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
         return new ArkSymbolGlyphComponent()
     })
-    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
+    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (peer: ArkSymbolGlyphPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

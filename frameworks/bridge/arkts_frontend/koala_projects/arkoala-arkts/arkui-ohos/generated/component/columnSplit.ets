@@ -110,6 +110,9 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
 
 export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
     getPeer(): ArkColumnSplitPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkColumnSplitPeer)
     }
     public setColumnSplitOptions(): this {
@@ -155,8 +158,10 @@ export function ColumnSplitImpl(
     const receiver = remember<ArkColumnSplitComponent>((): ArkColumnSplitComponent => {
         return new ArkColumnSplitComponent()
     })
-    NodeAttach<ArkColumnSplitPeer>((): ArkColumnSplitPeer => ArkColumnSplitPeer.create(receiver), (_: ArkColumnSplitPeer): void => {
+    NodeAttach<ArkColumnSplitPeer>((): ArkColumnSplitPeer => ArkColumnSplitPeer.create(receiver), (peer: ArkColumnSplitPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

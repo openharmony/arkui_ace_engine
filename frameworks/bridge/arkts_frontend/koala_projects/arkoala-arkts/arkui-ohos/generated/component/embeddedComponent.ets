@@ -115,6 +115,9 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
 
 export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
     getPeer(): ArkEmbeddedComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkEmbeddedComponentPeer)
     }
     public setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType): this {
@@ -162,8 +165,10 @@ export function EmbeddedComponentImpl(
     const receiver = remember<ArkEmbeddedComponentComponent>((): ArkEmbeddedComponentComponent => {
         return new ArkEmbeddedComponentComponent()
     })
-    NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (_: ArkEmbeddedComponentPeer): void => {
+    NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (peer: ArkEmbeddedComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

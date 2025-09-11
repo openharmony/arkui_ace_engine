@@ -98,6 +98,9 @@ export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttri
 
 export class ArkPathComponent extends ArkCommonShapeMethodComponent implements PathAttribute {
     getPeer(): ArkPathPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkPathPeer)
     }
     public setPathOptions(options?: PathOptions): this {
@@ -136,8 +139,10 @@ export function PathImpl(
     const receiver = remember<ArkPathComponent>((): ArkPathComponent => {
         return new ArkPathComponent()
     })
-    NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (_: ArkPathPeer): void => {
+    NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (peer: ArkPathPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

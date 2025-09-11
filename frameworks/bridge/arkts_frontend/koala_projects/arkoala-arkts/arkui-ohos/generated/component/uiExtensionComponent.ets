@@ -348,6 +348,9 @@ export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implement
 
 export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent implements UIExtensionComponentAttribute {
     getPeer(): ArkUIExtensionComponentPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkUIExtensionComponentPeer)
     }
     public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
@@ -419,8 +422,10 @@ export function UIExtensionComponentImpl(
     const receiver = remember<ArkUIExtensionComponentComponent>((): ArkUIExtensionComponentComponent => {
         return new ArkUIExtensionComponentComponent()
     })
-    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (_: ArkUIExtensionComponentPeer): void => {
+    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (peer: ArkUIExtensionComponentPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

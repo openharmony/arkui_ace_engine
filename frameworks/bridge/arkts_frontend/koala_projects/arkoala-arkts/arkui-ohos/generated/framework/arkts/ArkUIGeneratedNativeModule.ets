@@ -1383,6 +1383,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerInterface_setNodeContainerOptions(ptr: KPointer, controller: KPointer): void
     @ani.unsafe.Direct
+    native static _PasteButton_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _PasteButtonInterface_setPasteButtonOptions(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _PasteButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Path_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PathInterface_setPathOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1619,6 +1625,22 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RowSplitAttribute_setResizeable(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SaveButton_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _SaveButtonInterface_setSaveButtonOptions(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setOnClick(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setSetIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setSetText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setIconSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setIconBorderRadius(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setStateEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Screen_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ScreenInterface_setScreenOptions(ptr: KPointer, screenId: number): void
@@ -1764,6 +1786,76 @@ export class ArkUIGeneratedNativeModule {
     native static _SearchAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setCustomKeyboard(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setIconSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setLayoutDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMarkAnchor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setOffset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFontSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFontStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFontFamily(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setIconColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setBorderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setBorderWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setBorderColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setBorderRadius(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setPadding(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setTextIconSpace(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setConstraintSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAlignRules(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setChainMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMinFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMaxFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMaxLines(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMinFontSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setMaxFontSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setHeightAdaptivePolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setEnabled(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Select_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -2769,6 +2861,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setOnPageBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setOnLoadStarted(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _WebAttribute_setOnLoadFinished(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setOnProgressChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setOnTitleReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3532,7 +3628,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ConsoleMessage_getSourceId(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _ConsoleMessage_getLineNumber(ptr: KPointer): number
+    native static _ConsoleMessage_getLineNumber(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -3833,15 +3929,15 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_removeChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNodeExtender_clearChildren(peer: KPointer): void
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getChild(peer: KPointer, index: number, expandMode: number): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getFirstChild(peer: KPointer): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getNextSibling(peer: KPointer): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getPreviousSibling(peer: KPointer): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getParent(peer: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getChildrenCount(peer: KPointer): int32
@@ -3909,9 +4005,9 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_getLastChildIndexWithoutExpand(peer: KPointer): number
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getAttachedFrameNodeById(id: KStringPtr): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodeById(id: number): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodeByUniqueId(id: number): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_reuse(peer: KPointer): void
@@ -5663,7 +5759,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceError_getErrorInfo(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _WebResourceError_getErrorCode(ptr: KPointer): number
+    native static _WebResourceError_getErrorCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebResourceRequest_construct(): KPointer
     @ani.unsafe.Direct
@@ -5697,7 +5793,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceResponse_getResponseHeader(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _WebResourceResponse_getResponseCode(ptr: KPointer): number
+    native static _WebResourceResponse_getResponseCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseData(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -5709,7 +5805,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseHeader(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: number): void
+    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: KInt): void
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseIsReady(ptr: KPointer, IsReady: KInt): void
     @ani.unsafe.Direct

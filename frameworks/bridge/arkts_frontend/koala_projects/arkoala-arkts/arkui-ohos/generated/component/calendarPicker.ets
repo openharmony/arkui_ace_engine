@@ -232,6 +232,9 @@ export interface CalendarDialogOptions extends CalendarOptions {
 
 export class ArkCalendarPickerComponent extends ArkCommonMethodComponent implements CalendarPickerAttribute {
     getPeer(): ArkCalendarPickerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCalendarPickerPeer)
     }
     public setCalendarPickerOptions(options?: CalendarOptions): this {
@@ -295,8 +298,10 @@ export function CalendarPickerImpl(
     const receiver = remember<ArkCalendarPickerComponent>((): ArkCalendarPickerComponent => {
         return new ArkCalendarPickerComponent()
     })
-    NodeAttach<ArkCalendarPickerPeer>((): ArkCalendarPickerPeer => ArkCalendarPickerPeer.create(receiver), (_: ArkCalendarPickerPeer): void => {
+    NodeAttach<ArkCalendarPickerPeer>((): ArkCalendarPickerPeer => ArkCalendarPickerPeer.create(receiver), (peer: ArkCalendarPickerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

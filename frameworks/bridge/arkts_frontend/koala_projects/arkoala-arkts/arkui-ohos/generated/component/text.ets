@@ -1207,6 +1207,9 @@ export interface TextMarqueeOptions {
 
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
     getPeer(): ArkTextPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextPeer)
     }
     public setTextOptions(content?: string | Resource, value?: TextOptions): this {
@@ -1588,8 +1591,10 @@ export function TextImpl(
     const receiver = remember<ArkTextComponent>((): ArkTextComponent => {
         return new ArkTextComponent()
     })
-    NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer): void => {
+    NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (peer: ArkTextPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

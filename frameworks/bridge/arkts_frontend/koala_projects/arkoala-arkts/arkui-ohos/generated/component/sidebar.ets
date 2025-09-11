@@ -412,6 +412,9 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
 
 export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements SideBarContainerAttribute {
     getPeer(): ArkSideBarContainerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSideBarContainerPeer)
     }
     public setSideBarContainerOptions(type?: SideBarContainerType): this {
@@ -546,8 +549,10 @@ export function SideBarContainerImpl(
     const receiver = remember<ArkSideBarContainerComponent>((): ArkSideBarContainerComponent => {
         return new ArkSideBarContainerComponent()
     })
-    NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (_: ArkSideBarContainerPeer): void => {
+    NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (peer: ArkSideBarContainerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

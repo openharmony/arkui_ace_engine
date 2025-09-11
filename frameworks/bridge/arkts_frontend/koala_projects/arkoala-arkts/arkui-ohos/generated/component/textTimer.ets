@@ -361,6 +361,9 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
 
 export class ArkTextTimerComponent extends ArkCommonMethodComponent implements TextTimerAttribute {
     getPeer(): ArkTextTimerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextTimerPeer)
     }
     public setTextTimerOptions(options?: TextTimerOptions): this {
@@ -461,8 +464,10 @@ export function TextTimerImpl(
     const receiver = remember<ArkTextTimerComponent>((): ArkTextTimerComponent => {
         return new ArkTextTimerComponent()
     })
-    NodeAttach<ArkTextTimerPeer>((): ArkTextTimerPeer => ArkTextTimerPeer.create(receiver), (_: ArkTextTimerPeer): void => {
+    NodeAttach<ArkTextTimerPeer>((): ArkTextTimerPeer => ArkTextTimerPeer.create(receiver), (peer: ArkTextTimerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

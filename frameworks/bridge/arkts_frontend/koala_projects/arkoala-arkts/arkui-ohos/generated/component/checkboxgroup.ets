@@ -248,6 +248,9 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
 
 export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implements CheckboxGroupAttribute {
     getPeer(): ArkCheckboxGroupPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCheckboxGroupPeer)
     }
     public setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
@@ -326,8 +329,10 @@ export function CheckboxGroupImpl(
     const receiver = remember<ArkCheckboxGroupComponent>((): ArkCheckboxGroupComponent => {
         return new ArkCheckboxGroupComponent()
     })
-    NodeAttach<ArkCheckboxGroupPeer>((): ArkCheckboxGroupPeer => ArkCheckboxGroupPeer.create(receiver), (_: ArkCheckboxGroupPeer): void => {
+    NodeAttach<ArkCheckboxGroupPeer>((): ArkCheckboxGroupPeer => ArkCheckboxGroupPeer.create(receiver), (peer: ArkCheckboxGroupPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

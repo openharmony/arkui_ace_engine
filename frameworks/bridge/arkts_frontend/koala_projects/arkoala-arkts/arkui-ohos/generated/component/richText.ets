@@ -103,6 +103,9 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
 
 export class ArkRichTextComponent extends ArkCommonMethodComponent implements RichTextAttribute {
     getPeer(): ArkRichTextPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRichTextPeer)
     }
     public setRichTextOptions(content: string): this {
@@ -149,8 +152,10 @@ export function RichTextImpl(
     const receiver = remember<ArkRichTextComponent>((): ArkRichTextComponent => {
         return new ArkRichTextComponent()
     })
-    NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (_: ArkRichTextPeer): void => {
+    NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (peer: ArkRichTextPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

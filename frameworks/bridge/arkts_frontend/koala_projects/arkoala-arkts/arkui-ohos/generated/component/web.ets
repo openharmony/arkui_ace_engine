@@ -30,6 +30,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CopyOptions, NestedScrollMode } from "./enums"
 import { CustomBuilder } from "./builder"
+import { PreviewMenuOptions, PreviewMenuOptions_serializer } from "./richEditor"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -123,7 +124,7 @@ export class ConsoleMessage implements MaterializedBase {
     public getSourceId(): string {
         return this.getSourceId_serialize()
     }
-    public getLineNumber(): number {
+    public getLineNumber(): int32 {
         return this.getLineNumber_serialize()
     }
     public getMessageLevel(): MessageLevel {
@@ -137,7 +138,7 @@ export class ConsoleMessage implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
         return retval
     }
-    getLineNumber_serialize(): number {
+    getLineNumber_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getLineNumber(this.peer!.ptr)
         return retval
     }
@@ -958,14 +959,14 @@ export class WebResourceError implements MaterializedBase {
     public getErrorInfo(): string {
         return this.getErrorInfo_serialize()
     }
-    public getErrorCode(): number {
+    public getErrorCode(): int32 {
         return this.getErrorCode_serialize()
     }
     getErrorInfo_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         return retval
     }
-    getErrorCode_serialize(): number {
+    getErrorCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
         return retval
     }
@@ -1069,7 +1070,7 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseData(): string {
         return this.getResponseData_serialize()
     }
-    public getResponseDataEx(): string | number | ArrayBuffer | Resource | undefined {
+    public getResponseDataEx(): string | int32 | ArrayBuffer | Resource | undefined {
         return this.getResponseDataEx_serialize()
     }
     public getResponseEncoding(): string {
@@ -1084,11 +1085,11 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseHeader(): Array<Header> {
         return this.getResponseHeader_serialize()
     }
-    public getResponseCode(): number {
+    public getResponseCode(): int32 {
         return this.getResponseCode_serialize()
     }
-    public setResponseData(data: string | number | Resource | ArrayBuffer): void {
-        const data_casted = data as (string | number | Resource | ArrayBuffer)
+    public setResponseData(data: string | int32 | Resource | ArrayBuffer): void {
+        const data_casted = data as (string | int32 | Resource | ArrayBuffer)
         this.setResponseData_serialize(data_casted)
         return
     }
@@ -1112,8 +1113,8 @@ export class WebResourceResponse implements MaterializedBase {
         this.setResponseHeader_serialize(header_casted)
         return
     }
-    public setResponseCode(code: number): void {
-        const code_casted = code as (number)
+    public setResponseCode(code: int32): void {
+        const code_casted = code as (int32)
         this.setResponseCode_serialize(code_casted)
         return
     }
@@ -1129,18 +1130,18 @@ export class WebResourceResponse implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
         return retval
     }
-    getResponseDataEx_serialize(): string | number | ArrayBuffer | Resource | undefined {
+    getResponseDataEx_serialize(): string | int32 | ArrayBuffer | Resource | undefined {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseDataEx(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : string | number | ArrayBuffer | Resource | undefined = undefined
+        let buffer : string | int32 | ArrayBuffer | Resource | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : string | number | ArrayBuffer | Resource | undefined
+            let buffer_ : string | int32 | ArrayBuffer | Resource | undefined
             if (buffer_UnionSelector == (0).toChar()) {
                 buffer_ = (retvalDeserializer.readString() as string)
             } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = (retvalDeserializer.readNumber() as number)
+                buffer_ = retvalDeserializer.readInt32()
             } else if (buffer_UnionSelector == (2).toChar()) {
                 buffer_ = (retvalDeserializer.readBuffer() as ArrayBuffer)
             } else if (buffer_UnionSelector == (3).toChar()) {
@@ -1148,9 +1149,9 @@ export class WebResourceResponse implements MaterializedBase {
             } else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as string | number | ArrayBuffer | Resource)
+            buffer = (buffer_ as string | int32 | ArrayBuffer | Resource)
         }
-        const returnResult : string | number | ArrayBuffer | Resource | undefined = buffer
+        const returnResult : string | int32 | ArrayBuffer | Resource | undefined = buffer
         return returnResult
     }
     getResponseEncoding_serialize(): string {
@@ -1176,20 +1177,20 @@ export class WebResourceResponse implements MaterializedBase {
         const returnResult : Array<Header> = buffer
         return returnResult
     }
-    getResponseCode_serialize(): number {
+    getResponseCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseCode(this.peer!.ptr)
         return retval
     }
-    setResponseData_serialize(data: string | number | Resource | ArrayBuffer): void {
+    setResponseData_serialize(data: string | int32 | Resource | ArrayBuffer): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (data instanceof string) {
             thisSerializer.writeInt8((0).toChar())
             const dataForIdx0  = data as string
             thisSerializer.writeString(dataForIdx0)
-        } else if (data instanceof number) {
+        } else if (data instanceof int32) {
             thisSerializer.writeInt8((1).toChar())
-            const dataForIdx1  = data as number
-            thisSerializer.writeNumber(dataForIdx1)
+            const dataForIdx1  = data as int32
+            thisSerializer.writeInt32(dataForIdx1)
         } else if (data instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
             const dataForIdx2  = data as Resource
@@ -1221,7 +1222,7 @@ export class WebResourceResponse implements MaterializedBase {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setResponseCode_serialize(code: number): void {
+    setResponseCode_serialize(code: int32): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseCode(this.peer!.ptr, code)
     }
     setResponseIsReady_serialize(IsReady: boolean): void {
@@ -1512,6 +1513,30 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setOnPageBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnLoadStartedAttribute(value: ((value0: OnLoadStartedEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnLoadStarted(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnLoadFinishedAttribute(value: ((value0: OnLoadFinishedEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnLoadFinished(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnProgressChangeAttribute(value: ((value0: OnProgressChangeEvent) => void) | undefined): void {
@@ -3022,11 +3047,18 @@ export interface OnPageEndEvent {
 export interface OnPageBeginEvent {
     url: string;
 }
+export interface OnLoadStartedEvent {
+    url: string;
+}
+export interface OnLoadFinishedEvent {
+    url: string;
+}
 export interface OnProgressChangeEvent {
     newProgress: int32;
 }
 export interface OnTitleReceiveEvent {
     title: string;
+    isRealTitle?: boolean;
 }
 export interface OnGeolocationShowEvent {
     origin: string;
@@ -3041,6 +3073,7 @@ export interface OnBeforeUnloadEvent {
     url: string;
     message: string;
     result: JsResult;
+    isReload?: boolean;
 }
 export interface OnConfirmEvent {
     url: string;
@@ -3069,7 +3102,7 @@ export interface OnDownloadStartEvent {
     userAgent: string;
     contentDisposition: string;
     mimetype: string;
-    contentLength: number;
+    contentLength: int64;
 }
 export interface OnRefreshAccessedHistoryEvent {
     url: string;
@@ -3108,8 +3141,8 @@ export interface OnContextMenuShowEvent {
     result: WebContextMenuResult;
 }
 export interface OnSearchResultReceiveEvent {
-    activeMatchOrdinal: number;
-    numberOfMatches: number;
+    activeMatchOrdinal: int32;
+    numberOfMatches: int32;
     isDoneCounting: boolean;
 }
 export interface OnScrollEvent {
@@ -3124,7 +3157,7 @@ export interface OnSslErrorEventReceiveEvent {
 export interface OnClientAuthenticationEvent {
     handler: ClientAuthenticationHandler;
     host: string;
-    port: number;
+    port: int32;
     keyTypes: Array<string>;
     issuers: Array<string>;
 }
@@ -3175,7 +3208,8 @@ export enum WebKeyboardAvoidMode {
     OVERLAYS_CONTENT = 2
 }
 export enum WebElementType {
-    IMAGE = 1
+    IMAGE = 1,
+    LINK = 2
 }
 export enum WebResponseType {
     LONG_PRESS = 1
@@ -3188,6 +3222,7 @@ export interface SelectionMenuOptionsExt {
     onDisappear?: (() => void);
     preview?: CustomBuilder;
     menuType?: MenuType;
+    previewMenuOptions?: PreviewMenuOptions;
 }
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
@@ -3258,6 +3293,12 @@ export interface WebAttribute extends CommonMethod {
     }
     onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onPageBegin")
+    }
+    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onLoadStarted")
+    }
+    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onLoadFinished")
     }
     onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onProgressChange")
@@ -3574,6 +3615,8 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     metaViewport_value?: boolean | undefined
     onPageEnd_value?: ((value0: OnPageEndEvent) => void) | undefined
     onPageBegin_value?: ((value0: OnPageBeginEvent) => void) | undefined
+    onLoadStarted_value?: ((value0: OnLoadStartedEvent) => void) | undefined
+    onLoadFinished_value?: ((value0: OnLoadFinishedEvent) => void) | undefined
     onProgressChange_value?: ((value0: OnProgressChangeEvent) => void) | undefined
     onTitleReceive_value?: ((value0: OnTitleReceiveEvent) => void) | undefined
     onGeolocationHide_value?: (() => void) | undefined
@@ -3736,6 +3779,12 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
+        return this
+    }
+    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
+        return this
+    }
+    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
         return this
     }
     onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
@@ -4051,6 +4100,9 @@ export interface EmbedOptions {
 
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
     getPeer(): ArkWebPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkWebPeer)
     }
     public setWebOptions(value: WebOptions): this {
@@ -4233,6 +4285,22 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onPageBegin")) {
             const value_casted = value as (((value0: OnPageBeginEvent) => void) | undefined)
             this.getPeer()?.setOnPageBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
+        if (this.checkPriority("onLoadStarted")) {
+            const value_casted = value as (((value0: OnLoadStartedEvent) => void) | undefined)
+            this.getPeer()?.setOnLoadStartedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
+        if (this.checkPriority("onLoadFinished")) {
+            const value_casted = value as (((value0: OnLoadFinishedEvent) => void) | undefined)
+            this.getPeer()?.setOnLoadFinishedAttribute(value_casted)
             return this
         }
         return this
@@ -5029,8 +5097,10 @@ export function WebImpl(
     const receiver = remember<ArkWebComponent>((): ArkWebComponent => {
         return new ArkWebComponent()
     })
-    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (_: ArkWebPeer): void => {
+    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (peer: ArkWebPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -5305,16 +5375,16 @@ export class OnSearchResultReceiveEvent_serializer {
     public static write(buffer: SerializerBase, value: OnSearchResultReceiveEvent): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForActiveMatchOrdinal  = value.activeMatchOrdinal
-        valueSerializer.writeNumber(valueHolderForActiveMatchOrdinal)
+        valueSerializer.writeInt32(valueHolderForActiveMatchOrdinal)
         const valueHolderForNumberOfMatches  = value.numberOfMatches
-        valueSerializer.writeNumber(valueHolderForNumberOfMatches)
+        valueSerializer.writeInt32(valueHolderForNumberOfMatches)
         const valueHolderForIsDoneCounting  = value.isDoneCounting
         valueSerializer.writeBoolean(valueHolderForIsDoneCounting)
     }
     public static read(buffer: DeserializerBase): OnSearchResultReceiveEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const activeMatchOrdinalTmpResult : number = (valueDeserializer.readNumber() as number)
-        const numberOfMatchesTmpResult : number = (valueDeserializer.readNumber() as number)
+        const activeMatchOrdinalTmpResult : int32 = valueDeserializer.readInt32()
+        const numberOfMatchesTmpResult : int32 = valueDeserializer.readInt32()
         const isDoneCountingTmpResult : boolean = valueDeserializer.readBoolean()
         let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinalTmpResult, numberOfMatches: numberOfMatchesTmpResult, isDoneCounting: isDoneCountingTmpResult} as OnSearchResultReceiveEvent)
         return value
@@ -5892,13 +5962,27 @@ export class OnBeforeUnloadEvent_serializer {
         valueSerializer.writeString(valueHolderForMessage)
         const valueHolderForResult  = value.result
         JsResult_serializer.write(valueSerializer, valueHolderForResult)
+        const valueHolderForIsReload  = value.isReload
+        if (valueHolderForIsReload !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsReloadTmpValue  = valueHolderForIsReload!
+            valueSerializer.writeBoolean(valueHolderForIsReloadTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): OnBeforeUnloadEvent {
         let valueDeserializer : DeserializerBase = buffer
         const urlTmpResult : string = (valueDeserializer.readString() as string)
         const messageTmpResult : string = (valueDeserializer.readString() as string)
         const resultTmpResult : JsResult = (JsResult_serializer.read(valueDeserializer) as JsResult)
-        let value : OnBeforeUnloadEvent = ({url: urlTmpResult, message: messageTmpResult, result: resultTmpResult} as OnBeforeUnloadEvent)
+        const isReloadTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isReloadTmpBuf : boolean | undefined = undefined
+        if ((isReloadTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isReloadTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isReloadTmpResult : boolean | undefined = isReloadTmpBuf
+        let value : OnBeforeUnloadEvent = ({url: urlTmpResult, message: messageTmpResult, result: resultTmpResult, isReload: isReloadTmpResult} as OnBeforeUnloadEvent)
         return value
     }
 }
@@ -5910,7 +5994,7 @@ export class OnClientAuthenticationEvent_serializer {
         const valueHolderForHost  = value.host
         valueSerializer.writeString(valueHolderForHost)
         const valueHolderForPort  = value.port
-        valueSerializer.writeNumber(valueHolderForPort)
+        valueSerializer.writeInt32(valueHolderForPort)
         const valueHolderForKeyTypes  = value.keyTypes
         valueSerializer.writeInt32((valueHolderForKeyTypes.length).toInt())
         for (let valueHolderForKeyTypesCounterI = 0; valueHolderForKeyTypesCounterI < valueHolderForKeyTypes.length; valueHolderForKeyTypesCounterI++) {
@@ -5928,7 +6012,7 @@ export class OnClientAuthenticationEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : ClientAuthenticationHandler = (ClientAuthenticationHandler_serializer.read(valueDeserializer) as ClientAuthenticationHandler)
         const hostTmpResult : string = (valueDeserializer.readString() as string)
-        const portTmpResult : number = (valueDeserializer.readNumber() as number)
+        const portTmpResult : int32 = valueDeserializer.readInt32()
         const keyTypesTmpBufLength : int32 = valueDeserializer.readInt32()
         let keyTypesTmpBuf : Array<string> = new Array<string>(keyTypesTmpBufLength)
         for (let keyTypesTmpBufBufCounterI = 0; keyTypesTmpBufBufCounterI < keyTypesTmpBufLength; keyTypesTmpBufBufCounterI++) {
@@ -5992,7 +6076,7 @@ export class OnDownloadStartEvent_serializer {
         const valueHolderForMimetype  = value.mimetype
         valueSerializer.writeString(valueHolderForMimetype)
         const valueHolderForContentLength  = value.contentLength
-        valueSerializer.writeNumber(valueHolderForContentLength)
+        valueSerializer.writeInt64(valueHolderForContentLength)
     }
     public static read(buffer: DeserializerBase): OnDownloadStartEvent {
         let valueDeserializer : DeserializerBase = buffer
@@ -6000,7 +6084,7 @@ export class OnDownloadStartEvent_serializer {
         const userAgentTmpResult : string = (valueDeserializer.readString() as string)
         const contentDispositionTmpResult : string = (valueDeserializer.readString() as string)
         const mimetypeTmpResult : string = (valueDeserializer.readString() as string)
-        const contentLengthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const contentLengthTmpResult : int64 = valueDeserializer.readInt64()
         let value : OnDownloadStartEvent = ({url: urlTmpResult, userAgent: userAgentTmpResult, contentDisposition: contentDispositionTmpResult, mimetype: mimetypeTmpResult, contentLength: contentLengthTmpResult} as OnDownloadStartEvent)
         return value
     }
@@ -6085,6 +6169,19 @@ export class OnInterceptRequestEvent_serializer {
         return value
     }
 }
+export class OnLoadFinishedEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnLoadFinishedEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+    }
+    public static read(buffer: DeserializerBase): OnLoadFinishedEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        let value : OnLoadFinishedEvent = ({url: urlTmpResult} as OnLoadFinishedEvent)
+        return value
+    }
+}
 export class OnLoadInterceptEvent_serializer {
     public static write(buffer: SerializerBase, value: OnLoadInterceptEvent): void {
         let valueSerializer : SerializerBase = buffer
@@ -6095,6 +6192,19 @@ export class OnLoadInterceptEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const dataTmpResult : WebResourceRequest = (WebResourceRequest_serializer.read(valueDeserializer) as WebResourceRequest)
         let value : OnLoadInterceptEvent = ({data: dataTmpResult} as OnLoadInterceptEvent)
+        return value
+    }
+}
+export class OnLoadStartedEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnLoadStartedEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+    }
+    public static read(buffer: DeserializerBase): OnLoadStartedEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        let value : OnLoadStartedEvent = ({url: urlTmpResult} as OnLoadStartedEvent)
         return value
     }
 }
@@ -6271,11 +6381,25 @@ export class OnTitleReceiveEvent_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTitle  = value.title
         valueSerializer.writeString(valueHolderForTitle)
+        const valueHolderForIsRealTitle  = value.isRealTitle
+        if (valueHolderForIsRealTitle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsRealTitleTmpValue  = valueHolderForIsRealTitle!
+            valueSerializer.writeBoolean(valueHolderForIsRealTitleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): OnTitleReceiveEvent {
         let valueDeserializer : DeserializerBase = buffer
         const titleTmpResult : string = (valueDeserializer.readString() as string)
-        let value : OnTitleReceiveEvent = ({title: titleTmpResult} as OnTitleReceiveEvent)
+        const isRealTitleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isRealTitleTmpBuf : boolean | undefined = undefined
+        if ((isRealTitleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isRealTitleTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isRealTitleTmpResult : boolean | undefined = isRealTitleTmpBuf
+        let value : OnTitleReceiveEvent = ({title: titleTmpResult, isRealTitle: isRealTitleTmpResult} as OnTitleReceiveEvent)
         return value
     }
 }
@@ -6371,105 +6495,6 @@ export class ScriptItem_serializer {
         }
         const scriptRulesTmpResult : Array<string> = scriptRulesTmpBuf
         let value : ScriptItem = ({script: scriptTmpResult, scriptRules: scriptRulesTmpResult} as ScriptItem)
-        return value
-    }
-}
-export class SelectionMenuOptionsExt_serializer {
-    public static write(buffer: SerializerBase, value: SelectionMenuOptionsExt): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOnAppear  = value.onAppear
-        if (valueHolderForOnAppear !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnAppearTmpValue  = valueHolderForOnAppear!
-            valueSerializer.holdAndWriteCallback(valueHolderForOnAppearTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForOnDisappear  = value.onDisappear
-        if (valueHolderForOnDisappear !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnDisappearTmpValue  = valueHolderForOnDisappear!
-            valueSerializer.holdAndWriteCallback(valueHolderForOnDisappearTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPreview  = value.preview
-        if (valueHolderForPreview !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreviewTmpValue  = valueHolderForPreview!
-            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValue))
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForMenuType  = value.menuType
-        if (valueHolderForMenuType !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMenuTypeTmpValue  = (valueHolderForMenuType as MenuType)
-            valueSerializer.writeInt32(valueHolderForMenuTypeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
-        let valueDeserializer : DeserializerBase = buffer
-        const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppearTmpBuf : (() => void) | undefined = undefined
-        if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
-                const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
-                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
-                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
-                onAppearTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
-        const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappearTmpBuf : (() => void) | undefined = undefined
-        if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
-                const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
-                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
-                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
-                onDisappearTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
-        const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewTmpBuf : CustomBuilder | undefined = undefined
-        if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const previewTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const previewTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const previewTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            previewTmpBuf = ():void => {
-                const previewTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                previewTmpBuf_BufArgsSerializer.writeInt32(previewTmpBuf_BufResource.resourceId);
-                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCall);
-                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufArgsSerializer.asBuffer(), previewTmpBuf_BufArgsSerializer.length());
-                previewTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const previewTmpResult : CustomBuilder | undefined = previewTmpBuf
-        const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let menuTypeTmpBuf : MenuType | undefined = undefined
-        if ((menuTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            menuTypeTmpBuf = MenuType.fromValue(valueDeserializer.readInt32())
-        }
-        const menuTypeTmpResult : MenuType | undefined = menuTypeTmpBuf
-        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult} as SelectionMenuOptionsExt)
         return value
     }
 }
@@ -6710,6 +6735,119 @@ export class WebOptions_serializer {
         }
         const sharedRenderProcessTokenTmpResult : string | undefined = sharedRenderProcessTokenTmpBuf
         let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult, incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult} as WebOptions)
+        return value
+    }
+}
+export class SelectionMenuOptionsExt_serializer {
+    public static write(buffer: SerializerBase, value: SelectionMenuOptionsExt): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOnAppear  = value.onAppear
+        if (valueHolderForOnAppear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnAppearTmpValue  = valueHolderForOnAppear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnAppearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDisappear  = value.onDisappear
+        if (valueHolderForOnDisappear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDisappearTmpValue  = valueHolderForOnDisappear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDisappearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPreview  = value.preview
+        if (valueHolderForPreview !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewTmpValue  = valueHolderForPreview!
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMenuType  = value.menuType
+        if (valueHolderForMenuType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMenuTypeTmpValue  = (valueHolderForMenuType as MenuType)
+            valueSerializer.writeInt32(valueHolderForMenuTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPreviewMenuOptions  = value.previewMenuOptions
+        if (valueHolderForPreviewMenuOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewMenuOptionsTmpValue  = valueHolderForPreviewMenuOptions!
+            PreviewMenuOptions_serializer.write(valueSerializer, valueHolderForPreviewMenuOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
+        let valueDeserializer : DeserializerBase = buffer
+        const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onAppearTmpBuf : (() => void) | undefined = undefined
+        if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onAppearTmpBuf = ():void => {
+                const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
+                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
+                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                onAppearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
+        const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDisappearTmpBuf : (() => void) | undefined = undefined
+        if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDisappearTmpBuf = ():void => {
+                const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
+                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
+                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                onDisappearTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
+        const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewTmpBuf : CustomBuilder | undefined = undefined
+        if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const previewTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const previewTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const previewTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            previewTmpBuf = ():void => {
+                const previewTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                previewTmpBuf_BufArgsSerializer.writeInt32(previewTmpBuf_BufResource.resourceId);
+                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCall);
+                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufArgsSerializer.asBuffer(), previewTmpBuf_BufArgsSerializer.length());
+                previewTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const previewTmpResult : CustomBuilder | undefined = previewTmpBuf
+        const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let menuTypeTmpBuf : MenuType | undefined = undefined
+        if ((menuTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            menuTypeTmpBuf = MenuType.fromValue(valueDeserializer.readInt32())
+        }
+        const menuTypeTmpResult : MenuType | undefined = menuTypeTmpBuf
+        const previewMenuOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewMenuOptionsTmpBuf : PreviewMenuOptions | undefined = undefined
+        if ((previewMenuOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            previewMenuOptionsTmpBuf = PreviewMenuOptions_serializer.read(valueDeserializer)
+        }
+        const previewMenuOptionsTmpResult : PreviewMenuOptions | undefined = previewMenuOptionsTmpBuf
+        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult} as SelectionMenuOptionsExt)
         return value
     }
 }

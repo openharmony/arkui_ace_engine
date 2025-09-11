@@ -358,6 +358,9 @@ export interface TimePickerDialogOptions extends TimePickerOptions {
 
 export class ArkTimePickerComponent extends ArkCommonMethodComponent implements TimePickerAttribute {
     getPeer(): ArkTimePickerPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTimePickerPeer)
     }
     public setTimePickerOptions(options?: TimePickerOptions): this {
@@ -476,8 +479,10 @@ export function TimePickerImpl(
     const receiver = remember<ArkTimePickerComponent>((): ArkTimePickerComponent => {
         return new ArkTimePickerComponent()
     })
-    NodeAttach<ArkTimePickerPeer>((): ArkTimePickerPeer => ArkTimePickerPeer.create(receiver), (_: ArkTimePickerPeer): void => {
+    NodeAttach<ArkTimePickerPeer>((): ArkTimePickerPeer => ArkTimePickerPeer.create(receiver), (peer: ArkTimePickerPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

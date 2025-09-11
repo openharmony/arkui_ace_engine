@@ -84,6 +84,9 @@ export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAt
 
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
     getPeer(): ArkRowSplitPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRowSplitPeer)
     }
     public setRowSplitOptions(): this {
@@ -121,8 +124,10 @@ export function RowSplitImpl(
     const receiver = remember<ArkRowSplitComponent>((): ArkRowSplitComponent => {
         return new ArkRowSplitComponent()
     })
-    NodeAttach<ArkRowSplitPeer>((): ArkRowSplitPeer => ArkRowSplitPeer.create(receiver), (_: ArkRowSplitPeer): void => {
+    NodeAttach<ArkRowSplitPeer>((): ArkRowSplitPeer => ArkRowSplitPeer.create(receiver), (peer: ArkRowSplitPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

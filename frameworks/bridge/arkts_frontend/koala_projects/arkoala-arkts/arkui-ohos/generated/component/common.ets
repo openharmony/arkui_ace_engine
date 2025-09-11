@@ -8943,6 +8943,9 @@ export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCommonMethodPeer)
     }
     public width(value: Length | LayoutPolicy | undefined): this {
@@ -10624,6 +10627,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
 }
 export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent implements CommonShapeMethod {
     getPeer(): ArkCommonShapeMethodPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCommonShapeMethodPeer)
     }
     public stroke(value: ResourceColor | undefined): this {
@@ -10725,6 +10731,9 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
 }
 export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent implements ScrollableCommonMethod {
     getPeer(): ArkScrollableCommonMethodPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkScrollableCommonMethodPeer)
     }
     public scrollBar(value: BarState | undefined): this {

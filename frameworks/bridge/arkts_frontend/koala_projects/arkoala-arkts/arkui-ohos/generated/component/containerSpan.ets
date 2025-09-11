@@ -84,6 +84,9 @@ export class ArkContainerSpanStyle implements ContainerSpanAttribute {
 
 export class ArkContainerSpanComponent extends ComponentBase implements ContainerSpanAttribute {
     getPeer(): ArkContainerSpanPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkContainerSpanPeer)
     }
     public setContainerSpanOptions(): this {
@@ -121,8 +124,10 @@ export function ContainerSpanImpl(
     const receiver = remember<ArkContainerSpanComponent>((): ArkContainerSpanComponent => {
         return new ArkContainerSpanComponent()
     })
-    NodeAttach<ArkContainerSpanPeer>((): ArkContainerSpanPeer => ArkContainerSpanPeer.create(receiver), (_: ArkContainerSpanPeer): void => {
+    NodeAttach<ArkContainerSpanPeer>((): ArkContainerSpanPeer => ArkContainerSpanPeer.create(receiver), (peer: ArkContainerSpanPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -392,6 +392,9 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
 
 export class ArkTextClockComponent extends ArkCommonMethodComponent implements TextClockAttribute {
     getPeer(): ArkTextClockPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkTextClockPeer)
     }
     public setTextClockOptions(options?: TextClockOptions): this {
@@ -508,8 +511,10 @@ export function TextClockImpl(
     const receiver = remember<ArkTextClockComponent>((): ArkTextClockComponent => {
         return new ArkTextClockComponent()
     })
-    NodeAttach<ArkTextClockPeer>((): ArkTextClockPeer => ArkTextClockPeer.create(receiver), (_: ArkTextClockPeer): void => {
+    NodeAttach<ArkTextClockPeer>((): ArkTextClockPeer => ArkTextClockPeer.create(receiver), (peer: ArkTextClockPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -1160,6 +1160,9 @@ export type OnHoverCallback = (status: boolean, event: HoverEvent) => void;
 
 export class ArkRichEditorComponent extends ArkCommonMethodComponent implements RichEditorAttribute {
     getPeer(): ArkRichEditorPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRichEditorPeer)
     }
     public setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
@@ -1459,8 +1462,10 @@ export function RichEditorImpl(
     const receiver = remember<ArkRichEditorComponent>((): ArkRichEditorComponent => {
         return new ArkRichEditorComponent()
     })
-    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer): void => {
+    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (peer: ArkRichEditorPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

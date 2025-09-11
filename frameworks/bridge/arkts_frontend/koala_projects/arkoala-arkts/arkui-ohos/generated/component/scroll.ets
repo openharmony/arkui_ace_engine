@@ -657,6 +657,9 @@ export type ScrollOnWillScrollCallback = (xOffset: number, yOffset: number, scro
 
 export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements ScrollAttribute {
     getPeer(): ArkScrollPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkScrollPeer)
     }
     public setScrollOptions(scroller?: Scroller): this {
@@ -824,8 +827,10 @@ export function ScrollImpl(
     const receiver = remember<ArkScrollComponent>((): ArkScrollComponent => {
         return new ArkScrollComponent()
     })
-    NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (_: ArkScrollPeer): void => {
+    NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (peer: ArkScrollPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

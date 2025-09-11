@@ -301,7 +301,7 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     parameter.mimetype = Converter::ArkValue<Ark_String>(eventInfo->GetMimetype());
     parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
     parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
-    parameter.contentLength = Converter::ArkValue<Ark_Number>(static_cast<uint64_t>(eventInfo->GetContentLength()));
+    parameter.contentLength = static_cast<Ark_Int64>(eventInfo->GetContentLength());
     arkCallback.Invoke(parameter);
 }
 
@@ -531,8 +531,8 @@ void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEv
     auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnSearchResultReceiveEvent parameter;
-    parameter.activeMatchOrdinal = Converter::ArkValue<Ark_Number>(eventInfo->GetActiveMatchOrdinal());
-    parameter.numberOfMatches = Converter::ArkValue<Ark_Number>(eventInfo->GetNumberOfMatches());
+    parameter.activeMatchOrdinal = static_cast<Ark_Int32>(eventInfo->GetActiveMatchOrdinal());
+    parameter.numberOfMatches = static_cast<Ark_Int32>(eventInfo->GetNumberOfMatches());
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
     arkCallback.Invoke(parameter);
 }
@@ -613,7 +613,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     CHECK_NULL_RETURN(eventInfo, false);
     Ark_OnClientAuthenticationEvent parameter;
     parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
-    parameter.port = Converter::ArkValue<Ark_Number>(eventInfo->GetPort());
+    parameter.port = static_cast<Ark_Int32>(eventInfo->GetPort());
     std::vector<std::string> keyTypes = eventInfo->GetKeyTypes();
     Converter::ArkArrayHolder<Array_String> vecKeyTypes(keyTypes);
     parameter.keyTypes = vecKeyTypes.ArkValue();

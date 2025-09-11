@@ -142,6 +142,9 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
 
 export class ArkCounterComponent extends ArkCommonMethodComponent implements CounterAttribute {
     getPeer(): ArkCounterPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkCounterPeer)
     }
     public setCounterOptions(): this {
@@ -203,8 +206,10 @@ export function CounterImpl(
     const receiver = remember<ArkCounterComponent>((): ArkCounterComponent => {
         return new ArkCounterComponent()
     })
-    NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (_: ArkCounterPeer): void => {
+    NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (peer: ArkCounterPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

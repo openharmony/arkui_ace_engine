@@ -205,6 +205,9 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
 
 export class ArkRefreshComponent extends ArkCommonMethodComponent implements RefreshAttribute {
     getPeer(): ArkRefreshPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkRefreshPeer)
     }
     public setRefreshOptions(value: RefreshOptions): this {
@@ -283,8 +286,10 @@ export function RefreshImpl(
     const receiver = remember<ArkRefreshComponent>((): ArkRefreshComponent => {
         return new ArkRefreshComponent()
     })
-    NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (_: ArkRefreshPeer): void => {
+    NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (peer: ArkRefreshPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

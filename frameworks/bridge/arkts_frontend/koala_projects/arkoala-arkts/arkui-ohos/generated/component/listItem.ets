@@ -196,6 +196,9 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
 
 export class ArkListItemComponent extends ArkCommonMethodComponent implements ListItemAttribute {
     getPeer(): ArkListItemPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkListItemPeer)
     }
     public setListItemOptions(value?: ListItemOptions): this {
@@ -258,8 +261,10 @@ export function ListItemImpl(
     const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {
         return new ArkListItemComponent()
     })
-    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (_: ArkListItemPeer): void => {
+    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (peer: ArkListItemPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

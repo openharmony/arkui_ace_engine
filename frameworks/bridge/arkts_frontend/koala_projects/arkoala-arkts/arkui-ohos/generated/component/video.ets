@@ -544,6 +544,9 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
 
 export class ArkVideoComponent extends ArkCommonMethodComponent implements VideoAttribute {
     getPeer(): ArkVideoPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkVideoPeer)
     }
     public setVideoOptions(value: VideoOptions): this {
@@ -718,8 +721,10 @@ export function VideoImpl(
     const receiver = remember<ArkVideoComponent>((): ArkVideoComponent => {
         return new ArkVideoComponent()
     })
-    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer): void => {
+    NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (peer: ArkVideoPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -79,6 +79,9 @@ export class ArkToolBarItemStyle implements ToolBarItemAttribute {
 
 export class ArkToolBarItemComponent extends ComponentBase implements ToolBarItemAttribute {
     getPeer(): ArkToolBarItemPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkToolBarItemPeer)
     }
     public setToolBarItemOptions(options?: ToolBarItemOptions): this {
@@ -109,8 +112,10 @@ export function ToolBarItemImpl(
     const receiver = remember<ArkToolBarItemComponent>((): ArkToolBarItemComponent => {
         return new ArkToolBarItemComponent()
     })
-    NodeAttach<ArkToolBarItemPeer>((): ArkToolBarItemPeer => ArkToolBarItemPeer.create(receiver), (_: ArkToolBarItemPeer): void => {
+    NodeAttach<ArkToolBarItemPeer>((): ArkToolBarItemPeer => ArkToolBarItemPeer.create(receiver), (peer: ArkToolBarItemPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }
