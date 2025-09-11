@@ -48,6 +48,7 @@
 #include "utils/ani_trace.h"
 #include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
+#include "visual_effect/visual_effect_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -1224,6 +1225,46 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Component3D_SetWidget",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
+        },
+        ani_native_function {
+            "_Extractors_ToRectShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToRectShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_FromRectShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromRectShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_ToCircleShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToCircleShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_FromCircleShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromCircleShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_ToEllipseShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToEllipseShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_FromEllipseShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromEllipseShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_ToPathShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToPathShapePtr)
+        },
+        ani_native_function {
+            "_Extractors_FromPathShapePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromPathShapePtr)
         },
     };
 

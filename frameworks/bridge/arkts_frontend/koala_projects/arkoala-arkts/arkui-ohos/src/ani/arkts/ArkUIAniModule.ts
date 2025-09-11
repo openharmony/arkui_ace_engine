@@ -34,12 +34,21 @@ import { default as uiObserver }  from "@ohos/arkui/observer"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from "@ohos.graphics.scene"
+import { RectShape, CircleShape, EllipseShape, PathShape } from "@ohos.arkui.shape"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
+    native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
+    native static _Extractors_FromRectShapePtr(ptr: KPointer): RectShape;
+    native static _Extractors_ToCircleShapePtr(value: CircleShape): KPointer;
+    native static _Extractors_FromCircleShapePtr(ptr: KPointer): CircleShape;
+    native static _Extractors_ToEllipseShapePtr(value: EllipseShape): KPointer;
+    native static _Extractors_FromEllipseShapePtr(ptr: KPointer): EllipseShape;
+    native static _Extractors_ToPathShapePtr(value: PathShape): KPointer;
+    native static _Extractors_FromPathShapePtr(ptr: KPointer): PathShape;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void

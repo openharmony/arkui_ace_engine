@@ -44,13 +44,15 @@
         };                                                                                             \
         ani_status ret;                                                                                \
         if ((ret = (env)->call) != ANI_OK) {                                                           \
-            LOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                     \
+            HILOGE("ani call %{public}s failed: %{public}d, %{public}s", #call, ret,                   \
                 static_cast<size_t>(ret) < std::extent_v<decltype(aniErr)> ? aniErr[ret] : "ANI_???"); \
             if (ret == ANI_PENDING_ERROR) {                                                            \
                 Ani::AniUtils::ClearAniPendingError(env);                                              \
             }                                                                                          \
             onFail;                                                                                    \
         }                                                                                              \
+    } else {                                                                                           \
+        onFail;                                                                                        \
     }
 
 namespace OHOS::Ace::Ani {
