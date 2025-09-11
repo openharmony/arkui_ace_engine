@@ -178,6 +178,25 @@ HWTEST_F(WaterFlowTestNg, Cache007, TestSize.Level1)
     EXPECT_EQ(ctx, GetItem(32)->GetRenderContext());
 }
 
+/**
+ * @tc.name: SetScrollBarColor001
+ * @tc.desc: Test SetScrollBarColor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SetScrollBarColor001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    model.SetScrollBarColor(std::nullopt);
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto scrollBarColor = paintProperty->GetScrollBarColor();
+    EXPECT_EQ(scrollBarColor, std::nullopt);
+    model.SetScrollBarColor(Color::BLUE);
+    EXPECT_EQ(WaterFlowModelNG::GetScrollBarColor(AceType::RawPtr(frameNode_)), Color::BLUE.GetValue());
+    CreateDone();
+}
+
 /*
  * @tc.name: ShowCache004
  * @tc.desc: Test cache items active state
