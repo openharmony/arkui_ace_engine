@@ -15,11 +15,8 @@
 
 /*
 /
-* l3004457
-* 2024年6月27日
+* 
 * 验证bindMenu的箭头绘制
-*
-* 2024年1月17日10:35:16
 * 验证bindContextMenu的enableArrow | arrowOffset
 *
  */

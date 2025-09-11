@@ -14,16 +14,9 @@
  */
 
 /*
-/
-* l3004457
-* 2025年3月3日
 * 补充预览图菜单radius属性测试用例
-*
-* 2024年7月1日
 * 验证bindContextMenu: 预览图不同尺寸: 预览图有尺寸限制/优先绘制菜,再绘制预览图
-*
-*
- */
+*/
 
 import { LengthMetrics } from '@kit.ArkUI';
 import { MenuBuilder, MenuAttrOptions } from '../../customBuilder/MenuBuilder'
