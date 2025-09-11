@@ -20,7 +20,7 @@
 * stack次级菜单避让
 *
  */
-import { MyComponent } from "../../common/MyComponent"
+import { MyComponent } from '../../common/MyComponent'
 import { MenuBuilder, MenuAttrOptions } from  '../../customBuilder/MenuBuilder'
 
 @Extend(Text)
@@ -37,7 +37,7 @@ function paramTextStyle() {
 @Extend(Column)
 function columnStyle() {
   .backgroundColor(Color.Pink)
-  .width("100%")
+  .width('100%')
   .padding(5)
   .borderWidth(1.0)
 }
@@ -95,11 +95,11 @@ struct MenuTestLevel0_4 {
         }
         .alignItems(this.columnAlignHorizontal)
         .justifyContent(this.columnAlignFlex)
-        .width("100%").height("100%")
+        .width('100%').height('100%')
       }
       .padding({top: 0, bottom: 0, left: 16, right: 16})
-      .width("100%")
-      .height("100%")
+      .width('100%')
+      .height('100%')
       .backgroundColor(Color.Transparent)
 
       // 控制区域
@@ -124,54 +124,54 @@ struct MenuTestLevel0_4 {
             Text(`切换绑定组件的位置`)
               .paramTextStyle()
             Select([
-              { value: "TopStart" },
-              { value: "TopCenter" },
-              { value: "TopEnd" },
-              { value: "CenterStart" },
-              { value: "Center" },
-              { value: "CenterEnd" },
-              { value: "BottomStart" },
-              { value: "BottomCenter" },
-              { value: "BottomEnd" },
+              { value: 'TopStart' },
+              { value: 'TopCenter' },
+              { value: 'TopEnd' },
+              { value: 'CenterStart' },
+              { value: 'Center' },
+              { value: 'CenterEnd' },
+              { value: 'BottomStart' },
+              { value: 'BottomCenter' },
+              { value: 'BottomEnd' },
             ])
               .value('TopStart')
               .selected(0)
               .selectStyle()
               .onSelect((idx, value: string) => {
                 switch (value) {
-                  case "TopStart":
+                  case 'TopStart':
                     this.columnAlignFlex = FlexAlign.Start
                     this.columnAlignHorizontal = HorizontalAlign.Start
                     break;
-                  case "TopCenter":
+                  case 'TopCenter':
                     this.columnAlignFlex = FlexAlign.Start
                     this.columnAlignHorizontal = HorizontalAlign.Center
                     break;
-                  case "TopEnd":
+                  case 'TopEnd':
                     this.columnAlignFlex = FlexAlign.Start
                     this.columnAlignHorizontal = HorizontalAlign.End
                     break;
-                  case "CenterStart":
+                  case 'CenterStart':
                     this.columnAlignFlex = FlexAlign.Center
                     this.columnAlignHorizontal = HorizontalAlign.Start
                     break;
-                  case "Center":
+                  case 'Center':
                     this.columnAlignFlex = FlexAlign.Center
                     this.columnAlignHorizontal = HorizontalAlign.Center
                     break;
-                  case "CenterEnd":
+                  case 'CenterEnd':
                     this.columnAlignFlex = FlexAlign.Center
                     this.columnAlignHorizontal = HorizontalAlign.End
                     break;
-                  case "BottomStart":
+                  case 'BottomStart':
                     this.columnAlignFlex = FlexAlign.End
                     this.columnAlignHorizontal = HorizontalAlign.Start
                     break;
-                  case "BottomCenter":
+                  case 'BottomCenter':
                     this.columnAlignFlex = FlexAlign.End
                     this.columnAlignHorizontal = HorizontalAlign.Center
                     break;
-                  case "BottomEnd":
+                  case 'BottomEnd':
                     this.columnAlignFlex = FlexAlign.End
                     this.columnAlignHorizontal = HorizontalAlign.End
                     break;
@@ -182,71 +182,71 @@ struct MenuTestLevel0_4 {
             Text(`菜单的对齐方式`)
               .paramTextStyle()
             Select([
-              { value: "不设置placement" },
-              { value: "undefined" },
-              { value: "枚举值13" },
+              { value: '不设置placement' },
+              { value: 'undefined' },
+              { value: '枚举值13' },
 
-              { value: "Bottom" },
-              { value: "Top" },
-              { value: "Right" },
-              { value: "Left" },
+              { value: 'Bottom' },
+              { value: 'Top' },
+              { value: 'Right' },
+              { value: 'Left' },
 
-              { value: "BottomLeft" },
-              { value: "BottomRight" },
-              { value: "TopLeft" },
-              { value: "TopRight" },
-              { value: "LeftBottom" },
-              { value: "RightBottom" },
-              { value: "LeftTop" },
-              { value: "RightTop" },
+              { value: 'BottomLeft' },
+              { value: 'BottomRight' },
+              { value: 'TopLeft' },
+              { value: 'TopRight' },
+              { value: 'LeftBottom' },
+              { value: 'RightBottom' },
+              { value: 'LeftTop' },
+              { value: 'RightTop' },
             ])
               .selectStyle()
               .onSelect((idx, value: string) => {
                 switch (value) {
-                  case "不设置placement":
+                  case '不设置placement':
                     this.contextMenuOptions = {}
                     break;
-                  case "undefined":
+                  case 'undefined':
                     this.contextMenuOptions.placement = undefined
                     break;
-                  case "枚举值13":
+                  case '枚举值13':
                     this.contextMenuOptions.placement = 13
                     break;
 
-                  case "Bottom":
+                  case 'Bottom':
                     this.contextMenuOptions.placement = Placement.Bottom
                     break;
-                  case "Top":
+                  case 'Top':
                     this.contextMenuOptions.placement = Placement.Top
                     break;
-                  case "Right":
+                  case 'Right':
                     this.contextMenuOptions.placement = Placement.Right
                     break;
-                  case "Left":
+                  case 'Left':
                     this.contextMenuOptions.placement = Placement.Left
                     break;
-                  case "BottomLeft":
+                  case 'BottomLeft':
                     this.contextMenuOptions.placement = Placement.BottomLeft
                     break;
-                  case "BottomRight":
+                  case 'BottomRight':
                     this.contextMenuOptions.placement = Placement.BottomRight
                     break;
-                  case "TopLeft":
+                  case 'TopLeft':
                     this.contextMenuOptions.placement = Placement.TopLeft
                     break;
-                  case "TopRight":
+                  case 'TopRight':
                     this.contextMenuOptions.placement = Placement.TopRight
                     break;
-                  case "LeftBottom":
+                  case 'LeftBottom':
                     this.contextMenuOptions.placement = Placement.LeftBottom
                     break;
-                  case "RightBottom":
+                  case 'RightBottom':
                     this.contextMenuOptions.placement = Placement.RightBottom
                     break;
-                  case "LeftTop":
+                  case 'LeftTop':
                     this.contextMenuOptions.placement = Placement.LeftTop
                     break;
-                  case "RightTop":
+                  case 'RightTop':
                     this.contextMenuOptions.placement = Placement.RightTop
                     break;
                 }
@@ -266,11 +266,11 @@ struct MenuTestLevel0_4 {
       }
       .padding({top: 40, bottom: 0, left: 5, right: 5})
       .align(Alignment.TopStart)
-      .width("100%").height("100%")
+      .width('100%').height('100%')
     }
     .alignContent(Alignment.Center)
-    .width("100%")
-    .height("100%")
+    .width('100%')
+    .height('100%')
   }
 
   pageTransition() {

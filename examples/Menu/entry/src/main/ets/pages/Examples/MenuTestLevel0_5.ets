@@ -23,14 +23,14 @@
 * 验证bindContextMenu的enableArrow | arrowOffset
 *
  */
-import { MyComponent } from "../../common/MyComponent"
-import { MenuBuilder, MenuAttrOptions } from "../../customBuilder/MenuBuilder"
+import { MyComponent } from '../../common/MyComponent'
+import { MenuBuilder, MenuAttrOptions } from '../../customBuilder/MenuBuilder'
 
 
 @Extend(Text)
 function paramTextStyle() {
   .fontSize(9)
-  .width("100%")
+  .width('100%')
 }
 @Extend(Text)
 function componentTextStyle() {
@@ -42,7 +42,7 @@ function componentTextStyle() {
 @Extend(Column) function columnStyle() {
   .borderWidth(1.0)
   .padding(5)
-  .width("100%")
+  .width('100%')
   .backgroundColor(Color.Pink)
 }
 @Extend(Select) function selectStyle() {
@@ -82,7 +82,7 @@ struct MenuTestLevel0_5 {
     //6
     {
       enableArrow: true,
-      arrowOffset: "-60",
+      arrowOffset: '-60',
     },
     //7
     {
@@ -102,12 +102,12 @@ struct MenuTestLevel0_5 {
     //10
     {
       enableArrow: true,
-      arrowOffset: "30%",
+      arrowOffset: '30%',
     },
     //11
     {
       enableArrow: true,
-      arrowOffset: $r("app.string.EntryAbility_label"), //预期居左对齐
+      arrowOffset: $r('app.string.EntryAbility_label'), //预期居左对齐
     },
 
   ]
@@ -131,20 +131,20 @@ struct MenuTestLevel0_5 {
           Text(`切换次级菜单类型`)
             .paramTextStyle()
           Select([
-            { value:"SIDE" },
-            { value:"EMBEDDED" },
-            { value:"STACK" },
+            { value:'SIDE' },
+            { value:'EMBEDDED' },
+            { value:'STACK' },
           ])
             .selectStyle()
             .onSelect((idx, value: string) => {
               switch (value) {
-                case "SIDE":
+                case 'SIDE':
                   this.menuAttrOption.submenuMode = 0
                   break;
-                case "EMBEDDED":
+                case 'EMBEDDED':
                   this.menuAttrOption.submenuMode = 1
                   break;
-                case "STACK":
+                case 'STACK':
                   this.menuAttrOption.submenuMode = 2
                   break;
 
@@ -157,7 +157,7 @@ struct MenuTestLevel0_5 {
           Text(`切换Arrow参数`)
             .paramTextStyle()
           Row({ space: 2 }) {
-            Text(`${this.index[0] + 1}` + " / ")
+            Text(`${this.index[0] + 1}` + ' / ')
               .fontSize(9)
             Text(`${this.bindContextMenuArrowList.length}`)
               .key('paramSets_key_0')
@@ -180,7 +180,7 @@ struct MenuTestLevel0_5 {
             })
           }
 
-          Text("bindContextMenu: arrow")
+          Text('bindContextMenu: arrow')
             .componentTextStyle()
             .bindContextMenu(this.MenuBuilder(), ResponseType.LongPress, {
               enableArrow: this.bindContextMenuArrowList[this.index[0]].enableArrow,
@@ -219,10 +219,10 @@ struct MenuTestLevel0_5 {
       }
       .width('100%')
     }
-    .backgroundColor("#B6C5D1")
+    .backgroundColor('#B6C5D1')
     .padding(12)
     .align(Alignment.TopStart)
-    .width("100%").height("100%")
+    .width('100%').height('100%')
   }
 
   pageTransition() {

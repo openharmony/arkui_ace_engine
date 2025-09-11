@@ -25,25 +25,25 @@
 *
  */
 
-import { LengthMetrics } from "@kit.ArkUI";
-import { MenuBuilder, MenuAttrOptions } from "../../customBuilder/MenuBuilder"
+import { LengthMetrics } from '@kit.ArkUI';
+import { MenuBuilder, MenuAttrOptions } from '../../customBuilder/MenuBuilder'
 
 class SizeOption {
-  width?: Length = "240"
-  height?: Length = "300"
+  public width?: Length = '240'
+  public height?: Length = '300'
 }
 
 @Extend(Column)
 function columnStyle() {
   .borderWidth(1.0)
   .padding(5)
-  .width("100%")
+  .width('100%')
   .backgroundColor(Color.Pink)
 }
 @Extend(Text)
 function paramTextStyle() {
   .fontSize(9)
-  .width("100%")
+  .width('100%')
 }
 @Extend(Select) function selectStyle() {
   .width('36%')
@@ -67,10 +67,10 @@ struct MenuTestLevel0_18 {
   @Builder
   MenuBuilder_sized($$: SizeOption) {
     Menu() {
-      MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
-      MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+      MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
+      MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
     }
     .borderWidth(1.0)
     .height($$.height)
@@ -108,25 +108,25 @@ struct MenuTestLevel0_18 {
         Column({space: 5}){
           Row({space: 3}){
             Select([
-              { value:"W240" },
-              { value:"W360" },
-              { value:"W120" },
-              { value:"W80%" },
+              { value:'W240' },
+              { value:'W360' },
+              { value:'W120' },
+              { value:'W80%' },
             ])
               .selectStyle()
               .value('W240')
               .onSelect((idx, value: string) => {
                 switch (value) {
-                  case "W240":
+                  case 'W240':
                     this.previewBuilderSizeOptions.width = 240
                     break;
-                  case "W360":
+                  case 'W360':
                     this.previewBuilderSizeOptions.width = 360
                     break;
-                  case "W120":
+                  case 'W120':
                     this.previewBuilderSizeOptions.width = 120
                     break;
-                  case "W80%":
+                  case 'W80%':
                     this.previewBuilderSizeOptions.width = '80%'
                     break;
                 }
@@ -134,25 +134,25 @@ struct MenuTestLevel0_18 {
               .key('select_previewBuilderWidth')
 
             Select([
-              { value:"H160" },
-              { value:"H320" },
-              { value:"H640" },
-              { value:"H40%" },
+              { value:'H160' },
+              { value:'H320' },
+              { value:'H640' },
+              { value:'H40%' },
             ])
               .selectStyle()
               .value('H160')
               .onSelect((idx, value: string) => {
                 switch (value) {
-                  case "H160":
+                  case 'H160':
                     this.previewBuilderSizeOptions.height = 160
                     break;
-                  case "H320":
+                  case 'H320':
                     this.previewBuilderSizeOptions.height = 320
                     break;
-                  case "H640":
+                  case 'H640':
                     this.previewBuilderSizeOptions.height = 640
                     break;
-                  case "H40%":
+                  case 'H40%':
                     this.previewBuilderSizeOptions.height = '40%'
                     break;
                 }
@@ -160,11 +160,14 @@ struct MenuTestLevel0_18 {
               .key('select_previewBuilderHeight')
           }
 
-          Image($r("app.media.app_icon"))
+          Image($r('app.media.app_icon'))
             .key(`contextMenu: previewCustom`)
-            .width("120").height(45)
+            .width('120').height(45)
             .bindContextMenu(this.menuShow[0], this.MenuBuilder_sized({width: 200}), {
-              preview: this.MenuPreviewBuilder({width: this.previewBuilderSizeOptions.width, height: this.previewBuilderSizeOptions.height}),
+              preview: this.MenuPreviewBuilder({
+                width: this.previewBuilderSizeOptions.width,
+                height: this.previewBuilderSizeOptions.height
+              }),
               onDisappear: () => {
                 this.menuShow[0] = false
               }
@@ -201,65 +204,65 @@ struct MenuTestLevel0_18 {
           Text(`菜单预览图设置Custom类型,切换radius不同参数的绘制效果: 生效`)
             .paramTextStyle()
           Select([
-            { value:"不设置预览图radius" },
-            { value:"设置undefined" },
-            { value:"设置length-24vp" },
-            { value:"设置length-4" },
-            { value:"设置length-24px" },
-            { value:"设置length-50%" },
-            { value:"设置length-res异常" },
-            { value:"设置length-str异常" },
-            { value:"设置length-num超大" },  // 预期走maxRadius的一般
+            { value:'不设置预览图radius' },
+            { value:'设置undefined' },
+            { value:'设置length-24vp' },
+            { value:'设置length-4' },
+            { value:'设置length-24px' },
+            { value:'设置length-50%' },
+            { value:'设置length-res异常' },
+            { value:'设置length-str异常' },
+            { value:'设置length-num超大' },  // 预期走maxRadius的一般
 
-            { value:"设置radius-缺省,正常" },
-            { value:"设置radius-全部,正常" },
-            { value:"设置radius-全部,混合" },
+            { value:'设置radius-缺省,正常' },
+            { value:'设置radius-全部,正常' },
+            { value:'设置radius-全部,混合' },
 
-            { value:"设置localizedRadius-全部,正常" },  //测试镜像化
+            { value:'设置localizedRadius-全部,正常' },  //测试镜像化
           ])
             .selectStyle()
             .onSelect((idx, value: string) => {
               switch (value) {
-                case "不设置预览图radius":
+                case '不设置预览图radius':
                   this.contextMenuOption = {}
                   break;
-                case "设置undefined":
+                case '设置undefined':
                   this.contextMenuOption.previewBorderRadius = undefined
                   break;
 
-                case "设置length-24vp":
+                case '设置length-24vp':
                   this.contextMenuOption.previewBorderRadius = '24vp'
                   break;
-                case "设置length-4":
+                case '设置length-4':
                   this.contextMenuOption.previewBorderRadius = 4
                   break;
-                case "设置length-24px":
+                case '设置length-24px':
                   this.contextMenuOption.previewBorderRadius = '24px'
                   break;
-                case "设置length-50%":
+                case '设置length-50%':
                   this.contextMenuOption.previewBorderRadius = '50%'
                   break;
-                case "设置length-res异常":
+                case '设置length-res异常':
                   this.contextMenuOption.previewBorderRadius = $r('app.media.app_icon')
                   break;
-                case "设置length-str异常":
+                case '设置length-str异常':
                   this.contextMenuOption.previewBorderRadius = $r('app.string.app_name')
                   break;
-                case "设置length-num超大":
+                case '设置length-num超大':
                   this.contextMenuOption.previewBorderRadius = 60
                   break;
 
-                case "设置radius-缺省,正常":
+                case '设置radius-缺省,正常':
                   this.contextMenuOption.previewBorderRadius = {topLeft: 8}
                   break;
-                case "设置radius-全部,正常":
+                case '设置radius-全部,正常':
                   this.contextMenuOption.previewBorderRadius = {
                     topLeft: 24,
                     topRight: 10,
                     bottomLeft: '24px',
                     bottomRight: '20%'}
                   break;
-                case "设置radius-缺省,混合":
+                case '设置radius-缺省,混合':
                   this.contextMenuOption.previewBorderRadius = {
                     topLeft: '-24',
                     topRight: '0',
@@ -268,7 +271,7 @@ struct MenuTestLevel0_18 {
                   }
                   break;
 
-                case "设置localizedRadius-全部,正常":
+                case '设置localizedRadius-全部,正常':
                   this.contextMenuOption.previewBorderRadius = {
                     topStart: LengthMetrics.vp(4),
                     topEnd: LengthMetrics.vp(8),
@@ -279,9 +282,9 @@ struct MenuTestLevel0_18 {
               }
             })
             .key('select_previewRadius')
-          Image($r("app.media.app_icon"))
+          Image($r('app.media.app_icon'))
             .key(`contextMenu: previewRadius`)
-            .width("120").height(60)
+            .width('120').height(60)
             .bindContextMenu(this.menuShow[2], this.MenuBuilder(), {
               preview: this.MenuPreviewBuilder({width: 160, height: 75}),
               previewBorderRadius: this.contextMenuOption.previewBorderRadius,
@@ -296,9 +299,9 @@ struct MenuTestLevel0_18 {
 
           Text(`菜单预览图设置Custom类型,设置radius的绘制效果,组合测试预览图scale和transition`)
             .paramTextStyle()
-          Image($r("app.media.app_icon"))
+          Image($r('app.media.app_icon'))
             .key(`contextMenu: response_previewRadius_scale_transition`)
-            .width("120").height(60)
+            .width('120').height(60)
             .bindContextMenu(this.MenuBuilder(), ResponseType.LongPress, {
               preview: this.MenuPreviewBuilder({width: 160, height: 75}),
               previewBorderRadius: {
@@ -317,11 +320,11 @@ struct MenuTestLevel0_18 {
         }
         .columnStyle()
       }
-      .width("100%")
+      .width('100%')
     }
     .padding(12)
     .align(Alignment.TopStart)
-    .width("100%").height("100%")
+    .width('100%').height('100%')
   }
 
   pageTransition() {
