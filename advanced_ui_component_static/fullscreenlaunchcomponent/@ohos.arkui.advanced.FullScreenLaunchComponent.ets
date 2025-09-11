@@ -60,19 +60,19 @@ export struct FullScreenLaunchComponent {
     }
 
     commonEventManager.createSubscriber(subscribeInfo,
-      (err: BusinessError<void> | null, data: commonEventManager.CommonEventSubscriber | undefined) => {
+      (err: BusinessError<void> | null, data: commonEventManager.CommonEventSubscriber | undefined | null) => {
         if (err) {
           hilog.error(0x3900, 'FullScreenLaunchComponent',
             'Failed to create subscriber, err: %{public}s.', JSON.stringify(err))
           return;
         }
 
-        if (data == null || data == undefined) {
+        if (data !== null && data !== undefined) {
+          this.subscriber = data as commonEventManager.CommonEventSubscriber;
+        } else {
           hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.')
           return;
         }
-
-        this.subscriber = data;
         commonEventManager.subscribe(this.subscriber as commonEventManager.CommonEventSubscriber,
           (err: BusinessError | null, data: commonEventManager.CommonEventData | undefined) => {
             if (err) {
