@@ -306,11 +306,16 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
         if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
             executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
             executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
-            RemoveFrsNode();
-            ReleaseRenderer();
-            UnregisterAccessibility();
-            isSnapshot_ = true;
-            needSnapshotAgain_ = false;
+            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+                auto formPattern = weak.Upgrade();
+                CHECK_NULL_VOID(formPattern);
+                formPattern->RemoveFrsNode();
+                formPattern->ReleaseRenderer();
+                formPattern->UnregisterAccessibility();
+                isSnapshot_ = true;
+                needSnapshotAgain_ = false;
+            }, "ArkUIFormRemoveFrsNode");
             return;
         }
     }
