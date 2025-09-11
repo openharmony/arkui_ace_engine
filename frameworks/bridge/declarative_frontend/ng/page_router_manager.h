@@ -283,7 +283,7 @@ protected:
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
     void StartBackToIndex(int32_t index, const std::string& params);
-    bool StartPop();
+    virtual bool StartPop();
     void StartRestore(const RouterPageInfo& target);
     void BackCheckAlert(const RouterPageInfo& target);
     void BackToIndexCheckAlert(int32_t index, const std::string& params);

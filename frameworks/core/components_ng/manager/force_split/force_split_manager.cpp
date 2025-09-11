@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/force_split/force_split_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -67,6 +68,15 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool ignoreOrient
     }
 }
  
+void ForceSplitManager::NotifyForceFullScreenChange(bool isForceFullScreen)
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowManager->NotifyForceFullScreenChange(isForceFullScreen);
+}
+
 void ForceSplitManager::UpdateIsInForceSplitMode(int32_t width)
 {
     if (!isForceSplitSupported_) {

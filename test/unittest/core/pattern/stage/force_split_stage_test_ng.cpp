@@ -1012,4 +1012,38 @@ HWTEST_F(ParallelStageTestNg, ParallelStageManagerTest012, TestSize.Level1)
     res = stageManager->PopPageInSplitMode(true, true);
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: UpdateIsTopFullScreenPageTest001
+ * @tc.desc: Testing UpdateIsTopFullScreenPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, UpdateIsTopFullScreenPageTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopPageInSplitMode and ParallelStageManager.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    /**
+     * @tc.steps: step2. Call UpdateIsTopFullScreenPage and do asserts.
+     */
+    ASSERT_FALSE(stageManager->IsTopFullScreenPageChanged());
+    ASSERT_FALSE(stageManager->IsTopFullScreenPage());
+    stageManager->UpdateIsTopFullScreenPage(true);
+    ASSERT_TRUE(stageManager->IsTopFullScreenPageChanged());
+    ASSERT_TRUE(stageManager->IsTopFullScreenPage());
+    stageManager->UpdateIsTopFullScreenPage(true);
+    ASSERT_FALSE(stageManager->IsTopFullScreenPageChanged());
+    ASSERT_TRUE(stageManager->IsTopFullScreenPage());
+    stageManager->UpdateIsTopFullScreenPage(false);
+    ASSERT_TRUE(stageManager->IsTopFullScreenPageChanged());
+    ASSERT_FALSE(stageManager->IsTopFullScreenPage());
+}
 } // namespace OHOS::Ace::NG

@@ -78,6 +78,26 @@ public:
     std::vector<RefPtr<FrameNode>> GetTopPagesWithTransition() const override;
     bool IsSplitMode() const override;
 
+    void UpdateIsTopFullScreenPage(bool isTopFullScreenPage)
+    {
+        if (isTopFullScreenPage_ == isTopFullScreenPage) {
+            isTopFullScreenPageChanged_ = false;
+        } else {
+            isTopFullScreenPage_ = isTopFullScreenPage;
+            isTopFullScreenPageChanged_ = true;
+        }
+    }
+
+    bool IsTopFullScreenPageChanged() const
+    {
+        return isTopFullScreenPageChanged_;
+    }
+
+    bool IsTopFullScreenPage() const
+    {
+        return isTopFullScreenPage_;
+    }
+
 private:
     class StageOptScope {
     public:
@@ -143,6 +163,8 @@ private:
     bool isInStageOperation_ = false;
     bool primaryPageTouched_ = false;
     bool needClearSecondaryPage_ = false;
+    bool isTopFullScreenPage_ = false;
+    bool isTopFullScreenPageChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

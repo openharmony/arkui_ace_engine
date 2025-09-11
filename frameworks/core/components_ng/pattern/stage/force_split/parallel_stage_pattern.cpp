@@ -127,9 +127,9 @@ bool ParallelStagePattern::CalculateMode(double width)
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     auto pipelineContext = hostNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto stageManager = pipelineContext->GetStageManager();
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
-    if (stageManager->GetForceSplitEnable()) {
+    if (stageManager->GetForceSplitEnable() && !stageManager->IsTopFullScreenPage()) {
         auto thresholdWidth = MAX_WINDOW_WIDTH.ConvertToPx();
         auto dipScale = pipelineContext->GetDipScale();
         bool ignoreOrientation = stageManager->GetIgnoreOrientation();

@@ -30,6 +30,7 @@ struct ForceSplitConfig {
     bool navigationDisableDivider = false;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
+    std::set<std::string> fullScreenPages;
 };
 
 class ForceSplitUtils {
@@ -40,6 +41,10 @@ public:
     static bool IsHomePageNavBar(const RefPtr<NavBarNode>& navBar);
     static RefPtr<FrameNode> CreatePlaceHolderNode();
     static bool ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
+
+private:
+    static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
+    static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);
 };
 
 } // namespace OHOS::Ace::NG

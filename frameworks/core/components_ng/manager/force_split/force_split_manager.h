@@ -49,11 +49,24 @@ public:
 
     void UpdateIsInForceSplitMode(int32_t width);
 
+    void SetFullScreenPages(std::set<std::string>&& pages)
+    {
+        fullScreenPages_ = std::move(pages);
+    }
+
+    bool IsFullScreenPage(const std::string& name) const
+    {
+        return fullScreenPages_.find(name) != fullScreenPages_.end();
+    }
+
+    void NotifyForceFullScreenChange(bool isForceFullScreen);
+
 private:
     WeakPtr<PipelineContext> pipeline_;
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     bool ignoreOrientation_ = false;
+    std::set<std::string> fullScreenPages_;
 };
 } // namespace OHOS::Ace::NG
 

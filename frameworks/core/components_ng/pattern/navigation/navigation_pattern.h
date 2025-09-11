@@ -586,6 +586,10 @@ public:
         return enableShowHideWithContentCover_;
     }
 
+    bool IsTopFullScreenPage() const
+    {
+        return isTopFullScreenPage_;
+    }
 private:
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
         NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
@@ -775,6 +779,7 @@ private:
         const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node);
     void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
         const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
+    void NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames);
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -843,6 +848,7 @@ private:
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
+    bool isTopFullScreenPage_ = false;
     bool forceSplitUseNavBar_ = false;
     bool homeNodeTouched_ = false;
     bool navBarIsHome_ = false;
