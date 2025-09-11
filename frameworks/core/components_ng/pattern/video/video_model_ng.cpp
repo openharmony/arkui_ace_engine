@@ -325,6 +325,15 @@ void VideoModelNG::SetImageAIOptions(void *options)
     videoPattern->SetImageAIOptions(options);
 }
 
+void VideoModelNG::SetContentTransition(ContentTransitionType contentTransition)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetContentTransition(contentTransition);
+}
+
 void VideoModelNG::SetOnStart(FrameNode* frameNode, VideoEventFunc&& onStart)
 {
     CHECK_NULL_VOID(frameNode);

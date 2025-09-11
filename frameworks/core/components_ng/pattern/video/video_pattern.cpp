@@ -30,6 +30,7 @@
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
@@ -740,6 +741,7 @@ void VideoPattern::OnStartRenderFrameCb()
     auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(posterLayoutProperty);
     posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    UpdateBackgroundColor();
     image->MarkModifyDone();
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
@@ -868,6 +870,7 @@ void VideoPattern::UpdateLooping()
 void VideoPattern::SetSurfaceBackgroundColor(Color color)
 {
     CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    surfaceBgColor_ = color;
     renderContextForMediaPlayer_->UpdateBackgroundColor(color);
 }
 
@@ -1070,6 +1073,9 @@ void VideoPattern::OnModifyDone()
     UpdateControllerBar();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    bgColor_ = renderContext->GetBackgroundColor().value_or(Color::BLACK);
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
         ContainerScope scope(instanceId_);
@@ -1213,35 +1219,41 @@ void VideoPattern::UpdatePreviewImage()
     CHECK_NULL_VOID(video);
     auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
     CHECK_NULL_VOID(image);
+    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(posterLayoutProperty);
 
     if (showFirstFrame_) {
-        auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        UpdateBackgroundColor();
         image->MarkModifyDone();
         return;
     }
 
     if (!isInitialState_) {
-        auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        UpdateBackgroundColor();
         image->MarkModifyDone();
         return;
     }
 
     if (!posterSourceInfo.IsValid()) {
-        auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        UpdateBackgroundColor();
         image->MarkModifyDone();
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Src image is not valid.");
         return;
     }
 
+    auto imageRenderProperty = image->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateContentTransition(contentTransition_);
+    if (contentTransition_ != ContentTransitionType::IDENTITY) {
+        SetTransparentBackgroundColor();
+    } else {
+        UpdateBackgroundColor();
+    }
+
     image->SetDraggable(false);
-    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(posterLayoutProperty);
     posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
     if (EXPORT_IMAGEFIT_SUPPORT_TYPES.find(imageFit) == EXPORT_IMAGEFIT_SUPPORT_TYPES.end()) {
@@ -1249,6 +1261,17 @@ void VideoPattern::UpdatePreviewImage()
     }
     posterLayoutProperty->UpdateImageFit(imageFit);
     image->MarkModifyDone();
+}
+
+void VideoPattern::SetTransparentBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 
 void VideoPattern::UpdateControllerBar()
@@ -2399,5 +2422,21 @@ void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoCont
 RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
 {
     return videoControllerV2_;
+}
+
+void VideoPattern::SetContentTransition(ContentTransitionType contentTransition)
+{
+    contentTransition_ = contentTransition;
+}
+
+void VideoPattern::UpdateBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(bgColor_);
+    CHECK_NULL_VOID(renderContextForMediaPlayer_);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(surfaceBgColor_);
 }
 } // namespace OHOS::Ace::NG

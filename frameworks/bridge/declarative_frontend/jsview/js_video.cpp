@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
@@ -132,6 +133,10 @@ bool JSVideo::ParseJsPosterOptions(const JSRef<JSVal>& jsValue, bool& result)
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> showFirstFrame = jsObj->GetProperty("showFirstFrame");
+    JSRef<JSVal> contentTransitionValue = jsObj->GetProperty("contentTransitionEffect");
+    ContentTransitionType contentTransitionType = ContentTransitionType::IDENTITY;
+    JSImage::ParseContentTransitionEffect(contentTransitionValue, contentTransitionType);
+    VideoModel::GetInstance()->SetContentTransition(contentTransitionType);
     return ParseJsBool(showFirstFrame, result);
 }
 
