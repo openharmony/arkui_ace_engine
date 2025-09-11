@@ -121,4 +121,13 @@ const std::string SpringCurve::ToString()
     return curveString;
 }
 
+const std::string SpringCurve::ToSimpleString()
+{
+    const int32_t precision = 2;
+    std::stringstream ss;
+    std::string comma(",");
+    ss << "spring(" << std::fixed << std::setprecision(precision) << velocity_
+       << comma << mass_ << comma << stiffness_ << comma << damping_ << ")";
+    return ss.str();
+}
 } // namespace OHOS::Ace
