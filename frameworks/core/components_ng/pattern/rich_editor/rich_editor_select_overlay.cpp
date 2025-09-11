@@ -464,6 +464,7 @@ void RichEditorSelectOverlay::ToggleMenu()
     } else {
         UpdateMenuOffset();
         ShowMenu();
+        SetMenuIsShow(true);
     }
 }
 
