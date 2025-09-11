@@ -784,6 +784,7 @@ let StickyStyle;
   StickyStyle[StickyStyle.None = 0] = 'None';
   StickyStyle[StickyStyle.Header = 1] = 'Header';
   StickyStyle[StickyStyle.Footer = 2] = 'Footer';
+  StickyStyle[StickyStyle.BOTH = 3] = 'BOTH';
 })(StickyStyle || (StickyStyle = {}));
 
 let ScrollSnapAlign;
