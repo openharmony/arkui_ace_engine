@@ -13,48 +13,50 @@
  * limitations under the License.
  */
 
-import { Disposable } from "@koalaui/runtime";
-import { KoalaCallsiteKey } from "@koalaui/common"
+import { Disposable, scheduleCallback } from "@koalaui/runtime";
 
 export class ReusablePool implements Disposable {
-    private cache: Map<KoalaCallsiteKey, Disposable>;
+    private _maxSize: number = Number.POSITIVE_INFINITY
+    private _cache: Disposable[] = []
+    private _disposed: boolean = false;
 
-    constructor() {
-        this.cache = new Map<KoalaCallsiteKey, Disposable>();
+    get disposed(): boolean {
+        return this._disposed
     }
-    disposed: boolean = false
 
     /**
-     * prioritize reusing the same scope. If not found, use the earliest inserted scope
+     * Returns and removes the first available item from the pool
      */
-    get(key: KoalaCallsiteKey): Disposable | undefined {
+    get(): Disposable | undefined {
         if (this.disposed) return undefined;
-        if (!this.cache.has(key)) {
-            const leastUsedKey = this.cache.keys().next().value;
-            if (!leastUsedKey) return undefined
-            const leastUsedValue = this.cache.get(leastUsedKey!);
-            this.cache.delete(leastUsedKey!);
-            return leastUsedValue;
-        }
-        const value = this.cache.get(key)!;
-        this.cache.delete(key);
-        return value;
+        return this._cache.shift();
     }
 
-    put(key: KoalaCallsiteKey, value: Disposable): void {
-        if (this.disposed) return
-        if (this.cache.has(key)) {
-            throw Error("the same scope is recycled twice")
-        }
-        this.cache.set(key, value);
+    /**
+     * Adds an item to the pool
+     */
+    put(value: Disposable): void {
+        if (this.disposed || this._cache.length >= this._maxSize) return;
+        this._cache.push(value);
     }
 
     dispose(): void {
-        if (this.disposed) return
-        this.disposed = true
-        for (const value of this.cache.values()) {
+        if (this.disposed) return;
+        this._disposed = true;
+        for (const value of this._cache) {
             value.dispose();
         }
-        this.cache.clear();
+        this._cache = [];
+    }
+
+    setMaxSize(value: number) {
+        this._maxSize = value
+        if (this._cache.length > this._maxSize) {
+            const removed = this._cache.splice(this._maxSize);
+            scheduleCallback(() => {
+                for (const value of removed)
+                    value.dispose();
+            })
+        }
     }
 }
