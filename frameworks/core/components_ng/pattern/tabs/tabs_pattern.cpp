@@ -809,8 +809,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
 
-    if (!tabsLayoutProperty->HasDividerColorSetByUser() ||
-        (tabsLayoutProperty->HasDividerColorSetByUser() && !tabsLayoutProperty->GetDividerColorSetByUserValue())) {
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() || !tabsLayoutProperty->GetDividerColorSetByUserValue()) {
         auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
         currentDivider.color = theme->GetDividerColor();
         auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());

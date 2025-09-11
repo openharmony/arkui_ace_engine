@@ -321,7 +321,10 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForNotUECSubwindow(Lay
     ContainerScope scope(hostWindowId);
     auto container = AceEngine::Get().GetContainer(hostWindowId);
     CHECK_NULL_VOID(container);
-    auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(mainWindowContext);
 
     auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
     CHECK_NULL_VOID(subContainer);
