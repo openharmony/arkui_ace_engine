@@ -5633,8 +5633,8 @@ bool NavigationPattern::IsHomeDestinationVisible()
         return false;
     }
     if (navigationMode_ == NavigationMode::STACK) {
-        CHECK_NULL_RETURN(navigationStack_, false);
-        return navigationStack_->Empty();
+        auto lastStandardIndex = host->GetLastStandardIndex();
+        return lastStandardIndex < 0;
     }
     return navigationMode_ == NavigationMode::SPLIT;
 }
