@@ -29,6 +29,7 @@ export class ArkCheckboxNode extends ArkBaseNode implements CheckboxAttribute {
             options_casted = param[0] as (CheckboxOptions | undefined);
         }
         this.getPeer()?.setCheckboxOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     getPeer(): ArkCheckboxPeer {
@@ -37,11 +38,13 @@ export class ArkCheckboxNode extends ArkBaseNode implements CheckboxAttribute {
     initialize(options?: CheckboxOptions): this {
         const options_casted = options as (CheckboxOptions | undefined);
         this.getPeer()?.setCheckboxOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     setCheckboxOptions(options?: CheckboxOptions): this {
         const options_casted = options as (CheckboxOptions | undefined);
         this.getPeer()?.setCheckboxOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     select(value: boolean | Bindable<boolean> | undefined): this {
@@ -49,37 +52,45 @@ export class ArkCheckboxNode extends ArkBaseNode implements CheckboxAttribute {
         if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setSelectAttribute(value_casted)
-            return this;
+            this.markDirty();
+        return this;
         }
+        this.markDirty();
         return this;
     }
     selectedColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined);
         this.getPeer()?.setSelectedColorAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     shape(value: CheckBoxShape | undefined): this {
         const value_casted = value as (CheckBoxShape | undefined);
         this.getPeer()?.setShapeAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     unselectedColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined);
         this.getPeer()?.setUnselectedColorAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     mark(value: MarkStyle | undefined): this {
         const value_casted = value as (MarkStyle | undefined);
         this.getPeer()?.setMarkAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     onChange(value: OnCheckboxChangeCallback | undefined): this {
         const value_casted = value as (OnCheckboxChangeCallback | undefined);
         this.getPeer()?.setOnChangeAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<CheckBoxConfiguration> | undefined);
+        this.markDirty();
         return this;
     }
 }

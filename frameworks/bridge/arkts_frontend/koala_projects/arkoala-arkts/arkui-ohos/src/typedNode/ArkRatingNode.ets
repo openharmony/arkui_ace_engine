@@ -28,6 +28,7 @@ export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
             options_casted = param[0] as (RatingOptions | undefined);
         }
         this.getPeer()?.setRatingOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     getPeer(): ArkRatingPeer {
@@ -36,35 +37,36 @@ export class ArkRatingNode extends ArkBaseNode implements RatingAttribute {
     initialize(options?: RatingOptions | Object): this {
         const options_casted = options as (RatingOptions | undefined);
         this.getPeer()?.setRatingOptionsAttribute(options_casted);
-        return this;
-    }
-    setRatingOptions(options?: RatingOptions): this {
-        const options_casted = options as (RatingOptions | undefined);
-        this.getPeer()?.setRatingOptionsAttribute(options_casted);
+        this.markDirty();
         return this;
     }
     stars(value: number | undefined): this {
         const value_casted = value as (number | undefined);
         this.getPeer()?.setStarsAttribute(value_casted);
+        this.markDirty();
         return this;
     }
     stepSize(value: number | undefined): this {
         const value_casted = value as (number | undefined);
         this.getPeer()?.setStepSizeAttribute(value_casted);        
+        this.markDirty();
         return this;
     }
     starStyle(value: StarStyleOptions | undefined): this {
         const value_casted = value as (StarStyleOptions | undefined);
         this.getPeer()?.setStarStyleAttribute(value_casted);            
+        this.markDirty();
         return this;
     }
     onChange(value: ((index: number) => void) | OnRatingChangeCallback | undefined): this {
         const value_casted = value as (((index: number) => void) | OnRatingChangeCallback | undefined);
         this.getPeer()?.setOnChangeAttribute(value_casted);          
+        this.markDirty();
         return this;
     }
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         const value_casted = value as (ContentModifier<RatingConfiguration> | undefined);
+        this.markDirty();
         return this;
     }
 }
