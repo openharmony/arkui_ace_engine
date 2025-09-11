@@ -38,6 +38,8 @@ struct Index {
     { title: "示例12：菜单基本功能_1_bCM内容/自定义尺寸", url: "pages/Examples/MenuTestLevel0_1" },
     { title: "示例13：菜单基本功能_2_标题/subwindow", url: "pages/Examples/MenuTestLevel0_2" },
     { title: "示例14：菜单基本功能_3_位置", url: "pages/Examples/MenuTestLevel0_3" },
+    { title: "示例15：菜单基本功能_4_避让", url: "pages/Examples/MenuTestLevel0_4" },
+    { title: "示例16：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_18" },
   ]
 
   build() {
