@@ -1062,6 +1062,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         overlayManager->RemovePixelMap();
         overlayManager->RemovePreviewBadgeNode();
         overlayManager->RemoveGatherNode();
+        DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
         dragEventActuator_->NotifyTransDragWindowToFwk();
         pipeline->AddAfterRenderTask([]() {
             ACE_SCOPED_TRACE("drag: set drag window visible, touch");
@@ -1073,6 +1074,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             overlayManager->RemovePixelMap();
             overlayManager->RemovePreviewBadgeNode();
             overlayManager->RemoveGatherNode();
+            DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
             dragEventActuator_->NotifyTransDragWindowToFwk();
             pipeline->AddAfterRenderTask([]() {
                 ACE_SCOPED_TRACE("drag: set drag window visible, touch");
@@ -1081,6 +1083,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!isSwitchedToSubWindow) {
+            DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
             dragEventActuator_->NotifyTransDragWindowToFwk();
             pipeline->AddDragWindowVisibleTask([]() {
                 ACE_SCOPED_TRACE("drag: set drag window visible, mouse");
