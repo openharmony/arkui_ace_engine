@@ -2496,8 +2496,15 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
         auto abilityContext =
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        abilityContext->StartAbility(want, REQUEST_CODE);
+        if (abilityContext) {
+            abilityContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto serviceContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(sharedContext);
+        if (serviceContext) {
+            serviceContext->StartAbility(want);
+        }
     });
 
     container->SetAbilityOnCalendar(
