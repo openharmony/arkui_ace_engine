@@ -88,8 +88,8 @@ public:
     static SwipeGestureModel* GetInstance();
     virtual ~SwipeGestureModel() = default;
 
-    virtual void Create(
-        int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount) = 0;
+    virtual void Create(int32_t fingersNum, const SwipeDirection& slideDirection,
+        const Dimension& speedNum, bool isLimitFingerCount) = 0;
 
 private:
     static std::unique_ptr<SwipeGestureModel> instance_;

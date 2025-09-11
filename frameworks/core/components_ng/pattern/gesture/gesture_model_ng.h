@@ -54,7 +54,7 @@ public:
 
 class ACE_EXPORT SwipeGestureModelNG : public OHOS::Ace::SwipeGestureModel {
 public:
-    void Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum,
+    void Create(int32_t fingersNum, const SwipeDirection& slideDirection, const Dimension& speedNum,
         bool isLimitFingerCount = false) override;
 };
 

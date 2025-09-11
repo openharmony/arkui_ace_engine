@@ -31,8 +31,13 @@ class SwipeRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(SwipeRecognizer, MultiFingersRecognizer);
 
 public:
-    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed, bool isLimitFingerCount = false)
+    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, const Dimension& speed,
+        bool isLimitFingerCount = false)
         : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), speed_(speed)
+    {}
+    SwipeRecognizer(int32_t fingers, const SwipeDirection& direction, double speed, bool isLimitFingerCount = false)
+        : MultiFingersRecognizer(fingers, isLimitFingerCount),
+        direction_(direction), speed_(Dimension(speed, DimensionUnit::VP))
     {}
     ~SwipeRecognizer() override = default;
 
@@ -62,6 +67,11 @@ public:
 
     void SetSpeed(double speed)
     {
+        speed_ = Dimension(speed, DimensionUnit::VP);
+    }
+
+    void SetSpeed(const Dimension& speed)
+    {
         speed_ = speed;
     }
 
@@ -72,7 +82,7 @@ public:
 
     double GetSpeed() const
     {
-        return speed_;
+        return speed_.ConvertToPx();
     }
 
 private:
@@ -96,7 +106,7 @@ private:
     bool CheckAngle(double angle);
 
     SwipeDirection direction_;
-    double speed_ = 0.0;
+    Dimension speed_ = Dimension(0.0, DimensionUnit::VP);
     TouchEvent lastTouchEvent_;
     std::map<int32_t, TouchEvent> downEvents_;
 

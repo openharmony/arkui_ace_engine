@@ -52,8 +52,8 @@ public:
 
 class SwipeGestureModelImpl : public OHOS::Ace::SwipeGestureModel {
 public:
-    void Create(
-        int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount) override;
+    void Create(int32_t fingersNum, const SwipeDirection& slideDirection,
+        const Dimension& speedNum, bool isLimitFingerCount) override;
 };
 
 class PinchGestureModelImpl : public OHOS::Ace::PinchGestureModel {
