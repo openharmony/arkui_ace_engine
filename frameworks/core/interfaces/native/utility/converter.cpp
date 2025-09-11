@@ -3310,4 +3310,10 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
     CHECK_NULL_VOID(src);
     dst = Color(src->colorValue.value);
 }
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src)
+{
+    dst = static_cast<int32_t>(reinterpret_cast<intptr_t>(src));
+}
 } // namespace OHOS::Ace::NG::Converter

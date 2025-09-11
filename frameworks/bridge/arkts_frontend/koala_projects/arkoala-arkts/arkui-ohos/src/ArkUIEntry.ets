@@ -176,16 +176,10 @@ function drawCurrentCrash(crash: Object) {
     ArkUINativeModule._ShowCrash(msg ?? "unknown error message")
 }
 
-function registerSyncCallbackProcessor() {
-    wrapSystemApiHandlerCallback()
-    registerArkuiApiHandler()
-}
-
 export class Application {
     private manager: StateManager | undefined = undefined
     private uiContext: UIContextImpl | undefined = undefined
     private rootState: ComputableState<PeerNode> | undefined = undefined
-    private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
     private exitApp: boolean = false
@@ -199,6 +193,7 @@ export class Application {
     private withLog = false
     private useNativeLog = true
     private rootPointer: KPointer = nullptr
+    private static firstRegisterArkuiApiHandler: boolean = true
 
     constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined) {
         this.useNativeLog = useNativeLog
@@ -238,7 +233,6 @@ export class Application {
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance
-            this.timer = createAnimationTimer(this.manager!)
             let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             this.instanceId = uiContext.getInstanceId();
             uiContext.stateMgr = this.manager
@@ -384,7 +378,6 @@ export class Application {
             drawCurrentCrash(this.currentCrash!)
         } else {
             try {
-                this.timer!.value = Date.now() as int64
                 this.loopIteration(arg0, arg1)
                 if (this.enableDumpTree) {
                     dumpTree(this.rootState!.value)
@@ -471,7 +464,11 @@ export class Application {
         registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
-        registerSyncCallbackProcessor()
+        wrapSystemApiHandlerCallback()
+        if (Application.firstRegisterArkuiApiHandler) {
+            registerArkuiApiHandler()
+            Application.firstRegisterArkuiApiHandler = false
+        }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
     }
 }
