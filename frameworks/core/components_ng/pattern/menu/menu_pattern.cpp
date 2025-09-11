@@ -1657,11 +1657,10 @@ void MenuPattern::ShowMenuAppearAnimation()
         if (theme->GetMenuAnimationDuration()) {
             option.SetDuration(theme->GetMenuAnimationDuration());
             option.SetCurve(theme->GetMenuAnimationCurve());
-            renderContext->UpdateTransformCenter(DimensionOffset(Offset()));
         } else {
             option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
-            renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
         }
+        renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
         AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
             CHECK_NULL_VOID(renderContext);
             if (IsSelectOverlayExtensionMenu()) {
