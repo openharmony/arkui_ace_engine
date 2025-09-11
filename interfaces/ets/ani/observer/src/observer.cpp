@@ -731,7 +731,6 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
 {
-    LOGE("lzr in off");
     auto* observer = Unwrapp(env, object);
     if (observer == nullptr) {
         LOGE("observer-ani context is null.");
@@ -739,7 +738,11 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
     }
     std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
     ani_ref fnObjGlobalRef = nullptr;
-    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
 
     const int idMs = 100000;
     if (typeStr == "densityUpdate") {
