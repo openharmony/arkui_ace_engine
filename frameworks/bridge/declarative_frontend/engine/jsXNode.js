@@ -142,6 +142,9 @@ class BuilderNode extends Disposable {
         return ret;
     }
     dispose() {
+        if (this.isDisposed_) {
+            return;
+        }
         super.dispose();
         this._JSBuilderNode.dispose();
     }
@@ -550,6 +553,9 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
+        if (this.isDisposed_) {
+            return;
+        }
         this.disposable_.dispose();
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
@@ -1017,6 +1023,9 @@ class FrameNode extends Disposable {
         }
     }
     dispose() {
+        if (this.isDisposed_) {
+            return;
+        }
         super.dispose();
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
@@ -2921,6 +2930,9 @@ class RenderNode extends Disposable {
         return getUINativeModule().renderNode.getNodeType(this.nodePtr);
     }
     dispose() {
+        if (this.isDisposed_) {
+            return;
+        }
         super.dispose();
         if (this.nodePtr) {
             getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),

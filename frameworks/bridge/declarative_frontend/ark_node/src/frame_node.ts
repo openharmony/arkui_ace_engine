@@ -177,6 +177,9 @@ class FrameNode extends Disposable {
     }
   }
   dispose(): void {
+    if (this.isDisposed_) {
+      return;
+    }
     super.dispose();
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
