@@ -115,6 +115,12 @@ namespace Converter {
         dst = src;
     }
 
+    template<typename T, typename... Types>
+    void AssignTo(std::variant<Types...>& dst, const T& src)
+    {
+        dst = src;
+    }
+
     template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
     void AssignTo(std::vector<To>& dst, const From& src)
     {
@@ -504,6 +510,8 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_Number& src);
     template<> BorderWidthProperty Convert(const Ark_Resource& src);
     template<> BorderWidthProperty Convert(const Ark_String& src);
+    template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
+    template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);

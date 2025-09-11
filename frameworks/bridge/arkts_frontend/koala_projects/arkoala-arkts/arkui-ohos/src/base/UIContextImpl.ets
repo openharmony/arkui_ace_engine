@@ -62,7 +62,7 @@ import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeseri
 import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
-import { PromptActionExtender, FrameNodeExtender } from '../framework';
+import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet } from '../framework';
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -1490,13 +1490,13 @@ export class UIContextImpl extends UIContext {
     public showAlertDialog(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons |
         AlertDialogParamWithOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // AlertDialog.show(options);
+        AlertDialog.show(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public showActionSheet(options: ActionSheetOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // ActionSheet.show(options);
+        ActionSheet.show(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

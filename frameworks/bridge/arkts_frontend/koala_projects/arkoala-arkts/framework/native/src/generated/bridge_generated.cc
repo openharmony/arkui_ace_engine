@@ -25875,6 +25875,33 @@ void impl_AccessibilityHoverEvent_setWindowY(Ark_NativePointer thisPtr, KInterop
         GetAccessors()->getAccessibilityHoverEventAccessor()->setWindowY(self, (const Ark_Number*) (&windowY));
 }
 KOALA_INTEROP_DIRECT_V2(AccessibilityHoverEvent_setWindowY, Ark_NativePointer, KInteropNumber)
+void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_ActionSheetOptions optionsValueTemp = ActionSheetOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getActionSheetAccessor()->show(static_cast<Ark_ActionSheetOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(ActionSheet_show, KSerializerBuffer, int32_t)
+void impl_AlertDialog_show(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 optionsValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.selector = optionsValueTempTmpBufUnionSelector;
+        if (optionsValueTempTmpBufUnionSelector == 0) {
+            optionsValueTempTmpBuf.selector = 0;
+            optionsValueTempTmpBuf.value0 = AlertDialogParamWithConfirm_serializer::read(thisDeserializer);
+        } else if (optionsValueTempTmpBufUnionSelector == 1) {
+            optionsValueTempTmpBuf.selector = 1;
+            optionsValueTempTmpBuf.value1 = AlertDialogParamWithButtons_serializer::read(thisDeserializer);
+        } else if (optionsValueTempTmpBufUnionSelector == 2) {
+            optionsValueTempTmpBuf.selector = 2;
+            optionsValueTempTmpBuf.value2 = AlertDialogParamWithOptions_serializer::read(thisDeserializer);
+        } else {
+            INTEROP_FATAL("One of the branches for optionsValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions optionsValueTemp = static_cast<Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions>(optionsValueTempTmpBuf);;
+        GetAccessors()->getAlertDialogAccessor()->show(static_cast<Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(AlertDialog_show, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_SetClipRect(Ark_NativePointer node, KFloat x, KFloat y, KFloat width, KFloat height) {
         GetAccessors()->getAnimationExtenderAccessor()->SetClipRect(node, x, y, width, height);
 }

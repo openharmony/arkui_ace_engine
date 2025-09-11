@@ -79,7 +79,8 @@ namespace GeneratedApiImpl {
 namespace OHOS::Ace::NG::GeneratedModifier {
 
 void SetAppendGroupedLog(void* pFunc) {}
-
+const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
+const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier();
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier();
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier();
@@ -492,6 +493,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
 {
     static const GENERATED_ArkUIAccessors accessorsImpl = {
         GetAccessibilityHoverEventAccessor,
+        GetActionSheetAccessor,
+        GetAlertDialogAccessor,
         GetAnimationExtenderAccessor,
         GetAppearSymbolEffectAccessor,
         GetAxisEventAccessor,
