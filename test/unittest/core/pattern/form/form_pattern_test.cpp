@@ -318,6 +318,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     pattern->HandleSnapshot(delayTime, "1");
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_NE(pipeline->taskExecutor_, nullptr);
+
     taskExecutor = pipeline->GetTaskExecutor();
     uint32_t taskNum = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
     EXPECT_EQ(taskNum, 0);
