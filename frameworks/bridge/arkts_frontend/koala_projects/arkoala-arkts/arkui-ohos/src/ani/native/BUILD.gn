@@ -75,6 +75,7 @@ ohos_shared_library("arkoala_native_ani") {
     "utils/ani_trace.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
+    "visual_effect/visual_effect_module.cpp",
     "rich_editor/rich_editor_module.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "water_flow/water_flow_module.cpp",

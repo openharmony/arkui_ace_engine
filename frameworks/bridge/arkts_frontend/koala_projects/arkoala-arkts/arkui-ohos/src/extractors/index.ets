@@ -292,35 +292,35 @@ export namespace extractors {
   }
 
   export function toRectShapePtr(value: RectShape): KPointer {
-    return 123;
+    let result = ArkUIAniModule._Extractors_ToRectShapePtr(value);
+    return result;
   }
   export function fromRectShapePtr(ptr: KPointer): RectShape {
-    const x: Object = {};
-    return x as RectShape;
+    return ArkUIAniModule._Extractors_FromRectShapePtr(ptr);
   }
 
   export function toCircleShapePtr(value: CircleShape): KPointer {
-    return 123;
+    let result = ArkUIAniModule._Extractors_ToCircleShapePtr(value);
+    return result;
   }
   export function fromCircleShapePtr(ptr: KPointer): CircleShape {
-    const x: Object = {};
-    return x as CircleShape;
+    return ArkUIAniModule._Extractors_FromCircleShapePtr(ptr);
   }
 
   export function toEllipseShapePtr(value: EllipseShape): KPointer {
-    return 123;
+    let result = ArkUIAniModule._Extractors_ToEllipseShapePtr(value);
+    return result;
   }
   export function fromEllipseShapePtr(ptr: KPointer): EllipseShape {
-    const x: Object = {};
-    return x as EllipseShape;
+    return ArkUIAniModule._Extractors_FromEllipseShapePtr(ptr);
   }
 
   export function toPathShapePtr(value: PathShape): KPointer {
-    return 123;
+    let result = ArkUIAniModule._Extractors_ToPathShapePtr(value);
+    return result;
   }
   export function fromPathShapePtr(ptr: KPointer): PathShape {
-    const x: Object = {};
-    return x as PathShape;
+    return ArkUIAniModule._Extractors_FromPathShapePtr(ptr);
   }
 
   export function toResourceManagerResourceManagerPtr(
