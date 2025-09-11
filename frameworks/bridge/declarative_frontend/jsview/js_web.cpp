@@ -4351,6 +4351,7 @@ JSRef<JSVal> RefreshAccessedHistoryEventToJSValue(const RefreshAccessedHistoryEv
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetVisitedUrl());
     obj->SetProperty("isRefreshed", eventInfo.IsRefreshed());
+    obj->SetProperty("isMainFrame", eventInfo.IsMainFrame());
     return JSRef<JSVal>::Cast(obj);
 }
 

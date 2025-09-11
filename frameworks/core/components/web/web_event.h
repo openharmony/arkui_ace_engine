@@ -1454,8 +1454,9 @@ class ACE_EXPORT RefreshAccessedHistoryEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(RefreshAccessedHistoryEvent, BaseEventInfo);
 
 public:
-    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed)
-        : BaseEventInfo("RefreshAccessedHistoryEvent"), url_(url), isRefreshed_(isRefreshed)
+    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed, bool isMainFrame)
+        : BaseEventInfo("RefreshAccessedHistoryEvent"),
+        url_(url), isRefreshed_(isRefreshed), isMainFrame_(isMainFrame)
     {}
 
     ~RefreshAccessedHistoryEvent() = default;
@@ -1470,9 +1471,15 @@ public:
         return isRefreshed_;
     }
 
+    bool IsMainFrame() const
+    {
+        return isMainFrame_;
+    }
+
 private:
     std::string url_;
     bool isRefreshed_;
+    bool isMainFrame_;
 };
 
 class ACE_EXPORT FileSelectorEvent : public BaseEventInfo {

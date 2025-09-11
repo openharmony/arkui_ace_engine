@@ -1611,4 +1611,14 @@ void WebClientImpl::OnSafeBrowsingCheckFinish(int threat_type)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnSafeBrowsingCheckFinish(threat_type);
 }
+
+void WebClientImpl::OnRefreshAccessedHistoryV2(const std::string& url, bool isReload, bool isMainFrame)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnRefreshAccessedHistory(url, isReload, isMainFrame);
+}
 } // namespace OHOS::Ace
