@@ -442,8 +442,9 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
     if (clip_ && clip_->Get() &&
         (!fontSize_.has_value() || !fontSizeFloat_ ||
             NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+        auto contentOffsetY = std::max(contentOffset.GetY(), 0.0f);
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffsetY,
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffsetY);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     if (!marqueeSet_) {
