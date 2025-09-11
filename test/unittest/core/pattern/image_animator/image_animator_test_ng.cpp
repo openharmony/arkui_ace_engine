@@ -2701,6 +2701,41 @@ HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageAnimatorPatternSetVisibleTest001
+ * @tc.desc: Verify SetVisible Functionality in ImageAnimatorPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorPatternSetVisibleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimator.
+     */
+
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
+    RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
+        AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
+    ASSERT_NE(imageAnimatorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set visible to false.
+     * @tc.expected: step2. check whether isVisible is false.
+     */
+    imageAnimatorPattern->SetVisible(false);
+    EXPECT_FALSE(imageAnimatorPattern->visible_);
+    /**
+     * @tc.steps: step3. set visible to true.
+     * @tc.expected: step3. check whether isVisible is true.
+     */
+    imageAnimatorPattern->SetVisible(true);
+    EXPECT_TRUE(imageAnimatorPattern->visible_);
+}
+
+/**
  * @tc.name: ImageAnimatorSetImagesTest001
  * @tc.desc: SetImages into ImageAnimatorPattern.
  * @tc.type: FUNC

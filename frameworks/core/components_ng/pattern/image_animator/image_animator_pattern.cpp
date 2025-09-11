@@ -286,6 +286,9 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
             ShowIndex(index);
             break;
         default:
+            if (isAutoMonitorInvisibleArea_ && !visible_) {
+                return;
+            }
             ResetFormAnimationStartTime();
             if (isFormAnimationEnd_) {
                 ResetFormAnimationFlag();
@@ -387,6 +390,7 @@ void ImageAnimatorPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
+        self->SetVisible(visible);
         if (self->CheckIfNeedVisibleAreaChange()) {
             self->OnVisibleAreaChange(visible, ratio);
         }
@@ -405,9 +409,9 @@ void ImageAnimatorPattern::OnVisibleAreaChange(bool visible, double ratio)
         TAG_LOGI(AceLogTag::ACE_IMAGE, "ImageAnimator OnVisibleAreaChange visible:%{public}d", visible);
     }
     if (!visible) {
-        OnInActive();
+        OnInActiveImageAnimator();
     } else {
-        OnActive();
+        OnActiveImageAnimator();
     }
 }
 
