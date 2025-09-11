@@ -38,4 +38,8 @@ double ResSchedTouchOptimizer::HandleMainDelta(double& mainDelta, const double& 
 void ResSchedTouchOptimizer::SetSlideAcceptOffset(Offset offset)
 {
 }
+
+void ResSchedTouchOptimizer::SetSlideDirection(int32_t slideDirection)
+{
+}
 } // namespace OHOS::Ace
