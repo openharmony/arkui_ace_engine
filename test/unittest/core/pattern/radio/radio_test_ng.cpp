@@ -2395,6 +2395,135 @@ HWTEST_F(RadioTestNg, RadioPatternTest052, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: Test RadioModelNG ColorTypeToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all RadioColorType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<RadioColorType, std::string>> types = {
+        { RadioColorType::CHECKED_BACKGROUND_COLOR, "CheckedBackgroundColor" },
+        { RadioColorType::UNCHECKED_BORDER_COLOR, "UncheckedBorderColor" },
+        { RadioColorType::INDICATOR_COLOR, "IndicatorColor" },
+        { static_cast<RadioColorType>(999), "" }
+    };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = RadioModelNG::ColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: MeasureContentTest001
+ * @tc.desc: Test Radio MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, MeasureContentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = radioLayoutAlgorithm.MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: LayoutPolicyIsMatchParentTest001
+ * @tc.desc: Test Radio LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: step1. ret is equal to TEST_SIZE_0.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    auto layoutPolicy = radioLayoutAlgorithm.GetLayoutPolicy(&layoutWrapper);
+    auto ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step2. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step2. ret is equal to TEST_SIZE_100.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+
+    /**
+     * @tc.steps: step3. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: step3. ret is equal to TEST_SIZE_60.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+
+    /**
+     * @tc.steps: step4. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step4. ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step5. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: step5. ret is equal to TEST_SIZE_50.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_50);
+
+    /**
+     * @tc.steps: step6. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step6. ret is equal to TEST_SIZE_100.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
  * @tc.name: RadioCreateResetSetByUserTest001
  * @tc.desc: Test RadioModelNG::Create resets *_SetByUser flags in RadioPaintProperty.
  * @tc.type: FUNC
@@ -2522,134 +2651,5 @@ HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     auto colorRet = paintProperty->GetRadioIndicatorColor();
     EXPECT_FALSE(colorRet.has_value());
-}
-
-/**
- * @tc.name: ColorTypeToString
- * @tc.desc: Test RadioModelNG ColorTypeToString function.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, ColorTypeToString, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Define test cases for all RadioColorType values and an unknown value.
-     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
-     */
-    std::vector<std::pair<RadioColorType, std::string>> types = {
-        { RadioColorType::CHECKED_BACKGROUND_COLOR, "CheckedBackgroundColor" },
-        { RadioColorType::UNCHECKED_BORDER_COLOR, "UncheckedBorderColor" },
-        { RadioColorType::INDICATOR_COLOR, "IndicatorColor" },
-        { static_cast<RadioColorType>(999), "" }
-    };
-
-    /**
-     * @tc.steps: step2. Iterate through test cases and verify string conversion.
-     * @tc.expected: step2. All enum values are converted to their correct string representations.
-     */
-    for (const auto& [type, expected] : types) {
-        auto result = RadioModelNG::ColorTypeToString(type);
-        EXPECT_EQ(result, expected);
-    }
-}
-
-/**
- * @tc.name: MeasureContentTest001
- * @tc.desc: Test Radio MeasureContent.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, MeasureContentTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
-     * @tc.expected: ret is equal to TEST_SIZE_100.
-     */
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
-    RadioLayoutAlgorithm radioLayoutAlgorithm;
-    LayoutConstraintF contentConstraint;
-    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
-    auto layoutProperty = layoutWrapper.GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    LayoutPolicyProperty layoutPolicyProperty;
-    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
-    auto ret = radioLayoutAlgorithm.MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_100);
-}
-
-/**
- * @tc.name: LayoutPolicyIsMatchParentTest001
- * @tc.desc: Test Radio LayoutPolicyIsMatchParent.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call LayoutPolicyIsMatchParent function.
-     * @tc.expected: step1. ret is equal to TEST_SIZE_0.
-     */
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
-    RadioLayoutAlgorithm radioLayoutAlgorithm;
-    LayoutConstraintF contentConstraint;
-    auto layoutPolicy = radioLayoutAlgorithm.GetLayoutPolicy(&layoutWrapper);
-    auto ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_0);
-
-    /**
-     * @tc.steps: step2. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
-     * @tc.expected: step2. ret is equal to TEST_SIZE_100.
-     */
-    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
-    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_100);
-
-    /**
-     * @tc.steps: step3. set selfIdealSize.height_ to TEST_HEIGHT_60.
-     * @tc.expected: step3. ret is equal to TEST_SIZE_60.
-     */
-    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
-    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_60);
-
-    /**
-     * @tc.steps: step4. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
-     * @tc.expected: step4. ret is equal to TEST_SIZE_200.
-     */
-    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
-    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_200);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize.width_ to TEST_WIDTH_50.
-     * @tc.expected: step5. ret is equal to TEST_SIZE_50.
-     */
-    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
-    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_50);
-
-    /**
-     * @tc.steps: step6. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
-     * @tc.expected: step6. ret is equal to TEST_SIZE_100.
-     */
-    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
-    ret = radioLayoutAlgorithm.LayoutPolicyIsMatchParent(contentConstraint,
-        layoutPolicy, &layoutWrapper);
-    EXPECT_EQ(ret, TEST_SIZE_100);
 }
 } // namespace OHOS::Ace::NG
