@@ -87,7 +87,7 @@ struct MenuTestLevel0_5 {
     //7
     {
       enableArrow: true,
-      arrowOffset: $r("app.float.float_0"),
+      arrowOffset: 0,
     },
     //8
     {

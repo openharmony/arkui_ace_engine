@@ -70,7 +70,7 @@ struct MenuTestLevel0_6 {
   //PreviewBuilder
   @Builder
   MenuPreviewBuilder() {
-    Image($r('app.media.jpg_backgroundPic'))
+    Image($r('app.media.app_icon'))
       .width(240)
       .height(180)
   }
@@ -110,7 +110,7 @@ struct MenuTestLevel0_6 {
     },
     //9
     {
-      top: $r("app.float.float_20"), bottom: $r("app.string.Length_20"), left: "10%", right: "10%"
+      top: 20, bottom: 20, left: "10%", right: "10%"
     },
     //10
     {top: 16, bottom: 4, left: 16, right: 16},
@@ -167,7 +167,7 @@ struct MenuTestLevel0_6 {
     //9
     {
       layoutRegionMargin: {
-        top: $r("app.float.float_20"), bottom: $r("app.string.Length_20"), left: "10%", right: "10%"
+        top: 20, bottom: 20, left: "10%", right: "10%"
       }
     },
     //10 res设置异常值

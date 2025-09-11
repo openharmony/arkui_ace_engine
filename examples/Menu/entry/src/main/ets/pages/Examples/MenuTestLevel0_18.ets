@@ -81,7 +81,7 @@ struct MenuTestLevel0_18 {
   @Builder
   MenuPreviewBuilder($$: SizeOption) {
     Column(){
-      Image($r('app.media.jpg_backgroundPic'))
+      Image($r('app.media.app_icon'))
     }
     .width($$.width).height($$.height)
   }
@@ -160,7 +160,7 @@ struct MenuTestLevel0_18 {
               .key('select_previewBuilderHeight')
           }
 
-          Image($r("app.media.unsplash_pic"))
+          Image($r("app.media.app_icon"))
             .key(`contextMenu: previewCustom`)
             .width("120").height(45)
             .bindContextMenu(this.menuShow[0], this.MenuBuilder_sized({width: 200}), {
@@ -240,7 +240,7 @@ struct MenuTestLevel0_18 {
                   this.contextMenuOption.previewBorderRadius = '50%'
                   break;
                 case "设置length-res异常":
-                  this.contextMenuOption.previewBorderRadius = $r('app.media.win')
+                  this.contextMenuOption.previewBorderRadius = $r('app.media.app_icon')
                   break;
                 case "设置length-str异常":
                   this.contextMenuOption.previewBorderRadius = $r('app.string.app_name')
@@ -255,7 +255,7 @@ struct MenuTestLevel0_18 {
                 case "设置radius-全部,正常":
                   this.contextMenuOption.previewBorderRadius = {
                     topLeft: 24,
-                    topRight: $r("app.float.float_10"),
+                    topRight: 10,
                     bottomLeft: '24px',
                     bottomRight: '20%'}
                   break;
@@ -279,7 +279,7 @@ struct MenuTestLevel0_18 {
               }
             })
             .key('select_previewRadius')
-          Image($r("app.media.unsplash_pic"))
+          Image($r("app.media.app_icon"))
             .key(`contextMenu: previewRadius`)
             .width("120").height(60)
             .bindContextMenu(this.menuShow[2], this.MenuBuilder(), {
@@ -296,7 +296,7 @@ struct MenuTestLevel0_18 {
 
           Text(`菜单预览图设置Custom类型,设置radius的绘制效果,组合测试预览图scale和transition`)
             .paramTextStyle()
-          Image($r("app.media.unsplash_pic"))
+          Image($r("app.media.app_icon"))
             .key(`contextMenu: response_previewRadius_scale_transition`)
             .width("120").height(60)
             .bindContextMenu(this.MenuBuilder(), ResponseType.LongPress, {
