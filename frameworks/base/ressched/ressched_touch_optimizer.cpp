@@ -63,6 +63,14 @@ namespace {
         TP_USE = 1,     // TP use state
         OFFSET = 2,     // Offset state
     };
+    
+    // slide direction from pan recognizer
+    enum SLIDE_DIRECTION : int32_t {
+        VERTICAL = 0,
+        HORIZONTAL = 1,
+        FREE = 2,
+        NONE = 3,
+    };
 }
 
 namespace OHOS::Ace {
@@ -112,6 +120,18 @@ void ResSchedTouchOptimizer::SetLastTpFlushCount(uint32_t lastVsyncCount)
     lastTpFlushCount_ = lastVsyncCount;
 }
 
+
+/*
+ * Set slide direction from pan gesture
+ * Parameters:
+ *     slideDirection [in] slide direction from pan gesture
+ */
+void ResSchedTouchOptimizer::SetSlideDirection(int32_t slideDirection)
+{
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck slide direction %{public}u", slideDirection);
+    slideDirection_ = slideDirection;
+}
+
 /*
  * Check if TP flush is needed for the current VSync.
  *
@@ -134,18 +154,23 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(TouchEvent touchEvent, uint32_t cu
     }
     // If slide is not accepted, trigger TP flush for the first frame
     if (!slideAccepted_) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "slide first frame scene");
         ACE_SCOPED_TRACE("slide first frame scene");
         return true;
     }
     // If last frame was TP triggered and current VSync count differs,
     // trigger TP flush to avoid frame drop
     if (lastTpFlushCount_ != 0 && lastTpFlushCount_ != currentVsyncCount) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "reversed and need tp flush");
         ACE_SCOPED_TRACE("reversed and need tp flush");
         return true;
+    } else {
+        lastTpFlushCount_ = 0;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
-    if (!lastTpFlush_ && (touchEvent.xReverse || touchEvent.yReverse)) {
+    if (!lastTpFlush_ && (RVSDirectionStateCheck(touchEvent.xReverse) || RVSDirectionStateCheck(touchEvent.yReverse))) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "slide reversed");
         ACE_SCOPED_TRACE("slide reversed");
         return true;
     }
@@ -186,7 +211,8 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
         }
 
         // Process X-axis data
-        if (!(rvsDequeX_[iter.id].size() >= 1 && rvsDequeX_[iter.id].back() == iter.x)) {
+        if (slideDirection_ == SLIDE_DIRECTION::HORIZONTAL &&
+            !(rvsDequeX_[iter.id].size() >= 1 && rvsDequeX_[iter.id].back() == iter.x)) {
             rvsDequeX_[iter.id].push_back(iter.x);
             if (rvsDequeX_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeX_[iter.id].pop_front();
@@ -196,7 +222,8 @@ void ResSchedTouchOptimizer::RVSQueueUpdate(std::list<TouchEvent>& touchEvents)
         }
 
         // Process Y-axis data
-        if (!(rvsDequeY_[iter.id].size() >= 1 && rvsDequeY_[iter.id].back() == iter.y)) {
+        if (slideDirection_ == SLIDE_DIRECTION::VERTICAL &&
+            !(rvsDequeY_[iter.id].size() >= 1 && rvsDequeY_[iter.id].back() == iter.y)) {
             rvsDequeY_[iter.id].push_back(iter.y);
             if (rvsDequeY_[iter.id].size() >= RVS_QUEUE_SIZE) {
                 rvsDequeY_[iter.id].pop_front();
@@ -241,11 +268,11 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithSignal(TouchEvent& touchEvent, con
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse with signal");
-                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
+                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] with signal", axis, direction);
             } else {
                 touchEvent.yReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse with signal");
-                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
+                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] with signal", axis, direction);
             }
             return true;
         }
@@ -296,12 +323,12 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithoutSignal(TouchEvent& touchEvent, 
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse without signal");
-                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
+                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] without signal", axis, direction);
                 return true;
             } else {
                 touchEvent.yReverse = direction;
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse without signal");
-                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d]", axis, direction);
+                ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] without signal", axis, direction);
                 return true;
             }
         }
@@ -696,4 +723,18 @@ bool ResSchedTouchOptimizer::HandleState2(const TouchEvent& point, const int32_t
     return true;
 }
 
+/*
+ * Check if the RVS direction state is valid for touch optimization
+ *
+ * Parameters:
+ *     rvsDirection [in] rvsDirection state of current point.
+ *
+ * Returns:
+ *     true if the direction is either RVS_DOWN_LEFT or RVS_UP_RIGHT
+ */
+bool ResSchedTouchOptimizer::RVSDirectionStateCheck(uint32_t rvsDirection)
+{
+    return static_cast<int32_t>(rvsDirection) == RVS_DIRECTION::RVS_DOWN_LEFT ||
+        static_cast<int32_t>(rvsDirection) == RVS_DIRECTION::RVS_UP_RIGHT;
+}
 }

@@ -3175,8 +3175,19 @@ void PipelineContext::OnTouchEvent(
         }
 
         hasIdleTasks_ = true;
-        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount())) {
-            FlushVsync(static_cast<uint64_t>(GetSysTimestamp()), GetFrameCount());
+        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount()) &&
+            historyPointsById_.find(touchEvents_.back().id) != historyPointsById_.end()) {
+            //Fine-tuning fictional vsync timestamp
+            uint64_t intime = static_cast<uint64_t>(GetSysTimestamp());
+            auto hisAvgPoint = ResampleAlgo::GetAvgPoint(
+                std::vector<PointerEvent>(historyPointsById_[touchEvents_.back().id].begin(),
+                    historyPointsById_[touchEvents_.back().id].end()), CoordinateType::NORMAL);
+            if (hisAvgPoint.time != 0) {
+                uint64_t historyTime = hisAvgPoint.time;
+                uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+                intime = intime - vsyncPeriod + ONE_MS_IN_NS > historyTime ? intime : historyTime + vsyncPeriod;
+            }
+            FlushVsync(intime, GetFrameCount());
             ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
             ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(GetFrameCount());
         } else {

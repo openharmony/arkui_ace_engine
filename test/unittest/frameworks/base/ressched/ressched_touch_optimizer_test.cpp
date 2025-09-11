@@ -53,6 +53,14 @@ namespace {
         TP_USE = 1,
         OFFSET = 2,
     };
+
+    // slide direction from pan recognizer
+    enum SLIDE_DIRECTION : int32_t {
+        VERTICAL = 0,
+        HORIZONTAL = 1,
+        FREE = 2,
+        NONE = 3,
+    };
 } // namespace
 
 class ResSchedTouchOptimizerTest : public testing::Test {
@@ -108,7 +116,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 101));
     ResSchedTouchOptimizer::GetInstance().lastTpFlush_ = false;
     touchEvent.xReverse = true;
-    EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
+    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
     touchEvent.xReverse = false;
     touchEvent.yReverse = false;
     EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
@@ -233,7 +241,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 
     optimizer.RVSQueueUpdate(touchEvents);
 
-    EXPECT_FALSE(optimizer.rvsDequeX_[1].empty());
+    EXPECT_TRUE(optimizer.rvsDequeX_[1].empty());
     EXPECT_FALSE(optimizer.rvsDequeY_[1].empty());
     EXPECT_TRUE(optimizer.rvsDequeX_.find(2) == optimizer.rvsDequeX_.end());
     EXPECT_TRUE(optimizer.rvsDequeY_.find(2) == optimizer.rvsDequeY_.end());
@@ -265,7 +273,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1
 
     optimizer.RVSQueueUpdate(touchEvents);
 
-    EXPECT_FALSE(optimizer.rvsDequeX_[1].empty());
+    EXPECT_TRUE(optimizer.rvsDequeX_[1].empty());
     EXPECT_FALSE(optimizer.rvsDequeY_[1].empty());
     EXPECT_TRUE(optimizer.rvsDequeX_.find(2) == optimizer.rvsDequeX_.end());
     EXPECT_TRUE(optimizer.rvsDequeY_.find(2) == optimizer.rvsDequeY_.end());
@@ -1411,7 +1419,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // Check that new elements were added
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 105);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 100);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 205);
 }
 
@@ -1455,7 +1463,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
     EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 6);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 150);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 125);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 250);
 }
 
@@ -1503,11 +1511,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
     EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 7);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 200);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 130);
     EXPECT_EQ(optimizer.rvsDequeY_[1].back(), 300);
     
     // The old front element should no longer be in the deque
-    EXPECT_NE(optimizer.rvsDequeX_[1].front(), frontX);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].front(), frontX);
     EXPECT_NE(optimizer.rvsDequeY_[1].front(), frontY);
 }
 
@@ -1575,11 +1583,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
     optimizer.RVSQueueUpdate(touchEvents);
     
     // MOVE event should be processed and data added
-    EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
+    EXPECT_TRUE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());
     
     // data for ID 1 should still exist
-    EXPECT_FALSE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
+    EXPECT_TRUE(optimizer.rvsDequeX_.find(1) == optimizer.rvsDequeX_.end());
     EXPECT_FALSE(optimizer.rvsDequeY_.find(1) == optimizer.rvsDequeY_.end());
 }
 
@@ -1802,5 +1810,205 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Lev
     // With two elements, gap1 will be calculated but not gap2
     // Loop will exit without comparing gap signs, should return false
     EXPECT_TRUE(optimizer.RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+}
+
+/**
+ * @tc.name: SetSlideDirection001
+ * @tc.desc: Test SetSlideDirection functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.slideDirection_ = SLIDE_DIRECTION::NONE;
+    
+    optimizer.SetSlideDirection(SLIDE_DIRECTION::HORIZONTAL);
+    EXPECT_EQ(optimizer.slideDirection_, SLIDE_DIRECTION::HORIZONTAL);
+    
+    optimizer.SetSlideDirection(SLIDE_DIRECTION::VERTICAL);
+    EXPECT_EQ(optimizer.slideDirection_, SLIDE_DIRECTION::VERTICAL);
+}
+
+/**
+ * @tc.name: NeedTpFlushVsync003
+ * @tc.desc: Test NeedTpFlushVsync lastTpFlushCount_ reset branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync003, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideAccepted_ = true;
+    optimizer.lastTpFlush_ = false;
+    optimizer.lastTpFlushCount_ = 100;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    
+    // Test the branch where lastTpFlushCount_ != 0 && lastTpFlushCount_ == currentVsyncCount
+    EXPECT_FALSE(optimizer.NeedTpFlushVsync(touchEvent, 100));
+    EXPECT_EQ(optimizer.lastTpFlushCount_, 0); // Should be reset to 0
+}
+
+/**
+ * @tc.name: RVSDirectionStateCheck001
+ * @tc.desc: Test RVSDirectionStateCheck with different directions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    
+    // Test valid directions
+    EXPECT_TRUE(optimizer.RVSDirectionStateCheck(RVS_DIRECTION::RVS_DOWN_LEFT));
+    EXPECT_TRUE(optimizer.RVSDirectionStateCheck(RVS_DIRECTION::RVS_UP_RIGHT));
+    
+    // Test invalid directions
+    EXPECT_FALSE(optimizer.RVSDirectionStateCheck(RVS_DIRECTION::RVS_NOT_APPLY));
+    EXPECT_FALSE(optimizer.RVSDirectionStateCheck(RVS_DIRECTION::RVS_INITIAL_SIGNAL));
+    EXPECT_FALSE(optimizer.RVSDirectionStateCheck(100)); // Invalid value
+}
+
+/**
+ * @tc.name: RVSQueueUpdate011
+ * @tc.desc: Test RVSQueueUpdate horizontal slide direction processing
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer.rvsDequeX_.clear();
+    optimizer.rvsDequeY_.clear();
+    
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    std::list<TouchEvent> touchEvents = {touchEvent};
+    
+    // First call - should add to deque but not process yet (size < RVS_QUEUE_SIZE)
+    optimizer.RVSQueueUpdate(touchEvents);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 1);
+    EXPECT_TRUE(optimizer.rvsDequeY_[1].empty()); // Y should not be processed for horizontal slide
+    
+    // Add more events to reach RVS_QUEUE_SIZE
+    for (int i = 1; i < 7; i++) {
+        touchEvent.x = 100 + i * 10;
+        touchEvents = {touchEvent};
+        optimizer.RVSQueueUpdate(touchEvents);
+    }
+    
+    // Now deque should have RVS_QUEUE_SIZE elements
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
+}
+
+/**
+ * @tc.name: RVSQueueUpdate012
+ * @tc.desc: Test RVSQueueUpdate vertical slide direction processing
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideDirection_ = SLIDE_DIRECTION::VERTICAL;
+    optimizer.rvsDequeX_.clear();
+    optimizer.rvsDequeY_.clear();
+    
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100;
+    touchEvent.y = 200;
+    
+    std::list<TouchEvent> touchEvents = {touchEvent};
+    
+    // First call - should add to deque but not process yet (size < RVS_QUEUE_SIZE)
+    optimizer.RVSQueueUpdate(touchEvents);
+    EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 1);
+    EXPECT_TRUE(optimizer.rvsDequeX_[1].empty()); // X should not be processed for vertical slide
+    
+    // Add more events to reach RVS_QUEUE_SIZE
+    for (int i = 1; i < 7; i++) {
+        touchEvent.y = 200 + i * 10;
+        touchEvents = {touchEvent};
+        optimizer.RVSQueueUpdate(touchEvents);
+    }
+    
+    // Now deque should have RVS_QUEUE_SIZE elements
+    EXPECT_EQ(optimizer.rvsDequeY_[1].size(), 6);
+}
+
+/**
+ * @tc.name: RVSQueueUpdate013
+ * @tc.desc: Test RVSQueueUpdate duplicate value filtering
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer.rvsDequeX_.clear();
+    
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 100; // Same value
+    
+    std::list<TouchEvent> touchEvents = {touchEvent};
+    
+    // Add same value multiple times
+    for (int i = 0; i < 3; i++) {
+        optimizer.RVSQueueUpdate(touchEvents);
+    }
+    
+    // Should only contain one element due to duplicate filtering
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 1);
+    EXPECT_EQ(optimizer.rvsDequeX_[1].back(), 100);
+}
+
+/**
+ * @tc.name: RVSQueueUpdate014
+ * @tc.desc: Test RVSQueueUpdate processing when queue reaches RVS_QUEUE_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer.rvsDequeX_.clear();
+    
+    // Pre-fill deque to RVS_QUEUE_SIZE - 1
+    for (int i = 0; i < 6; i++) {
+        optimizer.rvsDequeX_[1].push_back(50 + i * 10);
+    }
+    
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.x = 150; // This will make the queue reach RVS_QUEUE_SIZE
+    
+    std::list<TouchEvent> touchEvents = {touchEvent};
+    
+    // Mock the check functions to avoid complex setup
+    optimizer.RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
+    optimizer.RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
+    
+    optimizer.RVSQueueUpdate(touchEvents);
+    
+    // Queue should now have RVS_QUEUE_SIZE elements
+    EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
 }
 } // namespace OHOS::Ace
