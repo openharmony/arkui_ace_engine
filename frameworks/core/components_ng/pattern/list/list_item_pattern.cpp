@@ -341,8 +341,8 @@ void ListItemPattern::ExpandSwipeAction(ListItemSwipeActionDirection direction)
     CHECK_NULL_VOID(host);
     CHECK_EQUAL_VOID(host->IsOnMainTree(), false);
     CHECK_EQUAL_VOID(host->IsActive(), false);
-    auto targetIndex = direction == ListItemSwipeActionDirection::START ? ListItemSwipeIndex::SWIPER_END
-                                                                        : ListItemSwipeIndex::SWIPER_START;
+    auto targetIndex = direction == ListItemSwipeActionDirection::START ? ListItemSwipeIndex::SWIPER_START
+                                                                        : ListItemSwipeIndex::SWIPER_END;
     CHECK_EQUAL_VOID(targetIndex, swiperIndex_);
     auto nodeIndex = direction == ListItemSwipeActionDirection::START ? endNodeIndex_ : startNodeIndex_;
     CHECK_EQUAL_VOID(nodeIndex, -1);
