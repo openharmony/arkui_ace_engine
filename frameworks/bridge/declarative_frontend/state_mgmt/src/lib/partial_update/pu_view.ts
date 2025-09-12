@@ -273,6 +273,7 @@ abstract class ViewPU extends PUV2ViewBase
     });
 
     if (ConfigureStateMgmt.instance.needsV2Observe()) {
+      ObserveV2.getObserve().clearBinding(this.id_);
       delete ObserveV2.getObserve().id2cmp_[this.id_];
     }
 
