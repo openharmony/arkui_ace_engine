@@ -913,6 +913,7 @@ public:
     void ResetDragging() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
+    RefPtr<FrameNode> GetContainerModalNode();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
@@ -1316,7 +1317,6 @@ protected:
         float safeHeight = 0.0f, const bool supportAvoidance = false);
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    RefPtr<FrameNode> GetContainerModalNode();
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
     void StartFoldStatusDelayTask(FoldStatus foldStatus);

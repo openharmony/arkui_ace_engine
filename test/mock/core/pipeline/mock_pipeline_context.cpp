@@ -1141,6 +1141,15 @@ void PipelineContext::FlushDirtyPropertyNodes()
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
 void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis) {}
+
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(rootNode_, nullptr);
+    return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
@@ -99,7 +100,7 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
         dragContext->UpdateForegroundColorStrategy(hostContext->GetForegroundColorStrategy().value());
     }
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
-    auto data = CalculateTextDragData(hostPattern, dragNode);
+    auto data = CalculateTextDragData(hostPattern, dragNode, hostNode);
     TAG_LOGI(AceLogTag::ACE_TEXT, "CreateDragNode SelectPositionInfo startX = %{public}f, startY = %{public}f,\
              endX = %{public}f, endY = %{public}f, globalX = %{public}f, globalY = %{public}f",
              data.selectPosition_.startX_, data.selectPosition_.startY_,
@@ -120,13 +121,21 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
-void TextDragPattern::CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+void TextDragPattern::CalculateOverlayOffset(
+    RefPtr<FrameNode>& dragNode, OffsetF& offset, const RefPtr<FrameNode>& hostNode)
 {
     auto pipeline = dragNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
+    auto containerModalNode = pipeline->GetContainerModalNode();
+    if (containerModalNode) {
+        auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+        if (containerModalPattern && containerModalPattern->CheckNodeOnContainerModalTitle(hostNode)) {
+            rootNode = containerModalNode;
+        }
+    }
     CHECK_NULL_VOID(rootNode);
     auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
     CHECK_NULL_VOID(rootGeometryNode);
@@ -144,7 +153,8 @@ void TextDragPattern::DropBlankLines(std::vector<RectF>& boxes)
     }
 }
 
-TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
+TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode,
+    const RefPtr<FrameNode>& hostNode)
 {
     auto dragContext = dragNode->GetRenderContext();
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
@@ -156,7 +166,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     CHECK_NULL_RETURN(!boxes.empty(), {});
     DropBlankLines(boxes);
     auto globalOffset = pattern->GetParentGlobalOffset();
-    CalculateOverlayOffset(dragNode, globalOffset);
+    CalculateOverlayOffset(dragNode, globalOffset, hostNode);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);

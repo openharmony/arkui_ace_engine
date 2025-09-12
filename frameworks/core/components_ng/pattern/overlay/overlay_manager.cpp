@@ -59,6 +59,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/focus/focus_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -6988,9 +6989,19 @@ void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode
  * mouse, etc.
  * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
  */
-void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap)
+void OverlayManager::MountPixelMapToRootNode(
+    const RefPtr<FrameNode>& columnNode, bool isDragPixelMap, const RefPtr<FrameNode>& hostNode)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto containerModalNode = pipeline->GetContainerModalNode();
+    if (containerModalNode) {
+        auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+        if (containerModalPattern && containerModalPattern->CheckNodeOnContainerModalTitle(hostNode)) {
+            rootNode = containerModalNode;
+        }
+    }
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
