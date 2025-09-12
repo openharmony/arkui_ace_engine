@@ -5133,7 +5133,7 @@ HWTEST_F(SelectOverlayTestNg, CreatExtensionMenu001, TestSize.Level1)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     std::vector<OptionParam> params;
-    selectOverlayNode->CreatExtensionMenu(std::move(params));
+    selectOverlayNode->CreatExtensionMenu(std::move(params), nullptr);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
 }
 

@@ -882,6 +882,7 @@ public:
     virtual RefPtr<FrameNode> CreateAIEntityMenu();
     virtual bool CheckAIPreviewMenuEnable();
     void InitAiSelection(const Offset& globalOffset);
+    bool PressOnEllipsisTextRange(const Offset& localOffset);
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
     void ResetAISelected(AIResetSelectionReason reason) override;
