@@ -60,7 +60,8 @@ export struct MenuIndex {
     { name: 'MenuTestLevel01', path: 'MenuTestLevel01'},
     { name: 'MenuTestLevel010', path: 'MenuTestLevel010'},
     { name: 'MenuTestLevel011', path: 'MenuTestLevel011'},
-    { name: 'MenuTestLevel012', path: 'MenuTestLevel012'}
+    { name: 'MenuTestLevel012', path: 'MenuTestLevel012'},
+    { name: 'MenuComplex', path: 'MenuComplex' },
   ]
 
   build() {

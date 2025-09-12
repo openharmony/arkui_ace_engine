@@ -42,6 +42,8 @@ export struct PopupIndex {
     { name: 'PopupKeyboardTest', path: 'PopupKeyboardTest' },
     { name: 'UIContextPopupTest', path: 'UIContextPopupTest' },
     { name: 'PopupBigTest', path: 'PopupBigTest' },
+    { name: 'AdvancedPopupTest', path: 'AdvancedPopupTest' },
+    { name: 'PopupTest', path: 'PopupTest' },
   ]
 
   build() {
