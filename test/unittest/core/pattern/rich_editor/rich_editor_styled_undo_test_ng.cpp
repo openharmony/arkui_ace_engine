@@ -240,6 +240,15 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation003, TestSize.Level1)
     EXPECT_EQ(undoRecord.rangeBefore.end, 9);
     EXPECT_EQ(undoRecord.rangeAfter.start, 0);
     EXPECT_EQ(undoRecord.rangeAfter.end, 0);
+
+    // step5 Invalid SpanType
+    auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto spanItem = spanNode->GetSpanItem();
+    richEditorPattern->undoManager_->RecordAddSpanOperation(spanItem, static_cast<SpanOptionsType>(4));
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 4);
+    auto resultObject = ResultObject { .type = static_cast<SelectSpanType>(4) };
+    auto spanOptions = richEditorPattern->undoManager_->builder_->CreateSpanOptionsBySpanObject(resultObject);
+    EXPECT_TRUE(std::holds_alternative<TextSpanOptions>(spanOptions));
 }
 
 /**
