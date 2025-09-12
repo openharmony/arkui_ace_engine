@@ -130,7 +130,7 @@ class ComputedV2 {
   public static clearComputedFromTarget(target: Object): void {
     const computedIds = ComputedV2.getComputedIds(target);
     stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(computedIds)}`);
-    computedIds?.forEach((computedId: number) => {
+    computedIds.forEach((computedId: number) => {
       ObserveV2.getObserve().clearWatch(computedId);
       delete ObserveV2.getObserve().id2Others_[computedId];
     });

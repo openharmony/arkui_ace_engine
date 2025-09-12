@@ -54,7 +54,7 @@ class WeakRefPool {
   // Create a WeakRef for the given object and put it into the pool, or get
   // existing WeakRef from the pool if the object is already there. WeakRefs
   // for the same object are always identical.
-  public static getWeekRef<T extends object>(obj: T): WeakRef<T> {
+  public static getWeakRef<T extends object>(obj: T): WeakRef<T> {
     let observedV2ClassInfo = WeakRefPool.wmap_.get(obj);
     if (observedV2ClassInfo === undefined) {
       WeakRefPool.wmap_.set(obj, observedV2ClassInfo = { weakRef: new WeakRef(obj), cleanupInfo: {} });

@@ -354,7 +354,7 @@ public notifyChangeForEachPath(pathId: number): number {
   public static clearWatchesFromTarget(target: Object): void {
     const monitorIds = MonitorV2.getMonitorIds(target);
     stateMgmtConsole.debug(`MonitorV2: clearWatchesFromTarget: from target ${target.constructor?.name} watchIds to clear ${JSON.stringify(monitorIds)}`);
-    monitorIds?.forEach((watchId) => {
+    monitorIds.forEach((watchId) => {
       ObserveV2.getObserve().clearWatch(watchId);
       delete ObserveV2.getObserve().id2Others_[watchId];
     });
