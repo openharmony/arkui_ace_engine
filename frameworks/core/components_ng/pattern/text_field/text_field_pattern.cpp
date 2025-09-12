@@ -5146,7 +5146,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 #if defined(IOS_PLATFORM)
-    if (info.compose.isActive || info.unmarkText) {
+    if (info.compose.isActive && (insertValue.length() > 0 || info.unmarkText)) {
         auto composeStart = info.compose.start;
         auto composeEnd = info.compose.end;
         DeleteByRange(composeStart, composeEnd);
