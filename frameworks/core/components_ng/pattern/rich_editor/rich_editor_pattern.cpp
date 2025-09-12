@@ -1447,6 +1447,8 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
         spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
+        StyleManager::AddTextColorResource(spanNode, textStyle);
+        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
     }
     UpdateUrlStyle(spanNode, options.urlAddress);
 }
@@ -1553,6 +1555,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
         spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
         spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
+        StyleManager::AddSymbolColorResource(spanNode, options.style.value());
     }
     bool isUndoRedo = (options.optionSource == OptionSource::UNDO_REDO);
     IF_TRUE(isUndoRedo && options.paraStyle.has_value(), UpdateParagraphStyle(spanNode, options.paraStyle.value()));
@@ -1932,6 +1935,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
     UpdateTextBackgroundStyle(target, source->GetTextBackgroundStyle());
+    target->CopyResource(source);
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -2326,6 +2330,7 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
+        StyleManager::AddTextColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
@@ -2370,6 +2375,7 @@ void RichEditorPattern::UpdateDecoration(
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
+        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -2394,6 +2400,7 @@ void RichEditorPattern::UpdateSymbolStyle(
     }
     if (updateSpanStyle.updateSymbolColor.has_value()) {
         spanNode->UpdateSymbolColorList(updateSpanStyle.updateSymbolColor.value());
+        StyleManager::AddSymbolColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
         spanNode->UpdateSymbolRenderingStrategy(updateSpanStyle.updateSymbolRenderingStrategy.value());
@@ -5484,6 +5491,36 @@ bool RichEditorPattern::UnableStandardInputCrossPlatform(TextInputConfiguration&
 }
 #endif
 
+void RichEditorPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto color = std::get_if<Color>(&(value->GetValue()));
+    CHECK_NULL_VOID(color);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateProperty, key=%{public}s, color=%{public}s",
+        key.c_str(), color->ToString().c_str());
+    const std::unordered_map<std::string, std::function<void(const Color& color)>> UPDATER_MAP = {
+        { StyleManager::CARET_COLOR_KEY,  [this](const Color& c){ SetCaretColor(c); } },
+        { StyleManager::SCROLL_BAR_COLOR_KEY,  [this](const Color& c){ UpdateScrollBarColor(c); } },
+        { StyleManager::PLACEHOLDER_FONT_COLOR_KEY,  [this](const Color& c){ UpdatePlaceholderFontColor(c); } },
+        { StyleManager::SELECTED_BACKGROUND_COLOR_KEY,  [this](const Color& c){ SetSelectedBackgroundColor(c); } },
+    };
+    auto iter = UPDATER_MAP.find(key);
+    IF_TRUE(iter != UPDATER_MAP.end(), iter->second(*color));
+}
+
+void RichEditorPattern::OnColorModeChange(uint32_t colorMode)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnColorModeChange, mode=%{public}u", colorMode);
+    Pattern::OnColorModeChange(colorMode);
+}
+
+void RichEditorPattern::UpdatePlaceholderFontColor(const Color& color)
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    IF_PRESENT(layoutProperty, UpdatePlaceholderTextColor(color));
+    auto host = GetContentHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
+}
+
 void RichEditorPattern::OnColorConfigurationUpdate()
 {
     auto colorMode = GetColorMode();
@@ -6239,6 +6276,7 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
     IF_TRUE(updateSpanStyle.updateTextDecorationStyle, ret.SetTextDecorationStyle(textStyle.GetTextDecorationStyle()));
     IF_TRUE(updateSpanStyle.updateLineThicknessScale, ret.SetLineThicknessScale(textStyle.GetLineThicknessScale()));
     IF_TRUE(updateSpanStyle.updateTextBackgroundStyle, ret.SetTextBackgroundStyle(textStyle.GetTextBackgroundStyle()));
+    ret.CopyResource(textStyle);
     return ret;
 }
 

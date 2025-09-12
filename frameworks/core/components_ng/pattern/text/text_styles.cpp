@@ -325,6 +325,10 @@ std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<
 
 void FontStyle::UpdateColorByResourceId()
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        ReloadResources();
+        return;
+    }
     if (propTextColor) {
         propTextColor->UpdateColorByResourceId();
     }

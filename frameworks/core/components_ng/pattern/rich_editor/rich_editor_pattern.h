@@ -982,6 +982,8 @@ public:
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    void OnColorModeChange(uint32_t colorMode) override;
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void OnCommonColorChange();
@@ -1401,6 +1403,7 @@ public:
 
     bool IsShortCutBlocked() override { return IsDragging(); }
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
+    void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender();
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };

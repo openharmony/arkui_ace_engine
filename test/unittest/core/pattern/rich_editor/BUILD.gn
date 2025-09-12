@@ -44,6 +44,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_onwill_test_replace_insert.cpp",
     "rich_editor_placeholder_span_test_ng.cpp",
     "rich_editor_preview_text_test_ng.cpp",
+    "rich_editor_resource_test.cpp",
     "rich_editor_scroll_test_ng.cpp",
     "rich_editor_select_overlay_test_ng.cpp",
     "rich_editor_selection_test_ng.cpp",

@@ -115,6 +115,14 @@ std::string TextStyle::GetDeclarationString(
 
 void TextStyle::UpdateColorByResourceId()
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        ReloadResources();
+        std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.ReloadResources(); });
+        if (propTextBackgroundStyle_.has_value()) {
+            propTextBackgroundStyle_->ReloadResources();
+        }
+        return;
+    }
     propTextColor_.UpdateColorByResourceId();
     propTextDecorationColor_.UpdateColorByResourceId();
     if (propTextBackgroundStyle_.has_value()) {
@@ -122,6 +130,39 @@ void TextStyle::UpdateColorByResourceId()
     }
     std::for_each(propRenderColors_.begin(), propRenderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+}
+
+void TextStyle::AddResource(
+    const std::string& key,
+    const RefPtr<ResourceObject>& resObj,
+    std::function<void(const RefPtr<ResourceObject>&, TextStyle&)>&& updateFunc)
+{
+    CHECK_NULL_VOID(resObj && updateFunc);
+    resMap_[key] = { resObj, std::move(updateFunc) };
+}
+
+const RefPtr<ResourceObject>& TextStyle::GetResource(const std::string& key) const
+{
+    static const RefPtr<ResourceObject> invalidResObj = nullptr;
+    auto iter = resMap_.find(key);
+    return iter == resMap_.end() ? invalidResObj : iter->second.resObj;
+}
+
+void TextStyle::CopyResource(const TextStyle& source)
+{
+    resMap_ = source.resMap_;
+}
+
+void TextStyle::AppendResource(const TextStyle& source)
+{
+    resMap_.insert(source.resMap_.begin(), source.resMap_.end());
+}
+
+void TextStyle::ReloadResources()
+{
+    for (const auto& [key, resourceUpdater] : resMap_) {
+        resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+    }
 }
 
 std::string TextStyle::ToString() const
