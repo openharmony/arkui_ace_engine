@@ -831,7 +831,7 @@ void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     if (accessibilityManager->IsRegister() && accessibilityChildTreeCallback_) {
-        accessibilityChildTreeCallback_->OnDeregister();
+        OnAccessibilityChildTreeDeregister(frameNode);
     }
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(accessibilityId);
     accessibilityChildTreeCallback_ = nullptr;
@@ -886,13 +886,18 @@ bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int3
     return accessibilityManager->RegisterInteractionOperationAsChildTree(registration);
 }
 
-bool XComponentPattern::OnAccessibilityChildTreeDeregister()
+bool XComponentPattern::OnAccessibilityChildTreeDeregister(FrameNode* frameNode)
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
         "windowId: %{public}u, treeId: %{public}d.", windowId_, treeId_);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipeline = host->GetContextRefPtr();
+    RefPtr<PipelineContext> pipeline;
+    if (!frameNode) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        pipeline = host->GetContextRefPtr();
+    } else {
+        pipeline = frameNode->GetContextRefPtr();
+    }
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
