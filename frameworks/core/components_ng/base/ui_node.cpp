@@ -20,6 +20,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
@@ -594,6 +595,46 @@ bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
 }
 }
 
+void UINode::AllowForceDark(bool forceDarkAllowed)
+{
+    forceDarkAllowed_ = forceDarkAllowed;
+
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    if (context_) {
+        context_->NeedReloadResource(true);
+        context_->AddNeedReloadNodes(WeakClaim(this));
+    }
+    for (const auto& child : GetChildren()) {
+        child->AllowForceDark(forceDarkAllowed);
+    }
+}
+
+void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(child);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto pipelineContext = GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    if (!GetForceDarkAllowed() || (!child->GetForceDarkAllowed() && !(child->GetForceDarkAllowedByUser()))) {
+        child->forceDarkAllowed_ = GetForceDarkAllowed();
+        pipelineContext->NeedReloadResource(true);
+        pipelineContext->AddNeedReloadNodes(WeakClaim(AceType::RawPtr(child)));
+    }
+    if (!child->GetForceDarkAllowed() && GetForceDarkAllowed() && child->GetForceDarkAllowedByUser()) {
+        pipelineContext->NeedReloadResource(true);
+        pipelineContext->AddNeedReloadNodes(WeakClaim(AceType::RawPtr(child)));
+    }
+    for (const auto& uiChild : child->GetChildren()) {
+        child->UpdateForceDarkAllowedNode(uiChild);
+    }
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
@@ -639,6 +680,7 @@ void UINode::DoAddChild(
             NotifyColorModeChange(colorMode);
         }
     }
+    UpdateForceDarkAllowedNode(child);
 }
 
 void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
@@ -1633,6 +1675,7 @@ void UINode::NotifyColorModeChange(uint32_t colorMode)
         child->SetShouldClearCache(CheckShouldClearCache());
         child->SetRerenderable(GetRerenderable());
         child->SetMeasureAnyway(CheckMeasureAnyway());
+        child->forceDarkAllowed_ = (child->GetForceDarkAllowed() && GetForceDarkAllowed());
         if (!AceType::DynamicCast<FrameNode>(child)) {
             child->SetDarkMode(CheckIsDarkMode());
         }

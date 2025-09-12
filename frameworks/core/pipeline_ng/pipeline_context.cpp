@@ -722,6 +722,37 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
     }
 }
 
+void PipelineContext::AddNeedReloadNodes(const WeakPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node.Upgrade());
+    if (std::find(needReloadNodes_.begin(), needReloadNodes_.end(), node) == needReloadNodes_.end()) {
+        needReloadNodes_.push_back(node);
+    }
+}
+
+void PipelineContext::ReloadNodesResource()
+{
+    if (!SystemProperties::ConfigChangePerform() || !needReloadResource_) {
+        return;
+    }
+
+    auto needReloadNodes = std::move(needReloadNodes_);
+    for (const auto& it : needReloadNodes) {
+        auto needReloadNode = it.Upgrade();
+        auto frameNode = AceType::DynamicCast<FrameNode>(needReloadNode);
+        if (frameNode) {
+            auto pattern = frameNode->GetPattern();
+            if (pattern) {
+                bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
+                ResourceParseUtils::SetIsReloading(forceDarkAllowed);
+                pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
+                ResourceParseUtils::SetIsReloading(false);
+            }
+        }
+    }
+    needReloadResource_ = false;
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -749,6 +780,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
+    ReloadNodesResource();
     ProcessDelayTasks();
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);

@@ -2343,4 +2343,18 @@ HWTEST_F(ViewAbstractTestNg, backgroundImagePostionCheckDiff, TestSize.Level1)
     backgroundImagePosition1.SetIsAlign(true);
     EXPECT_TRUE(backgroundImagePosition1 == backgroundImagePosition2);
 }
+
+/**
+ * @tc.name: AllowForceDark001
+ * @tc.desc: Test AllowForceDark
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, AllowForceDark001, TestSize.Level1)
+{
+    auto topNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewAbstract::AllowForceDark(false);
+    EXPECT_FALSE(topNode->GetForceDarkAllowed());
+    ViewAbstract::AllowForceDark(AceType::RawPtr(topNode), true);
+    EXPECT_TRUE(topNode->GetForceDarkAllowed());
+}
 } // namespace OHOS::Ace::NG

@@ -1515,6 +1515,8 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
+void NG::PipelineContext::AddNeedReloadNodes(const WeakPtr<NG::UINode>& node) {}
+
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
 {
     vsyncListener_ = std::move(vsync);

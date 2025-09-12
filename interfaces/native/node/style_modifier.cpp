@@ -1546,6 +1546,29 @@ const ArkUI_AttributeItem* GetPositionEdges(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetAllowForceDark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->allowForceDark(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetAllowForceDark(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetAllowForceDark(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetAllowForceDark(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAllowForceDark(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
 void ResetRotate(ArkUI_NodeHandle node)
 {
     // already check in entry point.
@@ -16676,6 +16699,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetWidthLayoutPolicy,
         SetHeightLayoutPolicy,
         SetPositionEdges,
+        SetAllowForceDark,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16795,6 +16819,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetWidthLayoutPolicy,
         GetHeightLayoutPolicy,
         GetPositionEdges,
+        GetAllowForceDark,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16918,6 +16943,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetWidthLayoutPolicy,
         ResetHeightLayoutPolicy,
         ResetPositionEdges,
+        ResetAllowForceDark,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

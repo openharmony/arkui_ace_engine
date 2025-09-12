@@ -1173,6 +1173,27 @@ void SetHeightLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
     ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, false);
 }
 
+void AllowForceDark(ArkUINodeHandle node, ArkUI_Bool forceDarkAllowed)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    ViewAbstract::AllowForceDark(uiNode, forceDarkAllowed);
+}
+
+void ResetAllowForceDark(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    ViewAbstract::ResetAllowForceDark(uiNode);
+}
+
+ArkUI_Bool GetAllowForceDark(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetAllowForceDark(uiNode));
+}
+
 void ResetHeightLayoutPolicy(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10182,6 +10203,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetHeightLayoutPolicy = ResetHeightLayoutPolicy,
         .getHeightLayoutPolicy = GetHeightLayoutPolicy,
         .getPositionEdges = GetPositionEdges,
+        .allowForceDark = AllowForceDark,
+        .resetAllowForceDark = ResetAllowForceDark,
+        .getAllowForceDark = GetAllowForceDark,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

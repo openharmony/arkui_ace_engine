@@ -1017,6 +1017,23 @@ public:
         return shouldClearCache_;
     }
 
+    void AllowForceDark(bool forceDarkAllowed);
+
+    bool GetForceDarkAllowed()
+    {
+        return forceDarkAllowed_;
+    }
+
+    void AllowForceDarkByUser(bool forceDarkAllowedbyUser)
+    {
+        forceDarkAllowedbyUser_ = forceDarkAllowedbyUser;
+    }
+
+    bool GetForceDarkAllowedByUser()
+    {
+        return forceDarkAllowedbyUser_;
+    }
+
     bool IsArkTsRenderNode() const
     {
         return isArkTsRenderNode_;
@@ -1195,6 +1212,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
     void UpdateDrawChildObserver(const RefPtr<UINode>& child);
 
@@ -1280,6 +1298,8 @@ private:
     bool isDarkMode_ = false;
     bool measureAnyWay_ = false;
     bool shouldClearCache_ = true;
+    bool forceDarkAllowed_ = true;
+    bool forceDarkAllowedbyUser_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;

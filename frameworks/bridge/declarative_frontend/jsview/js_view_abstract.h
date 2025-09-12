@@ -884,6 +884,7 @@ public:
     static bool CheckLengthMetrics(const JSRef<JSObject>& object);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state);
+    static void JSAllowForceDark(const JSCallbackInfo& info);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
