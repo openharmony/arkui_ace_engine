@@ -1082,14 +1082,16 @@ HWTEST_F(WebPatternWindowTestNg, AdjustRotationRenderFitTest001, TestSize.Level1
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto type = WindowSizeChangeReason::UNDEFINED;
     webPattern->AdjustRotationRenderFit(type);
-    type = WindowSizeChangeReason::ROTATION;
+    type = WindowSizeChangeReason::MAXIMIZE;
     webPattern->AdjustRotationRenderFit(type);
     webPattern->isAttachedToMainTree_ = true;
     webPattern->isVisible_ = false;
+    type = WindowSizeChangeReason::ROTATION;
     webPattern->AdjustRotationRenderFit(type);
     webPattern->isVisible_ = true;
     webPattern->delegate_ = nullptr;
