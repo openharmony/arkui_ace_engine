@@ -242,6 +242,8 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
         const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
+    void SearchElementInfoBySpecificPropertyInner(const int64_t elementId, const SpecificPropertyParam &param,
+        const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void SearchDefaultFocusByWindowId(const int32_t windowId, int32_t pageId, const int32_t requestId,
