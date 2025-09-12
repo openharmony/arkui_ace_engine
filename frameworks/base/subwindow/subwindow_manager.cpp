@@ -1560,6 +1560,9 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
                 : FoldStatus::UNKNOWN;
     }
 
+    if (searchKey.windowType == SubwindowType::TYPE_SHEET) {
+        searchKey.foldStatus = FoldStatus::UNKNOWN;
+    }
     searchKey.displayId = displayId;
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Get current subwindow searchKey is %{public}s.",
         searchKey.ToString().c_str());
