@@ -73,6 +73,8 @@ struct AnimateParam {
 
 struct SymbolData {
     std::optional<uint32_t> symbol;
+    std::vector<std::string> symbolFamilyName;
+    SymbolType symbolType;
 };
 
 struct FontFamilies {

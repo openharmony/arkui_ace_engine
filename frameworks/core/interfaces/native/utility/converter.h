@@ -211,7 +211,7 @@ namespace Converter {
             std::vector<ParamType> params_;
     };
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
-    std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
+    template<typename T> std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src,
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
@@ -219,6 +219,7 @@ namespace Converter {
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
+
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
     {

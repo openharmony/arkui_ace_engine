@@ -168,7 +168,7 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src)
             break;
     }
 }
-}
+} /* namespace OHOS::Ace::NG::Converter */
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextModifier {
@@ -199,8 +199,14 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 
     // pass internal controller to peer
     auto textOptions = Converter::OptConvertPtr<Converter::TextOptions>(value);
-    if (textOptions && textOptions->peer) {
-        textOptions->peer->controller = AceType::DynamicCast<TextController>(internalController);
+    CHECK_NULL_VOID(textOptions);
+    auto textController = textOptions->peer;
+    CHECK_NULL_VOID(textController);
+    textController->controller = AceType::DynamicCast<TextController>(internalController);
+    auto styledStringCache = textController->GetStyledStringCache();
+    if (styledStringCache) {
+        textController->controller->SetStyledString(styledStringCache);
+        textController->SetStyledStringCache(nullptr);
     }
 }
 } // TextInterfaceModifier
@@ -218,7 +224,10 @@ void SetFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetFontSize(frameNode, fontSize);
@@ -228,7 +237,10 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMinFontSize(frameNode, fontSize);
@@ -238,7 +250,10 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMaxFontSize(frameNode, fontSize);
@@ -294,7 +309,10 @@ void SetLineHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto lineHeight = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> lineHeight = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        lineHeight = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(lineHeight);
     TextModelStatic::SetLineHeight(frameNode, lineHeight);
 }
@@ -410,7 +428,10 @@ void SetTextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indent = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> indent = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        indent = Converter::OptConvertFromArkNumStrRes(value->value, DimensionUnit::FP);
+    }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
 void SetWordBreakImpl(Ark_NativePointer node,
@@ -613,6 +634,12 @@ void SetFontImpl(Ark_NativePointer node,
     if (convValue.has_value()) {
         convValue->enableVariableFontWeight = enableVariableFontWeight;
     }
+    Converter::FontWeightInt defaultWeight = {};
+    std::optional<Converter::FontWeightInt> weight = defaultWeight;
+    if (fontValue->tag != INTEROP_TAG_UNDEFINED) {
+        weight = Converter::OptConvert<Converter::FontWeightInt>(fontValue->value.weight).value_or(defaultWeight);
+    }
+    TextModelStatic::SetVariableFontWeight(frameNode, weight->variable);
     TextModelStatic::SetFont(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
