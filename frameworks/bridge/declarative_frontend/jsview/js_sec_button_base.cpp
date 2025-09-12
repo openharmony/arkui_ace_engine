@@ -54,11 +54,10 @@ void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(iconSizeObj->GetProperty("height"), heightDimen)) {
             height.emplace(heightDimen);
         }
-        if ((!width.has_value()) && (!height.has_value())) {
+        if (width.has_value() || height.has_value()) {
+            SecurityComponentModelNG::SetIconSize(NG::CalcSize(width, height));
             return;
         }
-        SecurityComponentModelNG::SetIconSize(NG::CalcSize(width, height));
-        return;
     }
 
     CalcDimension value;
