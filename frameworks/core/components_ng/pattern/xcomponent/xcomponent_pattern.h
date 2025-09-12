@@ -323,7 +323,7 @@ public:
     void InitializeAccessibility();
     void UninitializeAccessibility(FrameNode* frameNode);
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
-    bool OnAccessibilityChildTreeDeregister();
+    bool OnAccessibilityChildTreeDeregister(FrameNode* frameNode = nullptr);
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     void SetAccessibilityState(bool state) {}
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;

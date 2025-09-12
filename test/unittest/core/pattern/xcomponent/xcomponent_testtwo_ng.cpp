@@ -2062,4 +2062,31 @@ HWTEST_F(XComponentTestTwoNg, InitNativeNodeCallbacksTest, TestSize.Level1)
     EXPECT_TRUE(pattern->nativeXComponentImpl_->attachNativeNodeCallback_);
     EXPECT_TRUE(pattern->nativeXComponentImpl_->detachNativeNodeCallback_);
 }
+
+/**
+ * @tc.name: OnAccessibilityChildTreeDeregisterTest001
+ * @tc.desc: Test InitNativeNodeCallbacks Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, OnAccessibilityChildTreeDeregisterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps2: GetNativeProvider is null ptr
+     * @tc.expected: OnAccessibilityChildTreeDeregister return false
+     */
+    auto result = pattern->OnAccessibilityChildTreeDeregister(AceType::RawPtr(frameNode));
+    ASSERT_FALSE(result);
+    result = pattern->OnAccessibilityChildTreeDeregister();
+    ASSERT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
