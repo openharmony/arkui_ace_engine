@@ -258,7 +258,7 @@ bool FolderStackLayoutAlgorithm::CheckExpandConstraintFullScreen(
     const SafeAreaInsets& safeArea, WindowMode windowMode, SizeF fullScreen)
 {
     CHECK_NULL_RETURN(foldStackLayoutProperty, false);
-    if (foldStackLayoutProperty->IsExpandConstraintNeeded()) {
+    if (!foldStackLayoutProperty->IsExpandConstraintNeeded()) {
         return false;
     }
     const auto& ignoreOpts = foldStackLayoutProperty->GenIgnoreOpts();

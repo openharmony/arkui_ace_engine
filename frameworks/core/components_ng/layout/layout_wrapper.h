@@ -349,7 +349,8 @@ protected:
         INCLUDING_SELF,
         FROM_MARGIN
     };
-    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace,
+        const RectF& adjustingRect, LayoutSafeAreaType ignoreType);
     ExpandEdges GetAccumulatedSafeAreaExpandForAllEdges(
         StartPoint startPoint = StartPoint::NORMAL, LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM);
     void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
