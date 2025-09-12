@@ -26,6 +26,113 @@ public:
     StyleManager() {}
     StyleManager(const WeakPtr<RichEditorPattern>& pattern) : weakPattern_(pattern) {}
 
+    // color in RichEditor
+    inline static const std::string CARET_COLOR_KEY = "caretColor";
+    inline static const std::string SCROLL_BAR_COLOR_KEY = "scrollBarColor";
+    inline static const std::string PLACEHOLDER_FONT_COLOR_KEY = "placeholderFontColor";
+    inline static const std::string SELECTED_BACKGROUND_COLOR_KEY = "selectedBackgroundColor";
+
+    // color in TextStyle
+    inline static const std::string TEXT_COLOR_KEY = "textColor";
+    inline static const std::string TEXT_DECORATION_COLOR_KEY = "textDecorationColor";
+    inline static const std::string SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
+
+    // color updater
+    inline static const auto TEXT_COLOR_UPDATER = [](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        fontStyle.UpdateTextColor(colorValue);
+    };
+
+    inline static const auto TEXT_STYLE_TEXT_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, TextStyle& textStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        textStyle.SetTextColor(colorValue);
+    };
+    
+    inline static const auto TEXT_DECORATION_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        fontStyle.UpdateTextDecorationColor(colorValue);
+    };
+
+    inline static const auto TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, TextStyle& textStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        textStyle.SetTextDecorationColor(colorValue);
+    };
+
+    static void AddTextColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && colorResObj);
+        const auto& key = TEXT_COLOR_KEY;
+        const auto& updater = TEXT_STYLE_TEXT_COLOR_UPDATER;
+        textStyle.AddResource(key, colorResObj, updater);
+    }
+
+    static void AddTextColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && spanNode);
+        const auto& key = TEXT_COLOR_KEY;
+        const auto& updater = TEXT_COLOR_UPDATER;
+        spanNode->AddResource(key, textStyle.GetResource(key), updater);
+    }
+
+    static void AddTextDecorationColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && colorResObj);
+        const auto& key = TEXT_DECORATION_COLOR_KEY;
+        const auto& updater = TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER;
+        textStyle.AddResource(key, colorResObj, updater);
+    }
+
+    static void AddTextDecorationColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && spanNode);
+        const auto& key = TEXT_DECORATION_COLOR_KEY;
+        const auto& updater = TEXT_DECORATION_COLOR_UPDATER;
+        spanNode->AddResource(key, textStyle.GetResource(key), updater);
+    }
+
+    static void AddSymbolColorResource(
+        TextStyle& textStyle, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        for (const auto& [resObjIndex, colorResObj] : resObjArr) {
+            CHECK_NULL_CONTINUE(colorResObj);
+            auto&& updater = [i = resObjIndex] (const RefPtr<ResourceObject>& colorResObj, TextStyle& textStyle) {
+                auto& colorVec = textStyle.GetSymbolColorListRef();
+                CHECK_NULL_VOID(i < static_cast<int32_t>(colorVec.size()));
+                Color fontColor;
+                ResourceParseUtils::ParseResColor(colorResObj, fontColor);
+                colorVec[i] = fontColor;
+            };
+            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(resObjIndex);
+            textStyle.AddResource(key, colorResObj, std::move(updater));
+        }
+    }
+
+    static void AddSymbolColorResource(const RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    {
+        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        auto& symbolColorList = textStyle.GetSymbolColorList();
+        for (size_t i = 0; i < symbolColorList.size(); ++i) {
+            auto updater = [i](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
+                CHECK_NULL_VOID(fontStyle.propSymbolColorList.has_value());
+                auto& symbolColorList = fontStyle.propSymbolColorList.value();
+                CHECK_NULL_VOID(i < symbolColorList.size());
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                symbolColorList[i] = colorValue;
+            };
+            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(i);
+            spanNode->AddResource(key, textStyle.GetResource(key), std::move(updater));
+        }
+    }
+
     void SetTypingStyle(const std::optional<struct UpdateSpanStyle>& typingStyle,
         const std::optional<TextStyle>& textStyle)
     {

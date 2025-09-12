@@ -95,6 +95,8 @@ public:
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetUndoStyle(const JSCallbackInfo& info);
     static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void RegisterColorResource(const std::string& key, const Color& color,
+        const RefPtr<ResourceObject>& resourceObject);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);

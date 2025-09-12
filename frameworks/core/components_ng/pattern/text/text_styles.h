@@ -236,6 +236,37 @@ struct FontStyle {
         return decorations.value().size() > 0 ?
             decorations.value()[0] : TextDecoration::NONE;
     }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void CopyResource(const std::unique_ptr<FontStyle>& source)
+    {
+        resMap_ = source->resMap_;
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+        if (propTextShadow) {
+            auto& shadows = propTextShadow.value();
+            std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.ReloadResources(); });
+        }
+    }
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, FontStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 };
 
 struct TextLineStyle {

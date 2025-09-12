@@ -245,6 +245,10 @@ public:
 
     void UpdateColorByResourceId()
     {
+        if (SystemProperties::ConfigChangePerform()) {
+            ReloadResources();
+            return;
+        }
         color_.UpdateColorByResourceId();
     }
 

@@ -1200,6 +1200,11 @@ public:
         return propRenderColors_;
     }
 
+    std::vector<Color>& GetSymbolColorListRef()
+    {
+        return propRenderColors_;
+    }
+
     void CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
     void CompareAnimationMode(const std::optional<NG::SymbolEffectOptions>& options,
@@ -1302,6 +1307,13 @@ public:
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
     }
 
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextStyle&)>&& updateFunc);
+    const RefPtr<ResourceObject>& GetResource(const std::string& key) const;
+    void CopyResource(const TextStyle& source);
+    void AppendResource(const TextStyle& source);
+    void ReloadResources();
+
 private:
     ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolEffectOptions, NG::SymbolEffectOptions);
     ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolShadowProp, SymbolShadow);
@@ -1329,6 +1341,12 @@ private:
 
     RefPtr<AdvancedTextStyle> advancedTextStyle_;
     RefPtr<SymbolTextStyle> symbolTextStyle_;
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, TextStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 };
 
 namespace StringUtils {

@@ -505,6 +505,27 @@ public:
 
     std::optional<TextStyle> textStyle_;
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
+    {
+        fontStyle->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void CopyResource(const RefPtr<SpanItem>& source)
+    {
+        fontStyle->CopyResource(source->fontStyle);
+    }
+
+    void ReloadResources()
+    {
+        fontStyle->ReloadResources();
+        if (backgroundStyle.has_value()) {
+            backgroundStyle->ReloadResources();
+        }
+    }
+
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
     void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
@@ -709,6 +730,10 @@ public:
 
     void UpdateColorByResourceId()
     {
+        if (SystemProperties::ConfigChangePerform()) {
+            ReloadResources();
+            return;
+        }
         spanItem_->fontStyle->UpdateColorByResourceId();
         if (spanItem_->backgroundStyle) {
             spanItem_->backgroundStyle->UpdateColorByResourceId();
@@ -723,6 +748,24 @@ public:
     void UpdateTextDecorationColorWithoutCheck(Color color)
     {
         spanItem_->UpdateTextDecorationColorWithoutCheck(color);
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
+    {
+        spanItem_->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void CopyResource(const RefPtr<SpanNode>& source)
+    {
+        spanItem_->CopyResource(source->GetSpanItem());
+    }
+
+    void ReloadResources()
+    {
+        spanItem_->ReloadResources();
     }
 
     // ChangeFlag only for rich editor
