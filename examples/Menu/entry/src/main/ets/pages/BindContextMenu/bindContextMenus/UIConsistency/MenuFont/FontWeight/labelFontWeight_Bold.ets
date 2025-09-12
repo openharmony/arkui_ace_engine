@@ -1,4 +1,3 @@
-import { Size } from '@ohos/hypium'
 @Entry
 @Component
 struct MenuFont_LabelFontWeight_Bold {
