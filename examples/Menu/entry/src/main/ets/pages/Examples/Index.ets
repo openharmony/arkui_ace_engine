@@ -41,7 +41,11 @@ struct Index {
     { title: "示例15：菜单基本功能_4_避让", url: "pages/Examples/MenuTestLevel0_4" },
     { title: "示例16：菜单基本功能_5_箭头", url: "pages/Examples/MenuTestLevel0_5" },
     { title: "示例17：菜单基本功能_6_布局边距", url: "pages/Examples/MenuTestLevel0_6" },
-    { title: "示例18：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_18" },
+    { title: "示例18：菜单基本功能_9_radius", url: "pages/Examples/MenuTestLevel0_12" },
+    { title: "示例19：菜单基本功能_11_预览图弹出方式/类型", url: "pages/Examples/MenuTestLevel0_16" },
+    { title: "示例20：菜单基本功能_12_预览图scale/hoverScale", url: "pages/Examples/MenuTestLevel0_17" },
+    { title: "示例21：菜单基本功能_13_预览图尺寸/圆角", url: "pages/Examples/MenuTestLevel0_18" },
+    { title: "示例22：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_24" },
   ]
 
   build() {

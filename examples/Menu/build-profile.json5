@@ -18,15 +18,15 @@
     "signingConfigs": [
       {
         "name": "default",
-        "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001A12ACFB4480AAD89226350F28E5E47B21128FC9670E13BB0019F8B6D297CEC1F2D4731041D3FF",
-          "profile": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\Armstrong\\.ohos\\config\\default_Menu__5mdUu-ouDfZnMA_-Z6gH7Dfg_F_WfohdZB4Fwx41s0=.p12",
-          "storePassword": "0000001A4E1CD51E41FE5D1FFA8E7A03263264694EAA5D5192C5290797F968557C574E830E2E09E08F93"
+          // 使用签名工具生成签名
+          "certpath": "",
+          "keyAlias": "",
+          "keyPassword": "",
+          "profile": "",
+          "signAlg": "",
+          "storeFile": "",
+          "storePassword": ""
         }
       }
     ],
@@ -34,7 +34,8 @@
       {
         "name": "default",
         "signingConfig": "default",
-        "compatibleSdkVersion": "5.0.3(15)",
+        "targetSdkVersion": "6.0.0(20)",
+        "compatibleSdkVersion": "6.0.0(20)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
