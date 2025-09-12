@@ -105,14 +105,14 @@ public:
         fixedSize_ = fixedSize;
     }
 
-    void OnInActive() override
+    void OnInActiveImageAnimator()
     {
         if (status_ == ControlledAnimator::ControlStatus::RUNNING) {
             controlledAnimator_->Pause();
         }
     }
 
-    void OnActive() override
+    void OnActiveImageAnimator()
     {
         if (status_ == ControlledAnimator::ControlStatus::RUNNING &&
             controlledAnimator_->GetControlStatus() != ControlledAnimator::ControlStatus::RUNNING) {
@@ -172,6 +172,11 @@ public:
         return true;
     }
 
+    void SetVisible(bool visible)
+    {
+        visible_ = visible;
+    }
+
 private:
     std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
@@ -221,6 +226,7 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
+    bool visible_ = false;
     bool isAutoMonitorInvisibleArea_ = false; // Controls whether the system's onVisibleAreaChange callback is used to
                                               // manage the play and stop behavior of ImageAnimator.
 };
