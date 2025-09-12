@@ -121,7 +121,7 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS };
+enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS, UNDO };
 const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
     { OperationType::DEFAULT, TextChangeReason::INPUT },
     { OperationType::DRAG, TextChangeReason::DRAG },
@@ -592,12 +592,6 @@ public:
     void AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo = false);
     void AfterStyledStringChange(int32_t start, int32_t length, const std::u16string& string);
 
-    void ProcessStyledUndo(const UndoRedoRecord& record);
-    void ProcessStyledRedo(const UndoRedoRecord& record);
-    void ApplyRecordInStyledString(const UndoRedoRecord& record);
-    void ApplyRecordInSpans(const UndoRedoRecord& record, bool isUndo);
-    void ApplyOptions(const OptionsList& optionsList, bool restoreBuilderSpan, bool isUndo);
-
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -855,8 +849,6 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub();
     void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
-    bool BeforeSpansChange(const UndoRedoRecord& record, bool isUndo);
-    void AfterSpansChange(const UndoRedoRecord& record, bool isUndo);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
@@ -1315,13 +1307,7 @@ public:
         return keyboardAppearance_;
     }
 
-    void SetSupportStyledUndo(bool enabled)
-    {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SupportStyledUndo:%{public}d->%{public}d", isStyledUndoSupported_, enabled);
-        CHECK_NULL_VOID(!isSpanStringMode_ && (isStyledUndoSupported_ != enabled));
-        ClearOperationRecords();
-        isStyledUndoSupported_ = enabled;
-    }
+    void SetSupportStyledUndo(bool enabled);
 
     bool IsSupportStyledUndo() const
     {
@@ -1418,6 +1404,9 @@ private:
     friend class RichEditorSelectOverlay;
     friend class OneStepDragController;
     friend class RichEditorUndoManager;
+    friend class StyledStringUndoManager;
+    friend class SpansUndoManager;
+    friend class StringUndoManager;
     friend class RichEditorContentPattern;
     friend class StyleManager;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
