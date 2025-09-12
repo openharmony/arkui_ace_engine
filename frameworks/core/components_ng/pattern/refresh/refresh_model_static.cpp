@@ -23,8 +23,16 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RefreshModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::REFRESH_ETS_TAG, nodeId);
-    return FrameNode::GetOrCreateFrameNode(
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
+    CHECK_NULL_RETURN(frameNode, frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->UpdateNestedModeForChildren(NestedScrollOptions({
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    }));
+    return frameNode;
 }
 
 void RefreshModelStatic::SetRefreshing(FrameNode* frameNode, const std::optional<bool>& isRefreshing)
