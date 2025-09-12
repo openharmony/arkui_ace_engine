@@ -77,6 +77,7 @@ struct hdrBrightnessDemo04 {
     } else {
       console.info('imageInfo.isHdr: ' + imageInfo.isHdr)
     }
+    imageSource?.release()
   }
 
   build() {

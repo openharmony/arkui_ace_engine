@@ -37,6 +37,7 @@ struct Index {
     imageSource.createPixelMap(options).then((pixelMap) => {
       this.pixelMap = pixelMap
     })
+    imageSource?.release()
   }
 
   build() {

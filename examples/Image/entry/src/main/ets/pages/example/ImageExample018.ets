@@ -38,6 +38,7 @@ struct Index {
       // 成功获取到图片信息，打印HDR状态
       console.info(TAG, 'imageInfo.isHdr:' + imageInfo.isHdr);
     }
+    imageSource?.release()
   }
 
   build() {
