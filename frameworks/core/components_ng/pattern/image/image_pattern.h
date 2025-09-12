@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
@@ -132,6 +133,11 @@ public:
     void CalAndUpdateSelectOverlay();
     OffsetF GetParentGlobalOffset() const;
     void CheckHandles(SelectHandleInfo& handleInfo);
+    // for drawable descriptor
+    void UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable);
+    void AnimatedDrawableControllAnimation(const int32_t id);
+    void DrawableRegisterUpdateCallback();
+    void ResetDrawableDescriptor();
 
     void EnableDrag();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -243,59 +249,9 @@ public:
     bool IsEnableAnalyzer() const;
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
-
-    // animation
-    struct CacheImageStruct {
-        CacheImageStruct() = default;
-        CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
-        virtual ~CacheImageStruct() = default;
-        RefPtr<FrameNode> imageNode;
-        int32_t index = 0;
-        bool isLoaded = false;
-    };
-
-    void ImageAnimatorPattern();
-    void SetImages(std::vector<ImageProperties>&& images)
-    {
-        CHECK_NULL_VOID(images.size());
-        images_ = std::move(images);
-        durationTotal_ = 0;
-        for (const auto& childImage : images_) {
-            if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
-                durationTotal_ += childImage.duration;
-            }
-        }
-        imagesChangedFlag_ = true;
-        RegisterVisibleAreaChange();
-    }
-
-    void ResetImages()
-    {
-        images_.clear();
-    }
     void ResetImage();
     void ResetAltImage();
-    void ResetImageProperties();
-
     void ResetImageAndAlt();
-
-    void ResetPictureSize();
-
-    bool GetHasSizeChanged()
-    {
-        return hasSizeChanged;
-    }
-
-    void StartAnimation()
-    {
-        status_ = AnimatorStatus::RUNNING;
-    }
-
-    void StopAnimation()
-    {
-        status_ = AnimatorStatus::STOPPED;
-        OnAnimatedModifyDone();
-    }
 
     void SetImageType(ImageType imageType)
     {
@@ -318,19 +274,6 @@ public:
     }
 
     bool AllowVisibleAreaCheck() const override;
-
-    void OnInActive() override;
-
-    void OnActive() override;
-
-    void SetDuration(int32_t duration);
-    void SetIteration(int32_t iteration);
-
-    void SetSrcUndefined(bool isUndefined)
-    {
-        isSrcUndefined_ = isUndefined;
-    }
-
     void SetImageAnimator(bool isImageAnimator)
     {
         isImageAnimator_ = isImageAnimator;
@@ -518,30 +461,11 @@ private:
     void InitDefaultValue();
     void ClearAltData();
     void UpdateSvgSmoothEdgeValue();
-
-    // animation
-    RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
-    void AdaptSelfSize();
-    void SetShowingIndex(int32_t index);
-    void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
-    void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);
-    std::list<CacheImageStruct>::iterator FindCacheImageNode(const RefPtr<PixelMap>& src);
-    int32_t GetNextIndex(int32_t preIndex);
-    void GenerateCachedImages();
-    void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
-    static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src);
-    bool IsFormRender();
-    void UpdateFormDurationByRemainder();
-    void ResetFormAnimationStartTime();
-    void ResetFormAnimationFlag();
-    void OnAnimatedModifyDone();
-    void OnImageModifyDone();
-    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
-    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
-    void ControlAnimation(int32_t index);
-    void SetObscured();
     void OnKeyEvent(const KeyEvent& event);
     void InitFromThemeIfNeed();
+
+private:
+    RefPtr<DrawableDescriptor> drawable_;
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -592,36 +516,17 @@ private:
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
-
-    ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
-
-    // After the animated drawable descriptor code goes online, need to
-    // remove all the following codes.
-    ImageType imageType_ = ImageType::BASE;
-    RefPtr<Animator> animator_;
-    std::vector<ImageProperties> images_;
-    std::list<CacheImageStruct> cacheImages_;
-    AnimatorStatus status_ = AnimatorStatus::IDLE;
-    int32_t durationTotal_ = 0;
-    int32_t nowImageIndex_ = 0;
-    uint64_t repeatCallbackId_ = 0;
-    bool imagesChangedFlag_ = false;
-    bool firstUpdateEvent_ = true;
-    bool isLayouted_ = false;
-    int64_t formAnimationStartTime_ = 0;
-    int32_t formAnimationRemainder_ = 0;
     bool isOrientationChange_ = false;
-    bool isFormAnimationStart_ = true;
-    bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
-    bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
-    bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
     bool hasSetPixelMapMemoryName_ = false;
     bool previousVisibility_ = false;
     bool supportSvg2_ = false;
+    ImageType imageType_ = ImageType::BASE;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
 
 } // namespace OHOS::Ace::NG

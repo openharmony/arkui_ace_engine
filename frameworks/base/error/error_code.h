@@ -95,6 +95,9 @@ constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_ONGOING = 110002;
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_STOPPED = 110003;
 
+// Drawable error
+constexpr int32_t ERROR_CODE_DRAWABLE_LOADER_ERROR = 111001;
+
 // Drag event error code (190001 ~ 191000)
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001;  // GetData failed, data not found.
 constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;      // GetData failed, data error.

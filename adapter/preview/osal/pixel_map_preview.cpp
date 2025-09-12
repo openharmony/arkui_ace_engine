@@ -36,12 +36,6 @@ RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
     return nullptr;
 }
 
-bool PixelMap::GetPxielMapListFromAnimatedDrawable(
-    void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t& duration, int32_t& iterations)
-{
-    return false;
-}
-
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
 {
     return nullptr;

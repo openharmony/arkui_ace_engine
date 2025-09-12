@@ -15,15 +15,16 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MOCK_IMAGE_ACE_IMAGE_SOURCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOCK_IMAGE_ACE_IMAGE_SOURCE_H
+
 #include "gmock/gmock.h"
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
+
 namespace OHOS::Ace {
 class MockImageSource : public ImageSource {
     DECLARE_ACE_TYPE(MockImageSource, ImageSource);
 
 public:
-
     MOCK_METHOD1(GetProperty, std::string(const std::string& key));
     MOCK_METHOD3(CreatePixelMap,
         RefPtr<PixelMap>(const ImageSource::Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig));
@@ -34,6 +35,8 @@ public:
     MOCK_METHOD0(GetImageSize, ImageSource::Size());
     MOCK_METHOD0(GetFrameCount, uint32_t());
     MOCK_METHOD0(GetEncodedFormat, std::string());
+    MOCK_METHOD0(GetLoopCount, int32_t());
+    MOCK_METHOD0(GetDelayTime, std::vector<int32_t>());
 
     static RefPtr<MockImageSource> mockImageSource_;
 };

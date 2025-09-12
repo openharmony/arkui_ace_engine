@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#include "native_drawable_descriptor.h"
+#include "base/base64/base64_util.h"
 
-#include "node_extened.h"
+namespace OHOS::Ace {
 
-extern "C" {
-
-ArkUI_DrawableDescriptor* OH_ArkUI_CreateFromNapiDrawable(OHOS::Ace::Napi::DrawableDescriptor* napiDrawable)
+bool Base64Util::Decode(const std::string& src, std::string& dst)
 {
-    auto pixelMap = napiDrawable->GetPixelMap();
-    auto drawable = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(pixelMap);
-    return new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, drawable };
+    dst = "mockbase64data";
+    return true;
 }
 
-} // namespace OHOS::Ace::Drawable
+} // namespace OHOS::Ace

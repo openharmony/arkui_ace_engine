@@ -18,12 +18,1085 @@
 #include "base/image/image_defines.h"
 
 namespace OHOS::Ace::NG {
+class ImageTestTwoNg : public ImageBases {};
 
-namespace {} // namespace
+/**
+ * @tc.name: ImagePatternCreateCompleteCallBackInDataReady
+ * @tc.desc: call CreateCompleteCallBackInDataReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternCreateCompleteCallBackInDataReady, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageSourceInfo info;
+    imagePattern->CreateCompleteCallBackInDataReady()(info);
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
 
-class ImageTestTwoNg : public ImageBases {
-public:
-};
+/**
+ * @tc.name: ImagePatternSetOnFinishCallback
+ * @tc.desc: call SetOnFinishCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternSetOnFinishCallback, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->SetOnFinishCallback(canvasImage);
+    imagePattern->SetRedrawCallback(canvasImage);
+    EXPECT_EQ(imagePattern->image_, nullptr);
+    EXPECT_NE(canvasImage->redrawCallback_, nullptr);
+    canvasImage->redrawCallback_();
+    EXPECT_NE(canvasImage->onFinishCallback_, nullptr);
+    canvasImage->onFinishCallback_();
+}
+
+/**
+ * @tc.name: ImagePatternCheckHandles
+ * @tc.desc: call CheckHandles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternCheckHandles, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    SelectHandleInfo info;
+    imagePattern->CheckHandles(info);
+    EXPECT_FALSE(info.isShow);
+}
+
+/**
+ * @tc.name: ImagePatternCalAndUpdateSelectOverlay
+ * @tc.desc: call CalAndUpdateSelectOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->CalAndUpdateSelectOverlay();
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
+    auto info = imagePattern->selectOverlay_->GetSelectOverlayMangerInfo();
+    info.onHandleMoveDone(RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH), true);
+    info.menuCallback.onCopy();
+}
+
+/**
+ * @tc.name: ImagePatternGetParentGlobalOffset
+ * @tc.desc: call GetParentGlobalOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternGetParentGlobalOffset, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    OffsetF offset = imagePattern->GetParentGlobalOffset();
+    EXPECT_EQ(offset, OffsetF());
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnAreaChangedInner, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternStartDecoding
+ * @tc.desc: call StartDecoding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternStartDecoding, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF());
+    imagePattern->StartDecoding(SizeF());
+    EXPECT_NE(frameNode->GetGeometryNode()->GetContent().get(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycle
+ * @tc.desc: call OnRecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnRecycle, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnReuse
+ * @tc.desc: call OnReuse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnReuse, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnReuse();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternHandleCopy
+ * @tc.desc: call HandleCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternHandleCopy, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->HandleCopy();
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternToJsonValue
+ * @tc.desc: call ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternToJsonValue, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    InspectorFilter filter;
+    imagePattern->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+}
+
+/**
+ * @tc.name: ImagePatternUpdateFillColorIfForegroundColor
+ * @tc.desc: call UpdateFillColorIfForegroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternUpdateFillColorIfForegroundColor, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateForegroundColor(Color::BLACK);
+    EXPECT_TRUE(renderContext->HasForegroundColor());
+}
+
+/**
+ * @tc.name: ImagePatternBetweenSelectedPosition
+ * @tc.desc: call BetweenSelectedPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternBetweenSelectedPosition, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    bool b = imagePattern->BetweenSelectedPosition(Offset());
+    imagePattern->BeforeCreatePaintWrapper();
+    imagePattern->OnDirectionConfigurationUpdate();
+    imagePattern->OnIconConfigurationUpdate();
+    EXPECT_FALSE(b);
+}
+
+/**
+ * @tc.name: ImagePatternGetImageColorFilterStr
+ * @tc.desc: call GetImageColorFilterStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternGetImageColorFilterStr, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::vector<float> colorFilter = { .0f, .0f };
+
+    std::string str1 = imagePattern->GetImageColorFilterStr(colorFilter);
+    std::string str2 = std::string("[") + std::to_string(colorFilter[0]) + ", " + std::to_string(colorFilter[1]) + "]";
+    EXPECT_STREQ(str1.c_str(), str2.c_str());
+}
+
+/**
+ * @tc.name: ImagePatternGetSrcTypeToString001
+ * @tc.desc: call GetSrcTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternGetSrcTypeToString001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. SrcType value should be we set.
+     */
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::UNSUPPORTED).c_str(), "unsupported");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::FILE).c_str(), "file");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASSET).c_str(), "asset");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::NETWORK).c_str(), "network");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::MEMORY).c_str(), "memory");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::BASE64).c_str(), "base64");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::INTERNAL).c_str(), "internal");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE).c_str(), "resource");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY).c_str(), "dataAbility");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY_DECODED).c_str(), "dataAbilityDecoded");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE_ID).c_str(), "resourceId");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::PIXMAP).c_str(), "pixmap");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASTC).c_str(), "astc");
+}
+
+/**
+ * @tc.name: ImagePatternGetSrcTypeToString002
+ * @tc.desc: call GetSrcTypeToString with error type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternGetSrcTypeToString002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::string retStr;
+
+    /**
+     * @tc.steps: step2. call GetSrcTypeToString with error value.
+     */
+    auto errType = static_cast<SrcType>(99);
+    retStr = imagePattern->GetSrcTypeToString(errType);
+
+    /**
+     * @tc.steps: step3. SrcType value should be null string.
+     */
+    EXPECT_STREQ(retStr.c_str(), "");
+}
+
+/**
+ * @tc.name: ImagePatternSetImageAnalyzerConfig
+ * @tc.desc: call SetImageAnalyzerConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternSetImageAnalyzerConfig, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageAnalyzerConfig config;
+    imagePattern->SetImageAnalyzerConfig(config);
+    imagePattern->SetImageAnalyzerConfig(nullptr);
+    EXPECT_FALSE(imagePattern->isEnableAnalyzer_);
+}
+
+/**
+ * @tc.name: ImagePatternCreateAnalyzerOverlay
+ * @tc.desc: call CreateAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternCreateAnalyzerOverlay, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->CreateAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternUpdateAnalyzerOverlayLayout
+ * @tc.desc: call UpdateAnalyzerOverlayLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternUpdateAnalyzerOverlayLayout, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternDestroyAnalyzerOverlay
+ * @tc.desc: call DestroyAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternDestroyAnalyzerOverlay, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->DestroyAnalyzerOverlay();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->DestroyAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternReleaseImageAnalyzer
+ * @tc.desc: call ReleaseImageAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternReleaseImageAnalyzer, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ReleaseImageAnalyzer();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->ReleaseImageAnalyzer();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternUpdateAnalyzerUIConfig
+ * @tc.desc: call UpdateAnalyzerUIConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternUpdateAnalyzerUIConfig, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerUIConfig(nullptr);
+    bool b = imagePattern->IsSupportImageAnalyzerFeature();
+    EXPECT_FALSE(b);
+}
+
+/**
+ * @tc.name:  ImagePatternhasSceneChanged
+ * @tc.desc: call hasSceneChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternhasSceneChanged, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    bool b = imagePattern->hasSceneChanged();
+    EXPECT_TRUE(b);
+}
+
+/**
+ * @tc.name:  ImagePatternResetImage
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternResetImage, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ResetImage();
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternResetAltImage001
+ * @tc.desc: call ResetAltImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternResetAltImage001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->ResetAltImage();
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternResetAltImage002
+ * @tc.desc: call ResetAltImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternResetAltImage002, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ResetAltImage();
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name:  ImagePatternMethods
+ * @tc.desc: call void methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternMethods, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    imagePattern->TriggerFirstVisibleAreaChange();
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    EXPECT_NE(eventHub->completeEvent_, nullptr);
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    loadImageSuccessEvent.loadingStatus_ = -1;
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->SetIsFormRender(true);
+    int testData = 0;
+    std::function onProgress = [&testData](const uint32_t&, const uint32_t&) { testData = 1; };
+    imagePattern->SetOnProgressCallback(std::move(onProgress));
+    imagePattern->onProgressCallback_(uint32_t(0), uint32_t(1));
+    EXPECT_EQ(testData, 1);
+    imagePattern->EnableDrag();
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->defaultOnDragStart_(dragEvent, string(""));
+    EXPECT_EQ(dragEvent->GetData(), nullptr);
+    std::vector<float> matrix = { 1.1f };
+    ImageModelNG::SetColorFilterMatrix(AceType::RawPtr(frameNode), matrix);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), matrix);
+    ImageModelNG::SetImageFit(AceType::RawPtr(frameNode), ImageFit::COVER);
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), ImageFit::COVER);
+}
+
+/**
+ * @tc.name: ImagePatternIsSupportImageAnalyzerFeature0045
+ * @tc.desc: call IsSupportImageAnalyzerFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternIsSupportImageAnalyzerFeature0045, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_TRUE(!imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name:  ImagePatternhasSceneChanged0048
+ * @tc.desc: call hasSceneChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternhasSceneChanged0048, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = nullptr;
+    bool b = imagePattern->hasSceneChanged();
+    EXPECT_TRUE(b);
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner0049
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnAreaChangedInner111, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreateNodePaintMethod0050
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternCreateNodePaintMethod0050, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->isSensitive_ = true;
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnDirtyLayoutWrapperSwap0051
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    imagePattern->imageType_ = ImageType::BASE;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner0054
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnAreaChangedInner0054, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->parentGlobalOffset_ = OffsetF(1, 1);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternIsSupportImageAnalyzerFeature0055
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternIsSupportImageAnalyzerFeature0055, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isEnableAnalyzer_ = true;
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+    EXPECT_FALSE(imagePattern->loadingCtx_->GetSourceInfo().IsSvg());
+    EXPECT_TRUE(imagePattern->loadingCtx_->GetFrameCount() <= 1);
+
+    imagePattern->DestroyAnalyzerOverlay();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->DestroyAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+    EXPECT_FALSE(imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: ImagePatternSetImageAIOptions0056
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternSetImageAIOptions0056, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    imagePattern->SetImageAIOptions(nullptr);
+    ASSERT_NE(imagePattern->imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternEnableAnalyzer0057
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternEnableAnalyzer0057, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->CreateAnalyzerOverlay();
+    imagePattern->isEnableAnalyzer_ = true;
+    imagePattern->EnableAnalyzer(false);
+    EXPECT_FALSE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name: ImagePatternGetImageColorFilterStr0058
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternGetImageColorFilterStr0058, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::vector<float> testColorFilter;
+    testColorFilter.push_back(1.0f);
+    testColorFilter.clear();
+    std::string str = imagePattern->GetImageColorFilterStr(testColorFilter);
+    EXPECT_EQ(str, "");
+}
+
+/**
+ * @tc.name: ImagePatternOnLanguageConfigurationUpdate0059
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnLanguageConfigurationUpdate0059, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    RectF testRectF = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->srcRect_ = testRectF;
+    imagePattern->loadingCtx_->dstRect_ = testRectF;
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::RESOURCE;
+    imagePattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnAttachToFrameNode0060
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->OnAttachToFrameNode();
+    EXPECT_TRUE(imagePattern->GetIsAnimation());
+}
+
+/**
+ * @tc.name: ImagePatternUpdateDragEvent0061
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternUpdateDragEvent0061, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(dragEvent->unifiedData_, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternUpdateDragEvent0062
+ * @tc.desc: call UpdateDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternUpdateDragEvent0062, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(dragEvent->unifiedData_, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateDragEvent.
+     * @tc.expected: Returned color value is BLUE.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImageCreator0063
+ * @tc.desc: call Creat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImageCreator0063, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call Create.
+     * @tc.expected: GetImageType value is not BASE.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto imageType = ImageType::BASE;
+    auto res = imagePattern->GetImageType();
+    EXPECT_EQ(res, imageType);
+    imageType = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->SetImageType(imageType);
+    image.Create(imageInfoConfig);
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ImageCreator0064
+ * @tc.desc: call Creat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImageCreator0064, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call Create.
+     * @tc.expected: GetImageType value is not BASE and pattern has changed.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto res = imagePattern->GetImageType();
+    auto imageType = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->SetImageType(imageType);
+    image.Create(imageInfoConfig);
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ResetImage0065
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ResetImage0065, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call ResetImage.
+     * @tc.expected: GetImageType value is UNDEFINED.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto imageType = ImageType::BASE;
+    auto res = imagePattern->GetImageType();
+    imagePattern->SetImageType(imageType);
+    image.ResetImage();
+    /**
+     * @tc.steps: step3. call ResetImage.
+     * @tc.expected: GetImageType value is ANIMATION.
+     */
+    imageType = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->SetImageType(imageType);
+    image.ResetImage();
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ResetImage0066
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ResetImage0066, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call ResetImage.
+     * @tc.expected: GetImageType value is ANIMATION and pattern has changed.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto res = imagePattern->GetImageType();
+    auto imageType = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->SetImageType(imageType);
+    image.ResetImage();
+    EXPECT_NE(res, imageType);
+}
 
 /**
  * @tc.name: TestAutoResize001
@@ -536,69 +1609,6 @@ HWTEST_F(ImageTestTwoNg, ImageSetImageAnalyzerConfig0001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImagePixelMapListTest0001
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. images size is 0.
-     * @tc.expected: do nothing
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(0);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
-     * @tc.expected: nowImageIndex_ not change
-     */
-    frameNode = CreatePixelMapAnimator(1);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    imagePattern->SetShowingIndex(1);
-    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
-
-    /**
-     * @tc.steps: step3. CreateAnimation() set PixelMap List.
-     * @tc.expected: images_ size is 2, other paramater is default value.
-     */
-    frameNode = CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-
-    /**
-     * @tc.steps: step4. set SrcUndefined and call OnAnimatedModifyDone.
-     * @tc.expected: isSrcUndefined_ is true.
-     */
-    imagePattern->imageType_ = ImageType::BASE;
-    imagePattern->status_ = AnimatorStatus::PAUSED;
-    imagePattern->SetSrcUndefined(true);
-    imagePattern->OnModifyDone();
-    imagePattern->OnAnimatedModifyDone();
-    EXPECT_TRUE(imagePattern->isSrcUndefined_);
-}
-
-/**
  * @tc.name: ImageSensitiveTest0001
  * @tc.desc: Test image privacySensitive.
  * @tc.type: FUNC
@@ -650,1174 +1660,21 @@ HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0002, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImagePixelMapListTest0002
- * @tc.desc: Test initial value
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-
-    /**
-     * @tc.steps: step2. Test imagenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(imageFrameNode, nullptr);
-    EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
-
-    /**
-     * @tc.steps: step3. Test FillMode
-     * @tc.expected: BACKWARDS
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-
-    /**
-     * @tc.steps: step4. Test Duration
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    /**
-     * @tc.steps: step5. Test Iteration
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-
-    /**
-     * @tc.steps: step6. Test images size
-     * @tc.expected: 2
-     */
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step7. Test isAnimation
-     * @tc.expected: true
-     */
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-
-    /**
-     * @tc.steps: step8. Test status
-     * @tc.expected: STATE_START
-     */
-    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
-
-    /**
-     * @tc.steps: step9. Test durationTotal
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-
-    /**
-     * @tc.steps: step10. Test nowImageIndex
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
-
-    /**
-     * @tc.steps: step11. Test isSrcUndefined
-     * @tc.expected: false
-     */
-    EXPECT_EQ(imagePattern->isSrcUndefined_, false);
-
-    /**
-     * @tc.steps: step12. Test ImageType
-     * @tc.expected: ANIMATION
-     */
-    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0003
- * @tc.desc: Test SetDuration
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0003, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test Duration, default value
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    /**
-     * @tc.steps: step3. Test Duration, Set Duration -10
-     * @tc.expected: DURATION_DEFAULT
-     */
-    imagePattern->SetDuration(-10);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    /**
-     * @tc.steps: step4. Test Duration, Set Duration 0
-     * @tc.expected: 0
-     */
-    imagePattern->SetDuration(0);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), 0);
-
-    /**
-     * @tc.steps: step5. Test Duration, Set Duration 10
-     * @tc.expected: 10
-     */
-    imagePattern->SetDuration(10);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), 10);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0004
- * @tc.desc: Test Iteration
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0004, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test Iteration, default value
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-
-    /**
-     * @tc.steps: step3. Test Iteration, Set Iteration -10
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 0; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, -10);
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0005
- * @tc.desc: Test GetIsAnimation()
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test isAnimation
-     * @tc.expected: true
-     */
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-
-    /**
-     * @tc.steps: step3. Test isAnimation
-     * @tc.expected: false
-     */
-    imagePattern->SetImageType(ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetIsAnimation(), false);
-
-    /**
-     * @tc.steps: step4. Test isAnimation
-     * @tc.expected: false
-     */
-    imagePattern->SetImageType(ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetIsAnimation(), false);
-
-    /**
-     * @tc.steps: step5. Test isAnimation
-     * @tc.expected: true
-     */
-    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0006
- * @tc.desc: Test GetImageType()
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test GetImageType
-     * @tc.expected: ANIMATION
-     */
-    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATED_DRAWABLE);
-
-    /**
-     * @tc.steps: step3. Test GetImageType
-     * @tc.expected: BASE
-     */
-    imagePattern->SetImageType(ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
-
-    /**
-     * @tc.steps: step4. Test GetImageType
-     * @tc.expected: UNDEFINED
-     */
-    imagePattern->SetImageType(ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
-
-    /**
-     * @tc.steps: step5. Test GetImageType
-     * @tc.expected: ANIMATION
-     */
-    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATED_DRAWABLE);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0007
- * @tc.desc: Test status
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0007, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test status
-     * @tc.expected: STATE_START
-     */
-    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
-
-    /**
-     * @tc.steps: step3. Test status
-     * @tc.expected: STOPPED
-     */
-    imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
-
-    /**
-     * @tc.steps: step4. Test status
-     * @tc.expected: RUNNING
-     */
-    imagePattern->StartAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::RUNNING);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0008
- * @tc.desc: Test durationTotal
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0008, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step2. Test durationTotal, default value
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-
-    /**
-     * @tc.steps: step3. Test durationTotal, Set Duration -10
-     * @tc.expected: 0
-     */
-    imagePattern->SetDuration(-10);
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-
-    /**
-     * @tc.steps: step4. Test durationTotal, Set Duration 0
-     * @tc.expected: 0
-     */
-    imagePattern->SetDuration(0);
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-
-    /**
-     * @tc.steps: step5. Test durationTotal, Set Duration 10
-     * @tc.expected: 0
-     */
-    imagePattern->SetDuration(10);
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0009
- * @tc.desc: Test GetDuration
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0009, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        imageProperties.duration = 200;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
-    EXPECT_TRUE(imagePattern->images_.size() == 10);
-
-    /**
-     * @tc.steps: step2. Test GetDuration, default value
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    /**
-     * @tc.steps: step3. Test GetDuration, Set Duration 10
-     * @tc.expected: 10
-     */
-    imagePattern->SetDuration(10);
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), 10);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0010
- * @tc.desc: Test SetSrcUndefined
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0010, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Test framenode tag
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto frameNode = ImageTestTwoNg::CreatePixelMapAnimator(2);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    ASSERT_NE(imagePattern->animator_, nullptr);
-    EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
-    EXPECT_TRUE(imagePattern->images_.size() == 2);
-
-    /**
-     * @tc.steps: step1. Test isSrcUndefined
-     * @tc.expected: false
-     */
-    EXPECT_EQ(imagePattern->isSrcUndefined_, false);
-
-    /**
-     * @tc.steps: step2. Test isSrcUndefined
-     * @tc.expected: false
-     */
-    imagePattern->SetSrcUndefined(true);
-    EXPECT_EQ(imagePattern->isSrcUndefined_, true);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0011
- * @tc.desc: Test frameNode before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0011, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test imagenode
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(imageFrameNode, nullptr);
-    EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test imagenode is empty
-     * @tc.expected: true
-     */
-    EXPECT_EQ(frameNode->GetChildren().empty(), true);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0012
- * @tc.desc: Test Duration before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0012, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test Duration
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test Duration
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0013
- * @tc.desc: Test Iteration before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0013, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test Iteration
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test Iteration
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0014
- * @tc.desc: Test images size before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0014, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test images size
-     * @tc.expected: 10
-     */
-    EXPECT_TRUE(imagePattern->images_.size() == 10);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test images size
-     * @tc.expected: 0
-     */
-    EXPECT_TRUE(imagePattern->images_.size() == 0);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0015
- * @tc.desc: Test isAnimation before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0015, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test isAnimation
-     * @tc.expected: true
-     */
-    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test isAnimation
-     * @tc.expected: false
-     */
-    EXPECT_EQ(imagePattern->GetIsAnimation(), false);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0016
- * @tc.desc: Test status before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test status
-     * @tc.expected: STATE_START
-     */
-    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test status
-     * @tc.expected: IDLE
-     */
-    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0017
- * @tc.desc: Test durationTotal before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0017, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test durationTotal
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test durationTotal
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->durationTotal_, 0);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0018
- * @tc.desc: Test nowImageIndex before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0018, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test nowImageIndex
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test nowImageIndex
-     * @tc.expected: 0
-     */
-    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0019
- * @tc.desc: Test isSrcUndefined before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0019, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test isSrcUndefined
-     * @tc.expected: false
-     */
-    EXPECT_EQ(imagePattern->isSrcUndefined_, false);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test isSrcUndefined
-     * @tc.expected: false
-     */
-    EXPECT_EQ(imagePattern->isSrcUndefined_, false);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0020
- * @tc.desc: Test ImageType before and after type switching, pixelMap list to resource
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test ImageType
-     * @tc.expected: ANIMATION
-     */
-    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
-
-    // 切换Image数据源
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test ImageType
-     * @tc.expected: BASE
-     */
-    EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0021
- * @tc.desc: Test frameNode before and after type switching, resource to pixelMap list
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0021, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test imagenode
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    EXPECT_EQ(frameNode->GetChildren().empty(), true);
-
-    // 切换Image数据源
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test imagenode
-     * @tc.expected: V2::IMAGE_ETS_TAG
-     */
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(imageFrameNode, nullptr);
-    EXPECT_EQ(imageFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0022
- * @tc.desc: Test Duration before and after type switching, resource to pixelMap list
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0022, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test Duration
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-
-    // 切换Image数据源
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test Duration
-     * @tc.expected: DURATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
-}
-
-/**
- * @tc.name: ImagePixelMapListTest0023
- * @tc.desc: Test Iteration before and after type switching, resource to pixelMap list
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0023, TestSize.Level0)
-{
-    ImageModelNG imageModelNG;
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(PNG_IMAGE);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.pixelMap = pixMap;
-    imageModelNG.Create(imageInfoConfig);
-    imageModelNG.SetAlt(ImageSourceInfo { ALT_SRC_URL });
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step1. Test Iteration
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-
-    // 切换Image数据源
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < 10; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageTestTwoNg::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test Iteration
-     * @tc.expected: ITERATION_DEFAULT
-     */
-    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
-}
-
-/**
  * @tc.name: TestCreate001
  * @tc.desc: Test image Create.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level0)
 {
-    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    auto frameNode = CreateImageNode("", "", nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ImageModelNG image;
-    image.SetSyncMode(frameNode, SYNCMODE_DEFAULT);
+    image.SetSyncMode(AceType::RawPtr(frameNode), SYNCMODE_DEFAULT);
     EXPECT_EQ(imagePattern->GetSyncLoad(), SYNCMODE_DEFAULT);
     image.EnableAnalyzer(false);
-    image.EnableAnalyzer(frameNode, true);
+    image.EnableAnalyzer(AceType::RawPtr(frameNode), true);
     imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
-    image.ResetImageSrc(frameNode);
+    image.ResetImageSrc(AceType::RawPtr(frameNode));
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.pixelMap = pixMap;
@@ -1825,7 +1682,7 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level0)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig);
-    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATED_DRAWABLE);
 }
 
 /**

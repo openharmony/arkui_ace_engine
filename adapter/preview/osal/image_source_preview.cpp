@@ -22,6 +22,11 @@ RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
     return nullptr;
 }
 
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+{
+    return nullptr;
+}
+
 RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
 {
     return nullptr;
@@ -82,5 +87,15 @@ uint32_t ImageSourcePreview::GetFrameCount()
 std::string ImageSourcePreview::GetEncodedFormat()
 {
     return "";
+}
+
+int32_t ImageSourcePreview::GetLoopCount()
+{
+    return -1;
+}
+
+std::vector<int32_t> ImageSourcePreview::GetDelayTime()
+{
+    return {};
 }
 } // namespace OHOS::Ace

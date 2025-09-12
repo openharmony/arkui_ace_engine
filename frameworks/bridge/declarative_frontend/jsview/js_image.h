@@ -31,7 +31,6 @@ class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
-    static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations);
     static void CheckIsCard(std::string& src, const JSRef<JSVal>& jsValue);
     static bool CheckResetImage(const bool& srcValid, const JSCallbackInfo& info);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);

@@ -19,27 +19,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "testing_image_info.h"
 #include "testing_rect.h"
 
 namespace OHOS::Ace::Testing {
-class TestingImageInfo;
 typedef uint32_t ColorQuad;
-
-enum ColorType {
-    COLORTYPE_UNKNOWN = 0,
-    COLORTYPE_ALPHA_8,
-    COLORTYPE_RGB_565,
-    COLORTYPE_ARGB_4444,
-    COLORTYPE_RGBA_8888,
-    COLORTYPE_BGRA_8888,
-};
-
-enum AlphaType {
-    ALPHATYPE_UNKNOWN = 0,
-    ALPHATYPE_OPAQUE,
-    ALPHATYPE_PREMUL,
-    ALPHATYPE_UNPREMUL,
-};
 
 struct BitmapFormat {
     ColorType colorType;
@@ -50,14 +34,27 @@ class TestingBitmap {
 public:
     TestingBitmap() = default;
     ~TestingBitmap() = default;
-
-    virtual void* GetPixels()
+    bool Build(const TestingImageInfo& imageInfo, int32_t stride = 0)
+    {
+        return false;
+    }
+    void SetPixels(void* pixel) {}
+    void* GetPixels() const
     {
         return nullptr;
     }
-
-    void SetPixels(void* pixel) {}
-
+    int GetWidth() const
+    {
+        return -1;
+    }
+    int GetHeight() const
+    {
+        return -1;
+    }
+    int GetRowBytes() const
+    {
+        return 0;
+    }
     void ClearWithColor(const ColorQuad& color) const {}
     size_t ComputeByteSize() const
     {

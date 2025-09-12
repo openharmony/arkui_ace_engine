@@ -24,6 +24,8 @@
 
 extern "C" {
 
+constexpr uint32_t ANIMATED_TYPE = 2;
+
 int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle)
 {
     bool hasProperty = false;
@@ -222,20 +224,13 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     if (!descriptor) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto drawableType = descriptor->GetDrawableType();
-    if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::ANIMATED) {
-        auto* animatedDrawable = static_cast<OHOS::Ace::Napi::AnimatedDrawableDescriptor*>(descriptor);
-        if (!animatedDrawable) {
-            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-        }
-        int32_t duration = animatedDrawable->GetDuration();
-        int32_t iteration = animatedDrawable->GetIterations();
-        drawable->animatedDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::AnimatedDrawableDescriptor>(
-            animatedDrawable->GetPixelMapList(), duration, iteration);
+    if (OHOS::Ace::NodeModel::GetDrawableType(objectNapi) == ANIMATED_TYPE) {
+        // set animated drawable
+        drawable->newDrawableDescriptor = objectNapi;
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

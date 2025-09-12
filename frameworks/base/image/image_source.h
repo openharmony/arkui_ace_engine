@@ -53,6 +53,7 @@ public:
 
     static RefPtr<ImageSource> Create(int32_t fd);
     static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size, uint32_t& errorCode);
+    static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
     static RefPtr<ImageSource> Create(const std::string& filePath);
     static bool IsAstc(const uint8_t* data, size_t size);
     static Size GetASTCInfo(const uint8_t* data, size_t size);
@@ -66,6 +67,8 @@ public:
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;
     virtual std::string GetEncodedFormat() = 0;
+    virtual int32_t GetLoopCount() = 0;
+    virtual std::vector<int32_t> GetDelayTime() = 0;
 };
 } // namespace OHOS::Ace
 

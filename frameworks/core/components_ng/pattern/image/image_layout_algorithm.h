@@ -38,9 +38,6 @@ public:
     void UpdateFrameSizeWithLayoutPolicy(
         LayoutWrapper* layoutWrapper, OptionalSizeF& imageFrameSize, const std::optional<SizeF>& rawImageSize);
 
-    static void PerformImageAnimationLayout(LayoutWrapper* layoutWrapper);
-    static bool IsImageAnimationLayout(LayoutWrapper* layoutWrapper);
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutAlgorithm);
 };

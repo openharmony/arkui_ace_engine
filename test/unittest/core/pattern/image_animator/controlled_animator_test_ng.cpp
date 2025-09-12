@@ -17,7 +17,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "ui/base/ace_type.h"
 
-#include "core/components_ng/pattern/image_animator/controlled_animator.h"
+#include "base/image/controlled_animator.h"
 
 using namespace testing;
 using namespace testing::ext;

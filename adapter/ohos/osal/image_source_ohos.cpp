@@ -59,6 +59,18 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+{
+    uint32_t errorCode = 0;
+    Media::SourceOptions options;
+    auto src = Media::ImageSource::CreateImageSource(data, size, options, errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
+        return nullptr;
+    }
+    return MakeRefPtr<ImageSourceOhos>(std::move(src));
+}
+
 RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
 {
     Media::SourceOptions options;
@@ -171,6 +183,27 @@ uint32_t ImageSourceOhos::GetFrameCount()
         return 0;
     }
     return frameCount;
+}
+
+int32_t ImageSourceOhos::GetLoopCount()
+{
+    uint32_t errorCode;
+    auto loopCount = imageSource_->GetLoopCount(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get image loop count failed, errorCode = %{public}u", errorCode);
+        return 0;
+    }
+    return loopCount;
+}
+std::vector<int32_t> ImageSourceOhos::GetDelayTime()
+{
+    uint32_t errorCode;
+    auto delayTime = imageSource_->GetDelayTime(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get image delay time failed, errorCode = %{public}u", errorCode);
+        return {};
+    }
+    return std::move(*delayTime.release());
 }
 
 std::string ImageSourceOhos::GetEncodedFormat()

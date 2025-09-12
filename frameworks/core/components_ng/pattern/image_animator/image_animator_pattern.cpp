@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
+#include "base/image/controlled_animator.h"
 #include "base/utils/multi_thread.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
-#include "core/components_ng/pattern/image_animator/controlled_animator.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

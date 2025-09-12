@@ -83,15 +83,9 @@ if (is_arkui_x) {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "base/source_info.cpp",
-      "core/pixelmap_drawable_descriptor.cpp",
+      "drawable_bridge.cpp",
       "drawable_descriptor.cpp",
       "js_drawable_descriptor.cpp",
-      "loader/file_image_loader.cpp",
-      "loader/image_loader.cpp",
-      "loader/resource_image_loader.cpp",
-      "utils/napi_utils.cpp",
-      "utils/resource_manager.cpp",
     ]
 
     external_deps = [

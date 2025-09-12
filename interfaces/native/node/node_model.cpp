@@ -685,19 +685,19 @@ void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent)
     if (!innerEvent) {
         return;
     }
-    
+
     auto nativeNodeEventType = GetNativeNodeEventType(innerEvent, true);
     if (nativeNodeEventType == -1) {
         return;
     }
-    
+
     auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
     auto extraCommonData = reinterpret_cast<ExtraData*>(nodePtr->extraCommonData);
     if (!extraCommonData) {
         return;
     }
-    
+
     auto innerEventExtraParam = extraCommonData->eventMap.find(eventType);
     if (innerEventExtraParam == extraCommonData->eventMap.end()) {
         return;
@@ -886,6 +886,143 @@ void* GetParseJsMedia()
         return nullptr;
     }
     return reinterpret_cast<void*>(parseJsMedia);
+}
+
+uint32_t GetDrawableType(void* object)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return 0;
+    }
+    uint32_t (*getType)(void* object) = nullptr;
+    getType = reinterpret_cast<uint32_t (*)(void*)>(FindFunction(module, "OHOS_ACE_GetDrawableDescriptorType"));
+    if (!getType) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_GetDrawableDescriptorType");
+        return 0;
+    }
+    return getType(object);
+}
+
+void IncreaseRefDrawable(void* object)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*increase)(void* object) = nullptr;
+    increase = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_IncreaseRefDrawableDescriptor"));
+    if (!increase) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_IncreaseRefDrawableDescriptor");
+        return;
+    }
+    increase(object);
+}
+
+void DecreaseRefDrawable(void* object)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*decrease)(void* object) = nullptr;
+    decrease = reinterpret_cast<void (*)(void*)>(FindFunction(module, "OHOS_ACE_DecreaseRefDrawableDescriptor"));
+    if (!decrease) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_DecreaseRefDrawableDescriptor");
+        return;
+    }
+    decrease(object);
+}
+
+void* CreateDrawable(uint32_t type)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void* (*create)(uint32_t type) = nullptr;
+    create = reinterpret_cast<void* (*)(uint32_t)>(FindFunction(module, "OHOS_ACE_CreateDrawableDescriptorByType"));
+    if (!create) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_CreateDrawableDescriptorByType");
+        return nullptr;
+    }
+    auto* drawable = create(type);
+    return drawable;
+}
+
+void SetTotalDuration(void* object, int32_t duration)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*setFunc)(void* object, int32_t duration) = nullptr;
+    setFunc = reinterpret_cast<void (*)(void*, int32_t)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetTotalDuration"));
+    if (!setFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetTotalDuration");
+        return;
+    }
+    setFunc(object, duration);
+}
+
+int32_t GetTotalDuration(void* object)
+{
+    int32_t duration = -1;
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return duration;
+    }
+    int32_t (*getFunc)(void* object) = nullptr;
+    getFunc = reinterpret_cast<int32_t (*)(void*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetTotalDuration"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetTotalDuration");
+        return duration;
+    }
+    duration = getFunc(object);
+    return duration;
+}
+
+void SetIterations(void* object, int32_t iterations)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*setFunc)(void* object, int32_t iterations) = nullptr;
+    setFunc = reinterpret_cast<void (*)(void*, int32_t)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetIterations"));
+    if (!setFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetIterations");
+        return;
+    }
+    setFunc(object, iterations);
+}
+
+int32_t GetIterations(void* object)
+{
+    int32_t iterations = -1;
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return iterations;
+    }
+    int32_t (*getFunc)(void* object) = nullptr;
+    getFunc = reinterpret_cast<int32_t (*)(void*)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_GetIterations"));
+    if (!getFunc) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_GetIterations");
+        return iterations;
+    }
+    iterations = getFunc(object);
+    return iterations;
 }
 
 bool CheckIsCNode(ArkUI_NodeHandle node)

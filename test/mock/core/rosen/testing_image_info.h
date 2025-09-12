@@ -18,10 +18,25 @@
 
 #include <memory>
 
-#include "testing_bitmap.h"
 #include "testing_color_space.h"
 
 namespace OHOS::Ace::Testing {
+enum ColorType {
+    COLORTYPE_UNKNOWN = 0,
+    COLORTYPE_ALPHA_8,
+    COLORTYPE_RGB_565,
+    COLORTYPE_ARGB_4444,
+    COLORTYPE_RGBA_8888,
+    COLORTYPE_BGRA_8888,
+};
+
+enum AlphaType {
+    ALPHATYPE_UNKNOWN = 0,
+    ALPHATYPE_OPAQUE,
+    ALPHATYPE_PREMUL,
+    ALPHATYPE_UNPREMUL,
+};
+
 class TestingImageInfo {
 public:
     TestingImageInfo() = default;

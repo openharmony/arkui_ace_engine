@@ -1819,7 +1819,7 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level0)
  */
 HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level0)
 {
-    CreatePixelMapAnimator(1);
+    CreateImageNode("", "", nullptr);
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
 
     EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::CONTAIN), "CONTAIN");

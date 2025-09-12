@@ -64,8 +64,6 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap);
-bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps,
-    int32_t& duration, int32_t& iterations);
 #endif
 
 const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj);

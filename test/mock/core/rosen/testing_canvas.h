@@ -131,7 +131,10 @@ public:
     {
         return TestingMatrix();
     }
-
+    bool ReadPixels(const TestingImageInfo& dstInfo, void* dstPixels, size_t dstRowBytes, int srcX, int srcY)
+    {
+        return true;
+    }
     void ResetHybridRenderSize(float width, float height) {}
 };
 } // namespace OHOS::Ace::Testing

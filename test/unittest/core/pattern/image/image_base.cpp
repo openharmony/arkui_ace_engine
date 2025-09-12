@@ -35,24 +35,6 @@ RefPtr<PixelMap> ImageBases::CreatePixelMap(const std::string& src)
     return pixelMap;
 }
 
-RefPtr<FrameNode> ImageBases::CreatePixelMapAnimator(int32_t number)
-{
-    ImageModelNG imageModelNG;
-    std::vector<ImageProperties> images;
-    for (int32_t index = 0; index < number; index++) {
-        ImageProperties imageProperties;
-        imageProperties.pixelMap = ImageBases::CreatePixelMap(IMAGE_SRC_URL);
-        imageProperties.width = IMAGE_WIDTH;
-        imageProperties.height = IMAGE_HEIGHT;
-        imageProperties.top = IMAGE_TOP;
-        imageProperties.left = IMAGE_LEFT;
-        images.push_back(imageProperties);
-    }
-    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
-}
-
 RefPtr<FrameNode> ImageBases::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;

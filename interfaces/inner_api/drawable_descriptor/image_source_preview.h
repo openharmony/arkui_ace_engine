@@ -148,6 +148,10 @@ public:
     {
         return nullptr;
     }
+    static std::shared_ptr<std::vector<std::shared_ptr<PixelMap>>> GetPixelMaps(napi_env env, napi_value pixelmaps)
+    {
+        return nullptr;
+    }
 };
 } // namespace Media
 } // namespace OHOS

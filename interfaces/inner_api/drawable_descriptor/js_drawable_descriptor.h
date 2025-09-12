@@ -35,11 +35,18 @@ public:
     static DRAWABLE_FORCE_EXPORT constexpr char MODULE_NAME[] = "arkui.drawableDescriptor";
 
 private:
+    struct AnimationOptions {
+        int32_t duration = -1;
+        int32_t iterations = 1;
+        bool autoPlay = true;
+        std::vector<int32_t> durations;
+    };
+
     static napi_value InitDrawable(napi_env env);
     static napi_value InitLayeredDrawable(napi_env env);
     static napi_value InitAnimatedDrawable(napi_env env);
     static napi_value InitPixelMapDrawable(napi_env env);
-
+    static void ParseAnimationOptions(napi_env env, napi_value napiOptions, AnimationOptions& options);
     static napi_value DrawableConstructor(napi_env env, napi_callback_info info);
     static napi_value AnimatedConstructor(napi_env env, napi_callback_info info);
     static napi_value PixelMapConstructor(napi_env env, napi_callback_info info);
@@ -49,15 +56,19 @@ private:
 
     // drawable descriptor and pixel map drawable descriptor methods
     static napi_value GetPixelMap(napi_env env, napi_callback_info info);
-    static napi_value GetOriginalWidth(napi_env env, napi_callback_info info);
-    static napi_value GetOriginalHeight(napi_env env, napi_callback_info info);
-    static napi_value Fetch(napi_env env, napi_callback_info info);
-    static napi_value FetchSync(napi_env env, napi_callback_info info);
+    static napi_value CreateLoadResult(napi_env env, int32_t width, int32_t height);
+    static napi_value Load(napi_env env, napi_callback_info info);
+    static void LoadExecute(napi_env env, void* data);
+    static void LoadComplete(napi_env env, napi_status status, void* data);
+    static napi_value LoadSync(napi_env env, napi_callback_info info);
 
-    // animated drawable descriptor methos
-    static napi_value IsRunning(napi_env env, napi_callback_info info);
+    // animated drawable descriptor methods
+    static napi_value GetAnimationController(napi_env env, napi_callback_info info);
+    static napi_value GetStatus(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
+    static napi_value Pause(napi_env env, napi_callback_info info);
+    static napi_value Resume(napi_env env, napi_callback_info info);
 
     // layered drawable descriptor methods
     static napi_value GetForeground(napi_env env, napi_callback_info info);

@@ -29,13 +29,9 @@ void ImagePattern::OnAttachToMainTreeMultiThread()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     imagePaintMethod_ = MakeRefPtr<ImagePaintMethod>(nullptr);
-    if (GetIsAnimation()) {
-        renderCtx->SetClipToFrame(true);
-    } else {
-        renderCtx->SetClipToBounds(false);
-        renderCtx->SetUsingContentRectForRenderFrame(true);
-        pipeline->AddWindowStateChangedCallback(host->GetId());
-    }
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     selectedColor_ = textTheme->GetSelectedColor();
