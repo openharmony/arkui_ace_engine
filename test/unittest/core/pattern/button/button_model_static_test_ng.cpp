@@ -505,6 +505,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg013, TestSize.Level1)
      */
     std::optional<bool> stateEffectValue = true;
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
     ButtonModelStatic::SetStateEffect(frameNode, stateEffectValue);
     EXPECT_EQ(buttonEventHub->GetStateEffect(), true);
 }

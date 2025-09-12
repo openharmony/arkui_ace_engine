@@ -34,6 +34,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -2573,6 +2574,54 @@ HWTEST_F(SelectPatternTestNg, BindMenuTouch014, TestSize.Level1)
     touchInfoMove.AddTouchLocationInfo(std::move(touchLocationInfo));
     EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoMove));
     ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: SetOptionBgColorByUser
+ * @tc.desc: Test SelectPattern SetOptionBgColorByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetOptionBgColorByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    selectPattern->UpdateTargetSize();
+    auto menu = selectPattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto targetSize = menuLayoutProps->GetTargetSizeValue(SizeF());
+    EXPECT_EQ(targetSize, SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto option = selectPattern->options_[0];
+    auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step2. Test option background color update with user-defined flag.
+     * @tc.expected: step2. Option background color is updated based on user-defined flag.
+     */
+    std::vector<bool> vec { true, false };
+    for (auto flag : vec) {
+        props->UpdateSelectedOptionBgColorSetByUser(flag);
+        selectPattern->optionBgColor_.reset();
+        selectPattern->SetOptionBgColor(Color::GREEN);
+        EXPECT_EQ(optionPaintProperty->GetOptionBgColorValue(), Color::GREEN);
+    }
 }
 
 /**

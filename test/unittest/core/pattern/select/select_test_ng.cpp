@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -2250,6 +2251,31 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SelectLayoutPropertyTest008
+ * @tc.desc: Test Select set textDirection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest008, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    // create select
+    std::vector<SelectParam> params = { {OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE},
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    /**
+     * @tc.cases: case1. verify the SetLayoutDirection function.
+     */
+    selectPattern->SetLayoutDirection(TextDirection::RTL);
+    auto layoutProps = selectPattern->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    auto direction = layoutProps->GetNonAutoLayoutDirection();
+    ASSERT_EQ(direction, TextDirection::RTL);
+}
+
+/**
  * @tc.name: SelectMenuOutline001
  * @tc.desc: Test SelectModelNG SelectMenuOutline.
  * @tc.type: FUNC
@@ -2280,6 +2306,39 @@ HWTEST_F(SelectTestNg, SelectMenuOutline001, TestSize.Level1)
     auto renderContext = menu->GetRenderContext();
     EXPECT_EQ(renderContext->GetOuterBorderColor(), menuParam.outlineColor);
     EXPECT_EQ(renderContext->GetOuterBorderWidth(), menuParam.outlineWidth);
+}
+
+/**
+ * @tc.name: GetSelectTheme001
+ * @tc.desc: Test GetSelectTheme with valid frameNode and valid context, expect correct SelectTheme returned.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetSelectTheme001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode with SelectPattern and MockPipelineContext.
+     * @tc.expected: step1. FrameNode and context are created successfully.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->SetThemeManager(themeManager);
+    
+    /**
+     * @tc.steps: step2. Prepare SelectTheme and mock themeManager to return it.
+     * @tc.expected: step2. Mocked themeManager returns the prepared SelectTheme.
+     */
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    frameNode->DetachContext(pipelineContext);
+    
+    /**
+     * @tc.steps: step3. Call GetSelectTheme and verify the result.
+     * @tc.expected: step3. The returned SelectTheme matches the prepared one.
+     */
+    auto result = SelectModelNG::GetSelectTheme(frameNode.GetRawPtr());
+    EXPECT_EQ(result, selectTheme);
 }
 
 /**
@@ -2347,6 +2406,58 @@ HWTEST_F(SelectTestNg, ResetComponentColor001, TestSize.Level1)
     EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
     EXPECT_EQ(pattern->selectedFont_.FontColor, Color::RED);
     EXPECT_EQ(pattern->optionFont_.FontColor, Color::RED);
+}
+
+/**
+ * @tc.name: ResetComponentColor002
+ * @tc.desc: Test ResetSelectComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetComponentColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select and get pattern.
+     * @tc.expected: SelectPattern created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup mock theme and pipeline context.
+     * @tc.expected: Mock theme injected.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetThemeManager(themeManager);
+
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.steps: step3. Set theme colors and override pattern colors.
+     * @tc.expected: pattern colors set to RED, theme colors are GREEN.
+     */
+    auto selectLayoutProps = frameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+    selectTheme->selectedColor_ = Color::GREEN;
+    pattern->SetSelectedOptionBgColor(Color::RED);
+    SelectModelNG::SetShowDefaultSelectedIcon(frameNode, true);
+    SelectModelNG::ResetComponentColor(frameNode, SelectColorType::SELECTED_OPTION_BG_COLOR);
+
+    /**
+     * @tc.steps: step4. Validate that colors were not changed (reset skipped).
+     */
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), true);
+    EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
 }
 
 /**
