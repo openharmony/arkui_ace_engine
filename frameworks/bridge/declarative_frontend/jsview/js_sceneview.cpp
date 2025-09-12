@@ -189,7 +189,10 @@ std::shared_ptr<Render3D::ISceneAdapter> UnwrapScene(JSRef<JSVal> obj)
 
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        return nullptr;
+    }
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     auto ret = Render3D::SceneBridge::UnwrapSceneFromJs(env, napiValue);
