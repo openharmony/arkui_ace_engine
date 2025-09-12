@@ -530,7 +530,8 @@ class __RepeatVirtualScroll2Impl<T> {
             onRecycleItems: this.onRecycleItems.bind(this),
             onActiveRange: this.onActiveRange.bind(this),
             onMoveFromTo: this.onMoveFromTo.bind(this),
-            onPurge: this.onPurge.bind(this)
+            onPurge: this.onPurge.bind(this),
+            onUpdateDirty:this.onUpdateDirty.bind(this)
         });
 
         // init onMove
@@ -564,6 +565,10 @@ class __RepeatVirtualScroll2Impl<T> {
             }
         }
         return undefined;
+    }
+
+    private onUpdateDirty(): void {
+        ObserveV2.getObserve().updateDirty2(true);
     }
 
     // update Repeat, see overview documentation at the top of this file.
@@ -622,7 +627,7 @@ class __RepeatVirtualScroll2Impl<T> {
         this.newItemsNeedToRender(newActiveDataItems, newL1Rid4Index);
 
         // render all data changes in one go
-        ObserveV2.getObserve().updateDirty2(true);
+        
 
         this.activeDataItems_ = newActiveDataItems;
 

@@ -78,6 +78,7 @@ public:
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
+    std::function<void()> onUpdateDirty_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_SYNTAX_REPEAT_VIRTUAL_2_TEST_NG_H

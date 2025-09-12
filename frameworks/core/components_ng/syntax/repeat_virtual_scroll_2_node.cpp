@@ -35,7 +35,8 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
     uint32_t totalCount, const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
-    const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge)
+    const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge,
+    const std::function<void()>& onUpdateDirty)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
     if (node) {
@@ -46,7 +47,8 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
         return node;
     }
     node = MakeRefPtr<RepeatVirtualScroll2Node>(
-        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
+        onMoveFromTo, onPurge, onUpdateDirty);
 
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -57,10 +59,11 @@ RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrL
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo,
-    const std::function<void()>& onPurge)
+    const std::function<void()>& onPurge,
+    const std::function<void()>& onUpdateDirty)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount), caches_(onGetRid4Index),
       onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onMoveFromTo_(onMoveFromTo),
-      onPurge_(onPurge), postUpdateTaskHasBeenScheduled_(false)
+      onPurge_(onPurge), onUpdateDirty_(onUpdateDirty), postUpdateTaskHasBeenScheduled_(false)
 {}
 
 void RepeatVirtualScroll2Node::UpdateTotalCount(uint32_t totalCount)
@@ -844,6 +847,12 @@ void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
 RefPtr<FrameNode> RepeatVirtualScroll2Node::GetFrameNode(int32_t index)
 {
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
+}
+
+void RepeatVirtualScroll2Node::fireOnUpdateDirty()
+{
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    onUpdateDirty_();
 }
 
 void RepeatVirtualScroll2Node::DumpInfo()

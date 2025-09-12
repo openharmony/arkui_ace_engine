@@ -27,13 +27,15 @@ void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
     const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
-    const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge)
+    const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
+    const std::function<void()>& onUpdateDirty)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll2ModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
+        onMoveFromTo, onPurge, onUpdateDirty);
 
     stack->Push(repeatNode);
     stack->PopContainer();

@@ -159,8 +159,9 @@ HWTEST_F(ListItemPatternTestNg, GetParentFrameNode003, TestSize.Level1)
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
+    std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
     ASSERT_NE(node, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listItemPattern);
     ASSERT_NE(frameNode, nullptr);

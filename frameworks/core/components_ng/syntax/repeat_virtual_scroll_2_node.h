@@ -99,14 +99,16 @@ public:
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
-        const std::function<void()>& onPurge);
+        const std::function<void()>& onPurge,
+        const std::function<void()>& onUpdateDirty);
 
     RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
-        const std::function<void()>& onPurge);
+        const std::function<void()>& onPurge,
+        const std::function<void()>& onUpdateDirty);
 
     ~RepeatVirtualScroll2Node() override = default;
 
@@ -241,6 +243,8 @@ public:
         isLoop_ = isLoop;
     }
 
+    void fireOnUpdateDirty();
+
     void DumpInfo() override;
     
 
@@ -309,6 +313,7 @@ private:
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
+    std::function<void()> onUpdateDirty_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
