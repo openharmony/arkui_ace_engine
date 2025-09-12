@@ -213,7 +213,7 @@ void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& touchEve
             windowPoint.SetY(historyEvent.GetY());
             transformEvent.time = Platform::GetTouchEventOriginTimeStamp(end ? lastTouchEvent_ : event);
         }
-        NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        NGGestureRecognizer::TransformForRecognizer(windowPoint, GetAttachedNode(), false,
             isPostEventResult_, event.postEventNodeId);
 
         transformEvent.x = windowPoint.GetX();
@@ -517,8 +517,8 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
     } else if (event.sourceTool == SourceTool::TOUCHPAD) {
         PointF originPoint(lastAxisEvent_.horizontalAxis, lastAxisEvent_.verticalAxis);
         PointF finalPoint(originPoint.GetX() + delta_.GetX(), originPoint.GetY() + delta_.GetY());
-        NGGestureRecognizer::Transform(originPoint, GetAttachedNode(), false, false, -1);
-        NGGestureRecognizer::Transform(finalPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::TransformForRecognizer(originPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::TransformForRecognizer(finalPoint, GetAttachedNode(), false, false, -1);
         delta_ = Offset(finalPoint.GetX(), finalPoint.GetY()) - Offset(originPoint.GetX(), originPoint.GetY());
     }
 }
