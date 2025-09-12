@@ -1818,6 +1818,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     dragCallback(notifyMessage);
     EXPECT_FALSE(dragDropManager->IsDragged());
     EXPECT_EQ(callbackInfo, 1);
+
     MockContainer::TearDown();
 }
 

@@ -1238,7 +1238,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback()
     auto ret = [](const DragNotifyMsgCore& notifyMessage) {};
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, ret);
-    auto callback = [id = frameNode->GetInstanceId(), weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]
+    auto callback = [id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]
         (const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
         auto container = Container::GetContainer(id);
