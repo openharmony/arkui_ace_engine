@@ -44,6 +44,11 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
     let staticHook: StaticInteropHook | undefined = InteropConfigureStateMgmt.instance.needsInterop() ? new StaticInteropHook() : undefined;
     return new Proxy(source, {
         set(target, prop, val) {
+            //for interop
+            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+                staticHook!.addRef = val;
+                return true;
+            }
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
@@ -53,18 +58,6 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
             stateMgmtConsole.debug(`get - prop ${prop.toString()} prop1 ${prop1}`);
             if (!(typeof target === 'object') && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
-            }
-            // for interop
-            if (InteropConfigureStateMgmt.instance.needsInterop()) {
-                if (prop === '__static_interop_hook') {
-                    return (state, addRef) => {
-                        staticHook!.state = state;
-                        staticHook!.addRef = addRef;
-                    };
-                }
-                if (prop === '__static_interop_state') {
-                    return () => staticHook.state;
-                }
             }
             const value = target[prop1];
             if (typeof value !== 'function') {
@@ -89,6 +82,12 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
 
             stateMgmtConsole.debug(`      - func - no ObservedPropertybstract - ret value ${funcRet}`);
             return funcRet;
-        } // get
+        }, // get
+        has(target, prop) {
+            if (InteropConfigureStateMgmt.instance.needsInterop() && prop === '__static_interop_hook') {
+                return true;
+            }
+            return prop in target;
+        }
     }); // new Proxy
 }
