@@ -3420,8 +3420,11 @@ test/unittest/interfaces/form_render/ @form_framework
 
 [Generated source]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/peers/Deserializer.ts @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/generated/arkoala_api_generated.h @ArkUI-idlize
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/generated/Serializers.h @ArkUI-idlize
 frameworks/core/interfaces/native/utility/converter.cpp @arkui-idlize
 
 [Koala mirror]

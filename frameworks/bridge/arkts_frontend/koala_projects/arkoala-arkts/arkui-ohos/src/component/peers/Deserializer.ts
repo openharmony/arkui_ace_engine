@@ -12512,7 +12512,7 @@ export class Deserializer extends DeserializerBase {
         let pressedTime_buf : number | undefined
         if ((RuntimeType.UNDEFINED) != (pressedTime_buf_runtimeType))
         {
-            pressedTime_buf = (valueDeserializer.readNumber() as number)
+            pressedTime_buf = (valueDeserializer.readInt64() as number)
         }
         const pressedTime_result : number | undefined = pressedTime_buf
         const pressure_buf_runtimeType  = (valueDeserializer.readInt8() as int32)

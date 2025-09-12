@@ -15255,7 +15255,7 @@ typedef struct Ark_TouchObject {
     Ark_Number x;
     Ark_Number y;
     Opt_InteractionHand hand;
-    Opt_Number pressedTime;
+    Opt_Int64 pressedTime;
     Opt_Number pressure;
     Opt_Number width;
     Opt_Number height;
