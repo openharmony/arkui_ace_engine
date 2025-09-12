@@ -272,7 +272,7 @@ static ani_string AniGetInspectorTree(ani_env *env)
     return aniResult;
 }
 
-static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
 {
     bool isLayoutInspector = false;
     const NG::InspectorFilter& inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
@@ -291,7 +291,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     return result;
 }
  
-static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
 {
     if (depth < 0) {
         AniThrow(env, "invalid filter depth");

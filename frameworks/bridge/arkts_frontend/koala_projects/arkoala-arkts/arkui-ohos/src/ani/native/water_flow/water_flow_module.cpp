@@ -240,7 +240,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
         return;
     }
     ani_size changeArrayLength;
-    if (env->Array_GetLength(static_cast<ani_array_ref>(changeArray), &changeArrayLength) != ANI_OK) {
+    if (env->Array_GetLength(static_cast<ani_array>(changeArray), &changeArrayLength) != ANI_OK) {
     }
 
     ani_class sectionChangeInfo;
@@ -256,7 +256,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
     int32_t changeLength = static_cast<int32_t>(changeArrayLength);
     for (int32_t i = 0; i < changeLength; i++) {
         ani_ref change;
-        if (env->Array_Get_Ref(static_cast<ani_array_ref>(changeArray), i, &change) != ANI_OK) {
+        if (env->Array_Get(static_cast<ani_array>(changeArray), i, &change) != ANI_OK) {
             continue;
         }
 
@@ -280,7 +280,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
         env->Object_GetPropertyByName_Ref(static_cast<ani_object>(change), "sections", &sectionOptionsArray);
 
         ani_size aniLength;
-        if (env->Array_GetLength(static_cast<ani_array_ref>(sectionOptionsArray), &aniLength) != ANI_OK) {
+        if (env->Array_GetLength(static_cast<ani_array>(sectionOptionsArray), &aniLength) != ANI_OK) {
             continue;
         }
 
@@ -288,7 +288,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
         std::vector<ArkUIWaterFlowSection> newSections;
         for (int32_t j = 0; j < length; j++) {
             ani_ref section;
-            if (env->Array_Get_Ref(static_cast<ani_array_ref>(sectionOptionsArray), j, &section) != ANI_OK) {
+            if (env->Array_Get(static_cast<ani_array>(sectionOptionsArray), j, &section) != ANI_OK) {
                 continue;
             }
             ani_boolean isSectionOptions;

@@ -457,7 +457,7 @@ JSMeasureLayoutParamNG::JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper,
     if (ANI_OK != env->GetVM(&vm)) {
         LOGE("GetVM failed");
     }
-    deleter_ = [vm](ani_array_ref ref) {
+    deleter_ = [vm](ani_array ref) {
             if (ref != nullptr) {
                 ani_env* env = nullptr;
                 vm->GetEnv(ANI_VERSION_1, &env);
@@ -470,26 +470,21 @@ JSMeasureLayoutParamNG::JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper,
 void JSMeasureLayoutParamNG::Init(ani_env* env)
 {
     int32_t count = GetTotalChildCount();
-    ani_class childCls = nullptr;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/MeasurableLayoutableInner;";
-    if (ANI_OK != env->FindClass(className, &childCls)) {
-        return;
-    }
 
     ani_ref undefinedRef = nullptr;
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {
         return;
     }
 
-    ani_array_ref array;
-    if (ANI_OK != env->Array_New_Ref(childCls, count, undefinedRef, &array)) {
+    ani_array array;
+    if (ANI_OK != env->Array_New(count, undefinedRef, &array)) {
         return;
     }
     ani_ref temp;
     if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(array), &temp)) {
         return;
     }
-    childArray_.reset(static_cast<ani_array_ref>(temp), deleter_);
+    childArray_.reset(static_cast<ani_array>(temp), deleter_);
     GenChildArray(env, 0, count);
 }
 
@@ -530,7 +525,7 @@ void JSMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t 
             }
         }
 
-        if (ANI_OK != env->Array_Set_Ref(childArray_.get(), index, info)) {
+        if (ANI_OK != env->Array_Set(childArray_.get(), index, info)) {
             return;
         }
     }
@@ -588,8 +583,8 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
             return;
         }
         
-        ani_array_ref array;
-        if (ANI_OK != env->Array_New_Ref(childCls, newCount, undefinedRef, &array)) {
+        ani_array array;
+        if (ANI_OK != env->Array_New(newCount, undefinedRef, &array)) {
             return;
         }
         
@@ -604,7 +599,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
                     return;
                 }
             }
-            if (ANI_OK != env->Array_Set_Ref(array, index, info)) {
+            if (ANI_OK != env->Array_Set(array, index, info)) {
                 return;
             }
         }
@@ -612,7 +607,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
         if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(array), &temp)) {
             return;
         }
-        childArray_.reset(static_cast<ani_array_ref>(temp), deleter_);
+        childArray_.reset(static_cast<ani_array>(temp), deleter_);
     }
 }
 

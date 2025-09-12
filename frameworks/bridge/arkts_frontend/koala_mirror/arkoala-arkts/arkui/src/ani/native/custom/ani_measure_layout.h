@@ -57,10 +57,10 @@ public:
     }
     void GenChildArray(ani_env* env, int32_t start, int32_t end);
     
-    using AniArrayRef =  std::remove_reference_t<decltype(*static_cast<ani_array_ref>(nullptr))>;
+    using AniArray = std::remove_reference_t<decltype(*static_cast<ani_array>(nullptr))>;
 
-    std::shared_ptr<AniArrayRef> childArray_;
-    std::function<void(ani_array_ref)> deleter_;
+    std::shared_ptr<AniArray> childArray_;
+    std::function<void(ani_array)> deleter_;
 
 };
 

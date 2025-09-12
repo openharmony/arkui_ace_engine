@@ -32,7 +32,6 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 #include "frameworks/core/components_ng/render/adapter/matrix_util.h"
-#include "interop_js/arkts_esvalue.h"
 namespace OHOS::Ace::MatrixAni {
 constexpr int32_t MATRIX_LENGTH = 16;
 constexpr int32_t MATRIX_LENGTH_TRANSFORM_POINT = 2;
@@ -98,7 +97,7 @@ Matrix4 ConvertToMatrix([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
 Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object option)
 {
     Matrix4 result = Matrix4::CreateIdentity();
-    ani_array_double inputArray = static_cast<ani_array_double>(option);
+    ani_array inputArray = static_cast<ani_array>(option);
     ani_size length = 0;
     if (ANI_OK != env->Array_GetLength(inputArray, &length)) {
         return result;
@@ -107,14 +106,20 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
     if (inputSize != MATRIX_LENGTH) {
         return result;
     }
+
     for (int32_t i = 0; i < Matrix4::DIMENSION; i++) {
         for (int32_t j = 0; j < Matrix4::DIMENSION; j++) {
-            ani_double value;
+            ani_ref value;
             auto index = static_cast<ani_size>(i * Matrix4::DIMENSION + j);
-            if (ANI_OK != env->Array_GetRegion_Double(inputArray, index, static_cast<ani_size>(1), &value)) {
+            if (env->Array_Get(inputArray, index, &value) != ANI_OK) {
                 return result;
             }
-            auto ret = static_cast<double>(value);
+            ani_double unboxedDouble {};
+            if (env->Object_CallMethodByName_Double(
+                reinterpret_cast<ani_object>(value), "unboxed", ":d", &unboxedDouble) != ANI_OK) {
+                return result;
+            }
+            auto ret = static_cast<double>(unboxedDouble);
             result.Set(j, i, ret);
         }
     }

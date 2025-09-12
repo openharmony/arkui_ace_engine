@@ -186,7 +186,7 @@ void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_ob
 }
 
 void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array_ref array, [[maybe_unused]] ani_int length)
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array array, [[maybe_unused]] ani_int length)
 {
     auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
     if (!frameNode || length < 0) {
@@ -205,7 +205,7 @@ void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
     const char** allowDrops = new const char* [length];
     std::vector<std::string> allowDropsSave(length);
     for (int i = 0; i < length; i++) {
-        if (ANI_OK == env->Array_Get_Ref(array, i, &ref)) {
+        if (ANI_OK == env->Array_Get(array, i, &ref)) {
             ani_string stringValue = static_cast<ani_string>(ref);
             std::string dataType = AniUtils::ANIStringToStdString(env, stringValue);
             allowDropsSave[i] = dataType;

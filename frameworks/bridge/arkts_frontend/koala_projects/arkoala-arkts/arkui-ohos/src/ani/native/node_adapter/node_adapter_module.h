@@ -34,7 +34,7 @@ void NodeAdapterNotifyItemInserted(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_double start, ani_double count);
 void NodeAdapterNotifyItemMoved(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_double from, ani_double to);
-ani_array_double NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
+ani_array NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_NODE_ADAPTER_MODULE
