@@ -295,14 +295,14 @@ ArkUINativeModuleValue ScrollBridge::SetScrollable(ArkUIRuntimeCallInfo* runtime
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollable(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
+    /* 5: array size */
+    constexpr std::array<Axis, 5> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE, Axis::NONE, Axis::FREE };
     int32_t scrollDirection = scrollDirectionArg->Int32Value(vm);
-    if (scrollDirection != static_cast<int32_t>(Axis::VERTICAL) &&
-        scrollDirection != static_cast<int32_t>(Axis::HORIZONTAL) &&
-        scrollDirection != static_cast<int32_t>(Axis::FREE) && scrollDirection != static_cast<int32_t>(Axis::NONE)) {
+    if (scrollDirection < 0 || scrollDirection >= static_cast<int32_t>(AXIS.size())) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollable(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollable(nativeNode, scrollDirection);
+        GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollable(nativeNode,
+            static_cast<int32_t>(AXIS[scrollDirection]));
     }
 
     return panda::JSValueRef::Undefined(vm);
