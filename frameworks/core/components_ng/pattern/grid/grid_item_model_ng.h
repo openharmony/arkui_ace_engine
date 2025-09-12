@@ -47,6 +47,7 @@ public:
     static void SetColumnStart(FrameNode* frameNode, int32_t columnStart);
     static void SetColumnEnd(FrameNode* frameNode, int32_t columnEnd);
     static void SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle);
+    static GridItemStyle GetGridItemStyle(FrameNode* frameNode);
     static void SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect);
     static void SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent);
 };

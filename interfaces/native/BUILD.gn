@@ -73,6 +73,7 @@ ohos_shared_library("ace_ndk") {
     "node/event_converter.cpp",
     "node/frame_information.cpp",
     "node/gesture_impl.cpp",
+    "node/grid_layout_option.cpp",
     "node/list_option.cpp",
     "node/native_drawable_descriptor.cpp",
     "node/native_impl.cpp",

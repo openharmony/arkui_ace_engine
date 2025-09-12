@@ -59,6 +59,7 @@ struct ArkUI_Node {
     bool isBindNative = false;
     void* commonEventListeners = nullptr;
     void* extraCommonData = nullptr;
+    void* gridLayoutOptions =  nullptr;
 };
 
 struct ArkUI_Context {

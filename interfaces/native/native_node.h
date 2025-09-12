@@ -6898,6 +6898,52 @@ typedef enum {
     NODE_GRID_SYNC_LOAD = 1013007,
 
     /**
+     * @brief Specifies the alignment of <b>GridItem</b> components in the parent <b>Grid</b> container. 
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: alignment of <b>GridItem</b> components in the parent <b>Grid</b> container, \n
+     * specified using the {@link ArkUI_GridItemAlignment} enum. \n
+     * The default value is <b>GRID_ITEM_ALIGNMENT_DEFAULT</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: alignment of <b>GridItem</b> components in the parent <b>Grid</b> container, \n
+     * specified using the {@link ArkUI_GridItemAlignment} enum. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_ALIGN_ITEMS = 1013008,
+
+    /**
+     * @brief Specifies the layout options of the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .object: layout options, with the parameter format of {@link ArkUI_GridLayoutOptions}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: current {@link ArkUI_GridLayoutOptions} object. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_LAYOUT_OPTIONS = 1013009,
+
+    /**
+     * @brief Sets the style of the <b>GridItem</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: style of the <b>GridItem</b> component, specified using {@link ArkUI_SliderStyle}. \n
+     * The default value is <b>GRID_ITEM_STYLE_NONE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: style of the <b>GridItem</b> component, specified using {@link ArkUI_SliderStyle}. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_ITEM_STYLE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID_ITEM,
+
+    /**
     * @brief Defines the column width of the text picker.
     * This attribute can be set, reset, and obtained as required through APIs.
     *
@@ -8524,6 +8570,83 @@ typedef enum {
      *
     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH = 19004,
+
+    /**
+     * @brief Defines the event triggered when a child component enters or leaves the grid display area.
+     *
+     * Notes for triggering the event:\n
+     * This event is triggered once when the grid is initialized and when the index of the first or \n
+     * last child component in the grid display area changes. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is \n
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the first child component in the grid display area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the last child component in the grid display area. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID,
+
+    /**
+     * @brief Defines the event triggered when the grid is about to scroll.
+     *
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the scrollable component or other input settings,
+     * such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>:
+     * Scroll offset of each frame. A positive offset indicates content scrolling upward, \n
+     * and a negative offset indicates content scrolling downward. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. The parameter type is
+     * {@link ArkUI_ScrollState}. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: scroll source. The parameter type is {@link ArkUI_ScrollSource}. \n
+     * @return Returns one or no number to indicate the actual amount by which the scroll component scrolls.
+     *
+     * @since 21
+     */
+    NODE_GRID_ON_WILL_SCROLL = 1013001,
+
+    /**
+     * @brief Defines the event triggered when the grid scrolls.
+     *
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the scrollable component or other input settings,
+     * such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>:
+     * Scroll offset of each frame. A positive offset indicates content scrolling upward, \n
+     * and a negative offset indicates content scrolling downward. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_ON_DID_SCROLL = 1013002,
+
+    /**
+     * @brief Defines the event triggered at the end of each frame layout of the <b>ARKUI_NODE_GRID</b> component,
+     * which is used to set the position and length of the scrollbar.
+     *
+     * The event parameter is {@link ArkUI_NodeEvent}. \n
+     * value.i32 at index 0:offset of the first visible grid item,
+     * obtained using <b>OH_ArkUI_NodeEvent_GetNumberValue</b>. \n
+     * value.f32 at index 1: offset of the first visible item relative to the grid's display starting position, in vp,
+     * obtained using <b>OH_ArkUI_NodeEvent_GetNumberValue</b>. \n
+     * @return Information about the scrollbar position and length. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.f32 at index 0: total offset of the grid content relative to the display area, in px. \n
+     * value.f32 at index 1: total length of the grid content, in px. \n
+     *
+     * @since 21
+     */
+    NODE_GRID_ON_SCROLL_BAR_UPDATE = 1013003,
 } ArkUI_NodeEventType;
 
 /**

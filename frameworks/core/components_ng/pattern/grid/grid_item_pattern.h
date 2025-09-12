@@ -161,6 +161,11 @@ public:
         return true;
     }
 
+    GridItemStyle GetGridItemStyle() const
+    {
+        return gridItemStyle_;
+    }
+
 protected:
     void OnModifyDone() override;
 
