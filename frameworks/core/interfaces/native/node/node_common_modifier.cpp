@@ -4990,11 +4990,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        radius = CalcDimension(radiusArg, DimensionUnit::VP);
-    } else {
-        radius = CalcDimension(radiusArg, DimensionUnit::PX);
-    }
+    radius = CalcDimension(radiusArg, DimensionUnit::VP);
     Color color(colorArg);
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
