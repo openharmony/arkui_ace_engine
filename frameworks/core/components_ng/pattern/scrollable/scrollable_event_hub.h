@@ -236,6 +236,45 @@ public:
         return onJSFrameNodeDidScrollEvent_;
     }
 
+    void SetOnWillStartDragging(OnWillStartDraggingEvent&& event)
+    {
+        onWillStartDraggingEvent_ = std::move(event);
+    }
+
+    const OnWillStartDraggingEvent& GetOnWillStartDragging() const
+    {
+        return onWillStartDraggingEvent_;
+    }
+
+    void SetOnDidStopDragging(OnDidStopDraggingEvent&& event)
+    {
+        onDidStopDraggingEvent_ = std::move(event);
+    }
+
+    const OnDidStopDraggingEvent& GetOnDidStopDragging() const
+    {
+        return onDidStopDraggingEvent_;
+    }
+
+    void SetOnWillStartFling(OnWillStartFlingEvent&& event)
+    {
+        onWillStartFlingEvent_ = std::move(event);
+    }
+
+    const OnWillStartFlingEvent& GetOnWillStartFling() const
+    {
+        return onWillStartFlingEvent_;
+    }
+
+    void SetOnDidStopFling(OnDidStopFlingEvent&& event)
+    {
+        onDidStopFlingEvent_ = std::move(event);
+    }
+
+    const OnDidStopFlingEvent& GetOnDidStopFling() const
+    {
+        return onDidStopFlingEvent_;
+    }
 private:
     OnScrollEvent onScrollEvent_;
     OnWillScrollEvent onWillScrollEvent_;
@@ -254,6 +293,11 @@ private:
     OnScrollFrameBeginEvent onJSFrameNodeScrollFrameBeginEvent_;
     OnWillScrollEvent onJSFrameNodeWillScrollEvent_;
     OnScrollEvent onJSFrameNodeDidScrollEvent_;
+
+    OnWillStartDraggingEvent onWillStartDraggingEvent_;
+    OnDidStopDraggingEvent onDidStopDraggingEvent_;
+    OnWillStartFlingEvent onWillStartFlingEvent_;
+    OnDidStopFlingEvent onDidStopFlingEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_EVENT_HUB_H

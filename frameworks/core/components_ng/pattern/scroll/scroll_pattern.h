@@ -388,7 +388,8 @@ public:
 
     bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
+    void StartScrollSnapAnimation(
+        float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
 
     SizeF GetChildrenExpandedSize() override;
 

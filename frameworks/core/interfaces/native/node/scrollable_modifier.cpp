@@ -315,6 +315,82 @@ void ResetOnWillStopDragging(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
 }
+
+void SetOnWillStartDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onWillStartDragging = reinterpret_cast<OnWillStartDraggingEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillStartDragging(frameNode, std::move(*onWillStartDragging));
+    } else {
+        ScrollableModelNG::SetOnWillStartDragging(frameNode, nullptr);
+    }
+}
+
+void ResetOnWillStartDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStartDragging(frameNode, nullptr);
+}
+
+void SetOnDidStopDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onDidStopDragging = reinterpret_cast<OnDidStopDraggingEvent*>(extraParam);
+        ScrollableModelNG::SetOnDidStopDragging(frameNode, std::move(*onDidStopDragging));
+    } else {
+        ScrollableModelNG::SetOnDidStopDragging(frameNode, nullptr);
+    }
+}
+
+void ResetOnDidStopDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidStopDragging(frameNode, nullptr);
+}
+
+void SetOnWillStartFling(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onWillStartFling = reinterpret_cast<OnWillStartFlingEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillStartFling(frameNode, std::move(*onWillStartFling));
+    } else {
+        ScrollableModelNG::SetOnWillStartFling(frameNode, nullptr);
+    }
+}
+
+void ResetOnWillStartFling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStartFling(frameNode, nullptr);
+}
+
+void SetOnDidStopFling(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onDidStopFling = reinterpret_cast<OnDidStopFlingEvent*>(extraParam);
+        ScrollableModelNG::SetOnDidStopFling(frameNode, std::move(*onDidStopFling));
+    } else {
+        ScrollableModelNG::SetOnDidStopFling(frameNode, nullptr);
+    }
+}
+
+void ResetOnDidStopFling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidStopFling(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -356,6 +432,14 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
         .setOnWillStopDragging = SetOnWillStopDragging,
         .resetOnWillStopDragging = ResetOnWillStopDragging,
+        .setOnWillStartDragging = SetOnWillStartDragging,
+        .resetOnWillStartDragging = ResetOnWillStartDragging,
+        .setOnDidStopDragging = SetOnDidStopDragging,
+        .resetOnDidStopDragging = ResetOnDidStopDragging,
+        .setOnWillStartFling = SetOnWillStartFling,
+        .resetOnWillStartFling = ResetOnWillStartFling,
+        .setOnDidStopFling = SetOnDidStopFling,
+        .resetOnDidStopFling = ResetOnDidStopFling,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

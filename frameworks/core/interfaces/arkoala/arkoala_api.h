@@ -1271,6 +1271,10 @@ enum ArkUIEventSubKind {
     ON_SCROLL_DID_ZOOM,
     ON_SCROLL_ZOOM_START,
     ON_SCROLL_ZOOM_STOP,
+    ON_SCROLL_WILL_START_DRAGGING,
+    ON_SCROLL_DID_STOP_DRAGGING,
+    ON_SCROLL_WILL_START_FLING,
+    ON_SCROLL_DID_STOP_FLING,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -3967,6 +3971,14 @@ struct ArkUIScrollableModifier {
     void (*getScrollBarMargin)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
     void (*setOnWillStopDragging)(ArkUINodeHandle node, void* callback);
     void (*resetOnWillStopDragging)(ArkUINodeHandle node);
+    void (*setOnWillStartDragging)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillStartDragging)(ArkUINodeHandle node);
+    void (*setOnDidStopDragging)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDidStopDragging)(ArkUINodeHandle node);
+    void (*setOnWillStartFling)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillStartFling)(ArkUINodeHandle node);
+    void (*setOnDidStopFling)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDidStopFling)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {

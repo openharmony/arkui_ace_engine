@@ -704,7 +704,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
      * @tc.steps: step2. Call ProcessScrollMotionStop
      * @tc.expected: Verify that the scroll snap change is processed correctly
      */
-    scrollable->ProcessScrollMotionStop();
+    scrollable->ProcessScrollMotionStop(0);
     EXPECT_EQ(scrollable->currentVelocity_, 0.0);
     EXPECT_FALSE(isOverScrollCallbackCalled);
 
@@ -714,7 +714,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
      */
     scrollable->scrollPause_ = true;
     scrollable->edgeEffect_ = EdgeEffect::SPRING;
-    scrollable->ProcessScrollMotionStop();
+    scrollable->ProcessScrollMotionStop(0);
     EXPECT_FALSE(scrollable->scrollPause_);
 
     /**
@@ -728,7 +728,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
         return 0.0f;
     };
     scrollable->scrollPause_ = true;
-    scrollable->ProcessScrollMotionStop();
+    scrollable->ProcessScrollMotionStop(0);
     EXPECT_TRUE(isOverScrollCallbackCalled);
 }
 

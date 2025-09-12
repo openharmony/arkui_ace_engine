@@ -55,6 +55,10 @@ public:
     static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
     static void SetMaxFlingSpeed(double max);
     static void SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopDragging);
+    static void SetOnWillStartDragging(OnWillStartDraggingEvent&& event) ;
+    static void SetOnDidStopDragging(OnDidStopDraggingEvent&& event);
+    static void SetOnWillStartFling(OnWillStartFlingEvent&& event);
+    static void SetOnDidStopFling(OnDidStopFlingEvent&& event);
 
     static void SetEdgeEffect(
         FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL);
@@ -84,6 +88,10 @@ public:
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
     static void SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging);
+    static void SetOnWillStartDragging(FrameNode* frameNode, OnWillStartDraggingEvent&& event) ;
+    static void SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event);
+    static void SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event);
+    static void SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);

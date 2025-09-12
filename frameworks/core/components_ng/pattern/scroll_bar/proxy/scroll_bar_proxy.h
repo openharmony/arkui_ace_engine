@@ -33,6 +33,8 @@ struct ScrollableNodeInfo {
     StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
     std::function<void(bool, bool smooth)> scrollPageCallback;
+    std::function<void(bool isWillFling)> scrollBarOnDidStopDraggingCallback;
+    std::function<void()> scrollBarOnDidStopFlingCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -96,6 +98,14 @@ public:
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
     void NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll = false) const;
+
+    void NotifyScrollBarOnDidStopDragging(bool isWillFling) const;
+
+    void NotifyScrollBarOnDidStopFling() const;
+
+    void SetScrollBarOnDidStopDraggingCallback(const OnDidStopDraggingEvent& onDidStopDraggingCallback);
+
+    void SetScrollBarOnDidStopFlingCallback(const OnDidStopFlingEvent& onDidStopFlingCallback);
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)
     {

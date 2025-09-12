@@ -784,3 +784,23 @@ globalThis.Grid.onWillStopDragging = function (value: (velocity: number) => void
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };
+
+globalThis.Grid.onWillStartDragging = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+};
+
+globalThis.Grid.onDidStopDragging = function (value: (isWillFling: boolean) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+};
+
+globalThis.Grid.onWillStartFling = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+};
+
+globalThis.Grid.onDidStopFling = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+};

@@ -331,6 +331,17 @@ public:
     {
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
+
+    void SetScrollBarOnDidStopDraggingCallback(const OnDidStopDraggingEvent& onDidStopDraggingCallback)
+    {
+        scrollBarOnDidStopDraggingCallback_ = onDidStopDraggingCallback;
+    }
+
+    void SetScrollBarOnDidStopFlingCallback(const OnDidStopFlingEvent& onDidStopFlingCallback)
+    {
+        scrollBarOnDidStopFlingCallback_ = onDidStopFlingCallback;
+    }
+
     void SetDragStartPosition(float position)
     {
         dragStartPosition_ = position;
@@ -728,6 +739,8 @@ private:
     Axis axis_ = Axis::VERTICAL;
     std::optional<ScrollBarMargin> scrollBarMargin_;
     DragFRCSceneCallback dragFRCSceneCallback_;
+    OnDidStopDraggingEvent scrollBarOnDidStopDraggingCallback_;
+    OnDidStopFlingEvent scrollBarOnDidStopFlingCallback_;
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;

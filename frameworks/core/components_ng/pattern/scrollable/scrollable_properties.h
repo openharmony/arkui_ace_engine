@@ -216,6 +216,7 @@ constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 constexpr int32_t SCROLL_FROM_CROWN = 14;
 constexpr int32_t SCROLL_FROM_STATUSBAR = 15;
+constexpr int32_t SCROLL_FROM_LAYOUT = 16;
 
 inline std::string GetSourceStr(int32_t scrollSource)
 {
@@ -459,6 +460,7 @@ struct SnapAnimationOptions {
     float animationVelocity = 0.f;
     float dragDistance = 0.f;
     SnapDirection snapDirection = SnapDirection::NONE;
+    int32_t source = SCROLL_FROM_NONE;
     bool fromScrollBar = false;
 };
 
@@ -493,6 +495,11 @@ using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
 using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
     ScrollFrameResult&, ScrollState, ScrollSource)>;
+
+using OnWillStartDraggingEvent = std::function<void()>;
+using OnDidStopDraggingEvent = std::function<void(bool)>;
+using OnWillStartFlingEvent = std::function<void()>;
+using OnDidStopFlingEvent = std::function<void()>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;

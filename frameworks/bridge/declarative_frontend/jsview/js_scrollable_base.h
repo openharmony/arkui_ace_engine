@@ -31,6 +31,10 @@ public:
     static void SetScrollBarMargin(const JSCallbackInfo& info);
     static void JSBackToTop(const JSCallbackInfo& info);
     static void JSOnWillStopDragging(const JSCallbackInfo& args);
+    static void JSOnWillStartDragging(const JSCallbackInfo& info);
+    static void JSOnDidStopDragging(const JSCallbackInfo& info);
+    static void JSOnWillStartFling(const JSCallbackInfo& info);
+    static void JSOnDidStopFling(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_BASE_H

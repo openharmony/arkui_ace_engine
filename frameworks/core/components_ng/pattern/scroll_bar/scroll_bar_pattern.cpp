@@ -811,6 +811,14 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
             }
             scrollEndCallback_();
         }
+
+        bool isWillFling = false;
+        CHECK_NULL_VOID(scrollBarProxy_);
+        if (info.GetInputEventType() != InputEventType::AXIS) {
+            isWillFling = scrollBarProxy_->NotifySnapScroll(
+                0, 0, GetScrollableDistance(), static_cast<float>(GetDragOffset()));
+        }
+        scrollBarProxy_->NotifyScrollBarOnDidStopDragging(isWillFling);
         return;
     }
     frictionPosition_ = 0.0;
@@ -827,6 +835,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     if (scrollBarProxy_ && scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
         velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset()))) {
         scrollBarProxy_->SetScrollSnapTrigger_(false);
+        scrollBarProxy_->NotifyScrollBarOnDidStopDragging(true);
         return;
     }
     if (!frictionController_) {
@@ -840,6 +849,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
             CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotionStop();
         });
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBarOnDidStopDragging(true);
     }
     frictionController_->PlayMotion(frictionMotion_);
 }
@@ -861,6 +873,7 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
     }
     CHECK_NULL_VOID(scrollBarProxy_);
     scrollBarProxy_->SetScrollSnapTrigger_(false);
+    scrollBarProxy_->NotifyScrollBarOnDidStopFling();
 }
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,

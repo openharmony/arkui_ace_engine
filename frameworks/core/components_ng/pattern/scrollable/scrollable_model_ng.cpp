@@ -177,6 +177,72 @@ void ScrollableModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+void ScrollableModelNG::SetOnWillStartDragging(OnWillStartDraggingEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartDragging(std::move(event));
+}
+
+void ScrollableModelNG::SetOnDidStopDragging(OnDidStopDraggingEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopDragging(std::move(event));
+}
+void ScrollableModelNG::SetOnWillStartFling(OnWillStartFlingEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartFling(std::move(event));
+}
+
+void ScrollableModelNG::SetOnDidStopFling(OnDidStopFlingEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopFling(std::move(event));
+}
+
+void ScrollableModelNG::SetOnWillStartDragging(FrameNode* frameNode, OnWillStartDraggingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartDragging(std::move(event));
+}
+
+void ScrollableModelNG::SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopDragging(std::move(event));
+}
+void ScrollableModelNG::SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartFling(std::move(event));
+}
+
+void ScrollableModelNG::SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopFling(std::move(event));
+}
+
 void ScrollableModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);

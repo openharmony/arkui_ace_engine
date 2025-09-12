@@ -1378,5 +1378,90 @@ void ResetOnWillStopDragging(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
 }
+
+void SetOnWillStartDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillStartDragging = [extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_WILL_START_DRAGGING;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnWillStartDragging(frameNode, std::move(onWillStartDragging));
+}
+
+void ResetOnWillStartDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStartDragging(frameNode, nullptr);
+}
+
+void SetOnDidStopDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDidStopDragging = [extraParam](bool isWillFling) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_DID_STOP_DRAGGING;
+        event.componentAsyncEvent.data[0].i32 = isWillFling;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnDidStopDragging(frameNode, std::move(onDidStopDragging));
+}
+
+void ResetOnDidStopDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidStopDragging(frameNode, nullptr);
+}
+
+void SetOnWillStartFling(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillStartFling = [extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_WILL_START_FLING;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnWillStartFling(frameNode, std::move(onWillStartFling));
+}
+
+void ResetOnWillStartFling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStartFling(frameNode, nullptr);
+}
+
+void SetOnDidStopFling(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDidStopFling = [extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_DID_STOP_FLING;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnDidStopFling(frameNode, std::move(onDidStopFling));
+}
+
+void ResetOnDidStopFling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidStopFling(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -241,6 +241,7 @@ bool ScrollBarProxy::NotifySnapScroll(
         .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
         .snapDirection = SnapDirection::NONE,
         .fromScrollBar = true,
+        .source = SCROLL_FROM_BAR,
     };
     return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
@@ -252,6 +253,30 @@ bool ScrollBarProxy::NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnima
         return false;
     }
     return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
+}
+
+void ScrollBarProxy::NotifyScrollBarOnDidStopDragging(bool isWilFling) const
+{
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.scrollBarOnDidStopDraggingCallback);
+    node.scrollBarOnDidStopDraggingCallback(isWilFling);
+}
+
+void ScrollBarProxy::NotifyScrollBarOnDidStopFling() const
+{
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.scrollBarOnDidStopFlingCallback);
+    node.scrollBarOnDidStopFlingCallback();
+}
+
+void ScrollBarProxy::SetScrollBarOnDidStopDraggingCallback(const OnDidStopDraggingCallback& onDidStopDraggingCallback)
+{
+    scorllableNode_.scrollBarOnDidStopDraggingCallback = onDidStopDraggingCallback;
+}
+
+void ScrollBarProxy::SetScrollBarOnDidStopFlingCallback(const OnDidStopFlingCallback& onDidStopFlingCallback)
+{
+    scorllableNode_.scrollBarOnDidStopFlingCallback = onDidStopFlingCallback;
 }
 
 float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const
