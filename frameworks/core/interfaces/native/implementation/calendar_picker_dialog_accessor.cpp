@@ -57,8 +57,10 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
 {
     DialogProperties dialogProps;
     dialogProps.alignment = DialogAlignment::CENTER;
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    auto blurStyle = Converter::OptConvert<BlurStyle>(options.backgroundBlurStyle);
+    if (blurStyle.has_value()) {
+        dialogProps.backgroundBlurStyle = static_cast<int32_t>(blurStyle.value());
+    }
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
     dialogProps.effectOption = Converter::OptConvert<EffectOption>(options.backgroundEffect);
@@ -94,6 +96,41 @@ CalendarSettingData BuildSettingData(const Ark_CalendarDialogOptions options)
     }
     return settingData;
 }
+
+std::map<std::string, NG::DialogCancelEvent> ParseDialogLifeCycleEvents(const Ark_CalendarDialogOptions& options)
+{
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("didAppearId", onDidAppear);
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("didDisappearId", onDidDisappear);
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("willAppearId", onWillAppear);
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogLifeCycleEvent.emplace("willDisappearId", onWillDisappear);
+    }
+    return dialogLifeCycleEvent;
+}
+
 std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options)
 {
     std::vector<ButtonInfo> buttonInfos;
@@ -159,6 +196,8 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
 
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = ParseDialogLifeCycleEvents(arkOptions);
+
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
     auto container = Container::CurrentSafely();
@@ -167,7 +206,8 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowCalendarDialog(dialogProps, settingData, dialogEvent, dialogCancelEvent, {}, buttonInfos);
+    overlayManager->ShowCalendarDialog(
+        dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
