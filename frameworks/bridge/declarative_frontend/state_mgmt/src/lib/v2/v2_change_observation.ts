@@ -204,7 +204,7 @@ class ObserveV2 {
       this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase | PersistenceV2Impl>(cmp);
       return;
     } 
-    const weakRef = WeakRefPool.getWeekRef(cmp);
+    const weakRef = WeakRefPool.getWeakRef(cmp);
     // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
     if (this.id2Others_[id] === weakRef) {
       return;
@@ -408,7 +408,7 @@ class ObserveV2 {
       idRefs[id].add(attrName);
     }
 
-    const weakRef = WeakRefPool.getWeekRef(target);
+    const weakRef = WeakRefPool.getWeakRef(target);
     if (this.id2targets_?.[id]?.has(weakRef)) {
       return;
     }
@@ -1070,7 +1070,7 @@ class ObserveV2 {
   public clearMonitorPath(target: object, path: string | string[], monitorFunc?: MonitorCallback): void {
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
     const paths = Array.isArray(path) ? path : [path];
-    
+
     if (monitorFunc) {
       const funcName = monitorFunc.name;
       let monitor = refs[funcName];
@@ -1148,7 +1148,7 @@ class ObserveV2 {
   }
 
   public registerMonitor(monitor: MonitorV2, id: number): void {
-    const weakRef = WeakRefPool.getWeekRef(monitor);
+    const weakRef = WeakRefPool.getWeakRef(monitor);
     // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
     if (this.id2Others_[id] === weakRef) {
       return;
