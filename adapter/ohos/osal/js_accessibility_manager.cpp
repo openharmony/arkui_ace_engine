@@ -6090,6 +6090,37 @@ void JsAccessibilityManager::SearchElementInfoBySpecificProperty(const int64_t e
     const SpecificPropertyParam &param, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback, const int32_t windowId)
 {
+    auto context = GetPipelineByWindowId(windowId);
+    if (!context) {
+        std::list<AccessibilityElementInfo> infos;
+        std::list<AccessibilityElementInfo> treeInfos;
+        callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+    }
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    if (ngPipeline) {
+        ngPipeline->AddAfterRenderTask(
+            [weak = WeakClaim(this), elementId, param, requestId, &callback, windowId]() {
+                auto jsAccessibilityManager = weak.Upgrade();
+                if (!jsAccessibilityManager) {
+                    std::list<AccessibilityElementInfo> infos;
+                    std::list<AccessibilityElementInfo> treeInfos;
+                    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SearchElementInfoBySpecificPropertyInner(
+                    elementId, param, requestId, callback, windowId);
+            }
+        );
+        ngPipeline->RequestFrame();
+    } else {
+        SearchElementInfoBySpecificPropertyInner(elementId, param, requestId, callback, windowId);
+    }
+}
+
+void JsAccessibilityManager::SearchElementInfoBySpecificPropertyInner(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback, const int32_t windowId)
+{
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", propType: %{public}d,"
         "propTarget: %{public}s", elementId, param.propertyType, param.propertyTarget.c_str());
     std::list<AccessibilityElementInfo> infos;
