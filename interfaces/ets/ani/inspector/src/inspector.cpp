@@ -59,13 +59,13 @@ public:
     
     std::list<ani_ref>::iterator FindCbList(ani_ref& cb, const std::string& eventType, ani_env* env)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return std::find_if(cbLayoutList_.begin(), cbLayoutList_.end(), [env, cb](const ani_ref& item) -> bool {
                 ani_boolean rs;
                 env->Reference_StrictEquals(cb, item, &rs);
                 return rs == ANI_TRUE;
             });
-        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
             return std::find_if(cbDrawChildrenList_.begin(), cbDrawChildrenList_.end(),
                 [env, cb](const ani_ref& item) -> bool {
                 ani_boolean rs;
@@ -115,9 +115,9 @@ public:
                 TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
                 return;
             }
-            if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+            if (LAYOUT_TYPE == eventType) {
                 arkTsFrontend->UnregisterLayoutInspectorCallback(id_);
-            } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+            } else if (DRAW_CHILDREN_TYPE == eventType) {
                 arkTsFrontend->UnregisterDrawChildrenInspectorCallback(id_);
             } else {
                 arkTsFrontend->UnregisterDrawInspectorCallback(id_);
@@ -138,9 +138,9 @@ public:
     
     std::list<ani_ref>&  GetCbListByType(const std::string& eventType)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return cbLayoutList_;
-        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
             return cbDrawChildrenList_;
         }
         return cbDrawList_;
@@ -148,9 +148,9 @@ public:
     
     RefPtr<InspectorEvent> GetInspectorFuncByType(const std::string& eventType)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return layoutEvent_;
-        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
             return drawChildrenEvent_;
         }
         return drawEvent_;
@@ -158,9 +158,9 @@ public:
     
     void SetInspectorFuncByType(const std::string& eventType, const RefPtr<InspectorEvent>& fun)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             layoutEvent_ = fun;
-        } else if (strcmp(DRAW_CHILDREN_TYPE, eventType.c_str()) == 0) {
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
             drawChildrenEvent_ = fun;
         } else {
             drawEvent_ = fun;
@@ -193,9 +193,7 @@ static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object f
     }
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 &&
-        strcmp(DRAW_TYPE, typeStr.c_str()) != 0 &&
-        strcmp(DRAW_CHILDREN_TYPE, typeStr.c_str()) != 0) {
+    if (LAYOUT_TYPE != typeStr && DRAW_TYPE != typeStr && DRAW_CHILDREN_TYPE != typeStr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
@@ -215,9 +213,7 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
 {
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 &&
-        strcmp(DRAW_TYPE, typeStr.c_str()) != 0 &&
-        strcmp(DRAW_CHILDREN_TYPE, typeStr.c_str())) {
+    if (LAYOUT_TYPE != typeStr && DRAW_TYPE != typeStr && DRAW_CHILDREN_TYPE != typeStr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
