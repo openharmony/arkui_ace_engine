@@ -1382,6 +1382,11 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg079, TestSize.Level1)
 
     setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto pipeline = menuNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->menuAnimationDuration_ = 20;
     EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
 
     radius.SetRadius(Dimension(20));
