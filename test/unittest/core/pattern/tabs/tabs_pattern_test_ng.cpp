@@ -1314,4 +1314,20 @@ HWTEST_F(TabPatternTestNg, GetNoMinHeightLimitTest001, TestSize.Level1)
     result = tabbarLayoutAlgorithm->GetNoMinHeightLimit(&layoutWrapper);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: GetIsCustomAnimationTest001
+ * @tc.desc: GetIsCustomAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, GetIsCustomAnimationTest001, TestSize.Level1)
+{
+    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+
+    bool isCustomAnimation = true;
+    tabsPattern->SetIsCustomAnimation(isCustomAnimation);
+
+    EXPECT_EQ(tabsPattern->GetIsCustomAnimation(), true);
+}
 } // namespace OHOS::Ace::NG
