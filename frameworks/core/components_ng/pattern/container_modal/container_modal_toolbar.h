@@ -49,7 +49,7 @@ public:
     void UpdateToolbarShow(bool isTitleShow, bool customTitleSettedShow);
     void AdjustContainerModalTitleHeight();
 
-    bool GetNavOrSideBarNodes();
+    bool GetNavOrSideBarNodes(const RefPtr<FrameNode>& node);
     void ToInitNavOrSideBarNode();
 
     void UpdateSideTitleBgColor(
@@ -69,7 +69,8 @@ protected:
     void UpdateTitleLayout();
 
 private:
-    void ParsePlacementType();
+    RefPtr<UINode> GetCurrentPageNode(const RefPtr<UINode>& node);
+    void ParsePlacementType(const RefPtr<FrameNode>& node);
     bool HandleToolbarItemList(const RefPtr<FrameNode>& parentNode, std::list<RefPtr<UINode>>& list);
     ItemPlacementType GetItemTypeFromTag(const std::string& tag, uint32_t placement);
 
