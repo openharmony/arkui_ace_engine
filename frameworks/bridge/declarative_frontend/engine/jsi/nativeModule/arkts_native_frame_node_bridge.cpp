@@ -281,10 +281,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
     }
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
     FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
-    const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
-    int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
-        panda::NumberRef::New(vm, rawPtr) };
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
 }
@@ -308,10 +306,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTransFrameNode(ArkUIRuntimeCallInf
     }
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
     FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
-    const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
-    int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
-        panda::NumberRef::New(vm, rawPtr) };
+    const char* keys[] = { "nodeId", "nativeStrongRef"};
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node)};
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
 }
@@ -501,10 +497,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     if (nodeType != ARKUI_CUSTOM) {
         HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
-    const char* keys[] = { "nodeId", "nativeStrongRef", "nodePtr_" };
-    int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
-        panda::NumberRef::New(vm, rawPtr) };
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
 }
@@ -518,16 +512,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTransTypedFrameNode(ArkUIRuntimeCa
     }
     int64_t point = paramRawPtr->ToNumber(vm)->Value();
     FrameNode* nodePtr = reinterpret_cast<FrameNode*>(point);
-    int32_t  nodeId = nodePtr->GetId();
-    RefPtr<FrameNode>  node =  AceType::Claim<FrameNode>(nodePtr);
-    ArkUINodeType nodeType = ARKUI_CUSTOM;
-    if (nodeType != ARKUI_CUSTOM) {
-        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
-    }
-    const char* keys[] = { "nodeId", "nativeStrongRef", "nodePtr_" };
-    int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
-        panda::NumberRef::New(vm, rawPtr) };
+    int32_t nodeId = nodePtr->GetId();
+    RefPtr<FrameNode> node = AceType::Claim<FrameNode>(nodePtr);
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto result = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return result;
 }
@@ -757,6 +745,15 @@ ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodeId = GetArkUINodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(nativeNode);
     return panda::NumberRef::New(vm, nodeId);
+}
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeRawPtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int64_t rawPtr = reinterpret_cast<int64_t>(nativeNode);
+    return panda::NumberRef::New(vm, rawPtr);
 }
 static int32_t GetOperatingHand(GestureEvent& info)
 {
