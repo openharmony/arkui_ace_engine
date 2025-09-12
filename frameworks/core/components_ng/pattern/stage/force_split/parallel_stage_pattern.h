@@ -79,7 +79,7 @@ public:
     void OnWindowHide() override;
 
     void OnForceSplitConfigUpdate() override;
-    
+
 private:
     void FireModeChangeCallback();
     void CreateDividerNodeIfNeeded();

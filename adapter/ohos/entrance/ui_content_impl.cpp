@@ -5606,11 +5606,16 @@ void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
         config.navigationDisablePlaceholder, config.navigationDisableDivider);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navManager);
-    navManager->SetForceSplitNavigationId(config.navigationId);
-    navManager->SetForceSplitNavigationDepth(config.navigationDepth);
-    navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
-    navManager->SetDividerDisabled(config.navigationDisableDivider);
+    if (navManager) {
+        navManager->SetForceSplitNavigationId(config.navigationId);
+        navManager->SetForceSplitNavigationDepth(config.navigationDepth);
+        navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+        navManager->SetDividerDisabled(config.navigationDisableDivider);
+    }
+    auto forceSplitMgr = context->GetForceSplitManager();
+    if (forceSplitMgr) {
+        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    }
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

@@ -3157,6 +3157,16 @@ void AceContainer::InitWindowCallback()
         return window->GetWidthBreakpoint(layoutWidthBreakpoints);
     });
 
+    windowManager->SetForceFullScreenChangeCallback(
+        [window = uiWindow_](bool isFullScreen) {
+            if (window) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                    "will notify rs window force full screen change, is full screen? %{public}s",
+                    isFullScreen ? "yes" : "no");
+                window->NotifyIsFullScreenInForceSplitMode(isFullScreen);
+            }
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);

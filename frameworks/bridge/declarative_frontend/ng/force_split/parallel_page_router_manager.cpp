@@ -21,6 +21,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -39,6 +40,25 @@ constexpr Dimension APP_ICON_SIZE = 64.0_vp;
 const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "root"};
 }
 
+void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
+    const std::string& curTopPageName, const RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
+    if (!stageManager->GetForceSplitEnable()) {
+        return;
+    }
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    stageManager->UpdateIsTopFullScreenPage(forceSplitMgr->IsFullScreenPage(curTopPageName));
+    if (stageManager->IsTopFullScreenPageChanged()) {
+        forceSplitMgr->NotifyForceFullScreenChange(stageManager->IsTopFullScreenPage());
+        // try to update mode immediately
+        stageManager->OnForceSplitConfigUpdate();
+    }
+}
+
 void ParallelPageRouterManager::LoadPage(
     int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition, bool isPush)
 {
@@ -48,6 +68,7 @@ void ParallelPageRouterManager::LoadPage(
     if (!CheckStackSize(target, needClearSecondaryPage)) {
         return;
     }
+    NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
@@ -359,5 +380,22 @@ bool ParallelPageRouterManager::CheckStackSize(const RouterPageInfo& target, boo
         return false;
     }
     return true;
+}
+
+bool ParallelPageRouterManager::StartPop()
+{
+    if (pageRouterStack_.size() > 1) {
+        auto penultimatePage = pageRouterStack_.rbegin();
+        std::advance(penultimatePage, 1);
+        auto penultimatePageNode = penultimatePage->Upgrade();
+        if (penultimatePageNode) {
+            auto pattern = penultimatePageNode->GetPattern<PagePattern>();
+            if (pattern) {
+                NotifyForceFullScreenChangeIfNeeded(
+                    pattern->GetPageUrl(), penultimatePageNode->GetContextRefPtr());
+            }
+        }
+    }
+    return PageRouterManager::StartPop();
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include "ui/base/utils/utils.h"
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
@@ -45,6 +46,7 @@ constexpr char NAVIGATION_OPTIONS_ID_KEY[] = "id";
 constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
 constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholder";
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
+constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 }
 
 RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<PipelineContext>& context)
@@ -141,6 +143,7 @@ bool ForceSplitUtils::IsHomePageNavBar(const RefPtr<NavBarNode>& navBar)
             count, depth);
         return true;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Not HomePage, count: %{public}d, depth: %{public}d", count, depth);
     return false;
 }
 
@@ -232,6 +235,74 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
     return phNode;
 }
 
+bool ForceSplitUtils::ParseNavigationOptions(
+    const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config)
+{
+    if (!navigationOptions || !navigationOptions->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions is an invalid json object!");
+        return false;
+    }
+    if (navigationOptions->Contains(NAVIGATION_OPTIONS_ID_KEY)) {
+        auto idJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_ID_KEY);
+        if (!idJson->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.id is not string!");
+            return false;
+        }
+        auto idStr = idJson->GetString();
+        if (!idStr.empty()) {
+            config.navigationId = idStr;
+        }
+    }
+    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DEPTH_KEY)) {
+        auto depthJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DEPTH_KEY);
+        if (!depthJson->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.depth is not number!");
+            return false;
+        }
+        config.navigationDepth = navigationOptions->GetInt(NAVIGATION_OPTIONS_DEPTH_KEY);
+    }
+    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
+        auto disablePlaceholderJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
+        if (!disablePlaceholderJson->IsBool()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disablePlaceholder is not bool!");
+            return false;
+        }
+        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
+    }
+    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
+        auto disableDividerJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
+        if (!disableDividerJson->IsBool()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disableDivider is not bool!");
+            return false;
+        }
+        config.navigationDisableDivider = disableDividerJson->GetBool();
+    }
+    return true;
+}
+
+bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config)
+{
+    if (!fullScreenPages || !fullScreenPages->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, fullScreenPages is an invalid json array!");
+        return false;
+    }
+    std::set<std::string> pageSet;
+    int32_t itemSize = fullScreenPages->GetArraySize();
+    for (int32_t idx = 0; idx < itemSize; ++idx) {
+        auto item = fullScreenPages->GetArrayItem(idx);
+        if (!item || !item->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, fullScreenPages item is not a string!");
+            continue;
+        }
+        auto page = item->GetString();
+        if (!page.empty()) {
+            pageSet.insert(page);
+        }
+    }
+    std::swap(config.fullScreenPages, pageSet);
+    return true;
+}
+
 bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse forceSplit config: %{public}s", configJsonStr.c_str());
@@ -244,48 +315,15 @@ bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, Fo
         return false;
     }
     config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false);
-    if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
-        return true;
-    }
-    auto navOptions = configJson->GetValue(NAVIGATION_OPTIONS_KEY);
-    if (!navOptions || !navOptions->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions is an invalid json object!");
-        return false;
-    }
-    if (navOptions->Contains(NAVIGATION_OPTIONS_ID_KEY)) {
-        auto idJson = navOptions->GetValue(NAVIGATION_OPTIONS_ID_KEY);
-        if (!idJson->IsString()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.id is not string!");
+    if (configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
+        if (!ParseNavigationOptions(configJson->GetValue(NAVIGATION_OPTIONS_KEY), config)) {
             return false;
         }
-        auto idStr = idJson->GetString();
-        if (!idStr.empty()) {
-            config.navigationId = idStr;
-        }
     }
-    if (navOptions->Contains(NAVIGATION_OPTIONS_DEPTH_KEY)) {
-        auto depthJson = navOptions->GetValue(NAVIGATION_OPTIONS_DEPTH_KEY);
-        if (!depthJson->IsNumber()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.depth is not number!");
+    if (configJson->Contains(FULL_SCREEN_PAGES_KEY)) {
+        if (!ParseFullScreenPages(configJson->GetValue(FULL_SCREEN_PAGES_KEY), config)) {
             return false;
         }
-        config.navigationDepth = navOptions->GetInt(NAVIGATION_OPTIONS_DEPTH_KEY);
-    }
-    if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
-        auto disablePlaceholderJson = navOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
-        if (!disablePlaceholderJson->IsBool()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disablePlaceholder is not bool!");
-            return false;
-        }
-        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
-    }
-    if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
-        auto disableDividerJson = navOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
-        if (!disableDividerJson->IsBool()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disableDivider is not bool!");
-            return false;
-        }
-        config.navigationDisableDivider = disableDividerJson->GetBool();
     }
     return true;
 }

@@ -250,7 +250,7 @@ bool ParallelStageManager::PushPage(const RefPtr<FrameNode>& node, bool needHide
     auto newTopPattern = node->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(newTopPattern, false);
     newTopPattern->InitOnTouchEvent();
-    if (!stagePattern->GetIsSplit()) {
+    if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PushPage(node, needHideLast, needTransition, std::move(pushIntentPageCallback));
         auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
@@ -508,7 +508,7 @@ bool ParallelStageManager::PopPage(const RefPtr<FrameNode>& pageNode, bool needS
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    if (!stagePattern->GetIsSplit()) {
+    if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PopPage(pageNode, needShowNext, needTransition);
         auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
@@ -696,7 +696,7 @@ bool ParallelStageManager::PopPageToIndex(int32_t index, bool needShowNext, bool
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    if (!stagePattern->GetIsSplit()) {
+    if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PopPageToIndex(index, needShowNext, needTransition);
         auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
@@ -781,7 +781,7 @@ bool ParallelStageManager::CleanPageStack()
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    if (!stagePattern->GetIsSplit()) {
+    if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::CleanPageStack();
         auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
@@ -868,7 +868,7 @@ bool ParallelStageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool n
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
-    if (!stagePattern->GetIsSplit()) {
+    if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::MovePageToFront(node, needHideLast, needTransition);
         auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);

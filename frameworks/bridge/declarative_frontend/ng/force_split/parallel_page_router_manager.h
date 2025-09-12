@@ -30,6 +30,8 @@ public:
 
     int32_t GetLastPageIndex() override;
 
+    bool StartPop() override;
+
 private:
     void LoadPage(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
@@ -42,6 +44,8 @@ private:
     bool SetOnKeyEvent(const RefPtr<FrameNode> &pageNode);
     bool CheckSecondaryPageNeedClear(bool isPush);
     bool CheckStackSize(const RouterPageInfo& target, bool needClearSecondaryPage);
+    void NotifyForceFullScreenChangeIfNeeded(
+        const std::string& curTopPageName, const RefPtr<PipelineContext>& context);
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPageRouterManager);
 };

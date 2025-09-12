@@ -544,6 +544,13 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     bool enableModeChangeAnimation = navigationLayoutProperty->GetEnableModeChangeAnimation().value_or(true);
     bool doModeSwitchAnimationInAnotherTask =
         enableModeChangeAnimation && modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    if (navigationManager && navigationManager->IsForceSplitEnable() && navigationPattern->IsTopFullScreenPage()) {
+        // disable animation of mode switch when force-split changed with full screen page
+        doModeSwitchAnimationInAnotherTask = false;
+    }
     if (doModeSwitchAnimationInAnotherTask) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
@@ -558,9 +565,6 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
         navigationPattern->SetNavigationMode(usrNavigationMode);
         navigationPattern->SetNavigationModeChange(modeChange);
     }
-
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weakNavigationPattern = WeakPtr<NavigationPattern>(navigationPattern),
         modeChange, doModeSwitchAnimationInAnotherTask]() {
         auto navigationPattern = weakNavigationPattern.Upgrade();

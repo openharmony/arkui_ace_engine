@@ -905,7 +905,7 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
      * The NavDestination between the homeNode and the first newly added NavDestination will be removed.
      */
     auto homeNode = homeNode_.Upgrade();
-    if (!forceSplitSuccess_ || !homeNodeTouched_) {
+    if (!forceSplitSuccess_ || !homeNodeTouched_ || isTopFullScreenPage_) {
         return;
     }
     if (!forceSplitUseNavBar_ && !homeNode) {
@@ -961,6 +961,25 @@ bool NavigationPattern::IsForceSplitSupported(const RefPtr<PipelineContext>& con
     auto manager = context->GetNavigationManager();
     CHECK_NULL_RETURN(manager, false);
     return manager->IsForceSplitSupported();
+}
+
+void NavigationPattern::NotifyForceFullScreenChangeIfNeeded(const std::vector<std::string>& allNames)
+{
+    if (allNames.empty()) {
+        return;
+    }
+    auto context = Claim(GetContext());
+    CHECK_NULL_VOID(context);
+    if (!IsForceSplitSupported(context)) {
+        return;
+    }
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto isCurTopFullScreenPage = forceSplitMgr->IsFullScreenPage(allNames.back());
+    if (isTopFullScreenPage_ != isCurTopFullScreenPage) {
+        isTopFullScreenPage_ = isCurTopFullScreenPage;
+        forceSplitMgr->NotifyForceFullScreenChange(isTopFullScreenPage_);
+    }
 }
 
 void NavigationPattern::SyncWithJsStackIfNeeded()
@@ -1080,7 +1099,6 @@ void NavigationPattern::RecognizeHomePageIfNeeded()
         }
         auto navBar = AceType::DynamicCast<NavBarNode>(host->GetNavBarNode());
         if (navBar && ForceSplitUtils::IsHomePageNavBar(navBar)) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Recognize NavBar as HomePage");
             navBarIsHome_ = true;
             return;
         }
@@ -1102,6 +1120,7 @@ void NavigationPattern::UpdateNavPathList()
 {
     CHECK_NULL_VOID(navigationStack_);
     auto pathNames = navigationStack_->GetAllPathName();
+    NotifyForceFullScreenChangeIfNeeded(pathNames);
     auto indexes = navigationStack_->GetAllPathIndex();
     topFromSingletonMoved_ = navigationStack_->IsTopFromSingletonMoved();
     navigationStack_->ResetSingletonMoved();
@@ -5223,7 +5242,7 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
     bool forceSplitUseNavBar = false;
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
-    if (navManager->IsForceSplitEnable()) {
+    if (navManager->IsForceSplitEnable() && !isTopFullScreenPage_) {
         /**
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application
