@@ -21,6 +21,7 @@ import http from '@ohos.net.http';
 import ResponseCode from '@ohos.net.http';
 import image from '@ohos.multimedia.image';
 import { BusinessError } from '@ohos.base';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 class ImageModifier implements AttributeModifier<ImageAttribute> {
   public value: DynamicRangeMode = DynamicRangeMode.HIGH
@@ -40,35 +41,37 @@ struct DarkModeTest {
   @State imagePixelMap: PixelMap | undefined = undefined;
 
   httpRequest() {
-    http.createHttp().request(
-      'xxx.gif', // 填写具体网络图片地址
-      (error: BusinessError, data: http.HttpResponse) => {
-        if (error) {
-          console.error(`WYXX http reqeust failed with. Code: ${error.code}, message: ${error.message}`);
-        } else {
-          console.error(`WYXX http reqeust success.`);
-          let imageData: ArrayBuffer = data.result as ArrayBuffer;
-          let imageSource: image.ImageSource = image.createImageSource(imageData);
-          console.error(`WYXX http reqeust size = ${imageData.byteLength}`);
+    const session = rcp.createSession();
+    let req = new rcp.Request('')// 填写具体网络图片地址
+    session.fetch(req).then(async (response)=> {
+      if (response.statusCode === 200) {
+        console.error(`WYXX http reqeust success.`);
+        let imageData: ArrayBuffer = response.body as ArrayBuffer;
+        let imageSource: image.ImageSource = image.createImageSource(imageData);
+        console.error(`WYXX http reqeust size = ${imageData.byteLength}`);
 
-          class Tmp {
-            public height: number = 100
-            public width: number = 100
-          }
-
-          let options: Record<string, number | boolean | Tmp> = {
-            'alphaType': 0, // 透明度
-            'editable': false, // 是否可编辑
-            'pixelFormat': 3, // 像素格式
-            'scaleMode': 1, // 缩略值
-            'size': { height: 100, width: 100 }
-          } // 创建图片大小
-          imageSource.createPixelMap(options).then((pixelMap: PixelMap) => {
-            this.imagePixelMap = pixelMap
-          })
+        class Tmp {
+          public height: number = 100
+          public width: number = 100
         }
+
+        let options: Record<string, number | boolean | Tmp> = {
+          'alphaType': 0, // 透明度
+          'editable': false, // 是否可编辑
+          'pixelFormat': 3, // 像素格式
+          'scaleMode': 1, // 缩略值
+          'size': { height: 100, width: 100 }
+        } // 创建图片大小
+        await imageSource.createPixelMap(options).then((pixelMap: PixelMap) => {
+          this.imagePixelMap = pixelMap
+          imageSource?.release()
+        })
       }
-    )
+
+    }).catch((error: Error) => {
+      console.error(`WYXX http reqeust failed with. Code: ${error.name}, message: ${error.message}`);
+    })
+    session.close()
   }
 
   build() {

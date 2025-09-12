@@ -16,6 +16,7 @@
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { image } from '@kit.ImageKit';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 /**
  * 下载与显示网络图片
@@ -26,15 +27,15 @@ struct ImageExample002 {
   @State pixelMapImg: PixelMap | undefined = undefined;
 
   aboutToAppear() {
-    this.requestImageUrl('https://xxx/xxx.png');// 请填写一个具体的网络图片地址
+    this.requestImageUrl('');// 请填写一个具体的网络图片地址
   }
 
   requestImageUrl(url: string) {
-    http.createHttp().request(url, (error: BusinessError, data: http.HttpResponse)=> {
-      if (error) {
-        console.error(`request image failed: url: ${url}, code: ${error.code}, message: ${error.message}`);
-      } else {
-        let imgData: ArrayBuffer = data.result as ArrayBuffer;
+    const session = rcp.createSession();
+    let req = new rcp.Request(url)
+    session.fetch(req).then(async (response)=> {
+      if (response.statusCode === 200) {
+        let imgData: ArrayBuffer = response.body as ArrayBuffer;
         console.info(`request image success, size: ${imgData.byteLength}`);
         let imgSource: image.ImageSource = image.createImageSource(imgData);
         class SizeTmp {
@@ -48,12 +49,16 @@ struct ImageExample002 {
           'scaleMode': 1,
           'size': { height: 100, width: 100 }
         }
-        imgSource.createPixelMap(options).then((pixelMap: PixelMap) => {
+        await imgSource.createPixelMap(options).then((pixelMap: PixelMap) => {
           console.error('image createPixelMap success');
           this.pixelMapImg = pixelMap;
+          imgSource?.release()
         })
       }
+    }).catch((error: Error) => {
+      console.error(`request image failed: url: ${url}, code: ${error.name}, message: ${error.message}`);
     })
+    session.close()
   }
 
   build() {

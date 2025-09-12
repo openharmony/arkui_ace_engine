@@ -29,6 +29,8 @@ struct DrawableTestCase2 {
     let imageSource = image.createImageSource(uint8.buffer)
     let pixmap = imageSource.createPixelMapSync()
     this.drawable = new PixelMapDrawableDescriptor(pixmap)
+    imageSource?.release()
+    pixmap?.release()
   }
 
   build() {
