@@ -3258,6 +3258,7 @@ frameworks/core/interfaces/native/implementation/web/webview_controller_peer_imp
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/web @arkwebinarkuireview
 
 [Test source]
+test/mock/base/mock_ressched_report.cpp @arkuievent
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkui_superman
@@ -3289,6 +3290,8 @@ test/unittest/core/common/sharedata/ @arkuiframework
 test/unittest/core/common/storage/ @arkuistatemgmt
 test/unittest/core/common/task/ @arkuiframework
 test/unittest/core/common/vibrator/ @arkuiframework
+test/unittest/core/common/key_event_manager/key_event_manager_test.cpp @arkuievent
+test/unittest/core/common/key_event_manager/BUILD.gn @arkuievent
 test/unittest/core/event/ @arkuievent
 test/unittest/core/gestures/ @arkuievent
 test/unittest/core/image_file_cache/ @arkui_image
@@ -3403,6 +3406,12 @@ test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
 test/unittest/core/base/observer_test_ng.cpp @arkuiframework
+test/unittest/core/base/view_abstract_test_ng_new.cpp @arkuievent
+test/unittest/core/base/view_abstract_test_ng_for_property_config.cpp @arkuievent
+test/unittest/core/base/view_abstract_test_ng.h @arkuievent
+test/unittest/core/base/view_abstract_test_ng.cpp @arkuievent
+test/unittest/core/base/view_abstract_model_static_test_ng.cpp @arkuievent
+test/unittest/core/base/BUILD.gn @arkuievent
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
