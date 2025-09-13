@@ -23,7 +23,7 @@ import { StateUpdateLoop } from "./stateManagement"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
-export const LazyForEachType = 13
+export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
 export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
 const INITIAL_ID = 1000
 
@@ -77,32 +77,57 @@ export class PeerNode extends IncrementalNode {
     }
 
     /* reuse and recycle object on RootPeers */
-    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
-        if (!this.isRootNode()) {
-            return this.parent?.reuse(reuseKey, id)
+    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+        if (reuseKey === undefined) {
+            return undefined;
         }
+
+        if (!this.isKind(RootPeerType))
+            return this.parent?.reuse(reuseKey, id)
 
         if (this._reusePool === undefined)
             return undefined
         if (this._reusePool!.has(reuseKey)) {
             const pool = this._reusePool!.get(reuseKey)!;
-            return pool.get(id);
+            return pool.get();
         }
         return undefined;
     }
 
-    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (!this.isRootNode()) {
-            return this.parent?.recycle(reuseKey, child, id) ?? false
+    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (reuseKey === undefined) {
+            return false;
         }
 
+        if (!this.isKind(RootPeerType)) {
+            return this.parent?.recycle(reuseKey, child, id) ?? false
+        }
         if (!this._reusePool)
             this._reusePool = new Map<string, ReusablePool>()
         if (!this._reusePool!.has(reuseKey)) {
             this._reusePool!.set(reuseKey, new ReusablePool());
         }
-        this._reusePool!.get(reuseKey)!.put(id, child);
+        this._reusePool!.get(reuseKey)!.put(child);
         return true
+    }
+
+    setReusePoolSize(size: number, reuseKey: string): void {
+        if (size < 0) {
+            return
+        }
+        if (!this.isKind(RootPeerType)) {
+            if (this.parent?.isKind(PeerNodeType)) {
+                (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
+            }
+            return
+        }
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool?.has(reuseKey)) {
+            this._reusePool?.set(reuseKey, new ReusablePool())
+        }
+        this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
 
     setOnRecycle(cb: () => void): void {

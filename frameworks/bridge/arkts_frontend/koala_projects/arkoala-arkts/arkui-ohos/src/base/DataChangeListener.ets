@@ -13,34 +13,19 @@
  * limitations under the License.
  */
 
-import { ArkUIAniModule } from "arkui.ani";
-import { pointer } from "@koalaui/interop";
-import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "#generated";
-import { int32 } from "@koalaui/common"
-import { MutableState } from "@koalaui/runtime";
-
-export interface DataChangeListener {
-    onDataReloaded(): void;
-    onDataAdded(index: number): void;
-    onDataAdd(index: number): void;
-    onDataMoved(from: number, to: number): void;
-    onDataMove(from: number, to: number): void;
-    onDataDeleted(index: number): void;
-    onDataDelete(index: number): void;
-    onDataChanged(index: number): void;
-    onDataChange(index: number): void;
-    onDatasetChange(dataOperations: DataOperation[]): void;
-}
+import { pointer } from '@koalaui/interop'
+import { int32 } from '@koalaui/common'
+import { MutableState } from '@koalaui/runtime'
+import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation,
+    DataMoveOperation, DataExchangeOperation, DataChangeListener } from '../component/lazyForEach'
 
 export class InternalListener implements DataChangeListener {
-    parent: pointer
-    startIndex: number // Tracks the minimum item index that has changed
-    endIndex: number
-    changeCount: number // Tracks the number of items added or deleted
-    version: MutableState<int32> // reference to mark LazyForEach dirty
+    private startIndex: number // Tracks the minimum item index that has changed
+    private endIndex: number
+    private changeCount: number // Tracks the number of items added or deleted
+    private version: MutableState<int32> // reference to mark LazyForEach dirty
 
-    constructor(parent: pointer, version: MutableState<int32>) {
-        this.parent = parent
+    constructor(version: MutableState<int32>) {
         this.startIndex = Number.POSITIVE_INFINITY
         this.endIndex = Number.NEGATIVE_INFINITY
         this.changeCount = 0
@@ -50,16 +35,10 @@ export class InternalListener implements DataChangeListener {
      * Notify the change of data to backend
      * @return the index of the first changed item
      */
-    flush(offset: int32): number {
+    flush(nodePtr: pointer): number {
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             return Number.POSITIVE_INFINITY // none affected
         }
-        // LazyForEachOps.NotifyChange(
-        //     this.parent,
-        //     this.startIndex as int32 + offset,
-        //     this.endIndex as int32 + offset,
-        //     this.changeCount as int32
-        // );
         const firstAffected = this.startIndex
         // Reset the cache after flushing
         this.startIndex = Number.POSITIVE_INFINITY;
@@ -77,7 +56,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataAdd(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -86,7 +67,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataMove(from: number, to: number): void {
-        if (from < 0 || to < 0) return
+        if (from < 0 || to < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -95,7 +78,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataDelete(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -104,10 +89,11 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataChange(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
-            ArkUIAniModule._CustomNode_RequestFrame();
         }
         this.startIndex = Math.min(this.startIndex, index)
     }
@@ -117,34 +103,34 @@ export class InternalListener implements DataChangeListener {
         let endIndex = Number.NEGATIVE_INFINITY
         let changeCount = 0
         for (const operation of dataOperations) {
-            switch (operation.type.valueOf()) {
-                case DataOperationType.ADD.valueOf(): {
+            switch (operation.type) {
+                case DataOperationType.ADD: {
                     startIndex = Math.min(startIndex, (operation as DataAddOperation).index);
                     ++changeCount
                     break;
                 }
-                case DataOperationType.DELETE.valueOf(): {
+                case DataOperationType.DELETE: {
                     startIndex = Math.min(startIndex, (operation as DataDeleteOperation).index);
                     --changeCount
                     break;
                 }
-                case DataOperationType.CHANGE.valueOf(): {
+                case DataOperationType.CHANGE: {
                     startIndex = Math.min(startIndex, (operation as DataChangeOperation).index);
                     break;
                 }
-                case DataOperationType.MOVE.valueOf(): {
+                case DataOperationType.MOVE: {
                     const moveOp = operation as DataMoveOperation;
                     startIndex = Math.min(startIndex, Math.min(moveOp.index.from, moveOp.index.to));
                     endIndex = Math.max(endIndex, Math.max(moveOp.index.from, moveOp.index.to));
                     break;
                 }
-                case DataOperationType.EXCHANGE.valueOf(): {
+                case DataOperationType.EXCHANGE: {
                     const exchangeOp = operation as DataExchangeOperation;
                     startIndex = Math.min(startIndex, Math.min(exchangeOp.index.start, exchangeOp.index.end));
                     endIndex = Math.max(endIndex, Math.max(exchangeOp.index.start, exchangeOp.index.end));
                     break;
                 }
-                case DataOperationType.RELOAD.valueOf(): {
+                case DataOperationType.RELOAD: {
                     startIndex = 0;
                     endIndex = Number.POSITIVE_INFINITY
                     break;
@@ -159,17 +145,13 @@ export class InternalListener implements DataChangeListener {
         this.changeCount = changeCount
     }
 
-    /* deprecated */
-    onDataAdded(index: number): void {
-        this.onDataAdd(index)
-    }
-    onDataMoved(from: number, to: number): void {
-        this.onDataMove(from, to)
-    }
-    onDataDeleted(index: number): void {
-        this.onDataDelete(index)
-    }
-    onDataChanged(index: number): void {
-        this.onDataChange(index)
+    /**
+     * @internal
+     * Notify data change without updating MutableState. Safe to call during composition.
+     */
+    update(start: number, end: number, countDiff: number): void {
+        this.startIndex = Math.min(start, this.startIndex)
+        this.endIndex = Math.max(end, this.endIndex)
+        this.changeCount += countDiff
     }
 }

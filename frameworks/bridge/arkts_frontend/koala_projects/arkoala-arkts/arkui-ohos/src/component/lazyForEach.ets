@@ -14,19 +14,20 @@
  */
 
 
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+// HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder } from "@koalaui/builderLambda"
+import { __context, __id, remember } from '@koalaui/runtime'
+import { ArkCommonMethodComponent, CommonMethod, DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { LazyForEachImplForOptions } from '../base/LazyForEachImpl'
+import { InteropNativeModule } from '@koalaui/interop'
+
 export enum DataOperationType {
-    ADD = "'add'",
-    DELETE = "'delete'",
-    EXCHANGE = "'exchange'",
-    MOVE = "'move'",
-    CHANGE = "'change'",
-    RELOAD = "'reload'"
+    ADD = 'add',
+    DELETE = 'delete',
+    EXCHANGE = 'exchange',
+    MOVE = 'move',
+    CHANGE = 'change',
+    RELOAD = 'reload'
 }
 export interface DataAddOperation {
     type: DataOperationType;
@@ -70,3 +71,106 @@ export interface DataReloadOperation {
     type: DataOperationType;
 }
 export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation | DataExchangeOperation | DataReloadOperation;
+
+export interface DataChangeListener {
+    onDataReloaded(): void;
+    onDataAdd(index: number): void;
+    onDataMove(from: number, to: number): void;
+    onDataDelete(index: number): void;
+    onDataChange(index: number): void;
+    onDatasetChange(dataOperations: DataOperation[]): void;
+}
+
+/**
+ * Developers need to implement this interface to provide data to LazyForEach component.
+ * @since 7
+ */
+export interface IDataSource<T> {
+    /**
+     * Total data count.
+     * @since 7
+     */
+    totalCount(): number;
+    /**
+     * Return the data of index.
+     * @since 7
+     */
+    getData(index: number): T;
+    /**
+     * Register data change listener.
+     * @since 7
+     */
+    registerDataChangeListener(listener: DataChangeListener): void;
+    /**
+     * Unregister data change listener.
+     * @since 7
+     */
+    unregisterDataChangeListener(listener: DataChangeListener): void;
+}
+
+export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
+    dataSource: IDataSource<T> | null;
+    setLazyForEachOptions(dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler): this {
+        return this;
+    }
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        return this;
+    }
+}
+export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent implements LazyForEachAttribute<T> {
+    dataSource: IDataSource<T> | null = null;
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
+    keyGenerator?: (item: T, index: number) => string = undefined;
+    onMoveEvent?: OnMoveHandler = undefined;
+    itemDragEvent?: ItemDragEventHandler = undefined;
+
+    public onMove(handler?: OnMoveHandler): this {
+        this.onMoveEvent = handler;
+        return this;
+    }
+
+    public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
+        this.onMoveEvent = handler;
+        this.itemDragEvent = eventHandler;
+        return this;
+    }
+
+    public setLazyForEachOptions(dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        this.dataSource = dataSource;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        return this;
+    }
+}
+/** @memo */
+export function LazyForEachImpl<T>(
+    /** @memo */
+    style: ((attributes: LazyForEachAttribute<T>) => void) | undefined
+) {
+    const receiver = remember(() => {
+        return new ArkLazyForEachComponent<T>()
+    })
+    style?.(receiver)
+    if(!receiver.dataSource) {
+        InteropNativeModule._NativeLog('LazyForEach receiver.dataSource null !')
+    }
+    else {
+        LazyForEachImplForOptions(
+            receiver.dataSource!,
+            receiver.itemGenerator,
+            receiver.keyGenerator,
+            false,
+            receiver.onMoveEvent,
+            receiver.itemDragEvent);
+    }
+}
