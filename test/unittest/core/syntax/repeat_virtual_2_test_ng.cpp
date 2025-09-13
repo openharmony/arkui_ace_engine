@@ -63,8 +63,12 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
     onPurge_ = []() -> void {
         return;
     };
+    onUpdateDirty_ = []() -> void {
+        return;
+    };
     return RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        GetElmtId(), totalCount, totalCount, onGetRid4Index_, onRecycleItems_, onActiveRange_, onMoveFromTo_, onPurge_);
+        GetElmtId(), totalCount, totalCount, onGetRid4Index_, onRecycleItems_, onActiveRange_,
+        onMoveFromTo_, onPurge_, onUpdateDirty_);
 }
 
 RefPtr<FrameNode> RepeatVirtual2TestNg::CreateListItemNode()
@@ -104,7 +108,8 @@ HWTEST_F(RepeatVirtual2TestNg, CreateRepeat001, TestSize.Level1)
      * @tc.expected: Object is not nullptr.
      */
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, 10, 10, onGetRid4Index_, onRecycleItems_, onActiveRange_, onMoveFromTo_, onPurge_);
+        nodeId, 10, 10, onGetRid4Index_, onRecycleItems_, onActiveRange_,
+        onMoveFromTo_, onPurge_, onUpdateDirty_);
 
     EXPECT_NE(repeatNode, nullptr);
 }

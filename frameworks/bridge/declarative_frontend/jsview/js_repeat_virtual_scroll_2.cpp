@@ -136,8 +136,16 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 
+    auto onUpdateDirtyFunc = handlers->GetProperty("onUpdateDirty");
+    if (!onUpdateDirtyFunc->IsFunction()) {
+        return;
+    }
+    auto onUpdateDirty = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onUpdateDirtyFunc)]() {
+        JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
+    };
+
     RepeatVirtualScroll2Model::GetInstance()->Create(
-        arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
 }
 
 void JSRepeatVirtualScroll2::RemoveNode(const JSCallbackInfo& info)

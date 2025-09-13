@@ -40,7 +40,8 @@ public:
         const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
-        const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge) = 0;
+        const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
+        const std::function<void()>& onUpdateDirty) = 0;
 
     virtual void RemoveNode(uint32_t rid) = 0;
     virtual void SetInvalid(int32_t repeatElmtId, uint32_t rid) = 0;

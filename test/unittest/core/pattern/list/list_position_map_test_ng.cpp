@@ -128,8 +128,9 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
+    std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> repeatVirtualScroll2Node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
     ASSERT_NE(repeatVirtualScroll2Node, nullptr);
     repeatVirtualScroll2Node->children_ = { node };
     RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();

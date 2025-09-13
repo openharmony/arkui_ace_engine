@@ -87,9 +87,7 @@ bool RepeatVirtualScrollCaches::HasOverlapWithLastActiveRange(uint32_t from, uin
  */
 bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore)
 {
-    if (from > to) {
-        return false;
-    }
+    if (from > to) return false;
 
     if (allowFetchMore) {
         // following a key4index_/ttype4index_ purge fetch the whole range
@@ -112,6 +110,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
 
     // always request the same range for keys and ttype
     // optimism by merging the two calls into one
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     const std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
     const std::list<std::string> ttypesFrom = onGetTypes4Range_(from, to);
     if ((keysFrom.size() == 0) || (ttypesFrom.size() == 0) || (keysFrom.size() != ttypesFrom.size())) {
