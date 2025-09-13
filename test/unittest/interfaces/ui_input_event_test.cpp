@@ -4018,4 +4018,111 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayY008, TestSize.Level1
     res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: CapiInputTest009
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    event.touchEvent.subKind = ON_HOVER_EVENT;
+ 
+    uiInputEvent.inputEvent = nullptr;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+ 
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), 0);
+}
+
+/**
+ * @tc.name: CapiInputTest010
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    event.touchEvent.subKind = ON_HOVER_EVENT;
+ 
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+ 
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetWindowYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetDisplayYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), 0);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), 0);
+}
+
+/**
+ * @tc.name: CapiInputTest011
+ * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CapiInputTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    event.touchEvent.subKind = ON_HOVER_MOVE;
+    event.touchEvent.actionTouchPoint.tiltX = ARKUI_X;
+    event.touchEvent.actionTouchPoint.tiltY = ARKUI_Y;
+ 
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+ 
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltX(inputEvent, 0), ARKUI_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_Y);
+}
 } // namespace OHOS::Ace

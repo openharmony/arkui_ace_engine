@@ -1396,6 +1396,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     param2->SetIsShow(false);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
+    param2->SetShowInSubWindow(true);
+    ViewAbstract::BindPopup(param2, targetNode2, customNode);
     EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
 
@@ -3460,6 +3462,36 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest082, TestSize.Level1)
         std::nullopt, std::nullopt };
     auto positionEdges = context->GetOffsetEdgesValue(defaultEdgesParam);
     EXPECT_EQ(positionEdges.bottom, BOTTOM);
+}
+
+/**
+ * @tc.name: ViewAbstractTestNg0084
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0084, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    OffsetT<Dimension> value = { ZERO, ZERO };
+    ViewAbstract::SetPosition(frameNode, ZERO, ZERO, resObj, resObj);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetPosition(frameNode, ZERO, ZERO,  resObj, resObj);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+ 
+    auto context = frameNode->GetRenderContext();
+    EXPECT_NE(context, nullptr);
+    OffsetT<Dimension> defaultDimension = { WIDTH, HEIGHT };
+    auto positionValue = context->GetPositionValue(OffsetT<Dimension>(defaultDimension));
+    EXPECT_EQ(positionValue.GetX(), ZERO);
+    EXPECT_EQ(positionValue.GetY(), ZERO);
 }
 
 /**

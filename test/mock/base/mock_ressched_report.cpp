@@ -44,6 +44,8 @@ void ResSchedReport::ResSchedDataReport(
     uint32_t resType, int32_t value, const std::unordered_map<std::string, std::string>& payload)
 {}
 
+void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
+
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
 
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,

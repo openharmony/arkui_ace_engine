@@ -32,6 +32,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

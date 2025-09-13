@@ -1822,4 +1822,40 @@ HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
     ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
     EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
 }
+
+/**
+ * @tc.name: CustomBackgroundResourceTest001
+ * @tc.desc: Test set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test customBackgroundColor.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_TRUE(pattern->resourceMgr_);
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") != pattern->resourceMgr_->resMap_.end());
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(nullptr);
+    EXPECT_FALSE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") == pattern->resourceMgr_->resMap_.end());
+    ViewAbstract::SetCustomBackgroundColor(BLUE);
+ 
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
 } // namespace OHOS::Ace::NG
