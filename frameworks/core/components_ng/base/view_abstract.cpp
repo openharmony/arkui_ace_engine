@@ -1050,6 +1050,14 @@ void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint16_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
 }
 
+uint16_t ViewAbstract::GetPixelRound(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    return layoutProperty->GetPixelRound();
+}
+
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

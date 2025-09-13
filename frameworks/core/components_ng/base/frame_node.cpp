@@ -6025,7 +6025,7 @@ void FrameNode::ForceSyncGeometryNode()
 {
     CHECK_NULL_VOID(renderContext_);
     oldGeometryNode_.Reset();
-    renderContext_->SavePaintRect();
+    renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
     renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
 }
 

@@ -1279,6 +1279,80 @@ int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value
     *value = edges->right.value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_PixelRoundPolicy* OH_ArkUI_PixelRoundPolicy_Create()
+{
+    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy { { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND }, { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND } };
+    return policy;
+}
+
+void OH_ArkUI_PixelRoundPolicy_Dispose(ArkUI_PixelRoundPolicy* policy)
+{
+    delete policy;
+    policy = nullptr;
+}
+
+void OH_ArkUI_PixelRoundPolicy_SetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value)
+{
+    CHECK_NULL_VOID(policy);
+    policy->top = { 1, value };
+}
+
+int32_t OH_ArkUI_PixelRoundPolicy_GetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
+{
+    if (!policy || !policy->top.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = policy->top.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PixelRoundPolicy_SetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value)
+{
+    CHECK_NULL_VOID(policy);
+    policy->start = { 1, value };
+}
+
+int32_t OH_ArkUI_PixelRoundPolicy_GetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
+{
+    if (!policy || !policy->start.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = policy->start.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PixelRoundPolicy_SetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value)
+{
+    CHECK_NULL_VOID(policy);
+    policy->bottom = { 1, value };
+}
+
+int32_t OH_ArkUI_PixelRoundPolicy_GetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
+{
+    if (!policy || !policy->bottom.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = policy->bottom.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value)
+{
+    CHECK_NULL_VOID(policy);
+    policy->end = { 1, value };
+}
+
+int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
+{
+    if (!policy || !policy->end.isSet) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *value = policy->end.value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

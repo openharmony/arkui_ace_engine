@@ -4145,6 +4145,46 @@
     },
     {
         "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_Create"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_Dispose"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_SetTop"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_GetTop"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_SetStart"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_GetStart"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_SetBottom"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_GetBottom"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_SetEnd"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PixelRoundPolicy_GetEnd"
+    },
+    {
+        "first_introduced": "21",
         "name": "OH_ArkUI_GridLayoutOptions_Create"
     },
     {

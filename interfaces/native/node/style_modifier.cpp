@@ -1509,7 +1509,6 @@ int32_t SetPositionEdges(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!item || !item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     const ArkUI_PositionEdges* edges = reinterpret_cast<ArkUI_PositionEdges*>(item->object);
     CHECK_NULL_RETURN(edges, ERROR_CODE_PARAM_INVALID);
     std::vector<ArkUIStringAndFloat> options;
@@ -1566,6 +1565,64 @@ const ArkUI_AttributeItem* GetAllowForceDark(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAllowForceDark(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+int32_t SetPixelRound(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || !item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    const ArkUI_PixelRoundPolicy* policy = reinterpret_cast<ArkUI_PixelRoundPolicy*>(item->object);
+    CHECK_NULL_RETURN(policy, ERROR_CODE_PARAM_INVALID);
+    int32_t values[] = { -1, -1, -1, -1 };
+    if (policy->start.isSet) {
+        values[NUM_0] = static_cast<ArkUI_Int32>(policy->start.value);
+    }
+    if (policy->top.isSet) {
+        values[NUM_1] = static_cast<ArkUI_Int32>(policy->top.value);
+    }
+    if (policy->end.isSet) {
+        values[NUM_2] = static_cast<ArkUI_Int32>(policy->end.value);
+    }
+    if (policy->bottom.isSet) {
+        values[NUM_3] = static_cast<ArkUI_Int32>(policy->bottom.value);
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setPixelRound(
+        node->uiNodeHandle, values, (sizeof(values) / sizeof(values[NUM_0])));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetPixelRound(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetPixelRound(node->uiNodeHandle);
+}
+
+void FillPolicyFromVec(int32_t* vec, int32_t offset, ArkUI_OptionalCalcPolicy& calcPolicy)
+{
+    if (vec[offset] == -1) {
+        calcPolicy.isSet = 0;
+        return;
+    }
+    calcPolicy.isSet = 1;
+    calcPolicy.value = static_cast<ArkUI_PixelRoundCalcPolicy>(vec[offset]);
+}
+
+const ArkUI_AttributeItem* GetPixelRound(ArkUI_NodeHandle node)
+{
+    int32_t values[] = { -1, -1, -1, -1 };
+    auto* fullImpl = GetFullImpl();
+    if (!fullImpl->getNodeModifiers()->getCommonModifier()->getPixelRound(node->uiNodeHandle, values)) {
+        return nullptr;
+    }
+    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy;
+    FillPolicyFromVec(values, NUM_0, policy->start);
+    FillPolicyFromVec(values, NUM_1, policy->top);
+    FillPolicyFromVec(values, NUM_2, policy->end);
+    FillPolicyFromVec(values, NUM_3, policy->bottom);
+    g_attributeItem.object = policy;
     return &g_attributeItem;
 }
 
@@ -16700,6 +16757,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetHeightLayoutPolicy,
         SetPositionEdges,
         SetAllowForceDark,
+        SetPixelRound,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16820,6 +16878,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetHeightLayoutPolicy,
         GetPositionEdges,
         GetAllowForceDark,
+        GetPixelRound,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16944,6 +17003,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetHeightLayoutPolicy,
         ResetPositionEdges,
         ResetAllowForceDark,
+        ResetPixelRound,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

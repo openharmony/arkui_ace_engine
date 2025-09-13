@@ -108,6 +108,18 @@ struct ArkUI_PositionEdges {
     ArkUI_OptionalFloat right;
 };
 
+struct ArkUI_OptionalCalcPolicy {
+    int32_t isSet;
+    ArkUI_PixelRoundCalcPolicy value;
+};
+
+struct ArkUI_PixelRoundPolicy {
+    ArkUI_OptionalCalcPolicy start;
+    ArkUI_OptionalCalcPolicy top;
+    ArkUI_OptionalCalcPolicy end;
+    ArkUI_OptionalCalcPolicy bottom;
+};
+
 struct ArkUI_SwiperIndicator {
     ArkUI_SwiperIndicatorType type;
     ArkUI_OptionalFloat dimLeft;
