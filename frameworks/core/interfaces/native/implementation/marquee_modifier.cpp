@@ -134,7 +134,7 @@ void SetAllowScaleImpl(Ark_NativePointer node,
     MarqueeModelNG::SetAllowScale(frameNode, *convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -47,7 +47,7 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
 void SetColorImpl(Ark_NativePointer node,
-                  const Opt_Union_Color_Number_String_Resource* value)
+                  const Opt_Union_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

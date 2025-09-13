@@ -294,7 +294,7 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnContentScroll(frameNode, onContentScroll);
 }
 void SetMaxLengthImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -333,7 +333,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -460,7 +460,7 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetCaretPositionImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -559,7 +559,7 @@ void SetBarStateImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetBarState(frameNode, convValue);
 }
 void SetMaxLinesImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -651,7 +651,7 @@ void SetSelectAllImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetSelectAllValue(frameNode, convValue);
 }
 void SetMinFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -661,7 +661,7 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetAdaptMinFontSize(frameNode, convValue);
 }
 void SetMaxFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -671,7 +671,7 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetAdaptMaxFontSize(frameNode, convValue);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -681,7 +681,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -718,7 +718,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_Resource* value)
+                          const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -727,7 +727,7 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void SetLineHeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String_Resource* value)
+                       const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

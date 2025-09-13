@@ -111,7 +111,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,7 +164,7 @@ void SetRenderingStrategyImpl(Ark_NativePointer node,
     SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,7 +174,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     SymbolModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -199,7 +199,7 @@ bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect
 }
 void SetSymbolEffectImpl(Ark_NativePointer node,
                          const Opt_SymbolEffect* symbolEffect,
-                         const Opt_Union_Boolean_Number* triggerValue)
+                         const Opt_Union_Boolean_I32* triggerValue)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

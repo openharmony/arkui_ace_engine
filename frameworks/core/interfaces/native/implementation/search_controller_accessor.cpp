@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CaretPositionImpl(Ark_SearchController peer,
-                       const Ark_Number* value)
+                       const Ark_Int32* value)
 {
     CHECK_NULL_VOID(peer && value && peer->controller_);
     peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
@@ -44,8 +44,8 @@ void StopEditingImpl(Ark_SearchController peer)
     peer->controller_->StopEditing();
 }
 void SetTextSelectionImpl(Ark_SearchController peer,
-                          const Ark_Number* selectionStart,
-                          const Ark_Number* selectionEnd,
+                          const Ark_Int32* selectionStart,
+                          const Ark_Int32* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);

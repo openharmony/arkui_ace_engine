@@ -1780,10 +1780,10 @@ export class TextContentControllerBase implements MaterializedBase {
     public getTextContentRect(): RectResult {
         return this.getTextContentRect_serialize()
     }
-    public getTextContentLineCount(): number {
+    public getTextContentLineCount(): double {
         return this.getTextContentLineCount_serialize()
     }
-    public addText(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): double {
         const text_casted = text as (string)
         const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
         return this.addText_serialize(text_casted, textOperationOptions_casted)
@@ -1816,11 +1816,11 @@ export class TextContentControllerBase implements MaterializedBase {
         const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getTextContentLineCount_serialize(): number {
+    getTextContentLineCount_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
         return retval
     }
-    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): double {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (textOperationOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6257,7 +6257,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export interface InputCounterOptions {
-    thresholdPercentage?: number;
+    thresholdPercentage?: double;
     highlightBorder?: boolean;
 }
 export interface TextDecorationOptions {
@@ -11960,7 +11960,7 @@ export class InputCounterOptions_serializer {
         if (valueHolderForThresholdPercentage !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForThresholdPercentageTmpValue  = valueHolderForThresholdPercentage!
-            valueSerializer.writeNumber(valueHolderForThresholdPercentageTmpValue)
+            valueSerializer.writeFloat64(valueHolderForThresholdPercentageTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11976,11 +11976,11 @@ export class InputCounterOptions_serializer {
     public static read(buffer: DeserializerBase): InputCounterOptions {
         let valueDeserializer : DeserializerBase = buffer
         const thresholdPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let thresholdPercentageTmpBuf : number | undefined = undefined
+        let thresholdPercentageTmpBuf : double | undefined = undefined
         if ((thresholdPercentageTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            thresholdPercentageTmpBuf = (valueDeserializer.readNumber() as number)
+            thresholdPercentageTmpBuf = valueDeserializer.readFloat64()
         }
-        const thresholdPercentageTmpResult : number | undefined = thresholdPercentageTmpBuf
+        const thresholdPercentageTmpResult : double | undefined = thresholdPercentageTmpBuf
         const highlightBorderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let highlightBorderTmpBuf : boolean | undefined = undefined
         if ((highlightBorderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

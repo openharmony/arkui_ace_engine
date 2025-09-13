@@ -415,7 +415,7 @@ void SetCopyOptionImpl(Ark_NativePointer node,
     SearchModelStatic::SetCopyOption(frameNode, Converter::OptConvertPtr<CopyOptions>(value));
 }
 void SetMaxLengthImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -451,7 +451,7 @@ void SetSelectionMenuHiddenImpl(Ark_NativePointer node,
     SearchModelStatic::SetSelectionMenuHidden(frameNode, convValue);
 }
 void SetMinFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -461,7 +461,7 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     SearchModelStatic::SetAdaptMinFontSize(frameNode, optValue);
 }
 void SetMaxFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -471,7 +471,7 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     SearchModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -481,7 +481,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     SearchModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -502,7 +502,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_Resource* value)
+                          const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -512,7 +512,7 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
     SearchModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void SetLineHeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String_Resource* value)
+                       const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

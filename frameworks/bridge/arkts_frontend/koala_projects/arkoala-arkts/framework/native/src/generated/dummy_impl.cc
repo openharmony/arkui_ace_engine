@@ -7068,7 +7068,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkInterfaceModifier
     namespace HyperlinkAttributeModifier {
     void SetColorImpl(Ark_NativePointer node,
-                      const Opt_Union_Color_Number_String_Resource* value)
+                      const Opt_Union_Color_I32_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8602,7 +8602,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12265,7 +12265,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12313,7 +12313,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12325,7 +12325,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12337,7 +12337,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12349,7 +12349,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12373,7 +12373,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12385,7 +12385,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13704,7 +13704,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13728,7 +13728,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13764,7 +13764,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14466,7 +14466,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SymbolGlyphInterfaceModifier
     namespace SymbolGlyphAttributeModifier {
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14526,7 +14526,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14538,7 +14538,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14551,7 +14551,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetSymbolEffectImpl(Ark_NativePointer node,
                              const Opt_SymbolEffect* symbolEffect,
-                             const Opt_Union_Boolean_Number* triggerValue)
+                             const Opt_Union_Boolean_I32* triggerValue)
     {
         if (!needGroupedLog(1))
         {
@@ -14599,7 +14599,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SymbolSpanInterfaceModifier
     namespace SymbolSpanAttributeModifier {
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14623,7 +14623,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15155,7 +15155,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15167,7 +15167,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15179,7 +15179,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15191,7 +15191,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15203,7 +15203,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15251,7 +15251,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15287,7 +15287,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15311,7 +15311,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15335,7 +15335,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBaselineOffsetImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15503,7 +15503,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
-                                      const Opt_Callback_Number_Number_Void* value)
+                                      const Opt_Callback_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15626,7 +15626,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_String* weight,
                            const Opt_FontSettingOptions* options)
     {
         if (!needGroupedLog(1))
@@ -15641,8 +15641,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSelectionImpl(Ark_NativePointer node,
-                          const Opt_Number* selectionStart,
-                          const Opt_Number* selectionEnd)
+                          const Opt_Int32* selectionStart,
+                          const Opt_Int32* selectionEnd)
     {
         if (!needGroupedLog(1))
         {
@@ -15807,7 +15807,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15903,7 +15903,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
-                                      const Opt_Callback_Number_Number_Void* value)
+                                      const Opt_Callback_I32_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15915,7 +15915,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnContentScrollImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_Number_Void* value)
+                                const Opt_Callback_F64_F64_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15999,7 +15999,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16047,7 +16047,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16059,7 +16059,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16071,7 +16071,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16083,7 +16083,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16107,7 +16107,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16155,7 +16155,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16179,7 +16179,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16784,7 +16784,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16832,7 +16832,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -16964,7 +16964,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCaretPositionImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17072,7 +17072,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17132,7 +17132,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17144,7 +17144,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17156,7 +17156,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17168,7 +17168,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17216,7 +17216,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17228,7 +17228,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -37229,7 +37229,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void CaretPositionImpl(Ark_SearchController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -37251,8 +37251,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTextSelectionImpl(Ark_SearchController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
         if (!needGroupedLog(1))
@@ -38780,7 +38780,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void CaretPositionImpl(Ark_TextAreaController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -38792,8 +38792,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTextSelectionImpl(Ark_TextAreaController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
         if (!needGroupedLog(1))
@@ -39011,34 +39011,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+    Ark_Float64 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTextContentLineCount(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
-                           const Ark_String* text,
-                           const Opt_TextContentControllerOptions* textOperationOptions)
+    Ark_Float64 AddTextImpl(Ark_TextContentControllerBase peer,
+                            const Ark_String* text,
+                            const Opt_TextContentControllerOptions* textOperationOptions)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("addText(");
         WriteToString(&out, text);
         out.append(", ");
         WriteToString(&out, textOperationOptions);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void DeleteTextImpl(Ark_TextContentControllerBase peer,
                         const Opt_TextRange* range)
@@ -39472,7 +39472,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void CaretPositionImpl(Ark_TextInputController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -39484,8 +39484,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTextSelectionImpl(Ark_TextInputController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
         if (!needGroupedLog(1))

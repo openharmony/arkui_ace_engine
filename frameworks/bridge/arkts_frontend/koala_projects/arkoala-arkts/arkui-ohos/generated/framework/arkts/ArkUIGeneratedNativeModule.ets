@@ -5052,11 +5052,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SearchController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _SearchController_caretPosition(ptr: KPointer, value: number): void
+    native static _SearchController_caretPosition(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
     native static _SearchController_stopEditing(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _SearchController_setTextSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SearchController_setTextSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5255,9 +5255,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAreaController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _TextAreaController_caretPosition(ptr: KPointer, value: number): void
+    native static _TextAreaController_caretPosition(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _TextAreaController_setTextSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TextAreaController_setTextSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAreaController_stopEditing(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -5286,10 +5286,10 @@ export class ArkUIGeneratedNativeModule {
     native static _TextContentControllerBase_getCaretOffset(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getTextContentRect(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _TextContentControllerBase_getTextContentLineCount(ptr: KPointer): number
     @ani.unsafe.Quick
-    native static _TextContentControllerBase_addText(ptr: KPointer, text: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _TextContentControllerBase_getTextContentLineCount(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _TextContentControllerBase_addText(ptr: KPointer, text: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): double
     @ani.unsafe.Direct
     native static _TextContentControllerBase_deleteText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -5349,9 +5349,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextInputController_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _TextInputController_caretPosition(ptr: KPointer, value: number): void
+    native static _TextInputController_caretPosition(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _TextInputController_setTextSelection(ptr: KPointer, selectionStart: number, selectionEnd: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TextInputController_setTextSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextInputController_stopEditing(ptr: KPointer): void
     @ani.unsafe.Direct

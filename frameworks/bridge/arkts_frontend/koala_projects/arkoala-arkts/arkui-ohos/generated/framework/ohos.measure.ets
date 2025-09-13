@@ -41,10 +41,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForConstraintWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForConstraintWidthTmpValue  = valueHolderForConstraintWidth!
-            if (valueHolderForConstraintWidthTmpValue instanceof number) {
+            if (valueHolderForConstraintWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForConstraintWidthTmpValueForIdx0  = valueHolderForConstraintWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForConstraintWidthTmpValueForIdx0)
+                const valueHolderForConstraintWidthTmpValueForIdx0  = valueHolderForConstraintWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForConstraintWidthTmpValueForIdx0)
             } else if (valueHolderForConstraintWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForConstraintWidthTmpValueForIdx1  = valueHolderForConstraintWidthTmpValue as string
@@ -61,10 +61,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
-            if (valueHolderForFontSizeTmpValue instanceof number) {
+            if (valueHolderForFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx0)
+                const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as string
@@ -81,10 +81,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForFontStyle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontStyleTmpValue  = valueHolderForFontStyle!
-            if (valueHolderForFontStyleTmpValue instanceof number) {
+            if (valueHolderForFontStyleTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForFontStyleTmpValueForIdx0  = valueHolderForFontStyleTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontStyleTmpValueForIdx0)
+                const valueHolderForFontStyleTmpValueForIdx0  = valueHolderForFontStyleTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontStyleTmpValueForIdx0)
             } else if (valueHolderForFontStyleTmpValue instanceof FontStyle) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontStyleTmpValueForIdx1  = valueHolderForFontStyleTmpValue as FontStyle
@@ -97,10 +97,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForFontWeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
-            if (valueHolderForFontWeightTmpValue instanceof number) {
+            if (valueHolderForFontWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
+                const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as string
@@ -133,10 +133,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForLetterSpacing !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLetterSpacingTmpValue  = valueHolderForLetterSpacing!
-            if (valueHolderForLetterSpacingTmpValue instanceof number) {
+            if (valueHolderForLetterSpacingTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForLetterSpacingTmpValueForIdx0  = valueHolderForLetterSpacingTmpValue as number
-                valueSerializer.writeNumber(valueHolderForLetterSpacingTmpValueForIdx0)
+                const valueHolderForLetterSpacingTmpValueForIdx0  = valueHolderForLetterSpacingTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForLetterSpacingTmpValueForIdx0)
             } else if (valueHolderForLetterSpacingTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForLetterSpacingTmpValueForIdx1  = valueHolderForLetterSpacingTmpValue as string
@@ -149,10 +149,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForTextAlign !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextAlignTmpValue  = valueHolderForTextAlign!
-            if (valueHolderForTextAlignTmpValue instanceof number) {
+            if (valueHolderForTextAlignTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForTextAlignTmpValueForIdx0  = valueHolderForTextAlignTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTextAlignTmpValueForIdx0)
+                const valueHolderForTextAlignTmpValueForIdx0  = valueHolderForTextAlignTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForTextAlignTmpValueForIdx0)
             } else if (valueHolderForTextAlignTmpValue instanceof TextAlign) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTextAlignTmpValueForIdx1  = valueHolderForTextAlignTmpValue as TextAlign
@@ -165,10 +165,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForOverflow !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOverflowTmpValue  = valueHolderForOverflow!
-            if (valueHolderForOverflowTmpValue instanceof number) {
+            if (valueHolderForOverflowTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForOverflowTmpValueForIdx0  = valueHolderForOverflowTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOverflowTmpValueForIdx0)
+                const valueHolderForOverflowTmpValueForIdx0  = valueHolderForOverflowTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForOverflowTmpValueForIdx0)
             } else if (valueHolderForOverflowTmpValue instanceof TextOverflow) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForOverflowTmpValueForIdx1  = valueHolderForOverflowTmpValue as TextOverflow
@@ -181,7 +181,7 @@ export class MeasureOptions_serializer {
         if (valueHolderForMaxLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -189,10 +189,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForLineHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLineHeightTmpValue  = valueHolderForLineHeight!
-            if (valueHolderForLineHeightTmpValue instanceof number) {
+            if (valueHolderForLineHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForLineHeightTmpValueForIdx0  = valueHolderForLineHeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForLineHeightTmpValueForIdx0)
+                const valueHolderForLineHeightTmpValueForIdx0  = valueHolderForLineHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForLineHeightTmpValueForIdx0)
             } else if (valueHolderForLineHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForLineHeightTmpValueForIdx1  = valueHolderForLineHeightTmpValue as string
@@ -209,10 +209,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForBaselineOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBaselineOffsetTmpValue  = valueHolderForBaselineOffset!
-            if (valueHolderForBaselineOffsetTmpValue instanceof number) {
+            if (valueHolderForBaselineOffsetTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForBaselineOffsetTmpValueForIdx0  = valueHolderForBaselineOffsetTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBaselineOffsetTmpValueForIdx0)
+                const valueHolderForBaselineOffsetTmpValueForIdx0  = valueHolderForBaselineOffsetTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBaselineOffsetTmpValueForIdx0)
             } else if (valueHolderForBaselineOffsetTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForBaselineOffsetTmpValueForIdx1  = valueHolderForBaselineOffsetTmpValue as string
@@ -225,10 +225,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForTextCase !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextCaseTmpValue  = valueHolderForTextCase!
-            if (valueHolderForTextCaseTmpValue instanceof number) {
+            if (valueHolderForTextCaseTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForTextCaseTmpValueForIdx0  = valueHolderForTextCaseTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTextCaseTmpValueForIdx0)
+                const valueHolderForTextCaseTmpValueForIdx0  = valueHolderForTextCaseTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForTextCaseTmpValueForIdx0)
             } else if (valueHolderForTextCaseTmpValue instanceof TextCase) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTextCaseTmpValueForIdx1  = valueHolderForTextCaseTmpValue as TextCase
@@ -241,10 +241,10 @@ export class MeasureOptions_serializer {
         if (valueHolderForTextIndent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextIndentTmpValue  = valueHolderForTextIndent!
-            if (valueHolderForTextIndentTmpValue instanceof number) {
+            if (valueHolderForTextIndentTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForTextIndentTmpValueForIdx0  = valueHolderForTextIndentTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTextIndentTmpValueForIdx0)
+                const valueHolderForTextIndentTmpValueForIdx0  = valueHolderForTextIndentTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForTextIndentTmpValueForIdx0)
             } else if (valueHolderForTextIndentTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForTextIndentTmpValueForIdx1  = valueHolderForTextIndentTmpValue as string
@@ -275,12 +275,12 @@ export class MeasureOptions_serializer {
         }
         const textContentTmpResult : string | Resource = (textContentTmpBuf as string | Resource)
         const constraintWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let constraintWidthTmpBuf : number | string | Resource | undefined = undefined
+        let constraintWidthTmpBuf : double | string | Resource | undefined = undefined
         if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const constraintWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let constraintWidthTmpBuf_ : number | string | Resource | undefined
+            let constraintWidthTmpBuf_ : double | string | Resource | undefined
             if (constraintWidthTmpBuf_UnionSelector == (0).toChar()) {
-                constraintWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                constraintWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (constraintWidthTmpBuf_UnionSelector == (1).toChar()) {
                 constraintWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (constraintWidthTmpBuf_UnionSelector == (2).toChar()) {
@@ -288,16 +288,16 @@ export class MeasureOptions_serializer {
             } else {
                 throw new Error("One of the branches for constraintWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            constraintWidthTmpBuf = (constraintWidthTmpBuf_ as number | string | Resource)
+            constraintWidthTmpBuf = (constraintWidthTmpBuf_ as double | string | Resource)
         }
-        const constraintWidthTmpResult : number | string | Resource | undefined = constraintWidthTmpBuf
+        const constraintWidthTmpResult : double | string | Resource | undefined = constraintWidthTmpBuf
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontSizeTmpBuf : number | string | Resource | undefined = undefined
+        let fontSizeTmpBuf : double | string | Resource | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontSizeTmpBuf_ : number | string | Resource | undefined
+            let fontSizeTmpBuf_ : double | string | Resource | undefined
             if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                fontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 fontSizeTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontSizeTmpBuf_UnionSelector == (2).toChar()) {
@@ -305,31 +305,31 @@ export class MeasureOptions_serializer {
             } else {
                 throw new Error("One of the branches for fontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontSizeTmpBuf = (fontSizeTmpBuf_ as number | string | Resource)
+            fontSizeTmpBuf = (fontSizeTmpBuf_ as double | string | Resource)
         }
-        const fontSizeTmpResult : number | string | Resource | undefined = fontSizeTmpBuf
+        const fontSizeTmpResult : double | string | Resource | undefined = fontSizeTmpBuf
         const fontStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontStyleTmpBuf : number | FontStyle | undefined = undefined
+        let fontStyleTmpBuf : int32 | FontStyle | undefined = undefined
         if ((fontStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontStyleTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontStyleTmpBuf_ : number | FontStyle | undefined
+            let fontStyleTmpBuf_ : int32 | FontStyle | undefined
             if (fontStyleTmpBuf_UnionSelector == (0).toChar()) {
-                fontStyleTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontStyleTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontStyleTmpBuf_UnionSelector == (1).toChar()) {
                 fontStyleTmpBuf_ = FontStyle.fromValue(valueDeserializer.readInt32())
             } else {
                 throw new Error("One of the branches for fontStyleTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontStyleTmpBuf = (fontStyleTmpBuf_ as number | FontStyle)
+            fontStyleTmpBuf = (fontStyleTmpBuf_ as int32 | FontStyle)
         }
-        const fontStyleTmpResult : number | FontStyle | undefined = fontStyleTmpBuf
+        const fontStyleTmpResult : int32 | FontStyle | undefined = fontStyleTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontWeightTmpBuf : number | string | FontWeight | undefined = undefined
+        let fontWeightTmpBuf : int32 | string | FontWeight | undefined = undefined
         if ((fontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontWeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontWeightTmpBuf_ : number | string | FontWeight | undefined
+            let fontWeightTmpBuf_ : int32 | string | FontWeight | undefined
             if (fontWeightTmpBuf_UnionSelector == (0).toChar()) {
-                fontWeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                fontWeightTmpBuf_ = valueDeserializer.readInt32()
             } else if (fontWeightTmpBuf_UnionSelector == (1).toChar()) {
                 fontWeightTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontWeightTmpBuf_UnionSelector == (2).toChar()) {
@@ -337,9 +337,9 @@ export class MeasureOptions_serializer {
             } else {
                 throw new Error("One of the branches for fontWeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            fontWeightTmpBuf = (fontWeightTmpBuf_ as number | string | FontWeight)
+            fontWeightTmpBuf = (fontWeightTmpBuf_ as int32 | string | FontWeight)
         }
-        const fontWeightTmpResult : number | string | FontWeight | undefined = fontWeightTmpBuf
+        const fontWeightTmpResult : int32 | string | FontWeight | undefined = fontWeightTmpBuf
         const fontFamilyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontFamilyTmpBuf : string | Resource | undefined = undefined
         if ((fontFamilyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -356,63 +356,63 @@ export class MeasureOptions_serializer {
         }
         const fontFamilyTmpResult : string | Resource | undefined = fontFamilyTmpBuf
         const letterSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let letterSpacingTmpBuf : number | string | undefined = undefined
+        let letterSpacingTmpBuf : double | string | undefined = undefined
         if ((letterSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const letterSpacingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let letterSpacingTmpBuf_ : number | string | undefined
+            let letterSpacingTmpBuf_ : double | string | undefined
             if (letterSpacingTmpBuf_UnionSelector == (0).toChar()) {
-                letterSpacingTmpBuf_ = (valueDeserializer.readNumber() as number)
+                letterSpacingTmpBuf_ = valueDeserializer.readFloat64()
             } else if (letterSpacingTmpBuf_UnionSelector == (1).toChar()) {
                 letterSpacingTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for letterSpacingTmpBuf_ has to be chosen through deserialisation.")
             }
-            letterSpacingTmpBuf = (letterSpacingTmpBuf_ as number | string)
+            letterSpacingTmpBuf = (letterSpacingTmpBuf_ as double | string)
         }
-        const letterSpacingTmpResult : number | string | undefined = letterSpacingTmpBuf
+        const letterSpacingTmpResult : double | string | undefined = letterSpacingTmpBuf
         const textAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textAlignTmpBuf : number | TextAlign | undefined = undefined
+        let textAlignTmpBuf : int32 | TextAlign | undefined = undefined
         if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textAlignTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let textAlignTmpBuf_ : number | TextAlign | undefined
+            let textAlignTmpBuf_ : int32 | TextAlign | undefined
             if (textAlignTmpBuf_UnionSelector == (0).toChar()) {
-                textAlignTmpBuf_ = (valueDeserializer.readNumber() as number)
+                textAlignTmpBuf_ = valueDeserializer.readInt32()
             } else if (textAlignTmpBuf_UnionSelector == (1).toChar()) {
                 textAlignTmpBuf_ = TextAlign.fromValue(valueDeserializer.readInt32())
             } else {
                 throw new Error("One of the branches for textAlignTmpBuf_ has to be chosen through deserialisation.")
             }
-            textAlignTmpBuf = (textAlignTmpBuf_ as number | TextAlign)
+            textAlignTmpBuf = (textAlignTmpBuf_ as int32 | TextAlign)
         }
-        const textAlignTmpResult : number | TextAlign | undefined = textAlignTmpBuf
+        const textAlignTmpResult : int32 | TextAlign | undefined = textAlignTmpBuf
         const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let overflowTmpBuf : number | TextOverflow | undefined = undefined
+        let overflowTmpBuf : int32 | TextOverflow | undefined = undefined
         if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const overflowTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let overflowTmpBuf_ : number | TextOverflow | undefined
+            let overflowTmpBuf_ : int32 | TextOverflow | undefined
             if (overflowTmpBuf_UnionSelector == (0).toChar()) {
-                overflowTmpBuf_ = (valueDeserializer.readNumber() as number)
+                overflowTmpBuf_ = valueDeserializer.readInt32()
             } else if (overflowTmpBuf_UnionSelector == (1).toChar()) {
                 overflowTmpBuf_ = TextOverflow.fromValue(valueDeserializer.readInt32())
             } else {
                 throw new Error("One of the branches for overflowTmpBuf_ has to be chosen through deserialisation.")
             }
-            overflowTmpBuf = (overflowTmpBuf_ as number | TextOverflow)
+            overflowTmpBuf = (overflowTmpBuf_ as int32 | TextOverflow)
         }
-        const overflowTmpResult : number | TextOverflow | undefined = overflowTmpBuf
+        const overflowTmpResult : int32 | TextOverflow | undefined = overflowTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : number | undefined = undefined
+        let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
+            maxLinesTmpBuf = valueDeserializer.readInt32()
         }
-        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
         const lineHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lineHeightTmpBuf : number | string | Resource | undefined = undefined
+        let lineHeightTmpBuf : double | string | Resource | undefined = undefined
         if ((lineHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const lineHeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let lineHeightTmpBuf_ : number | string | Resource | undefined
+            let lineHeightTmpBuf_ : double | string | Resource | undefined
             if (lineHeightTmpBuf_UnionSelector == (0).toChar()) {
-                lineHeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                lineHeightTmpBuf_ = valueDeserializer.readFloat64()
             } else if (lineHeightTmpBuf_UnionSelector == (1).toChar()) {
                 lineHeightTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (lineHeightTmpBuf_UnionSelector == (2).toChar()) {
@@ -420,54 +420,54 @@ export class MeasureOptions_serializer {
             } else {
                 throw new Error("One of the branches for lineHeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            lineHeightTmpBuf = (lineHeightTmpBuf_ as number | string | Resource)
+            lineHeightTmpBuf = (lineHeightTmpBuf_ as double | string | Resource)
         }
-        const lineHeightTmpResult : number | string | Resource | undefined = lineHeightTmpBuf
+        const lineHeightTmpResult : double | string | Resource | undefined = lineHeightTmpBuf
         const baselineOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let baselineOffsetTmpBuf : number | string | undefined = undefined
+        let baselineOffsetTmpBuf : double | string | undefined = undefined
         if ((baselineOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const baselineOffsetTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let baselineOffsetTmpBuf_ : number | string | undefined
+            let baselineOffsetTmpBuf_ : double | string | undefined
             if (baselineOffsetTmpBuf_UnionSelector == (0).toChar()) {
-                baselineOffsetTmpBuf_ = (valueDeserializer.readNumber() as number)
+                baselineOffsetTmpBuf_ = valueDeserializer.readFloat64()
             } else if (baselineOffsetTmpBuf_UnionSelector == (1).toChar()) {
                 baselineOffsetTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for baselineOffsetTmpBuf_ has to be chosen through deserialisation.")
             }
-            baselineOffsetTmpBuf = (baselineOffsetTmpBuf_ as number | string)
+            baselineOffsetTmpBuf = (baselineOffsetTmpBuf_ as double | string)
         }
-        const baselineOffsetTmpResult : number | string | undefined = baselineOffsetTmpBuf
+        const baselineOffsetTmpResult : double | string | undefined = baselineOffsetTmpBuf
         const textCaseTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textCaseTmpBuf : number | TextCase | undefined = undefined
+        let textCaseTmpBuf : int32 | TextCase | undefined = undefined
         if ((textCaseTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textCaseTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let textCaseTmpBuf_ : number | TextCase | undefined
+            let textCaseTmpBuf_ : int32 | TextCase | undefined
             if (textCaseTmpBuf_UnionSelector == (0).toChar()) {
-                textCaseTmpBuf_ = (valueDeserializer.readNumber() as number)
+                textCaseTmpBuf_ = valueDeserializer.readInt32()
             } else if (textCaseTmpBuf_UnionSelector == (1).toChar()) {
                 textCaseTmpBuf_ = TextCase.fromValue(valueDeserializer.readInt32())
             } else {
                 throw new Error("One of the branches for textCaseTmpBuf_ has to be chosen through deserialisation.")
             }
-            textCaseTmpBuf = (textCaseTmpBuf_ as number | TextCase)
+            textCaseTmpBuf = (textCaseTmpBuf_ as int32 | TextCase)
         }
-        const textCaseTmpResult : number | TextCase | undefined = textCaseTmpBuf
+        const textCaseTmpResult : int32 | TextCase | undefined = textCaseTmpBuf
         const textIndentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textIndentTmpBuf : number | string | undefined = undefined
+        let textIndentTmpBuf : double | string | undefined = undefined
         if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textIndentTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let textIndentTmpBuf_ : number | string | undefined
+            let textIndentTmpBuf_ : double | string | undefined
             if (textIndentTmpBuf_UnionSelector == (0).toChar()) {
-                textIndentTmpBuf_ = (valueDeserializer.readNumber() as number)
+                textIndentTmpBuf_ = valueDeserializer.readFloat64()
             } else if (textIndentTmpBuf_UnionSelector == (1).toChar()) {
                 textIndentTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for textIndentTmpBuf_ has to be chosen through deserialisation.")
             }
-            textIndentTmpBuf = (textIndentTmpBuf_ as number | string)
+            textIndentTmpBuf = (textIndentTmpBuf_ as double | string)
         }
-        const textIndentTmpResult : number | string | undefined = textIndentTmpBuf
+        const textIndentTmpResult : double | string | undefined = textIndentTmpBuf
         const wordBreakTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let wordBreakTmpBuf : WordBreak | undefined = undefined
         if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -58,7 +58,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _textOverflow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -74,9 +74,9 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: EditableTextOnChangeCallback | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTextSelectionChange_0_0value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    _onTextSelectionChange_0_0value?: ((selectionStart: int32,selectionEnd: int32) => void) | undefined
     _onContentScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onContentScroll_0_0value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    _onContentScroll_0_0value?: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined
     _onEditChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onEditChange_0_0value?: ((isEditing: boolean) => void) | undefined
     _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -90,7 +90,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _enableKeyboardOnFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableKeyboardOnFocus_0_0value?: boolean | undefined
     _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: number | undefined
+    _maxLength_0_0value?: int32 | undefined
     _style_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _style_0_0value?: TextContentStyle | undefined
     _barState_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -98,17 +98,17 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _selectionMenuHidden_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectionMenuHidden_0_0value?: boolean | undefined
     _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontSize_0_0value?: number | string | Resource | undefined
+    _minFontSize_0_0value?: double | string | Resource | undefined
     _maxFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontSize_0_0value?: number | string | Resource | undefined
+    _maxFontSize_0_0value?: double | string | Resource | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
     _heightAdaptivePolicy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: number | undefined
+    _maxLines_0_0value?: int32 | undefined
     _wordBreak_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _wordBreak_0_0value?: WordBreak | undefined
     _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -116,11 +116,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _decoration_0_0value?: TextDecorationOptions | undefined
     _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: number | string | Resource | undefined
+    _letterSpacing_0_0value?: double | string | Resource | undefined
     _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineSpacing_0_0value?: LengthMetrics | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeight_0_0value?: number | string | Resource | undefined
+    _lineHeight_0_0value?: double | string | Resource | undefined
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: TextAreaType | undefined
     _enableAutoFill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -314,7 +314,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -324,7 +324,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -458,7 +458,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._onTextSelectionChange_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                     this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -468,7 +468,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTextSelectionChangeAttribute((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnTextSelectionChangeAttribute((undefined as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                 }
             }
         }
@@ -476,7 +476,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._onContentScroll_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnContentScrollAttribute((this._onContentScroll_0_0value as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnContentScrollAttribute((this._onContentScroll_0_0value as ((totalOffsetX: double,totalOffsetY: double) => void) | undefined));
                     this._onContentScroll_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -486,7 +486,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._onContentScroll_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnContentScrollAttribute((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    peer.setOnContentScrollAttribute((undefined as ((totalOffsetX: double,totalOffsetY: double) => void) | undefined));
                 }
             }
         }
@@ -602,7 +602,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as number | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -612,7 +612,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLengthAttribute((undefined as number | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -674,7 +674,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._minFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | Resource | undefined));
                     this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -684,7 +684,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -692,7 +692,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | Resource | undefined));
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -702,7 +702,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -710,7 +710,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -720,7 +720,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -728,7 +728,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -738,7 +738,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -764,7 +764,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -774,7 +774,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -836,7 +836,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._letterSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | Resource | undefined));
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -846,7 +846,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLetterSpacingAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -872,7 +872,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._lineHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | Resource | undefined));
                     this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -882,7 +882,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineHeightAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1362,7 +1362,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -1466,7 +1466,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.onTextSelectionChange((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    this.onTextSelectionChange((undefined as ((selectionStart: int32,selectionEnd: int32) => void) | undefined));
                 }
             }
         }
@@ -1479,7 +1479,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.onContentScroll((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    this.onContentScroll((undefined as ((totalOffsetX: double,totalOffsetY: double) => void) | undefined));
                 }
             }
         }
@@ -1570,7 +1570,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.maxLength((undefined as number | undefined));
+                    this.maxLength((undefined as int32 | undefined));
                 }
             }
         }
@@ -1622,7 +1622,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.minFontSize((undefined as number | string | Resource | undefined));
+                    this.minFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1635,7 +1635,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.maxFontSize((undefined as number | string | Resource | undefined));
+                    this.maxFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1648,7 +1648,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1661,7 +1661,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1687,7 +1687,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as number | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1739,7 +1739,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.letterSpacing((undefined as number | string | Resource | undefined));
+                    this.letterSpacing((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1765,7 +1765,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.lineHeight((undefined as number | string | Resource | undefined));
+                    this.lineHeight((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -2118,7 +2118,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2206,7 +2206,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         if (((this._onTextSelectionChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2217,7 +2217,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onContentScroll(value: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined): this {
         if (((this._onContentScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2294,7 +2294,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2338,7 +2338,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2349,7 +2349,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         if (((this._maxFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2360,7 +2360,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2371,7 +2371,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2393,7 +2393,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2437,7 +2437,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2459,7 +2459,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
