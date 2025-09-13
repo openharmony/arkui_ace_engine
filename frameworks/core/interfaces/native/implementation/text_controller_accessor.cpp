@@ -43,8 +43,12 @@ void CloseSelectionMenuImpl(Ark_TextController peer)
 void SetStyledStringImpl(Ark_TextController peer,
                          Ark_StyledString value)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
+    CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
+    if (!peer->controller) {
+        peer->SetStyledStringCache(value->spanString);
+        return;
+    }
     peer->controller->SetStyledString(value->spanString);
 }
 Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)

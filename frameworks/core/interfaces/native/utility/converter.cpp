@@ -567,6 +567,13 @@ std::optional<int32_t> ResourceConverter::ToInt()
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    if (type_ == ResourceType::STRING) {
+        auto result = GetStringResource();
+        if (result.has_value() && !result.value().empty()) {
+            /* 16: specifies base 16 (hexadecimal) */
+            return static_cast<uint32_t>(strtol(result.value().c_str(), nullptr, 16));
+        }
+    }
     if (id_ != -1) {
         return resWrapper_->GetSymbolById(id_);
     } else if (auto name = GetResourceName(); name) {
@@ -2030,28 +2037,36 @@ std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src
     return dimension;
 }
 
-std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
-    DimensionUnit defaultUnit)
+template<typename T>
+std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit defaultUnit)
 {
     std::optional<Dimension> dimension;
-    auto selector = src.selector;
-    if (selector == NUM_0) {
-        std::optional<float> optValue = Converter::OptConvert<float>(src.value0);
-        if (optValue.has_value()) {
-            dimension = Dimension(optValue.value(), defaultUnit);
-        }
-    } else if (selector == NUM_1) {
-        std::optional<std::string> optStr = Converter::OptConvert<std::string>(src.value1);
-        if (optStr.has_value()) {
-            dimension = ConvertFromString(optStr.value(), defaultUnit);
-        }
-    } else if (selector == NUM_2) {
-        dimension = OptConvertFromArkResource(src.value2, defaultUnit);
-    } else {
-        LOGE("Unexpected converter type: %{public}d\n", selector);
-    }
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_Number& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
+        },
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                dimension = ConvertFromString(optStr.value(), defaultUnit);
+            }
+        },
+        [&dimension, defaultUnit](const Ark_Resource& value) {
+            dimension = OptConvertFromArkResource(value, defaultUnit);
+        },
+        [&dimension]() {
+            dimension = Dimension();
+        });
+
     return dimension;
 }
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_Number_String_Resource>(
+    const Ark_Union_Number_String_Resource&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension>(const Ark_Dimension&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length>(const Ark_Length&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
@@ -2675,16 +2690,6 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
     CHECK_NULL_VOID(context);
 
     dst = shadowTheme->GetShadow(shadowStyle, context->GetColorMode());
-}
-
-template<>
-void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
-{
-    ResourceConverter converter(src);
-    if (!dst) {
-        dst = SymbolData();
-    }
-    dst->symbol = converter.ToSymbol();
 }
 
 template<>
