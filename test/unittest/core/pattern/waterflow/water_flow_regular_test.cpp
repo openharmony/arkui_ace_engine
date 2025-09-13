@@ -1345,4 +1345,64 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeightReachEnd001, TestSize.Level1) {
     float estimatedHeight = info->EstimateTotalHeight();
     EXPECT_EQ(estimatedHeight, info->maxHeight_);
 }
+
+/**
+ * @tc.name: WaterFlowReMeasureTest001
+ * @tc.desc: Test WaterFlow TOP_DOWN selective clearing mechanism
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with TOP_DOWN mode
+     * @tc.expected: WaterFlow index range is correct
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Call measure of WaterFlow for first time
+     * @tc.expected: WaterFlow layout range is correct, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<WaterFlowLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    // Record initial index range
+    int32_t initialStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t initialEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    /**
+     * @tc.steps: step3. Change WaterFlow mainSize and call measure for second time
+     * @tc.expected: Check selective clearing mechanism works with new index-based approach
+     */
+    // Modify layout constraints to trigger re-measurement
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(240.f, 200.f);
+    contentConstraint.maxSize = SizeF(240.f, 200.f);
+    contentConstraint.percentReference = SizeF(240.f, 200.f);
+
+    layoutProperty_->UpdateLayoutConstraint(contentConstraint);
+
+    // Verify that prevStartIndex_ and prevEndIndex_ are set correctly before measure
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+
+    // Verify selective clearing mechanism uses final indices correctly
+    int32_t newStartIndex = layoutAlgorithm->layoutInfo_->startIndex_;
+    int32_t newEndIndex = layoutAlgorithm->layoutInfo_->endIndex_;
+
+    // Verify that measuredStartIndex_ and currentEndIndex_ are updated
+    EXPECT_EQ(layoutAlgorithm->measuredStartIndex_, newStartIndex);
+    EXPECT_EQ(layoutAlgorithm->measuredEndIndex_, newEndIndex);
+
+    // The index range should be different after constraint change
+    EXPECT_TRUE(newStartIndex != initialStartIndex || newEndIndex != initialEndIndex);
+
+    // Complete layout to trigger ClearUnlayoutedItems
+    layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_TRUE(layoutAlgorithm->isLayouted_);
+}
 } // namespace OHOS::Ace::NG

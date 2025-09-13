@@ -184,6 +184,11 @@ private:
 
     bool IsForWard() const;
 
+    /**
+    * Perform measurement based on current layout strategy.
+    */
+    void PerformMeasurement();
+
     RefPtr<WaterFlowSections> sections_;
 
     // WaterFlow node's main-axis length
@@ -193,6 +198,21 @@ private:
     mutable std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
+
+    RefPtr<WaterFlowLayoutInfoBase> LayoutInfo() const override
+    {
+        return info_;
+    }
+
+    int32_t MeasuredStartIndex() const override
+    {
+        return info_->StartIndex();
+    }
+
+    int32_t MeasuredEndIndex() const override
+    {
+        return info_->EndIndex();
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };
