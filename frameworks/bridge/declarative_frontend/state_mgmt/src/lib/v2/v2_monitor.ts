@@ -343,12 +343,22 @@ public notifyChangeForEachPath(pathId: number): number {
 
   public static getMonitorIds(target: Object): number[] {
     let meta: Object;
-    if (!target || typeof target !== 'object' ||
-      !(meta = target[ObserveV2.MONITOR_REFS]) || typeof meta !== 'object') {
-      return [];
+    let meta1: Object;
+    let monitorIds = [];
+    if (target && typeof target === 'object') {
+      // get @Monitor id
+      meta = target[ObserveV2.MONITOR_REFS];
+      if (meta && typeof meta === 'object') {
+        monitorIds = Array.from(Object.values(meta)).map((monitor: MonitorV2) => monitor.watchId_);
+      }
+      // get AddMonitor id
+      meta1 = target[ObserveV2.ADD_MONITOR_REFS];
+      if (meta1 && typeof meta1 === 'object') {
+        monitorIds = [...monitorIds, ...Array.from(Object.values(meta1)).map((monitor: MonitorV2) => monitor.watchId_)];
+      }
     }
 
-    return Array.from(Object.values(meta)).map((monitor: MonitorV2) => monitor.watchId_);
+    return monitorIds;
   }
 
   public static clearWatchesFromTarget(target: Object): void {
