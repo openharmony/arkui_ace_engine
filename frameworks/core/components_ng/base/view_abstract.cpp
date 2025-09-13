@@ -6426,6 +6426,11 @@ void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const N
     auto overlayNode = AceType::WeakClaim(node).Upgrade();
     if (overlayNode == nullptr) {
         frameNode->SetOverlayNode(nullptr);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        frameNode->MarkNeedSyncRenderTree();
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
     frameNode->SetOverlayNode(overlayNode);
