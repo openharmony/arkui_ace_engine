@@ -762,6 +762,44 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
 }
 
 /**
+ * @tc.name: OverlengthDotIndicatorModifier019
+ * @tc.desc: Test the PaintBlackPoint method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set OverlengthDotIndicatorModifier attributes and ContentProperty attributes
+     * @tc.expected: attributes set successfully
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
+    auto vXSize = contentProperty.vectorBlackPointCenterX.size();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(AtMost(vXSize * 2)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtMost(vXSize * 2)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context { canvas, 100.f, 100.f };
+    auto indicatorModifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorModifier->backgroundStart_ = 50.0f;
+    indicatorModifier->backgroundEnd_ = 350.0f;
+    /**
+     * @tc.steps: step2. Set NearEqual(width, height) and isCustomSize_ true
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    contentProperty.unselectedIndicatorWidth = { 200.0f, 200.0f, 200.0f };
+    contentProperty.unselectedIndicatorHeight = { 200.0f, 200.0f, 200.0f };
+    indicatorModifier->isCustomSize_ = true;
+    indicatorModifier->PaintBlackPoint(context, contentProperty);
+
+    /**
+     * @tc.steps: step3. Set NearEqual(width, height) and isCustomSize_ false
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    indicatorModifier->isDrawbackground_ = true;
+    indicatorModifier->PaintBlackPoint(context, contentProperty);
+}
+
+/**
  * @tc.name: CalcTargetSelectedIndexOnBackward001
  * @tc.desc: Test CalcTargetSelectedIndexOnBackward
  * @tc.type: FUNC

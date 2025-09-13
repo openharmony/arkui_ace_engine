@@ -282,6 +282,7 @@ private:
     bool isAutoPlay_ = false;
     bool isBindIndicator_ = false;
     bool isLoop_ = true;
+    bool isDrawbackground_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

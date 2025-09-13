@@ -3524,6 +3524,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
         dragVelocity = 0.0;
     }
     if (!childScrolling_) {
+        ACE_SCOPED_TRACE("UpdateDragFRCSceneInfo END");
         UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     }
 
