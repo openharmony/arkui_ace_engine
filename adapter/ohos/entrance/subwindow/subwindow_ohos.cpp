@@ -959,6 +959,9 @@ void SubwindowOhos::HidePreviewNG()
     auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushPipelineImmediately();
+    if (window_) {
+        window_->SetTouchable(true);
+    }
     HideSubWindowNG();
 }
 
