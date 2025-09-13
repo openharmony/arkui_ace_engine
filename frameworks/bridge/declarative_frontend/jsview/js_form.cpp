@@ -94,22 +94,24 @@ void JSForm::Create(const JSCallbackInfo& info)
     if (!ParseFormId(formInfo, id)) {
         return;
     }
-    formInfo.cardName = name->ToString();
-    formInfo.bundleName = bundle->ToString();
-    formInfo.abilityName = ability->ToString();
-    formInfo.moduleName = module->ToString();
-    formInfo.exemptAppLock = exemptAppLock->ToBoolean();
-    if (!dimension->IsNull() && !dimension->IsEmpty()) {
+    formInfo.cardName = name->IsString() ? name->ToString() : "";
+    formInfo.bundleName = bundle->IsString() ? bundle->ToString() : "";
+    formInfo.abilityName = ability->IsString() ? ability->ToString() : "";
+    formInfo.moduleName = module->IsString() ? module->ToString() : "";
+    if (exemptAppLock->IsBoolean()) {
+        formInfo.exemptAppLock = exemptAppLock->ToBoolean();
+    }
+    if (!dimension->IsNull() && dimension->IsNumber()) {
         formInfo.dimension = dimension->ToNumber<int32_t>();
     }
-    formInfo.temporary = temporary->ToBoolean();
+    formInfo.temporary = temporary->IsBoolean() ? temporary->ToBoolean() : false;
     if (!wantValue->IsNull() && wantValue->IsObject()) {
         formInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
     }
-    if (!renderingMode->IsNull() && !renderingMode->IsEmpty()) {
+    if (!renderingMode->IsNull() && renderingMode->IsNumber()) {
         formInfo.renderingMode = renderingMode->ToNumber<int32_t>();
     }
-    if (!shape->IsNull() && !shape->IsEmpty()) {
+    if (!shape->IsNull() && shape->IsNumber()) {
         formInfo.shape = shape->ToNumber<int32_t>();
     }
     FormModel::GetInstance()->Create(formInfo);
