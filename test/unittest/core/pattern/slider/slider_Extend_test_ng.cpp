@@ -1061,6 +1061,9 @@ HWTEST_F(SliderExTestNg, SliderTipModifierPaintText001, TestSize.Level1)
     auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
     auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    sliderTipModifier.arrowWidth_ = arrowSizeWidth;
+    sliderTipModifier.arrowHeight_ = arrowSizeHeight;
+    sliderTipModifier.circularHorizontalOffset_ = circularOffset;
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
     Testing::MockCanvas canvas;
@@ -1995,5 +1998,38 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
     // call UpdateContentModifier function
     sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
     EXPECT_EQ(sliderPaintMethod.sliderContentModifier_->stepColor_->Get(), LinearColor(Color::RED));
+}
+
+/**
+ * @tc.name: sliderTipModifierTestUpdateBubbleSize001
+ * @tc.desc: Test UpdateBubbleSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderExTestNg, sliderTipModifierTestUpdateBubbleSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->bubbleArrowHeight_ = 10.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
+    sliderTipModifier.UpdateBubbleSize();
+    EXPECT_EQ(sliderTipModifier.arrowHeight_, sliderTheme->GetBubbleArrowHeight().ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,24 @@ public:
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
         static constexpr double DEFAULT_SLIDER_PPI = 775.0;
         static constexpr int32_t SLIDER_TIP_DELAY_TIME = 2000;
+        static constexpr Dimension TEXT_MAX = 36.0_vp;
+        static constexpr Dimension BUBBLE_TO_SLIDER_EXTRA_DISTANCE = 0.0_vp;
+        static constexpr Dimension ARROW_RADIUS = 2.0_vp;
+        static constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+        static constexpr Dimension ARROW_WIDTH = 16.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH = 92.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT = 52.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH = 48.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT = 60.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH = 96.0_vp;
+        static constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT = 56.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
+        static constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
+        static constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
 #ifdef SUPPORT_DIGITAL_CROWN
         static constexpr double CROWN_DISPLAY_CONTROL_RATIO = 2.1;
 #endif
@@ -119,6 +137,38 @@ public:
                 theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
                 theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");
                 theme->tipDelayTime_ = pattern->GetAttr<int32_t>("slider_tip_delay_time", SLIDER_TIP_DELAY_TIME);
+                theme->bubbleTextMax_ = pattern->GetAttr<Dimension>("bubble_text_max", TEXT_MAX);
+                theme->bubbleToSliderExtraDistance_ =
+                    pattern->GetAttr<Dimension>("bubble_to_slider_extra_distance", BUBBLE_TO_SLIDER_EXTRA_DISTANCE);
+                theme->bubbleVerticalWidth_ =
+                    pattern->GetAttr<Dimension>("bubble_vertical_width", BUBBLE_VERTICAL_WIDTH);
+                theme->bubbleVerticalHeight_ =
+                    pattern->GetAttr<Dimension>("bubble_vertical_height", BUBBLE_VERTICAL_HEIGHT);
+                theme->bubbleHorizontalWidth_ =
+                    pattern->GetAttr<Dimension>("bubble_horizontal_width", BUBBLE_HORIZONTAL_WIDTH);
+                theme->bubbleHorizontalHeight_ =
+                    pattern->GetAttr<Dimension>("bubble_horizontal_height", BUBBLE_HORIZONTAL_HEIGHT);
+                theme->bubbleLevel1VerticalWidth_ = pattern->GetAttr<Dimension>(
+                    "bubble_level1_vertical_width", BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH);
+                theme->bubbleLevel1VerticalHeight_ = pattern->GetAttr<Dimension>(
+                    "bubble_level1_vertical_height", BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT);
+                theme->bubbleLevel1HorizontalWidth_ = pattern->GetAttr<Dimension>(
+                    "bubble_level1_horizontal_width", BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH);
+                theme->bubbleLevel1HorizontalHeight_ = pattern->GetAttr<Dimension>(
+                    "bubble_level1_horizontal_height", BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT);
+                theme->bubbleLevel2VerticalWidth_ = pattern->GetAttr<Dimension>(
+                    "bubble_level2_vertical_width", BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH);
+                theme->bubbleLevel2VerticalHeight_ = pattern->GetAttr<Dimension>(
+                    "bubble_level2_vertical_height", BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT);
+                theme->bubbleLevel2HorizontalWidth_ = pattern->GetAttr<Dimension>(
+                    "bubble_level2_horizontal_width", BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH);
+                theme->bubbleLevel2HorizontalHeight_ = pattern->GetAttr<Dimension>(
+                    "bubble_level2_horizontal_height", BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT);
+                theme->bubbleArrowHeight_ = pattern->GetAttr<Dimension>("bubble_arrow_height", ARROW_HEIGHT);
+                theme->bubbleArrowWidth_ = pattern->GetAttr<Dimension>("bubble_arrow_width", ARROW_WIDTH);
+                theme->bubbleArrowRadius_ = pattern->GetAttr<Dimension>("bubble_arrow_radius", ARROW_RADIUS);
+                theme->circularHorizontalOffset_ =
+                    pattern->GetAttr<Dimension>("circular_horizontal_offset", CIRCULAR_HORIZON_OFFSET);
 #ifdef SUPPORT_DIGITAL_CROWN
                 theme->crownDisplayControlRatio_ =
                     pattern->GetAttr<double>("crown_display_control_ratio", CROWN_DISPLAY_CONTROL_RATIO);
@@ -343,6 +393,82 @@ public:
         return noneModeSelectedTrackColor_;
     }
 
+    Dimension GetBubbleTextMax() const
+    {
+        return bubbleTextMax_;
+    }
+
+    Dimension GetBubbleToSliderExtraDistance() const
+    {
+        return bubbleToSliderExtraDistance_;
+    }
+
+    Dimension GetBubbleVerticalWidth() const
+    {
+        return bubbleVerticalWidth_;
+    }
+    Dimension GetBubbleVerticalHeight() const
+    {
+        return bubbleVerticalHeight_;
+    }
+    Dimension GetBubbleHorizontalWidth() const
+    {
+        return bubbleHorizontalWidth_;
+    }
+    Dimension GetBubbleHorizontalHeight() const
+    {
+        return bubbleHorizontalHeight_;
+    }
+    Dimension GetBubbleLevel1VerticalWidth() const
+    {
+        return bubbleLevel1VerticalWidth_;
+    }
+    Dimension GetBubbleLevel1VerticalHeight() const
+    {
+        return bubbleLevel1VerticalHeight_;
+    }
+    Dimension GetBubbleLevel1HorizontalWidth() const
+    {
+        return bubbleLevel1HorizontalWidth_;
+    }
+    Dimension GetBubbleLevel1HorizontalHeight() const
+    {
+        return bubbleLevel1HorizontalHeight_;
+    }
+    Dimension GetBubbleLevel2VerticalWidth() const
+    {
+        return bubbleLevel2VerticalWidth_;
+    }
+    Dimension GetBubbleLevel2VerticalHeight() const
+    {
+        return bubbleLevel2VerticalHeight_;
+    }
+    Dimension GetBubbleLevel2HorizontalWidth() const
+    {
+        return bubbleLevel2HorizontalWidth_;
+    }
+    Dimension GetBubbleLevel2HorizontalHeight() const
+    {
+        return bubbleLevel2HorizontalHeight_;
+    }
+    Dimension GetBubbleArrowRadius() const
+    {
+        return bubbleArrowRadius_;
+    }
+    Dimension GetBubbleArrowWidth() const
+    {
+        return bubbleArrowWidth_;
+    }
+    Dimension GetBubbleArrowHeight() const
+    {
+        return bubbleArrowHeight_;
+    }
+
+    Dimension GetCircularHorizontalOffset() const
+    {
+        return circularHorizontalOffset_;
+    }
+
 protected:
     SliderTheme() = default;
     Color blockColor_;
@@ -380,6 +506,24 @@ private:
     Color tipColor_;
     Color tipTextColor_;
     Color blockShadowColor_;
+    Dimension bubbleTextMax_;
+    Dimension bubbleToSliderExtraDistance_;
+    Dimension bubbleVerticalWidth_;
+    Dimension bubbleVerticalHeight_;
+    Dimension bubbleHorizontalWidth_;
+    Dimension bubbleHorizontalHeight_;
+    Dimension bubbleLevel1VerticalWidth_;
+    Dimension bubbleLevel1VerticalHeight_;
+    Dimension bubbleLevel1HorizontalWidth_;
+    Dimension bubbleLevel1HorizontalHeight_;
+    Dimension bubbleLevel2VerticalWidth_;
+    Dimension bubbleLevel2VerticalHeight_;
+    Dimension bubbleLevel2HorizontalWidth_;
+    Dimension bubbleLevel2HorizontalHeight_;
+    Dimension bubbleArrowRadius_;
+    Dimension bubbleArrowWidth_;
+    Dimension bubbleArrowHeight_;
+    Dimension circularHorizontalOffset_;
 
     // others
     Dimension focusSideDistance_;

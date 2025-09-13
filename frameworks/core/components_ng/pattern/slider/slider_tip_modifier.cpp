@@ -26,12 +26,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
 constexpr Dimension ARROW_HORIZON_OFFSET = 1.5_vp;
 constexpr Dimension ARROW_VERTICAL_OFFSET = 0.68_vp;
-constexpr Dimension ARROW_RADIUS = 2.0_vp;
-constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr Dimension ARROW_WIDTH = 16.0_vp;
 constexpr float HALF = 0.5f;
 
 constexpr float BUBBLE_SIZE_MIN_SCALE = 0.6f;
@@ -42,19 +38,6 @@ constexpr int32_t BUBBLE_DISPLAY_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER = 150;
 constexpr int32_t BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER = 250;
-constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH = 92.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT = 52.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH = 48.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT = 60.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH = 96.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT = 56.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
-constexpr Dimension TEXT_MAX = 36.0_vp;
 constexpr Dimension TEXT_AGING_MAX = 72.0_vp;
 constexpr int32_t MAX_LENGTH = 1;
 constexpr float SUITABLEAGING_LEVEL_1_SCALE = 1.75f;
@@ -100,15 +83,14 @@ void SliderTipModifier::PaintTip(DrawingContext& context)
 
 void SliderTipModifier::PaintText(DrawingContext& context)
 {
-    auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
-    auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
     auto pipeLine = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeLine);
     auto fontScale = pipeLine->GetFontScale();
     SizeF textSize = { 0, 0 };
     if (paragraph_) {
-        auto width = static_cast<float>(TEXT_MAX.ConvertToPx());
+        auto theme = pipeLine->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        auto width = static_cast<float>(theme->GetBubbleTextMax().ConvertToPx());
         if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) ||
             (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE))) {
             width = static_cast<float>(TEXT_AGING_MAX.ConvertToPx());
@@ -118,20 +100,20 @@ void SliderTipModifier::PaintText(DrawingContext& context)
     if (axis_ == Axis::HORIZONTAL) {
         textOffset_.SetX(vertex_.GetX() - textSize.Width() * HALF);
         if (isMask_) {
-            textOffset_.SetY(vertex_.GetY() + (bubbleSize_.Height() - textSize.Height() + arrowSizeHeight) * HALF);
+            textOffset_.SetY(vertex_.GetY() + (bubbleSize_.Height() - textSize.Height() + arrowHeight_) * HALF);
         } else {
-            textOffset_.SetY(vertex_.GetY() - (bubbleSize_.Height() + textSize.Height() + arrowSizeHeight) * HALF);
+            textOffset_.SetY(vertex_.GetY() - (bubbleSize_.Height() + textSize.Height() + arrowHeight_) * HALF);
         }
     } else {
         textOffset_.SetY(vertex_.GetY() - textSize.Height() * HALF);
         if (isMask_) {
-            textOffset_.SetX(
-                vertex_.GetX() +
-                (bubbleSize_.Width() - textSize.Width() + arrowSizeHeight + circularOffset - arrowSizeWidth) * HALF);
+            textOffset_.SetX(vertex_.GetX() + (bubbleSize_.Width() - textSize.Width() + arrowHeight_ +
+                                                  circularHorizontalOffset_ - arrowWidth_) *
+                                                  HALF);
         } else {
-            textOffset_.SetX(
-                vertex_.GetX() -
-                (bubbleSize_.Width() + textSize.Width() + arrowSizeHeight + circularOffset - arrowSizeWidth) * HALF);
+            textOffset_.SetX(vertex_.GetX() - (bubbleSize_.Width() + textSize.Width() + arrowHeight_ +
+                                                  circularHorizontalOffset_ - arrowWidth_) *
+                                                  HALF);
         }
     }
     paragraph_->Paint(context.canvas, textOffset_.GetX(), textOffset_.GetY());
@@ -139,14 +121,15 @@ void SliderTipModifier::PaintText(DrawingContext& context)
 
 void SliderTipModifier::PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path)
 {
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
-    auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    float arrowRadius = std::round(arrowRadius_);
+    auto arrowSizeWidth = std::round(arrowWidth_);
+    auto arrowSizeHeight =  std::round(arrowHeight_);
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float circularRadius = (bubbleSize_.Height() - arrowSizeHeight) * HALF;
+    vertex_.AddY(-bubbleToSliderExtraDistance_);
     if (sliderGlobalOffset_->Get().GetY() + vertex_.GetY() < bubbleSize_.Height()) {
-        vertex_.AddY(vertexOffsetFromBlock / HALF);
+        vertex_.AddY(vertexOffsetFromBlock / HALF + bubbleToSliderExtraDistance_ / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
         path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowHorizonOffset,
@@ -176,29 +159,30 @@ void SliderTipModifier::PaintHorizontalBubble(float vertexOffsetFromBlock, RSPat
 
 void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path)
 {
-    auto arrowWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
-    auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
+    auto arrowWidth = std::round(arrowWidth_);
+    auto arrowHeight = std::round(arrowHeight_);
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
+    float arrowRadius = std::round(arrowRadius_);
     float circularRadius = bubbleSize_.Height() * HALF;
+    vertex_.AddX(-bubbleToSliderExtraDistance_);
     if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
         AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        vertex_.AddX(vertexOffsetFromBlock / HALF);
+        vertex_.AddX(vertexOffsetFromBlock / HALF + bubbleToSliderExtraDistance_ / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
         path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowVerticalOffset,
             vertex_.GetY() - arrowHorizonOffset);
         path.LineTo(vertex_.GetX() + arrowHeight, vertex_.GetY() - arrowWidth * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
-            vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() - bubbleSize_.Height() * HALF);
+            vertex_.GetX() + arrowHeight + circularHorizontalOffset_, vertex_.GetY() - bubbleSize_.Height() * HALF);
         path.LineTo(vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() * HALF,
             vertex_.GetY() - bubbleSize_.Height() * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
             vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() * HALF,
             vertex_.GetY() + bubbleSize_.Height() * HALF);
-        path.LineTo(vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() + bubbleSize_.Height() * HALF);
+        path.LineTo(
+            vertex_.GetX() + arrowHeight + circularHorizontalOffset_, vertex_.GetY() + bubbleSize_.Height() * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowHeight,
             vertex_.GetY() + arrowWidth * HALF);
         path.LineTo(vertex_.GetX() + arrowVerticalOffset, vertex_.GetY() + arrowHorizonOffset);
@@ -209,13 +193,14 @@ void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath&
             vertex_.GetY() + arrowHorizonOffset);
         path.LineTo(vertex_.GetX() - arrowHeight, vertex_.GetY() + arrowWidth * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
-            vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() + bubbleSize_.Height() * HALF);
+            vertex_.GetX() - arrowHeight - circularHorizontalOffset_, vertex_.GetY() + bubbleSize_.Height() * HALF);
         path.LineTo(vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() * HALF,
             vertex_.GetY() + bubbleSize_.Height() * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
             vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() * HALF,
             vertex_.GetY() - bubbleSize_.Height() * HALF);
-        path.LineTo(vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() - bubbleSize_.Height() * HALF);
+        path.LineTo(
+            vertex_.GetX() - arrowHeight - circularHorizontalOffset_, vertex_.GetY() - bubbleSize_.Height() * HALF);
         path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() - arrowHeight,
             vertex_.GetY() - arrowWidth * HALF);
         path.LineTo(vertex_.GetX() - arrowVerticalOffset, vertex_.GetY() - arrowHorizonOffset);
@@ -225,14 +210,15 @@ void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath&
 
 void SliderTipModifier::PaintHorizontalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path)
 {
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
-    auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    float arrowRadius = std::round(arrowRadius_);
+    auto arrowSizeWidth = std::round(arrowWidth_);
+    auto arrowSizeHeight = std::round(arrowHeight_);
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float circularRadius = (bubbleSize_.Height() - arrowSizeHeight) * (1.0f / 3.0f);
+    vertex_.AddY(-bubbleToSliderExtraDistance_);
     if (sliderGlobalOffset_->Get().GetY() + vertex_.GetY() < bubbleSize_.Height()) {
-        vertex_.AddY(vertexOffsetFromBlock / HALF);
+        vertex_.AddY(vertexOffsetFromBlock / HALF + bubbleToSliderExtraDistance_ / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
         path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowHorizonOffset,
@@ -286,15 +272,16 @@ void SliderTipModifier::PaintHorizontalBubbleSuitableAging(float vertexOffsetFro
 
 void SliderTipModifier::PaintVerticalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path)
 {
-    auto arrowWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
-    auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    auto arrowWidth = std::round(arrowWidth_);
+    auto arrowHeight = std::round(arrowHeight_);
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
+    float arrowRadius = std::round(arrowRadius_);
     float circularRadius = bubbleSize_.Height() * (1.0f / 3.0f);
+    vertex_.AddX(-bubbleToSliderExtraDistance_);
     if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
         AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        vertex_.AddX(vertexOffsetFromBlock / HALF);
+        vertex_.AddX(vertexOffsetFromBlock / HALF + bubbleToSliderExtraDistance_ / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
         path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowVerticalOffset,
@@ -511,7 +498,9 @@ void SliderTipModifier::CreateParagraphAndLayout(const TextStyle& textStyle, con
     auto pipeLine = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeLine);
     auto fontScale = pipeLine->GetFontScale();
-    auto width = static_cast<float>(TEXT_MAX.ConvertToPx());
+    auto theme = pipeLine->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto width = static_cast<float>(theme->GetBubbleTextMax().ConvertToPx());
     if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) ||
         (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE))) {
         width = static_cast<float>(TEXT_AGING_MAX.ConvertToPx());
@@ -552,28 +541,33 @@ void SliderTipModifier::UpdateBubbleSize()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
+    bubbleToSliderExtraDistance_ = static_cast<float>(theme->GetBubbleToSliderExtraDistance().ConvertToPx());
+    arrowHeight_ = static_cast<float>(theme->GetBubbleArrowHeight().ConvertToPx());
+    arrowWidth_ = static_cast<float>(theme->GetBubbleArrowWidth().ConvertToPx());
+    arrowRadius_ = static_cast<float>(theme->GetBubbleArrowRadius().ConvertToPx());
+    circularHorizontalOffset_ = static_cast<float>(theme->GetCircularHorizontalOffset().ConvertToPx());
 
-    float bubbleSizeHeight = static_cast<float>(BUBBLE_HORIZONTAL_WIDTH.ConvertToPx());
-    float bubbleSizeWidth = static_cast<float>(BUBBLE_HORIZONTAL_HEIGHT.ConvertToPx());
+    float bubbleSizeHeight = static_cast<float>(theme->GetBubbleHorizontalWidth().ConvertToPx());
+    float bubbleSizeWidth = static_cast<float>(theme->GetBubbleHorizontalHeight().ConvertToPx());
     if (axis_ != Axis::HORIZONTAL) {
-        bubbleSizeHeight = static_cast<float>(BUBBLE_VERTICAL_WIDTH.ConvertToPx());
-        bubbleSizeWidth = static_cast<float>(BUBBLE_VERTICAL_HEIGHT.ConvertToPx());
+        bubbleSizeHeight = static_cast<float>(theme->GetBubbleVerticalWidth().ConvertToPx());
+        bubbleSizeWidth = static_cast<float>(theme->GetBubbleVerticalHeight().ConvertToPx());
     }
 
     auto fontScale = pipeline->GetFontScale();
     if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_1_SCALE) && LessNotEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE)) {
-        bubbleSizeHeight = static_cast<float>(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx());
-        bubbleSizeWidth = static_cast<float>(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
+        bubbleSizeHeight = static_cast<float>(theme->GetBubbleLevel1HorizontalWidth().ConvertToPx());
+        bubbleSizeWidth = static_cast<float>(theme->GetBubbleLevel1HorizontalHeight().ConvertToPx());
         if (axis_ != Axis::HORIZONTAL) {
-            bubbleSizeHeight = static_cast<float>(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx());
-            bubbleSizeWidth = static_cast<float>(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
+            bubbleSizeHeight = static_cast<float>(theme->GetBubbleLevel1VerticalWidth().ConvertToPx());
+            bubbleSizeWidth = static_cast<float>(theme->GetBubbleLevel1VerticalHeight().ConvertToPx());
         }
     } else if (GreatOrEqual(fontScale, SUITABLEAGING_LEVEL_2_SCALE)) {
-        bubbleSizeHeight = static_cast<float>(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx());
-        bubbleSizeWidth = static_cast<float>(BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
+        bubbleSizeHeight = static_cast<float>(theme->GetBubbleLevel2HorizontalWidth().ConvertToPx());
+        bubbleSizeWidth = static_cast<float>(theme->GetBubbleLevel2HorizontalHeight().ConvertToPx());
         if (axis_ != Axis::HORIZONTAL) {
-            bubbleSizeHeight = static_cast<float>(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx());
-            bubbleSizeWidth = static_cast<float>(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
+            bubbleSizeHeight = static_cast<float>(theme->GetBubbleLevel2VerticalWidth().ConvertToPx());
+            bubbleSizeWidth = static_cast<float>(theme->GetBubbleLevel2VerticalHeight().ConvertToPx());
         }
     }
     bubbleSize_ = SizeF(bubbleSizeHeight, bubbleSizeWidth);

@@ -163,6 +163,11 @@ private:
     std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc_;
     int32_t taskId_ = 0;
     int32_t tipDelayTime_ = 0;
+    float bubbleToSliderExtraDistance_ = 0.0;
+    float arrowHeight_ = 0.0;
+    float arrowWidth_ = 0.0;
+    float arrowRadius_ = 0.0;
+    float circularHorizontalOffset_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };
