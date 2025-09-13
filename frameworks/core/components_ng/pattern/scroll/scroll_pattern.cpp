@@ -221,7 +221,9 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, cons
 bool ScrollPattern::ScrollSnapTrigger()
 {
     if (ScrollableIdle() && !AnimateRunning()) {
-        SnapAnimationOptions snapAnimationOptions;
+        SnapAnimationOptions snapAnimationOptions = {
+            .source = SCROLL_FROM_LAYOUT,
+        };
         if (StartSnapAnimation(snapAnimationOptions)) {
             if (!IsScrolling()) {
                 FireOnScrollStart();
@@ -1508,13 +1510,15 @@ bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions
     auto predictSnapOffset = CalcPredictSnapOffset(snapAnimationOptions.snapDelta, snapAnimationOptions.dragDistance,
         snapAnimationOptions.animationVelocity, snapAnimationOptions.snapDirection);
     if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-        StartScrollSnapAnimation(predictSnapOffset.value(), snapAnimationOptions.animationVelocity, fromScrollBar);
+        StartScrollSnapAnimation(predictSnapOffset.value(), snapAnimationOptions.animationVelocity, fromScrollBar,
+            snapAnimationOptions.source);
         return true;
     }
     return false;
 }
 
-void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar)
+void ScrollPattern::StartScrollSnapAnimation(
+    float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source)
 {
     auto scrollableEvent = GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
@@ -1524,7 +1528,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
         scrollable->UpdateScrollSnapEndWithOffset(
             -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
-        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
+        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar, source);
         if (!IsScrolling()) {
             FireOnScrollStart();
         }

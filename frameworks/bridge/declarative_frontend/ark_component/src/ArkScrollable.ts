@@ -123,6 +123,62 @@ class OnWillStopDraggingModifier extends ModifierWithKey<(velocity: number) => v
   }
 }
 
+class OnWillStartDraggingModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onWillStartDragging');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStartDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStartDragging(node, this.value);
+    }
+  }
+}
+
+class OnDidStopDraggingModifier extends ModifierWithKey<(isWillFling: boolean) => void> {
+  constructor(value: (isWillFling: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDidStopDragging');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnDidStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnDidStopDragging(node, this.value);
+    }
+  }
+}
+
+class OnWillStartFlingModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onWillStartFling');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStartFling(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStartFling(node, this.value);
+    }
+  }
+}
+
+class OnDidStopFlingModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDidStopFling');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnDidStopFling(node);
+    } else {
+      getUINativeModule().scrollable.setOnDidStopFling(node, this.value);
+    }
+  }
+}
+
 class OnReachEndModifier extends ModifierWithKey<() => void> {
     constructor(value: () => void) {
         super(value);
@@ -181,6 +237,22 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     onWillStopDragging(callback: (velocity: number) => void) : this {
       modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, callback);
+      return this;
+    }
+    onWillStartDragging(callback: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStartDraggingModifier.identity, OnWillStartDraggingModifier, callback);
+      return this;
+    }
+    onDidStopDragging(callback: (isAnimate: boolean) => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnDidStopDraggingModifier.identity, OnDidStopDraggingModifier, callback);
+      return this;
+    }
+    onWillStartFling(callback: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStartFlingModifier.identity, OnWillStartFlingModifier, callback);
+      return this;
+    }
+    onDidStopFling(callback: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, callback);
       return this;
     }
 }

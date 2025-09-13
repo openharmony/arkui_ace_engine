@@ -548,3 +548,23 @@ globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) =>
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };
+
+globalThis.WaterFlow.onWillStartDragging = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+};
+
+globalThis.WaterFlow.onDidStopDragging = function (value: (isWillFling: boolean) => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+};
+
+globalThis.WaterFlow.onWillStartFling = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+};
+
+globalThis.WaterFlow.onDidStopFling = function (value: () => void): void {
+  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+  getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+};

@@ -466,6 +466,10 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDidZoom,
     NodeModifier::SetOnZoomStart,
     NodeModifier::SetOnZoomStop,
+    NodeModifier::SetOnWillStartDragging,
+    NodeModifier::SetOnDidStopDragging,
+    NodeModifier::SetOnWillStartFling,
+    NodeModifier::SetOnDidStopFling,
 };
 
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -698,6 +702,10 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnDidZoom,
     NodeModifier::ResetOnZoomStart,
     NodeModifier::ResetOnZoomStop,
+    NodeModifier::ResetOnWillStartDragging,
+    NodeModifier::ResetOnDidStopDragging,
+    NodeModifier::ResetOnWillStartFling,
+    NodeModifier::ResetOnDidStopFling,
 };
 
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

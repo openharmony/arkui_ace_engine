@@ -65,5 +65,13 @@ void SetScrollOnWillScrollCallBack(ArkUINodeHandle node, void* extraParam);
 void ResetScrollOnWillScrollCallBack(ArkUINodeHandle node);
 void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam);
 void ResetOnWillStopDragging(ArkUINodeHandle node);
+void SetOnWillStartDragging(ArkUINodeHandle node, void* extraParam);
+void ResetOnWillStartDragging(ArkUINodeHandle node);
+void SetOnDidStopDragging(ArkUINodeHandle node, void* extraParam);
+void ResetOnDidStopDragging(ArkUINodeHandle node);
+void SetOnWillStartFling(ArkUINodeHandle node, void* extraParam);
+void ResetOnWillStartFling(ArkUINodeHandle node);
+void SetOnDidStopFling(ArkUINodeHandle node, void* extraParam);
+void ResetOnDidStopFling(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H

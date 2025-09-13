@@ -7084,6 +7084,62 @@ class OnWillStopDraggingModifier extends ModifierWithKey {
 }
 OnWillStopDraggingModifier.identity = Symbol('onWillStopDragging');
 
+class OnWillStartDraggingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStartDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStartDragging(node, this.value);
+    }
+  }
+}
+OnWillStartDraggingModifier.identity = Symbol('onWillStartDragging');
+
+class OnDidStopDraggingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnDidStopDragging(node);
+    } else {
+      getUINativeModule().scrollable.setOnDidStopDragging(node, this.value);
+    }
+  }
+}
+OnDidStopDraggingModifier.identity = Symbol('onDidStopDragging');
+
+class OnWillStartFlingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnWillStartFling(node);
+    } else {
+      getUINativeModule().scrollable.setOnWillStartFling(node, this.value);
+    }
+  }
+}
+OnWillStartFlingModifier.identity = Symbol('onWillStartFling');
+
+class OnDidStopFlingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetOnDidStopFling(node);
+    } else {
+      getUINativeModule().scrollable.setOnDidStopFling(node, this.value);
+    }
+  }
+}
+OnDidStopFlingModifier.identity = Symbol('onDidStopFling');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7130,6 +7186,22 @@ class ArkScrollable extends ArkComponent {
   }
   onWillStopDragging(value) {
     modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, value);
+    return this;
+  }
+  onWillStartDragging(value) {
+    modifierWithKey(this._modifiersWithKeys, OnWillStartDraggingModifier.identity, OnWillStartDraggingModifier, value);
+    return this;
+  }
+  onDidStopDragging(value) {
+    modifierWithKey(this._modifiersWithKeys, OnDidStopDraggingModifier.identity, OnDidStopDraggingModifier, value);
+    return this;
+  }
+  onWillStartFling(value) {
+    modifierWithKey(this._modifiersWithKeys, OnWillStartFlingModifier.identity, OnWillStartFlingModifier, value);
+    return this;
+  }
+  onDidStopFling(value) {
+    modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, value);
     return this;
   }
 }
@@ -7874,6 +7946,22 @@ if (globalThis.Grid !== undefined) {
   globalThis.Grid.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
+  globalThis.Grid.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  globalThis.Grid.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  globalThis.Grid.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  globalThis.Grid.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
   };
 }
 
@@ -21723,6 +21811,22 @@ if (globalThis.Scroll !== undefined) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
   };
+  globalThis.Scroll.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  globalThis.Scroll.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  globalThis.Scroll.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  globalThis.Scroll.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -34927,6 +35031,22 @@ if (globalThis.List !== undefined) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
   };
+  globalThis.List.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  globalThis.List.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  globalThis.List.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  globalThis.List.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -37865,6 +37985,22 @@ if (globalThis.WaterFlow !== undefined) {
   globalThis.WaterFlow.onWillStopDragging = function (value) {
     let nodePtr = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
+  globalThis.WaterFlow.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  globalThis.WaterFlow.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  globalThis.WaterFlow.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  globalThis.WaterFlow.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
   };
 }
 

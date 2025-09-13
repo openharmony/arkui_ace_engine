@@ -758,6 +758,22 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             scrollEndCallback_();
         }
         isDriving_ = false;
+        SnapAnimationOptions snapAnimationOptions = {
+            .snapDelta = 0,
+            .animationVelocity = 0,
+            .dragDistance = CalcPatternOffset(GetDragOffset()),
+            .snapDirection = SnapDirection::NONE,
+            .fromScrollBar = true,
+            .source = SCROLL_FROM_BAR,
+        };
+        bool isWillFling = false;
+        if (info.GetInputEventType() != InputEventType::AXIS) {
+            CHECK_NULL_VOID(startSnapAnimationCallback_);
+            isWillFling = startSnapAnimationCallback_(snapAnimationOptions);
+        }
+        if (scrollBarOnDidStopDraggingCallback_) {
+            scrollBarOnDidStopDraggingCallback_(isWillFling);
+        }
         return;
     }
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
@@ -781,6 +797,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
         isDriving_ = false;
+        if (scrollBarOnDidStopDraggingCallback_) {
+            scrollBarOnDidStopDraggingCallback_(true);
+        }
         return;
     }
 
@@ -793,6 +812,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotionStop();
         });
+    }
+    if (scrollBarOnDidStopDraggingCallback_) {
+        scrollBarOnDidStopDraggingCallback_(true);
     }
     frictionController_->PlayMotion(frictionMotion_);
 }
@@ -812,6 +834,9 @@ void ScrollBar::ProcessFrictionMotion(double value)
 
 void ScrollBar::ProcessFrictionMotionStop()
 {
+    if (scrollBarOnDidStopFlingCallback_) {
+        scrollBarOnDidStopFlingCallback_();
+    }
     if (scrollEndCallback_) {
         scrollEndCallback_();
     }

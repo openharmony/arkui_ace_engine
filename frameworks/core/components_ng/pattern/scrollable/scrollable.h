@@ -84,6 +84,10 @@ using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
 using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
 using OnWillStopDraggingCallback = std::function<void(float velocity)>;
+using OnWillStartDraggingCallback = std::function<void()>;
+using OnDidStopDraggingCallback = std::function<void(bool isWillStartAnimate)>;
+using OnWillStartFlingCallback = std::function<void()>;
+using OnDidStopFlingCallback = std::function<void()>;
 
 class FrameNode;
 class PipelineContext;
@@ -234,7 +238,7 @@ public:
         return canStayOverScroll_;
     }
 
-    void ProcessScrollMotionStop();
+    void ProcessScrollMotionStop(int32_t source);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -306,6 +310,52 @@ public:
     {
         onWillStopDraggingCallback_ = onWillStopDraggingCallback;
     }
+
+    const OnWillStartDraggingCallback& GetOnWillStartDraggingCallback() const
+    {
+        return onWillStartDraggingCallback_;
+    }
+
+    void SetOnWillStartDraggingCallback(const OnWillStartDraggingCallback& onWillStartDraggingCallback)
+    {
+        onWillStartDraggingCallback_ = onWillStartDraggingCallback;
+    }
+
+    const OnDidStopDraggingCallback& GetOnDidStopDraggingCallback() const
+    {
+        return onDidStopDraggingCallback_;
+    }
+
+    void SetOnDidStopDraggingCallback(const OnDidStopDraggingCallback& onDidStopDraggingCallback)
+    {
+        onDidStopDraggingCallback_ = onDidStopDraggingCallback;
+    }
+
+    const OnWillStartFlingCallback& GetOnWillStartFlingCallback() const
+    {
+        return onWillStartFlingCallback_;
+    }
+
+    void SetOnWillStartFlingCallback(const OnWillStartFlingCallback& onWillStartFlingCallback)
+    {
+        onWillStartFlingCallback_ = onWillStartFlingCallback;
+    }
+
+    const OnDidStopFlingCallback& GetOnDidStopFlingCallback() const
+    {
+        return onDidStopFlingCallback_;
+    }
+
+    void SetOnDidStopFlingCallback(const OnDidStopFlingCallback& onDidStopFlingCallback)
+    {
+        onDidStopFlingCallback_ = onDidStopFlingCallback;
+    }
+
+    void HandleScrollBarOnDidStopDragging(bool isWillFling);
+
+    void HandleScrollBarOnWillStartFling();
+
+    void HandleScrollBarOnDidStopFling();
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
     {
@@ -417,7 +467,7 @@ public:
     {
         handleExtScrollCallback_ = std::move(func);
     }
-    void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
+    bool StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
         onScrollStartRec_ = std::move(func);
@@ -467,7 +517,8 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
+    void StartScrollSnapAnimation(
+        float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
 
     void StopSnapController()
     {
@@ -509,6 +560,11 @@ public:
     bool GetIsDragging() const
     {
         return isDragging_;
+    }
+
+    void SetIsScrollBarDragging(bool isScrollBarDragging)
+    {
+        isScrollBarDragging_ = isScrollBarDragging;
     }
 
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
@@ -597,6 +653,11 @@ public:
         snapDirection_ = SnapDirection::NONE;
     }
 
+    void SetIsUserFling(bool isUserFling)
+    {
+        isUserFling_ = isUserFling;
+    }
+
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
      */
@@ -656,6 +717,10 @@ private:
     ContinuousSlidingCallback continuousSlidingCallback_;
     GetSnapTypeCallback getSnapTypeCallback_;
     OnWillStopDraggingCallback onWillStopDraggingCallback_;
+    OnWillStartDraggingCallback onWillStartDraggingCallback_;
+    OnDidStopDraggingCallback onDidStopDraggingCallback_;
+    OnWillStartFlingCallback onWillStartFlingCallback_;
+    OnDidStopFlingCallback onDidStopFlingCallback_;
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
@@ -669,11 +734,16 @@ private:
     bool moved_ = false;
     bool isTouching_ = false;
     bool isDragging_ = false;
+    bool isScrollBarDragging_ = false;
     bool available_ = true;
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
     bool isCrownDragging_ = false;
+    bool isWillFling_ = false;
+    bool isNeedFireDidStopFling_ = false;
+    bool isTouchStopAnimation_ = false;
+    bool isUserFling_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode

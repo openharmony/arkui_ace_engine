@@ -164,7 +164,7 @@ void Scrollable::InitAxisAnimator()
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable);
         scrollable->ReportToDragFRCScene(scrollable->currentVelocity_, NG::SceneStatus::END);
-        scrollable->ProcessScrollMotionStop();
+        scrollable->ProcessScrollMotionStop(SCROLL_FROM_AXIS);
     };
     axisAnimator_ = AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback),
         std::move(axisAnimationStartCallback), std::move(axisAnimationFinishCallback));
@@ -492,6 +492,10 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown(bool fromcrown)
 {
+    isTouchStopAnimation_ = false;
+    if (state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) {
+        isTouchStopAnimation_ = true;
+    }
     if (!fromcrown) {
         isTouching_ = true;
     }
@@ -510,6 +514,10 @@ void Scrollable::HandleTouchUp()
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
     ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, nestedScrolling_:%u id:%d, tag:%s", isDragging_, nestedScrolling_,
         nodeId_, nodeTag_.c_str());
+    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
+        isUserFling_ = false;
+        onDidStopFlingCallback_();
+    }
     if (isDragging_) {
         return;
     }
@@ -649,6 +657,9 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
                      "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
         nodeId_, nodeTag_.c_str());
+    if (onWillStartDraggingCallback_) {
+        onWillStartDraggingCallback_();
+    }
     if (isAxisEvent && !CanStayOverScroll()) {
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
@@ -771,7 +782,7 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar)
                          "lastSnapDirection:%d, id:%d, tag:%s",
             snapDelta, snapDirection, snapDirection_, nodeId_, nodeTag_.c_str());
         SnapAnimationOptions snapAnimationOptions = { .snapDelta = snapDelta, .animationVelocity = currentVelocity_,
-            .snapDirection = snapDirection, .fromScrollBar = fromScrollBar };
+            .snapDirection = snapDirection, .fromScrollBar = fromScrollBar, .source = SCROLL_FROM_AXIS };
         startSnapAnimationCallback_(snapAnimationOptions);
         auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
         if (isNeedAdjustDirection) {
@@ -847,12 +858,15 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
+    bool isWillFling = false;
     if (!moved_ || isAxisEvent) {
         LayoutDirectionEst(lastGestureVelocity_, flingVelocityScale_, isScrollFromTouchPad);
         ResetContinueDragCount();
         if (GetSnapType() == SnapType::SCROLL_SNAP) {
             currentPos_ = mainPosition;
-            SnapAnimationOptions snapAnimationOptions = { .animationVelocity = currentVelocity_ };
+            SnapAnimationOptions snapAnimationOptions = {
+                .animationVelocity = currentVelocity_,
+                .source = isAxisEvent ? SCROLL_FROM_AXIS : SCROLL_FROM_NONE };
             if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
                 isTouching_ = false;
                 return;
@@ -869,11 +883,23 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
         LayoutDirectionEst(lastGestureVelocity_, springVelocityScale_, isScrollFromTouchPad);
         CalcOverScrollVelocity();
         ResetContinueDragCount();
-        HandleOverScroll(currentVelocity_);
+        isWillFling = HandleOverScroll(currentVelocity_);
     } else {
         LayoutDirectionEst(lastGestureVelocity_, flingVelocityScale_, isScrollFromTouchPad);
-        StartScrollAnimation(mainPosition, currentVelocity_, isScrollFromTouchPad);
+        isWillFling = StartScrollAnimation(mainPosition, currentVelocity_, isScrollFromTouchPad);
     }
+
+    if (onDidStopDraggingCallback_) {
+        onDidStopDraggingCallback_(isWillFling);
+    }
+    if (onWillStartFlingCallback_ && isWillFling && !isUserFling_) {
+        onWillStartFlingCallback_();
+    }
+    if (onDidStopFlingCallback_ && isUserFling_ && !isWillFling) {
+        onDidStopFlingCallback_();
+    }
+    isUserFling_ = isWillFling;
+
     ACE_SCOPED_TRACE(
         "HandleDragEnd, mainPosition:%f, getureDelta:%lf, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
         "canOverScroll_:%u, id:%d, tag:%s",
@@ -900,6 +926,9 @@ void Scrollable::ProcessAxisEndEvent()
         HandleOverScroll(0);
         SetCanStayOverScroll(false);
     }
+    if (onDidStopDraggingCallback_) {
+        onDidStopDraggingCallback_(false);
+    }
 }
 
 void Scrollable::ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus)
@@ -918,7 +947,7 @@ void Scrollable::CalcOverScrollVelocity()
     currentVelocity_ = currentVelocity_ * exp(-ratio_ * gamma);
 }
 
-void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity, bool isScrollFromTouchPad)
+bool Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity, bool isScrollFromTouchPad)
 {
     if (state_ == AnimationState::SPRING) {
         StopSpringAnimation();
@@ -956,7 +985,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         if (GetSnapType() == SnapType::LIST_SNAP) {
             currentVelocity_ = 0.0;
         }
-        return;
+        return true;
     }
     if (fixScrollParamCallback_) {
         fixScrollParamCallback_(mainPosition, initVelocity_, finalPosition_);
@@ -975,9 +1004,10 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
             FrameReport::GetInstance().EndListFling();
         }
 #endif
-        return;
+        return false;
     }
     TriggerFrictionAnimation(mainPosition, friction, correctVelocity);
+    return true;
 }
 
 void Scrollable::TriggerFrictionAnimation(float mainPosition, float friction, float correctVelocity)
@@ -1006,7 +1036,7 @@ void Scrollable::TriggerFrictionAnimation(float mainPosition, float friction, fl
             scroll->state_ = AnimationState::IDLE;
             ACE_SCOPED_TRACE(
                 "Scrollable friction animation finish, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
-            scroll->ProcessScrollMotionStop();
+            scroll->ProcessScrollMotionStop(SCROLL_FROM_ANIMATION);
         });
     state_ = AnimationState::FRICTION;
     auto context = context_.Upgrade();
@@ -1163,6 +1193,10 @@ void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSna
             scroll->updateSnapAnimationCount_--;
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->state_ = AnimationState::IDLE;
+                if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
+                    scroll->onDidStopFlingCallback_();
+                    scroll->isUserFling_ = false;
+                }
                 scroll->axisSnapDistance_ = 0.f;
                 scroll->ProcessScrollSnapStop();
             }
@@ -1175,7 +1209,8 @@ void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSna
     MarkNeedFlushAnimationStartTime();
 }
 
-void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar)
+void Scrollable::StartScrollSnapAnimation(
+    float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE,
         "The snap delta of scroll motion is %{public}f, "
@@ -1206,7 +1241,7 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     updateSnapAnimationCount_++;
     snapOffsetProperty_->AnimateWithVelocity(
-        option, endPos_, scrollSnapVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
+        option, endPos_, scrollSnapVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId(), source]() {
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
@@ -1217,7 +1252,7 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
                 scroll->axisSnapDistance_ = 0.f;
                 scroll->snapDirection_ = SnapDirection::NONE;
                 ACE_SCOPED_TRACE("Scroll snap animation finish, id:%d", scroll->nodeId_);
-                scroll->ProcessScrollMotionStop();
+                scroll->ProcessScrollMotionStop(source);
             }
         });
     state_ = AnimationState::SNAP;
@@ -1346,6 +1381,10 @@ void Scrollable::StartSpringMotion(
                 return;
             }
             scroll->state_ = AnimationState::IDLE;
+            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
+                scroll->onDidStopFlingCallback_();
+                scroll->isUserFling_ = false;
+            }
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
         });
@@ -1407,6 +1446,10 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
             ACE_SCOPED_TRACE(
                 "Scrollable updated spring animation finish, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
             scroll->state_ = AnimationState::IDLE;
+            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
+                scroll->onDidStopFlingCallback_();
+                scroll->isUserFling_ = false;
+            }
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
         });
@@ -1414,7 +1457,7 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
     skipRestartSpring_ = false;
 }
 
-void Scrollable::ProcessScrollMotionStop()
+void Scrollable::ProcessScrollMotionStop(int32_t source)
 {
     if (needScrollSnapChange_ && startSnapAnimationCallback_ && frictionOffsetProperty_) {
         needScrollSnapChange_ = false;
@@ -1434,6 +1477,12 @@ void Scrollable::ProcessScrollMotionStop()
             state_ = AnimationState::IDLE;
         }
         return;
+    }
+
+    if (onDidStopFlingCallback_ && !isTouchStopAnimation_ && source != SCROLL_FROM_AXIS &&
+        source != SCROLL_FROM_LAYOUT) {
+        onDidStopFlingCallback_();
+        isUserFling_ = false;
     }
 
     if (isDragUpdateStop_) {
@@ -1868,4 +1917,34 @@ void Scrollable::SetMaxFlingVelocity(double max)
     double density = PipelineBase::GetCurrentDensity();
     maxFlingVelocity_ = max * density;
 }
+
+void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)
+{
+    if (onDidStopDraggingCallback_) {
+        onDidStopDraggingCallback_(isWillFling);
+    }
+    if (isTouchStopAnimation_ && !isWillFling) {
+        isUserFling_ = false;
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
+    }
+}
+
+void Scrollable::HandleScrollBarOnWillStartFling()
+{
+    if (onWillStartFlingCallback_ && !isUserFling_) {
+        onWillStartFlingCallback_();
+    }
+    isUserFling_ = true;
+}
+
+void Scrollable::HandleScrollBarOnDidStopFling()
+{
+    if (onDidStopFlingCallback_ && isUserFling_) {
+        onDidStopFlingCallback_();
+    }
+    isUserFling_ = false;
+}
+
 } // namespace OHOS::Ace::NG
