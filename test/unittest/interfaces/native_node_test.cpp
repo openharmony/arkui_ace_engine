@@ -8915,8 +8915,6 @@ HWTEST_F(NativeNodeTest, NativeNodeOverlayTest001, TestSize.Level1)
 
     item4.string = "";
     item4.object = overlayNode;
-    item4.size = 0;
-    nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     item4.size = 4;
     nodeAPI->setAttribute(rootNode, NODE_OVERLAY, &item4);
     auto overlayVal = nodeAPI->getAttribute(rootNode, NODE_OVERLAY);

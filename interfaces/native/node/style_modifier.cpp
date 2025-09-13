@@ -2854,7 +2854,7 @@ void ResetResponseRegion(ArkUI_NodeHandle node)
 
 int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->string == nullptr && item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();

@@ -1720,7 +1720,7 @@ void LayoutProperty::SetOverlayOffset(
     const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY)
 {
     bool xChanged = true;
-    bool yChanged = false;
+    bool yChanged = true;
     if ((!overlayOffsetX.has_value() && overlayOffsetX_.Value() == 0) ||
         (overlayOffsetX.has_value() && overlayOffsetX.value() == overlayOffsetX_)) {
         xChanged = false;
