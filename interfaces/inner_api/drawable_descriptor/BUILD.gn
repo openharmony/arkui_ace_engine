@@ -52,6 +52,7 @@ if (is_arkui_x) {
     include_dirs += drawable_native_include
 
     sources = [
+      "drawable_bridge.cpp",
       "drawable_descriptor.cpp",
       "js_drawable_descriptor.cpp",
     ]
