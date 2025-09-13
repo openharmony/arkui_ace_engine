@@ -3062,6 +3062,7 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
 
 [ANI Interfaces]
+interfaces/ets/ani/inspector/ @arkuiabilitygroup
 interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @arkuievent
 
 [Innerkits Interfaces]
