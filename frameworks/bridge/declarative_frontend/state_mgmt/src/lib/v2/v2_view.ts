@@ -314,9 +314,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             delete ObserveV2.getObserve().id2cmp_[elmtId];
         });
 
-        delete ObserveV2.getObserve().id2cmp_[this.id_];
-        delete ObserveV2.getObserve().id2targets_[this.id_];
-
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
 
@@ -337,6 +334,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         MonitorV2.clearWatchesFromTarget(this);
         ComputedV2.clearComputedFromTarget(this);
+
+        ObserveV2.getObserve().clearBinding(this.id_);
+        delete ObserveV2.getObserve().id2cmp_[this.id_];
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
