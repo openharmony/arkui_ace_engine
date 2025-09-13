@@ -2123,6 +2123,10 @@ HWTEST_F(BubbleTestTwoNg, OnWindowSizeChangedTest001, TestSize.Level1)
     EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
     popupInfo.isCurrentOnShow = true;
     overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::FULL_TO_SPLIT);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
     bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::AVOID_AREA_CHANGE);
     EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, true);
 }

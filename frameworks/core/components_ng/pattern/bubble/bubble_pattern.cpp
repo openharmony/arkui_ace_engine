@@ -724,25 +724,52 @@ void BubblePattern::ResetToInvisible()
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %{public}d", type);
-    if (type == WindowSizeChangeReason::MAXIMIZE || type == WindowSizeChangeReason::RECOVER ||
-        type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::HIDE ||
-        type == WindowSizeChangeReason::TRANSFORM || type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipelineNg = host->GetContextRefPtr();
-        CHECK_NULL_VOID(pipelineNg);
-        auto overlayManager = pipelineNg->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->HideAllPopups();
-        auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-        CHECK_NULL_VOID(layoutProp);
-        auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-        if (showInSubWindow) {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-                pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
-            CHECK_NULL_VOID(subwindow);
-            subwindow->HidePopupNG(targetNodeId_);
+    switch (type) {
+        case WindowSizeChangeReason::MAXIMIZE:
+        case WindowSizeChangeReason::RECOVER:
+        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::HIDE:
+        case WindowSizeChangeReason::TRANSFORM:
+        case WindowSizeChangeReason::CUSTOM_ANIMATION:
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+        case WindowSizeChangeReason::PIP_START:
+        case WindowSizeChangeReason::PIP_SHOW:
+        case WindowSizeChangeReason::PIP_AUTO_START:
+        case WindowSizeChangeReason::PIP_RATIO_CHANGE:
+        case WindowSizeChangeReason::PIP_RESTORE:
+        case WindowSizeChangeReason::UPDATE_DPI_SYNC:
+        case WindowSizeChangeReason::DRAG_MOVE:
+        case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE:
+        case WindowSizeChangeReason::PAGE_ROTATION:
+        case WindowSizeChangeReason::SPLIT_DRAG_START:
+        case WindowSizeChangeReason::SPLIT_DRAG:
+        case WindowSizeChangeReason::SPLIT_DRAG_END:
+        case WindowSizeChangeReason::RESIZE_BY_LIMIT:
+        case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT:
+        case WindowSizeChangeReason::RECOVER_IN_IMPLICIT: {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto pipelineNg = host->GetContextRefPtr();
+            CHECK_NULL_VOID(pipelineNg);
+            auto overlayManager = pipelineNg->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->HideAllPopups();
+            auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
+            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (showInSubWindow) {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
+                CHECK_NULL_VOID(subwindow);
+                subwindow->HidePopupNG(targetNodeId_);
+            }
+            break;
         }
+        default: break;
     }
 }
 
