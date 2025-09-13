@@ -101,17 +101,17 @@ void JSForm::Create(const JSCallbackInfo& info)
     if (exemptAppLock->IsBoolean()) {
         formInfo.exemptAppLock = exemptAppLock->ToBoolean();
     }
-    if (!dimension->IsNull() && !dimension->IsEmpty() && dimension->IsNumber()) {
+    if (!dimension->IsNull() && dimension->IsNumber()) {
         formInfo.dimension = dimension->ToNumber<int32_t>();
     }
     formInfo.temporary = temporary->IsBoolean() ? temporary->ToBoolean() : false;
     if (!wantValue->IsNull() && wantValue->IsObject()) {
         formInfo.wantWrap = CreateWantWrapFromNapiValue(wantValue);
     }
-    if (!renderingMode->IsNull() && !renderingMode->IsEmpty() && renderingMode->IsNumber()) {
+    if (!renderingMode->IsNull() && renderingMode->IsNumber()) {
         formInfo.renderingMode = renderingMode->ToNumber<int32_t>();
     }
-    if (!shape->IsNull() && !shape->IsEmpty() && shape->IsNumber()) {
+    if (!shape->IsNull() && shape->IsNumber()) {
         formInfo.shape = shape->ToNumber<int32_t>();
     }
     FormModel::GetInstance()->Create(formInfo);
