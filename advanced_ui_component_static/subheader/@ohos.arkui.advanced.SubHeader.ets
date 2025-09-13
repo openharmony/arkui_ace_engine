@@ -95,20 +95,20 @@ export class SymbolOptions {
   public renderingStrategy?: SymbolRenderingStrategy;
 }
 
-class IconOptions {
-  public icon?: ResourceStr;
-  public symbolicIconOption?: SymbolOptions | null;
+interface IconOptions {
+  icon?: ResourceStr;
+  symbolicIconOption?: SymbolOptions | null;
 }
 
-class ContentIconOption {
-  public content?: ResourceStr;
-  public subContent?: ResourceStr;
-  public iconOptions?: IconOptions;
-  public action?: () => void;
-  public accessibilityLevel?: string;
-  public accessibilityText?: ResourceStr;
-  public accessibilityDescription?: ResourceStr;
-  public defaultFocus?: boolean;
+interface ContentIconOption {
+  content?: ResourceStr;
+  subContent?: ResourceStr;
+  iconOptions?: IconOptions;
+  action?: () => void;
+  accessibilityLevel?: string;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  defaultFocus?: boolean;
 }
 
 class FontStyle {
