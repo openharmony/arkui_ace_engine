@@ -35,7 +35,7 @@ class ArkoalaLazyNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaLazyNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaLazyNode(int32_t id, bool isRepeat);
+    explicit ArkoalaLazyNode(int32_t id, bool isRepeat = false);
     ~ArkoalaLazyNode() override = default;
 
     using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
@@ -102,6 +102,7 @@ private:
     {
         return index >= range.first && index <= range.second;
     }
+    void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
 
     void UpdateMoveFromTo(int32_t from, int32_t to);
     void UpdateItemsForOnMove();
@@ -125,7 +126,7 @@ private:
     int32_t totalCount_ = 0;
 
     // for tracking reused/recycled nodes
-    std::unordered_set<int32_t> recycledNodeIds_;
+    std::unordered_set<int32_t> recycleNodeIds_;
 
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.

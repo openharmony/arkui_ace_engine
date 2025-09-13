@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
-
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,11 +26,14 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "nodeId: %{public}d: DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    // range of screen node & preload node
     const RangeType cacheRange { start - cacheStart, end + cacheEnd };
     if (updateRange_) {
+        // trigger TS-side
         updateRange_(cacheRange.first, cacheRange.second);
     }
 
+    // range of screen node
     const RangeType activeRange = showCache ? cacheRange : std::make_pair(start, end);
     std::list<RefPtr<UINode>> toRemove;
     for (const auto& [index, nodeWeak] : node4Index_) {
@@ -46,17 +48,42 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
             RemoveChild(node);
         }
         node->SetActive(isInActiveRange);
+        if (isRepeat_) {
+            // trigger onReuse/onRecycle
+            UpdateIsCache(node, isInCacheRange);
+        }
     }
 
     node4Index_.RemoveIf([cacheRange, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         auto arkoalaLazyNode = weak.Upgrade();
         if (!arkoalaLazyNode) {
-            return idx < cacheRange.first || idx > cacheRange.second;
+            return true;
         }
         const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(idx);
-        return indexMapped < cacheRange.first || indexMapped > cacheRange.second;
+        return !arkoalaLazyNode->IsNodeInRange(indexMapped, cacheRange);
     });
+}
+
+void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger)
+{
+    if (!shouldTrigger) {
+        return;
+    }
+    CHECK_NULL_VOID(node);
+    auto child = node->GetFrameChildByIndex(0, false);
+    CHECK_NULL_VOID(child);
+    if (isCache) {
+        if (recycleNodeIds_.erase(child->GetId()) == 0) {
+            return;
+        }
+        child->OnReuse();
+    } else {
+        if (recycleNodeIds_.emplace(child->GetId()).second == false) {
+            return;
+        }
+        child->OnRecycle();
+    }
 }
 
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
@@ -68,33 +95,33 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
         static_cast<int32_t>(addToRenderTree));
 
     const auto indexMapped = ConvertFromToIndex(indexCasted);
-    auto item = GetChildByIndex(indexMapped);
-    if (!item && !needBuild) {
+    auto child = GetChildByIndex(indexMapped);
+    if (!child && !needBuild) {
         return nullptr;
     }
     if (createItem_) {
-        item = createItem_(indexMapped);
+        child = createItem_(indexMapped);
     }
-    CHECK_NULL_RETURN(item, nullptr);
-    node4Index_.Put(indexMapped, item);
+    CHECK_NULL_RETURN(child, nullptr);
+    node4Index_.Put(indexMapped, child);
 
     if (isCache) {
-        item->SetJSViewActive(false, !isRepeat_);
+        child->SetJSViewActive(false, !isRepeat_);
         if (!isRepeat_) {
-            item->SetParent(WeakClaim(this));
-            return item->GetFrameChildByIndex(0, needBuild);
+            child->SetParent(WeakClaim(this));
+            return child->GetFrameChildByIndex(0, needBuild);
         }
     } else if (addToRenderTree) {
-        item->SetActive(true);
+        child->SetActive(true);
     }
 
     if (isActive_) {
-        item->SetJSViewActive(true, !isRepeat_);
+        child->SetJSViewActive(true, !isRepeat_);
     }
 
-    AddChild(item);
+    AddChild(child);
 
-    auto childNode = item->GetFrameChildByIndex(0, needBuild);
+    auto childNode = child->GetFrameChildByIndex(0, needBuild);
     if (onMoveEvent_) {
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
@@ -103,8 +130,8 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 
 RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
-    auto item = node4Index_.Get(index);
-    return item ? item->Upgrade() : nullptr;
+    auto node = node4Index_.Get(index);
+    return node ? node->Upgrade() : nullptr;
 }
 
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)

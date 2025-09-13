@@ -29,7 +29,7 @@ class ArkoalaForEachNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaForEachNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaForEachNode(int32_t id, bool isRepeat);
+    explicit ArkoalaForEachNode(int32_t id, bool isRepeat = false);
     ~ArkoalaForEachNode() override = default;
 
     bool IsAtomicNode() const final
