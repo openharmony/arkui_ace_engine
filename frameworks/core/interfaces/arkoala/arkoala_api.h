@@ -2886,6 +2886,7 @@ struct ArkUICommonModifier {
     void (*allowForceDark)(ArkUINodeHandle node, ArkUI_Bool forceDarkAllowed);
     void (*resetAllowForceDark)(ArkUINodeHandle node);
     ArkUI_Bool (*getAllowForceDark)(ArkUINodeHandle node);
+    ArkUI_Bool (*getPixelRound)(ArkUINodeHandle node, ArkUI_Int32* result);
 };
 
 struct ArkUICommonShapeModifier {

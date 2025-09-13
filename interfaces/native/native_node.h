@@ -2114,6 +2114,18 @@ typedef enum {
      * @since 21
      */
     NODE_ALLOW_FORCE_DARK = 108,
+    /**
+     * @brief Defines the pixelRound attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object indicates struct of policy for pixelRound. The parameter type is {@link ArkUI_PixelRoundPolicy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object indicates struct of policy for pixelRound. The parameter type is {@link ArkUI_PixelRoundPolicy}. \n
+     *
+     * @since 21
+     */
+    NODE_PIXEL_ROUND = 109,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.

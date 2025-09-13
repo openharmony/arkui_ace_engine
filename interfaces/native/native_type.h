@@ -300,6 +300,13 @@ typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
 typedef struct ArkUI_PositionEdges ArkUI_PositionEdges;
 
 /**
+ * @brief Defines the PixelRound policy of a component's four edges.
+ *
+ * @since 21
+ */
+typedef struct ArkUI_PixelRoundPolicy ArkUI_PixelRoundPolicy;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -2697,6 +2704,20 @@ typedef enum {
     /** The component fills its content which means its size is as large as its children. */
     ARKUI_LAYOUTPOLICY_FIXATIDEALSIZE,
 } ArkUI_LayoutPolicy;
+
+/**
+ * @brief Enumerates the PixelRoundPolicy.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** No Force round the component boundary coordinates to integer pixel. */
+    ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND = 0,
+    /** Force ceil the component boundary coordinates to integer pixel. */
+    ARKUI_PIXELROUNDCALCPOLICY_FORCECEIL,
+    /** Force floor the component boundary coordinates to integer pixel. */
+    ARKUI_PIXELROUNDCALCPOLICY_FORCEFLOOR,
+} ArkUI_PixelRoundCalcPolicy;
 
 /**
  * @brief Define the direction to expand the swipe action.
@@ -5569,6 +5590,106 @@ int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListIte
  * @since 21
  */
 int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node);
+
+/**
+ * @brief Create a policy object for PixelRound attribute.
+ *
+ * @return A pointer to the policy object.
+ * @since 21
+ */
+ArkUI_PixelRoundPolicy* OH_ArkUI_PixelRoundPolicy_Create();
+
+/**
+ * @brief Dispose a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object to be disposed.
+ * @since 21
+ */
+void OH_ArkUI_PixelRoundPolicy_Dispose(ArkUI_PixelRoundPolicy* policy);
+
+/**
+ * @brief Sets the top edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of top edge.
+ * @since 21
+ */
+void OH_ArkUI_PixelRoundPolicy_SetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
+
+/**
+ * @brief Gets the top edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of top edge.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PixelRoundPolicy_GetTop(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
+
+/**
+ * @brief Sets the start edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of start edge.
+ * @since 21
+ */
+void OH_ArkUI_PixelRoundPolicy_SetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
+
+/**
+ * @brief Gets the start edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of start edge.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PixelRoundPolicy_GetStart(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
+
+/**
+ * @brief Sets the bottom edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of bottom edge.
+ * @since 21
+ */
+void OH_ArkUI_PixelRoundPolicy_SetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
+
+/**
+ * @brief Gets the bottom edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of bottom edge.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PixelRoundPolicy_GetBottom(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
+
+/**
+ * @brief Sets the end edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of end edge.
+ * @since 21
+ */
+void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy value);
+
+/**
+ * @brief Gets the end edge of a policy object for PixelRound attribute.
+ *
+ * @param edges Pointer to the policy object.
+ * @param value The CalcPolicy of end edge.
+ * @return Returns the result code.
+ *      Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *      Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the parameter is invalid.
+ * @since 21
+ */
+int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value);
 #ifdef __cplusplus
 };
 #endif

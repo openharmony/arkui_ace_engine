@@ -1039,6 +1039,7 @@ public:
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
     static void SetPixelRound(FrameNode* frameNode, uint16_t value);
+    static uint16_t GetPixelRound(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);

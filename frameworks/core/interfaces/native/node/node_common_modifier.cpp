@@ -8090,6 +8090,19 @@ uint16_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
     return static_cast<uint16_t>(ret);
 }
 
+void ConvertBinaryToPixelRoundPolicy(ArkUI_Int32* result, ArkUI_Int32 offset, ArkUI_Uint32 policy)
+{
+    ArkUI_Int32 ret = -1;
+    if (policy & (1 << offset)) {
+        ret = static_cast<ArkUI_Int32>(PixelRoundCalcPolicy::FORCE_CEIL);
+    } else if (policy & (1 << (offset + NUM_1))) {
+        ret = static_cast<ArkUI_Int32>(PixelRoundCalcPolicy::FORCE_FLOOR);
+    } else if (policy & (1 << (offset + NUM_2))) {
+        ret = static_cast<ArkUI_Int32>(PixelRoundCalcPolicy::NO_FORCE_ROUND);
+    }
+    result[offset / NUM_3] = ret;
+}
+
 void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8107,6 +8120,18 @@ void ResetPixelRound(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
+}
+
+ArkUI_Bool GetPixelRound(ArkUINodeHandle node, ArkUI_Int32* result)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    uint16_t policy = ViewAbstract::GetPixelRound(frameNode);
+    ConvertBinaryToPixelRoundPolicy(result, NUM_0, policy);
+    ConvertBinaryToPixelRoundPolicy(result, NUM_3, policy);
+    ConvertBinaryToPixelRoundPolicy(result, NUM_6, policy);
+    ConvertBinaryToPixelRoundPolicy(result, NUM_9, policy);
+    return true;
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
@@ -10206,6 +10231,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .allowForceDark = AllowForceDark,
         .resetAllowForceDark = ResetAllowForceDark,
         .getAllowForceDark = GetAllowForceDark,
+        .getPixelRound = GetPixelRound,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
