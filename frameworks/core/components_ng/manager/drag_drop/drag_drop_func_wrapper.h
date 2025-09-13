@@ -140,6 +140,7 @@ public:
 
     static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode>& targetNode);
+    static bool CheckInSceneBoardWindow();
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

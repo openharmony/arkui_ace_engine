@@ -388,6 +388,7 @@ public:
         bool isMenuShow = false;
         NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
         bool isDragController = false;
+        bool isSceneBoardTouchDrag = false;
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const DragPointerEvent& pointerEvent);
