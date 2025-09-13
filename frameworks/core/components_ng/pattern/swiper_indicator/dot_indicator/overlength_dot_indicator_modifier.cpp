@@ -60,6 +60,7 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 
     PaintBackground(context, contentProperty, maxDisplayCount_, isBindIndicator_);
     PaintContent(context, contentProperty);
+    isDrawbackground_ = false;
 }
 
 void OverlengthDotIndicatorModifier::PaintBackground(
@@ -176,8 +177,8 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
             // new point color
             paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
         }
-        if (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
-            center.GetX() + width * HALF_FLOAT < backgroundEnd_) {
+        if (isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
+                                     center.GetX() + width * HALF_FLOAT < backgroundEnd_)) {
             PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
         }
     }
