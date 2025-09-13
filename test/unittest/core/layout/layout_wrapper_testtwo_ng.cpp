@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
+#include "test/unittest/core/pattern/test_ng.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -194,6 +196,24 @@ void PresetSceneForStrategyTest(RefPtr<LayoutWrapper> layoutWrapper0, RefPtr<Lay
     layoutWrapper1->GetLayoutProperty()->UpdateSafeAreaPadding(safeAreaPadding1);
     layoutWrapper1->GetLayoutProperty()->UpdateMargin(margin1);
     layoutWrapper1->GetGeometryNode()->UpdateMargin(margin1_);
+}
+RefPtr<FrameNode> CreateStack(const std::function<void(StackModelNG)>& callback)
+{
+    StackModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+void FlushUITasks(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
 }
 } // namespace
 
@@ -1212,5 +1232,113 @@ HWTEST_F(LayoutWrapperTestTwoNg, OverBorderPaddingOnGetAccumulatedSafeAreaExpand
         .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
     }), expectedRes);
+}
+
+/**
+ * @tc.name: GetAccumulatedSafeAreaExpandCacheHitTest001
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand Cache whether hit
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, GetAccumulatedSafeAreaExpandCacheHitTest001, TestSize.Level0)
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    RefPtr<FrameNode> parent1, child1, child2;
+    auto StackNode = CreateStack([this, &parent1, &child1, &child2](StackModelNG model) {
+        CreateStack([this, &parent1, &child1, &child2](StackModelNG model) {
+            parent1 = CreateStack([this, &child1, &child2](StackModelNG model) {
+                child1 = CreateStack([this](StackModelNG model) {});
+                child2 = CreateStack([this](StackModelNG model) {});
+                ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+                ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+                ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+            });
+            ViewAbstract::SetSafeAreaPadding(CalcLength(20.0f, DimensionUnit::PX));
+        });
+        ViewAbstract::SetSafeAreaPadding(CalcLength(30.0f, DimensionUnit::PX));
+    });
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    auto childLayoutProperty1 = child1->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty1, nullptr);
+    childLayoutProperty1->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty1->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty1->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    auto childLayoutProperty2 = child2->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty2, nullptr);
+    childLayoutProperty2->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty2->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty2->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    FlushUITasks(StackNode);
+    EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(400.0f, 400.0f))
+        << child1->GetGeometryNode()->GetFrameSize().ToString();
+    EXPECT_EQ(child2->GetGeometryNode()->GetFrameSize(), SizeF(400.0f, 400.0f))
+        << child2->GetGeometryNode()->GetFrameSize().ToString();
+    ExpandEdges expectedRes;
+    expectedRes = { .left = std::make_optional<float>(50.0f),
+        .right = std::make_optional<float>(50.0f),
+        .top = std::make_optional<float>(50.0f),
+        .bottom = std::make_optional<float>(50.0f) };
+    EXPECT_EQ(parent1->GetAccumulatedSafeAreaExpand(
+                  false, { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL }),
+        expectedRes);
+}
+
+/**
+ * @tc.name: GetAccumulatedSafeAreaExpandCacheHitTest002
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand Cache whether hit
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, GetAccumulatedSafeAreaExpandCacheHitTest002, TestSize.Level0)
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    RefPtr<FrameNode> parent1, child1, child2;
+    auto StackNode = CreateStack([this, &parent1, &child1, &child2](StackModelNG model) {
+        CreateStack([this, &parent1, &child1, &child2](StackModelNG model) {
+            parent1 = CreateStack([this, &child1, &child2](StackModelNG model) {
+                child1 = CreateStack([this](StackModelNG model) {
+                    ViewAbstract::SetWidth(CalcLength(200.0f, DimensionUnit::PX));
+                    ViewAbstract::SetHeight(CalcLength(200.0f, DimensionUnit::PX));
+                    ViewAbstract::SetLayoutGravity(Alignment::TOP_LEFT);
+                });
+                child2 = CreateStack([this](StackModelNG model) {
+                    ViewAbstract::SetWidth(CalcLength(200.0f, DimensionUnit::PX));
+                    ViewAbstract::SetHeight(CalcLength(200.0f, DimensionUnit::PX));
+                    ViewAbstract::SetLayoutGravity(Alignment::BOTTOM_RIGHT);
+                });
+                ViewAbstract::SetWidth(CalcLength(400.0f, DimensionUnit::PX));
+                ViewAbstract::SetHeight(CalcLength(400.0f, DimensionUnit::PX));
+                ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+            });
+            ViewAbstract::SetSafeAreaPadding(CalcLength(20.0f, DimensionUnit::PX));
+        });
+        ViewAbstract::SetSafeAreaPadding(CalcLength(30.0f, DimensionUnit::PX));
+    });
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    auto childLayoutProperty1 = child1->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty1, nullptr);
+    childLayoutProperty1->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto childLayoutProperty2 = child2->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty2, nullptr);
+    childLayoutProperty2->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    FlushUITasks(StackNode);
+    EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(200.0f, 200.0f))
+        << child1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(child2->GetGeometryNode()->GetFrameSize(), SizeF(200.0f, 200.0f))
+        << child2->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(child1->GetGeometryNode()->GetFrameOffset(), OffsetF(-50.0f, -50.0f))
+        << child1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(child2->GetGeometryNode()->GetFrameOffset(), OffsetF(250.0f, 250.0f))
+        << child2->GetGeometryNode()->GetFrameRect().ToString();
+    ExpandEdges expectedRes;
+    expectedRes = { .left = std::make_optional<float>(50.0f),
+        .right = std::make_optional<float>(50.0f),
+        .top = std::make_optional<float>(50.0f),
+        .bottom = std::make_optional<float>(50.0f) };
+    EXPECT_EQ(parent1->GetAccumulatedSafeAreaExpand(
+                  false, { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL }),
+        expectedRes);
 }
 }

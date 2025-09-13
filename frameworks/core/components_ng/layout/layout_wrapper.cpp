@@ -373,8 +373,12 @@ void LayoutWrapper::ResetSafeAreaPadding()
     geometryNode->ResetAccumulatedSafeAreaPadding();
 }
 
-bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace)
+bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace,
+    const RectF& adjustingRect, LayoutSafeAreaType ignoreType)
 {
+    if (!IsIgnoreTypeTrivial(ignoreType)) {
+        return false;
+    }
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, false);
     const auto& geometryNode = GetGeometryNode();
@@ -392,8 +396,26 @@ bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const Pad
     CHECK_NULL_RETURN(CheckPaddingBorderGap(totalExpand, innerSpace), false);
     // if reaches page and totalExpand is still empty, then querying node is already as large as page
     // then add page cache directly to total expand
-    totalExpand =
-        totalExpand.Plus(*(selfAccumulateExpand.get()), totalExpand.Empty() && host->GetTag() == V2::PAGE_ETS_TAG);
+    auto accumulatedSafeAreaExpandCache = *(selfAccumulateExpand.get());
+    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& parentRect = geometryNode->GetFrameRect();
+    ACE_MEASURE_SCOPED_TRACE(
+        "AccumulateExpandCacheHit[tag:%s][self:%d] adjustingRect %s parentRect %s accumulatedSafeAreaExpandCache %s",
+        host->GetTag().c_str(), host->GetId(), adjustingRect.ToString().c_str(), parentRect.ToString().c_str(),
+        accumulatedSafeAreaExpandCache.ToString().c_str());
+    if (NearEqual(adjustingRect.GetX(), parentRect.GetX())) {
+        totalExpand.left = totalExpand.left.value_or(0.0f) + accumulatedSafeAreaExpandCache.left.value_or(0.0f);
+    }
+    if (NearEqual(adjustingRect.GetY(), parentRect.GetY())) {
+        totalExpand.top = totalExpand.top.value_or(0.0f) + accumulatedSafeAreaExpandCache.top.value_or(0.0f);
+    }
+    if (NearEqual(adjustingRect.GetX() + adjustingRect.Width(), parentRect.GetX() + parentRect.Width())) {
+        totalExpand.right = totalExpand.right.value_or(0.0f) + accumulatedSafeAreaExpandCache.right.value_or(0.0f);
+    }
+    if (NearEqual(adjustingRect.GetY() + adjustingRect.Height(), parentRect.GetY() + parentRect.Height())) {
+        totalExpand.bottom = totalExpand.bottom.value_or(0.0f) + accumulatedSafeAreaExpandCache.bottom.value_or(0.0f);
+    }
     return true;
 }
 
@@ -550,7 +572,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
         return;
     }
     if (IsIgnoreTypeTrivial(ignoreType) && !isScrollableAxis_ &&
-        recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace)) {
+        recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace, adjustingRect, ignoreType)) {
         return;
     }
     if (pattern && pattern->AccumulatingTerminateHelper(adjustingRect, totalExpand, fromSelf, ignoreType)) {
