@@ -833,7 +833,7 @@ HWTEST_F(AppBarTestNg, TestColorConfigurationCallBack027, TestSize.Level1)
      */
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
-
+    pattern->SetCustomAppBarNode(custom);
     /**
      * @tc.steps: step3. Set callback.
      */
@@ -898,7 +898,7 @@ HWTEST_F(AppBarTestNg, TestAppInfoCallBack028, TestSize.Level1)
      */
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
-
+    pattern->SetCustomAppBarNode(custom);
     /**
      * @tc.steps: step3. Set callback.
      */
@@ -950,7 +950,7 @@ HWTEST_F(AppBarTestNg, TestAppBgColorCallBack029, TestSize.Level1)
      */
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
-
+    pattern->SetCustomAppBarNode(custom);
     /**
      * @tc.steps: step3. Set callback.
      */
@@ -1053,7 +1053,7 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
      */
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
-
+    pattern->SetCustomAppBarNode(custom);
     bool callbackCalled = false;
     std::string callbackName;
     std::string callbackValue;
@@ -1233,7 +1233,7 @@ HWTEST_F(AppBarTestNg, TestAppBgColorCallBack030, TestSize.Level1)
 
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
-
+    pattern->SetCustomAppBarNode(custom);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetAppBgColor(Color::RED);
@@ -1283,6 +1283,23 @@ HWTEST_F(AppBarTestNg, GetJSAppBarContainer001, TestSize.Level1)
     ASSERT_NE(atomicServicePattern, nullptr);
     auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
     atomicServicePattern->customAppBarNodeNode_ = custom;
+    auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
+    EXPECT_NE(customAppBar, nullptr);
+}
+
+/**
+ * @tc.name: SetCustomAppBarNode
+ * @tc.desc: Test SetCustomAppBarNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetCustomAppBarNode001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    RefPtr<AtomicServicePattern> atomicServicePattern = AceType::MakeRefPtr<AtomicServicePattern>();
+    ASSERT_NE(atomicServicePattern, nullptr);
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    atomicServicePattern->SetCustomAppBarNode(custom);
     auto customAppBar = atomicServicePattern->GetJSAppBarContainer();
     EXPECT_NE(customAppBar, nullptr);
 }

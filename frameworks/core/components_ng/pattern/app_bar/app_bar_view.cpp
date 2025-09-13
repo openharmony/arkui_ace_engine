@@ -134,6 +134,7 @@ void AppBarView::BindJSContainer()
     atom->AddChild(customAppBarNode);
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetCustomAppBarNode(AceType::DynamicCast<CustomAppBarNode>(customAppBarNode));
     pattern->AppInfoCallBack();
     pattern->AppScreenCallBack();
     pattern->AppBgColorCallBack();
@@ -150,7 +151,9 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     CHECK_NULL_VOID(appbar);
     auto atom = appbar->atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
-    auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto customAppBarNode = pattern->GetJSAppBarContainer();
     CHECK_NULL_VOID(customAppBarNode);
     customAppBarNode->Build(nullptr);
     auto stageNodeWrapperNode = Inspector::GetInspectorByKey(atom, "AtomicServiceStageId");
@@ -158,8 +161,6 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     auto stageNodeWrapper = AceType::DynamicCast<FrameNode>(stageNodeWrapperNode);
     CHECK_NULL_VOID(stageNodeWrapper);
     CHECK_NULL_VOID(appbar->contentStage_);
-    auto pattern = atom->GetPattern<AtomicServicePattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->BeforeCreateLayoutWrapper();
     InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
     stageNodeWrapper->AddChild(appbar->contentStage_);
