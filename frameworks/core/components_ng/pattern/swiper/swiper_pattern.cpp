@@ -3847,6 +3847,42 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
     }
 }
 
+void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
+{
+    if (isBeginPerf) {
+#ifdef OHOS_PLATFORM
+        if (isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
+        }
+#endif
+        if (hasTabsAncestor_) {
+            AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
+        } else if (isInAutoPlay_) {
+            isAutoPlayAnimationRunning_ = true;
+            PerfMonitor::GetPerfMonitor()->StartCommercial(
+                PerfConstants::AUTO_APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+        } else {
+            PerfMonitor::GetPerfMonitor()->StartCommercial(
+                PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+        }
+    } else {
+#ifdef OHOS_PLATFORM
+        if (isInAutoPlay_) {
+            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
+        }
+#endif
+        isInAutoPlay_ = false;
+        if (hasTabsAncestor_) {
+            AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
+        } else if (isAutoPlayAnimationRunning_) {
+            isAutoPlayAnimationRunning_ = false;
+            PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::AUTO_APP_SWIPER_FLING, true);
+        } else {
+            PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
+        }
+    }
+}
+
 void SwiperPattern::PlayPropertyTranslateAnimation(
     float translate, int32_t nextIndex, float velocity, bool stopAutoPlay, std::optional<float> pixelRoundTargetPos)
 {
@@ -3907,16 +3943,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-#ifdef OHOS_PLATFORM
-        if (swiper->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
-        }
-#endif
-        if (!swiper->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
-        } else {
-            AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
-        }
+        swiper->PropertyPrefMonitor(false);
         swiper->OnPropertyTranslateAnimationFinish(offset);
         swiper->FireScrollStateEvent(ScrollState::IDLE);
     };
@@ -3944,17 +3971,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset = adOffset]() {
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
-#ifdef OHOS_PLATFORM
-        if (swiperPattern->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
-        }
-#endif
-        if (!swiperPattern->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_SWIPER_FLING,
-                PerfActionType::LAST_UP, "");
-        } else {
-            AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
-        }
+        swiperPattern->PropertyPrefMonitor(true);
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper start property animation with offsetX: %{public}f, offsetY: %{public}f, id: %{public}d",
             offset.GetX(), offset.GetY(), swiperPattern->swiperId_);
