@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/image/image_source_info.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/image_span_view_static.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
 
@@ -26,6 +28,9 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components ImageSpan used in ParallelizeUI");
+    }
     auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     imageSpanNode->IncRefCount();
@@ -57,8 +62,7 @@ void SetVerticalAlignImpl(Ark_NativePointer node,
 void SetColorFilterImpl(Ark_NativePointer node,
                         const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void SetObjectFitImpl(Ark_NativePointer node,
                       const Opt_ImageFit* value)
