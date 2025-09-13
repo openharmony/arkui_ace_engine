@@ -357,7 +357,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         }, nullptr, nullptr, GetContextRefPtr());
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
+        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto buttonPopupDistance =
             floatTitleMgr_ ? 0.0f : ((titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2);
@@ -701,7 +701,7 @@ bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
     CHECK_NULL_RETURN(floatingTitleRow, false);
     auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_RETURN(floatingTitleRowProp, false);
-    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+    return (floatingTitleRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
 }
 
 bool ContainerModalPatternEnhance::GetCustomTitleVisible()
@@ -710,7 +710,7 @@ bool ContainerModalPatternEnhance::GetCustomTitleVisible()
     CHECK_NULL_RETURN(customTitleRow, false);
     auto customTitleRowProp = customTitleRow->GetLayoutProperty();
     CHECK_NULL_RETURN(customTitleRowProp, false);
-    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+    return (customTitleRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
 }
 
 bool ContainerModalPatternEnhance::GetControlButtonVisible()
@@ -719,7 +719,7 @@ bool ContainerModalPatternEnhance::GetControlButtonVisible()
     CHECK_NULL_RETURN(controlButtonRow, false);
     auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
     CHECK_NULL_RETURN(controlButtonRowProp, false);
-    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+    return (controlButtonRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
 }
 
 void ContainerModalPatternEnhance::Init()
