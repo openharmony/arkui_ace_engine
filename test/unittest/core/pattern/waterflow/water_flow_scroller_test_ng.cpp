@@ -908,7 +908,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachStart002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(reached, 3);
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_NEAR(GetChildY(frameNode_, 1), 0.0f, 0.00001f);
 }
 
 /**

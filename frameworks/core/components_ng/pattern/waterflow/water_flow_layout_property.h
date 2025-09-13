@@ -18,12 +18,13 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT WaterFlowLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(WaterFlowLayoutProperty, LayoutProperty);
+class ACE_EXPORT WaterFlowLayoutProperty : public ScrollableLayoutProperty {
+    DECLARE_ACE_TYPE(WaterFlowLayoutProperty, ScrollableLayoutProperty);
 
 public:
     WaterFlowLayoutProperty() = default;
@@ -33,7 +34,7 @@ public:
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        ScrollableLayoutProperty::Reset();
         ResetColumnsTemplate();
         ResetRowsTemplate();
         ResetColumnsGap();
@@ -137,6 +138,24 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<WaterFlowLayoutProperty>(property);
+        ScrollableLayoutProperty::Clone(value);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propRowsTemplate_ = CloneRowsTemplate();
+        value->propColumnsTemplate_ = CloneColumnsTemplate();
+        value->propRowsGap_ = CloneRowsGap();
+        value->propColumnsGap_ = CloneColumnsGap();
+        value->propWaterflowDirection_ = CloneWaterflowDirection();
+        value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propSyncLoad_ = CloneSyncLoad();
+        if (itemLayoutConstraint_) {
+            value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
+        }
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutProperty);

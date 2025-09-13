@@ -1575,4 +1575,93 @@ HWTEST_F(GridScrollerTestNg, CreateWithResourceObjScrollBarColor002, TestSize.Le
     ASSERT_NE(pattern_->resourceMgr_, nullptr);
     EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
 }
+
+/**
+ * @tc.name: GetOverScrollOffsetWithContentOffset001
+ * @tc.desc: Test GetOverScrollOffsetWithContentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateFixedItems(10);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.currentOffset_, contentOffset);
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { ITEM_MAIN_SIZE - contentOffset, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 2;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
+
+/**
+ * @tc.name: GetOverScrollOffsetWithContentOffset
+ * @tc.desc: Test GetOverScrollOffsetWithContentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateFixedItems(10);
+    CreateDone();
+
+    pattern_->info_.currentOffset_ = ITEM_MAIN_SIZE;
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { -ITEM_MAIN_SIZE + contentOffset, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
 } // namespace OHOS::Ace::NG

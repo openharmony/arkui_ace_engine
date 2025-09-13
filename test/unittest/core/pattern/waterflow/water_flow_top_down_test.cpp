@@ -1535,4 +1535,70 @@ HWTEST_F(WaterFlowTestNg, onWillStopDragging002, TestSize.Level1)
     EXPECT_TRUE(isOnWillStopDraggingCallBack);
     EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
+
+/**
+ * @tc.name: ContentOffsetTest001
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ContentOffsetTest001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset * 1.5);
+}
+
+/**
+ * @tc.name: InvalidContentOffset
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_ with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, InvalidContentOffset, TestSize.Level1)
+{
+    CreateWaterFlow();
+    float contentOffset = WATER_FLOW_HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->contentStartOffset_, 0.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->contentEndOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: ContentOffsetIsAtTopAndBottomTest
+ * @tc.desc: Test IsAtTop and IsAtBottom with contentStartOffset_ and contentEndOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ContentOffsetIsAtTopAndBottomTest, TestSize.Level1)
+{
+    CreateWaterFlow();
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), contentOffset);
+
+    pattern_->UpdateCurrentOffset(-20, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 10, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
 } // namespace OHOS::Ace::NG

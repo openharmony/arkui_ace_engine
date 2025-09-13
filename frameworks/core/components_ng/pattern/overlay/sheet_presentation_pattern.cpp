@@ -298,7 +298,7 @@ void SheetPresentationPattern::AvoidAiBar()
     CHECK_NULL_VOID(pipeline);
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-    layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
+    layoutProperty->UpdateContentEndOffset(inset.bottom_.Length());
     TAG_LOGD(AceLogTag::ACE_SHEET, "AvoidAiBar function execution completed");
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }

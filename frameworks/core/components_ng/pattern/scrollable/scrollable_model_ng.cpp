@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -576,6 +577,100 @@ void ScrollableModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode
         auto scrollBar = pattern->GetScrollBar();
         CHECK_NULL_VOID(scrollBar);
         scrollBar->SetForegroundColor(color);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ScrollableModelNG::SetContentStartOffset(float offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentStartOffset, offset);
+}
+
+void ScrollableModelNG::SetContentEndOffset(float offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentEndOffset, offset);
+}
+
+void ScrollableModelNG::SetContentStartOffset(FrameNode* frameNode, float offset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentStartOffset, offset, frameNode);
+}
+
+void ScrollableModelNG::SetContentEndOffset(FrameNode* frameNode, float offset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentEndOffset, offset, frameNode);
+}
+
+void ScrollableModelNG::ResetContentStartOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    SetContentStartOffset(frameNode, 0.0f);
+}
+
+void ScrollableModelNG::ResetContentEndOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    SetContentEndOffset(frameNode, 0.0f);
+}
+
+void ScrollableModelNG::ResetContentStartOffset()
+{
+    SetContentStartOffset(0.0f);
+}
+
+void ScrollableModelNG::ResetContentEndOffset()
+{
+    SetContentEndOffset(0.0f);
+}
+
+void ScrollableModelNG::CreateWithResourceObjContentStartOffset(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjContentStartOffset(frameNode, resObj);
+}
+
+void ScrollableModelNG::CreateWithResourceObjContentEndOffset(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjContentEndOffset(frameNode, resObj);
+}
+
+void ScrollableModelNG::CreateWithResourceObjContentStartOffset(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "contentStartOffset";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        double offset = 0.0;
+        ResourceParseUtils::ParseResDouble(resObj, offset);
+        ScrollableModelNG::SetContentStartOffset(AceType::RawPtr(frameNode), static_cast<float>(offset));
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ScrollableModelNG::CreateWithResourceObjContentEndOffset(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "contentEndOffset";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        double offset = 0.0;
+        ResourceParseUtils::ParseResDouble(resObj, offset);
+        ScrollableModelNG::SetContentEndOffset(AceType::RawPtr(frameNode), static_cast<float>(offset));
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

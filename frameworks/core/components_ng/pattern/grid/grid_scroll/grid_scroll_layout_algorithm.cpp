@@ -109,6 +109,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(frameSize_, axis);
     float crossSize = GetCrossAxisSize(frameSize_, axis);
+    CalcContentOffset(layoutWrapper, mainSize);
     if (!NearEqual(mainSize, info_.lastMainSize_)) {
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
         UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
@@ -240,8 +241,9 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
         }
     }
 
-    auto lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
-    auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
+    float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
+    float totalHeight = lengthOfItemsInViewport + info_.contentStartOffset_ + info_.contentEndOffset_;
+    float gridMainSize = std::min(totalHeight, mainSize);
     gridMainSize = std::max(gridMainSize, GetMainAxisSize(gridLayoutProperty->GetLayoutConstraint()->minSize, axis_));
     idealSize.SetMainSize(gridMainSize, axis_);
     AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
@@ -481,6 +483,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     CHECK_NULL_VOID(host);
     auto gridPattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(gridPattern);
+    if (!gridPattern->IsInitialized()) {
+        info_.currentOffset_ = info_.contentStartOffset_;
+    }
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
     if (info_.targetIndex_.has_value()) {
@@ -515,10 +520,10 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     // Step3: Check if need to fill blank at start (in situation of grid items moving down)
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
-        auto offset = info_.currentOffset_;
+        auto offset = info_.currentOffset_ - info_.contentStartOffset_;
         if ((NonNegative(offset) && !canOverScrollStart_) || (NonPositive(offset) && !canOverScrollEnd_)) {
-            info_.currentOffset_ = 0.0;
-            info_.prevOffset_ = 0.0;
+            info_.currentOffset_ = info_.contentStartOffset_;
+            info_.prevOffset_ = info_.contentStartOffset_;
         }
         if (!haveNewLineAtStart) {
             if (canOverScrollStart_) {
@@ -691,32 +696,36 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if ((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
+        if ((GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_) && !canOverScrollStart_) ||
             (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) {
             info_.reachEnd_ = false;
+            info_.offsetEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
-            if (LessNotEqual(lengthOfItemsInViewport, mainSize) && NearEqual(mainSize, info_.lastMainSize_)) {
+            if (LessNotEqual(lengthOfItemsInViewport + info_.contentEndOffset_, mainSize) &&
+                NearEqual(mainSize, info_.lastMainSize_)) {
                 return;
             }
         }
     }
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
-    if (LessNotEqual(lengthOfItemsInViewport, mainSize) && info_.startIndex_ == 0) {
+    if (LessNotEqual(lengthOfItemsInViewport + info_.contentStartOffset_ + info_.contentEndOffset_, mainSize) &&
+        info_.startIndex_ == 0) {
         if (((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
                 (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) ||
             isChildrenUpdated_) {
-            info_.currentOffset_ = 0;
-            info_.prevOffset_ = 0;
+            info_.currentOffset_ = info_.contentStartOffset_;
+            info_.prevOffset_ = info_.contentStartOffset_;
         }
         info_.reachStart_ = true;
-        info_.offsetEnd_ = LessOrEqual(info_.currentOffset_ + lengthOfItemsInViewport, mainSize);
+        info_.offsetEnd_ =
+            LessOrEqual(info_.currentOffset_ + lengthOfItemsInViewport + info_.contentEndOffset_, mainSize);
         return;
     }
 
     // last grid item is not fully showed
-    if (GreatNotEqual(info_.currentOffset_ + lengthOfItemsInViewport, mainSize)) {
+    if (GreatNotEqual(info_.currentOffset_ + lengthOfItemsInViewport + info_.contentEndOffset_, mainSize)) {
         info_.offsetEnd_ = false;
         return;
     }
@@ -730,7 +739,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
 
     // Step3. modify [currentOffset_]
     if (!canOverScrollEnd_) {
-        float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + info_.prevOffset_;
+        float realOffsetToMoveUp = lengthOfItemsInViewport + info_.contentEndOffset_ - mainSize + info_.prevOffset_;
         info_.currentOffset_ = info_.prevOffset_ - realOffsetToMoveUp;
         info_.prevOffset_ = info_.currentOffset_;
     }
@@ -1108,7 +1117,7 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
         info_.startMainLineIndex_ = startLine;
         info_.UpdateStartIndexByStartLine();
         info_.prevOffset_ = 0;
-        info_.currentOffset_ = 0;
+        info_.currentOffset_ = info_.startIndex_ == 0 ? info_.contentStartOffset_:0;
         info_.ResetPositionFlags();
         return;
     }
@@ -1147,6 +1156,12 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
             /* targetIndex is out of the matrix */
             TAG_LOGW(AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", info_.jumpIndex_);
         }
+    }
+    if (info_.jumpIndex_ == info_.childrenCount_ - 1) {
+        info_.currentOffset_ -= info_.contentEndOffset_;
+    }
+    if (info_.jumpIndex_ == 0) {
+        info_.currentOffset_ += info_.contentStartOffset_;
     }
     if (info_.extraOffset_.has_value() && !info_.targetIndex_.has_value()) {
         info_.currentOffset_ += info_.extraOffset_.value();
@@ -2188,7 +2203,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
             }
             return -1.0f;
         }
-        // // Step2. Measure child
+        // Step2. Measure child
         auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
         auto crossSpan = MeasureCachedChild(frameSize, currentIndex, layoutWrapper, itemWrapper);
         if (crossSpan < 0) {
@@ -2198,7 +2213,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
             break;
         }
         i = static_cast<uint32_t>(lastCross_ - 1);
-        // // Step3. Measure [GridItem]
+        // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper);
 
         info_.endIndex_ = currentIndex;

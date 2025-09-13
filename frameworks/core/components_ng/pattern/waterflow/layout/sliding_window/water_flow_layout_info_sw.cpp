@@ -40,7 +40,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     endPos_ = EndPos();
 
     prevItemStart_ = itemStart_;
-    itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
+    itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin() - contentStartOffset_);
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
@@ -52,7 +52,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
         footerHeight_ = 0.0f;
     }
 
-    const float contentEnd = endPos_ + footerHeight_ + BotMargin();
+    const float contentEnd = endPos_ + footerHeight_ + BotMargin() + contentEndOffset_;
     offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
@@ -127,12 +127,13 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
         return false;
     }
     // checking first lane is enough because re-align automatically happens when reaching start
-    if (itemStart_ && !lanes_[0].empty() && Positive(lanes_[0][0].startPos - TopMargin() + delta_)) {
+    if (itemStart_ && !lanes_[0].empty() &&
+        Positive(lanes_[0][0].startPos - TopMargin() - contentStartOffset_ + delta_)) {
         return true;
     }
     if (!itemStart_ && offsetEnd_) {
         return std::all_of(lanes_.back().begin(), lanes_.back().end(), [this](const Lane& lane) {
-            return LessNotEqual(lane.endPos + footerHeight_ + BotMargin() + delta_, lastMainSize_);
+            return LessNotEqual(lane.endPos + footerHeight_ + BotMargin() + contentEndOffset_ + delta_, lastMainSize_);
         });
     }
     return false;
@@ -159,7 +160,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (!itemEnd_) {
         return res;
     }
-    float disToBot = EndPosWithMargin() + footerHeight_ - std::min(lastMainSize_, maxHeight_);
+    float disToBot = EndPosWithMargin() + footerHeight_ + contentEndOffset_ - std::min(lastMainSize_, maxHeight_);
     if (Positive(disToBot) && LessNotEqual(maxHeight_, lastMainSize_)) {
         res.end = std::min(0.0f, disToBot + delta);
         return res;
@@ -184,7 +185,7 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
         res = StartPosWithMargin() + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (EndPosWithMargin() + footerHeight_ + delta);
+        res = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
     }
     return res;
 }
@@ -258,7 +259,7 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    const bool backFromOverScroll = Positive(prevPos) && NonPositive(totalOffset_);
+    const bool backFromOverScroll = Positive(prevPos) && LessOrEqual(totalOffset_, contentStartOffset_);
     return firstLayout || prevItemStart_ != itemStart_ || backFromOverScroll;
 }
 
@@ -267,10 +268,10 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
     if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
-    const float prevEndPos = EndPosWithMargin() - (totalOffset_ - prevPos) + footerHeight_;
+    const float prevEndPos = EndPosWithMargin() - (totalOffset_ - prevPos) + footerHeight_ + contentEndOffset_;
     const bool backFromOverScroll =
         LessNotEqualCustomPrecision(prevEndPos, lastMainSize_, -0.1f) &&
-        GreatOrEqualCustomPrecision(EndPosWithMargin() + footerHeight_, lastMainSize_, -0.1f);
+        GreatOrEqualCustomPrecision(EndPosWithMargin() + footerHeight_ + contentEndOffset_, lastMainSize_, -0.1f);
     return firstLayout || GreatNotEqualCustomPrecision(prevEndPos, lastMainSize_, 0.1f) || backFromOverScroll;
 }
 
@@ -525,7 +526,7 @@ float WaterFlowLayoutInfoSW::TopFinalPos() const
 
 float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
 {
-    return -(EndPosWithMargin() + delta_ + footerHeight_) + std::min(maxHeight_, viewHeight);
+    return -(EndPosWithMargin() + delta_ + footerHeight_ + contentEndOffset_) + std::min(maxHeight_, viewHeight);
 };
 
 bool WaterFlowLayoutInfoSW::IsMisaligned() const
@@ -846,7 +847,7 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
                    + (endPos_ - startPos_);
     if (itemEnd_ && repeatDifference_ == 0) {
         float bottomOverScroll = std::max(BottomFinalPos(lastMainSize_), 0.0f);
-        return height - bottomOverScroll + BotMargin() + footerHeight_;
+        return height - bottomOverScroll + BotMargin() + footerHeight_ + contentEndOffset_;
     }
 
     const float average = GetAverageItemHeight();
@@ -854,6 +855,7 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
         height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
     float virtualTotalHeight = 0.f;
+    height += contentEndOffset_;
     if (EstimateVirtualTotalHeight(average, virtualTotalHeight)) {
         height += virtualTotalHeight;
         return height;
@@ -954,9 +956,9 @@ void WaterFlowLayoutInfoSW::SyncOnEmptyLanes(float mainSize)
 {
     startPos_ = StartPos();
     endPos_ = EndPos();
-    itemStart_ = NonNegative(startPos_ - TopMargin());
+    itemStart_ = NonNegative(startPos_ - TopMargin() - contentStartOffset_);
     itemEnd_ = true;
-    offsetEnd_ = LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
+    offsetEnd_ = LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin() + contentEndOffset_, mainSize, 0.1f);
     maxHeight_ = footerHeight_;
     knowTotalHeight_ = true;
     newStartIndex_ = EMPTY_NEW_START_INDEX;

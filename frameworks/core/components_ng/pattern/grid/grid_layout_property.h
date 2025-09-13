@@ -19,11 +19,12 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
+class ACE_EXPORT GridLayoutProperty : public ScrollableLayoutProperty {
     DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
 
 public:
@@ -33,27 +34,13 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<GridLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propRowsTemplate_ = CloneRowsTemplate();
-        value->propColumnsTemplate_ = CloneColumnsTemplate();
-        value->propRowsGap_ = CloneRowsGap();
-        value->propColumnsGap_ = CloneColumnsGap();
-        value->propCachedCount_ = CloneCachedCount();
-        value->propShowCachedItems_ = CloneShowCachedItems();
-        value->propGridDirection_ = CloneGridDirection();
-        value->propFocusWrapMode_ = CloneFocusWrapMode();
-        value->propMaxCount_ = CloneMaxCount();
-        value->propMinCount_ = CloneMinCount();
-        value->propCellLength_ = CloneCellLength();
-        value->propScrollEnabled_ = CloneScrollEnabled();
-        value->propLayoutOptions_ = CloneLayoutOptions();
-        value->propSyncLoad_ = CloneSyncLoad();
+        Clone(value);
         return value;
     }
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        ScrollableLayoutProperty::Reset();
         ResetColumnsTemplate();
         ResetRowsTemplate();
         ResetColumnsGap();
@@ -161,6 +148,27 @@ public:
     std::pair<bool, bool> GetPercentSensitive() override
     {
         return {true, true};
+    }
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<GridLayoutProperty>(property);
+        ScrollableLayoutProperty::Clone(value);
+        value->propRowsTemplate_ = CloneRowsTemplate();
+        value->propColumnsTemplate_ = CloneColumnsTemplate();
+        value->propRowsGap_ = CloneRowsGap();
+        value->propColumnsGap_ = CloneColumnsGap();
+        value->propCachedCount_ = CloneCachedCount();
+        value->propShowCachedItems_ = CloneShowCachedItems();
+        value->propGridDirection_ = CloneGridDirection();
+        value->propFocusWrapMode_ = CloneFocusWrapMode();
+        value->propMaxCount_ = CloneMaxCount();
+        value->propMinCount_ = CloneMinCount();
+        value->propCellLength_ = CloneCellLength();
+        value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propLayoutOptions_ = CloneLayoutOptions();
+        value->propSyncLoad_ = CloneSyncLoad();
     }
 
 private:

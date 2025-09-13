@@ -180,4 +180,39 @@ void WaterFlowLayoutBase::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
         frameNode->ClearSubtreeLayoutAlgorithm();
     }
 }
+
+void WaterFlowLayoutBase::CalcContentOffset(
+    LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, float mainSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto property = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(property);
+    auto startOffset = property->GetContentStartOffset();
+    if (!startOffset.has_value()) {
+        info->contentStartOffset_ = 0.0f;
+    }
+    auto endOffset = property->GetContentEndOffset();
+    if (!endOffset.has_value()) {
+        info->contentEndOffset_ = 0.0f;
+    }
+    if (!endOffset && !startOffset) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (startOffset) {
+        info->contentStartOffset_ =
+            std::max(pipeline->NormalizeToPx(Dimension(startOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (endOffset) {
+        info->contentEndOffset_ =
+            std::max(pipeline->NormalizeToPx(Dimension(endOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (GreatOrEqual(info->contentStartOffset_ + info->contentEndOffset_, mainSize)) {
+        info->contentStartOffset_ = 0.0f;
+        info->contentEndOffset_ = 0.0f;
+    }
+}
 } // namespace OHOS::Ace::NG

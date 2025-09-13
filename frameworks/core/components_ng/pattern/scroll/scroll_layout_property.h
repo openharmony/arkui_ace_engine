@@ -25,10 +25,11 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ScrollLayoutProperty : public LayoutProperty {
+class ACE_EXPORT ScrollLayoutProperty : public ScrollableLayoutProperty {
     DECLARE_ACE_TYPE(ScrollLayoutProperty, LayoutProperty);
 
 public:
@@ -37,25 +38,20 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<ScrollLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propAxis_ = CloneAxis();
-        value->propScrollEnabled_ = CloneScrollEnabled();
-        value->propScrollSnapAlign_ = CloneScrollSnapAlign();
-        value->propScrollContentEndOffset_ = CloneScrollContentEndOffset();
+        Clone(value);
         return value;
     }
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        ScrollableLayoutProperty::Reset();
         ResetAxis();
         ResetScrollEnabled();
-        ResetScrollContentEndOffset();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json, filter);
+        ScrollableLayoutProperty::ToJsonValue(json, filter);
         std::unordered_map<Axis, std::string> scrollableMap { { Axis::VERTICAL, "ScrollDirection.Vertical" },
             { Axis::HORIZONTAL, "ScrollDirection.Horizontal" }, { Axis::FREE, "ScrollDirection.Free" },
             { Axis::NONE, "ScrollDirection.None" } };
@@ -78,7 +74,17 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollWidth, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<ScrollLayoutProperty>(property);
+        ScrollableLayoutProperty::Clone(value);
+        value->propAxis_ = CloneAxis();
+        value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propScrollSnapAlign_ = CloneScrollSnapAlign();
+        value->propContentEndOffset_ = CloneContentEndOffset();
+    }
 };
 
 } // namespace OHOS::Ace::NG

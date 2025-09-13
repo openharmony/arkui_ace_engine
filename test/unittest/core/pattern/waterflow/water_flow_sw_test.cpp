@@ -583,4 +583,68 @@ HWTEST_F(WaterFlowSWTest, LazyVGridInWaterFlowSW002, TestSize.Level1)
     EXPECT_EQ(swInfo->endIndex_, 7);
     EXPECT_EQ(swInfo->totalOffset_, -1200);
 }
+
+/**
+ * @tc.name: ContentOffsetTest001
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ContentOffsetTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset * 1.5);
+}
+
+/**
+ * @tc.name: ContentOffsetTest002
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_ with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ContentOffsetTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    float contentOffset = WATER_FLOW_HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->contentStartOffset_, 0.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->contentEndOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: ContentOffsetTest003
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_ with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ContentOffsetTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 20.0);
+
+    pattern_->UpdateCurrentOffset(-20, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0.0);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+}
 } // namespace OHOS::Ace::NG

@@ -112,7 +112,7 @@ public:
     }
     float TopFinalPos() const override
     {
-        return 0.0f;
+        return contentStartOffset_;
     };
     float BottomFinalPos(float viewHeight) const override
     {

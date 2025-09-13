@@ -37,7 +37,7 @@ void WaterFlowLayoutProperty::ResetWaterflowLayoutInfoAndMeasure() const
 
 void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json, filter);
+    ScrollableLayoutProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
@@ -87,17 +87,7 @@ std::string WaterFlowLayoutProperty::GetWaterflowDirectionStr() const
 RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
 {
     auto value = MakeRefPtr<WaterFlowLayoutProperty>();
-    value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-    value->propRowsTemplate_ = CloneRowsTemplate();
-    value->propColumnsTemplate_ = CloneColumnsTemplate();
-    value->propRowsGap_ = CloneRowsGap();
-    value->propColumnsGap_ = CloneColumnsGap();
-    value->propWaterflowDirection_ = CloneWaterflowDirection();
-    value->propScrollEnabled_ = CloneScrollEnabled();
-    value->propSyncLoad_ = CloneSyncLoad();
-    if (itemLayoutConstraint_) {
-        value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
-    }
+    Clone(value);
     return value;
 }
 

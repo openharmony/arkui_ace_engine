@@ -3232,10 +3232,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     ASSERT_NE(scrollLayoutProperty, nullptr);
     sheetPattern->AvoidAiBar();
-    EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f), .0f);
+    EXPECT_EQ(scrollLayoutProperty->GetContentEndOffsetValue(.0f), .0f);
     scrollPattern->scrollableDistance_ = 10.0f;
     sheetPattern->AvoidAiBar();
-    EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f),
+    EXPECT_EQ(scrollLayoutProperty->GetContentEndOffsetValue(.0f),
         PipelineContext::GetCurrentContext()->GetSafeArea().bottom_.Length());
 }
 

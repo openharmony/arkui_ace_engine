@@ -152,15 +152,15 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
 
 bool GridLayoutInfo::IsOutOfStart() const
 {
-    return reachStart_ && Positive(currentOffset_);
+    return reachStart_ && GreatNotEqual(currentOffset_, contentStartOffset_);
 }
 
 bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
-    const bool atOrOutOfStart = reachStart_ && NonNegative(currentOffset_);
+    const bool atOrOutOfStart = reachStart_ && GreatOrEqual(currentOffset_, contentStartOffset_);
     if (irregular) {
         return !atOrOutOfStart &&
-               Negative(GetDistanceToBottom(lastMainSize_ - contentEndPadding_, totalHeightOfItemsInView_, mainGap));
+               Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
     }
     const float endPos = currentOffset_ + totalHeightOfItemsInView_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
@@ -905,7 +905,7 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
         offset += it->second + mainGap;
         ++it;
     }
-    const float bottomPos = offset + heightInView;
+    const float bottomPos = offset + heightInView + contentEndOffset_;
     return bottomPos - mainSize;
 }
 

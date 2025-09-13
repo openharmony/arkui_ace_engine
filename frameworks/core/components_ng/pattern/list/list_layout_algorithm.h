@@ -620,7 +620,7 @@ protected:
 
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
     virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
-    virtual void CalcContentOffset(const RefPtr<ListLayoutProperty>& property);
+    virtual void CalcContentOffset(LayoutWrapper* layoutWrapper);
     virtual bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
     virtual void FixItemLayoutOffset(LayoutWrapper* layoutWrapper) {}
 

@@ -69,7 +69,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
         if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN && GreatNotEqual(delta, 0.0f)) {
             // adjust top overScroll
-            delta = std::min(delta, -layoutInfo_->Offset());
+            delta = std::min(delta, -layoutInfo_->Offset() + layoutInfo_->contentStartOffset_);
         }
     }
     delta = -FireOnWillScroll(-delta);
@@ -132,14 +132,14 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
     float overScroll = 0.0f;
-    if (Positive(layoutInfo_->Offset())) {
-        overScroll = layoutInfo_->Offset();
+    if (GreatNotEqual(layoutInfo_->Offset(), layoutInfo_->contentStartOffset_)) {
+        overScroll = layoutInfo_->Offset() - layoutInfo_->contentStartOffset_;
     } else if (layoutInfo_->offsetEnd_) {
         overScroll = layoutInfo_->BottomFinalPos(GetMainContentSize()) - layoutInfo_->CurrentPos();
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-layoutInfo_->Offset(), layoutInfo_->EstimateTotalHeight(),
+    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_, layoutInfo_->EstimateTotalHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
