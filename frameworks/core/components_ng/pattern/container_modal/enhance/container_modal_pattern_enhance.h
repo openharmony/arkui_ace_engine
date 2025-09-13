@@ -109,6 +109,7 @@ private:
     void SetColorConfigurationUpdate();
     void SetMaximizeIconIsRecover();
     void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) override;
+    void InitMenuDefaultRadius();
 
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<FrameNode> menuList_;
