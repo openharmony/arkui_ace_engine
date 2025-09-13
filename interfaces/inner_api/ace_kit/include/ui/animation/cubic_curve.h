@@ -36,6 +36,7 @@ public:
 
     float MoveInternal(float time) override;
     const std::string ToString() override;
+    const std::string ToSimpleString() override;
 
     float GetX0() const
     {

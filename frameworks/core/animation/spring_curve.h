@@ -30,6 +30,7 @@ public:
 
     float MoveInternal(float time) override;
     const std::string ToString() override;
+    const std::string ToSimpleString() override;
 
     void UpdateVelocity(float velocity)
     {

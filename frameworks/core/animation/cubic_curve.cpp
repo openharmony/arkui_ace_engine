@@ -63,6 +63,16 @@ const std::string CubicCurve::ToString()
     return curveString;
 }
 
+const std::string CubicCurve::ToSimpleString()
+{
+    const int32_t precision = 2;
+    std::stringstream ss;
+    std::string comma(",");
+    ss << "cubic(" << std::fixed << std::setprecision(precision) << x0_
+       << comma << y0_ << comma << x1_ << comma << y1_ << ")";
+    return ss.str();
+}
+
 bool CubicCurve::IsEqual(const RefPtr<Curve>& curve) const
 {
     auto other = DynamicCast<CubicCurve>(curve);
