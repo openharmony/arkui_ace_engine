@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
 namespace OHOS::Ace {
+
+namespace {
+constexpr int PARAM_STYLE = 2;
+} // namespace
 
 std::unique_ptr<GridItemModel> GridItemModel::instance_ = nullptr;
 std::mutex GridItemModel::mutex_;
@@ -61,34 +65,41 @@ void JSGridItem::Create(const JSCallbackInfo& args)
 
 void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
-    if (args.Length() < 2 || !args[0]->IsFunction() || !args[1]->IsBoolean()) {
+    if (args.Length() < PARAM_STYLE || !args[0]->IsFunction() || !args[1]->IsBoolean()) {
         LOGE("parameter not valid");
         GridItemModel::GetInstance()->Create(NG::GridItemStyle::NONE);
         return;
     }
 
-    auto isLazy = args[1]->ToBoolean();
-    auto jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
-    auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
-                                      int32_t elmtId) {
-        ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
-        ACE_DCHECK(componentsStack_.empty());
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        JSRef<JSVal> jsParams[2];
-        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
-        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
-        jsDeepRenderFunc->ExecuteJS(2, jsParams);
-    };
-
     NG::GridItemStyle gridItemStyle = NG::GridItemStyle::NONE;
-    bool versionControl = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN);
-    if (!versionControl && args[2]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
-        JSRef<JSVal> styleObj = obj->GetProperty("style");
-        gridItemStyle = styleObj->IsNumber() ? static_cast<NG::GridItemStyle>(styleObj->ToNumber<int32_t>())
-                                             : NG::GridItemStyle::NONE;
+    if (args.Length() > PARAM_STYLE) {
+        bool versionControl = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN);
+        if (!versionControl && args[PARAM_STYLE]->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[PARAM_STYLE]);
+            JSRef<JSVal> styleObj = obj->GetProperty("style");
+            gridItemStyle = styleObj->IsNumber() ? static_cast<NG::GridItemStyle>(styleObj->ToNumber<int32_t>())
+                                                 : NG::GridItemStyle::NONE;
+        }
     }
-    GridItemModel::GetInstance()->Create(std::move(gridItemDeepRenderFunc), isLazy, gridItemStyle);
+
+    auto isLazy = args[1]->ToBoolean();
+    if (isLazy) {
+        auto jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
+                                          jsDeepRenderFunc = std::move(jsDeepRender)](int32_t elmtId) {
+            ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
+            ACE_DCHECK(componentsStack_.empty());
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> jsParams[2];
+            jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
+            jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+            jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        };
+
+        GridItemModel::GetInstance()->Create(std::move(gridItemDeepRenderFunc), isLazy, gridItemStyle);
+        return;
+    }
+    GridItemModel::GetInstance()->Create(gridItemStyle);
 }
 
 void JSGridItem::SetColumnStart(int32_t columnStart)
