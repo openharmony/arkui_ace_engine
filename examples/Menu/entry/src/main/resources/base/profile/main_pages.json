@@ -19,7 +19,11 @@
     "pages/Examples/MenuTestLevel0_4",
     "pages/Examples/MenuTestLevel0_5",
     "pages/Examples/MenuTestLevel0_6",
+    "pages/Examples/MenuTestLevel0_12",
+    "pages/Examples/MenuTestLevel0_16",
+    "pages/Examples/MenuTestLevel0_17",
     "pages/Examples/MenuTestLevel0_18",
+    "pages/Examples/MenuTestLevel0_24",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",

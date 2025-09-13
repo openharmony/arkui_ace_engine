@@ -181,3 +181,50 @@ export struct CustomMenuBuilder {
     .borderColor(Color.Blue)
   }
 }
+
+@Preview
+@Component
+export struct SimpleSubMenuBuilder {
+  build() {
+    Menu(){
+      MenuItem({ startIcon: startIcon, content: '复制' })
+        .enabled(false)
+      MenuItem({
+        symbolStartIcon: symbolStartIcon,
+        labelInfo: '粘贴',
+        symbolEndIcon: symbolEndIcon,
+      })
+    }
+  }
+}
+
+@Preview
+@Component
+export struct SimpleMenuBuilder {
+  @State menuAttrOptions: MenuAttrOptions = {
+    submenuMode: 0,
+    menuItemDivider: undefined,
+    menuItemGroupDivider: undefined
+  }
+  @Builder
+  SubMenuBuilder() {
+    SimpleSubMenuBuilder()
+  }
+  build() {
+    Menu(){
+      MenuItem({startIcon: startIcon, content: '选项' })
+        .enabled(true)
+      MenuItem({
+        symbolStartIcon: symbolStartIcon,
+        content: "次级",
+        builder:this.SubMenuBuilder()
+      })
+    }
+    .font(this.menuAttrOptions.font)
+    .fontColor(this.menuAttrOptions.fontColor)
+    .radius(this.menuAttrOptions.radius)
+    .subMenuExpandingMode(this.menuAttrOptions.submenuMode)
+    .menuItemDivider(this.menuAttrOptions.menuItemDivider)
+    .menuItemGroupDivider(this.menuAttrOptions.menuItemGroupDivider)
+  }
+}
