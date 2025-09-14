@@ -1037,6 +1037,15 @@ void DragDropManager::HandleOnDragMove(const DragPointerEvent& pointerEvent, con
     preTargetFrameNode_ = dragFrameNode;
 }
 
+void DragDropManager::DispatchLastDragEventVoluntarily(bool isTrans)
+{
+    if (currentPullId_ == -1 || isFlushed_ || !isTrans || lastDragPointerEvent_.sourceTool != SourceTool::MOUSE ||
+        lastDragPointerEvent_.action != PointerAction::PULL_MOVE) {
+        return;
+    }
+    OnDragMove(lastDragPointerEvent_, extraInfo_, lastRootNode_);
+}
+
 void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
@@ -1149,6 +1158,8 @@ void DragDropManager::DoDragReset()
     isPullThrow_ = false;
     fingerPointInfo_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    lastRootNode_ = nullptr;
+    lastDragPointerEvent_.reset();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 

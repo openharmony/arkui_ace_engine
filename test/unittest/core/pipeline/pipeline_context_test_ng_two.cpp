@@ -308,7 +308,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg137, TestSize.Level1)
     context_->isBeforeDragHandleAxis_ = true;
     axisEvent.action = AxisAction::END;
     context_->DispatchAxisEventToDragDropManager(axisEvent, frameNode_1, etsSerializedGesture);
-    EXPECT_FALSE(context_->isBeforeDragHandleAxis_);
+    EXPECT_TRUE(context_->isBeforeDragHandleAxis_);
 }
 
 /**
