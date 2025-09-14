@@ -126,7 +126,6 @@ class __RepeatImpl<T> {
                 itemInfo.repeatItem = oldRepeatItem;
                 stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`);
 
-                RepeatNative.recycle(oldKeyIndex);
                 itemInfo.repeatItem.updateItem(item);
                 itemInfo.repeatItem.updateIndex(index);
 
@@ -136,7 +135,6 @@ class __RepeatImpl<T> {
                 // TBD moveChild() only when item types are same
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
-                RepeatNative.reuse(oldKeyIndex);
             } else {
                 // case #3:
                 // new array item, there are no deleted array items
