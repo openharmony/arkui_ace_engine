@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class ACE_EXPORT GridLayoutProperty : public ScrollableLayoutProperty {
-    DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
+    DECLARE_ACE_TYPE(GridLayoutProperty, ScrollableLayoutProperty);
 
 public:
     GridLayoutProperty() = default;

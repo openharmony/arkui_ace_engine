@@ -1586,13 +1586,12 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset001, TestSize.L
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
-    float contentOffset = 20;
-    ScrollableModelNG::SetContentStartOffset(contentOffset);
-    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
     CreateFixedItems(10);
     CreateDone();
 
-    EXPECT_EQ(pattern_->info_.currentOffset_, contentOffset);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
     OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1605,7 +1604,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset001, TestSize.L
 
     pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE;
     offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
-    expectOffset = { ITEM_MAIN_SIZE - contentOffset, 0 };
+    expectOffset = { ITEM_MAIN_SIZE - CONTENT_START_OFFSET, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0);
     expectOffset = { 0, 0 };
@@ -1636,9 +1635,8 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset002, TestSize.L
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
-    float contentOffset = 20;
-    ScrollableModelNG::SetContentStartOffset(contentOffset);
-    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
     CreateFixedItems(10);
     CreateDone();
 
@@ -1650,7 +1648,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset002, TestSize.L
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
-    expectOffset = { -ITEM_MAIN_SIZE + contentOffset, 0 };
+    expectOffset = { -ITEM_MAIN_SIZE + CONTENT_START_OFFSET, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
     pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 3;
@@ -1663,5 +1661,264 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffsetWithContentOffset002, TestSize.L
     offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
+
+/**
+ * @tc.name: ScrollToIndexStartWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Start without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndexStartWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    bool smooth = false;
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 180);
+
+    ScrollToIndex(13, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 580);
+
+    ScrollToIndex(17, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: AnimateToIndexStartWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Start with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, AnimateToIndexStartWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::START;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 180);
+
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 580);
+
+    AnimateToIndexWithTicks(17, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: ScrollToIndexEndWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::End without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndexEndWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::END;
+    bool smooth = false;
+
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+
+    ScrollToIndex(13, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollToIndex(17, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: AnimateToIndexEndWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::End with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, AnimateToIndexEndWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::END;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    AnimateToIndexWithTicks(17, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: ScrollToIndexAutoWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Auto without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndexAutoWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::AUTO;
+    bool smooth = false;
+
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    // Scroll forward, item 5 is at top
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 180);
+
+    // Scroll backward, item 13 is at end
+    ScrollToIndex(13, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    // item 11 is in view
+    ScrollToIndex(11, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollBy(0, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+    ScrollToIndex(7, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    ScrollTo(300);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+    ScrollToIndex(13, false, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: AnimateToIndexAutoWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Auto with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, AnimateToIndexAutoWithContentOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateFixedItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::AUTO;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 180);
+
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    AnimateToIndexWithTicks(11, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollBy(0, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+    AnimateToIndexWithTicks(7, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    ScrollTo(300);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -673,5 +673,19 @@ void ScrollableModelNG::CreateWithResourceObjContentEndOffset(
         ScrollableModelNG::SetContentEndOffset(AceType::RawPtr(frameNode), static_cast<float>(offset));
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+float ScrollableModelNG::GetContentStartOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    return static_cast<float>(layoutProperty->GetContentStartOffset().value_or(0.0f));
+}
+
+float ScrollableModelNG::GetContentEndOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    return static_cast<float>(layoutProperty->GetContentEndOffset().value_or(0.0f));
 }
 } // namespace OHOS::Ace::NG

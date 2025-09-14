@@ -6772,56 +6772,55 @@ const ArkUI_AttributeItem* GetScrollContentClip(ArkUI_NodeHandle node)
 
 int32_t SetContentStartOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    auto fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || node->type != ARKUI_NODE_LIST) {
+    if (!node || actualSize < 0 || !fullImpl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getListModifier()->setContentStartOffset(node->uiNodeHandle, item->value[0].f32);
+    fullImpl->getNodeModifiers()->getScrollableModifier()->setContentStartOffset(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetContentStartOffset(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getListModifier()->resetContentStartOffset(node->uiNodeHandle);
+    if (!node || !fullImpl) {
+        return;
+    }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->resetContentStartOffset(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetContentStartOffset(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_LIST) {
-        auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getContentStartOffset(node->uiNodeHandle);
-        g_numberValues[0].f32 = value;
-    }
+    auto value = GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getContentStartOffset(node->uiNodeHandle);
+    g_numberValues[0].f32 = value;
     return &g_attributeItem;
 }
-
+ 
 int32_t SetContentEndOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    auto fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || node->type != ARKUI_NODE_LIST) {
+    if (!node || actualSize < 0 || !fullImpl) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getListModifier()->setContentEndOffset(node->uiNodeHandle, item->value[0].f32);
+    fullImpl->getNodeModifiers()->getScrollableModifier()->setContentEndOffset(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetContentEndOffset(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_LIST) {
-        auto* fullImpl = GetFullImpl();
-        fullImpl->getNodeModifiers()->getListModifier()->resetContentEndOffset(node->uiNodeHandle);
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
     }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->resetContentEndOffset(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetContentEndOffset(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_LIST) {
-        auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getContentEndOffset(node->uiNodeHandle);
-        g_numberValues[0].f32 = value;
-    }
+    auto value = GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getContentEndOffset(node->uiNodeHandle);
+    g_numberValues[0].f32 = value;
     return &g_attributeItem;
 }
 

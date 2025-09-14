@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,8 @@ public:
     static void ResetContentEndOffset();
     static void ResetContentStartOffset(FrameNode* frameNode);
     static void ResetContentEndOffset(FrameNode* frameNode);
+    static float GetContentStartOffset(FrameNode* frameNode);
+    static float GetContentEndOffset(FrameNode* frameNode);
     static void CreateWithResourceObjContentStartOffset(const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObjContentEndOffset(const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObjContentStartOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);

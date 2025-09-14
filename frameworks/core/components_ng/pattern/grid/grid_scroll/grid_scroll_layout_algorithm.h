@@ -159,6 +159,7 @@ private:
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     bool IsScrollToEndLine() const;
     bool IsEndLineInScreenWithGap(int32_t targetLine, float totalViewHeight, float mainSize) const;
+    void CalcScrollToIndexAutoWithContentOffset(int32_t startLine, float mainSize);
     void UpdateCurrentOffsetForJumpTo(float mainSize);
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
