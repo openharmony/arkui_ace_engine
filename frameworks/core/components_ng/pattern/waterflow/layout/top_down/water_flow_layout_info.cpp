@@ -157,7 +157,7 @@ OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
 {
     OverScrollOffset offset = { 0, 0 };
     if (startIndex_ == 0) {
-        auto startPos = currentOffset_;
+        auto startPos = currentOffset_ - contentStartOffset_;
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {
             offset.start = delta;
@@ -320,7 +320,7 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
         }
     }
 
-	// to pass taint data detection by tools.
+    // to pass taint data detection by tools.
     int32_t newIndex = currentIndex + 1;
     if (newIndex >= 0) {
         size_t newSize = static_cast<size_t>(newIndex);
@@ -343,8 +343,10 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
 
 bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
 {
-    auto scrollUpToReachTop = (LessNotEqual(prevOffset, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
-    auto scrollDownToReachTop = GreatNotEqual(prevOffset, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    auto scrollUpToReachTop = (LessNotEqual(prevOffset, contentStartOffset_) || firstLayout) &&
+                              GreatOrEqual(currentOffset_, contentStartOffset_);
+    auto scrollDownToReachTop =
+        GreatNotEqual(prevOffset, contentStartOffset_) && LessOrEqual(currentOffset_, contentStartOffset_);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
@@ -551,16 +553,16 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
     ScrollAlign align = align_;
     switch (align) {
         case ScrollAlign::START:
-            targetPosition = -item.first;
+            targetPosition = -item.first + contentStartOffset_;
             break;
         case ScrollAlign::END:
-            targetPosition = lastMainSize_ - (item.first + item.second);
+            targetPosition = lastMainSize_ - (item.first + item.second) - contentEndOffset_;
             break;
         case ScrollAlign::AUTO:
             if (currentOffset_ + item.first < 0) {
-                targetPosition = -item.first;
+                targetPosition = -item.first + contentStartOffset_;
             } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
-                targetPosition = lastMainSize_ - (item.first + item.second);
+                targetPosition = lastMainSize_ - (item.first + item.second) - contentEndOffset_;
             } else {
                 targetPosition = currentOffset_;
             }
@@ -610,7 +612,7 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
 {
     float res = 0;
     if (itemStart_) {
-        res = currentOffset_  - contentStartOffset_ + delta;
+        res = currentOffset_ - contentStartOffset_ + delta;
     }
     if (offsetEnd_) {
         res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);

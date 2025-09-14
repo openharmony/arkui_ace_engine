@@ -150,6 +150,10 @@ public:
         return {true, true};
     }
 
+    void OnContentStartOffsetUpdate(float /* contentStartOffset */) const override;
+
+    void OnContentEndOffsetUpdate(float /* contentEndOffset */) const override;
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {

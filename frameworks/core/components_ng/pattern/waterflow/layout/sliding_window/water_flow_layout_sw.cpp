@@ -43,7 +43,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
-                !NearZero(info_->delta_) || info_->targetIndex_.has_value() ;
+                !NearZero(info_->delta_) || info_->targetIndex_.has_value();
     Init(size);
 
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
@@ -259,7 +259,7 @@ int32_t WaterFlowLayoutSW::CheckReset()
         info_->ResetWithLaneOffset(std::nullopt);
         return info_->startIndex_;
     }
-    
+
     if (updateIdx <= info_->endIndex_) {
         return updateIdx;
     }
@@ -310,7 +310,7 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
     if (Positive(delta)) {
         // positive offset is scrolling upwards
         int32_t oldStartIdx = info_->StartIndex();
-        FillFront(info_->contentStartOffset_, info_->StartIndex() - 1, 0);
+        FillFront(0.0, info_->StartIndex() - 1, 0);
         MeasureRemainingLazyChild(oldStartIdx, info_->EndIndex(), false);
     } else {
         int32_t oldEndIdx = info_->EndIndex();
@@ -681,9 +681,10 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
     switch (align) {
         case ScrollAlign::START: {
             if (noSkip) {
-                ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]));
+                ApplyDelta(
+                    -info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]) + info_->contentStartOffset_);
             } else {
-                info_->ResetWithLaneOffset(0.0f);
+                info_->ResetWithLaneOffset(info_->contentStartOffset_);
                 FillBack(mainLen_, jumpIdx, itemCnt_ - 1);
             }
             break;
@@ -716,7 +717,8 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
         }
         case ScrollAlign::END: {
             if (noSkip) {
-                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]));
+                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]) -
+                           info_->contentEndOffset_);
             } else {
                 info_->ResetWithLaneOffset(mainLen_);
                 FillFront(info_->contentStartOffset_, jumpIdx, 0);

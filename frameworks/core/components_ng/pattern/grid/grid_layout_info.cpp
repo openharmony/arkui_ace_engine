@@ -171,10 +171,9 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
     const bool atOrOutOfStart = reachStart_ && GreatOrEqual(currentOffset_, contentStartOffset_);
     if (irregular) {
-        return !atOrOutOfStart &&
-               Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
+        return !atOrOutOfStart && Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
     }
-    const float endPos = currentOffset_ + totalHeightOfItemsInView_;
+    const float endPos = currentOffset_ + totalHeightOfItemsInView_ + contentEndOffset_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
            LessNotEqualCustomPrecision(endPos, lastMainSize_ - contentEndPadding_, -0.01f);
 }
@@ -588,25 +587,26 @@ float GridLayoutInfo::GetAnimatePosIrregular(int32_t targetIdx, int32_t height, 
     }
     auto it = FindInMatrix(targetIdx);
     if (it == gridMatrix_.end()) {
-        return -1.0f;
+        return -1.0f - contentStartOffset_;
     }
     if (align == ScrollAlign::AUTO) {
         align = TransformAutoScrollAlign(targetIdx, height, lastMainSize_, mainGap);
     }
     switch (align) {
         case ScrollAlign::START:
-            return GetTotalHeightFromZeroIndex(it->first, mainGap);
+            return GetTotalHeightFromZeroIndex(it->first, mainGap) - contentStartOffset_;
         case ScrollAlign::CENTER: {
             auto [center, offset] = FindItemCenter(it->first, height, mainGap);
             float res = GetTotalHeightFromZeroIndex(center, mainGap) + offset - lastMainSize_ / 2.0f;
-            return std::max(res, 0.0f);
+            return std::max(res, -contentStartOffset_);
         }
         case ScrollAlign::END: {
-            float res = GetTotalHeightFromZeroIndex(it->first + height, mainGap) - mainGap - lastMainSize_;
-            return std::max(res, 0.0f);
+            float res =
+                GetTotalHeightFromZeroIndex(it->first + height, mainGap) - mainGap - lastMainSize_ + contentEndOffset_;
+            return std::max(res, -contentStartOffset_);
         }
         default:
-            return -1.0f;
+            return -1.0f - contentStartOffset_;
     }
 }
 
@@ -635,6 +635,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     // Depending on align, calculate where you need to scroll to
     switch (align) {
         case ScrollAlign::START:
+            targetPos += currentGridLayoutInfo.contentStartOffset_;
         case ScrollAlign::NONE:
             break;
         case ScrollAlign::CENTER: {
@@ -642,7 +643,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
             break;
         }
         case ScrollAlign::END: {
-            targetPos -= (lastMainSize - targetLineHeight);
+            targetPos -= (lastMainSize - targetLineHeight - contentEndOffset_);
             break;
         }
         case ScrollAlign::AUTO: {
@@ -668,8 +669,9 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
                 }
             }
             if (startMainLineIndex >= targetLineIndex) {
+                targetPos -= currentGridLayoutInfo.contentStartOffset_;
             } else if (targetLineIndex >= endMainLineIndex) {
-                targetPos -= (lastMainSize - targetLineHeight);
+                targetPos -= (lastMainSize - targetLineHeight - currentGridLayoutInfo.contentEndOffset_);
             } else {
                 return false;
             }

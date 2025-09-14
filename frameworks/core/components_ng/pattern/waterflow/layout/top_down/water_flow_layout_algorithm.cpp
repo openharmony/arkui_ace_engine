@@ -150,11 +150,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             layoutInfo_->JumpTo(layoutInfo_->items_[0][crossIndex][layoutInfo_->jumpIndex_]);
         }
-        if (layoutInfo_->jumpIndex_ == 0) {
-            layoutInfo_->currentOffset_ += layoutInfo_->contentStartOffset_;
-        }
     } else if (layoutInfo_->jumpIndex_ == LAST_ITEM) {
-        layoutInfo_->currentOffset_ -= layoutInfo_->contentEndOffset_;
         // jump to bottom.
     } else {
         layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
