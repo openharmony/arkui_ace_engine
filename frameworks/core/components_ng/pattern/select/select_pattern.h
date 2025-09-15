@@ -226,7 +226,8 @@ public:
     void SetDividerMode(const std::optional<DividerMode>& mode);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
-    Dimension GetSelectLeftRightMargin() const;
+    Dimension GetSelectLeftMargin(ControlSize controlSize) const;
+    Dimension GetSelectRightMargin(ControlSize controlSize) const;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     RefPtr<PaintProperty> CreatePaintProperty() override
     {

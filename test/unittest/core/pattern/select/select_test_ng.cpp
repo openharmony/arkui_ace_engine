@@ -2611,6 +2611,97 @@ HWTEST_F(SelectTestNg, CreateWithIntegerResourceObj, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitSelect
+ * @tc.desc: Test InitSelect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, InitSelect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(frameNode->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SELECT_ETS_TAG, nodeId);
+    auto select = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(select);
+
+    selectTheme->selectLeftMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+    selectTheme->selectRightMarginMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, 8.0_px));
+
+    selectModelNG.InitSelect(AceType::RawPtr(select), params);
+
+    auto padding = ViewAbstract::GetPadding(frameNode);
+    EXPECT_EQ(padding.left.value().GetDimension().ConvertToPx(), 8.0);
+    EXPECT_EQ(padding.right.value().GetDimension().ConvertToPx(), 8.0);
+}
+
+/**
+ * @tc.name: OnModifyDone014
+ * @tc.desc: Test SelectPattern OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, OnModifyDone014, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    auto host = selectPattern->GetHost();
+    auto eventHub = host->GetEventHub<SelectEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    eventHub->SetEnabled(false);
+    selectTheme->isTV_ = true;
+    selectPattern->OnModifyDone();
+    auto val = menuPattern->IsSelectMenu();
+    EXPECT_EQ(val, true);
+    selectTheme->isTV_ = false;
+    selectPattern->OnModifyDone();
+    val = menuPattern->IsSelectMenu();
+    EXPECT_EQ(val, true);
+
+    eventHub->SetEnabled(true);
+    selectTheme->isTV_ = true;
+    selectPattern->OnModifyDone();
+    val = menuPattern->IsSelectMenu();
+    EXPECT_EQ(val, true);
+    selectTheme->isTV_ = false;
+    selectPattern->OnModifyDone();
+    val = menuPattern->IsSelectMenu();
+    EXPECT_EQ(val, true);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: CreateWithStringResourceObj
  * @tc.desc: Test CreateWithStringResourceObj function.
  * @tc.type: FUNC

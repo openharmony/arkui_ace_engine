@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t MIN_GRID_COUNTS = 2;
+constexpr uint32_t TV_MIN_GRID_COUNTS = 3;
+constexpr uint32_t TV_MAX_GRID_COUNTS = 6;
 constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
@@ -269,6 +271,13 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
             break;
         default:
             break;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, GRID_COUNTS_8);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, GRID_COUNTS_8);
+    if (theme->IsTV()) {
+        maxGridCounts = std::clamp(maxGridCounts, TV_MIN_GRID_COUNTS, TV_MAX_GRID_COUNTS);
     }
     return maxGridCounts;
 }
@@ -719,6 +728,8 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
 
     margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     optionPadding_ = margin_;
+    selectMenuAdditionX_ = static_cast<float>(theme->GetSelectMenuAdditionX().ConvertToPx());
+    selectMenuAdditionY_ = static_cast<float>(theme->GetSelectMenuAdditionY().ConvertToPx());
     if (!canExpandCurrentWindow_) {
         paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
@@ -2673,6 +2684,13 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     }
     auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->IsTV()) {
+        minWidth = static_cast<float>(columnInfo->GetWidth(TV_MIN_GRID_COUNTS));
+    }
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     if (menuPattern->IsSelectOverlayExtensionMenu() && props && props->HasMenuWidth()) {
@@ -2727,7 +2745,7 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, boo
     placement_ = Placement::BOTTOM;
     // can put menu below click point
     if (GreatOrEqual(bottomSpace_, size.Height())) {
-        return position + margin_;
+        return position + margin_ - selectMenuAdditionY_;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && isContextMenu) {
         if (LessNotEqual(bottomSpace_, size.Height()) && LessNotEqual(size.Height(), wrapperRect_.Height())) {
@@ -2778,7 +2796,7 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
     float wrapperWidth = wrapperSize_.Width();
     // can fit menu on the right side of position
     if (GreatOrEqual(rightSpace_, size.Width())) {
-        return position + margin_;
+        return position + margin_ - selectMenuAdditionX_;
     }
 
     // fit menu on the left side
