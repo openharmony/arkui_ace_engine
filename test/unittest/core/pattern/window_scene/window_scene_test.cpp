@@ -777,7 +777,7 @@ HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level0)
     session->scenePersistence_->SetHasSnapshot(true, key);
     windowScene->CreateSnapshotWindow();
 
-    session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
+    session->scenePersistence_->isSavingSnapshot_[key] = true;
     session->freeMultiWindow_.store(true);
     windowScene->CreateSnapshotWindow();
     EXPECT_EQ(windowScene->isBlankForSnapshot_, false);
@@ -808,7 +808,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
     session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     session->SetShowRecent(true);
     auto key = Rosen::defaultStatus;
-    session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
+    session->scenePersistence_->isSavingSnapshot_[key] = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
 }
