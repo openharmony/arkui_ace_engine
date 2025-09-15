@@ -84,22 +84,6 @@ void RepeatNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
     }
 }
 
-void RepeatNode::RecycleChild(uint32_t index)
-{
-    if (index < tempChildrenOfRepeat_.size()) {
-        auto& node = tempChildrenOfRepeat_.at(index);
-        node->OnRecycle();
-    }
-}
-
-void RepeatNode::ReuseChild(uint32_t index)
-{
-    if (index < tempChildrenOfRepeat_.size()) {
-        auto& node = tempChildrenOfRepeat_.at(index);
-        node->OnReuse();
-    }
-}
-
 void RepeatNode::AfterAddChild()
 {
     if (!ModifyChildren().empty()) {
