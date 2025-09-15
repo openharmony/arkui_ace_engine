@@ -13,4 +13,24 @@
  * limitations under the License.
  */
 
-export { __memo_id_type, __memo_context_type } from '@koalaui/runtime';
+export type __memo_context_type = StateContext;
+
+export type __memo_id_type = int;
+
+type Equivalent<Value> = (oldV: Value, newV: Value) => boolean;
+
+export interface StateContext {
+    scope<T>(id: __memo_id_type, paramCount: int): IncrementalScope<T>;
+}
+
+export interface IncrementalScope<T> {
+    get unchanged(): boolean;
+    get cached(): T;
+    recache(value?: T): T;
+    param<V>(index: int, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>;
+}
+
+export interface State<V> {
+    readonly value: V;
+    readonly modified: boolean;
+}

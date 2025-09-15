@@ -7,5 +7,5 @@
 	"exclude": [
 	],
 	"fileExtension": ".ets",
-	"memoTypeImport": "arkui.stateManagement.runtime"
+	"memoTypeImport": "arkui.incremental.runtime.state"
 }

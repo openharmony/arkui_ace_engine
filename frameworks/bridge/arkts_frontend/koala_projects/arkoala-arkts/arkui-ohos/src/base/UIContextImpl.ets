@@ -25,8 +25,9 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode } from '@ohos/arkui/UIContext';
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
+import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
 import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';

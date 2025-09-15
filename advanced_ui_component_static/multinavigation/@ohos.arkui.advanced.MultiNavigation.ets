@@ -15,7 +15,7 @@
 
 import deviceInfo from '@ohos.deviceInfo';
 import { Entry, Text, BuilderParam, LaunchMode, Builder,PopInfo,NavigationInterception,Callback,Component, NavPathStack, TouchType, Navigation,NavPathInfo, NavDestination, NavigationMode, NavigationOptions, AttributeModifier, NavigationAttribute, Percentage} from '@ohos.arkui.component'  // TextAttribute should be insert by ui-plugins
-import { State, MutableState, stateOf, observableProxy, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
+import { State, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
 import hilog from '@ohos.hilog'
 import mediaquery from '@ohos.mediaquery';
 import display from '@ohos.display';
