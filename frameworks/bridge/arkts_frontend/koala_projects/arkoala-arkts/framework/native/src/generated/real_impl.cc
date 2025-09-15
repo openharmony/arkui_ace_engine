@@ -10534,6 +10534,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AccessibilityHoverEventAccessor
+    namespace ActionSheetAccessor {
+    void ShowImpl(const Ark_ActionSheetOptions* options)
+    {
+    }
+    } // ActionSheetAccessor
+    namespace AlertDialogAccessor {
+    void ShowImpl(const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* options)
+    {
+    }
+    } // AlertDialogAccessor
     namespace AnimationExtenderAccessor {
     void SetClipRectImpl(Ark_NativePointer node,
                          Ark_Float32 x,
@@ -17978,6 +17988,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct AccessibilityHoverEventPeer {
         virtual ~AccessibilityHoverEventPeer() = default;
     };
+    const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
+    {
+        static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
+            ActionSheetAccessor::ShowImpl,
+        };
+        return &ActionSheetAccessorImpl;
+    }
+
+    const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
+    {
+        static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
+            AlertDialogAccessor::ShowImpl,
+        };
+        return &AlertDialogAccessorImpl;
+    }
+
     const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     {
         static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
@@ -21220,6 +21246,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
             GetAccessibilityHoverEventAccessor,
+            GetActionSheetAccessor,
+            GetAlertDialogAccessor,
             GetAnimationExtenderAccessor,
             GetAppearSymbolEffectAccessor,
             GetAxisEventAccessor,

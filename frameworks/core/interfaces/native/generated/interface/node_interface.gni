@@ -18,7 +18,9 @@ declare_args() {
 }
 generated_sources = [
   "implementation/accessibility_hover_event_accessor.cpp",
+  "implementation/action_sheet_accessor.cpp",
   "implementation/all_modifiers.cpp",
+  "implementation/alert_dialog_accessor.cpp",
   "implementation/alphabet_indexer_modifier.cpp",
   "implementation/animation_extender_accessor.cpp",
   "implementation/animator_modifier.cpp",

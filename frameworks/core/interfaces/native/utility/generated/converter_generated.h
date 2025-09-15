@@ -2270,6 +2270,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Dimension_EdgeOutlineWidths& src)
 {
     switch (src.selector) {
@@ -2857,6 +2873,22 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3693,6 +3725,7 @@ ASSIGN_OPT(Opt_WordBreak)
 ASSIGN_OPT(Opt_WrappedBuilder)
 ASSIGN_OPT(Opt_XComponentType)
 ASSIGN_OPT(Opt_Array_AbilityInfo)
+ASSIGN_OPT(Opt_Array_AlertDialogButtonOptions)
 ASSIGN_OPT(Opt_Array_Animation)
 ASSIGN_OPT(Opt_Array_Array_String)
 ASSIGN_OPT(Opt_Array_BarrierStyle)
@@ -3753,6 +3786,7 @@ ASSIGN_OPT(Opt_Array_SectionOptions)
 ASSIGN_OPT(Opt_Array_SelectOption)
 ASSIGN_OPT(Opt_Array_ShadowOptions)
 ASSIGN_OPT(Opt_Array_ShapePoint)
+ASSIGN_OPT(Opt_Array_SheetInfo)
 ASSIGN_OPT(Opt_Array_Skill)
 ASSIGN_OPT(Opt_Array_SkillUri)
 ASSIGN_OPT(Opt_Array_SourceTool)
@@ -4083,6 +4117,7 @@ ASSIGN_OPT(Opt_WebKeyboardCallback)
 ASSIGN_OPT(Opt_WorkerEventListener)
 ASSIGN_OPT(Opt_AccessibilityOptions)
 ASSIGN_OPT(Opt_AdsBlockedDetails)
+ASSIGN_OPT(Opt_AlertDialogTextStyleOptions)
 ASSIGN_OPT(Opt_AlignRuleOption)
 ASSIGN_OPT(Opt_Animation)
 ASSIGN_OPT(Opt_AnimationNumberRange)
@@ -4442,6 +4477,10 @@ ASSIGN_OPT(Opt_WebOptions)
 ASSIGN_OPT(Opt_window_SystemBarStyle)
 ASSIGN_OPT(Opt_WorkerOptions)
 ASSIGN_OPT(Opt_XComponentController)
+ASSIGN_OPT(Opt_ActionSheetButtonOptions)
+ASSIGN_OPT(Opt_ActionSheetOffset)
+ASSIGN_OPT(Opt_AlertDialogButtonBaseOptions)
+ASSIGN_OPT(Opt_AlertDialogButtonOptions)
 ASSIGN_OPT(Opt_AlphabetIndexerOptions)
 ASSIGN_OPT(Opt_AnimateParam)
 ASSIGN_OPT(Opt_ApplicationInfo)
@@ -4529,6 +4568,7 @@ ASSIGN_OPT(Opt_SelectOption)
 ASSIGN_OPT(Opt_ShadowOptions)
 ASSIGN_OPT(Opt_ShapePoint)
 ASSIGN_OPT(Opt_sharedTransitionOptions)
+ASSIGN_OPT(Opt_SheetInfo)
 ASSIGN_OPT(Opt_SheetTitleOptions)
 ASSIGN_OPT(Opt_SliderBlockStyle)
 ASSIGN_OPT(Opt_SliderOptions)
@@ -4652,6 +4692,7 @@ ASSIGN_OPT(Opt_Union_BadgePosition_Position)
 ASSIGN_OPT(Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses)
 ASSIGN_OPT(Opt_Union_CustomBuilder_SwipeActionItem)
 ASSIGN_OPT(Opt_Union_Dimension_BorderRadiuses)
+ASSIGN_OPT(Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses)
 ASSIGN_OPT(Opt_Union_Dimension_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_Union_Dimension_EdgeWidths)
 ASSIGN_OPT(Opt_Union_Dimension_EdgeWidths_LocalizedEdgeWidths)
@@ -4691,6 +4732,10 @@ ASSIGN_OPT(Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinati
 ASSIGN_OPT(Opt_Union_UIAbilityContext_UIContext)
 ASSIGN_OPT(Opt_Union_Union_Padding_Dimension_LocalizedPadding)
 ASSIGN_OPT(Opt_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters)
+ASSIGN_OPT(Opt_ActionSheetOptions)
+ASSIGN_OPT(Opt_AlertDialogParamWithButtons)
+ASSIGN_OPT(Opt_AlertDialogParamWithConfirm)
+ASSIGN_OPT(Opt_AlertDialogParamWithOptions)
 ASSIGN_OPT(Opt_Area)
 ASSIGN_OPT(Opt_BadgeParamWithNumber)
 ASSIGN_OPT(Opt_BadgeParamWithString)
@@ -4742,6 +4787,7 @@ ASSIGN_OPT(Opt_TextBackgroundStyle)
 ASSIGN_OPT(Opt_TextPickerTextStyle)
 ASSIGN_OPT(Opt_TouchEvent)
 ASSIGN_OPT(Opt_uiObserver_RouterPageInfo)
+ASSIGN_OPT(Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions)
 ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
 ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
 ASSIGN_OPT(Opt_Union_DotIndicator_DigitIndicator)

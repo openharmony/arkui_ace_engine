@@ -61,7 +61,7 @@ import { default as curves } from "@ohos.curves"
 import { CustomDialogController, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../../component/customDialogController"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
 import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions } from "./../../component/datePicker"
-import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogButtonOptions } from "./../../component/alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParam } from "./../../component/alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, ParticlePropertyAnimation } from "./../../component/particle"
 import { DpiFollowStrategy, UIExtensionProxy, WindowModeFollowStrategy, UIExtensionOptions } from "./../../component/uiExtensionComponent"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
@@ -131,7 +131,7 @@ import { TimePickerDialog, TimePickerFormat, TimePickerResult, TimePickerDialogO
 import { ToggleType, ToggleConfiguration, SwitchStyle, ToggleOptions } from "./../../component/toggle"
 import { ToolBarItemPlacement, ToolBarItemOptions } from "./../../component/toolbar"
 import { AnimatorOptions, SimpleAnimatorOptions, AnimatorResult } from "@ohos.animator"
-import { ActionSheetOptions, DismissDialogAction, SheetInfo } from "./../../component/actionSheet"
+import { ActionSheetOptions, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo } from "./../../component/actionSheet"
 import { default as Context } from "application.Context"
 import { default as UIAbilityContext } from "application.UIAbilityContext"
 import { default as ExtensionContext } from "application.ExtensionContext"
@@ -217,11 +217,38 @@ export class TypeChecker {
     static isAccessibilitySamePageMode(value: Object | string | number | undefined): boolean {
         return value instanceof AccessibilitySamePageMode
     }
+    static isActionSheetButtonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ActionSheetButtonOptions
+    }
+    static isActionSheetOffset(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ActionSheetOffset
+    }
+    static isActionSheetOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean): boolean {
+        return value instanceof ActionSheetOptions
+    }
     static isAdaptiveColor(value: Object | string | number | undefined): boolean {
         return value instanceof AdaptiveColor
     }
     static isAdsBlockedDetails(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof AdsBlockedDetails
+    }
+    static isAlertDialogButtonBaseOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof AlertDialogButtonBaseOptions
+    }
+    static isAlertDialogButtonOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof AlertDialogButtonOptions
+    }
+    static isAlertDialogParamWithButtons(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof AlertDialogParamWithButtons
+    }
+    static isAlertDialogParamWithConfirm(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof AlertDialogParamWithConfirm
+    }
+    static isAlertDialogParamWithOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof AlertDialogParamWithOptions
+    }
+    static isAlertDialogTextStyleOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof AlertDialogTextStyleOptions
     }
     static isAlignment(value: Object | string | number | undefined): boolean {
         return value instanceof Alignment
@@ -2553,6 +2580,9 @@ export class TypeChecker {
     }
     static isSheetDismiss(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof SheetDismiss
+    }
+    static isSheetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof SheetInfo
     }
     static isSheetKeyboardAvoidMode(value: Object | string | number | undefined): boolean {
         return value instanceof SheetKeyboardAvoidMode
@@ -5401,6 +5431,12 @@ export class TypeChecker {
     static isArray_LengthMetrics(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_SheetInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_AlertDialogButtonOptions(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_FingerInfo(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5411,12 +5447,6 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_HistoricalPoint(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_SheetInfo(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_AlertDialogButtonOptions(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Length(value: Object | string | number | undefined): boolean {

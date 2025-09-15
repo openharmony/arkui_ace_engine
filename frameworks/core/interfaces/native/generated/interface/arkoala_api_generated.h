@@ -833,6 +833,8 @@ typedef struct WrappedBuilderPeer* Ark_WrappedBuilder;
 typedef struct Opt_WrappedBuilder Opt_WrappedBuilder;
 typedef struct Array_AbilityInfo Array_AbilityInfo;
 typedef struct Opt_Array_AbilityInfo Opt_Array_AbilityInfo;
+typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
+typedef struct Opt_Array_AlertDialogButtonOptions Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_Animation Array_Animation;
 typedef struct Opt_Array_Animation Opt_Array_Animation;
 typedef struct Array_Array_String Array_Array_String;
@@ -953,6 +955,8 @@ typedef struct Array_ShadowOptions Array_ShadowOptions;
 typedef struct Opt_Array_ShadowOptions Opt_Array_ShadowOptions;
 typedef struct Array_ShapePoint Array_ShapePoint;
 typedef struct Opt_Array_ShapePoint Opt_Array_ShapePoint;
+typedef struct Array_SheetInfo Array_SheetInfo;
+typedef struct Opt_Array_SheetInfo Opt_Array_SheetInfo;
 typedef struct Array_Skill Array_Skill;
 typedef struct Opt_Array_Skill Opt_Array_Skill;
 typedef struct Array_SkillUri Array_SkillUri;
@@ -1613,6 +1617,8 @@ typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
 typedef struct Opt_AdsBlockedDetails Opt_AdsBlockedDetails;
+typedef struct Ark_AlertDialogTextStyleOptions Ark_AlertDialogTextStyleOptions;
+typedef struct Opt_AlertDialogTextStyleOptions Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_AlignRuleOption Ark_AlignRuleOption;
 typedef struct Opt_AlignRuleOption Opt_AlignRuleOption;
 typedef struct AnimationPeer AnimationPeer;
@@ -2379,6 +2385,14 @@ typedef struct Opt_WorkerOptions Opt_WorkerOptions;
 typedef struct XComponentControllerPeer XComponentControllerPeer;
 typedef struct XComponentControllerPeer* Ark_XComponentController;
 typedef struct Opt_XComponentController Opt_XComponentController;
+typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
+typedef struct Opt_ActionSheetButtonOptions Opt_ActionSheetButtonOptions;
+typedef struct Ark_ActionSheetOffset Ark_ActionSheetOffset;
+typedef struct Opt_ActionSheetOffset Opt_ActionSheetOffset;
+typedef struct Ark_AlertDialogButtonBaseOptions Ark_AlertDialogButtonBaseOptions;
+typedef struct Opt_AlertDialogButtonBaseOptions Opt_AlertDialogButtonBaseOptions;
+typedef struct Ark_AlertDialogButtonOptions Ark_AlertDialogButtonOptions;
+typedef struct Opt_AlertDialogButtonOptions Opt_AlertDialogButtonOptions;
 typedef struct Ark_AlphabetIndexerOptions Ark_AlphabetIndexerOptions;
 typedef struct Opt_AlphabetIndexerOptions Opt_AlphabetIndexerOptions;
 typedef struct Ark_AnimateParam Ark_AnimateParam;
@@ -2562,6 +2576,8 @@ typedef struct Ark_ShapePoint Ark_ShapePoint;
 typedef struct Opt_ShapePoint Opt_ShapePoint;
 typedef struct Ark_sharedTransitionOptions Ark_sharedTransitionOptions;
 typedef struct Opt_sharedTransitionOptions Opt_sharedTransitionOptions;
+typedef struct Ark_SheetInfo Ark_SheetInfo;
+typedef struct Opt_SheetInfo Opt_SheetInfo;
 typedef struct Ark_SheetTitleOptions Ark_SheetTitleOptions;
 typedef struct Opt_SheetTitleOptions Opt_SheetTitleOptions;
 typedef struct Ark_SliderBlockStyle Ark_SliderBlockStyle;
@@ -2812,6 +2828,8 @@ typedef struct Ark_Union_CustomBuilder_SwipeActionItem Ark_Union_CustomBuilder_S
 typedef struct Opt_Union_CustomBuilder_SwipeActionItem Opt_Union_CustomBuilder_SwipeActionItem;
 typedef struct Ark_Union_Dimension_BorderRadiuses Ark_Union_Dimension_BorderRadiuses;
 typedef struct Opt_Union_Dimension_BorderRadiuses Opt_Union_Dimension_BorderRadiuses;
+typedef struct Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses;
+typedef struct Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses;
 typedef struct Ark_Union_Dimension_EdgeOutlineWidths Ark_Union_Dimension_EdgeOutlineWidths;
 typedef struct Opt_Union_Dimension_EdgeOutlineWidths Opt_Union_Dimension_EdgeOutlineWidths;
 typedef struct Ark_Union_Dimension_EdgeWidths Ark_Union_Dimension_EdgeWidths;
@@ -2890,6 +2908,14 @@ typedef struct Ark_Union_Union_Padding_Dimension_LocalizedPadding Ark_Union_Unio
 typedef struct Opt_Union_Union_Padding_Dimension_LocalizedPadding Opt_Union_Union_Padding_Dimension_LocalizedPadding;
 typedef struct Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters;
 typedef struct Opt_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters Opt_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters;
+typedef struct Ark_ActionSheetOptions Ark_ActionSheetOptions;
+typedef struct Opt_ActionSheetOptions Opt_ActionSheetOptions;
+typedef struct Ark_AlertDialogParamWithButtons Ark_AlertDialogParamWithButtons;
+typedef struct Opt_AlertDialogParamWithButtons Opt_AlertDialogParamWithButtons;
+typedef struct Ark_AlertDialogParamWithConfirm Ark_AlertDialogParamWithConfirm;
+typedef struct Opt_AlertDialogParamWithConfirm Opt_AlertDialogParamWithConfirm;
+typedef struct Ark_AlertDialogParamWithOptions Ark_AlertDialogParamWithOptions;
+typedef struct Opt_AlertDialogParamWithOptions Opt_AlertDialogParamWithOptions;
 typedef struct Ark_Area Ark_Area;
 typedef struct Opt_Area Opt_Area;
 typedef struct Ark_BadgeParamWithNumber Ark_BadgeParamWithNumber;
@@ -3005,6 +3031,8 @@ typedef struct Opt_TouchEvent Opt_TouchEvent;
 typedef struct uiObserver_RouterPageInfoPeer uiObserver_RouterPageInfoPeer;
 typedef struct uiObserver_RouterPageInfoPeer* Ark_uiObserver_RouterPageInfo;
 typedef struct Opt_uiObserver_RouterPageInfo Opt_uiObserver_RouterPageInfo;
+typedef struct Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
+typedef struct Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
 typedef struct Ark_Union_BadgeParamWithNumber_BadgeParamWithString Ark_Union_BadgeParamWithNumber_BadgeParamWithString;
 typedef struct Opt_Union_BadgeParamWithNumber_BadgeParamWithString Opt_Union_BadgeParamWithNumber_BadgeParamWithString;
 typedef struct Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions;
@@ -8131,6 +8159,15 @@ typedef struct Opt_Array_AbilityInfo {
     Ark_Tag tag;
     Array_AbilityInfo value;
 } Opt_Array_AbilityInfo;
+typedef struct Array_AlertDialogButtonOptions {
+    /* kind: ContainerType */
+    Ark_AlertDialogButtonOptions* array;
+    Ark_Int32 length;
+} Array_AlertDialogButtonOptions;
+typedef struct Opt_Array_AlertDialogButtonOptions {
+    Ark_Tag tag;
+    Array_AlertDialogButtonOptions value;
+} Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_Animation {
     /* kind: ContainerType */
     Ark_Animation* array;
@@ -8671,6 +8708,15 @@ typedef struct Opt_Array_ShapePoint {
     Ark_Tag tag;
     Array_ShapePoint value;
 } Opt_Array_ShapePoint;
+typedef struct Array_SheetInfo {
+    /* kind: ContainerType */
+    Ark_SheetInfo* array;
+    Ark_Int32 length;
+} Array_SheetInfo;
+typedef struct Opt_Array_SheetInfo {
+    Ark_Tag tag;
+    Array_SheetInfo value;
+} Opt_Array_SheetInfo;
 typedef struct Array_Skill {
     /* kind: ContainerType */
     Ark_Skill* array;
@@ -11948,6 +11994,14 @@ typedef struct Opt_AdsBlockedDetails {
     Ark_Tag tag;
     Ark_AdsBlockedDetails value;
 } Opt_AdsBlockedDetails;
+typedef struct Ark_AlertDialogTextStyleOptions {
+    /* kind: Interface */
+    Opt_WordBreak wordBreak;
+} Ark_AlertDialogTextStyleOptions;
+typedef struct Opt_AlertDialogTextStyleOptions {
+    Ark_Tag tag;
+    Ark_AlertDialogTextStyleOptions value;
+} Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_AlignRuleOption {
     /* kind: Interface */
     Ark_Int32 _stub;
@@ -15456,6 +15510,56 @@ typedef struct Opt_XComponentController {
     Ark_Tag tag;
     Ark_XComponentController value;
 } Opt_XComponentController;
+typedef struct Ark_ActionSheetButtonOptions {
+    /* kind: Interface */
+    Opt_Boolean enabled;
+    Opt_Boolean defaultFocus;
+    Opt_DialogButtonStyle style;
+    Ark_Union_String_Resource value;
+    VoidCallback action;
+} Ark_ActionSheetButtonOptions;
+typedef struct Opt_ActionSheetButtonOptions {
+    Ark_Tag tag;
+    Ark_ActionSheetButtonOptions value;
+} Opt_ActionSheetButtonOptions;
+typedef struct Ark_ActionSheetOffset {
+    /* kind: Interface */
+    Ark_Union_Number_String_Resource dx;
+    Ark_Union_Number_String_Resource dy;
+} Ark_ActionSheetOffset;
+typedef struct Opt_ActionSheetOffset {
+    Ark_Tag tag;
+    Ark_ActionSheetOffset value;
+} Opt_ActionSheetOffset;
+typedef struct Ark_AlertDialogButtonBaseOptions {
+    /* kind: Interface */
+    Opt_Boolean enabled;
+    Opt_Boolean defaultFocus;
+    Opt_DialogButtonStyle style;
+    Ark_ResourceStr value;
+    Opt_ResourceColor fontColor;
+    Opt_ResourceColor backgroundColor;
+    VoidCallback action;
+} Ark_AlertDialogButtonBaseOptions;
+typedef struct Opt_AlertDialogButtonBaseOptions {
+    Ark_Tag tag;
+    Ark_AlertDialogButtonBaseOptions value;
+} Opt_AlertDialogButtonBaseOptions;
+typedef struct Ark_AlertDialogButtonOptions {
+    /* kind: Interface */
+    Opt_Boolean enabled;
+    Opt_Boolean defaultFocus;
+    Opt_DialogButtonStyle style;
+    Ark_ResourceStr value;
+    Opt_ResourceColor fontColor;
+    Opt_ResourceColor backgroundColor;
+    VoidCallback action;
+    Opt_Boolean primary;
+} Ark_AlertDialogButtonOptions;
+typedef struct Opt_AlertDialogButtonOptions {
+    Ark_Tag tag;
+    Ark_AlertDialogButtonOptions value;
+} Opt_AlertDialogButtonOptions;
 typedef struct Ark_AlphabetIndexerOptions {
     /* kind: Interface */
     Array_String arrayValue;
@@ -16341,6 +16445,16 @@ typedef struct Opt_sharedTransitionOptions {
     Ark_Tag tag;
     Ark_sharedTransitionOptions value;
 } Opt_sharedTransitionOptions;
+typedef struct Ark_SheetInfo {
+    /* kind: Interface */
+    Ark_Union_String_Resource title;
+    Opt_Union_String_Resource icon;
+    VoidCallback action;
+} Ark_SheetInfo;
+typedef struct Opt_SheetInfo {
+    Ark_Tag tag;
+    Ark_SheetInfo value;
+} Opt_SheetInfo;
 typedef struct Ark_SheetTitleOptions {
     /* kind: Interface */
     Ark_ResourceStr title;
@@ -17682,6 +17796,19 @@ typedef struct Opt_Union_Dimension_BorderRadiuses {
     Ark_Tag tag;
     Ark_Union_Dimension_BorderRadiuses value;
 } Opt_Union_Dimension_BorderRadiuses;
+typedef struct Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Dimension value0;
+        Ark_BorderRadiuses value1;
+        Ark_LocalizedBorderRadiuses value2;
+    };
+} Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses;
+typedef struct Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses {
+    Ark_Tag tag;
+    Ark_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses value;
+} Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses;
 typedef struct Ark_Union_Dimension_EdgeOutlineWidths {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18167,6 +18294,179 @@ typedef struct Opt_Union_XComponentParameters_XComponentOptions_NativeXComponent
     Ark_Tag tag;
     Ark_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters value;
 } Opt_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters;
+typedef struct Ark_ActionSheetOptions {
+    /* kind: Interface */
+    Ark_Union_String_Resource title;
+    Opt_ResourceStr subtitle;
+    Ark_Union_String_Resource message;
+    Opt_ActionSheetButtonOptions confirm;
+    Opt_VoidCallback cancel;
+    Array_SheetInfo sheets;
+    Opt_Boolean autoCancel;
+    Opt_DialogAlignment alignment;
+    Opt_ActionSheetOffset offset;
+    Opt_Rectangle maskRect;
+    Opt_Boolean showInSubWindow;
+    Opt_Boolean isModal;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_TransitionEffect transition;
+    Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses cornerRadius;
+    Opt_Dimension width;
+    Opt_Dimension height;
+    Opt_Union_Dimension_EdgeWidths_LocalizedEdgeWidths borderWidth;
+    Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
+    Opt_Union_BorderStyle_EdgeStyles borderStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
+} Ark_ActionSheetOptions;
+typedef struct Opt_ActionSheetOptions {
+    Ark_Tag tag;
+    Ark_ActionSheetOptions value;
+} Opt_ActionSheetOptions;
+typedef struct Ark_AlertDialogParamWithButtons {
+    /* kind: Interface */
+    Opt_ResourceStr title;
+    Opt_ResourceStr subtitle;
+    Ark_ResourceStr message;
+    Opt_Boolean autoCancel;
+    Opt_VoidCallback cancel;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_Number gridCount;
+    Opt_Rectangle maskRect;
+    Opt_Boolean showInSubWindow;
+    Opt_Boolean isModal;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_TransitionEffect transition;
+    Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses cornerRadius;
+    Opt_Dimension width;
+    Opt_Dimension height;
+    Opt_Union_Dimension_EdgeWidths_LocalizedEdgeWidths borderWidth;
+    Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
+    Opt_Union_BorderStyle_EdgeStyles borderStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_AlertDialogTextStyleOptions textStyle;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
+    Ark_AlertDialogButtonBaseOptions primaryButton;
+    Ark_AlertDialogButtonBaseOptions secondaryButton;
+} Ark_AlertDialogParamWithButtons;
+typedef struct Opt_AlertDialogParamWithButtons {
+    Ark_Tag tag;
+    Ark_AlertDialogParamWithButtons value;
+} Opt_AlertDialogParamWithButtons;
+typedef struct Ark_AlertDialogParamWithConfirm {
+    /* kind: Interface */
+    Opt_ResourceStr title;
+    Opt_ResourceStr subtitle;
+    Ark_ResourceStr message;
+    Opt_Boolean autoCancel;
+    Opt_VoidCallback cancel;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_Number gridCount;
+    Opt_Rectangle maskRect;
+    Opt_Boolean showInSubWindow;
+    Opt_Boolean isModal;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_TransitionEffect transition;
+    Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses cornerRadius;
+    Opt_Dimension width;
+    Opt_Dimension height;
+    Opt_Union_Dimension_EdgeWidths_LocalizedEdgeWidths borderWidth;
+    Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
+    Opt_Union_BorderStyle_EdgeStyles borderStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_AlertDialogTextStyleOptions textStyle;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
+    Opt_AlertDialogButtonBaseOptions confirm;
+} Ark_AlertDialogParamWithConfirm;
+typedef struct Opt_AlertDialogParamWithConfirm {
+    Ark_Tag tag;
+    Ark_AlertDialogParamWithConfirm value;
+} Opt_AlertDialogParamWithConfirm;
+typedef struct Ark_AlertDialogParamWithOptions {
+    /* kind: Interface */
+    Opt_ResourceStr title;
+    Opt_ResourceStr subtitle;
+    Ark_ResourceStr message;
+    Opt_Boolean autoCancel;
+    Opt_VoidCallback cancel;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_Number gridCount;
+    Opt_Rectangle maskRect;
+    Opt_Boolean showInSubWindow;
+    Opt_Boolean isModal;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_TransitionEffect transition;
+    Opt_Union_Dimension_BorderRadiuses_LocalizedBorderRadiuses cornerRadius;
+    Opt_Dimension width;
+    Opt_Dimension height;
+    Opt_Union_Dimension_EdgeWidths_LocalizedEdgeWidths borderWidth;
+    Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
+    Opt_Union_BorderStyle_EdgeStyles borderStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_AlertDialogTextStyleOptions textStyle;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
+    Array_AlertDialogButtonOptions buttons;
+    Opt_DialogButtonDirection buttonDirection;
+} Ark_AlertDialogParamWithOptions;
+typedef struct Opt_AlertDialogParamWithOptions {
+    Ark_Tag tag;
+    Ark_AlertDialogParamWithOptions value;
+} Opt_AlertDialogParamWithOptions;
 typedef struct Ark_Area {
     /* kind: Interface */
     Ark_Length width;
@@ -18799,6 +19099,19 @@ typedef struct Opt_uiObserver_RouterPageInfo {
     Ark_Tag tag;
     Ark_uiObserver_RouterPageInfo value;
 } Opt_uiObserver_RouterPageInfo;
+typedef struct Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_AlertDialogParamWithConfirm value0;
+        Ark_AlertDialogParamWithButtons value1;
+        Ark_AlertDialogParamWithOptions value2;
+    };
+} Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
+typedef struct Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions {
+    Ark_Tag tag;
+    Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions value;
+} Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions;
 typedef struct Ark_Union_BadgeParamWithNumber_BadgeParamWithString {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22904,6 +23217,14 @@ typedef struct GENERATED_ArkUIAccessibilityHoverEventAccessor {
                        const Ark_Number* windowY);
 } GENERATED_ArkUIAccessibilityHoverEventAccessor;
 
+typedef struct GENERATED_ArkUIActionSheetAccessor {
+    void (*show)(const Ark_ActionSheetOptions* options);
+} GENERATED_ArkUIActionSheetAccessor;
+
+typedef struct GENERATED_ArkUIAlertDialogAccessor {
+    void (*show)(const Ark_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions* options);
+} GENERATED_ArkUIAlertDialogAccessor;
+
 typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
     void (*SetClipRect)(Ark_NativePointer node,
                         Ark_Float32 x,
@@ -25967,6 +26288,8 @@ typedef struct GENERATED_ArkUINodeModifiers {
 
 typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAccessibilityHoverEventAccessor* (*getAccessibilityHoverEventAccessor)();
+    const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
+    const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIAxisEventAccessor* (*getAxisEventAccessor)();

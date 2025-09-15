@@ -17,10 +17,12 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
+import { ActionSheetOptions_serializer, ActionSheetOptions } from "./actionSheet"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from "./alertDialog"
+import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions } from "./units"
 import { Resource } from "global.resource"
@@ -64,6 +66,44 @@ import { CustomBuilderRootModifier } from "./../CustomBuilderRootModifier"
 import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
+export class ActionSheet {
+    static show_serialize(options: ActionSheetOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        ActionSheetOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._ActionSheet_show(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static show(options: ActionSheetOptions): void {
+        const options_casted = options as (ActionSheetOptions)
+        ActionSheet.show_serialize(options_casted)
+        return
+    }
+}
+export class AlertDialog {
+    static show_serialize(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options instanceof AlertDialogParamWithConfirm) {
+            thisSerializer.writeInt8((0).toChar())
+            const optionsForIdx0  = options as AlertDialogParamWithConfirm
+            AlertDialogParamWithConfirm_serializer.write(thisSerializer, optionsForIdx0)
+        } else if (options instanceof AlertDialogParamWithButtons) {
+            thisSerializer.writeInt8((1).toChar())
+            const optionsForIdx1  = options as AlertDialogParamWithButtons
+            AlertDialogParamWithButtons_serializer.write(thisSerializer, optionsForIdx1)
+        } else if (options instanceof AlertDialogParamWithOptions) {
+            thisSerializer.writeInt8((2).toChar())
+            const optionsForIdx2  = options as AlertDialogParamWithOptions
+            AlertDialogParamWithOptions_serializer.write(thisSerializer, optionsForIdx2)
+        }
+        ArkUIGeneratedNativeModule._AlertDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static show(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): void {
+        const options_casted = options as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
+        AlertDialog.show_serialize(options_casted)
+        return
+    }
+}
 export class AnimationExtender {
     static SetClipRect_serialize(node: KPointer, x: float, y: float, width: float, height: float): void {
         ArkUIGeneratedNativeModule._AnimationExtender_SetClipRect(node, x, y, width, height)
