@@ -120,7 +120,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg001, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -152,7 +152,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg002, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -184,7 +184,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg003, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -306,6 +306,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg007, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -334,6 +335,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg008, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -366,6 +368,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg009, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -398,6 +401,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg010, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -430,6 +434,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg011, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -462,6 +467,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg012, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -494,6 +500,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg013, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -504,8 +511,9 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg013, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     std::optional<bool> stateEffectValue = true;
-    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     ButtonModelStatic::SetStateEffect(frameNode, stateEffectValue);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
     EXPECT_EQ(buttonEventHub->GetStateEffect(), true);
 }
 
@@ -523,6 +531,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -573,6 +582,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg015, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -614,6 +624,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg016, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */
@@ -646,6 +657,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg017, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create button layoutProperty.
      */

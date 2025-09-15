@@ -18,5 +18,6 @@ ace_unittest("rating_test_ng") {
   sources = [
     "rating_content_modifier_test_ng.cpp",
     "rating_test_ng.cpp",
+    "rating_model_static_test_ng.cpp",
   ]
 }
