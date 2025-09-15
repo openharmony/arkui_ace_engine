@@ -4701,8 +4701,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
         " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
         " placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
@@ -4735,6 +4734,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
+        std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
+        privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
+        inputMethod->SendPrivateCommand(privateCommand);
         textFieldManager->SetIsImeAttached(true);
         textFieldManager->SetAttachInputId(GetRequestKeyboardId());
     }
@@ -10899,6 +10901,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("TextInput[%d]AddInsertCommand freeze:[%d] previewText:[%d]", host->GetId(),
         host->IsFreeze(), GetIsPreviewText());
+    TAG_LOGI(ACE_TEXT_FIELD, "AddInsertCommand len: %{public}d reason: %{public}d",
+        static_cast<int32_t>(insertValue.length()), static_cast<int32_t>(reason));
     if (reason != InputReason::PASTE) {
         if (!HasFocus()) {
             int32_t frameId = host->GetId();
@@ -10925,9 +10929,7 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
         }
         return;
     }
-    if (FinishTextPreviewByPreview(insertValue)) {
-        return;
-    }
+    CHECK_NULL_VOID(!FinishTextPreviewByPreview(insertValue));
     inputOperations_.emplace(InputOperation::INSERT);
     InsertCommandInfo info;
     info.insertValue = insertValue;
