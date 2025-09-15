@@ -52,12 +52,14 @@ DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
     isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    updateDataPanel_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(date_);
     AttachProperty(max_);
     AttachProperty(count_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
     AttachProperty(isEffect_);
+    AttachProperty(updateDataPanel_);
 
     shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowRadius().ConvertToPx());
     shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowOffsetX().ConvertToPx());
@@ -118,6 +120,7 @@ void DataPanelModifier::UpdateDate()
     } else {
         date_->Set(ANIMATION_END);
     }
+    updateDataPanel_->Set(!updateDataPanel_->Get());
 }
 
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) const

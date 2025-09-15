@@ -213,6 +213,7 @@ private:
     bool isHasShadowValue_ = false;
     bool isRtl_ = false;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> updateDataPanel_;
     
     RefPtr<AnimatablePropertyFloat> max_;
     RefPtr<AnimatablePropertyFloat> count_;
