@@ -162,6 +162,11 @@ public:
 
     int32_t GetCurrentIndex(bool original = false);
 
+    int32_t GetPreIndex() const
+    {
+        return oldIndex_;
+    }
+
     float GetTurnPageRate() const
     {
         return turnPageRate_;

@@ -150,6 +150,7 @@ struct TabContentInfo {
     int32_t index = 0;
     std::string id;
     int32_t uniqueId = 0;
+    std::optional<int32_t> lastIndex;
 
     TabContentInfo(std::string tabContentId, int32_t tabContentUniqueId, TabContentState state, int32_t index,
         std::string id, int32_t uniqueId)
@@ -200,6 +201,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
@@ -228,6 +230,7 @@ public:
         const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
+    using TabChangeHandleFunc = void (*)(const TabContentInfo&);
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
@@ -249,6 +252,7 @@ public:
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
+    void SetHandleTabChangeFunc(TabChangeHandleFunc func);
     void SetHandleGestureHandleFunc(GestureHandleFunc func);
 
     using BeforePanStartHandleFuncForAni = std::function<void()>;
@@ -280,6 +284,7 @@ private:
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
 
