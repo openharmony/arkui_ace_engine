@@ -16,6 +16,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/image_data_peer.h"
+#include "core/interfaces/native/utility/buffer_keeper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -54,11 +55,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Buffer GetDataImpl(Ark_ImageData peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    size_t size = peer->value.data.size() * sizeof(decltype(peer->value.data)::value_type);
+    Ark_Buffer result = BufferKeeper::Allocate(size);
+    if (!result.data || result.length < size) {
+        return {};
+    }
+    auto dst = reinterpret_cast<uint32_t*>(result.data);
+    std::copy(peer->value.data.begin(), peer->value.data.end(), dst);
+    return result;
 }
 void SetDataImpl(Ark_ImageData peer,
                  const Ark_Buffer* data)
 {
+    CHECK_NULL_VOID(peer && data && data->data && data->length > 0);
+    const uint32_t* ptr = reinterpret_cast<const uint32_t*>(data->data);
+    CHECK_NULL_VOID(ptr);
+    size_t size = data->length / sizeof(uint32_t);
+    peer->value.data.assign(ptr, ptr + size);
 }
 Ark_Int32 GetHeightImpl(Ark_ImageData peer)
 {
@@ -68,6 +82,11 @@ Ark_Int32 GetHeightImpl(Ark_ImageData peer)
 void SetHeightImpl(Ark_ImageData peer,
                    Ark_Int32 height)
 {
+    CHECK_NULL_VOID(peer);
+    if (Negative(height)) {
+        return;
+    }
+    peer->value.dirtyHeight = height;
 }
 Ark_Int32 GetWidthImpl(Ark_ImageData peer)
 {
@@ -77,6 +96,11 @@ Ark_Int32 GetWidthImpl(Ark_ImageData peer)
 void SetWidthImpl(Ark_ImageData peer,
                   Ark_Int32 width)
 {
+    CHECK_NULL_VOID(peer);
+    if (Negative(width)) {
+        return;
+    }
+    peer->value.dirtyWidth = width;
 }
 } // ImageDataAccessor
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
