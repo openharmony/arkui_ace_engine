@@ -81,6 +81,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         PreloadItems(wrapper_, info_, props_->GetCachedCountValue(info_->defCachedCount_));
     }
 
+    measuredStartIndex_ = info_->StartIndex();
+    measuredEndIndex_ = info_->EndIndex();
     isLayouted_ = false;
 }
 

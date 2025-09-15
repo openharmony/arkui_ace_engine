@@ -93,6 +93,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
         PreloadItems(wrapper_, info_, cacheCnt);
     }
 
+    measuredStartIndex_ = info_->StartIndex();
+    measuredEndIndex_ = info_->EndIndex();
     isLayouted_ = false;
 }
 

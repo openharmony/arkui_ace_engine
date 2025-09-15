@@ -211,14 +211,6 @@ private:
         return info_;
     }
 
-    int32_t MeasuredStartIndex() const override {
-        return info_->StartIndex();
-    }
-
-    int32_t MeasuredEndIndex() const override {
-        return info_->EndIndex();
-    }
-
     int32_t itemCnt_ = 0; // total number of FlowItems (excluding footer)
     float mainLen_ = 0.0f;
     std::optional<int64_t> cacheDeadline_; // cache layout deadline
