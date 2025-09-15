@@ -923,7 +923,7 @@ HWTEST_F(NavigationPatternTestFiveNg, GetFirstNewDestinationIndex003, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded001
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => true
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded001, TestSize.Level1)
@@ -941,13 +941,17 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded001, TestSize.L
     NavPathList preList;
     pattern->needSyncWithJsStack_ = true;
 
-    pattern->forceSplitSuccess_ = true;
-    pattern->homeNodeTouched_ = false;
+    pattern->forceSplitSuccess_ = false;
     pattern->ClearSecondaryNodesIfNeeded(std::move(preList));
     ASSERT_TRUE(pattern->needSyncWithJsStack_);
 
-    pattern->forceSplitSuccess_ = false;
-    pattern->homeNodeTouched_ = true;
+    pattern->forceSplitSuccess_ = true;
+    pattern->homeNodeTouched_ = std::nullopt;
+    pattern->ClearSecondaryNodesIfNeeded(std::move(preList));
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+
+    pattern->forceSplitSuccess_ = true;
+    pattern->homeNodeTouched_ = false;
     pattern->ClearSecondaryNodesIfNeeded(std::move(preList));
     ASSERT_TRUE(pattern->needSyncWithJsStack_);
 
@@ -959,7 +963,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded001, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded002
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => true
  * @tc.type: FUNC
  */
@@ -987,7 +991,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded002, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded003
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => true
  * @tc.type: FUNC
@@ -1034,7 +1038,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded003, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded004
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => true
@@ -1074,7 +1078,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded004, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded005
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => false
@@ -1136,7 +1140,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded005, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded006
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => false
@@ -1210,7 +1214,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded006, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded007
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => false
@@ -1267,7 +1271,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded007, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded008
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => false
@@ -1322,7 +1326,7 @@ HWTEST_F(NavigationPatternTestFiveNg, ClearSecondaryNodesIfNeeded008, TestSize.L
 
 /**
  * @tc.name: ClearSecondaryNodesIfNeeded009
- * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_) { => false
+ * @tc.desc: Branch: if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value()) { => false
  *                   if (!forceSplitUseNavBar_ && !homeNode) { => false
  *                   if (curList.empty()) { => false
  *                   if (it != preList.end()) { => false
