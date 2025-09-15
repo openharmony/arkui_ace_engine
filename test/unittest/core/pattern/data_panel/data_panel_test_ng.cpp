@@ -2364,4 +2364,26 @@ HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
     dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, true);
     dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, false);
 }
+
+/**
+ * @tc.name: DataPanelUpdateDateTest002
+ * @tc.desc: Test DataPanel PaintMethod UpdateDate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest002, TestSize.Level0)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+
+    /**
+     * @tc.cases: case. cover branch isEffect_.
+     */
+    DataPanelModifier dataPanelModifier(nullptr);
+    dataPanelModifier.isEffect_->Set(false);
+    dataPanelModifier.date_->Set(1.0f);
+    dataPanelModifier.UpdateDate();
+    EXPECT_EQ(1.0f, dataPanelModifier.date_->Get());
+}
 } // namespace OHOS::Ace::NG
