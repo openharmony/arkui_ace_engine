@@ -36,12 +36,16 @@ public:
     void ProcessBadgeTextColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBorderColor(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    void ProcessOuterBorderColor(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessFontWeight(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessFontSize(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgeSize(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgePositionX(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBadgePositionY(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessBorderWidth(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    void ProcessOuterBorderWidth(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetBadgeParam(
         FrameNode* frameNode, BadgeParameters& badgeParameters, bool isDefaultFontSize, bool isDefaultBadgeSize);

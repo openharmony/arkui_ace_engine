@@ -34018,9 +34018,10 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1;
+    let _outerBorderColor, _outerBorderWidth, _enableAutoAvoidance;
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithNumber(node, undefined, undefined, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined, undefined, undefined, undefined);
     }
     else {
       if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
@@ -34034,7 +34035,7 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
           isObject((_g = this.value) === null || _g === void 0 ? void 0 : _g.position) &&
           !isNull((_h = this.value) === null || _h === void 0 ? void 0 : _h.position),
           (_j = this.value) === null || _j === void 0 ? void 0 : _j.count,
-          (_k = this.value) === null || _k === void 0 ? void 0 : _k.maxCount);
+          (_k = this.value) === null || _k === void 0 ? void 0 : _k.maxCount, undefined, undefined, undefined);
       }
       else {
         getUINativeModule().badge.setBadgeParamWithNumber(node,
@@ -34053,12 +34054,16 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
           isObject((_y = this.value) === null || _y === void 0 ? void 0 : _y.position) &&
           !isNull((_z = this.value) === null || _z === void 0 ? void 0 : _z.position),
           (_0 = this.value) === null || _0 === void 0 ? void 0 : _0.count,
-          (_1 = this.value) === null || _1 === void 0 ? void 0 : _1.maxCount);
+          (_1 = this.value) === null || _1 === void 0 ? void 0 : _1.maxCount,
+          (_outerBorderColor = this.value.style) === null || _outerBorderColor === void 0 ? void 0 : _outerBorderColor.outerBorderColor,
+          (_outerBorderWidth = this.value.style) === null || _outerBorderWidth === void 0 ? void 0 : _outerBorderWidth.outerBorderWidth,
+          (_enableAutoAvoidance = this.value.style) === null || _enableAutoAvoidance === void 0 ? void 0 : _enableAutoAvoidance.enableAutoAvoidance);
       }
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
+    let _outerBorderColor1, _outerBorderColor2, _outerBorderWidth1, _outerBorderWidth2, _enableAutoAvoidance1, _enableAutoAvoidance2;
     let positionResult = false;
     let badgeSizeResult = false;
     let borderWidthResult = false;
@@ -34067,6 +34072,9 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
     let colorResult = false;
     let fontSizeResult = false;
     let fontWeightResult = false;
+    let outerBorderColorResult = false;
+    let outerBorderWidthResult = false;
+    let enableAutoAvoidanceResult = false;
     if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
       isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
@@ -34098,6 +34106,12 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
         (_z = this.value.style) === null || _z === void 0 ? void 0 : _z.fontSize);
       fontWeightResult = !isBaseOrResourceEqual((_0 = this.stageValue.style) === null || _0 === void 0 ? void 0 : _0.fontWeight,
         (_1 = this.value.style) === null || _1 === void 0 ? void 0 : _1.fontWeight);
+      outerBorderColorResult = !isBaseOrResourceEqual((_outerBorderColor1 = this.stageValue.style) === null || _outerBorderColor1 === void 0 ? void 0 : _outerBorderColor1.outerBorderColor,
+        (_outerBorderColor2 = this.value.style) === null || _outerBorderColor2 === void 0 ? void 0 : _outerBorderColor2.outerBorderColor);
+      outerBorderWidthResult = !isBaseOrResourceEqual((_outerBorderWidth1 = this.stageValue.style) === null || _outerBorderWidth1 === void 0 ? void 0 : _outerBorderWidth1.outerBorderWidth,
+        (_outerBorderWidth2 = this.value.style) === null || _outerBorderWidth2 === void 0 ? void 0 : _outerBorderWidth2.outerBorderWidth);
+      enableAutoAvoidanceResult = !isBaseOrResourceEqual((_enableAutoAvoidance1 = this.stageValue.style) === null || _enableAutoAvoidance1 === void 0 ? void 0 : _enableAutoAvoidance1.enableAutoAvoidance,
+        (_enableAutoAvoidance2 = this.value.style) === null || _enableAutoAvoidance2 === void 0 ? void 0 : _enableAutoAvoidance2.enableAutoAvoidance);
     }
     else if (((_2 = this.stageValue) === null || _2 === void 0 ? void 0 : _2.style) !== undefined ||
       ((_3 = this.value) === null || _3 === void 0 ? void 0 : _3.style) !== undefined) {
@@ -34108,12 +34122,15 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
       colorResult = true;
       fontSizeResult = true;
       fontWeightResult = true;
+      outerBorderColorResult = true;
+      outerBorderWidthResult = true;
+      enableAutoAvoidanceResult = true;
     }
     return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
       fontSizeResult || fontWeightResult || !isBaseOrResourceEqual((_4 = this.stageValue) === null || _4 === void 0 ? void 0 : _4.count,
       (_5 = this.value) === null || _5 === void 0 ? void 0 : _5.count) ||
       !isBaseOrResourceEqual((_6 = this.stageValue) === null || _6 === void 0 ? void 0 : _6.maxCount,
-      (_7 = this.value) === null || _7 === void 0 ? void 0 : _7.maxCount);
+      (_7 = this.value) === null || _7 === void 0 ? void 0 : _7.maxCount) || outerBorderColorResult || outerBorderWidthResult || enableAutoAvoidanceResult;
   }
 }
 BadgeParamWithNumberModifier.identity = Symbol('BadgeParamWithNumber');
@@ -34123,9 +34140,10 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+    let _outerBorderColor, _outerBorderWidth, _enableAutoAvoidance;
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithString(node, undefined, undefined, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
@@ -34138,7 +34156,7 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
           undefined, undefined, undefined, undefined, undefined, undefined, undefined,
           isObject((_g = this.value) === null || _g === void 0 ? void 0 : _g.position) &&
           !isNull((_h = this.value) === null || _h === void 0 ? void 0 : _h.position),
-          (_j = this.value) === null || _j === void 0 ? void 0 : _j.value);
+          (_j = this.value) === null || _j === void 0 ? void 0 : _j.value, undefined, undefined, undefined);
       }
       else {
         getUINativeModule().badge.setBadgeParamWithString(node,
@@ -34156,12 +34174,16 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
           (_w = this.value.style) === null || _w === void 0 ? void 0 : _w.fontWeight,
           isObject((_x = this.value) === null || _x === void 0 ? void 0 : _x.position) &&
           !isNull((_y = this.value) === null || _y === void 0 ? void 0 : _y.position),
-          (_z = this.value) === null || _z === void 0 ? void 0 : _z.value);
+          (_z = this.value) === null || _z === void 0 ? void 0 : _z.value,
+          (_outerBorderColor = this.value.style) === null || _outerBorderColor === void 0 ? void 0 : _outerBorderColor.outerBorderColor,
+          (_outerBorderWidth = this.value.style) === null || _outerBorderWidth === void 0 ? void 0 : _outerBorderWidth.outerBorderWidth,
+          (_enableAutoAvoidance = this.value.style) === null || _enableAutoAvoidance === void 0 ? void 0 : _enableAutoAvoidance.enableAutoAvoidance);
       }
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5;
+    let _outerBorderColor1, _outerBorderColor2, _outerBorderWidth1, _outerBorderWidth2, _enableAutoAvoidance1, _enableAutoAvoidance2;
     let positionResult = false;
     let badgeSizeResult = false;
     let borderWidthResult = false;
@@ -34170,6 +34192,9 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
     let colorResult = false;
     let fontSizeResult = false;
     let fontWeightResult = false;
+    let outerBorderColorResult = false;
+    let outerBorderWidthResult = false;
+    let enableAutoAvoidanceResult = false;
     if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
       isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
@@ -34201,6 +34226,12 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
         (_z = this.value.style) === null || _z === void 0 ? void 0 : _z.fontSize);
       fontWeightResult = !isBaseOrResourceEqual((_0 = this.stageValue.style) === null || _0 === void 0 ? void 0 : _0.fontWeight,
         (_1 = this.value.style) === null || _1 === void 0 ? void 0 : _1.fontWeight);
+      outerBorderColorResult = !isBaseOrResourceEqual((_outerBorderColor1 = this.stageValue.style) === null || _outerBorderColor1 === void 0 ? void 0 : _outerBorderColor1.outerBorderColor,
+        (_outerBorderColor2 = this.value.style) === null || _outerBorderColor2 === void 0 ? void 0 : _outerBorderColor2.outerBorderColor);
+      outerBorderWidthResult = !isBaseOrResourceEqual((_outerBorderWidth1 = this.stageValue.style) === null || _outerBorderWidth1 === void 0 ? void 0 : _outerBorderWidth1.outerBorderWidth,
+        (_outerBorderWidth2 = this.value.style) === null || _outerBorderWidth2 === void 0 ? void 0 : _outerBorderWidth2.outerBorderWidth);
+      enableAutoAvoidanceResult = !isBaseOrResourceEqual((_enableAutoAvoidance1 = this.stageValue.style) === null || _enableAutoAvoidance1 === void 0 ? void 0 : _enableAutoAvoidance1.enableAutoAvoidance,
+        (_enableAutoAvoidance2 = this.value.style) === null || _enableAutoAvoidance2 === void 0 ? void 0 : _enableAutoAvoidance2.enableAutoAvoidance);
     }
     else if (((_2 = this.stageValue) === null || _2 === void 0 ? void 0 : _2.style) !== undefined ||
       ((_3 = this.value) === null || _3 === void 0 ? void 0 : _3.style) !== undefined) {
@@ -34211,10 +34242,13 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
       colorResult = true;
       fontSizeResult = true;
       fontWeightResult = true;
+      outerBorderColorResult = true;
+      outerBorderWidthResult = true;
+      enableAutoAvoidanceResult = true;
     }
     return positionResult || badgeSizeResult || borderWidthResult || badgeColorResult || borderColorResult || colorResult ||
       fontSizeResult || fontWeightResult || !isBaseOrResourceEqual((_4 = this.stageValue) === null || _4 === void 0 ? void 0 : _4.value,
-      (_5 = this.value) === null || _5 === void 0 ? void 0 : _5.value);
+      (_5 = this.value) === null || _5 === void 0 ? void 0 : _5.value) || outerBorderColorResult || outerBorderWidthResult || enableAutoAvoidanceResult;
   }
 }
 BadgeParamWithStringModifier.identity = Symbol('BadgeParamWithString');
