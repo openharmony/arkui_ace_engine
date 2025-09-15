@@ -221,6 +221,13 @@ int32_t HandleCTouchEventSourceType(const ArkUI_UIInputEvent* event)
 
 int32_t HandleCClickEventSourceType(const ArkUI_UIInputEvent* event)
 {
+    if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
+        const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+        if (!keyEvent) {
+            RETURN_RET_WITH_STATUS_CHECK(-1, ARKUI_ERROR_CODE_PARAM_INVALID);
+        }
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<int32_t>(keyEvent->sourceType), ARKUI_ERROR_CODE_NO_ERROR);
+    }
     const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
     if (!clickEvent) {
         RETURN_RET_WITH_STATUS_CHECK(

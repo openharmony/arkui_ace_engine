@@ -1552,6 +1552,7 @@ struct ArkUIKeyEvent {
     ArkUI_Bool isNumLockOn;
     ArkUI_Bool isCapsLockOn;
     ArkUI_Bool isScrollLockOn;
+    ArkUI_Int32 sourceType;
 
     // user input.
     bool isConsumed;

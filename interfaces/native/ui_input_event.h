@@ -120,6 +120,18 @@ enum {
     UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE = 1,
     /** Touchscreen. */
     UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN = 2,
+    /**
+     * @brief The key type.
+     *
+     * @since 21
+     */
+    UI_INPUT_EVENT_SOURCE_TYPE_KEY = 4,
+    /**
+     * @brief The joystick type.
+     *
+     * @since 21
+     */
+    UI_INPUT_EVENT_SOURCE_TYPE_JOYSTICK = 5,
 };
 
 /**

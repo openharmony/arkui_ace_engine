@@ -365,6 +365,23 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetSourceType002, TestSize.Leve
     ret = OH_ArkUI_UIInputEvent_GetSourceType(&event);
     EXPECT_EQ(ret, 1);
 
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
+    event.apiVersion = 21;
+    ArkUIKeyEvent keyEvent;
+    keyEvent.sourceType = 4;
+    event.inputEvent = &keyEvent;
+    ret = OH_ArkUI_UIInputEvent_GetSourceType(&event);
+    EXPECT_EQ(ret, UI_INPUT_EVENT_SOURCE_TYPE_KEY);
+    keyEvent.sourceType = 5;
+    event.inputEvent = &keyEvent;
+    ret = OH_ArkUI_UIInputEvent_GetSourceType(&event);
+    EXPECT_EQ(ret, UI_INPUT_EVENT_SOURCE_TYPE_JOYSTICK);
+    keyEvent.sourceType = 4;
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_UIInputEvent_GetSourceType(&event);
+    EXPECT_EQ(ret, -1);
+
     event.eventTypeId = C_AXIS_EVENT_ID;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_UIInputEvent_GetSourceType(&event);
