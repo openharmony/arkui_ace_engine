@@ -27,8 +27,8 @@ constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
 constexpr int32_t STEPS_MIN_NUMBER = 2;
 } // namespace
-SliderContentModifier::SliderContentModifier(
-    const Parameters& parameters, UpdateImageCenterCallback updateImageCenterCallback)
+SliderContentModifier::SliderContentModifier(const Parameters& parameters,
+    UpdateImageCenterCallback updateImageCenterCallback, const RefPtr<SliderTheme>& theme)
     : updateImageCenterCallback_(std::move(updateImageCenterCallback)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
@@ -44,8 +44,16 @@ SliderContentModifier::SliderContentModifier(
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
     selectGradientColor_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.selectGradientColor));
-    blockGradientColor_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
-        GradientArithmetic(parameters.blockGradientColor.value_or(Gradient())));
+    if (parameters.blockColor.has_value()) {
+        blockGradientColor_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(SliderModelNG::CreateSolidGradient(parameters.blockColor.value())));
+    } else if (parameters.blockGradientColor.has_value()) {
+        blockGradientColor_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(parameters.blockGradientColor.value()));
+    } else {
+        blockGradientColor_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(SliderModelNG::CreateSolidGradient(theme ? theme->GetBlockColor() : Color())));
+    }
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
     selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
     stepSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1);
