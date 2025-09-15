@@ -1244,14 +1244,14 @@ export class MultiNavPathStack extends NavPathStack {
         console.log('MultiNavPathStack popToIndex home' + i);
         this.subStackList[i]?.secondaryStack.clear();
         this.subStackList[i].secondaryStack.policyInfoList.splice(0);
-        this.totalStack.splice(index + 1);
+        this.totalStack.splice(index.toInt() + 1);
         this.clearTrashStack(i + 1, {}, animated);
         console.log('MultiNavPathStack popToIndex totalStack=' + this.totalStack.length);
         break;
       } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
         this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
-        this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
-        this.totalStack.splice(index + 1);
+        this.subStackList[i].secondaryStack.policyInfoList.splice(index.toInt() - removeIndex + 1);
+        this.totalStack.splice(index.toInt() + 1);
         this.clearTrashStack(i + 1, {}, animated);
       }
       removeIndex += secondaryStackSize[i];
@@ -1284,14 +1284,14 @@ export class MultiNavPathStack extends NavPathStack {
         console.log('MultiNavPathStack popToIndex home' + i);
         this.subStackList[i]?.secondaryStack.clear();
         this.subStackList[i].secondaryStack.policyInfoList.splice(0);
-        this.totalStack.splice(index + 1);
+        this.totalStack.splice(index.toInt() + 1);
         this.clearTrashStack(i + 1, result, animated);
         console.log('MultiNavPathStack popToIndex totalStack=' + this.totalStack.length);
         break;
       } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
         this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
-        this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
-        this.totalStack.splice(index + 1);
+        this.subStackList[i].secondaryStack.policyInfoList.splice(index.toInt() - removeIndex + 1);
+        this.totalStack.splice(index.toInt() + 1);
         this.clearTrashStack(i + 1, result, animated);
       }
       removeIndex += secondaryStackSize[i];
@@ -1319,7 +1319,7 @@ export class MultiNavPathStack extends NavPathStack {
       this.subStackList[i].primaryStack.policyInfoList.splice(0);
       this.subStackList[i].secondaryStack.policyInfoList.splice(0);
     }
-    this.subStackList.splice(index);
+    this.subStackList.splice(index.toInt());
     console.log('MultiNavPathStack popToIndex subStackList.length=' + this.subStackList.length);
     this.outerStack.popToIndex(index - 1, result as Object, animated);
     console.log('MultiNavPathStack popToIndex outerStack.size=' + this.outerStack.size());
@@ -1357,7 +1357,7 @@ export class MultiNavPathStack extends NavPathStack {
           let innerIndex = index - stepStartIndex;
           if (innerIndex !== 0) {
             this.subStackList[subIndex].secondaryStack.moveIndexToTop(innerIndex - 1, animated);
-            const subInfo = this.subStackList[subIndex].secondaryStack.policyInfoList.splice(innerIndex - 1, 1);
+            const subInfo = this.subStackList[subIndex].secondaryStack.policyInfoList.splice(innerIndex.toInt() - 1, 1);
             this.subStackList[subIndex].secondaryStack.policyInfoList.push(...subInfo);
           }
         }
@@ -1365,7 +1365,7 @@ export class MultiNavPathStack extends NavPathStack {
       }
     }
     if (outerIndex !== -1) {
-      let subStack = this.subStackList.splice(outerIndex, 1);
+      let subStack = this.subStackList.splice(outerIndex.toInt(), 1);
       this.subStackList.push(...subStack);
       this.outerStack.moveIndexToTop(outerIndex, animated);
     }

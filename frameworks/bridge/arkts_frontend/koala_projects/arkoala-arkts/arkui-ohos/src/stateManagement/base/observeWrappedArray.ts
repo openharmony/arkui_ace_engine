@@ -256,7 +256,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @returns new length
      */
-    public override pushArray(...val: T[]): number {
+    public override pushArray(...val: T[]): int {
         const ret = this.store_.push(...val);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -272,7 +272,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @returns new length
      */
-    public override pushOne(val: T): number {
+    public override pushOne(val: T): int {
         const ret = this.store_.push(val);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -283,7 +283,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         return ret;
     }
 
-    public push(...val: T[]): number {
+    public push(...val: T[]): int {
         return this.pushArray(...val);
     }
 
@@ -294,7 +294,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @returns new length
      */
-    public override pushECMA(...val: T[]): number {
+    public override pushECMA(...val: T[]): int {
         const ret = this.store_.pushECMA(...val);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -313,44 +313,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param delete number of items after start index
      * @returns an Array with deleted elements
      */
-    public override splice(start: number, deleteIdx: Number | undefined, ...items: T[]): Array<T> {
+    public override splice(start: int, deleteIdx: int | undefined, ...items: T[]): Array<T> {
         const ret = this.store_.splice(start, deleteIdx, ...items);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('splice');
-        return ret;
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     * @param delete number of items after start index
-     * @returns an Array with deleted elements
-     */
-    public override splice(start: int, deleteIdx: int, ...items: T[]): Array<T> {
-        const ret = this.store_.splice(start, deleteIdx, ...items);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-        // exec all subscribing @Watch
-        this.executeOnSubscribingWatches('splice');
-
-        return ret;
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     * @returns an Array with deleted elements from start to the last element of the current instance
-     */
-    public override splice(start: number): Array<T> {
-        const ret = this.store_.splice(start);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
@@ -398,7 +362,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param values data to be added
      * @returns new length of the Array
      */
-    public override unshift(...values: T[]): number {
+    public override unshift(...values: T[]): int {
         const ret = this.store_.unshift(...values);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -649,7 +613,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): number {
+    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findIndex(predicate);
     }
@@ -700,7 +664,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param predicate testing function
      * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findLastIndex(predicate);
     }
