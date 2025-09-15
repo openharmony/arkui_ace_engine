@@ -102,7 +102,7 @@ Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetHorizontalAxis();
+    float value = peer->GetBaseInfo()->GetHorizontalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
@@ -114,7 +114,7 @@ Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetVerticalAxis();
+    float value = peer->GetBaseInfo()->GetVerticalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
@@ -126,13 +126,15 @@ Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetPinchAxisScale();
+    float value = peer->GetBaseInfo()->GetPinchAxisScale();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisPinchImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisPinch)
 {
-    LOGE("BaseEventAccessor.SetAxisPinchImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisPinch);
+    peer->GetBaseInfo()->SetPinchAxisScale(Converter::Convert<float>(*axisPinch));
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
