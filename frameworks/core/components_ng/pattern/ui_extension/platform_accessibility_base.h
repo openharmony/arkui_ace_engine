@@ -32,6 +32,7 @@ public:
     virtual void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
     virtual void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) const = 0;
+    virtual void InitializeAccessibility() = 0;
 };
 
 } // namespace OHOS::Ace::NG

@@ -30,7 +30,7 @@ public:
     void FireOnErrorCallback(
         int32_t code, const std::string& name, const std::string& message) override;
     void RegisterVisibleAreaChange();
-    void InitializeAccessibility();
+    void InitializeAccessibility() override;
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;

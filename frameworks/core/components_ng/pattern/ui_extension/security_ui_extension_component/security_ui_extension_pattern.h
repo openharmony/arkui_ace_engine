@@ -144,7 +144,7 @@ public:
 
 protected:
     void UpdateSessionInstanceId(int32_t instanceId);
-    void InitializeAccessibility();
+    void InitializeAccessibility() override;
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;

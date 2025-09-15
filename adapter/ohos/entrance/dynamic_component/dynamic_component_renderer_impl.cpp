@@ -985,12 +985,9 @@ void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
 
 void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
 {
-    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
-        return;
-    }
     auto dynamicHost = host_.Upgrade();
     CHECK_NULL_VOID(dynamicHost);
-    auto pattern = AceType::DynamicCast<DynamicPattern>(dynamicHost->GetPattern());
+    auto pattern = AceType::DynamicCast<PlatformAccessibilityBase>(dynamicHost->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->InitializeAccessibility();
 }

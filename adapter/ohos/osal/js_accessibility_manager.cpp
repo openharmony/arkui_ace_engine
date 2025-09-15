@@ -1339,6 +1339,18 @@ void UpdateWebEmbedParent(std::list<AccessibilityElementInfo>& infos,
     auto& frontElementInfo = infos.front();
     frontElementInfo.SetParent(webEmbedNodeId);
 }
+
+void InitAccessibilityEnabledAndScreenReadEnabled()
+{
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID(client);
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
+    bool isScreenReadEnabled = false;
+    client->IsScreenReaderEnabled(isScreenReadEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(isScreenReadEnabled);
+}
 } // namespace
 
 
@@ -3611,7 +3623,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     CHECK_NULL_RETURN(uiExtensionManager, false);
     auto container = Container::GetContainer(ngPipeline->GetInstanceId());
     bool isDynamicRender = container && container->IsDynamicRender() &&
-        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT;
+        container->GetUIContentType() != UIContentType::ISOLATED_COMPONENT &&
+        container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT;
     if (!IsRegister() && !isDynamicRender) {
         return false;
     }
@@ -3778,19 +3791,13 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
-    auto container = Container::GetContainer(context->GetInstanceId());
-    if (container && container->IsDynamicRender() &&
-        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
-        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKNOW_ID);
-    } else {
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
-                auto jsAccessibilityManager = weak.Upgrade();
-                CHECK_NULL_VOID(jsAccessibilityManager);
-                jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
-            },
-            TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
-    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
 }
 
 void GetRealEventWindowId(
@@ -3875,19 +3882,13 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
     }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
-    auto container = Container::GetContainer(context->GetInstanceId());
-    if (container && container->IsDynamicRender() &&
-        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
-        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_OFFSET_MAX);
-    } else {
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
-                auto jsAccessibilityManager = weak.Upgrade();
-                CHECK_NULL_VOID(jsAccessibilityManager);
-                jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
-            },
-            TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
-    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
 }
 
 #ifdef WEB_SUPPORTED
@@ -7685,8 +7686,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     Register(false);
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId, treeId_);
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
-    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    InitAccessibilityEnabledAndScreenReadEnabled();
     parentElementId_ = INVALID_PARENT_ID;
     parentTreeId_ = 0;
     parentWindowId_ = 0;
