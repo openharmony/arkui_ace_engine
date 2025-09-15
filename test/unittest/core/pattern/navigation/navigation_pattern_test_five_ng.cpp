@@ -1893,4 +1893,32 @@ HWTEST_F(NavigationPatternTestFiveNg, NotifyNavDestinationSwitch002, TestSize.Le
 
     UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = backupFunc;
 }
+
+/**
+ * @tc.name: IsHomeDestinationVisible
+ * @tc.desc: Branch: if (navigationMode_ == NavigationMode::STACK)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, IsHomeDestinationVisible, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->navigationMode_ = NavigationMode::STACK;
+    navNode->lastStandardIndex_ = 0;
+    bool ret = pattern->IsHomeDestinationVisible();
+    EXPECT_FALSE(ret);
+    
+    navNode->lastStandardIndex_ = -1;
+    ret = pattern->IsHomeDestinationVisible();
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG
