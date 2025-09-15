@@ -1007,7 +1007,10 @@ void WebPattern::ShowPreviewMenu(WebElementType type)
         delegate_->OnContextMenuHide("");
         return;
     }
-
+    if (type == WebElementType::TEXT && curResponseType_ == ResponseType::LONG_PRESS) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Not to display the text menu while long press.");
+        return;
+    }
     if (!IsLongPreviewMenu(params)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Show web context menu");
         if (!contextSelectOverlay_) {
