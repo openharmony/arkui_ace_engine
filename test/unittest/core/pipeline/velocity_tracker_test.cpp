@@ -462,6 +462,7 @@ HWTEST_F(VelocityTrackerTest, sampleDatas2, TestSize.Level1)
             std::chrono::microseconds microseconds(point[0] * RATIO_MS_TO_US);
             TimeStamp timeStamp(microseconds);
             TouchEvent touchEvent;
+            touchEvent.sourceType = SourceType::TOUCH;
             touchEvent.x = point[1] / TO_TRUE_DATA;
             touchEvent.y = point[2] / TO_TRUE_DATA;
             touchEvent.time = timeStamp;
@@ -526,6 +527,7 @@ HWTEST_F(VelocityTrackerTest, justPanDatas, TestSize.Level1)
             std::chrono::microseconds microseconds(static_cast<int64_t>(point[0] / RATIO_NS_TO_US));
             TimeStamp timeStamp(microseconds);
             TouchEvent touchEvent;
+            touchEvent.sourceType = SourceType::TOUCH;
             touchEvent.x = point[1];
             touchEvent.y = point[2];
             touchEvent.time = timeStamp;
@@ -540,5 +542,33 @@ HWTEST_F(VelocityTrackerTest, justPanDatas, TestSize.Level1)
     EXPECT_NE(velocityTracker.velocity_.GetVelocityX(), 0.0);
 }
 
-
+/**
+ * @tc.name: velcoityTrackerEndPointTest001
+ * @tc.desc: Test UpdateTouchPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(VelocityTrackerTest, velcoityTrackerEndTest001, TestSize.Level1)
+{
+    SystemProperties::velocityTrackerPointNumber_ = 20;
+    SystemProperties::isVelocityWithinTimeWindow_ = false;
+    SystemProperties::isVelocityWithoutUpPoint_ = false;
+    VelocityTracker velocityTracker;
+    std::vector<int32_t> timeStampList = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000 };
+    std::vector<SourceType> sourceTypeList = { SourceType::TOUCH, SourceType::TOUCH, SourceType::NONE,
+        SourceType::NONE, SourceType::TOUCH, SourceType::TOUCH, SourceType::NONE, SourceType::NONE };
+    std::vector<bool> isEndList = { false, true, false, true, false, true, false, true };
+    for (auto i = 0; i < timeStampList.size(); ++i) {
+        if (i == 4) {
+            SystemProperties::isVelocityWithoutUpPoint_ = true;
+        }
+        std::chrono::microseconds microseconds(static_cast<int64_t>(timeStampList[i] * RATIO_MS_TO_US));
+        TimeStamp timeStamp(microseconds);
+        TouchEvent touchEvent;
+        touchEvent.id = i;
+        touchEvent.time = timeStamp;
+        touchEvent.sourceType = sourceTypeList[i];
+        velocityTracker.UpdateTouchPoint(touchEvent, isEndList[i], TOUCH_STILL_THRESHOLD);
+    }
+    EXPECT_EQ(velocityTracker.xAxis_.GetTrackNum(), 7);
+}
 } // namespace OHOS::Ace::NG
