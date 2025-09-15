@@ -2372,5 +2372,23 @@ HWTEST_F(PinchRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     pinchRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
     pinchRecognizerPtr->GetGestureEventInfo(info);
     EXPECT_EQ(info.GetSourceTool(), SourceTool::PEN);
+
+    double resultPinchScale = 0.0f;
+    pinchRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    GestureRecognizerJudgeFunc judgeFunc1;
+    judgeFunc1 = [&resultPinchScale](const std::shared_ptr<BaseGestureEvent>& info,
+        const RefPtr<NGGestureRecognizer>& current,
+        const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(info.get());
+        if (pinchGestureEvent) {
+            resultPinchScale = info->GetPinchAxisScale();
+        }
+        return GestureJudgeResult::CONTINUE;
+    };
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    pinchRecognizerPtr->SetTargetComponent(targetComponent);
+    pinchRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(resultPinchScale, axisEvent.pinchAxisScale);
 }
 } // namespace OHOS::Ace::NG
