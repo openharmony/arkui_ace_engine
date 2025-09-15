@@ -442,6 +442,13 @@ export function deserializeAndCallCallback_Extender_OnProgress(thisDeserializer:
     let value : float = thisDeserializer.readFloat32()
     _call(value)
 }
+export function deserializeAndCallCallback_F64_F64_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((totalOffsetX: double,totalOffsetY: double) => void))
+    let totalOffsetX : double = thisDeserializer.readFloat64()
+    let totalOffsetY : double = thisDeserializer.readFloat64()
+    _call(totalOffsetX, totalOffsetY)
+}
 export function deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: FocusAxisEvent) => void))
@@ -535,6 +542,13 @@ export function deserializeAndCallCallback_HoverEvent_Void(thisDeserializer: Des
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: HoverEvent) => void))
     let value0 : HoverEvent = (HoverEvent_serializer.read(thisDeserializer) as HoverEvent)
     _call(value0)
+}
+export function deserializeAndCallCallback_I32_I32_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((selectionStart: int32,selectionEnd: int32) => void))
+    let selectionStart : int32 = thisDeserializer.readInt32()
+    let selectionEnd : int32 = thisDeserializer.readInt32()
+    _call(selectionStart, selectionEnd)
 }
 export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2303,8 +2317,8 @@ export function deserializeAndCallOnCheckboxGroupChangeCallback(thisDeserializer
 export function deserializeAndCallOnContentScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnContentScrollCallback)
-    let totalOffsetX : number = (thisDeserializer.readNumber() as number)
-    let totalOffsetY : number = (thisDeserializer.readNumber() as number)
+    let totalOffsetX : double = thisDeserializer.readFloat64()
+    let totalOffsetY : double = thisDeserializer.readFloat64()
     _call(totalOffsetX, totalOffsetY)
 }
 export function deserializeAndCallOnContextMenuHideCallback(thisDeserializer: DeserializerBase): void {
@@ -2697,8 +2711,8 @@ export function deserializeAndCallOnTextPickerChangeCallback(thisDeserializer: D
 export function deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTextSelectionChangeCallback)
-    let selectionStart : number = (thisDeserializer.readNumber() as number)
-    let selectionEnd : number = (thisDeserializer.readNumber() as number)
+    let selectionStart : int32 = thisDeserializer.readInt32()
+    let selectionEnd : int32 = thisDeserializer.readInt32()
     _call(selectionStart, selectionEnd)
 }
 export function deserializeAndCallOnTimePickerChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -3418,6 +3432,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_ErrorInformation_Void: return deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
         case CallbackKind.Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
+        case CallbackKind.Kind_Callback_F64_F64_Void: return deserializeAndCallCallback_F64_F64_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FullscreenInfo_Void: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
@@ -3429,6 +3444,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_GestureRecognizer_Void: return deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_HitTestMode_Void: return deserializeAndCallCallback_HitTestMode_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_HoverEvent_Void: return deserializeAndCallCallback_HoverEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_I32_I32_Void: return deserializeAndCallCallback_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer);

@@ -58,23 +58,23 @@ Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
     auto rect = peer->controller_->GetTextContentRect();
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
-Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->controller_, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
+    return Converter::ArkValue<Ark_Int32>(peer->controller_->GetTextContentLinesNum());
 }
-Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
+Ark_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
                        const Ark_String* text,
                        const Opt_TextContentControllerOptions* textOperationOptions)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->controller_ && text, errValue);
     auto textConv = Converter::Convert<std::u16string>(*text);
     auto optionsConv = Converter::OptConvertPtr<int32_t>(textOperationOptions);
     const auto defaultOffset = -1;
     auto retValue = peer->controller_->AddText(textConv, optionsConv.value_or(defaultOffset));
-    return Converter::ArkValue<Ark_Number>(retValue);
+    return Converter::ArkValue<Ark_Int32>(retValue);
 }
 void DeleteTextImpl(Ark_TextContentControllerBase peer,
                     const Opt_TextRange* range)

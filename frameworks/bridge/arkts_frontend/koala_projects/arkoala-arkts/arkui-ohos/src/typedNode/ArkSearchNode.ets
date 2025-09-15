@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
@@ -137,7 +138,7 @@ export class ArkSearchNode extends ArkBaseNode  implements SearchAttribute  {
         this.markDirty();
         return this;
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         this.getPeer().setMaxLengthAttribute(value);
         this.markDirty();
         return this;
@@ -157,22 +158,22 @@ export class ArkSearchNode extends ArkBaseNode  implements SearchAttribute  {
         this.markDirty();
         return this;
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         this.getPeer().setMinFontSizeAttribute(value);
         this.markDirty();
         return this;
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         this.getPeer().setMaxFontSizeAttribute(value);
         this.markDirty();
         return this;
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         this.getPeer().setMinFontScaleAttribute(value);
         this.markDirty();
         return this;
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         this.getPeer().setMaxFontScaleAttribute(value);
         this.markDirty();
         return this;
@@ -182,12 +183,12 @@ export class ArkSearchNode extends ArkBaseNode  implements SearchAttribute  {
         this.markDirty();
         return this;
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         this.getPeer().setLetterSpacingAttribute(value);
         this.markDirty();
         return this;
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         this.getPeer().setLineHeightAttribute(value);
         this.markDirty();
         return this;

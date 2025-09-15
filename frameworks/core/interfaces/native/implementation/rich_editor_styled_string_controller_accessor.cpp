@@ -26,8 +26,8 @@ namespace OHOS::Ace::NG {
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
     dst.replacementString = StyledStringPeer::Create(src.GetReplacementString());
-    dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeBefore().start);
-    dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeBefore().end);
+    dst.range.start = Converter::ArkValue<Opt_Int32>(src.GetRangeBefore().start);
+    dst.range.end = Converter::ArkValue<Opt_Int32>(src.GetRangeBefore().end);
     dst.previewText = !src.GetPreviewText() ? Converter::ArkValue<Opt_StyledString>(Ark_Empty())
         : Converter::ArkValue<Opt_StyledString>(StyledStringPeer::Create(src.GetPreviewText()));
 }

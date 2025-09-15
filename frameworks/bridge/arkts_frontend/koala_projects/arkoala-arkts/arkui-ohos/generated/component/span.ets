@@ -140,15 +140,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -176,15 +176,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -232,15 +232,15 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._SpanAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | undefined): void {
+    setLetterSpacingAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -351,13 +351,13 @@ export interface SpanAttribute extends BaseSpan {
     fontColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method fontColor")
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -366,7 +366,7 @@ export interface SpanAttribute extends BaseSpan {
     decoration(value: DecorationStyleInterface | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
     textCase(value: TextCase | undefined): this {
@@ -385,12 +385,12 @@ export interface SpanAttribute extends BaseSpan {
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
-    fontSize_value?: number | string | Resource | undefined
+    fontSize_value?: double | string | Resource | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: string | Resource | undefined
     decoration_value?: DecorationStyleInterface | undefined
-    letterSpacing_value?: number | string | undefined
+    letterSpacing_value?: double | string | undefined
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
@@ -404,13 +404,13 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -419,7 +419,7 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     decoration(value: DecorationStyleInterface | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         return this
     }
     textCase(value: TextCase | undefined): this {
@@ -499,9 +499,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    public fontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setFontSizeAttribute(value_casted)
             return this
         }
@@ -515,9 +515,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -539,9 +539,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
+    public letterSpacing(value: double | string | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }

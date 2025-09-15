@@ -81,8 +81,8 @@ const PUBLIC_IMAGE_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 const DEFAULT_TITLE_BAR_HEIGHT: number = 56;
 const DEFAULT_TITLE_PADDING: number = 2;
-const MAX_LINE_ONE: number = 1;
-const MAX_LINES_TWO: number = 2;
+const MAX_LINE_ONE: int = 1;
+const MAX_LINES_TWO: int = 2;
 const MAX_MAIN_TITLE_PERCENT: number = 0.65;
 const MAX_SUB_TITLE_PERCENT: number = 0.35;
 const MIN_SUBTITLE_SIZE = '10.0vp';
@@ -902,14 +902,14 @@ struct EditableTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {
   }
   @Prop fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
 
   build() {

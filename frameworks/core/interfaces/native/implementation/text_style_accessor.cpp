@@ -90,23 +90,23 @@ Opt_String GetFontFamilyImpl(Ark_TextStyle peer)
     auto retStr = std::accumulate(fontFamilies.begin(), fontFamilies.end(), std::string());
     return Converter::ArkValue<Opt_String>(retStr, Converter::FC);
 }
-Opt_Number GetFontSizeImpl(Ark_TextStyle peer)
+Opt_Float64 GetFontSizeImpl(Ark_TextStyle peer)
 {
-    auto invalidValue = Converter::ArkValue<Opt_Number>();
+    auto invalidValue = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
     if (!peer->span->GetFont().fontSize.has_value()) {
         return invalidValue;
     }
     auto ret = peer->span->GetFont().fontSize.value().ConvertToVp();
-    return Converter::ArkValue<Opt_Number>(ret);
+    return Converter::ArkValue<Opt_Float64>(ret);
 }
-Opt_Number GetFontWeightImpl(Ark_TextStyle peer)
+Opt_Int32 GetFontWeightImpl(Ark_TextStyle peer)
 {
-    auto invalidValue = Converter::ArkValue<Opt_Number>();
+    auto invalidValue = Converter::ArkValue<Opt_Int32>();
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
-    return Converter::ArkValue<Opt_Number>(EnumToInt(peer->span->GetFont().fontWeight));
+    return Converter::ArkValue<Opt_Int32>(EnumToInt(peer->span->GetFont().fontWeight));
 }
 Opt_FontStyle GetFontStyleImpl(Ark_TextStyle peer)
 {

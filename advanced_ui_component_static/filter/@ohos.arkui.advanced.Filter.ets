@@ -387,7 +387,7 @@ struct MultiFilterRow {
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover');
   @State isArrowBgHoverRow: boolean = false;
   @PropRef fontSizeScale: number | undefined;
-  @State replaceEffect: number = 0;
+  @State replaceEffect: int = 0;
   @State isSendArrowAccessibility: boolean = false;
   private filterColumnWidth: number = 0;
   private lastFilterColumnWidth: number = 0;

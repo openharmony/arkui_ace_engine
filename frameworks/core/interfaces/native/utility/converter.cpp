@@ -924,9 +924,22 @@ Dimension Convert(const Ark_Number& src)
 }
 
 template<>
+Dimension Convert(const Ark_Int32& src)
+{
+    return Dimension(static_cast<int>(src), DimensionUnit::VP);
+}
+
+template<>
 Color Convert(const Ark_Number& src)
 {
     uint32_t value = static_cast<uint32_t>(Convert<int>(src));
+    return Color(ColorAlphaAdapt(value));
+}
+
+template<>
+Color Convert(const Ark_Int32& src)
+{
+    uint32_t value = static_cast<uint32_t>(src);
     return Color(ColorAlphaAdapt(value));
 }
 
@@ -961,6 +974,12 @@ template<>
 float Convert(const Ark_Float32& src)
 {
     return src;
+}
+
+template<>
+int Convert(const Ark_Float64& src)
+{
+    return static_cast<int>(src);
 }
 
 template<>
@@ -1149,7 +1168,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Number& src)
+FontWeightInt Convert(const Ark_Int32& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -2037,12 +2056,12 @@ std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src
     return dimension;
 }
 
-template<typename T>
+template<typename T, typename NumberType>
 std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit defaultUnit)
 {
     std::optional<Dimension> dimension;
     Converter::VisitUnion(src,
-        [&dimension, defaultUnit](const Ark_Number& value) {
+        [&dimension, defaultUnit](const NumberType& value) {
             std::optional<float> optValue = Converter::OptConvert<float>(value);
             if (optValue.has_value()) {
                 dimension = Dimension(optValue.value(), defaultUnit);
@@ -2063,10 +2082,10 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 
     return dimension;
 }
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_Number_String_Resource>(
-    const Ark_Union_Number_String_Resource&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension>(const Ark_Dimension&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length>(const Ark_Length&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Int32>(
+    const Ark_Union_F64_String_Resource&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {

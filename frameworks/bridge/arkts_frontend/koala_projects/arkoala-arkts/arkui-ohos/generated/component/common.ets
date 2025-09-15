@@ -1783,10 +1783,10 @@ export class TextContentControllerBase implements MaterializedBase {
     public getTextContentRect(): RectResult {
         return this.getTextContentRect_serialize()
     }
-    public getTextContentLineCount(): number {
+    public getTextContentLineCount(): int32 {
         return this.getTextContentLineCount_serialize()
     }
-    public addText(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
         const text_casted = text as (string)
         const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
         return this.addText_serialize(text_casted, textOperationOptions_casted)
@@ -1819,11 +1819,11 @@ export class TextContentControllerBase implements MaterializedBase {
         const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getTextContentLineCount_serialize(): number {
+    getTextContentLineCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
         return retval
     }
-    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (textOperationOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6260,7 +6260,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export interface InputCounterOptions {
-    thresholdPercentage?: number;
+    thresholdPercentage?: double;
     highlightBorder?: boolean;
 }
 export interface TextDecorationOptions {
@@ -8729,10 +8729,10 @@ export type Filter = uiEffect.Filter;
 export type Blender = uiEffect.Blender;
 export type PromptActionDialogController = promptAction.DialogController;
 export interface RectResult {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: double;
+    y: double;
+    width: double;
+    height: double;
 }
 export interface CaretOffset {
     index: number;
@@ -10964,20 +10964,20 @@ export class RectResult_serializer {
     public static write(buffer: SerializerBase, value: RectResult): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): RectResult {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : RectResult = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as RectResult)
         return value
     }
@@ -12003,7 +12003,7 @@ export class InputCounterOptions_serializer {
         if (valueHolderForThresholdPercentage !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForThresholdPercentageTmpValue  = valueHolderForThresholdPercentage!
-            valueSerializer.writeNumber(valueHolderForThresholdPercentageTmpValue)
+            valueSerializer.writeFloat64(valueHolderForThresholdPercentageTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12019,11 +12019,11 @@ export class InputCounterOptions_serializer {
     public static read(buffer: DeserializerBase): InputCounterOptions {
         let valueDeserializer : DeserializerBase = buffer
         const thresholdPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let thresholdPercentageTmpBuf : number | undefined = undefined
+        let thresholdPercentageTmpBuf : double | undefined = undefined
         if ((thresholdPercentageTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            thresholdPercentageTmpBuf = (valueDeserializer.readNumber() as number)
+            thresholdPercentageTmpBuf = valueDeserializer.readFloat64()
         }
-        const thresholdPercentageTmpResult : number | undefined = thresholdPercentageTmpBuf
+        const thresholdPercentageTmpResult : double | undefined = thresholdPercentageTmpBuf
         const highlightBorderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let highlightBorderTmpBuf : boolean | undefined = undefined
         if ((highlightBorderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

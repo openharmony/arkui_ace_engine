@@ -24,7 +24,7 @@ namespace Converter = NG::Converter;
 namespace NG {
 void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src)
 {
-    dst.position = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.position_));
+    dst.position = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.position_));
 #ifdef WRONG_SDK
     dst.affinity = Converter::ArkValue<Ark_text_Affinity>(src.affinity_);
 #endif
@@ -46,25 +46,25 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
+Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, errValue);
     int32_t count = handler->GetLineCount();
-    return Converter::ArkValue<Ark_Number>(count);
+    return Converter::ArkValue<Ark_Int32>(count);
 }
 Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
-                                                          const Ark_Number* x,
-                                                          const Ark_Number* y)
+                                                          const Ark_Float64 x,
+                                                          const Ark_Float64 y)
 {
-    CHECK_NULL_RETURN(peer && x && y, {});
+    CHECK_NULL_RETURN(peer, {});
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, {});
     PositionWithAffinity result = handler->GetGlyphPositionAtCoordinate(
-        Converter::Convert<int32_t>(*x),
-        Converter::Convert<int32_t>(*y)
+        Converter::Convert<Ark_Float64>(x),
+        Converter::Convert<Ark_Float64>(y)
     );
     return Converter::ArkValue<Ark_PositionWithAffinity>(result);
 }
