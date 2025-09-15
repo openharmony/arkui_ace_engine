@@ -28,6 +28,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -565,13 +566,51 @@ HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints005, TestSize.Le
     EXPECT_EQ(points[2].y, 5);
 }
 
-
 /**
- * @tc.name: TextDragPatternCalculateOverlayOffset
- * @tc.desc: test CalculateOverlayOffset
+ * @tc.name: TextDragPatternCalculateOverlayOffset001
+ * @tc.desc: test CalculateOverlayOffset pattern not is ContainerModalPattern
  * @tc.type: FUNC
  */
-HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset, TestSize.Level1)
+HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textDragPattern and rootNode, containerModalNode
+     */
+    TextDragPattern textDragPattern;
+    auto dragNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXTDRAG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    auto rootGeometryNode = rootNode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameOffset(OffsetF(10.f, 10.f));
+
+    /**
+     * @tc.steps2: call CalculateOverlayOffset when pipeline->windowModal_ = WindowModal::NORMAL.
+     * @tc.expected: offset is OffsetF(20.f, 20.f).
+     */
+    OffsetF offset(30.f, 30.f);
+    textDragPattern.CalculateOverlayOffset(dragNode, offset, nullptr);
+    EXPECT_EQ(offset, OffsetF(20.f, 20.f));
+
+    /**
+     * @tc.steps3: call CalculateOverlayOffset when pipeline->windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: containerModalPattern is nullptr, offset is OffsetF(10.f, 10.f).
+     */
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    textDragPattern.CalculateOverlayOffset(dragNode, offset, nullptr);
+    EXPECT_EQ(offset, OffsetF(10.f, 10.f));
+    pipeline->windowModal_ = WindowModal::NORMAL;
+}
+
+/**
+ * @tc.name: TextDragPatternCalculateOverlayOffset002
+ * @tc.desc: test CalculateOverlayOffset when pattern is ContainerModalPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textDragPattern and rootNode
@@ -581,16 +620,16 @@ HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::TEXTDRAG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->SetupRootElement();
     pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
     auto rootNode = pipeline->rootNode_;
     ASSERT_NE(rootNode, nullptr);
     auto rootGeometryNode = rootNode->GetGeometryNode();
     ASSERT_NE(rootGeometryNode, nullptr);
     rootGeometryNode->SetFrameOffset(OffsetF(10.f, 10.f));
-    auto containerNode = pipeline->GetContainerModalNode();
-    ASSERT_NE(containerNode, nullptr);
-    auto containerNodeGeometryNode = containerNode->GetGeometryNode();
+    auto containerModalNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode, 0);
+    auto containerNodeGeometryNode = containerModalNode->GetGeometryNode();
     ASSERT_NE(containerNodeGeometryNode, nullptr);
     containerNodeGeometryNode->SetFrameOffset(OffsetF(20.f, 20.f));
 
@@ -613,5 +652,7 @@ HWTEST_F(TextDragTestNg, TextDragPatternCalculateOverlayOffset, TestSize.Level1)
     toolbarItem->AddChild(hostNode);
     textDragPattern.CalculateOverlayOffset(dragNode, offset, hostNode);
     EXPECT_EQ(offset, OffsetF(0.f, 0.f));
+    pipeline->windowModal_ = WindowModal::NORMAL;
+    rootNode->RemoveChild(containerModalNode);
 }
 } // namespace OHOS::Ace::NG

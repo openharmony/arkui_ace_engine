@@ -2646,51 +2646,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckNodeOnContainerModalTitle
- * @tc.desc: Test function CheckNodeOnContainerModalTitle
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, CheckNodeOnContainerModalTitle, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
-
-    /**
-     * @tc.steps2: call CheckNodeOnContainerModalTitle when frameNode not has parent.
-     * @tc.expected: result is false.
-     */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
-    auto result = context_->CheckNodeOnContainerModalTitle(frameNode);
-    EXPECT_FALSE(result);
-
-    /**
-     * @tc.steps3: call CheckNodeOnContainerModalTitle when frameNode parent is column.
-     * @tc.expected: result is false.
-     */
-    auto column = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
-    column->AddChild(frameNode);
-    result = context_->CheckNodeOnContainerModalTitle(frameNode);
-    EXPECT_FALSE(result);
-
-    /**
-     * @tc.steps4: call CheckNodeOnContainerModalTitle when frameNode  parent is toolbarItem.
-     * @tc.expected: result is true.
-     */
-    auto toolbarItem = FrameNode::GetOrCreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
-    toolbarItem->AddChild(column);
-    result = context_->CheckNodeOnContainerModalTitle(frameNode);
-    EXPECT_TRUE(result);
-}
-
-/**
  * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test001
  * @tc.desc: Test OnTouchEvent with RVS enabled and touch event processing
  * @tc.type: FUNC

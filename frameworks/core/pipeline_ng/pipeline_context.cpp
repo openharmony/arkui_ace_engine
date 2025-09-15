@@ -5822,21 +5822,6 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
 }
 
-bool PipelineContext::CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_RETURN(node, false);
-    auto containerNode = GetContainerModalNode();
-    CHECK_NULL_RETURN(containerNode, false);
-    auto parent = node->GetParent();
-    while (parent) {
-        if (parent->GetTag() == V2::TOOLBARITEM_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParent();
-    }
-    return false;
-}
-
 void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig,
     float keyboardHeight, const std::function<void()>& func)
 {
