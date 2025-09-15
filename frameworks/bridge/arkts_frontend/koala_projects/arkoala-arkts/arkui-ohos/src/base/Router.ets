@@ -28,10 +28,10 @@ import {
     memoEntry,
     scheduleCallback,
     GlobalStateManager,
-    StateContext,
     ComputableState,
     IncrementalNode
 } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
 import { UserViewBuilder, UserView } from "../UserView"
 import { EntryPoint, NavInterface } from '../component/customComponent';

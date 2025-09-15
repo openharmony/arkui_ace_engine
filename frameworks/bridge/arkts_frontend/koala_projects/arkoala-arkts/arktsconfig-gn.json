@@ -46,6 +46,9 @@
             "arkui.stateManagement.runtime": [
                 "./arkui/stateManagement/runtime"
             ],
+            "arkui.incremental.runtime.state": [
+                "../../incremental/public/src/state.ets"
+            ],
             "@ohos/animator": [
                 "@ohos.animator.ets"
             ],
