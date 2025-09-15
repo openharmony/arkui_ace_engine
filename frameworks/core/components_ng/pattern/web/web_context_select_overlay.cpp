@@ -160,6 +160,7 @@ void WebContextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->contextMenuParam_);
+    BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(selectInfo, requestCode);
     selectInfo.handlerColor = Color(0xff007dff);
     selectInfo.handleReverse = IsHandleReverse();
     auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
