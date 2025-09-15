@@ -23802,7 +23802,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_String (*getInspectorInfo)(Ark_FrameNode peer);
     void (*invalidate)(Ark_FrameNode peer);
     void (*disposeTree)(Ark_FrameNode peer);
-    void (*setCrossLanguageOptions)(Ark_FrameNode peer,
+    Ark_Boolean (*setCrossLanguageOptions)(Ark_FrameNode peer,
                                     Ark_Boolean options);
     Ark_Boolean (*getCrossLanguageOptions)(Ark_FrameNode peer);
     void (*setMeasuredSize)(Ark_FrameNode peer,

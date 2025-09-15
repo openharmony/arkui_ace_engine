@@ -28903,10 +28903,10 @@ void impl_FrameNodeExtender_disposeTree(Ark_NativePointer peer) {
         GetAccessors()->getFrameNodeExtenderAccessor()->disposeTree(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_disposeTree, Ark_NativePointer)
-void impl_FrameNodeExtender_setCrossLanguageOptions(Ark_NativePointer peer, Ark_Boolean options) {
-        GetAccessors()->getFrameNodeExtenderAccessor()->setCrossLanguageOptions(static_cast<Ark_FrameNode>(peer), options);
+Ark_Boolean impl_FrameNodeExtender_setCrossLanguageOptions(Ark_NativePointer peer, Ark_Boolean options) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->setCrossLanguageOptions(static_cast<Ark_FrameNode>(peer), options);
 }
-KOALA_INTEROP_DIRECT_V2(FrameNodeExtender_setCrossLanguageOptions, Ark_NativePointer, Ark_Boolean)
+KOALA_INTEROP_DIRECT_2(FrameNodeExtender_setCrossLanguageOptions,Ark_Boolean, Ark_NativePointer, Ark_Boolean)
 Ark_Boolean impl_FrameNodeExtender_getCrossLanguageOptions(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getCrossLanguageOptions(static_cast<Ark_FrameNode>(peer));
 }

@@ -122,6 +122,7 @@ import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
 import { FrameNodeExtender } from './framework';
 import { extractors } from "#handwritten";
+import hilog from '@ohos.hilog';
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -570,8 +571,16 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.disposeTree(this);
     };
     public setCrossLanguageOptions(options: CrossLanguageOptions): void {
+        let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
+        const error = Error(errorMessage);
+        if (!this.isModifiable()) {
+            throw new BusinessError(100021, error);
+        }
         let setting: boolean = options.attributeSetting ? options.attributeSetting! : false;
-        FrameNodeExtender.setCrossLanguageOptions(this, setting);
+        let isSupport = FrameNodeExtender.setCrossLanguageOptions(this, setting);
+        if (!isSupport) {
+            throw new BusinessError(100021, error);
+        }
     }
     public getCrossLanguageOptions(): CrossLanguageOptions {
         let option: boolean = FrameNodeExtender.getCrossLanguageOptions(this);

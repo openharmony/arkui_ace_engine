@@ -795,8 +795,8 @@ export class FrameNodeExtender {
     static disposeTree_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(extractors.toFrameNodePtr(peer))
     }
-    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
+    static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
+        return ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
     }
     static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
@@ -1040,11 +1040,10 @@ export class FrameNodeExtender {
         FrameNodeExtender.disposeTree_serialize(peer_casted)
         return
     }
-    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): void {
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
         const peer_casted = peer as (FrameNode)
         const options_casted = options as (boolean)
-        FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
-        return
+        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
     }
     public static getCrossLanguageOptions(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)
