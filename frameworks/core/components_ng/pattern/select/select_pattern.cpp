@@ -2095,6 +2095,11 @@ Dimension SelectPattern::GetFontSize()
 
 void SelectPattern::SetOptionWidth(const Dimension& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProperty = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProperty);
+    selectLayoutProperty->UpdateOptionWidth(value);
     isFitTrigger_ = false;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
@@ -2602,5 +2607,16 @@ void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const Re
     SetOptionTextModifierByUser(theme, props);
     SetSelectedOptionTextModifierByUser(theme, props);
     SetArrowModifierByUser(theme, props);
+}
+
+void SelectPattern::OnDpiConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProperty = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProperty);
+    if (selectLayoutProperty->HasOptionWidth() && !isFitTrigger_) {
+        SetOptionWidth(selectLayoutProperty->GetOptionWidthValue(Dimension()));
+    }
 }
 } // namespace OHOS::Ace::NG
