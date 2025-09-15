@@ -658,6 +658,11 @@ public:
         isUserFling_ = isUserFling;
     }
 
+    bool GetIsUserFling() const
+    {
+        return isUserFling_;
+    }
+
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
      */
