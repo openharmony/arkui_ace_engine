@@ -33,7 +33,9 @@ bool WebContextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
+    SetEnableHandleLevel(true);
     SetEnableSubWindowMenu(true);
+    CheckEnableContainerModal();
     return true;
 }
 
