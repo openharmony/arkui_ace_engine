@@ -64,22 +64,3 @@ export function UserMemoWrapper(
     const wrapper = () => { page_() }
     return wrapper
 }
-
-export class EntryPoint {
-    constructor() {}
-    /** @memo */
-    entry(): void {
-    }
-
-    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        
-    }
-}
-
-export interface NavInterface {
-    bundleName: string;
-    moduleName: string;
-    pagePath: string;
-    pageFullPath: string;
-    integratedHsp: string;
-}

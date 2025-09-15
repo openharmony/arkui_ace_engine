@@ -91,7 +91,7 @@ export interface PageLifeCycle {
     onNewParam(param: object | undefined | null): void {}
 }
 
-export interface LayoutCallback {
+export interface LayoutCallbacks {
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
         return {width: 0, height: 0} as SizeResult
@@ -112,7 +112,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     get isCustomLayout(): boolean {
-        return this.instance instanceof LayoutCallback;
+        return this.instance instanceof LayoutCallbacks;
     }
 
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
@@ -263,16 +263,16 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     // Custom layout
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             layout.onPlaceChildren(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        if (this.instance instanceof LayoutCallback) {
-            const layout = this.instance as LayoutCallback;
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
             return layout.onMeasureSize(selfLayoutInfo, children, constraint);
         } else {
             throw new Error('not a custom layout component');
@@ -435,4 +435,23 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
     }
 
     aboutToReuse(): void {}
+}
+
+export class EntryPoint {
+    constructor() {}
+    /** @memo */
+    entry(): void {
+    }
+
+    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
+        
+    }
+}
+
+export interface NavInterface {
+    bundleName: string;
+    moduleName: string;
+    pagePath: string;
+    pageFullPath: string;
+    integratedHsp: string;
 }
