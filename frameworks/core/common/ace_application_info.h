@@ -108,6 +108,15 @@ public:
         return dataDirFilePath_;
     }
 
+    void SetDebugForParallel(bool isDebug)
+    {
+        isDebugForParallel_ = isDebug;
+    }
+    bool IsDebugForParallel() const
+    {
+        return isDebugForParallel_;
+    }
+
     void SetApiTargetVersion(int32_t apiVersion)
     {
         apiVersion_ = apiVersion;
@@ -331,6 +340,7 @@ protected:
 
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
+    bool isDebugForParallel_ = false;
     bool needDebugBreakpoint_ = false;
     std::optional<bool> useNewPipeline_;
 

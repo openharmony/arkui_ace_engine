@@ -29,7 +29,7 @@ import { VoidCallback, Length, ResourceColor, ResourceStr, Padding, Dimension, L
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { SymbolGlyphModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { VerticalAlign, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

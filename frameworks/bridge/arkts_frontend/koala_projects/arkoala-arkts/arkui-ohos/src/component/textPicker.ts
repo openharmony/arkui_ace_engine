@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, Offset } from "./units"
 import { CrownSensitivity, TextOverflow } from "./enums"
 import { Resource } from "global.resource"
@@ -45,7 +45,7 @@ export class TextPickerDialog {
         thisSerializer.writeInt8(options_type as int32)
         if ((RuntimeType.UNDEFINED) != (options_type)) {
             const options_value  = options!
-            thisSerializer.writeTextPickerDialogOptions(options_value)
+            HookWriteTextPickerDialogOptions(thisSerializer, options_value)
         }
         const retval  = ArkUIGeneratedNativeModule._TextPickerDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -63,18 +63,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setTextPickerOptionsAttribute(options?: TextPickerOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeTextPickerOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._TextPickerInterface_setTextPickerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
+    setTextPickerOptionsAttribute(options?: TextPickerOptions): void {}
     defaultPickerItemHeight0Attribute(value: number | string | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -379,7 +368,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextPickerAttribute_selectedIndex1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    divider0Attribute(value: DividerOptions | undefined): void {
+    divider0Attribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -391,7 +380,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextPickerAttribute_divider0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    divider1Attribute(value: DividerOptions | undefined): void {
+    divider1Attribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -474,8 +463,8 @@ export interface TextCascadePickerRangeContent {
 }
 export interface TextPickerOptions {
     range: Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>;
-    value?: string | Array<string>;
-    selected?: number | Array<number>;
+    value?: string | Array<string> | Bindable<string> | Bindable<Array<string>>;
+    selected?: number | Array<number> | Bindable<number> | Bindable<Array<number>>;
     columnWidths?: Array<LengthMetrics>;
 }
 export type TextPickerInterface = (options?: TextPickerOptions) => TextPickerAttribute;
@@ -511,7 +500,7 @@ export interface TextPickerAttribute extends CommonMethod {
     onScrollStop(value: TextPickerScrollStopCallback | undefined): this
     onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this
     selectedIndex(value: number | Array<number> | undefined): this
-    divider(value: DividerOptions | undefined): this
+    divider(value: DividerOptions | null | undefined): this
     gradientHeight(value: Dimension | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
@@ -575,7 +564,7 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     public selectedIndex(value: number | Array<number> | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         return this
     }
     public gradientHeight(value: Dimension | undefined): this {
@@ -637,7 +626,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     public setTextPickerOptions(options?: TextPickerOptions): this {
         if (this.checkPriority("setTextPickerOptions")) {
             const options_casted = options as (TextPickerOptions | undefined)
-            this.getPeer()?.setTextPickerOptionsAttribute(options_casted)
+            hookSetTextPickerOptions(this.getPeer(), options_casted)
             return this
         }
         return this
@@ -818,16 +807,16 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (DividerOptions | undefined)
+                const value_casted = value as (DividerOptions | null | undefined)
                 this.getPeer()?.divider0Attribute(value_casted)
                 return this
             }
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (DividerOptions | undefined)
+                const value_casted = value as (DividerOptions | null | undefined)
                 this.getPeer()?.divider1Attribute(value_casted)
                 return this
             }

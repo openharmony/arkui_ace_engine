@@ -14,17 +14,20 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "indicator_component_controller_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentControllerAccessor {
 void DestroyPeerImpl(Ark_IndicatorComponentController peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_IndicatorComponentController CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,14 +35,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ShowNextImpl(Ark_IndicatorComponentController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->ShowNext();
 }
 void ShowPreviousImpl(Ark_IndicatorComponentController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->ShowPrevious();
 }
 void ChangeIndexImpl(Ark_IndicatorComponentController peer,
                      const Ark_Number* index,
                      const Opt_Boolean* useAnimation)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(index);
+    auto idx = Converter::Convert<int32_t>(*index);
+    idx = idx < 0 ? 0 : idx;
+    auto useAnim = Converter::OptConvertPtr<bool>(useAnimation).value_or(false);
+    peer->ChangeIndex(idx, useAnim);
 }
 } // IndicatorComponentControllerAccessor
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor()

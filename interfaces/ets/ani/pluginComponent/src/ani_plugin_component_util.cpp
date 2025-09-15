@@ -18,7 +18,7 @@
  
 ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(ani_env* env)
 {
-    auto containerId = OHOS::Ace::Container::CurrentId();
+    auto containerId = OHOS::Ace::Container::CurrentIdSafelyWithCheck();
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,

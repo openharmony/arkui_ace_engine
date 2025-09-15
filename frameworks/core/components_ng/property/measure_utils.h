@@ -31,14 +31,8 @@
 #include "core/components_ng/property/magic_layout_property.h"
 
 namespace OHOS::Ace::NG {
-#ifdef ACE_STATIC
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
-#else
-std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
-    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
-#endif
-
 std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
 

@@ -40,10 +40,10 @@ void CheckBoxGroupModelStatic::SetSelectedColor(FrameNode* frameNode, const std:
         ACE_UPDATE_NODE_PAINT_PROPERTY(
             CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, true, frameNode);
     } else {
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
-            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, PROPERTY_UPDATE_RENDER);
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
-            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -56,8 +56,8 @@ void CheckBoxGroupModelStatic::SetUnSelectedColor(FrameNode* frameNode, const st
             CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, frameNode);
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
-            CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -111,5 +111,13 @@ void CheckBoxGroupModelStatic::SetChangeEvent(FrameNode* frameNode, GroupChangeE
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void CheckBoxGroupModelStatic::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

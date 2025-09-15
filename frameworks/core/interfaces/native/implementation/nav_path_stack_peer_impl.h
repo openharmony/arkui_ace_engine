@@ -31,6 +31,11 @@ public:
         auto* stack = new Nav::NavigationStack();
         navStack_ = AceType::Claim(stack);
     }
+    
+    NavPathStackPeer(const RefPtr<AceType>& stack)
+    {
+        SetNavigationStack(stack);
+    }
 
     void SetNavigationStack(const RefPtr<AceType>& stack)
     {

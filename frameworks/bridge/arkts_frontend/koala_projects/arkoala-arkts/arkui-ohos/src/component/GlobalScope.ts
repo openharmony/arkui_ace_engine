@@ -21,7 +21,7 @@ import { ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, Rot
 import { Size, Edges } from "./../Graphics"
 import { Dimension, BorderRadiuses, Length } from "./units"
 import { WrappedBuilder, Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./arkui-wrapper-builder"
-import { Context, BaseContext, Context_getGroupDir_Callback, ContextInternal, PointerStyle } from "./arkui-custom"
+import { Context, BaseContext, Context_getGroupDir_Callback, ContextInternal } from "./arkui-custom"
 import { Resource } from "global.resource"
 import { AnimateParam, ICurve, FinishCallbackType, ExpectedFrameRateRange } from "./common"
 import { Curve, PlayMode } from "./enums"
@@ -32,6 +32,7 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { PointerStyle } from '#external'
 export class GlobalScope {
     public static getRectangleById(id: string): ComponentInfo {
         const id_casted = id as (string)

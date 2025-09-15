@@ -25,7 +25,8 @@ public:
     ImageBitmapPeer();
     virtual ~ImageBitmapPeer() = default;
 
-    void SetOptions(const std::string& textString, const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelMap = nullptr);
+    void SetOptions(const std::string& textString, const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelMap = nullptr,
+        int32_t unitValue = 0);
     void OnClose();
     double OnGetHeight();
     double OnGetWidth();

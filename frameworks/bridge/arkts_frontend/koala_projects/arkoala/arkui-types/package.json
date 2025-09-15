@@ -1,6 +1,0 @@
-{
-  "name": "@types/arkoala-arkui",
-  "version": "1.4.1+devel",
-  "description": "OHOS SDK API declarations",
-  "types": "./index-full.d.ts"
-}

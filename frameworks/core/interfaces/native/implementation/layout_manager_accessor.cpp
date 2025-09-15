@@ -43,6 +43,7 @@ void AssignArkValue(Ark_TextBox& dst, const ParagraphManager::TextBox& src)
     dst.rect = Converter::ArkValue<Ark_Rect>(src.rect_);
     dst.direction = Converter::ArkValue<Ark_TextDirection>(src.direction_);
 }
+
 void AssignArkValue(Ark_Affinity& dst, const Ace::TextAffinity& src)
 {
     switch (src) {
@@ -54,6 +55,7 @@ void AssignArkValue(Ark_Affinity& dst, const Ace::TextAffinity& src)
             break;
     }
 }
+
 void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src)
 {
     dst.position = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.position_));

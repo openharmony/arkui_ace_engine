@@ -22,16 +22,16 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { LinearGradient } from "./dataPanel"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { CrownSensitivity, Color, Axis } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SliderOpsHandWritten, hookSliderContentModifier } from "./../handwritten"
 
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -432,7 +432,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_minResponsiveDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifierAttribute(value: ContentModifier | undefined): void {
+    contentModifierAttribute(value: ContentModifier<SliderConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -544,7 +544,7 @@ export interface SlideRange {
     to?: number;
 }
 export interface SliderOptions {
-    value?: number;
+    value?: number | Bindable<number>;
     min?: number;
     max?: number;
     step?: number;
@@ -563,7 +563,7 @@ export interface SliderBlockStyle {
     shape?: string;
 }
 export type SliderTriggerChangeCallback = (value: number, mode: SliderChangeMode) => void;
-export interface SliderConfiguration extends CommonConfiguration {
+export interface SliderConfiguration extends CommonConfiguration<SliderConfiguration> {
     value: number;
     min: number;
     max: number;
@@ -591,11 +591,11 @@ export interface SliderAttribute extends CommonMethod {
     stepSize(value: Length | undefined): this
     sliderInteractionMode(value: SliderInteraction | undefined): this
     minResponsiveDistance(value: number | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this
     slideRange(value: SlideRange | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
-    showTips(value: boolean | undefined, content?: ResourceStr | undefined): this
+    showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this
     _onChangeEvent_value(callback: ((index: number) => void)): void
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
@@ -617,7 +617,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     stepSize_value?: Length | undefined
     sliderInteractionMode_value?: SliderInteraction | undefined
     minResponsiveDistance_value?: number | undefined
-    contentModifier_value?: ContentModifier | undefined
+    contentModifier_value?: ContentModifier<SliderConfiguration> | undefined
     slideRange_value?: SlideRange | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
@@ -675,7 +675,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     public minResponsiveDistance(value: number | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
         return this
     }
     public slideRange(value: SlideRange | undefined): this {
@@ -698,11 +698,24 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     getPeer(): ArkSliderPeer {
         return (this.peer as ArkSliderPeer)
     }
+    SliderOptionsValueIsBindable(options?: SliderOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.value;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
     public setSliderOptions(options?: SliderOptions): this {
         if (this.checkPriority("setSliderOptions")) {
             const options_casted = options as (SliderOptions | undefined)
             this.getPeer()?.setSliderOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.SliderOptionsValueIsBindable(options)) {
+            SliderOpsHandWritten.hookSliderAttributeValueImpl(this.getPeer().peer.ptr,
+                (options!.value as Bindable<number>));
         }
         return this
     }
@@ -859,11 +872,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier | undefined)
-            this.getPeer()?.contentModifierAttribute(value_casted)
-            return this
+            hookSliderContentModifier(this, value)
         }
         return this
     }
@@ -891,10 +902,10 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public showTips(value: boolean | undefined, content?: ResourceStr | undefined): this {
+    public showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this {
         if (this.checkPriority("showTips")) {
             const value_casted = value as (boolean | undefined)
-            const content_casted = content as (ResourceStr | undefined)
+            const content_casted = content as ( ResourceStr | undefined)
             this.getPeer()?.showTipsAttribute(value_casted, content_casted)
             return this
         }

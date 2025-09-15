@@ -20,7 +20,7 @@
 #include "gesture_recognizer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
-const int32_t DEFAULT_DURATION = 500;
+const int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 const bool DEFAULT_REPEAT = false;
 
 struct LongPressRecognizerPeer : public MultiFingerRecognizerPeer {
@@ -36,7 +36,7 @@ struct LongPressRecognizerPeer : public MultiFingerRecognizerPeer {
         if (recognizer) {
             return duration_;
         }
-        return DEFAULT_DURATION;
+        return DEFAULT_LONG_PRESS_DURATION;
     }
     bool GetRepeat()
     {
@@ -57,6 +57,6 @@ protected:
     friend OHOS::Ace::NG::PeerUtils;
 
 private:
-    int32_t duration_ = DEFAULT_DURATION;
+    int32_t duration_ = DEFAULT_LONG_PRESS_DURATION;
     bool repeat = DEFAULT_REPEAT;
 };

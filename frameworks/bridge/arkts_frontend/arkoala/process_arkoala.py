@@ -78,8 +78,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     main(sys.argv)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Arkoala: build time: {elapsed_time:.2f} seconds")

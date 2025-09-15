@@ -16,22 +16,13 @@
 #pragma once
 
 #include "core/components/common/properties/paint_state.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct ImageDataPeer {
+struct ImageDataPeer final {
     OHOS::Ace::ImageData value;
 
-    static ImageDataPeer *Create(const OHOS::Ace::ImageData& src)
-    {
-        return new ImageDataPeer{src};
-    }
-
-    static ImageDataPeer *Create(OHOS::Ace::ImageData&& src)
-    {
-        return new ImageDataPeer{std::move(src)};
-    }
-
-    static void Destroy(ImageDataPeer *peer)
-    {
-        delete peer;
-    }
+protected:
+    explicit ImageDataPeer(const OHOS::Ace::ImageData& src) : value(src) {}
+    ~ImageDataPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

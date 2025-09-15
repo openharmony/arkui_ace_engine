@@ -250,4 +250,10 @@ sptr<IRemoteObject> Container::GetToken()
 {
     return nullptr;
 }
+
+Window* Container::GetWindow() const
+{
+    auto context = GetPipelineContext();
+    return context ? context->GetWindow() : nullptr;
+}
 } // namespace OHOS::Ace

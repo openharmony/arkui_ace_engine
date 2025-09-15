@@ -23,4 +23,4 @@ ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClas
 ani_object ConvertToPixelMapAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long pixelMapPtr);
 } // namespace OHOS::Ace::Ani
 
-#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UTILS_CONVERT_UTILS
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_UTILS_CONVERT_UTILS

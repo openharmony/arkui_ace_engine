@@ -24,6 +24,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SelectedCallback } from "./common"
 export class GridItemOps {
     public static registerSelectedCallback(node: KPointer, value: boolean, callback: SelectedCallback): KPointer {
         const node_casted = node as (KPointer)
@@ -39,4 +40,3 @@ export class GridItemOps {
         return retval
     }
 }
-export type SelectedCallback = (selected: boolean) => void;

@@ -686,16 +686,19 @@ bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const s
     return client.IsAppropriateType(summary, allowTypesArr);
 }
 
-#if defined(ACE_STATIC)
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
 {
     CHECK_NULL_RETURN(rawData, nullptr);
-    auto unifiedDataPtr = reinterpret_cast<UDMF::UnifiedData*>(rawData);
-    std::shared_ptr<UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto unifiedDataPtr = reinterpret_cast<std::shared_ptr<UDMF::UnifiedData>*>(rawData);
+    if (unifiedDataPtr == nullptr || *unifiedDataPtr == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UnifiedData or UnifiedData pointer is null");
+        return nullptr;
+    }
     auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
-    udData->SetUnifiedData(unifiedData);
+    udData->SetUnifiedData(*unifiedDataPtr);
     return udData;
 }
+
 
 void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
 {
@@ -707,5 +710,4 @@ void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary
     }
     udmfSummary->summary = std::move(summary);
 }
-#endif
 } // namespace OHOS::Ace

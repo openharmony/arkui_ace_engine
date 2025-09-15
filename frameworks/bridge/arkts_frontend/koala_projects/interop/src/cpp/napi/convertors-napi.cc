@@ -18,6 +18,7 @@
 #include <string>
 
 #include "interop-logging.h"
+#undef KOALA_INTEROP_MODULE
 #define KOALA_INTEROP_MODULE InteropNativeModule
 #include "convertors-napi.h"
 

@@ -473,6 +473,10 @@ FrameNode::FrameNode(
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
     paintProperty_->SetHost(WeakClaim(this));
+
+    if (IsThreadSafeNode()) {
+        MultiThreadBuildManager::CheckTag(tag);
+    }
 }
 
 
@@ -841,6 +845,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetLayoutRect()) {
         DumpLog::GetInstance().AddDesc(
             std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
+    }
+    if (GetSuggestOpIncMarked()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("SuggestOpIncMarked: ").append(std::to_string(static_cast<int32_t>(GetSuggestOpIncMarked()))));
     }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
@@ -1843,18 +1851,9 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
-bool FrameNode::CheckAncestorPageShow()
-{
-    auto pageNode = GetPageNode();
-    if (!pageNode) {
-        return true;
-    }
-    return pageNode->GetPattern<PagePattern>()->IsOnShow();
-}
-
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive() || !CheckAncestorPageShow()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -2599,7 +2598,7 @@ void FrameNode::MarkModifyDone()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -4414,6 +4413,11 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
     return iter->second;
 }
 
+bool FrameNode::HasAnimatableProperty(const std::string& propertyName) const
+{
+    return nodeAnimatablePropertyMap_.find(propertyName) != nodeAnimatablePropertyMap_.end();
+}
+
 RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
@@ -5328,9 +5332,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    if (arkoalaLazyAdapter_) {
-        return ArkoalaGetOrCreateChild(index, addToRenderTree);
-    }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
@@ -5343,9 +5344,6 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    if (arkoalaLazyAdapter_) {
-        return arkoalaLazyAdapter_->GetChild(index);
-    }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
@@ -5395,74 +5393,8 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    if (arkoalaLazyAdapter_) {
-        return ArkoalaUpdateActiveRange(start, end, cacheStart, cacheEnd, showCached);
-    }
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
-
-/* ============================== Arkoala LazyForEach adapter section START ==============================*/
-void FrameNode::ArkoalaSynchronize(
-    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
-{
-    if (!arkoalaLazyAdapter_) {
-        arkoalaLazyAdapter_ = std::make_unique<LazyComposeAdapter>();
-    }
-    arkoalaLazyAdapter_->SetCallbacks(std::move(creator), std::move(updater));
-    arkoalaLazyAdapter_->SetTotalCount(totalCount);
-}
-
-void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
-{
-    CHECK_NULL_VOID(arkoalaLazyAdapter_);
-    std::vector<RefPtr<UINode>> toRemove;
-    for (const auto& child : GetChildren()) {
-        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-        if (index >= changeIndex) {
-            toRemove.push_back(child);
-        }
-    }
-    for (auto&& node : toRemove) {
-        RemoveChild(node);
-    }
-    arkoalaLazyAdapter_->OnDataChange(changeIndex);
-}
-
-void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
-{
-    CHECK_NULL_VOID(arkoalaLazyAdapter_);
-    const int32_t liveStart = start - cacheStart;
-    const int32_t liveEnd = end + cacheEnd;
-    const int32_t visibleStart = showCached ? liveStart : start;
-    const int32_t visibleEnd = showCached ? liveEnd : end;
-    std::vector<RefPtr<UINode>> toRemove;
-    for (const auto& child : GetChildren()) {
-        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-        if (index < liveStart || index > liveEnd) {
-            toRemove.push_back(child);
-            continue;
-        }
-        child->SetActive(index >= visibleStart && index <= visibleEnd);
-    }
-    for (auto&& node : toRemove) {
-        RemoveChild(node);
-    }
-    arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
-}
-
-RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index, bool active)
-{
-    CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
-    if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
-        return node;
-    }
-    auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
-    CHECK_NULL_RETURN(node, nullptr);
-    AddChild(node);
-    node->SetActive(active);
-    return node;
-}
-/* ============================== Arkoala LazyForEach adapter section END ================================*/
 
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
@@ -5500,7 +5432,7 @@ bool FrameNode::ReachResponseDeadline() const
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
@@ -6979,6 +6911,9 @@ void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
     }
     if (layoutProperty_->GetLayoutRect()) {
         json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
+    }
+    if (static_cast<int32_t>(GetSuggestOpIncMarked()) != 0) {
+        json->Put("SuggestOpIncMarked", static_cast<int32_t>(GetSuggestOpIncMarked()));
     }
 }
 

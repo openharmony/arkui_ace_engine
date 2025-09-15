@@ -14,111 +14,51 @@
  */
 
 import {
-    Theme,
-    LayoutChild,
     ConstraintSizeOptions,
     GeometryInfo,
     Layoutable,
     Measurable,
     SizeResult,
-    NavigationInfo,
-    NavDestinationInfo,
-    RouterPageInfo
 } from "./component"
-import { UIContext } from "@ohos/arkui/UIContext"
+import { PeerNode } from "./PeerNode"
+import { Theme } from '@ohos/arkui/theme';
 
 /**
- * This is basically the CustomComponent, which doesn't extend CommonAttribute
- *
- * memo markup according to arkui-common/config/tsconfig.base.json
- *
- * "render": {
- *     "method": [
- *         "build",
- *         "pageTransition"
- *     ]
- * }
+ * This is basically the CustomComponent
  */
 export interface ArkCustomComponent {
+    setPeer(peer: PeerNode): void
+    getPeer(): PeerNode | undefined
+
+    // Life cycle
     /** @memo */
     build(): void;
-    aboutToAppear/* ? */(): void;
-    aboutToDisappear/* ? */(): void;
-    aboutToReuse/* ? */(params: Record<string, Object>): void;
-    aboutToRecycle/* ? */(): void
-    onWillApplyTheme/* ? */(theme: Theme): void
-    onLayout/* ? */(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void
-    onPlaceChildren/* ? */(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void
-    onMeasure/* ? */(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void
-    onMeasureSize/* ? */(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult
-    onPageShow/* ? */(): void
-    onPageHide/* ? */(): void
-    onFormRecycle/* ? */(): string
-    onFormRecover/* ? */(statusData: string): void;
-    onBackPress/* ? */(): boolean;
-    /** @memo */
-    pageTransition/* ? */(): void;
-    getUIContext(): UIContext;
-    getUniqueId(): number;
-    queryNavDestinationInfo(): NavDestinationInfo | undefined;
-    queryNavigationInfo(): NavigationInfo | undefined;
-    queryRouterPageInfo(): RouterPageInfo | undefined;
-    onDidBuild/* ? */(): void;
-}
+    aboutToAppear(): void;
+    aboutToDisappear(): void;
+    onDidBuild(): void;
+    onCleanup(): void;
 
-export class ArkCustomComponentImpl implements ArkCustomComponent {
-    /** @memo */
-    build(): void {
-    }
-    aboutToAppear(): void {
-    }
-    aboutToDisappear(): void {
-    }
-    aboutToReuse(params: Record<string, Object>): void {
-    }
-    aboutToRecycle(): void {
-    }
-    onWillApplyTheme(theme: Theme): void {
-    }
-    onLayout(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void {
-    }
-    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-    }
-    onMeasure(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void {
-    }
-    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        throw new Error("Unexpected use of base class method")
-    }
-    onPageShow(): void {
-    }
-    onPageHide(): void {
-    }
-    onFormRecycle(): string {
-        throw new Error("Unexpected use of base class method")
-    }
-    onFormRecover(statusData: string): void {
-    }
-    onBackPress(): boolean {
-        throw new Error("Unexpected use of base class method")
-    }
-    /** @memo */
-    pageTransition(): void {
-    }
-    getUIContext(): UIContext {
-        return new UIContext(100000);
-    }
-    getUniqueId(): number {
-        throw new Error("Unexpected use of base class method")
-    }
-    queryNavDestinationInfo(): NavDestinationInfo | undefined {
-        return undefined
-    }
-    queryNavigationInfo(): NavigationInfo | undefined {
-        return undefined
-    }
-    queryRouterPageInfo(): RouterPageInfo | undefined {
-        return undefined
-    }
-    onDidBuild(): void {
-    }
+    // Page life cycle
+    onPageShow(): void
+    onPageHide(): void
+    onBackPress(): boolean;
+    pageTransition(): void;
+    onNewParam(param: object | undefined | null): void;
+
+    // Custom layout
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void
+    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult
+
+    // Theme
+    onWillApplyTheme(theme: Theme): void
+    onGlobalThemeChanged(theme: Theme): void
+
+    // Form recover
+    onFormRecycle(): string
+    onFormRecover(statusData: string): void;
+
+    // dump info
+    onDumpInspector(): string;
+
+    readonly isCustomLayout: boolean;
 }

@@ -19,23 +19,25 @@
 import { KBoolean, KStringPtr, NativeBuffer, MaterializedBase } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { AccessibilityHoverType, Alignment, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
-import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, RectResult, Literal_Boolean_isVisible, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PopupStateChangeParam, PreDragStatus, ProgressMask, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, Callback_ClickEvent_Void, ClickEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, HoverCallback, HoverEvent, Callback_MouseEvent_Void, MouseEvent, SizeChangeCallback, VisibleAreaEventOptions, VisibleAreaChangeCallback, SheetOptions, View, Callback_KeyEvent_Boolean, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, CrownEvent, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragInteractionOptions, DragItemInfo, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, Tuple_ResourceColor_Number, LinearGradient_common, FractionStop, LinearGradientBlurOptions, LinearGradientOptions, Literal_Alignment_align, Literal_Number_offset_span, HorizontalAlignParam, VerticalAlignParam, Literal_String_value_Callback_Void_action, Literal_TransitionEffect_appear_disappear, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, SheetDismiss, SpringBackAction, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, TouchResult, AlignRuleOption, BlurStyleOptions, ContentCoverOptions, BindOptions, Callback_DismissContentCoverAction_Void, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, FocusAxisEvent, BaseEvent, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, Literal_ResourceColor_color, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, ReuseIdCallback, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, AccessibilityHoverEvent, AxisEvent, BorderImageOption, CustomPopupOptions, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, PromptActionDialogController, LayoutChild, Layoutable, DividerStyle, BlendMode } from "./../common"
+import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, RectResult, Literal_Boolean_isVisible, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PopupStateChangeParam, PreDragStatus, ProgressMask, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, Callback_ClickEvent_Void, ClickEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, HoverCallback, HoverEvent, Callback_MouseEvent_Void, MouseEvent, SizeChangeCallback, VisibleAreaEventOptions, VisibleAreaChangeCallback, SheetOptions, View, Callback_KeyEvent_Boolean, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, CrownEvent, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragInteractionOptions, DragItemInfo, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, Tuple_ResourceColor_Number, LinearGradient_common, FractionStop, LinearGradientBlurOptions, LinearGradientOptions, BackgroundOptions, Literal_Number_offset_span, HorizontalAlignParam, VerticalAlignParam, Literal_String_value_Callback_Void_action, Literal_TransitionEffect_appear_disappear, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, SheetDismiss, SpringBackAction, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, TouchResult, AlignRuleOption, BlurStyleOptions, ContentCoverOptions, BindOptions, Callback_DismissContentCoverAction_Void, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, FocusAxisEvent, BaseEvent, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, Literal_ResourceColor_color, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, ReuseIdCallback, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, AccessibilityHoverEvent, AxisEvent, BorderImageOption, CustomPopupOptions, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, PromptActionDialogController, LayoutChild, Layoutable, DividerStyle, BlendMode } from "./../common"
 import { Affinity, TextBox, LineMetrics, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { AlphabetIndexerAttribute, Callback_Number_Void, OnAlphabetIndexerSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerPopupSelectCallback, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ResourceStr, Dimension, LengthConstrain, VoidCallback, DividerStyleOptions, ConstraintSizeOptions, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, VP, Area, EdgeColors, PX, LPX, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles } from "./../units"
-import { PixelMap } from "./../arkui-pixelmap"
-import { AnimatedDrawableDescriptor, DrawableDescriptor, AnimationOptions, LayeredDrawableDescriptor, PixelMapDrawableDescriptor } from "./../arkui-drawabledescriptor"
+import { PixelMap } from "#external"
+import { AnimatedDrawableDescriptor, DrawableDescriptor, AnimationOptions, LayeredDrawableDescriptor, PixelMapDrawableDescriptor } from "#external"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsAttribute, OnTabsAnimationStartCallback, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, ScrollableBarModeOptions, TabsCacheMode, TabsController, CommonModifier, TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabsOptions } from "./../tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, SelectAttribute, Callback_Number_String_Void, OnSelectCallback, MenuOutlineOptions, Callback_Opt_Union_Number_Resource_Void, Callback_Opt_ResourceStr_Void, MenuItemConfiguration, SelectOption } from "./../select"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, CaretStyle, EditableTextOnChangeCallback, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, CaretStyle, EditableTextOnChangeCallback, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, ToolbarItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathInfo, NavPathStack, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, MoreButtonOptions } from "./../navigation"
-import { BaseShape, CircleShape, ShapeSize, CommonShape, WebviewController, Summary, EllipseShape, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
+import { BaseShape, ShapeSize, CommonShape, WebviewController, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { ReplaceSymbolEffect, ScaleSymbolEffect, SymbolEffect, EffectDirection, EffectScope } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
-import { DrawingCanvas, DrawingColorFilter, RectType, DrawingLattice } from "./../arkui-drawing"
+import { DrawingCanvas, RectType } from "./../arkui-drawing"
 import { BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, Literal_Function_callback__Object_fileSelector, Literal_Function_handler_Object_error, Literal_Object_detail, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, ScriptItem, ExpandedMenuItemOptions, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, Callback_Literal_Function_handler_Object_error_Void, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Type_WebAttribute_onFileSelectorShow_callback, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, OnContextMenuHideCallback, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, OnSafeBrowsingCheckResultCallback, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebController, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebKeyboardController, WebNavigationType, WebResourceError, Literal_String_plainText, WebKeyboardOptions, WebOptions, Callback_Literal_String_plainText_Void, NativeEmbedInfo } from "./../web"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
@@ -45,10 +47,10 @@ import { CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, C
 import { CanvasGradient, CanvasPath, CanvasPattern, OffscreenCanvas, ImageBitmap, RenderingContextSettings, OffscreenCanvasRenderingContext2D, Path2D, TextMetrics, DrawingRenderingContext, ImageData, CanvasRenderer, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D } from "./../canvas"
 import { Matrix2D } from "./../matrix2d"
 import { ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, CloseSwipeActionOptions, ListOptions } from "./../list"
-import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
+import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { ComponentContent, UnifiedData, SystemBarStyle, PointerStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
+import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
@@ -57,13 +59,14 @@ import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPat
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, UIExtensionOptions, Literal_Number_code__want } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, Callback_SwipeActionState_Void, SwipeActionOptions } from "./../listItem"
 import { EffectFillStyle, PulseSymbolEffect, SymbolEffectStrategy, SymbolGlyphAttribute, SymbolRenderingStrategy, AppearSymbolEffect, BounceSymbolEffect, DisappearSymbolEffect, HierarchicalSymbolEffect } from "./../symbolglyph"
 import { EventTargetInfo, GestureControl, GestureType, GestureGroupInterface, GestureMode, GestureJudgeResult, GestureMask, GesturePriority, GestureRecognizer, GestureRecognizerState, LongPressGestureInterface, GestureInterface, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureHandlerOptions, Callback_GestureEvent_Void, GestureEvent, LongPressRecognizer, PanDirection, PanGestureInterface, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchGestureInterface, Literal_Number_distance_fingers, PinchGestureHandlerOptions, PinchRecognizer, RotationGestureInterface, Literal_Number_angle_fingers, RotationGestureHandlerOptions, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGestureInterface, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureHandlerOptions, SwipeRecognizer, TapGestureInterface, TapGestureParameters, TapRecognizer, GestureHandler, FingerInfo, GestureInfo, BaseHandlerOptions, LongPressGestureEvent, BaseGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../gesture"
-import { Filter, TileMode, WaterRippleMode, FlyMode, VisualEffect, BrightnessBlender } from "./../arkui-uieffect"
+import { TileMode, WaterRippleMode, FlyMode } from "./../arkui-uieffect"
+import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { FocusPriority, KeyProcessingMode, FocusBoxStyle } from "./../focus"
 import { FormDimension, FormRenderingMode, FormShape, FormCallbackInfo, Literal_Number_errcode_String_msg, FormInfo } from "./../formComponent"
 import { FrameNode } from "../../FrameNode"
@@ -118,7 +121,6 @@ import { TextClockController, TextClockOptions } from "./../textClock"
 import { TextTimerController, TextTimerOptions } from "./../textTimer"
 import { TimePickerFormat, TimePickerResult, TimePickerOptions, TimePickerDialogOptions, Callback_TimePickerResult_Void } from "./../timePicker"
 import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
-import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../waterFlow"
 import { WindowSceneAttribute } from "./../windowScene"
 import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
@@ -130,7 +132,7 @@ import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
 import { DateTimeOptions } from "./../arkui-intl"
-import { DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
+import { DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../animationExtender"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
@@ -158,7 +160,9 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
+import { PointerStyle, UniformDataType, DataSyncOptions} from '#external'
+import promptAction from "@ohos/promptAction"
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -195,6 +199,12 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof AccessibilityHoverEvent")
         }
+    }
+    static isTargetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return true
+    }
+    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+        return true
     }
     static isAccessibilityHoverType(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (AccessibilityHoverType.HOVER_ENTER)) {
@@ -751,47 +761,6 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof ActionSheetOptions")
-        }
-    }
-    static isShowToastOptions(value: Object | string | number | undefined | boolean, duplicated_message: boolean, duplicated_duration: boolean, duplicated_bottom: boolean, duplicated_showMode: boolean, duplicated_alignment: boolean, duplicated_offset: boolean, duplicated_backgroundColor: boolean, duplicated_textColor: boolean, duplicated_backgroundBlurStyle: boolean, duplicated_shadow: boolean, duplicated_enableHoverMode: boolean, duplicated_hoverModeArea: boolean): boolean {
-        if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
-            return true
-        }
-        if ((!duplicated_duration) && (value?.hasOwnProperty("duration"))) {
-            return true
-        }
-        if ((!duplicated_bottom) && (value?.hasOwnProperty("bottom"))) {
-            return true
-        }
-        if ((!duplicated_showMode) && (value?.hasOwnProperty("showMode"))) {
-            return true
-        }
-        if ((!duplicated_alignment) && (value?.hasOwnProperty("alignment"))) {
-            return true
-        }
-        if ((!duplicated_offset) && (value?.hasOwnProperty("offset"))) {
-            return true
-        }
-        if ((!duplicated_backgroundColor) && (value?.hasOwnProperty("backgroundColor"))) {
-            return true
-        }
-        if ((!duplicated_textColor) && (value?.hasOwnProperty("textColor"))) {
-            return true
-        }
-        if ((!duplicated_backgroundBlurStyle) && (value?.hasOwnProperty("backgroundBlurStyle"))) {
-            return true
-        }
-        if ((!duplicated_shadow) && (value?.hasOwnProperty("shadow"))) {
-            return true
-        }
-        if ((!duplicated_enableHoverMode) && (value?.hasOwnProperty("enableHoverMode"))) {
-            return true
-        }
-        if ((!duplicated_hoverModeArea) && (value?.hasOwnProperty("hoverModeArea"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof ShowToastOptions")
         }
     }
     static isAdaptiveColor(value: Object | string | number | undefined | boolean): boolean {
@@ -1983,6 +1952,23 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof BreakpointsReference")
+        }
+    }
+    static isBuilderNodeOps(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof BuilderNodeOps")
+    }
+    static isBuilderNodeOptions(value: Object | string | number | undefined | boolean, duplicated_selfIdealSize: boolean, duplicated_type: boolean, duplicated_surfaceId: boolean): boolean {
+        if ((!duplicated_selfIdealSize) && (value?.hasOwnProperty("selfIdealSize"))) {
+            return true
+        }
+        else if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
+            return true
+        }
+        else if ((!duplicated_surfaceId) && (value?.hasOwnProperty("surfaceId"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof BuilderNodeOptions")
         }
     }
     static isBrightnessBlender(value: Object | string | number | undefined | boolean, duplicated_cubicRate: boolean, duplicated_quadraticRate: boolean, duplicated_linearRate: boolean, duplicated_degree: boolean, duplicated_saturation: boolean, duplicated_positiveCoefficient: boolean, duplicated_negativeCoefficient: boolean, duplicated_fraction: boolean): boolean {
@@ -4722,12 +4708,6 @@ export class TypeChecker {
     static isDrawingCanvas(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof DrawingCanvas")
     }
-    static isDrawingColorFilter(value: Object | string | number | undefined | boolean): boolean {
-        throw new Error("Can not discriminate value typeof DrawingColorFilter")
-    }
-    static isDrawingLattice(value: Object | string | number | undefined | boolean): boolean {
-        throw new Error("Can not discriminate value typeof DrawingLattice")
-    }
     static isDrawingRenderingContext(value: Object | string | number | undefined | boolean, duplicated_size: boolean, duplicated_canvas: boolean): boolean {
         if ((!duplicated_size) && (value?.hasOwnProperty("size"))) {
             return true
@@ -5712,7 +5692,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof Frame")
         }
     }
-    static isFrameNode(value: Object | string | number | undefined | boolean): boolean {
+    static isFrameNode(value: Object | string | number | undefined | boolean, arg0: boolean): boolean {
         throw new Error("Can not discriminate value typeof FrameNode")
     }
     static isFrictionMotion(value: Object | string | number | undefined | boolean): boolean {
@@ -6987,8 +6967,11 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ImageSpanAlignment")
         }
     }
-    static isImmersiveMode(value: Object | string | number | undefined | boolean, duplicated__ImmersiveModeStub: boolean): boolean {
-        if ((!duplicated__ImmersiveModeStub) && (value?.hasOwnProperty("_ImmersiveModeStub"))) {
+    static isImmersiveMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ImmersiveMode.DEFAULT)) {
+            return true
+        }
+        else if ((value) === (ImmersiveMode.EXTEND)) {
             return true
         }
         else {
@@ -7652,21 +7635,19 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof LetterSpacingStyle")
         }
     }
-    static isLevelMode(value: Object | string | number | undefined | boolean, duplicated__LevelModeStub: boolean): boolean {
-        if ((!duplicated__LevelModeStub) && (value?.hasOwnProperty("_LevelModeStub"))) {
+    static isLevelMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (LevelMode.OVERLAY)) {
+            return true
+        }
+        else if ((value) === (LevelMode.EMBEDDED)) {
             return true
         }
         else {
             throw new Error("Can not discriminate value typeof LevelMode")
         }
     }
-    static isLevelOrder(value: Object | string | number | undefined | boolean, duplicated__LevelOrderStub: boolean): boolean {
-        if ((!duplicated__LevelOrderStub) && (value?.hasOwnProperty("_LevelOrderStub"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof LevelOrder")
-        }
+    static isLevelOrder(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof LevelOrder")
     }
     static isLightSource(value: Object | string | number | undefined | boolean, duplicated_positionX: boolean, duplicated_positionY: boolean, duplicated_positionZ: boolean, duplicated_intensity: boolean, duplicated_color: boolean): boolean {
         if ((!duplicated_positionX) && (value?.hasOwnProperty("positionX"))) {
@@ -8119,12 +8100,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof Literal__want")
         }
     }
-    static isLiteral_Alignment_align(value: Object | string | number | undefined | boolean, duplicated_align: boolean): boolean {
+    static isBackgroundOptions(value: Object | string | number | undefined | boolean, duplicated_align: boolean): boolean {
         if ((!duplicated_align) && (value?.hasOwnProperty("align"))) {
             return true
         }
         else {
-            throw new Error("Can not discriminate value typeof Literal_Alignment_align")
+            throw new Error("Can not discriminate value typeof BackgroundOptions")
         }
     }
     static isLiteral_Boolean_isVisible(value: Object | string | number | undefined | boolean, duplicated_isVisible: boolean): boolean {
@@ -16734,6 +16715,14 @@ export class TypeChecker {
     static isTextMenuItemId(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof TextMenuItemId")
     }
+    static isTextMenuOptions(value: Object | string | number | undefined | boolean, duplicated_showMode: boolean): boolean {
+        if ((!duplicated_showMode) && (value?.hasOwnProperty("showMode"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof TextMenuOptions")
+        }
+    }
     static isTextMenuShowMode(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (TextMenuShowMode.DEFAULT)) {
             return true
@@ -17037,12 +17026,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof TextSpanType")
         }
     }
-    static isTextStyle_alert_dialog(value: Object | string | number | undefined | boolean, duplicated_wordBreak: boolean): boolean {
+    static isAlertDialogTextStyleOptions(value: Object | string | number | undefined | boolean, duplicated_wordBreak: boolean): boolean {
         if ((!duplicated_wordBreak) && (value?.hasOwnProperty("wordBreak"))) {
             return true
         }
         else {
-            throw new Error("Can not discriminate value typeof TextStyle_alert_dialog")
+            throw new Error("Can not discriminate value typeof AlertDialogTextStyleOptions")
         }
     }
     static isTextStyle_styled_string(value: Object | string | number | undefined | boolean, duplicated_fontColor: boolean, duplicated_fontFamily: boolean, duplicated_fontSize: boolean, duplicated_fontWeight: boolean, duplicated_fontStyle: boolean): boolean {
@@ -17742,7 +17731,7 @@ export class TypeChecker {
             return true
         }
         else {
-            throw new Error("Can not discriminate value typeof Type_ImageAttribute_onComplete_callback_event")
+            throw new Error("Can not discriminate value typeof ImageCompleteEvent")
         }
     }
     static isType_XComponentInterface_callable0_value(value: Object | string | number | undefined | boolean, duplicated_id: boolean, duplicated_type: boolean, duplicated_libraryname: boolean, duplicated_controller: boolean): boolean {
@@ -17807,6 +17796,78 @@ export class TypeChecker {
     }
     static isUIExtensionProxy(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof UIExtensionProxy")
+    }
+    static isUIFontAdjustInfo(value: Object | string | number | undefined | boolean, duplicated_weight: boolean, duplicated_to: boolean): boolean {
+        if ((!duplicated_weight) && (value?.hasOwnProperty("weight"))) {
+            return true
+        }
+        else if ((!duplicated_to) && (value?.hasOwnProperty("to"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontAdjustInfo")
+        }
+    }
+    static isUIFontAliasInfo(value: Object | string | number | undefined | boolean, duplicated_name: boolean, duplicated_weight: boolean): boolean {
+        if ((!duplicated_name) && (value?.hasOwnProperty("name"))) {
+            return true
+        }
+        else if ((!duplicated_weight) && (value?.hasOwnProperty("weight"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontAliasInfo")
+        }
+    }
+    static isUIFontConfig(value: Object | string | number | undefined | boolean, duplicated_fontDir: boolean, duplicated_generic: boolean, duplicated_fallbackGroups: boolean): boolean {
+        if ((!duplicated_fontDir) && (value?.hasOwnProperty("fontDir"))) {
+            return true
+        }
+        else if ((!duplicated_generic) && (value?.hasOwnProperty("generic"))) {
+            return true
+        }
+        else if ((!duplicated_fallbackGroups) && (value?.hasOwnProperty("fallbackGroups"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontConfig")
+        }
+    }
+    static isUIFontFallbackGroupInfo(value: Object | string | number | undefined | boolean, duplicated_fontSetName: boolean, duplicated_fallback: boolean): boolean {
+        if ((!duplicated_fontSetName) && (value?.hasOwnProperty("fontSetName"))) {
+            return true
+        }
+        else if ((!duplicated_fallback) && (value?.hasOwnProperty("fallback"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontFallbackGroupInfo")
+        }
+    }
+    static isUIFontFallbackInfo(value: Object | string | number | undefined | boolean, duplicated_language: boolean, duplicated_family: boolean): boolean {
+        if ((!duplicated_language) && (value?.hasOwnProperty("language"))) {
+            return true
+        }
+        else if ((!duplicated_family) && (value?.hasOwnProperty("family"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontFallbackInfo")
+        }
+    }
+    static isUIFontGenericInfo(value: Object | string | number | undefined | boolean, duplicated_family: boolean, duplicated_alias: boolean, duplicated_adjust: boolean): boolean {
+        if ((!duplicated_family) && (value?.hasOwnProperty("family"))) {
+            return true
+        }
+        else if ((!duplicated_alias) && (value?.hasOwnProperty("alias"))) {
+            return true
+        }
+        else if ((!duplicated_adjust) && (value?.hasOwnProperty("adjust"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof UIFontGenericInfo")
+        }
     }
     static isUIGestureEvent(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof UIGestureEvent")
@@ -19166,11 +19227,29 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<boolean>")
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<number>")
+    }
+    static isBindableArrayNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Array<number>>")
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
     }
+    static isBindableArrayString(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Array<String>>")
+    }
+    static isBindableResource(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Resource>")
+    }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
+    }
+    static isBindableDate(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Date>")
     }
     static isWebOptions(value: Object | string | number | undefined | boolean, duplicated_src: boolean, duplicated_controller: boolean, duplicated_renderMode: boolean, duplicated_incognitoMode: boolean, duplicated_sharedRenderProcessToken: boolean): boolean {
         if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
@@ -20149,6 +20228,18 @@ export class TypeChecker {
     }
     static HoverModeAreaType_FromNumeric(ordinal: int32): HoverModeAreaType {
         return ordinal as HoverModeAreaType
+    }
+    static LevelMode_ToNumeric(value: LevelMode): int32 {
+        return value as int32
+    }
+    static LevelMode_FromNumeric(ordinal: int32): LevelMode {
+        return ordinal as LevelMode
+    }
+    static ImmersiveMode_ToNumeric(value: ImmersiveMode): int32 {
+        return value as int32
+    }
+    static ImmersiveMode_FromNumeric(ordinal: int32): ImmersiveMode {
+        return ordinal as ImmersiveMode
     }
     static IlluminatedType_ToNumeric(value: IlluminatedType): int32 {
         return value as int32
@@ -21392,6 +21483,12 @@ export class TypeChecker {
     static XComponentType_FromNumeric(ordinal: int32): XComponentType {
         return ordinal as XComponentType
     }
+    static ToastShowMode_ToNumeric(value: promptAction.ToastShowMode): int32 {
+        return value as int32
+    }
+    static ToastShowMode_FromNumeric(ordinal: int32): promptAction.ToastShowMode {
+        return ordinal as promptAction.ToastShowMode
+    }
     static isArray_PixelMap(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -21518,6 +21615,21 @@ export class TypeChecker {
     static isArray_Union_RichEditorTextSpanResult_RichEditorImageSpanResult(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
+    static isArray_UIFontGenericInfo(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_UIFontFallbackGroupInfo(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_UIFontFallbackInfo(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_UIFontAliasInfo(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_UIFontAdjustInfo(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
     static isArray_DateRange(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -21616,12 +21728,6 @@ export class TypeChecker {
     }
     static isArray_CustomObject(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
-    }
-    static isIObservedObject<T>(value: T): boolean {
-        return true;
-    }
-    static isIWatchTrigger<T>(value: T): boolean {
-        return true;
     }
     static isPopupButton(value: Object | string | number | undefined | boolean, duplicated_value: boolean, duplicated_action: boolean): boolean {
         if ((!duplicated_value) && (value?.hasOwnProperty("value"))) {

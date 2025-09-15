@@ -24,22 +24,23 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Resource } from "global.resource"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap, PixelMapDrawableDescriptor, AnimatedDrawableDescriptor, LayeredDrawableDescriptor } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
-import { DrawingColorFilter, DrawingLattice } from "./arkui-drawing"
+import { ColorMetrics } from "../Graphics"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
-import { DrawableDescriptor } from "./arkui-drawabledescriptor"
+import { DrawableDescriptor } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
-import { ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
+import { ImageModifier } from "../ImageModifier"
 import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 import { AttributeUpdater } from "../AttributeUpdater"
+import { drawing } from "@ohos/graphics/drawing"
 
 export class ArkImagePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -50,6 +51,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         const _peerPtr  = ArkUIGeneratedNativeModule._Image_construct(peerId, flags)
         const _peer  = new ArkImagePeer(_peerPtr, peerId, "Image", flags)
         component?.setPeer(_peer)
+        return _peer
+    }
+    public static createImagePeerFromPtr(peerPtr: KPointer) :ArkImagePeer {
+        const peerId = PeerNode.nextId()
+        const _peer = new ArkImagePeer(peerPtr, peerId, "Image", 0)
         return _peer
     }
     setImageOptions0Attribute(src: PixelMap | ResourceStr | DrawableDescriptor): void {
@@ -76,11 +82,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 const src_1_1  = src_1 as Resource
                 thisSerializer.writeResource(src_1_1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
         }
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -109,11 +110,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 const src_1_1  = src_1 as Resource
                 thisSerializer.writeResource(src_1_1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
         }
         else if (TypeChecker.isImageContent(src)) {
             thisSerializer.writeInt8(3 as int32)
@@ -147,11 +143,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 const src_1_1  = src_1 as Resource
                 thisSerializer.writeResource(src_1_1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
         }
         thisSerializer.writeImageAIOptions(imageAIOptions)
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -394,7 +385,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_syncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    colorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+    colorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -407,11 +398,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ColorFilter
                 thisSerializer.writeColorFilter(value_value_0)
-            }
-            else if (TypeChecker.isDrawingColorFilter(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as DrawingColorFilter
-                thisSerializer.writeDrawingColorFilter(value_value_1)
             }
         }
         ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -465,7 +451,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_edgeAntialiasing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onCompleteAttribute(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): void {
+    onCompleteAttribute(value: ((event?: ImageCompleteEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -609,9 +595,7 @@ export interface ImageSourceSize {
     width: number;
     height: number;
 }
-export interface ColorContent {
-}
-export interface Type_ImageAttribute_onComplete_callback_event {
+export interface ImageCompleteEvent {
     width: number;
     height: number;
     componentWidth: number;
@@ -622,12 +606,12 @@ export interface Type_ImageAttribute_onComplete_callback_event {
     contentOffsetX: number;
     contentOffsetY: number;
 }
-export type Callback_Type_ImageAttribute_onComplete_callback_event_Void = (event?: Type_ImageAttribute_onComplete_callback_event) => void;
+export type ImageOnCompleteCallback = (event?: ImageCompleteEvent) => void;
 export interface ImageAttribute extends CommonMethod {
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
     fitOriginalSize(value: boolean | undefined): this
-    fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this
+    fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this
     objectFit(value: ImageFit | undefined): this
     imageMatrix(value: Matrix4Transit | undefined): this
     objectRepeat(value: ImageRepeat | undefined): this
@@ -637,12 +621,12 @@ export interface ImageAttribute extends CommonMethod {
     interpolation(value: ImageInterpolation | undefined): this
     sourceSize(value: ImageSourceSize | undefined): this
     syncLoad(value: boolean | undefined): this
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
     copyOption(value: CopyOptions | undefined): this
     draggable(value: boolean | undefined): this
     pointLight(value: PointLightStyle | undefined): this
     edgeAntialiasing(value: number | undefined): this
-    onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this
+    onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this
     onError(value: ImageErrorCallback | undefined): this
     onFinish(value: (() => void) | undefined): this
     enableAnalyzer(value: boolean | undefined): this
@@ -666,12 +650,12 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     interpolation_value?: ImageInterpolation | undefined
     sourceSize_value?: ImageSourceSize | undefined
     syncLoad_value?: boolean | undefined
-    colorFilter_value?: ColorFilter | DrawingColorFilter | undefined
+    colorFilter_value?: ColorFilter | drawing.ColorFilter | undefined
     copyOption_value?: CopyOptions | undefined
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
     edgeAntialiasing_value?: number | undefined
-    onComplete_value?: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined
+    onComplete_value?: ((event?: ImageCompleteEvent) => void) | undefined
     onError_value?: ImageErrorCallback | undefined
     onFinish_value?: (() => void) | undefined
     enableAnalyzer_value?: boolean | undefined
@@ -689,7 +673,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public fitOriginalSize(value: boolean | undefined): this {
         return this
     }
-    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
+    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this {
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
@@ -719,7 +703,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public syncLoad(value: boolean | undefined): this {
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
     public copyOption(value: CopyOptions | undefined): this {
@@ -734,7 +718,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public edgeAntialiasing(value: number | undefined): this {
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         return this
     }
     public onError(value: ImageErrorCallback | undefined): this {
@@ -760,7 +744,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     }
     public orientation(value: ImageRotateOrientation | undefined): this {
         return this
-        }
+    }
 }
 export type ImageErrorCallback = (error: ImageError) => void;
 export interface ImageError {
@@ -770,42 +754,18 @@ export interface ImageError {
 }
 export interface ResizableOptions {
     slice?: EdgeWidths;
-    lattice?: DrawingLattice;
+    lattice?: drawing.Lattice;
 }
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
 
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost == undefined || this._modifierHost == null) {
-            this._modifierHost = new ArkImageNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
-    }
-
+  
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_type = runtimeType(src)
-            const imageAIOptions_type = runtimeType(imageAIOptions)
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                this.getPeer()?.setImageOptions0Attribute(src_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
-                this.getPeer()?.setImageOptions2Attribute(src_casted, imageAIOptions_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src)) || (TypeChecker.isImageContent(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
-                this.getPeer()?.setImageOptions1Attribute(src_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageOptions(this, src, imageAIOptions)
+            return this
         }
         return this
     }
@@ -833,20 +793,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
+    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this {
         if (this.checkPriority("fillColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.fillColor0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColorContent | undefined)
-                this.getPeer()?.fillColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageFillColor(this.getPeer().getPeerPtr(), value)
         }
         return this
     }
@@ -922,11 +871,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
-            const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
-            this.getPeer()?.colorFilterAttribute(value_casted)
-            return this
+            hookSetColorFilter(this, value);
         }
         return this
     }
@@ -962,9 +909,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         if (this.checkPriority("onComplete")) {
-            const value_casted = value as (((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined)
+            const value_casted = value as (((event?: ImageCompleteEvent) => void) | undefined)
             this.getPeer()?.onCompleteAttribute(value_casted)
             return this
         }
@@ -1004,9 +951,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public resizable(value: ResizableOptions | undefined): this {
         if (this.checkPriority("resizable")) {
-            const value_casted = value as (ResizableOptions | undefined)
-            this.getPeer()?.resizableAttribute(value_casted)
-            return this
+            hookSetResizableOptions(this.getPeer()!, value)
         }
         return this
     }
@@ -1034,31 +979,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public attributeModifier<T>(value: AttributeModifier<T>): this {
-        let peerNode = this.getPeer()
-        if (!peerNode._attributeSet) {
-            let isImageModifier: boolean = (value instanceof ImageModifier)
-            if (isImageModifier) {
-                let imageModifier = value as object as ImageModifier
-                peerNode._attributeSet = imageModifier.attribute
-            } else {
-                peerNode._attributeSet = new ArkCommonAttributeSet()
-            }
-        }
-        applyUIAttributes(value, peerNode)
-        let isAttributeUpdater: boolean = (value instanceof AttributeUpdater)
-        if (isAttributeUpdater) {
-            let attributeUpdater = value as object as AttributeUpdater<ImageAttribute, ImageInterface>
-            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
-                const node = this.getModifierHost()! as ArkImageNode
-                this.getModifierHost()!.constructParam(params)
-                return node
-            }
-        }
-        peerNode._attributeSet!.applyModifierPatch(peerNode)
-        return this
-    }
-
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

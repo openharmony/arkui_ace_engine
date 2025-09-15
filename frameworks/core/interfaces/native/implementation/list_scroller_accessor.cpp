@@ -105,6 +105,8 @@ void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
     if (funcOpt.has_value()) {
         auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
         scrollController->CloseAllSwipeActions(std::move(func));
+    } else {
+        scrollController->CloseAllSwipeActions(nullptr);
     }
 }
 Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,

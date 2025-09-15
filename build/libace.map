@@ -225,10 +225,12 @@
       OHOS::Ace::Platform::GetTouchEventOriginOffset*;
       OHOS::Ace::Base64Util::Decode*;
       OHOS::Ace::Frontend::*;
+      OHOS::Ace::PluginFrontend*;
       OHOS::Ace::Component::*;
       OHOS::Ace::Framework::ManifestParser::*;
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
+      OHOS::Ace::NG::DialogManagerStatic::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
       "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
@@ -249,6 +251,7 @@
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::NG::Matrix2D::*;
+      OHOS::Ace::NG::MatrixUtil::*;
       OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::DatePickerDialogModel::*;
@@ -280,6 +283,11 @@
       OHOS::Ace::PipelineBase::GetImageCache*;
       OHOS::Ace::PipelineBase::ConvertPxToVp*;
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
+      OHOS::Ace::PipelineBase::CurrentThemeManager*;
+      OHOS::Ace::PipelineBase::GetCurrentContext*;
+      OHOS::Ace::ArktsAniUtils::*;
+      OHOS::Ace::PluginManager::*;
+
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -327,16 +335,22 @@
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
-
+      "OHOS::Ace::NG::GeometryNode::GetFrameRect(bool) const";
+      OHOS::Ace::NG::GeometryNode::*;
+      OHOS::Ace::NG::PageRouterManagerFactory::*;
+      OHOS::Ace::NG::PageRouterManager::*;
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
+      OHOS::Ace::NG::DynamicModelStatic::*;
+      OHOS::Ace::NG::DynamicParam::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
       virtual?thunk?to?OHOS::Ace::Frontend::~Frontend*;
+      virtual?thunk?to?OHOS::Ace::PluginFrontend::~PluginFrontend*;
       virtual?thunk?to?OHOS::Ace::Component::~Component*;
 
       vtable?for?OHOS::Ace::AceApplicationInfo;
@@ -493,6 +507,7 @@
       OHOS::Ace::Kit::FrameNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NG::CustomNodeStatic::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
@@ -502,6 +517,17 @@
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
       OHOS::Ace::Kit::FrameNode::*;
+      OHOS::Ace::NG::MeasureLayoutParam::*;
+      OHOS::Ace::NG::MeasureLayoutParam::~MeasureLayoutParam*;
+      virtual?thunk?to?OHOS::Ace::NG::MeasureLayoutParam::*;
+      OHOS::Ace::NG::MeasureLayoutChild::*;
+      OHOS::Ace::V2::COMMON_VIEW_ETS_TAG*;
+      OHOS::Ace::NG::ScaleProperty::*;
+      OHOS::Ace::NG::ConvertToPx*;
+
+      OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
+      "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
+
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;

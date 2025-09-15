@@ -51,7 +51,7 @@ public:
     static NG::SelectDivider GetDefaultDivider(FrameNode* frameNode);
     static void SetDividerStyle(FrameNode* frameNode,
         const std::optional<NG::SelectDivider>& divider, const std::optional<DividerMode>& mode);
-    // static void SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance);
+    static void SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance);
     static void SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static void ResetDividerStyle(FrameNode* frameNode);

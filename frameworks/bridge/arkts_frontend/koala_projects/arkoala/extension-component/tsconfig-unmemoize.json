@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "outDir": "build/garbage",
-        "plugins": [
-            { "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js", "trace": false, "only_unmemoize": true }
-        ]
-    }
-}

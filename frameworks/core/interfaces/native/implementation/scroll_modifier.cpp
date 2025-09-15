@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/scroll/scroll_model_static.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
@@ -405,8 +407,18 @@ void EdgeEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto effect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    auto always = Converter::OptConvert<bool>(*options);
-    ScrollModelStatic::SetEdgeEffect(frameNode, effect, always);
+    
+    bool alwaysEnabled = true;
+    EffectEdge edge = EffectEdge::ALL;
+    auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
+    if (edgeEffectOptions) {
+        alwaysEnabled = Converter::Convert<bool>(edgeEffectOptions.value().alwaysEnabled);
+        auto value = Converter::OptConvert<int32_t>(edgeEffectOptions.value().effectEdge);
+        if (value.has_value()) {
+            edge = static_cast<EffectEdge>(value.value());
+        }
+    }
+    ScrollModelStatic::SetEdgeEffect(frameNode, effect, alwaysEnabled, edge);
 }
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()

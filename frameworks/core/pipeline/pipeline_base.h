@@ -1651,6 +1651,10 @@ public:
 
     void SetUiDVSyncCommandTime(uint64_t vsyncTime);
     void ForceUpdateDesignWidthScale(int32_t width);
+    void SetAsyncEventsHookListener(const std::function<void()>& asyncEventsExecution)
+    {
+        asyncEventsHookListener_ = asyncEventsExecution;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1815,6 +1819,8 @@ protected:
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;
     int32_t dvsyncTimeUseCount_ = 0;
+    // add for arkola frontend loops, called at the tail of vsync
+    std::function<void()> asyncEventsHookListener_;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

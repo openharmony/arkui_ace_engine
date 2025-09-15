@@ -67,6 +67,10 @@ enum class AvoidanceMode {
     AVOID_AROUND_TARGET,
 };
 
+struct Avoidance {
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+};
+
 struct SelectParam {
     std::string text;
     std::string icon;

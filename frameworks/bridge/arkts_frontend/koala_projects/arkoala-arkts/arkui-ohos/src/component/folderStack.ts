@@ -149,7 +149,7 @@ export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderS
     }
     public autoHalfFold(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export interface HoverEventParam {
     foldStatus: FoldStatus;

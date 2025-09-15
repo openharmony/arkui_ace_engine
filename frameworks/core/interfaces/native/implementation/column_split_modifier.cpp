@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
 
 namespace OHOS::Ace::NG {
@@ -30,9 +30,9 @@ struct DividerOptions {
 }
 namespace OHOS::Ace::NG::Converter {
 template<>
-ColumnSplitDivider Convert(const Ark_ColumnSplitDividerStyle& src)
+ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
 {
-    ColumnSplitDivider divider;
+    ItemDivider divider;
     auto margin = OptConvert<Dimension>(src.startMargin);
     if (margin.has_value()) {
         divider.startMargin = margin.value();
@@ -80,7 +80,7 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<ColumnSplitDivider>(*value);
+    auto divider = Converter::OptConvert<ItemDivider>(*value);
     LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier

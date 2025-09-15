@@ -1022,8 +1022,6 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
         return;
     }
     accessibilityText_ = text;
-    auto frameNode = host_.Upgrade();
-    FREE_NODE_CHECK(frameNode, SetAccessibilityTextWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1033,6 +1031,8 @@ void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::str
         return;
     }
     accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusInspectorKey, accessibilityNextFocusInspectorKey);
     UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
@@ -1043,6 +1043,8 @@ void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& tex
         return;
     }
     accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityTextWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1057,8 +1059,6 @@ void AccessibilityProperty::SetAccessibilityDescription(const std::string& acces
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
-    auto frameNode = host_.Upgrade();
-    FREE_NODE_CHECK(frameNode, SetAccessibilityDescriptionWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1068,6 +1068,8 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityDescriptionWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 

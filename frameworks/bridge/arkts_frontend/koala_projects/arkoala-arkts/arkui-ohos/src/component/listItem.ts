@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -31,6 +31,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 import { Length } from "./units"
 import { Callback_Number_Void } from "./alphabetIndexer"
+import { ListItemOpsHandWritten } from "./../handwritten"
 
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -127,12 +128,12 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     swipeActionAttribute(value: SwipeActionOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
+            const value_value = value!
             thisSerializer.writeSwipeActionOptions(value_value)
         }
         ArkUIGeneratedNativeModule._ListItemAttribute_swipeAction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -198,7 +199,7 @@ export interface SwipeActionOptions {
     start?: CustomBuilder | SwipeActionItem;
     end?: CustomBuilder | SwipeActionItem;
     edgeEffect?: SwipeEdgeEffect;
-    onOffsetChange?: ((index: number) => void);
+    onOffsetChange?: ((offset: number) => void);
 }
 export enum ListItemStyle {
     NONE = 0,
@@ -211,7 +212,7 @@ export interface ListItemAttribute extends CommonMethod {
     sticky(value: Sticky | undefined): this
     editable(value: boolean | EditMode | undefined): this
     selectable(value: boolean | undefined): this
-    selected(value: boolean | undefined): this
+    selected(value: boolean | Bindable<boolean> | undefined): this
     swipeAction(value: SwipeActionOptions | undefined): this
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
@@ -220,7 +221,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     sticky_value?: Sticky | undefined
     editable_value?: boolean | EditMode | undefined
     selectable_value?: boolean | undefined
-    selected_value?: boolean | undefined
+    selected_value?: boolean | Bindable<boolean> | undefined
     swipeAction_value?: SwipeActionOptions | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
     public sticky(value: Sticky | undefined): this {
@@ -232,7 +233,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     public selectable(value: boolean | undefined): this {
         return this
     }
-    public selected(value: boolean | undefined): this {
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public swipeAction(value: SwipeActionOptions | undefined): this {
@@ -243,7 +244,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkListItemComponent extends ArkCommonMethodComponent implements ListItemAttribute {
     getPeer(): ArkListItemPeer {
@@ -290,12 +291,16 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         }
         return this
     }
-    public selected(value: boolean | undefined): this {
-        if (this.checkPriority("selected")) {
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
+        if (typeof value === 'boolean' || typeof value === 'undefined') {
+            if (this.checkPriority("selected")) {
             const value_casted = value as (boolean | undefined)
-            this.getPeer()?.selectedAttribute(value_casted)
-            return this
+                this.getPeer()?.selectedAttribute(value_casted)
+                return this
+            }
         }
+        ListItemOpsHandWritten.hookListItemAttributeSelectedImpl(this.getPeer().peer.ptr,
+            (value as Bindable<boolean>));
         return this
     }
     public swipeAction(value: SwipeActionOptions | undefined): this {

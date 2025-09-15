@@ -282,21 +282,10 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
     }
     public edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
         if (this.checkPriority("edgeAlign")) {
-            const alignType_type = runtimeType(alignType)
-            const offset_type = runtimeType(offset)
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (CalendarAlign | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.edgeAlign0Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (CalendarAlign | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.edgeAlign1Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const alignType_casted = alignType as (CalendarAlign | undefined)
+            const offset_casted = offset as (Offset)
+            this.getPeer()?.edgeAlign0Attribute(alignType_casted, offset_casted)
+            return this
         }
         return this
     }

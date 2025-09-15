@@ -38,7 +38,7 @@ public:
 
 struct CallbackBuffer {
     InteropInt32 kind;
-    uint8_t buffer[60 * 4];
+    uint8_t buffer[4096];
     CallbackResourceHolder resourceHolder;
 };
 
@@ -46,9 +46,11 @@ enum CallbackEventKind {
     Event_CallCallback = 0,
     Event_HoldManagedResource = 1,
     Event_ReleaseManagedResource = 2,
+    Event_CallCallback_Customize = 3,
 };
 
 void enqueueCallback(const CallbackBuffer* event);
+void enqueueCustomCallback(const CallbackBuffer* event);
 void holdManagedCallbackResource(InteropInt32 resourceId);
 void releaseManagedCallbackResource(InteropInt32 resourceId);
 

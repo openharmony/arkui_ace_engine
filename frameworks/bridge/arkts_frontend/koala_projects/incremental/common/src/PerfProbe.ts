@@ -266,7 +266,7 @@ class PerfProbeImpl implements PerfProbe {
         const mainProbe = this.main.probes.get(this.main.name)!
         const percentage = mainProbe.totalTime > 0 ? Math.round((100 / mainProbe.totalTime) * this.totalTime) : 0
 
-        let result = `[${this.name}] call count: ${this.callCount}`
+        let result: string = `[${this.name}] call count: ${this.callCount}`
             +  ` | recursive call count: ${this.recursiveCallCount}`
             +  ` | time: ${this.totalTime}ms ${percentage}%`
 
@@ -312,7 +312,7 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
 
     push(probe: PerfProbeImpl) {
         probe.parent = this.currentProbe
-        probe.index = probe.parent ? probe.parent!.children.length as int32 : 0
+        probe.index = probe.parent ? (probe.parent!.children.length).toInt() : 0
         if (probe.parent) probe.parent!.children.push(probe)
         this.currentProbe = probe
     }
@@ -422,7 +422,7 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
                 const parentTime = probe.parent!.totalTime
                 let childrenTime = 0
                 probe.parent!.children.forEach((a: PerfProbeImpl):void => { childrenTime += a.totalTime })
-                probe.totalTime = Math.max(0, parentTime - childrenTime) as int32
+                probe.totalTime = (Math.max(0, parentTime - childrenTime)).toInt()
                 const percentage = parentTime > 0 ? Math.round((100 / parentTime) * probe.totalTime) : 0
                 console.log(`${prefix}${indent}[${probe.name}] time: ${numberToFixed(probe.totalTime, 2)}ms ${percentage}%`)
             } else {

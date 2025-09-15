@@ -45,5 +45,33 @@ void ListItemPattern::OnAttachToMainTreeMultiThread()
         SetListItemDefaultAttributes(host);
     }
 }
+void ListItemPattern::CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([onFinishCallback, weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->onFinishEvent_ = onFinishCallback;
+        pattern->ResetSwipeStatus(true);
+    });
+}
+
+void ListItemPattern::SetListItemStyleMultiThread(V2::ListItemStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
+        host->PostAfterAttachMainTreeTask([style, weak = WeakClaim(this), weakNode = WeakClaim(RawPtr(host))]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->listItemStyle_ = style;
+            pattern->SetListItemDefaultAttributes(node);
+            pattern->InitListItemCardStyleForList();
+        });
+    }
+}
 
 } // namespace OHOS::Ace::NG

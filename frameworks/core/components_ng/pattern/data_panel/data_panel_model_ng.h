@@ -20,6 +20,11 @@
 #include "core/components_ng/base/common_configuration.h"
 
 namespace OHOS::Ace::NG {
+
+enum class DataPanelType {
+    CIRCLE = 0,
+    LINE = 1
+};
 class DataPanelConfiguration : public CommonConfiguration {
     public:
         DataPanelConfiguration(std::vector<double>& values, double maxValue, bool enabled)

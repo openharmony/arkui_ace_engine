@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupModifier {

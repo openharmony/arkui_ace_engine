@@ -82,10 +82,10 @@ export class CustomTextEncoder {
 
     static getHeaderLength(array: Uint8Array, offset: int32 = 0): int32 {
         return (
-            (array.at(offset) as int32) |
-            (array.at(((offset + 1) << 8)) as int32) |
-            (array.at((offset + 2) << 16) as int32) |
-            (array.at((offset + 3) << 24)) as int32)
+            Double.toInt(array.at(offset)!) |
+            Double.toInt(array.at((offset + 1) << 8)!) |
+            Double.toInt(array.at((offset + 2) << 16)!) |
+            Double.toInt(array.at((offset + 3) << 24)!))
     }
 
     // Produces array of bytes with encoded string headed by 4 bytes (little endian) size information:
@@ -103,7 +103,7 @@ export class CustomTextEncoder {
             this.encodeInto(input, result, headerLen)
         }
         if (addLength) {
-            this.addLength(result, 0, (result.length - headerLen) as int32)
+            this.addLength(result, 0, Double.toInt(result.length - headerLen))
         }
         return result
     }
@@ -119,10 +119,10 @@ export class CustomTextEncoder {
         }
         let array = new Uint8Array(totalBytes)
         let position = 0
-        this.addLength(array, position, lengths.length as int32)
+        this.addLength(array, position, Double.toInt(lengths.length))
         position += CustomTextEncoder.HeaderLen
         for (let i = 0; i < lengths.length; i++) {
-            this.addLength(array, position, lengths[i] as int32)
+            this.addLength(array, position, Double.toInt(lengths[i]))
             position += CustomTextEncoder.HeaderLen
             this.encodeInto(strings[i], array, position)
             position += lengths[i]
@@ -179,7 +179,7 @@ export class CustomTextDecoder {
         let index = 0
         let result = ""
         while (index < input.length) {
-            let elem = input[index] as uint8
+            let elem = Double.toByte(input[index])
             let lead = elem & 0xff
             let count = 0
             let value = 0
@@ -187,15 +187,15 @@ export class CustomTextDecoder {
                 count = 1
                 value = elem
             } else if ((lead >> 5) == 0x6) {
-                value = (((elem << 6) & 0x7ff) + (input[index + 1] & 0x3f)) as int32
+                value = Long.toInt(((elem << 6) & 0x7ff) + (input[index + 1] & 0x3f))
                 count = 2
             } else if ((lead >> 4) == 0xe) {
-                value = (((elem << 12) & 0xffff) + ((input[index + 1] << 6) & 0xfff) +
-                    (input[index + 2] & 0x3f)) as int32
+                value = Long.toInt(((elem << 12) & 0xffff) + ((input[index + 1] << 6) & 0xfff) +
+                    (input[index + 2] & 0x3f))
                 count = 3
             } else if ((lead >> 3) == 0x1e) {
-                value = (((elem << 18) & 0x1fffff) + ((input[index + 1] << 12) & 0x3ffff) +
-                    ((input[index + 2] << 6) & 0xfff) + (input[index + 3] & 0x3f)) as int32
+                value = Long.toInt(((elem << 18) & 0x1fffff) + ((input[index + 1] << 12) & 0x3ffff) +
+                    ((input[index + 2] << 6) & 0xfff) + (input[index + 3] & 0x3f))
                 count = 4
             }
             codePoints[cpIndex++] = value

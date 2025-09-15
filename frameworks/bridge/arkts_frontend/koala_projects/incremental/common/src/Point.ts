@@ -25,11 +25,11 @@ export class Point {
     }
 
     get x(): float32 {
-        return this.coordinates[0] as float32
+        return (this.coordinates[0]).toInt()
     }
 
     get y(): float32 {
-        return this.coordinates[1] as float32
+        return this.coordinates[1].toFloat()
     }
 
     offsetXY(dx: float32, dy: float32): Point {
@@ -48,7 +48,7 @@ export class Point {
         return new Point(this.x * sx, this.y * sy)
     }
 
-    static ZERO = new Point(0.0 as float32, 0.0 as float32)
+    static ZERO = new Point((0.0).toFloat(), (0.0).toFloat())
 
     toArray(): Float32Array {
         return this.coordinates
@@ -69,7 +69,7 @@ export class Point {
 
         let array = new Array<Point>(points.length / 2)
         for (let i = 0; i < points.length / 2; i++) {
-            array[i] = new Point(points[i * 2] as float32, points[i * 2 + 1] as float32)
+            array[i] = new Point(points[i * 2].toFloat(), points[i * 2 + 1].toFloat())
         }
         return array
     }

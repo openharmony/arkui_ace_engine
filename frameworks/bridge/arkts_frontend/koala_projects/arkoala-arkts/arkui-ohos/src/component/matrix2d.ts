@@ -99,22 +99,11 @@ export class Matrix2D implements MaterializedBase {
         const other_casted = other as (Matrix2D | undefined)
         return this.multiply_serialize(other_casted)
     }
-    public rotate(degree?: number | undefined | number, rx?: number, ry?: number): Matrix2D {
-        const degree_type = runtimeType(degree)
-        const rx_type = runtimeType(rx)
-        const ry_type = runtimeType(ry)
-        if (((RuntimeType.NUMBER == degree_type) || (RuntimeType.UNDEFINED == degree_type)) && ((RuntimeType.NUMBER == rx_type) || (RuntimeType.UNDEFINED == rx_type)) && (RuntimeType.UNDEFINED == ry_type)) {
-            const rx_casted = degree as (number | undefined)
-            const ry_casted = rx as (number | undefined)
-            return this.rotate0_serialize(rx_casted, ry_casted)
-        }
-        if ((RuntimeType.NUMBER == degree_type) && ((RuntimeType.NUMBER == rx_type) || (RuntimeType.UNDEFINED == rx_type)) && ((RuntimeType.NUMBER == ry_type) || (RuntimeType.UNDEFINED == ry_type))) {
-            const degree_casted = degree as (number)
-            const rx_casted = rx as (number | undefined)
-            const ry_casted = ry as (number | undefined)
-            return this.rotate1_serialize(degree_casted, rx_casted, ry_casted)
-        }
-        throw new Error("Can not select appropriate overload")
+    public rotate(degree: number, rx?: number, ry?: number): Matrix2D {
+        const degree_casted = degree as (number)
+        const rx_casted = rx as (number | undefined)
+        const ry_casted = ry as (number | undefined)
+        return this.rotate1_serialize(degree_casted, rx_casted, ry_casted)
     }
     public translate(tx?: number, ty?: number): Matrix2D {
         const tx_casted = tx as (number | undefined)

@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -136,6 +136,7 @@ void MarkAnchorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    // ViewAbstract::MarkAnchor(frameNode, Converter::OptConvert<OffsetT<Dimension>>(*value));
 }
 void OffsetImpl(Ark_NativePointer node,
                 const Opt_Union_Position_Edges_LocalizedEdges* value)
@@ -277,6 +278,7 @@ void KeyImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
+    // ViewAbstract::SetInspectorId(frameNode, *convValue);
 }
 void WidthImpl(Ark_NativePointer node,
                const Opt_Length* value)

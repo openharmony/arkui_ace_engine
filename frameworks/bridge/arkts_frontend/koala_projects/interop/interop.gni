@@ -16,18 +16,18 @@
 # ../tools/gen_gni.py --json arktsconfig.json --output interop.gni --gn-tool ../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn
 
 koalaui_interop_files = [
-  "src/arkts/loadLibraries.ts",
-  "src/arkts/NativeBuffer.ts",
   "src/arkts/DeserializerBase.ts",
-  "src/arkts/index.ts",
+  "src/arkts/Finalizable.ts",
   "src/arkts/InteropNativeModule.ts",
   "src/arkts/InteropTypes.ts",
-  "src/arkts/SerializerBase.ts",
   "src/arkts/MaterializedBase.ts",
-  "src/arkts/Finalizable.ts",
+  "src/arkts/NativeBuffer.ts",
+  "src/arkts/ResourceManager.ts",
+  "src/arkts/ResourceManager.ts",
+  "src/arkts/SerializerBase.ts",
   "src/arkts/callback.ts",
-  "src/arkts/ResourceManager.ts",
-  "src/arkts/ResourceManager.ts",
+  "src/arkts/index.ts",
+  "src/arkts/loadLibraries.ts",
 ]
 
 koalaui_interop_path_keys = [

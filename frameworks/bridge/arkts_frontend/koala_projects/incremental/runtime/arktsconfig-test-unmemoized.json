@@ -6,7 +6,6 @@
         "paths": {
             "@koalaui/compat": [ "../../../compat/src/arkts" ],
             "@koalaui/common": [ "../../../common/src" ],
-            "@koalaui/harness": [ "../../../harness/src/arkts" ]
         }
     },
     "include": [

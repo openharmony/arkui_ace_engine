@@ -52,8 +52,7 @@ void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
         auto offscreenPattern = renderingContext->CreateOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
         SetOffscreenPattern(offscreenPattern);
-        std::lock_guard<std::mutex> lock(mutex_);
-        offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
+        AddOffscreenCanvasPattern(offscreenPattern);
     }
     if (optSettings && optSettings.value() && optSettings.value()->antialias) {
         bool anti = optSettings.value()->antialias.value();

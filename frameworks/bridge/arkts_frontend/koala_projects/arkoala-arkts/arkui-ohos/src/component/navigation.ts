@@ -26,11 +26,12 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback, Bindable } from "./common"
 import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { Resource } from "global.resource"
-import { SymbolGlyphModifier, TextModifier } from "./arkui-external"
+import { TextModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { SystemBarStyle } from "./arkui-custom"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight } from "./enums"
@@ -41,6 +42,7 @@ import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ArkStackComponent, ArkStackPeer } from "./stack"
+import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl} from "./../handwritten"
 
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
@@ -163,6 +165,9 @@ export class NavPathStack implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
+    static getParamWithNavDestinationId(navDestinationId: string): Object | null | undefined {
+        return PathStackUtils.getParamByNavDestinationId(navDestinationId);
+    }
     public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.pushPath(this, info, animated)
     }
@@ -189,6 +194,13 @@ export class NavPathStack implements MaterializedBase {
         const param_type = runtimeType(param)
         const onPop_type = runtimeType(onPop)
         const animated_type = runtimeType(animated)
+        // if (((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
+        //     const name_casted = name as (string)
+        //     const param_casted = param as (Object)
+        //     const animated_unknown = onPop as (unknown)
+        //     const animated_casted = animated_unknown as (boolean | undefined)
+        //     return this.pushDestinationByName0_serialize(name_casted, param_casted, animated_casted)
+        // }
         if ((RuntimeType.FUNCTION == onPop_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
             const name_casted = name as (string)
             const param_casted = param as (Object)
@@ -249,7 +261,7 @@ export class NavPathStack implements MaterializedBase {
     public getAllPathName(): Array<string> {
         return this.getAllPathName_serialize()
     }
-    public getParamByIndex(index: number): Object | undefined {
+    public getParamByIndex(index: number): Object | null | undefined {
         return PathStackUtils.getParamByIndex(this, index)
     }
     public getParamByName(name: string): Array<Object | undefined> {
@@ -1382,7 +1394,7 @@ export type Callback_NavigationMode_Void = (mode: NavigationMode) => void;
 export type Callback_String_Opt_Object_Void = (name: string, param: Object | undefined) => void;
 export type Type_NavigationAttribute_customNavContentTransition_delegate = (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => NavigationAnimatedTransition | undefined;
 export interface NavigationAttribute extends CommonMethod {
-    navBarWidth(value: Length | undefined): this
+    navBarWidth(value: Length | Bindable<Length> | undefined): this
     navBarPosition(value: NavBarPosition | undefined): this
     navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this
     minContentWidth(value: Dimension | undefined): this
@@ -1390,6 +1402,7 @@ export interface NavigationAttribute extends CommonMethod {
     backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
     hideNavBar(value: boolean | undefined): this
     subTitle(value: string | undefined): this
+    hideTitleBar(hide: boolean | undefined): this
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this
     hideBackButton(value: boolean | undefined): this
     titleMode(value: NavigationTitleMode | undefined): this
@@ -1413,7 +1426,7 @@ export interface NavigationAttribute extends CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
-    navBarWidth_value?: Length | undefined
+    navBarWidth_value?: Length | Bindable<Length> | undefined
     navBarPosition_value?: NavBarPosition | undefined
     navBarWidthRange_value?: [ Dimension, Dimension ] | undefined
     minContentWidth_value?: Dimension | undefined
@@ -1438,7 +1451,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
     public navBarPosition(value: NavBarPosition | undefined): this {
@@ -1460,6 +1473,9 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
         return this
     }
     public subTitle(value: string | undefined): this {
+        return this
+    }
+    public hideTitleBar(hide: boolean | undefined): this {
         return this
     }
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
@@ -1555,13 +1571,32 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             if (pathInfos_type != RuntimeType.UNDEFINED) {
                 info = pathInfos!
             }
-            this.getPeer()?.setNavigationOptions1Attribute(info)
+            hookNavigationSetNavigationOptionsImpl(this.getPeer().peer.ptr, info)
             return this
         }
         return this
     }
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
+        /**
+         * 1.check navBarWidth property name is correct
+         * 2.check if param is undefined
+         * 3.check if param is Length
+         */
         if (this.checkPriority("navBarWidth")) {
+            let value_type : int32 = RuntimeType.UNDEFINED
+            value_type = runtimeType(value);
+            if ((RuntimeType.UNDEFINED) != (value_type)) {
+                const value_value = value!
+                let value_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_type = runtimeType(value_value)
+                if (RuntimeType.STRING != value_value_type && RuntimeType.NUMBER != value_value_type &&
+                    RuntimeType.UNDEFINED != value_value_type &&
+                    !TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                    NavigationOpsHandWritten.hookNavigationAttributeNavBarWidthImpl(this.getPeer().peer.ptr,
+                        (value as Bindable<Length>));
+                    return this
+                }
+            }
             const value_casted = value as (Length | undefined)
             this.getPeer()?.navBarWidthAttribute(value_casted)
             return this
@@ -1605,17 +1640,11 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             const icon_type = runtimeType(icon)
             const accessibilityText_type = runtimeType(accessibilityText)
             if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && (RuntimeType.UNDEFINED == accessibilityText_type)) {
+                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.UNDEFINED == accessibilityText_type) ||
+                (RuntimeType.STRING == accessibilityText_type) || (RuntimeType.OBJECT == accessibilityText_type))) {
                 const value_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
-                this.getPeer()?.backButtonIcon0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.STRING == accessibilityText_type) ||
-                (RuntimeType.OBJECT == accessibilityText_type))) {
-                const icon_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
-                const accessibilityText_casted = accessibilityText as (ResourceStr)
-                this.getPeer()?.backButtonIcon1Attribute(icon_casted, accessibilityText_casted)
+                const accessibilityText_casted = accessibilityText as (ResourceStr | undefined)
+                hookNavigationBackButtonIconImpl(this.getPeer().peer.ptr, value_casted, accessibilityText_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1638,22 +1667,20 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public hideTitleBar(hide: boolean | undefined): this {
+        if (this.checkPriority("hideTitleBar")) {
+            const value_casted = hide as (boolean | undefined)
+            this.getPeer()?.hideTitleBar0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
         if (this.checkPriority("hideTitleBar")) {
-            const hide_type = runtimeType(hide)
-            const animated_type = runtimeType(animated)
-            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-                const value_casted = hide as (boolean | undefined)
-                this.getPeer()?.hideTitleBar0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-                const hide_casted = hide as (boolean | undefined)
-                const animated_casted = animated as (boolean | undefined)
-                this.getPeer()?.hideTitleBar1Attribute(hide_casted, animated_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = hide as (boolean | undefined)
+            const animated_casted = animated as (boolean | undefined)
+            this.getPeer()?.hideTitleBar1Attribute(value_casted, animated_casted)
+            return this
         }
         return this
     }
@@ -1677,15 +1704,10 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("menus")) {
             const items_type = runtimeType(items)
             const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type)) && (RuntimeType.UNDEFINED == options_type)) {
+            if ((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type)) {
                 const value_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
-                this.getPeer()?.menus0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type) && (RuntimeType.UNDEFINED != options_type)) {
-                const items_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
-                const options_casted = options as (NavigationMenuOptions)
-                this.getPeer()?.menus1Attribute(items_casted, options_casted)
+                const options_casted = options as (NavigationMenuOptions | undefined)
+                hookNavigationMenusImpl(this.getPeer().peer.ptr, value_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1803,7 +1825,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("title")) {
             const value_casted = value as (ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined)
             const options_casted = options as (NavigationTitleOptions | undefined)
-            this.getPeer()?.titleAttribute(value_casted, options_casted)
+            hookNavigationTitleImpl(this.getPeer().peer.ptr, value_casted, options_casted)
             return this
         }
         return this
@@ -1812,7 +1834,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("toolbarConfiguration")) {
             const value_casted = value as (Array<ToolbarItem> | CustomBuilder | undefined)
             const options_casted = options as (NavigationToolbarOptions | undefined)
-            this.getPeer()?.toolbarConfigurationAttribute(value_casted, options_casted)
+            hookNavigationToolbarConfigurationImpl(this.getPeer().peer.ptr, value_casted, options_casted)
             return this
         }
         return this
@@ -1857,8 +1879,8 @@ export function Navigation(
         content_?.()
         if (pathInfos != undefined) {
             remember(() => {
-                const updater: (name: string, param: object|undefined)=>PeerNode =
-                (name: string, param: object|undefined) => {
+                    const updater: (name: string, param: object|null|undefined)=>PeerNode =
+                    (name: string, param: object|null|undefined) => {
                     let node = ArkStackPeer.create(new ArkStackComponent())
                     return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
                         setNeedCreate(true)
@@ -1866,7 +1888,7 @@ export function Navigation(
                         setNeedCreate(false)
                     })
                 }
-                const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                const value_casted = updater as ((name: string, param: object|null|undefined) => PeerNode)
                 NavExtender.setUpdateStackCallback(pathInfos!, () => {
                     addPartialUpdate(() => {
                         if (!receiver.isNeedSync()) {
@@ -1890,6 +1912,22 @@ export function Navigation(
                     receiver.updateNeedSync(true)
                 })
             })
+            // NavExtender.setOnPopCallback(pathInfos!, (id: string) => {
+            //     const result = PathStackUtils.result
+            //     if (runtimeType(result) === RuntimeType.UNDEFINED) {
+            //         return
+            //     }
+            //     const info = PathStackUtils.getNavPathInfoById(id)
+            //     if (runtimeType(info) === RuntimeType.UNDEFINED) {
+            //         return
+            //     }
+            //     const onPop = info!.onPop
+            //     if (runtimeType(onPop) === RuntimeType.UNDEFINED) {
+            //         return;
+            //     }
+            //     const popInfo: PopInfo = {result: result!, info: info!}
+            //     onPop!(popInfo)
+            // })
         }
         receiver.applyAttributesFinish()
     })

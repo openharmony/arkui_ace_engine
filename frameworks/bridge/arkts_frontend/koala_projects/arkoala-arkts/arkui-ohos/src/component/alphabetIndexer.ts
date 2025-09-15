@@ -22,13 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, Font, Position, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AlphabetIndexerOpsHandWritten } from "./../handwritten"
 export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -594,7 +595,7 @@ export enum IndexerAlign {
 }
 export interface AlphabetIndexerOptions {
     arrayValue: Array<string>;
-    selected: number;
+    selected: number | Bindable<number>;
 }
 export type AlphabetIndexerInterface = (options: AlphabetIndexerOptions) => AlphabetIndexerAttribute;
 export type OnAlphabetIndexerSelectCallback = (index: number) => void;
@@ -621,7 +622,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this
     onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this
     onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this
-    selected(value: number | undefined): this
+    selected(value: number | Bindable<number> | undefined): this
     popupPosition(value: Position | undefined): this
     autoCollapse(value: boolean | undefined): this
     popupItemBorderRadius(value: number | undefined): this
@@ -713,7 +714,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     public onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         return this
     }
-    public selected(value: number | undefined): this {
+    public selected(value: number | Bindable<number> | undefined): this {
         return this
     }
     public popupPosition(value: Position | undefined): this {
@@ -748,11 +749,24 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
     getPeer(): ArkAlphabetIndexerPeer {
         return (this.peer as ArkAlphabetIndexerPeer)
     }
-        public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
+    AlphabetIndexerOptionsValueIsBindable(options: AlphabetIndexerOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.selected;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
+    public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
         if (this.checkPriority("setAlphabetIndexerOptions")) {
             const options_casted = options as (AlphabetIndexerOptions)
             this.getPeer()?.setAlphabetIndexerOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.AlphabetIndexerOptionsValueIsBindable(options!)) {
+            AlphabetIndexerOpsHandWritten.hookAlphabetIndexerAttributeSelectedImpl(this.getPeer().peer.ptr,
+                (options!.selected as Bindable<number>));
         }
         return this
     }
@@ -900,12 +914,16 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-        public selected(value: number | undefined): this {
-        if (this.checkPriority("selected")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.selectedAttribute(value_casted)
-            return this
+        public selected(value: number | Bindable<number> | undefined): this {
+        if (typeof value === 'number' || typeof value === 'undefined') {
+            if (this.checkPriority("selected")) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.selectedAttribute(value_casted)
+                return this
+            }
         }
+        AlphabetIndexerOpsHandWritten.hookAlphabetIndexerAttributeSelectedImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
         public popupPosition(value: Position | undefined): this {

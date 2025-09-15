@@ -26,12 +26,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineHeightStyleAccessor {
 void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LineHeightStyle CtorImpl(Ark_LengthMetrics lineHeight)
 {
-    auto peer = new LineHeightStylePeer();
+    auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
     Dimension height = Converter::OptConvert<Dimension>(lineHeight).value_or(Dimension());
     peer->span = AceType::MakeRefPtr<LineHeightSpan>(height);
     return peer;
@@ -45,7 +44,7 @@ Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
     Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->span, ret);
-    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToPx());
+    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToVp());
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()

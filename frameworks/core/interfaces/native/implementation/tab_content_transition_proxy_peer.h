@@ -20,9 +20,10 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 
-using TabContentTransitionProxyRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::TabContentTransitionProxy>;
+using TabContentTransitionProxyRefPtr = OHOS::Ace::WeakPtr<OHOS::Ace::TabContentTransitionProxy>;
 
 struct TabContentTransitionProxyPeer {
+    virtual ~TabContentTransitionProxyPeer() {}
     TabContentTransitionProxyRefPtr handler;
     void SetHandler(const TabContentTransitionProxyRefPtr& handlerIn)
     {
@@ -31,7 +32,9 @@ struct TabContentTransitionProxyPeer {
 
     void FinishTransition()
     {
-        handler->FinishTransition();
+        auto weakHandler = handler.Upgrade();
+        CHECK_NULL_VOID(weakHandler);
+        weakHandler->FinishTransition();
     }
 };
 

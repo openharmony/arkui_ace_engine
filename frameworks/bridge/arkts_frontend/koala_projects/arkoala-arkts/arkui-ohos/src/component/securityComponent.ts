@@ -603,7 +603,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_maxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    maxLinesAttribute(value: number | undefined): void {
+    maxLinesAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -748,7 +748,7 @@ export interface SecurityComponentMethod {
     id(value: string | undefined): this
     minFontScale(value: number | Resource | undefined): this
     maxFontScale(value: number | Resource | undefined): this
-    maxLines(value: number | undefined): this
+    maxLines(value: int32 | undefined): this
     minFontSize(value: number | string | Resource | undefined): this
     maxFontSize(value: number | string | Resource | undefined): this
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
@@ -784,7 +784,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     id_value?: string | undefined
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
-    maxLines_value?: number | undefined
+    maxLines_value?: int32 | undefined
     minFontSize_value?: number | string | Resource | undefined
     maxFontSize_value?: number | string | Resource | undefined
     heightAdaptivePolicy_value?: TextHeightAdaptivePolicy | undefined
@@ -873,7 +873,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     public maxFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         return this
     }
     public minFontSize(value: number | string | Resource | undefined): this {
@@ -890,7 +890,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {
@@ -1138,9 +1138,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         if (this.checkPriority("maxLines")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.maxLinesAttribute(value_casted)
             return this
         }

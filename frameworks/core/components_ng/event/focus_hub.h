@@ -35,7 +35,12 @@ constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_VERTICAL = 0x01;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-
+constexpr auto DEFAULT_FOCUS_IS_GROUP = false;
+constexpr auto DEFAULT_FOCUS_ON_TOUCH = false;
+constexpr auto DEFAULT_FOCUS_IS_GROUP_DEFAULT = false;
+constexpr auto DEFAULT_FOCUS_DEFAULT_FOCUS = false;
+constexpr auto DEFAULT_FOCUS_ARROW_KEY_STEP_OUT = true;
+constexpr auto DEFAULT_FOCUS_TAB_INDEX = 0;
 enum class FocusNodeType : int32_t {
     DEFAULT = 0,
     GROUP_DEFAULT = 1,

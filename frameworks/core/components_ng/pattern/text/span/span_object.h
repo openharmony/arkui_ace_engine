@@ -365,6 +365,7 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
+    void SetPixelMap(const RefPtr<PixelMap>& pixelMap);
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 
 private:

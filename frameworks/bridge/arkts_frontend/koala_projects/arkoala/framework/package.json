@@ -28,7 +28,7 @@
         "prepare:arm32": "npm run prepare:compiler && npm run install:sysroot:arm32 --prefix ../tools/compiler",
         "prepare:wincrt:bz": "node ../ohos-sdk/scripts/openlab-cli.mjs download -p wincrt -f wincrt-14.33.173.tar.gz -v 14.33.173 -d prebuilt/wincrt",
         "prepare:wincrt:yz": "node ../ohos-sdk/scripts/gitlab-cli.mjs download -p wincrt -f wincrt-14.33.173.tar.gz -v 14.33.173 -d prebuilt/wincrt",
-        "clean": "ets-tsc -b . --clean && rimraf -g build dist lib generated native/build-* *.ini",
+        "clean": "rimraf -g build dist lib generated native/build-* *.ini",
         "configure:native-node-host": "cd native && meson setup -D vm_kind=node build-node-host",
         "compile:native-node-host": "npm run configure:native-node-host && cd native && meson compile -C build-node-host && meson install -C build-node-host",
         "configure:native-hzvm-host": "cd native && meson setup -D vm_kind=hzvm build-hzvm-host",

@@ -14,8 +14,9 @@
  */
 
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -42,6 +43,7 @@ struct DatePickerOptions {
     PickerDate start;
     PickerDate end;
     PickerDate selected;
+    DatePickerMode mode;
 };
 } // namespace
 namespace Converter {
@@ -60,6 +62,11 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
     opt = Converter::OptConvert<PickerDate>(src.selected);
     if (opt) {
         options.selected = *opt;
+    }
+
+    auto mode = Converter::OptConvert<DatePickerMode>(src.mode);
+    if (mode) {
+        options.mode = *mode;
     }
     dst = options;
 }
@@ -85,9 +92,31 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto opt = Converter::OptConvert<DatePickerOptions>(*options);
     CHECK_NULL_VOID(opt);
-    DatePickerModelNG::SetStartDate(frameNode, opt->start);
-    DatePickerModelNG::SetEndDate(frameNode, opt->end);
+
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto startDate = opt->start;
+    auto endDate = opt->end;
+    if (startDate.GetYear() <= 0) {
+        startDate = theme->GetDefaultStartDate();
+    }
+    if (endDate.GetYear() <= 0) {
+        endDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = startDate.ToDays();
+    auto endDays = endDate.ToDays();
+    if (startDays > endDays) {
+        startDate = theme->GetDefaultStartDate();
+        endDate = theme->GetDefaultEndDate();
+    }
+
+    DatePickerModelNG::SetStartDate(frameNode, startDate);
+    DatePickerModelNG::SetEndDate(frameNode, endDate);
     DatePickerModelNG::SetSelectedDate(frameNode, opt->selected);
+
+    DatePickerModelNG::SetMode(frameNode, opt->mode);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
@@ -222,7 +251,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto result = Converter::ArkValue<Ark_DatePickerResult>(selectedStr);
         arkCallback.Invoke(result);
     };
-    DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
+    DatePickerModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void OnDateChange0Impl(Ark_NativePointer node,
                        const Opt_Callback_Date_Void* value)
@@ -277,24 +306,29 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, *convValue);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Date_Void* callback)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(callback);
-    // WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    // auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
-    //     CHECK_NULL_VOID(event);
-    //     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-    //     CHECK_NULL_VOID(eventInfo);
-    //     auto selectedStr = eventInfo->GetSelectedStr();
-    //     auto result = Converter::ArkValue<Ark_Date>(selectedStr);
-    //     PipelineContext::SetCallBackNode(weakNode);
-    //     arkCallback.Invoke(result);
-    // };
-    // DatePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(result);
+    };
+    DatePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()

@@ -1,8 +1,0 @@
-/** @memo */
-function foo(__memo_context: __memo_context_type, __memo_id: __memo_id_type, a: any): any {
-    const __memo_scope = __memo_context.scope<any>(__memo_id + ("0___key_id_DIRNAME/wrap_object_literal.test.ts" as __memo_id_type), 1);
-    const __memo_parameter_a = __memo_scope.param(0, a);
-    if (__memo_scope.unchanged)
-        return __memo_scope.cached;
-    return __memo_scope.recache(__memo_parameter_a.value);
-}

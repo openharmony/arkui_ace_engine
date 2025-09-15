@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 
+#include "frameworks/bridge/arkts_frontend/arkts_frontend.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -65,7 +66,35 @@ struct MediaQueryResult {
         env->String_NewUTF8(mediac, strlen(mediac), &media);
         match = static_cast<ani_boolean>(matches_);
         env->Object_SetFieldByName_Boolean(result, "matches", match);
-        env->Object_SetFieldByName_Ref(result, "matches", static_cast<ani_ref>(media));
+        env->Object_SetFieldByName_Ref(result, "media", static_cast<ani_ref>(media));
+        env->DestroyLocalScope();
+    }
+
+    virtual void AniResultSerializer([[maybe_unused]] ani_env *env, ani_object& result)
+    {
+        ani_boolean match;
+        ani_string media;
+        static const char *className = "L@ohos/mediaquery/mediaquery/Result;";
+        ani_class cls;
+        if (ANI_OK != env->FindClass(className, &cls)) {
+            return;
+        }
+        ani_method method;
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) {
+            return;
+        }
+        ani_size nr_refs = 16;
+        if (ANI_OK != env->CreateLocalScope(nr_refs)) {
+            return;
+        }
+        const char* mediac = media_.c_str();
+        if (ANI_OK != env->String_NewUTF8(mediac, strlen(mediac), &media)) {
+            return;
+        }
+        match = static_cast<ani_boolean>(matches_);
+        if (ANI_OK != env->Object_New(cls, method, &result, match, media)) {
+            return;
+        }
         env->DestroyLocalScope();
     }
 };
@@ -88,26 +117,38 @@ public:
         }
     }
 
-    static void IdlCallback(OHOS::Ace::Framework::JsEngine* jsEngine)
+    static OHOS::Ace::RefPtr<OHOS::Ace::ArktsFrontend> GetFronted()
     {
-        OnIdlCallback(jsEngine);
+        auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafely();
+        if (context == nullptr) {
+            LOGE("mediaquery-ani can not get current context.");
+            return nullptr;
+        }
+        return OHOS::Ace::AceType::DynamicCast<OHOS::Ace::ArktsFrontend>(context->GetFrontend());
     }
 
-    static void OnIdlCallback(OHOS::Ace::Framework::JsEngine* jsEngine)
+    static void IdlCallback(OHOS::Ace::ArktsFrontend* arktsFrontend)
+    {
+        OnIdlCallback(arktsFrontend);
+    }
+
+    static void OnIdlCallback(OHOS::Ace::ArktsFrontend* arktsFrontend)
     {
         std::set<std::unique_ptr<MediaQueryListener>> delayDeleteListenerSets;
         std::set<ani_ref> delayDeleteCallbacks;
         std::vector<MediaQueryListener*> copyListeners;
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            auto& currentListeners = listenerSets_[OHOS::Ace::AceType::WeakClaim(jsEngine)];
+            auto& currentListeners = listenerSets_[OHOS::Ace::AceType::WeakClaim(arktsFrontend)];
             copyListeners.insert(copyListeners.end(), currentListeners.begin(), currentListeners.end());
         }
         struct Leave {
             ~Leave()
             {
-                for (auto& cbRef : *delayDeleteCallbacks_) {
-                    delayDeleteEnv_->GlobalReference_Delete(cbRef);
+                if (delayDeleteEnv_) {
+                    for (auto& cbRef : *delayDeleteCallbacks_) {
+                        delayDeleteEnv_->GlobalReference_Delete(cbRef);
+                    }
                 }
                 delayDeleteCallbacks_ = nullptr;
                 delayDeleteListenerSets_ = nullptr;
@@ -133,27 +174,35 @@ public:
                 auto& currentCallbacks = listener->cbList_;
                 copyCallbacks.insert(copyCallbacks.end(), currentCallbacks.begin(), currentCallbacks.end());
             }
-
             for (const auto &cbRef : copyCallbacks) {
                 if (delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
                     continue;
                 }
                 TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "trigger:%{public}s matches:%{public}d",
                     listener->media_.c_str(), listener->matches_);
-                ani_size nr_refs = 16;
-                if (ANI_OK != listener->env_->CreateLocalScope(nr_refs)) {
+                ani_wref cbWref;
+                if (ANI_OK != listener->env_->WeakReference_Create(cbRef, &cbWref)) {
+                    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!WeakReference_Create");
                     return;
                 }
-                ani_wref cbWref;
-                listener->env_->WeakReference_Create(cbRef, &cbWref);
                 ani_ref ref;
                 ani_boolean wasReleased;
-                listener->env_->WeakReference_GetReference(cbWref, &wasReleased, &ref);
+                if (ANI_OK != listener->env_->WeakReference_GetReference(cbWref, &wasReleased, &ref)) {
+                    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!listener->env_->WeakReference_GetReference");
+                    return;
+                }
                 ani_object result = {};
-                listener->MediaQueryResult::AniSerializer(listener->env_, result);
+                listener->MediaQueryResult::AniResultSerializer(listener->env_, result);
                 ani_ref resultRef = static_cast<ani_ref>(result);
-                listener->env_->FunctionalObject_Call(static_cast<ani_fn_object>(ref), 1, &resultRef, nullptr);
-                listener->env_->DestroyLocalScope();
+                if (resultRef == nullptr) {
+                    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "resultRef == nullptr");
+                    return;
+                }
+                ani_ref fnReturnVal;
+                if (ANI_OK != listener->env_->FunctionalObject_Call(static_cast<ani_fn_object>(ref), 1,
+                    &resultRef, &fnReturnVal)) {
+                    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "FunctionalObject_Call fail");
+                }
             }
         }
     }
@@ -175,29 +224,32 @@ public:
     static void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
         ani_string type, ani_object callback)
     {
-        auto jsEngine = OHOS::Ace::EngineHelper::GetCurrentEngineSafely();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->RegisterMediaUpdateCallback(MediaQueryListener::IdlCallback);
         ani_size nr_refs = 16;
         if (ANI_OK != env->CreateLocalScope(nr_refs)) {
             return;
         }
         size_t argc = ParseArgs(env, object, type, callback);
-        if (argc == TWO_ARGS) {
+        if (argc != TWO_ARGS) {
             env->DestroyLocalScope();
+            TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "mediaquery argc == TWO_ARGS");
             return;
         }
-
         MediaQueryListener* listener = GetListener(env, object);
         if (!listener) {
             env->DestroyLocalScope();
+            TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "mediaquery listener");
             return;
         }
+        auto arkTsFrontend = MediaQueryListener::GetFronted();
+        if (!arkTsFrontend) {
+            TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "mediaquery arktsFrontend");
+            return;
+        }
+        arkTsFrontend->RegisterMediaUpdateCallback(MediaQueryListener::IdlCallback);
         auto iter = listener->FindCbList(callback);
         if (iter != listener->cbList_.end()) {
             env->DestroyLocalScope();
+            TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "mediaquery iter != listener->cbList_.end()");
             return;
         }
         ani_ref ref;
@@ -268,9 +320,9 @@ private:
         while (iter != listenerSets_.end()) {
             iter->second.erase(this);
             if (iter->second.empty()) {
-                auto jsEngineWeak = iter->first.Upgrade();
-                if (jsEngineWeak) {
-                    jsEngineWeak->UnregisterMediaUpdateCallback();
+                auto arktsFrontendWeak = iter->first.Upgrade();
+                if (arktsFrontendWeak) {
+                    arktsFrontendWeak->UnregisterMediaUpdateCallback();
                 }
                 iter = listenerSets_.erase(iter);
             } else {
@@ -289,13 +341,14 @@ private:
             env_ = env;
         }
         env->DestroyLocalScope();
-        auto jsEngine = OHOS::Ace::EngineHelper::GetCurrentEngineSafely();
-        if (!jsEngine) {
+        auto arkTsFrontend = MediaQueryListener::GetFronted();
+        if (!arkTsFrontend) {
+            TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!arkTsFrontend");
             return;
         }
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            listenerSets_[jsEngine].emplace(this);
+            listenerSets_[arkTsFrontend].emplace(this);
         }
     }
 
@@ -346,13 +399,13 @@ private:
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static std::set<ani_ref>* delayDeleteCallbacks_;
     static ani_env* delayDeleteEnv_;
-    static std::map<OHOS::Ace::WeakPtr<OHOS::Ace::Framework::JsEngine>, std::set<MediaQueryListener*>> listenerSets_;
+    static std::map<OHOS::Ace::WeakPtr<OHOS::Ace::ArktsFrontend>, std::set<MediaQueryListener*>> listenerSets_;
     static std::mutex mutex_;
 };
 std::set<std::unique_ptr<MediaQueryListener>>* MediaQueryListener::delayDeleteListenerSets_;
 ani_env* MediaQueryListener::delayDeleteEnv_;
 std::set<ani_ref>* MediaQueryListener::delayDeleteCallbacks_;
-std::map<OHOS::Ace::WeakPtr<OHOS::Ace::Framework::JsEngine>, std::set<MediaQueryListener*>>
+std::map<OHOS::Ace::WeakPtr<OHOS::Ace::ArktsFrontend>, std::set<MediaQueryListener*>>
     MediaQueryListener::listenerSets_;
 std::mutex MediaQueryListener::mutex_;
 
@@ -360,7 +413,7 @@ void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_s
 {
     MediaQueryListener::On(env, object, type, callback);
 #if defined(PREVIEW)
-    MediaQueryListener::IdlCallback(AceType::RawPtr(jsEngine));
+    MediaQueryListener::IdlCallback(AceType::RawPtr(arktsFrontend));
 #endif
 }
 
@@ -380,7 +433,7 @@ static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, ani_string con
     utf8Buffer[bytes_written] = '\0';
     std::string mediaCondition = std::string(utf8Buffer);
 
-    static const char *className = "L@ohos/mediaquery/mediaquery;";
+    static const char *className = "L@ohos/mediaquery/mediaquery/Mediaquery;";
     ani_object mediaquery_obj = {};
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {

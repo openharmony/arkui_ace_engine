@@ -21,6 +21,20 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 
+namespace OHOS::Ace::NG::Converter {
+    template<>
+    void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src)
+    {
+        switch (src) {
+            case Ark_TouchType::ARK_TOUCH_TYPE_DOWN: dst = TouchType::DOWN; break;
+            case Ark_TouchType::ARK_TOUCH_TYPE_UP: dst = TouchType::UP; break;
+            case Ark_TouchType::ARK_TOUCH_TYPE_MOVE: dst = TouchType::MOVE; break;
+            case Ark_TouchType::ARK_TOUCH_TYPE_CANCEL: dst = TouchType::CANCEL; break;
+            default: LOGE("Unexpected enum value in Ark_MouseButton: %{public}d", src);
+        }
+    }
+} // namespace OHOS::Ace::NG::Converter
+
 namespace {
 const std::unordered_set<std::string> g_touchPreventDefPattern = { "Checkbox", "CheckboxGroup", "Rating",
     "Radio", "Toggle", "Hyperlink" };
@@ -65,7 +79,16 @@ Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 void SetTypeImpl(Ark_TouchEvent peer,
                  Ark_TouchType type)
 {
-    LOGE("TouchEventAccessor::SetTypeImpl we can only GET event type");
+    CHECK_NULL_VOID(peer);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto changedTouches = info->GetChangedTouches();
+    if (changedTouches.empty()) {
+        LOGE("ARKOALA TouchEventAccessor::SetTypeImpl empty list of changed touches.");
+        return;
+    }
+    auto typeValue = Converter::Convert<std::optional<TouchType>>(type).value_or(TouchType::UNKNOWN);
+    changedTouches.front().SetTouchType(typeValue);
 }
 Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
 {
@@ -78,8 +101,12 @@ Array_TouchObject GetTouchesImpl(Ark_TouchEvent peer)
 void SetTouchesImpl(Ark_TouchEvent peer,
                     const Array_TouchObject* touches)
 {
-    LOGE("TouchEventAccessor::SetTouchesImpl we can only add new touches. "
-        "We can not set touches array");
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(touches);
+    auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*touches);
+    info->SetTouches(touchList);
 }
 Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
 {
@@ -92,8 +119,12 @@ Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
 void SetChangedTouchesImpl(Ark_TouchEvent peer,
                            const Array_TouchObject* changedTouches)
 {
-    LOGE("TouchEventAccessor::SetChangedTouchesImpl we can only add new changedTouches. "
-        "We can not set changedTouches array");
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(changedTouches);
+    auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*changedTouches);
+    info->SetChangedTouches(touchList);
 }
 Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
 {

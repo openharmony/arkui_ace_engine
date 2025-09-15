@@ -46,7 +46,6 @@
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -808,6 +807,9 @@ public:
     RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
+    // For ArkTS1.2 to determine whether there is already an animable property with corresponding name on the node
+    // due to differences in compilation implementation.
+    bool HasAnimatableProperty(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
@@ -896,9 +898,6 @@ public:
 
     int32_t GetTotalChildCount() const override
     {
-        if (arkoalaLazyAdapter_) {
-            return arkoalaLazyAdapter_->GetTotalCount();
-        }
         return UINode::TotalChildCount();
     }
 
@@ -1118,7 +1117,16 @@ public:
             removeCustomProperties_ = func;
         }
     }
-
+    void SetCustomPropertyCallback(
+        std::function<void()> func, std::function<std::string(const std::string&)> getFunc)
+    {
+        if (!removeCustomProperties_) {
+            removeCustomProperties_ = func;
+        }
+        if (!getCustomProperty_) {
+            getCustomProperty_ = getFunc;
+        }
+    }
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
     void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
                                 bool withClip = false) const;
@@ -1287,22 +1295,6 @@ public:
     uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
-
-    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
-    void ArkoalaSynchronize(
-        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
-
-    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
-
-private:
-    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index, bool active);
-    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
-
-    /* temporary adapter to provide LazyForEach feature in Arkoala */
-    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
-
-public:
-    /* ============================== Arkoala LazyForEach adapter section END ================================*/
 
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const

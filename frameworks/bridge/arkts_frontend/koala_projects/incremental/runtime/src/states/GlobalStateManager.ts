@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager, StateManagerImpl } from "./State"
 import { int32 } from "@koalaui/common"
 
 /**
@@ -22,8 +22,7 @@ import { int32 } from "@koalaui/common"
  */
 export class GlobalStateManager {
     // @ts-ignore
-    private static localManagerMap = new ConcurrentHashMap<int32, StateManager>()
-    private static current: StateManager | undefined = undefined
+    private static localManagerMap = new Map<int32, StateManager>()
 
     /**
      * The current instance of a coroutine local state manager.
@@ -32,11 +31,9 @@ export class GlobalStateManager {
     static get instance(): StateManager {
         let current = GlobalStateManager.GetLocalManager()
         if (current === undefined) {
-            if (GlobalStateManager.current === undefined) {
-                GlobalStateManager.current = createStateManager()
-                GlobalStateManager.SetLocalManager(GlobalStateManager.current)
-            }
-            return GlobalStateManager.current!
+            const manager = createStateManager()
+            GlobalStateManager.SetLocalManager(manager)
+            return manager
         }
         return current
     }
@@ -55,7 +52,8 @@ export class GlobalStateManager {
      */
     static GetLocalManager(): StateManager | undefined {
         // @ts-ignore
-        return GlobalStateManager.localManagerMap.get(CoroutineExtras.getWorkerId())
+        const coroutineId = CoroutineExtras.getWorkerId()
+        return GlobalStateManager.localManagerMap.get(coroutineId)
     }
 
     /**
@@ -63,13 +61,17 @@ export class GlobalStateManager {
      * @internal
      */
     static SetLocalManager(manager: StateManager | undefined): void {
+        // @ts-ignore
+        const coroutineId = CoroutineExtras.getWorkerId()
         if (manager === undefined) {
-            // @ts-ignore
-            GlobalStateManager.localManagerMap.delete(CoroutineExtras.getWorkerId())
+            GlobalStateManager.localManagerMap.delete(coroutineId)
             return
         }
-        // @ts-ignore
-        GlobalStateManager.localManagerMap.set(CoroutineExtras.getWorkerId(), manager)
+        GlobalStateManager.localManagerMap.set(coroutineId, manager)
+    }
+
+    public static getCurrentScopeId(): int32 | undefined {
+        return (GlobalStateManager.instance as StateManagerImpl).current ? (GlobalStateManager.instance as StateManagerImpl).current!.id : undefined;
     }
 }
 

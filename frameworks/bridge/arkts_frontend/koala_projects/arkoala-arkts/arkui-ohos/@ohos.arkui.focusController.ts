@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KeyProcessingMode } from "arkui/component/focus"
+import { KeyProcessingMode } from "arkui/component/focus";
 export declare namespace focusController {
     export function clearFocus(): void;
     export function requestFocus(key: string): void;

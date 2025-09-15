@@ -14,6 +14,8 @@
 */
 
 #include "core/components_ng/pattern/grid/grid_model_static.h"
+
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -283,12 +285,27 @@ void GridModelStatic::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
 void GridModelStatic::AddDragFrameNodeToManager(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, AddDragFrameNodeToManager, frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
 
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
+
+void GridModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddGridDragFrameNode(node->GetId(), AceType::WeakClaim(AceType::RawPtr(node)));
+    });
 }
 
 void GridModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)

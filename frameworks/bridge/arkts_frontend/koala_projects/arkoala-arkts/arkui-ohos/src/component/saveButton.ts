@@ -100,7 +100,7 @@ export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implemen
     onClick_value?: SaveButtonCallback | undefined
     public onClick(value: SaveButtonCallback | undefined): this {
         return this
-        }
+    }
 }
 export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent implements SaveButtonAttribute {
     getPeer(): ArkSaveButtonPeer {

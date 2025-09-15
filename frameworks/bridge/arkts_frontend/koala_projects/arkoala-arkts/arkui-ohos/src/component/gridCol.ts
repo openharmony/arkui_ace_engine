@@ -22,13 +22,15 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkGridColNode } from '../handwritten/modifiers/ArkGridColNode';
+import { ArkGridColAttributeSet, GridColModifier } from '../GridColModifier';
 
 export class ArkGridColPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkGridColPeer {
@@ -151,7 +153,7 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
     }
     public order(value: number | GridColColumnOption | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
     getPeer(): ArkGridColPeer {

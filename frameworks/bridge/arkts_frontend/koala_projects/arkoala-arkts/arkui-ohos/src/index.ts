@@ -15,6 +15,7 @@
 
 export { Observed, observableProxy } from "@koalaui/common"
 
+
 export * from "./component"
 // export * from "./handwritten"
 
@@ -27,9 +28,8 @@ export * from "@ohos/router"
 export * from "./PeerNode"
 export * from "./component/Events"
 export * from "./component/peers/CallbacksChecker"
-// export * from "./peers/ArkTestComponentPeer"
-// export * from "./ArkTestComponent"
 // export * from "./component/peers/ArkButtonPeer"
 export * from './stateManagement'
-export { LengthMetrics, LengthMetricsInternal } from './Graphics'
+export { LengthMetrics } from './Graphics'
+export * from "@ohos/overlayManager"
 export * from "@ohos/promptAction"

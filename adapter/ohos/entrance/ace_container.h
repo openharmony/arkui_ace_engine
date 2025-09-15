@@ -1000,6 +1000,7 @@ private:
 
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
+    void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

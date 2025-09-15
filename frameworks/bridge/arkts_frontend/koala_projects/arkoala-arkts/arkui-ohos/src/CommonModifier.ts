@@ -1,48 +1,25 @@
-import { ArkCommonAttributeSet } from "./handwritten/modifiers/ArkCommonModifier";
-import {  AttributeModifier, ClickEvent, CommonAttribute, Length, ResourceColor, SizeOptions} from "./";
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-export class CommonModifier implements AttributeModifier<CommonAttribute> {
-    
-    attributeSet: ArkCommonAttributeSet = new ArkCommonAttributeSet();
+import { AttributeModifier, CommonAttribute } from 'arkui/component/common'
 
-    applyNormalAttribute(instance: CommonAttribute): void {
-    }
-
-    applyPressedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applyFocusedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applyDisabledAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applySelectedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    size(value: SizeOptions): this {
-        this.attributeSet.size(value);
-        return this;
-    }
-    onClick(event: (event: ClickEvent) => void): this {
-        this.attributeSet.onClick(event);
-        return this;
-    }
-    width(value: Length | undefined): this {
-        this.attributeSet.width(value);
-        return this;
-    }
-    height(value: Length | undefined): this {
-        this.attributeSet.height(value);
-        return this;
-    }
-    backgroundColor(value: ResourceColor | undefined): this {
-        this.attributeSet.backgroundColor(value);
-        return this;
-    }
-
+import { CommonMethodModifier } from './CommonMethodModifier'
+export class CommonModifier  extends CommonMethodModifier implements CommonAttribute, AttributeModifier<CommonAttribute> {
+   applyNormalAttribute(instance: CommonAttribute): void {}
+   applyPressedAttribute(instance: CommonAttribute) : void {}
+   applyFocusedAttribute(instance: CommonAttribute) : void {}
+   applyDisabledAttribute(instance: CommonAttribute) : void {}
+   applySelectedAttribute(instance: CommonAttribute) : void {}
 }

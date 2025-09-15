@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, InputCounterOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ResourceColor, Font, Length, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
 import { EnterKeyType, SubmitEvent, ContentType } from "./textInput"
 import { TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, Color } from "./enums"
@@ -37,10 +37,10 @@ import { Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_Delet
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-
 import { Deserializer } from "./peers/Deserializer"
+
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextAreaPeer {
@@ -1032,7 +1032,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
 }
 export interface TextAreaOptions {
     placeholder?: ResourceStr;
-    text?: ResourceStr;
+    text?: ResourceStr | Bindable<ResourceStr>;
     controller?: TextAreaController;
 }
 export type TextAreaInterface = (value?: TextAreaOptions) => TextAreaAttribute;
@@ -1359,8 +1359,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     }
     public setTextAreaOptions(value?: TextAreaOptions): this {
         if (this.checkPriority("setTextAreaOptions")) {
-            const value_casted = value as (TextAreaOptions | undefined)
-            this.getPeer()?.setTextAreaOptionsAttribute(value_casted)
+            hookSetTextAreaOptions(this, value)
             return this
         }
         return this

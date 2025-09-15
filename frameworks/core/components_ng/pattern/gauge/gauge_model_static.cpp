@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/gauge/gauge_model_static.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 
@@ -74,6 +75,17 @@ void GaugeModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::opti
     // } else {
     //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
     // }
-    // ViewAbstract::SetPrivacySensitive(frameNode, flag);
+    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
+}
+
+void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(gaugePattern);
+    auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
+    gaugePattern->SetDescriptionNode(customDescriptionNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, true, frameNode);
+    frameNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

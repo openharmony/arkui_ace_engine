@@ -602,7 +602,8 @@ export interface GridAttribute extends ScrollableCommonMethod {
     scrollBar(value: BarState | undefined): this
     onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    cachedCount(count: number | undefined, show?: boolean): this
+    cachedCount(value: number | undefined):this 
+    cachedCount(count: number | undefined, show: boolean | undefined): this
     editMode(value: boolean | undefined): this
     multiSelectable(value: boolean | undefined): this
     maxCount(value: number | undefined): this
@@ -691,7 +692,10 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(value: number | undefined): this {
+        return this
+    }
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
         return this
     }
     public editMode(value: boolean | undefined): this {
@@ -768,7 +772,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGridComponent extends ArkScrollableCommonMethodComponent implements GridAttribute {
     getPeer(): ArkGridPeer {
@@ -855,7 +859,15 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(value: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.cachedCount0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
             const show_type = runtimeType(show)

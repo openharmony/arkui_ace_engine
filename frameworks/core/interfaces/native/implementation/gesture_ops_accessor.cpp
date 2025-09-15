@@ -26,7 +26,7 @@
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
-#include "core/components_ng/pattern/gesture/gesture_model_ng.h"
+#include "core/components_ng/pattern/gesture/gesture_model_ng_static.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -253,30 +253,30 @@ void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* type
 void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
     Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
-    // auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    // auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
-    // bool isModifierValue = Converter::Convert<bool>(isModifier);
-    // GesturePriority gesturePriority = static_cast<GesturePriority>(Converter::Convert<int32_t>(*priority));
-    // gesturePtr->SetPriority(gesturePriority);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
+    bool isModifierValue = Converter::Convert<bool>(isModifier);
+    GesturePriority gesturePriority = static_cast<GesturePriority>(Converter::Convert<int32_t>(*priority));
+    gesturePtr->SetPriority(gesturePriority);
 
-    // GestureMask gestureMask = Converter::Convert<std::optional<GestureMask>>(mask).value_or(GestureMask::Normal);
-    // gesturePtr->SetGestureMask(gestureMask);
-    // if (isModifierValue) {
-    //     gestureHub->AttachGesture(gesturePtr);
-    // } else {
-    //     gestureHub->AddGesture(gesturePtr);
-    //     GestureEventFunc clickEvent = GestureModelNG::GetTapGestureEventFunc(gesturePtr);
-    //     if (clickEvent) {
-    //         auto focusHub = frameNode->GetOrCreateFocusHub();
-    //         CHECK_NULL_VOID(focusHub);
-    //         focusHub->SetFocusable(true, false);
-    //         focusHub->SetOnClickCallback(std::move(clickEvent));
-    //     }
-    // }
-    // // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
-    // gesturePtr->DecRefCount();
+    GestureMask gestureMask = Converter::Convert<std::optional<GestureMask>>(mask).value_or(GestureMask::Normal);
+    gesturePtr->SetGestureMask(gestureMask);
+    if (isModifierValue) {
+        gestureHub->AttachGesture(gesturePtr);
+    } else {
+        gestureHub->AddGesture(gesturePtr);
+    }
+    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
+    }
+    // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
+    gesturePtr->DecRefCount();
 }
 void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
 {

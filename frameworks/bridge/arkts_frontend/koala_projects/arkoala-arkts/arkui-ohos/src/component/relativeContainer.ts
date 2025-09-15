@@ -30,7 +30,7 @@ import { Dimension } from "./units"
 import { Axis } from "./enums"
 
 export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkRelativeContainerPeer {
@@ -136,7 +136,7 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
     }
     public barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements RelativeContainerAttribute {
     getPeer(): ArkRelativeContainerPeer {

@@ -47,6 +47,7 @@ UIObserverHandler& UIObserverHandler::GetInstance()
 
 void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
 {
+    NotifyNavigationStateChangeForAni(weakPattern, state);
     CHECK_NULL_VOID(navigationHandleFunc_);
     auto ref = weakPattern.Upgrade();
     CHECK_NULL_VOID(ref);
@@ -78,6 +79,28 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         GetNavigationUniqueId(pattern));
     navigationHandleFunc_(info);
     pathInfo->CloseScope();
+}
+
+void UIObserverHandler::NotifyNavigationStateChangeForAni(
+    const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+{
+    CHECK_NULL_VOID(navigationHandleFuncForAni_);
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
+    
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+    navigationHandleFuncForAni_(info);
 }
 
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
@@ -156,7 +179,13 @@ void UIObserverHandler::NotifyWillClick(
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    if (willClickHandleFunc_) {
+        willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    }
+
+    if (willClickHandleFuncForAni_) {
+        willClickHandleFuncForAni_();
+    }
 }
 
 void UIObserverHandler::NotifyDidClick(
@@ -171,20 +200,54 @@ void UIObserverHandler::NotifyDidClick(
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+
+    if (didClickHandleFunc_) {
+        didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    }
+
+    if (didClickHandleFuncForAni_) {
+        didClickHandleFuncForAni_();
+    }
 }
 
 void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
     const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(panGestureHandleFunc_);
     auto getCurrent = Container::Current();
     CHECK_NULL_VOID(getCurrent);
     AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
 
-    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+    if (panGestureHandleFunc_) {
+        panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+    }
+
+    if (panGestureInfo.callbackState == CurrentCallbackState::START) {
+        if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
+            // beforePanStart
+            if (beforePanStartHandleFuncForAni_) {
+                beforePanStartHandleFuncForAni_();
+            }
+        } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
+            // afterPanStart
+            if (afterPanStartHandleFuncForAni_) {
+                afterPanStartHandleFuncForAni_();
+            }
+        }
+    } else if (panGestureInfo.callbackState == CurrentCallbackState::END) {
+        if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
+            // beforePanEnd
+            if (beforePanEndHandleFuncForAni_) {
+                beforePanEndHandleFuncForAni_();
+            }
+        } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
+            // afterPanEnd
+            if (afterPanEndHandleFuncForAni_) {
+                afterPanEndHandleFuncForAni_();
+            }
+        }
+    }
 }
 
 void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gestureListenerType,
@@ -379,6 +442,11 @@ void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
     navigationHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func)
+{
+    navigationHandleFuncForAni_ = func;
+}
+
 void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)
 {
     scrollEventHandleFunc_ = func;
@@ -432,6 +500,36 @@ void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
 void UIObserverHandler::SetHandleGestureHandleFunc(GestureHandleFunc func)
 {
     gestureHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetBeforePanStartHandleFuncForAni(BeforePanStartHandleFuncForAni func)
+{
+    beforePanStartHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetAfterPanStartHandleFuncForAni(AfterPanStartHandleFuncForAni func)
+{
+    afterPanStartHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetBeforePanEndHandleFuncForAni(BeforePanEndHandleFuncForAni func)
+{
+    beforePanEndHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetAfterPanEndHandleFuncForAni(AfterPanEndHandleFuncForAni func)
+{
+    afterPanEndHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetWillClickHandleFuncForAni(WillClickHandleFuncForAni func)
+{
+    willClickHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func)
+{
+    didClickHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

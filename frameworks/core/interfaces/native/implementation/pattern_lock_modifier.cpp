@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -56,6 +56,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // auto frameNode = PatternLockModelNG::CreateFrameNode(id);
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
     return {};
 }
 } // PatternLockModifier
@@ -63,18 +64,18 @@ namespace PatternLockInterfaceModifier {
 void SetPatternLockOptionsImpl(Ark_NativePointer node,
                                const Opt_PatternLockController* controller)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(controller);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(controller);
 
-    // auto controllerPtr = Converter::OptConvert<Ark_PatternLockController>(*controller);
-    // if (controllerPtr.has_value()) {
-    //     auto internalController = PatternLockModelNG::GetController(frameNode);
-    //     auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
-    //     CHECK_NULL_VOID(peerImplPtr);
-    //     // pass the internal controller to external management
-    //     peerImplPtr->SetHandler(internalController);
-    // }
+    auto controllerPtr = Converter::OptConvert<Ark_PatternLockController>(*controller);
+    if (controllerPtr.has_value()) {
+        // auto internalController = PatternLockModelNG::GetController(frameNode);
+        // auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
+        // CHECK_NULL_VOID(peerImplPtr);
+        // pass the internal controller to external management
+        // peerImplPtr->SetHandler(internalController);
+    }
 }
 } // PatternLockInterfaceModifier
 namespace PatternLockAttributeModifier {
@@ -84,7 +85,6 @@ void SideLengthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(convValue);
     PatternLockModelStatic::SetSideLength(frameNode, convValue);
 }
 void CircleRadiusImpl(Ark_NativePointer node,

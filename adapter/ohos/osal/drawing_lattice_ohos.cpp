@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,22 +18,7 @@
 #include "base/utils/utils.h"
 #include "lattice_napi/js_lattice.h"
 
-#if defined(ACE_STATIC)
-#include "lattice_ani/ani_lattice.h"
-#endif
 namespace OHOS::Ace {
-
-#if defined(ACE_STATIC)
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
-{
-    CHECK_NULL_RETURN(aniAddr, nullptr);
-    auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(aniAddr);
-    CHECK_NULL_RETURN(aniLattice, nullptr);
-    auto lattice = aniLattice->GetLattice();
-    return AceType::MakeRefPtr<DrawingLatticeOhos>(lattice);
-}
-#endif
-
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);

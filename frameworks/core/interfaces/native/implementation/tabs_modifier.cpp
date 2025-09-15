@@ -22,7 +22,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 #include "frameworks/base/utils/utils.h"
 
@@ -102,10 +102,11 @@ GeneratedModifier::TabsControllerPeerImpl* Convert(const Ark_Materialized &src)
 template<>
 TabsOptions Convert(const Ark_TabsOptions& src)
 {
+    Ark_TabsController controller;
     return {
-        .barPosOpt = OptConvert<BarPosition>(src.barPosition),
-        .indexOpt = OptConvert<int32_t>(src.index),
-        .controllerOpt = OptConvert<Ark_TabsController>(src.controller),
+        .barPosOpt = OptConvert<BarPosition>(src.barPosition).value_or(BarPosition::START),
+        .indexOpt = OptConvert<int32_t>(src.index).value_or(-1),
+        .controllerOpt = OptConvert<Ark_TabsController>(src.controller).value_or(controller),
     };
 }
 
@@ -114,6 +115,12 @@ void AssignTo(std::optional<TabContentAnimatedTransition>& dst, const Opt_TabCon
 {
     TabContentAnimatedTransition ret;
     ret.timeout = Converter::OptConvert<int32_t>(from.value.timeout).value_or(0);
+    ret.transition = [arkCallback = CallbackHelper(from.value.transition)](
+        const RefPtr<TabContentTransitionProxy>& proxy) {
+        Ark_TabContentTransitionProxy arkValue = new TabContentTransitionProxyPeer();
+        arkValue->SetHandler(proxy);
+        arkCallback.InvokeSync(arkValue);
+    };
     dst = ret;
 }
 
@@ -150,7 +157,12 @@ void SetTabsOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
+    std::optional<TabsOptions> tabsOptionsOpt;
+    if (options->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        tabsOptionsOpt = Converter::Convert<TabsOptions>(options->value);
+    } else {
+        tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
+    }
     CHECK_NULL_VOID(tabsOptionsOpt);
     TabsModelStatic::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
     TabsModelStatic::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
@@ -522,9 +534,10 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
             (const RefPtr<TabContentTransitionProxy>& proxy) {
             auto peer = new TabContentTransitionProxyPeer();
             CHECK_NULL_VOID(peer);
-            peer->SetHandler(proxy);
-            arkCallback.Invoke(peer);
+            peer->SetHandler(AceType::WeakClaim(proxy.GetRawPtr()));
+            arkCallback.InvokeSync(peer);
         };
+        transitionInfo.timeout = optTimeout.value_or(0);
         transitionInfo.transition = std::move(onTransition);
         return transitionInfo;
     };

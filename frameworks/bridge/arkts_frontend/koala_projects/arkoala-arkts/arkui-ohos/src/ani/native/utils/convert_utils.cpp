@@ -17,7 +17,6 @@
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
-#include "pixel_map_ani.h"
 #include "base/image/pixel_map.h"
 #endif
 #include "base/log/log_wrapper.h"

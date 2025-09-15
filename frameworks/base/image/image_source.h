@@ -21,11 +21,6 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
-
-struct DecodeOptions {
-    PixelFormat desiredFormat = PixelFormat::RGBA_8888;
-};
-
 struct PixelMapConfig {
     AIImageQuality imageQuality = AIImageQuality::NONE;
     bool isHdrDecoderNeed = false;
@@ -44,6 +39,9 @@ struct PixelMapConfig {
 };
 
 class PixelMap;
+struct DecodeOptions {
+    PixelFormat desiredFormat = PixelFormat::RGBA_8888;
+};
 
 class ACE_FORCE_EXPORT ImageSource : public AceType {
     DECLARE_ACE_TYPE(ImageSource, AceType);
@@ -62,8 +60,16 @@ public:
         const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(
         uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
-    virtual RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
+    /**
+     * @description: only for 1.2
+     * @param options decode options
+     * @return refptr pixelmap
+     */
+    virtual RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options)
+    {
+        return nullptr;
+    }
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;
     virtual std::string GetEncodedFormat() = 0;

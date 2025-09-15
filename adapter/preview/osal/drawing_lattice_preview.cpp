@@ -18,18 +18,9 @@
 #include "draw/core_canvas.h"
 #include "lattice_napi/js_lattice.h"
 
-#include "base/image/drawing_lattice.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-
-#if defined(ACE_STATIC)
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
-{
-    return nullptr;
-}
-#endif
-
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);

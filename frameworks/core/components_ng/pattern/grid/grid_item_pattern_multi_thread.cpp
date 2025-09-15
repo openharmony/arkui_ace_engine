@@ -38,4 +38,27 @@ void GridItemPattern::OnAttachToMainTreeMultiThread()
         renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
     }
 }
+void GridItemPattern::UpdateGridItemStyleMultiThread(GridItemStyle gridItemStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    gridItemStyle_ = gridItemStyle;
+    CHECK_NULL_VOID(host);
+
+    host->PostAfterAttachMainTreeTask([gridItemStyle, weak = WeakClaim(RawPtr(host))]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<GridItemTheme>();
+        CHECK_NULL_VOID(theme);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (gridItemStyle == GridItemStyle::PLAIN) {
+            renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+        } else if (gridItemStyle == GridItemStyle::NONE) {
+            renderContext->UpdateBorderRadius(BorderRadiusProperty());
+        }
+    });
+}
 } // namespace OHOS::Ace::NG

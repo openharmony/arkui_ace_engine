@@ -17,10 +17,10 @@ import { CustomTextDecoder } from "@koalaui/compat"
 import { int32 } from "@koalaui/compat"
 
 const K = [
-    (0x5a827999 | 0) as int32,
-    (0x6ed9eba1 | 0) as int32,
-    (0x8f1bbcdc | 0) as int32,
-    (0xca62c1d6 | 0) as int32,
+    (0x5a827999 | 0).toInt(),
+    (0x6ed9eba1 | 0).toInt(),
+    (0x8f1bbcdc | 0).toInt(),
+    (0xca62c1d6 | 0).toInt(),
 ]
 
 const inputBytes = 64
@@ -37,11 +37,11 @@ export function createSha1(): SHA1Hash {
 }
 
 export class SHA1Hash {
-    private A = (0x67452301 | 0) as int32
-    private B = (0xefcdab89 | 0) as int32
-    private C = (0x98badcfe | 0) as int32
-    private D = (0x10325476 | 0) as int32
-    private E = (0xc3d2e1f0 | 0) as int32
+    private A = (0x67452301 | 0).toInt()
+    private B = (0xefcdab89 | 0).toInt()
+    private C = (0x98badcfe | 0).toInt()
+    private D = (0x10325476 | 0).toInt()
+    private E = (0xc3d2e1f0 | 0).toInt()
     private readonly _byte: Uint8Array
     private readonly _word: Int32Array
     private _size = 0
@@ -80,25 +80,25 @@ export class SHA1Hash {
         // es2panda to segfault.
         let BYTES_PER_ELEMENT = 4
         if (data instanceof Int32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = (data.byteOffset).toInt()
+            length = (data.byteLength).toInt()
             buffer = data.buffer
         } else if (data instanceof Uint32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = (data.byteOffset).toInt()
+            length = (data.byteLength).toInt()
             buffer = data.buffer
         } else if (data instanceof Float32Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = (data.byteOffset).toInt()
+            length = (data.byteLength).toInt()
             buffer = data.buffer
         } else if (data instanceof Uint8Array) {
-            byteOffset = data.byteOffset as int32
-            length = data.byteLength as int32
+            byteOffset = (data.byteOffset).toInt()
+            length = (data.byteLength).toInt()
             buffer = data.buffer
             BYTES_PER_ELEMENT = 1
         }
 
-        let blocks: int32 = ((length / inputBytes) | 0) as int32
+        let blocks: int32 = ((length / inputBytes) | 0).toInt()
         let offset: int32 = 0
 
         // longer than 1 block
@@ -127,7 +127,7 @@ export class SHA1Hash {
         const _byte = this._byte
         const _word = this._word
         const length = data.length
-        offset = ((offset ?? 0) | 0) as int32
+        offset = ((offset ?? 0) | 0).toInt()
 
         while (offset < length) {
             const start = this._size % inputBytes
@@ -158,7 +158,7 @@ export class SHA1Hash {
             let index = start
 
             while (offset < length && index < inputBytes) {
-                let code = text.charCodeAt(offset++) | 0
+                let code = text.charCodeAt(offset++).toInt() | 0
                 if (code < 0x80) {
                     // ASCII characters
                     _byte[index++] = code
@@ -203,19 +203,19 @@ export class SHA1Hash {
         let D = this.D
         let E = this.E
         let i = 0
-        offset = ((offset ??  0) | 0) as int32
+        let _offset: int32 = ((offset ??  0) | 0).toInt()
 
         while (i < inputWords) {
-            W[i++] = swap32(data[offset++] as int32)
+            W[i++] = swap32(data[_offset++].toInt())
         }
 
         for (i = inputWords; i < workWords; i++) {
-            W[i] = rotate1((W[i - 3] as int32) ^ (W[i - 8] as int32) ^ (W[i - 14] as int32) ^ (W[i - 16] as int32))
+            W[i] = rotate1((W[i - 3].toInt()) ^ (W[i - 8].toInt()) ^ (W[i - 14].toInt()) ^ (W[i - 16].toInt()))
         }
 
         for (i = 0; i < workWords; i++) {
             const S = (i / 20) | 0
-            const T = ((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]) as int32) | 0
+            const T = ((rotate5(A) + ft(S, B, C, D) + E + W[i] + K[S]).toInt()) | 0
             E = D
             D = C
             C = rotate30(B)
@@ -259,10 +259,10 @@ export class SHA1Hash {
 
         // input size
         const bits64: int32 = this._size * 8
-        const low32: int32 = ((bits64 & 0xffffffff) as int32 >>> 0) as int32
-        const high32: int32 = ((bits64 - low32) as int32 / 0x100000000) as int32
-        if (high32) _word[highIndex] = swap32(high32) as int32
-        if (low32) _word[lowIndex] = swap32(low32) as int32
+        const low32: int32 = ((bits64 & 0xffffffff).toInt() >>> 0).toInt()
+        const high32: int32 = ((bits64 - low32).toInt() / 0x100000000).toInt()
+        if (high32) _word[highIndex] = swap32(high32).toInt()
+        if (low32) _word[lowIndex] = swap32(low32).toInt()
 
         this._int32(_word)
 

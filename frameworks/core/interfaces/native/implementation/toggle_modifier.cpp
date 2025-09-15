@@ -16,7 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_static.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
@@ -28,7 +28,7 @@ struct ToggleOptions {
     std::optional<ToggleType> type;
     std::optional<bool> isOn;
 };
- 
+
 template<>
 ToggleOptions Convert(const Ark_ToggleOptions& src)
 {
@@ -37,14 +37,14 @@ ToggleOptions Convert(const Ark_ToggleOptions& src)
         .isOn = Converter::OptConvert<bool>(src.isOn)
     };
 }
- 
+
 struct SwitchStyle {
     std::optional<Dimension> pointRadius;
     std::optional<Color> unselectedColor;
     std::optional<Color> pointColor;
     std::optional<Dimension> trackBorderRadius;
 };
- 
+
 template<>
 SwitchStyle Convert(const Ark_SwitchStyle& src)
 {
@@ -67,7 +67,23 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // ToggleModifier
+
+Ark_NativePointer buttonConstruct(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::BUTTON, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+Ark_NativePointer checkboxConstruct(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // namespace ToggleModifier
 namespace ToggleInterfaceModifier {
 void SetToggleOptionsImpl(Ark_NativePointer node,
                           const Ark_ToggleOptions* options)
@@ -79,6 +95,7 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
     if (convValue.isOn.has_value()) {
         ToggleModelNG::SetToggleState(frameNode, convValue.isOn.value());
     }
+    LOGE("ToggleModifier::SetToggleOptionsImpl. Set ToggleType is not supported!");
 }
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
@@ -103,8 +120,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // ToggleModelNG::SetContentModifier(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -156,6 +173,8 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
         ToggleModifier::ConstructImpl,
+        ToggleModifier::buttonConstruct,
+        ToggleModifier::checkboxConstruct,
         ToggleInterfaceModifier::SetToggleOptionsImpl,
         ToggleAttributeModifier::OnChangeImpl,
         ToggleAttributeModifier::ContentModifierImpl,

@@ -55,6 +55,7 @@ void PathStack::InitNavPathIndex(const std::vector<std::string>& pathName)
 std::vector<int> PathStack::GetAllPathIndex()
 {
     std::vector<int> array;
+    array.reserve(pathArray_.size());
     for (const auto& element : pathArray_) {
         array.push_back(element.index_);
     }
@@ -111,9 +112,9 @@ std::pair<LaunchMode, bool> PathStack::ParseNavigationOptions(const std::optiona
     return { DEFAULT_LAUNCH_MODE, DEFAULT_ANIMATED };
 }
 
-bool PathStack::PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated)
+bool PathStack::PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode launchMode, bool animated)
 {
-    if (launchMode != LaunchMode::MOVE_TO_TOP_SINGLETON && launchMode != LaunchMode::POP_TO_TOP_SINGLETON) {
+    if (launchMode != LaunchMode::MOVE_TO_TOP_SINGLETON && launchMode != LaunchMode::POP_TO_SINGLETON) {
         return false;
     }
     auto it = FindNameInternal(info.name_);
@@ -184,10 +185,10 @@ void PathStack::ReplacePath(PathInfo info, const std::optional<NavigationOptions
 {
     auto [launchMode, animated] = ParseNavigationOptions(optionParam);
     auto it = pathArray_.end();
-    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_TOP_SINGLETON) {
+    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
         it = FindNameInternal(info.name_);
     }
-    if (it != pathArray_.end()) { // is it singleton ?
+    if (it != pathArray_.end()) {
         it->param_ = info.param_;
         it->onPop_ = info.onPop_;
         it->index_ = -1;
@@ -223,6 +224,41 @@ void PathStack::ReplacePathByName(std::string name, const ParamType&  param, con
     pathArray_.back().index_ = -1;
     animated_ = animated.value_or(DEFAULT_ANIMATED);
     InvokeOnStateChanged();
+}
+
+ReplaceDestinationResultType PathStack::ReplaceDestination(PathInfo info,
+    const std::optional<NavigationOptions>& optionParam)
+{
+    auto [launchMode, animated] = ParseNavigationOptions(optionParam);
+    auto it = pathArray_.end();
+    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
+        it = FindNameInternal(info.name_);
+    }
+    if (it != pathArray_.end()) { // is it singleton ?
+        it->param_ = info.param_;
+        it->onPop_ = info.onPop_;
+        it->index_ = -1;
+        if (it == (pathArray_.end() - 1)) {
+            auto targetInfo = *it;
+            it = pathArray_.erase(it);
+            if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
+                pathArray_.pop_back();
+            } else {
+                pathArray_.erase(it, pathArray_.end());
+            }
+            pathArray_.push_back(targetInfo);
+        }
+    } else {
+        if (!pathArray_.empty()) {
+            pathArray_.pop_back();
+        }
+        pathArray_.push_back(info);
+        pathArray_.back().index_ = -1;
+    }
+    isReplace_ = BOTH_ANIM_AND_REPLACE;
+    animated_ = animated;
+    InvokeOnStateChanged();
+    return ERROR_CODE_NO_ERROR;
 }
 
 void PathStack::SetIsReplace(enum IsReplace value)
@@ -401,6 +437,7 @@ void PathStack::RemoveInvalidPage(size_t index)
 std::vector<std::string> PathStack::GetAllPathName()
 {
     std::vector<std::string> array;
+    array.reserve(pathArray_.size());
     for (const auto& element : pathArray_) {
         array.push_back(element.name_);
     }
@@ -410,6 +447,7 @@ std::vector<std::string> PathStack::GetAllPathName()
 std::vector<ParamType> PathStack::GetParamByName(const std::string& name)
 {
     std::vector<ParamType> array;
+    array.reserve(pathArray_.size());
     for (const auto& element : pathArray_) {
         if (element.name_ == name) {
             array.push_back(element.param_);
@@ -421,6 +459,7 @@ std::vector<ParamType> PathStack::GetParamByName(const std::string& name)
 std::vector<size_t> PathStack::GetIndexByName(const std::string& name)
 {
     std::vector<size_t> array;
+    array.reserve(pathArray_.size());
     for (size_t index = 0; index < pathArray_.size(); index++) {
         if (pathArray_[index].name_ == name) {
             array.push_back(index);
@@ -494,7 +533,7 @@ bool NavigationStack::IsEmpty()
 
 void NavigationStack::Pop()
 {
-    // PathStack::Pop(true);
+    PathStack::Pop(true);
 }
 
 void NavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
@@ -585,7 +624,6 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     if (pattern) {
         pattern->SetName(name);
         pattern->SetIndex(index);
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
         auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(name, isEntry); // `param` and `onPop` data may be added
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));
@@ -625,16 +663,19 @@ std::string NavigationStack::GetNameByIndex(int32_t index) const
     auto pathInfo = PathStack::GetPathInfo(index);
     return pathInfo ? pathInfo->name_ : "";
 }
+
 ParamType NavigationStack::GetParamByIndex(int32_t index) const
 {
     auto pathInfo = PathStack::GetPathInfo(index);
     return pathInfo ? pathInfo->param_ : ParamType();
 }
+
 OnPopCallback NavigationStack::GetOnPopByIndex(int32_t index) const
 {
     auto pathInfo = PathStack::GetPathInfo(index);
     return pathInfo ? pathInfo->onPop_ : OnPopCallback();
 }
+
 bool NavigationStack::GetIsEntryByIndex(int32_t index)
 {
     auto pathInfo = PathStack::GetPathInfo(index);

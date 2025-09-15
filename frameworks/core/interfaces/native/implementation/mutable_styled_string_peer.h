@@ -19,4 +19,10 @@
 
 struct MutableStyledStringPeer : public StyledStringPeer {
     ~MutableStyledStringPeer() override = default;
+    static MutableStyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
+    {
+        auto ret = new MutableStyledStringPeer;
+        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(src);
+        return ret;
+    }
 };

@@ -17,7 +17,6 @@
 #include <map>
 #include "convertors-ani.h"
 #include "signatures.h"
-#include "interop-logging.h"
 #include "interop-types.h"
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
@@ -37,10 +36,10 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
         if (registerByOne) {
             result &= env->Class_BindNativeMethods(clazz, &method, 1) == ANI_OK;
             ani_boolean isError = false;
-            env->ExistUnhandledError(&isError);
+            CHECK_ANI_FATAL(env->ExistUnhandledError(&isError));
             if (isError) {
-                env->DescribeError();
-                env->ResetError();
+                CHECK_ANI_FATAL(env->DescribeError());
+                CHECK_ANI_FATAL(env->ResetError());
             }
         }
         else {
@@ -58,7 +57,7 @@ bool registerAllModules(ani_env *aniEnv) {
     for (auto it = moduleNames.begin(); it != moduleNames.end(); ++it) {
         std::string classpath = AniExports::getInstance()->getClasspath(*it);
         ani_class nativeModule = nullptr;
-        aniEnv->FindClass(classpath.c_str(), &nativeModule);
+        CHECK_ANI_FATAL(aniEnv->FindClass(classpath.c_str(), &nativeModule));
         if (nativeModule == nullptr) {
             LOGE("Cannot find managed class %s", classpath.c_str());
             continue;
@@ -74,26 +73,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
     LOGE("Use ANI")
     ani_env* aniEnv = nullptr;
     *result = 1;
-    vm->GetEnv(/* version */ 1, (ani_env**)&aniEnv);
+    CHECK_ANI_FATAL(vm->GetEnv(/* version */ 1, (ani_env**)&aniEnv));
     if (!registerAllModules(aniEnv)) {
         LOGE("Failed to register ANI modules");
         return ANI_ERROR;
     }
     ani_boolean hasError = false;
-    aniEnv->ExistUnhandledError(&hasError);
+    CHECK_ANI_FATAL(aniEnv->ExistUnhandledError(&hasError));
     if (hasError) {
-        aniEnv->DescribeError();
-        aniEnv->ResetError();
+        CHECK_ANI_FATAL(aniEnv->DescribeError());
+        CHECK_ANI_FATAL(aniEnv->ResetError());
     }
     auto interopClassName = AniExports::getInstance()->getClasspath("InteropNativeModule");
     ani_class interopClass = nullptr;
-    aniEnv->FindClass(interopClassName.c_str(), &interopClass);
+    CHECK_ANI_FATAL(aniEnv->FindClass(interopClassName.c_str(), &interopClass));
     if (interopClass == nullptr) {
         LOGE("Can not find InteropNativeModule class to set callback dispatcher");
-        aniEnv->ExistUnhandledError(&hasError);
+        CHECK_ANI_FATAL(aniEnv->ExistUnhandledError(&hasError));
         if (hasError) {
-            aniEnv->DescribeError();
-            aniEnv->ResetError();
+            CHECK_ANI_FATAL(aniEnv->DescribeError());
+            CHECK_ANI_FATAL(aniEnv->ResetError());
         }
         return ANI_OK;
     }
@@ -148,9 +147,9 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 static std::map<std::string, std::string> g_defaultClasspaths = {
     {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
     // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "arkui/component/arkts/TestNativeModule/TestNativeModule"},
-    {"ArkUINativeModule", "arkui/component/arkts/ArkUINativeModule/ArkUINativeModule"},
-    {"ArkUIGeneratedNativeModule", "arkui/component/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule"},
+    {"TestNativeModule", "Larkui/component/arkts/TestNativeModule/TestNativeModule;"},
+    {"ArkUINativeModule", "Larkui/component/arkts/ArkUINativeModule/ArkUINativeModule;"},
+    {"ArkUIGeneratedNativeModule", "Larkui/component/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
 };
 
 const std::string& AniExports::getClasspath(const std::string& module) {
@@ -177,10 +176,10 @@ bool setKoalaANICallbackDispatcher(
     const char* dispatcherMethodSig
 ) {
     g_koalaANICallbackDispatcher.clazz = clazz;
-    aniEnv->Class_FindStaticMethod(
+    CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
-    );
+    ));
     if (g_koalaANICallbackDispatcher.method == nullptr) {
         return false;
     }
