@@ -81,7 +81,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     const std::string& src = imageInfoConfig.src ? *imageInfoConfig.src : "";
-    ACE_IMAGE_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
         frameNode = ImageSpanNode::GetOrCreateSpanNode(
