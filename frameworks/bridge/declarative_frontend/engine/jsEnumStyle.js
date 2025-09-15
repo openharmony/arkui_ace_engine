@@ -4335,6 +4335,12 @@ let ReplaceEffectType;
   ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
 })(ReplaceEffectType || (ReplaceEffectType = {}));
 
+let IndicatorType;
+(function (IndicatorType) {
+  IndicatorType[IndicatorType.DIVIDER = 0] = 'DIVIDER';
+  IndicatorType[IndicatorType.BACKGROUND = 1] = 'BACKGROUND';
+})(IndicatorType || (IndicatorType = {}));
+
 let ListItemSwipeActionDirection;
 (function (ListItemSwipeActionDirection) {
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';

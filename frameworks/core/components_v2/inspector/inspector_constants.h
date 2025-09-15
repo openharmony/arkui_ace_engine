@@ -679,6 +679,9 @@ ACE_EXPORT extern const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[];
 // LazyVGridLayout
 ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
 
+// Picker
+ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
+
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 } // namespace OHOS::Ace::V2

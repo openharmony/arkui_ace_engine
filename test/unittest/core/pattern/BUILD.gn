@@ -33,6 +33,7 @@ group("core_pattern_unittest") {
     "container_modal:container_modal_pattern_enhance_test_ng",
     "container_modal:container_modal_test_ng",
     "container_modal:container_modal_toolbar_test_ng",
+    "container_picker:container_picker_test",
     "counter:counter_test_ng",
     "custom:custom_test_ng",
     "custom_frame_node:custom_frame_node_test",
