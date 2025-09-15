@@ -431,8 +431,10 @@ void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogP
         CHECK_NULL_VOID(contentNode);
         auto contentRenderContext = contentNode->GetRenderContext();
         CHECK_NULL_VOID(contentRenderContext);
-        blurStyleOption.inactiveColor = inactiveColor;
-        contentRenderContext->UpdateBackBlurStyle(blurStyleOption);
+        auto currentBackBlurStyle = contentRenderContext->GetBackBlurStyle();
+        CHECK_NULL_VOID(currentBackBlurStyle.has_value());
+        currentBackBlurStyle->inactiveColor = inactiveColor;
+        contentRenderContext->UpdateBackBlurStyle(currentBackBlurStyle);
     }
 }
 
