@@ -3262,9 +3262,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     if (auto focusHub = GetFocusHub(); focusHub) {
         IF_TRUE(!isMouseClick || (blockPress_ && !isMouseClickWithShift), SetCaretPosition(position));
         IF_TRUE(isMouseClickWithShift, HandleShiftSelect(position));
-        if (focusHub->IsCurrentFocus()) {
-            HandleOnEditChanged(true);
-        }
+        IF_TRUE(focusHub->IsCurrentFocus(), HandleOnEditChanged(true));
         RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
         if (focusHub->RequestFocusImmediately()) {
             IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
@@ -3273,6 +3271,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(localOffset);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    IF_PRESENT(overlayModifier, SetCaretOffsetAndHeight(caretOffset, caretHeight));
     CHECK_NULL_VOID(!isMouseClick);
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();

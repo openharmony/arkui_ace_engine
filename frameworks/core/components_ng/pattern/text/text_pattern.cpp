@@ -414,6 +414,8 @@ void TextPattern::ShowAIEntityMenuForCancel()
         "end:%{public}d",
         host->GetId(), previewController_->IsPreviewMenuShow(), start, end);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    showSelect_ = true;
+    MarkContentNodeForRender();
 }
 
 AISpan TextPattern::GetSelectedAIData()
@@ -1950,6 +1952,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             auto frameNode = pattern->GetHost();
             CHECK_NULL_VOID(frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->MarkContentNodeForRender();
         }
     };
 }
@@ -2815,6 +2818,7 @@ void TextPattern::MarkDirtySelf()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkContentNodeForRender();
 }
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -6309,6 +6313,7 @@ void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
         HandleSelectionChange(textSelector_.baseOffset, end);
         isAutoScrollByMouse_ = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkContentNodeForRender();
     }
 }
 
@@ -6361,6 +6366,7 @@ void TextPattern::MarkDirtyNodeRender()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkContentNodeForRender();
 }
 
 void TextPattern::MarkDirtyNodeMeasure()
@@ -6417,6 +6423,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     CHECK_NULL_VOID(host);
     HandleSelectionChange(start, end);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    MarkContentNodeForRender();
 }
 
 void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo)

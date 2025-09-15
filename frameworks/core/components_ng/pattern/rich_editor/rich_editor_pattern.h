@@ -1390,7 +1390,7 @@ public:
     bool IsShortCutBlocked() override { return IsDragging(); }
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     void UpdatePlaceholderFontColor(const Color& color);
-    void MarkContentNodeForRender();
+    void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
 
