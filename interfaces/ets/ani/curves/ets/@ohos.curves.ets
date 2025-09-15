@@ -32,7 +32,6 @@ export default namespace curves {
     };
 
     export native function cubicBezierCurve(x1: number, y1: number, x2: number, y2: number):ICurve;
-    export native function cubicBezier(x1: number, y1: number, x2: number, y2: number):string;
     export native function springMotion(response?: number, dampingFraction?: number, overlapDuration?: number): ICurve;
     export native function initCurve(curve?: Curve):ICurve;
     export native function interpolatingSpring(velocity: number, mass: number, stiffness: number, damping: number):ICurve;
@@ -43,16 +42,14 @@ export default namespace curves {
 
     export interface ICurve
     {
-        interpolate(fraction: number) : number;
+        interpolate(fraction: number): number;
     }
-    class Curves implements ICurve
+    class ICurveImpl implements ICurve
     {
-        private  nativeContext:long = 0;
+        private nativeContext: long = 0;
     
         constructor(context:long) {
-            if(this.nativeContext == 0){
-                this.nativeContext = context;
-            }
+            this.nativeContext = context;
         }
         public native interpolate(fraction: number): number;
     }

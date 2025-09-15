@@ -3263,13 +3263,13 @@ void impl_CommonMethod_setTransform(Ark_NativePointer thisPtr, KSerializerBuffer
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Object valueValueTempTmpBuf = {};
+        Opt_matrix4_Matrix4Transit valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
+            valueValueTempTmpBuf.value = static_cast<Ark_matrix4_Matrix4Transit>(matrix4_Matrix4Transit_serializer::read(thisDeserializer));
         }
-        Opt_Object valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setTransform(self, static_cast<Opt_Object*>(&valueValueTemp));
+        Opt_matrix4_Matrix4Transit valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setTransform(self, static_cast<Opt_matrix4_Matrix4Transit*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setTransform, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setOnAppear(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

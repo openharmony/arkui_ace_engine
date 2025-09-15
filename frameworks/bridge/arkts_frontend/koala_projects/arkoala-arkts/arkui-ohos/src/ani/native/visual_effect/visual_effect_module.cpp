@@ -74,4 +74,20 @@ ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_lon
 {
     return CallFromPtrMethod(env, "PathFromPtr", ptr);
 }
+ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "nativeContext");
+}
+ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "matrix4Object");
+}
+ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "filterNativeObj");
+}
+ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj)
+{
+    return GetPropertyName(env, obj, "visualEffectNativeObj");
+}
 } // namespace OHOS::Ace::Ani

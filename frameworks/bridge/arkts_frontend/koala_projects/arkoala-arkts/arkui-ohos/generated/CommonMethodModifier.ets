@@ -27,6 +27,7 @@ import { LengthMetrics } from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority } from "./component/focus"
+import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
@@ -199,7 +200,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
     _rotate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rotate_0_0value?: RotateOptions | undefined
     _transform_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _transform_0_0value?: Object | undefined
+    _transform_0_0value?: matrix4.Matrix4Transit | undefined
     _onAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAppear_0_0value?: (() => void) | undefined
     _onDisAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1915,7 +1916,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._transform_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTransformAttribute((this._transform_0_0value as Object | undefined));
+                    peer.setTransformAttribute((this._transform_0_0value as matrix4.Matrix4Transit | undefined));
                     this._transform_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1925,7 +1926,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._transform_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTransformAttribute((undefined as Object | undefined));
+                    peer.setTransformAttribute((undefined as matrix4.Matrix4Transit | undefined));
                 }
             }
         }
@@ -5073,7 +5074,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                     break;
                 }
                 default: {
-                    this.transform((undefined as Object | undefined));
+                    this.transform((undefined as matrix4.Matrix4Transit | undefined));
                 }
             }
         }
@@ -7468,7 +7469,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         }
         return this
     }
-    transform(value: Object | undefined): this {
+    transform(value: matrix4.Matrix4Transit | undefined): this {
         if (((this._transform_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._transform_0_0value) !== (value)))
         {
             this._transform_0_flag = AttributeUpdaterFlag.UPDATE

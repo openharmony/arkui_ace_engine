@@ -146,23 +146,21 @@ export namespace extractors {
   // end
 
   export function toCurvesICurvePtr(value: curves.ICurve): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToICurvePtr(value);
   }
   export function fromCurvesICurvePtr(ptr: KPointer): curves.ICurve {
-    const x: Object = {};
-    return x as curves.ICurve;
+    throw new Error("fromCurvesICurvePtr is not implemented.")
   }
 
   export function toMatrix4Matrix4TransitPtr(
     value: matrix4.Matrix4Transit
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToMatrix4TransitPtr(value);
   }
   export function fromMatrix4Matrix4TransitPtr(
     ptr: KPointer
   ): matrix4.Matrix4Transit {
-    const x: Object = {};
-    return x as matrix4.Matrix4Transit;
+    throw new Error("fromMatrix4Matrix4TransitPtr is not implemented.")
   }
 
   export function toDrawingCanvasPtr(value: drawing.Canvas): KPointer {
@@ -194,23 +192,21 @@ export namespace extractors {
   }
 
   export function toUiEffectFilterPtr(value: uiEffect.Filter): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToUiEffectFilterPtr(value);
   }
   export function fromUiEffectFilterPtr(ptr: KPointer): uiEffect.Filter {
-    const x: Object = {};
-    return x as uiEffect.Filter;
+    throw new Error("fromUiEffectFilterPtr is not implemented.")
   }
 
   export function toUiEffectVisualEffectPtr(
     value: uiEffect.VisualEffect
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToUiEffectVisualEffectPtr(value);
   }
   export function fromUiEffectVisualEffectPtr(
     ptr: KPointer
   ): uiEffect.VisualEffect {
-    const x: Object = {};
-    return x as uiEffect.VisualEffect;
+    throw new Error("fromUiEffectVisualEffectPtr is not implemented.")
   }
 
   export function toUnifiedDataChannelUnifiedDataPtr(
