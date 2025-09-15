@@ -20,7 +20,8 @@ import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, regi
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
-import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
+import { UserView, UserViewBuilder } from "./UserView"
+import { EntryPoint } from './component/customComponent';
 import { ClickEvent, ClickEventInternal } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
