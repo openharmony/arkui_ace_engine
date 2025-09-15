@@ -677,7 +677,6 @@ export class d1 extends ViewPU {
         if (this.currentScreenStatus !== this.beforeScreenStatus) {
             this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
-            return v1;
         }
         v1 = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height);
         v1 -= this.titleHeight;
