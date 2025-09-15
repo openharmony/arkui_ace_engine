@@ -22,14 +22,15 @@
 
 namespace OHOS::Ace::Ani {
 
-ani_long ConstructForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj)
+ani_long ConstructForEachNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int id, ani_boolean isRepeat, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return 0;
     }
 
-    ani_long node = modifier->getForEachNodeAniModifier()->constructForEachNode(id);
+    ani_long node = modifier->getForEachNodeAniModifier()->constructForEachNode(id, isRepeat);
     return node;
 }
 

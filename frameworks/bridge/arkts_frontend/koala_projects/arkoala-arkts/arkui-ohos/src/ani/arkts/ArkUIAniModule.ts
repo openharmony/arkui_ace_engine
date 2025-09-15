@@ -93,7 +93,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
-    native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -347,7 +347,7 @@ export class ArkUIAniModule {
     native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
 
     native static _SyntaxItem_Construct(id: KInt): KPointer
-    native static _ForEachNode_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void

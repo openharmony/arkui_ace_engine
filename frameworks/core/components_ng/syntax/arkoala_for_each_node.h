@@ -29,7 +29,7 @@ class ArkoalaForEachNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaForEachNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaForEachNode(int32_t id);
+    explicit ArkoalaForEachNode(int32_t id, bool isRepeat);
     ~ArkoalaForEachNode() override = default;
 
     bool IsAtomicNode() const final
@@ -47,8 +47,12 @@ public:
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChildrenDragManager(bool init);
 
+    void DumpInfo() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ArkoalaForEachNode);
+
+    bool isRepeat_ = false;
 };
 
 } // namespace OHOS::Ace::NG
