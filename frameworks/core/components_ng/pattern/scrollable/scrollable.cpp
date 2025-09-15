@@ -492,9 +492,10 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    isTouchStopAnimation_ = false;
-    if (state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) {
+    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_) {
         isTouchStopAnimation_ = true;
+    } else {
+        isTouchStopAnimation_ = false;
     }
     if (!fromcrown) {
         isTouching_ = true;
@@ -514,11 +515,8 @@ void Scrollable::HandleTouchUp()
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
     ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, nestedScrolling_:%u id:%d, tag:%s", isDragging_, nestedScrolling_,
         nodeId_, nodeTag_.c_str());
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
-        isUserFling_ = false;
-        onDidStopFlingCallback_();
-    }
     if (isDragging_) {
+        isTouchStopAnimation_ = false;
         return;
     }
     isTouching_ = false;
@@ -526,6 +524,11 @@ void Scrollable::HandleTouchUp()
         return;
     }
     if (CanStayOverScroll()) {
+        if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
+            isUserFling_ = false;
+            onDidStopFlingCallback_();
+        }
+        isTouchStopAnimation_ = false;
         return;
     }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
@@ -536,12 +539,21 @@ void Scrollable::HandleTouchUp()
             }
             ProcessScrollOverCallback(0.0);
         }
+        isTouchStopAnimation_ = false;
         return;
     }
     if (state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
         SnapAnimationOptions snapAnimationOptions;
-        startSnapAnimationCallback_(snapAnimationOptions);
+        if (startSnapAnimationCallback_(snapAnimationOptions)) {
+            isTouchStopAnimation_ = false;
+            return;
+        }
     }
+    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
+        isUserFling_ = false;
+        onDidStopFlingCallback_();
+    }
+    isTouchStopAnimation_ = false;
 }
 
 void Scrollable::HandleTouchCancel()
@@ -1381,7 +1393,7 @@ void Scrollable::StartSpringMotion(
                 return;
             }
             scroll->state_ = AnimationState::IDLE;
-            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
+            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_ && !scroll->isTouchStopAnimation_) {
                 scroll->onDidStopFlingCallback_();
                 scroll->isUserFling_ = false;
             }
@@ -1924,16 +1936,16 @@ void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)
         onDidStopDraggingCallback_(isWillFling);
     }
     if (isTouchStopAnimation_ && !isWillFling) {
-        isUserFling_ = false;
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
         }
     }
+    isUserFling_ = isWillFling;
 }
 
 void Scrollable::HandleScrollBarOnWillStartFling()
 {
-    if (onWillStartFlingCallback_ && !isUserFling_) {
+    if (onWillStartFlingCallback_) {
         onWillStartFlingCallback_();
     }
     isUserFling_ = true;
@@ -1941,10 +1953,12 @@ void Scrollable::HandleScrollBarOnWillStartFling()
 
 void Scrollable::HandleScrollBarOnDidStopFling()
 {
-    if (onDidStopFlingCallback_ && isUserFling_) {
-        onDidStopFlingCallback_();
+    if (isUserFling_ && !isTouchStopAnimation_) {
+        isUserFling_ = false;
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
     }
-    isUserFling_ = false;
 }
 
 } // namespace OHOS::Ace::NG

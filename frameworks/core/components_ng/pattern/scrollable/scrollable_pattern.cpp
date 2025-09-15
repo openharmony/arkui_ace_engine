@@ -965,8 +965,20 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator();
+    }
     if (isBackToTopRunning_) {
-        StopAnimate();
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
+        }
         isBackToTopRunning_ = false;
     }
 }
@@ -1193,11 +1205,11 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        scrollable->SetIsScrollBarDragging(false);
+        bool userFlingBeforeDrag = scrollable->GetIsUserFling();
         if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
-        if (isWillFling && scrollable->GetOnWillStartFlingCallback()) {
+        if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
             scrollable->HandleScrollBarOnWillStartFling();
         }
     };
@@ -1210,6 +1222,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
+        scrollable->SetIsScrollBarDragging(false);
     };
     scrollBar_->SetScrollBarOnDidStopFlingCallback(std::move(scrollBarOnDidStopFlingCallback));
 
@@ -1494,11 +1507,11 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        scrollable->SetIsScrollBarDragging(false);
+        bool userFlingBeforeDrag = scrollable->GetIsUserFling();
         if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
-        if (isWillFling && scrollable->GetOnWillStartFlingCallback()) {
+        if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
             scrollable->HandleScrollBarOnWillStartFling();
         }
     };
@@ -1509,6 +1522,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
+        scrollable->SetIsScrollBarDragging(false);
     };
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
         std::move(scrollEndCallback), std::move(startSnapAnimationCallback), std::move(scrollbarFRcallback),
@@ -1683,6 +1697,9 @@ void ScrollablePattern::StopAnimate()
     }
     if (scrollBar_) {
         scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator();
     }
 }
 
