@@ -91,4 +91,41 @@ HWTEST_F(ImageLoaderTest, BuildImageData, TestSize.Level1)
     result = loader.BuildImageData(rsData);
     EXPECT_NE(result, nullptr);
 }
+
+/**
+ * @tc.name: TestImageSourceInfoGetKey001
+ * @tc.desc: Test ImageSourceInfo GetKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageLoaderTest, TestImageSourceInfoGetKey001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image Info.
+     */
+    ImageSourceInfo sourceInfo;
+    /**
+     * @tc.steps: step2. Test get cache key isSvg_=false
+     */
+    sourceInfo.isSvg_ = false;
+    auto cacheKey = sourceInfo.GetKey();
+    /**
+     * @tc.steps: step2. Test get cache key isSvg_=true supportSvg2=false
+     */
+    sourceInfo.isSvg_ = true;
+    sourceInfo.SetSupportSvg2(false);
+    auto cacheKeySvg = sourceInfo.GetKey();
+    EXPECT_EQ(cacheKey, cacheKeySvg);
+    /**
+     * @tc.steps: step2. Test get cache key isSvg_=true supportSvg2=true
+     */
+    sourceInfo.SetSupportSvg2(true);
+    auto cacheKeySvg2 = sourceInfo.GetKey();
+    EXPECT_EQ(cacheKey+"supportSvg2", cacheKeySvg2);
+    /**
+     * @tc.steps: step2. Test get cache key isSvg_=true supportSvg2=false SetFillColor
+     */
+    sourceInfo.SetFillColor(Color::BLUE);
+    auto cacheKeyFillColor = sourceInfo.GetKey();
+    EXPECT_NE(cacheKeySvg2, cacheKeyFillColor);
+}
 } // namespace OHOS::Ace
