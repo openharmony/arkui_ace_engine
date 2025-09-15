@@ -210,14 +210,24 @@ public:
 
     bool IsHasHeader()
     {
-        auto headerNode = DynamicCast<FrameNode>(header_.Upgrade());
-        return headerNode ? true : false;
+        auto header = header_.Upgrade();
+        if (DynamicCast<FrameNode>(header)) {
+            return true;
+        } else if (header && header->TotalChildCount() > 0) {
+            return true;
+        }
+        return false;
     }
 
     bool IsHasFooter()
     {
-        auto footerGroup = DynamicCast<FrameNode>(footer_.Upgrade());
-        return footerGroup ? true : false;
+        auto footer = footer_.Upgrade();
+        if (DynamicCast<FrameNode>(footer)) {
+            return true;
+        } else if (footer && footer->TotalChildCount() > 0) {
+            return true;
+        }
+        return false;
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
