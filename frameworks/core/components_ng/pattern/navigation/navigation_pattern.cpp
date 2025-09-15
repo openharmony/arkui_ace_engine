@@ -905,9 +905,10 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
      * The NavDestination between the homeNode and the first newly added NavDestination will be removed.
      */
     auto homeNode = homeNode_.Upgrade();
-    if (!forceSplitSuccess_ || !homeNodeTouched_ || isTopFullScreenPage_) {
+    if (!forceSplitSuccess_ || !homeNodeTouched_.has_value() || !homeNodeTouched_.value() || isTopFullScreenPage_) {
         return;
     }
+    homeNodeTouched_ = std::nullopt;
     if (!forceSplitUseNavBar_ && !homeNode) {
         return;
     }

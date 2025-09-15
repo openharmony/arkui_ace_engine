@@ -527,11 +527,11 @@ public:
         return forceSplitUseNavBar_;
     }
 
-    bool IsHomeNodeTouched() const
+    std::optional<bool> IsHomeNodeTouched() const
     {
         return homeNodeTouched_;
     }
-    void SetIsHomeNodeTouched(bool touch)
+    void SetIsHomeNodeTouched(const std::optional<bool>& touch)
     {
         homeNodeTouched_ = touch;
     }
@@ -850,7 +850,7 @@ private:
     bool forceSplitSuccess_ = false;
     bool isTopFullScreenPage_ = false;
     bool forceSplitUseNavBar_ = false;
-    bool homeNodeTouched_ = false;
+    std::optional<bool> homeNodeTouched_;
     bool navBarIsHome_ = false;
     bool isTargetForceSplitNav_ = false;
     WeakPtr<NavDestinationGroupNode> homeNode_;
