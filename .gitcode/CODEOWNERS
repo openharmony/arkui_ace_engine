@@ -1,14 +1,14 @@
 # Code owners for ArkUI ace_engine
 
 [Default]
-adapter/ @arkui-default
-advanced_ui_component/ @arkui-default
-component_ext/ @arkui-default
-examples/ @arkui-default
-figures/ @arkui-default
-frameworks/ @arkui-default
-interfaces/ @arkui-default
-test/ @arkui-default
+adapter/ @arkui-featrue-manager
+advanced_ui_component/ @arkui-featrue-manager
+component_ext/ @arkui-featrue-manager
+examples/ @arkui-featrue-manager
+figures/ @arkui-featrue-manager
+frameworks/ @arkui-featrue-manager
+interfaces/ @arkui-featrue-manager
+test/ @arkui-featrue-manager
 
 [Config Files]
 .clang-format @arkui_architecture
