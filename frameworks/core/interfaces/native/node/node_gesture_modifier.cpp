@@ -387,6 +387,8 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         points[i].id = fingureIterator->fingerId_;
         points[i].windowX = fingureIterator->globalLocation_.GetX();
         points[i].windowY = fingureIterator->globalLocation_.GetY();
+        points[i].screenX = fingureIterator->screenLocation_.GetX();
+        points[i].screenY = fingureIterator->screenLocation_.GetY();
         points[i].nodeX = fingureIterator->localLocation_.GetX();
         points[i].nodeY = fingureIterator->localLocation_.GetY();
         points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
