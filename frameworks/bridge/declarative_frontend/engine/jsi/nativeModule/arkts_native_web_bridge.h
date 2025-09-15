@@ -210,6 +210,8 @@ public:
     static ArkUINativeModuleValue ResetOnDataResubmitted(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGestureFocusMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGestureFocusMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRotateRenderEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetRotateRenderEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);

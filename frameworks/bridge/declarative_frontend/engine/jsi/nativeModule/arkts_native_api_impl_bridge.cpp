@@ -6931,6 +6931,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetGestureFocusMode));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGestureFocusMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetGestureFocusMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRotateRenderEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetRotateRenderEffect));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRotateRenderEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetRotateRenderEffect));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDataDetector));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),

@@ -65,6 +65,7 @@ constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr bool DEFAULT_BLOCK_NETWORK_ENABLED = false;
 constexpr OverScrollMode DEFAULT_OVERSCROLL_MODE = OverScrollMode::NEVER;
 constexpr GestureFocusMode DEFAULT_GESTURE_FOCUS_MODE = GestureFocusMode::DEFAULT;
+constexpr WebRotateEffect DEFAULT_WEB_ROTATE_EFFECT = WebRotateEffect::TOPLEFT_EFFECT;
 constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 } // namespace
 
@@ -1992,6 +1993,20 @@ void ResetGestureFocusMode(ArkUINodeHandle node)
     WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
 }
 
+void SetRotateRenderEffect(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetRotateRenderEffect(frameNode, WebRotateEffect(value));
+}
+
+void ResetRotateRenderEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetRotateRenderEffect(frameNode, DEFAULT_WEB_ROTATE_EFFECT);
+}
+
 void SetEnableDataDetector(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2404,6 +2419,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setRotateRenderEffect = SetRotateRenderEffect,
+        .resetRotateRenderEffect = ResetRotateRenderEffect,
         .setEnableDataDetector = SetEnableDataDetector,
         .resetEnableDataDetector = ResetEnableDataDetector,
         .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,
@@ -2619,6 +2636,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setRotateRenderEffect = SetRotateRenderEffect,
+        .resetRotateRenderEffect = ResetRotateRenderEffect,
         .setEnableDataDetector = SetEnableDataDetector,
         .resetEnableDataDetector = ResetEnableDataDetector,
         .setDataDetectorConfigWithEvent = SetDataDetectorConfigWithEvent,

@@ -251,6 +251,7 @@ public:
     void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
+    void SetRotateRenderEffect(WebRotateEffect effect) override;
     void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetForceEnableZoom(bool isEnabled) override;
@@ -376,6 +377,7 @@ public:
     static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
+    static void SetRotateRenderEffect(FrameNode* frameNode, WebRotateEffect effect);
     static void SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnClientAuthenticationRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);

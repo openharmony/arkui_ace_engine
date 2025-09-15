@@ -31589,6 +31589,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, enabled);
     return this;
   }
+  rotateRenderEffect(effect) {
+    modifierWithKey(this._modifiersWithKeys, WebRotateRenderEffectModifier.identity, WebRotateRenderEffectModifier, effect);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -32969,6 +32973,20 @@ class WebGestureFocusModeModifier extends ModifierWithKey {
 }
 WebGestureFocusModeModifier.identity = Symbol('webGestureFocusModeModifier');
 
+class WebRotateRenderEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetRotateRenderEffect(node);
+    }
+    else {
+      getUINativeModule().web.setRotateRenderEffect(node, this.value);
+    }
+  }
+}
+WebRotateRenderEffectModifier.identity = Symbol('webRotateRenderEffectModifier');
 
 class WebOnSslErrorEventReceiveModifier extends ModifierWithKey {
   constructor(value) {

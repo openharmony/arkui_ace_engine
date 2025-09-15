@@ -216,6 +216,7 @@ public:
     static void OnLoadStarted(const JSCallbackInfo& args);
     static void OnLoadFinished(const JSCallbackInfo& args);
     static void GestureFocusMode(int32_t gestureFocusMode);
+    static void RotateRenderEffect(int32_t webRotateEffect);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);

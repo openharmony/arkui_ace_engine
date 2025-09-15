@@ -4319,6 +4319,12 @@ let GestureFocusMode;
   GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
 })(GestureFocusMode || (GestureFocusMode = {}));
 
+let WebRotateEffect;
+(function (WebRotateEffect) {
+  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
+  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
+})(WebRotateEffect || (WebRotateEffect = {}));
+
 let PdfLoadResult;
 (function (PdfLoadResult) {
   PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';

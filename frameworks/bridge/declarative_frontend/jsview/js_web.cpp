@@ -2269,6 +2269,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onLoadStarted", &JSWeb::OnLoadStarted);
     JSClass<JSWeb>::StaticMethod("onLoadFinished", &JSWeb::OnLoadFinished);
     JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
+    JSClass<JSWeb>::StaticMethod("rotateRenderEffect", &JSWeb::RotateRenderEffect);
     JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
     JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
@@ -6720,7 +6721,19 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
     auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
     WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
- 
+
+void JSWeb::RotateRenderEffect(int32_t webRotateEffect)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (webRotateEffect < static_cast<int32_t>(WebRotateEffect::TOPLEFT_EFFECT) ||
+        webRotateEffect > static_cast<int32_t>(WebRotateEffect::RESIZE_COVER_EFFECT)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebRotateEffect param err");
+        return;
+    }
+    auto effect = static_cast<enum WebRotateEffect>(webRotateEffect);
+    WebModel::GetInstance()->SetRotateRenderEffect(effect);
+}
+
 void JSWeb::SetForceEnableZoom(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsBoolean()) {

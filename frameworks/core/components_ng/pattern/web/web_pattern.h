@@ -573,6 +573,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
 
     bool IsFocus() const
@@ -1056,6 +1057,8 @@ private:
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
+    void OnRotateRenderEffectUpdate(WebRotateEffect effect);
+    void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
 
     int GetWebId();
@@ -1474,6 +1477,7 @@ private:
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool needSetDefaultBackgroundColor_ = false;
     GestureFocusMode gestureFocusMode_ = GestureFocusMode::DEFAULT;
+    RenderFit renderFit_ = RenderFit::TOP_LEFT;
 
     RectF firstInfoHandle_;
     RectF secondInfoHandle_;
