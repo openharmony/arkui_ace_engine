@@ -528,6 +528,7 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     if (inputEventType_ == InputEventType::AXIS) {
+        info->SetPinchAxisScale(lastAxisEvent_.pinchAxisScale);
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {

@@ -8742,7 +8742,7 @@ std::string ViewAbstract::GetKey(FrameNode* frameNode)
 {
     std::string value;
     CHECK_NULL_RETURN(frameNode, value);
-    return value = frameNode->GetInspectorIdValue();
+    return value = frameNode->GetInspectorIdValue("");
 }
 
 bool ViewAbstract::GetEnabled(FrameNode* frameNode)
