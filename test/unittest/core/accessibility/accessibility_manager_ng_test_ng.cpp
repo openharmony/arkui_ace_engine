@@ -767,7 +767,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallba
     // 2.has nodeTransparent, transformed false,currentHoveringId != INVALID_NODE_ID, lastHoveringId == INVALID_NODE_ID
     // 2.1  currentHoveringId != transparentNode->GetAccessibilityId()
     processFlag = false;
-    param = {frameNode1->GetAccessibilityId(), INVALID_NODE_ID, point};
+    param = {frameNode1->GetId(), INVALID_NODE_ID, point};
     ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
             transformed, frameNode1, param, touchEvent, hoverState);
     EXPECT_EQ(processFlag, true);
@@ -776,7 +776,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallba
     hoverState.nodeTransparent.clear();
     hoverState.nodeTransparent.emplace_back(frameNode2);
     processFlag = false;
-    param = {frameNode2->GetAccessibilityId(), INVALID_NODE_ID, point};
+    param = {frameNode2->GetId(), INVALID_NODE_ID, point};
     ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
             transformed, frameNode1, param, touchEvent, hoverState);
     EXPECT_EQ(processFlag, false);
@@ -817,7 +817,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallba
     // 3.transformed true , currentHoveringId != INVALID_NODE_ID, lastHoveringId == INVALID_NODE_ID
     // 3.1  currentHoveringId != transparentNode->GetAccessibilityId(), point in node
     processFlag = false;
-    param = {frameNode1->GetAccessibilityId(), INVALID_NODE_ID, point};
+    param = {frameNode1->GetId(), INVALID_NODE_ID, point};
     auto ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
         transformed, frameNode1, param, touchEvent, hoverState);
     EXPECT_EQ(processFlag, true);
@@ -826,7 +826,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallba
     hoverState.nodeTransparent.clear();
     hoverState.nodeTransparent.emplace_back(frameNode2);
     processFlag = false;
-    param = {frameNode2->GetAccessibilityId(), INVALID_NODE_ID, point};
+    param = {frameNode2->GetId(), INVALID_NODE_ID, point};
     ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
         transformed, frameNode1, param, touchEvent, hoverState);
     EXPECT_EQ(processFlag, true);
@@ -834,12 +834,58 @@ HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallba
     hoverState.nodeTransparent.clear();
     hoverState.nodeTransparent.emplace_back(frameNode2);
     processFlag = false;
-    param = {frameNode2->GetAccessibilityId(), INVALID_NODE_ID, point};
+    param = {frameNode2->GetId(), INVALID_NODE_ID, point};
     ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
         transformed, frameNode1, param, touchEvent, hoverState);
     EXPECT_EQ(processFlag, true);
 }
 
+/**
+ * @tc.name: HandleAccessibilityHoverTransparentCallback004
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerNgTestNg, HandleAccessibilityHoverTransparentCallback005, TestSize.Level1)
+{
+    AccessibilityManagerNG accessibilityManagerNg{};
+    TouchEvent touchEvent;
+    AccessibilityHoverState hoverState;
+    PointF point{1, 1};
+    bool processFlag = false;
+    TouchType resultType = TouchType::UNKNOWN;
+    AccessibilityManagerNG::HandleTransparentCallbackParam param;
+    RefPtr<FrameNode> frameNode1;
+    RefPtr<FrameNode> frameNode2;
+    auto initRet = InitTwoFrameNode(frameNode1, frameNode2);
+    ASSERT_EQ(initRet, true);
+    RefPtr<FrameNode> frameNode3;
+    RefPtr<FrameNode> frameNode4;
+    initRet = InitTwoFrameNode(frameNode3, frameNode4);
+    ASSERT_EQ(initRet, true);
+
+    auto accessibilityProperty2 = frameNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty2, nullptr);
+    accessibilityProperty2->SetAccessibilityTransparentCallback([&] (TouchEventInfo& eventInfo) {
+        processFlag = true;
+        auto touches = eventInfo.GetChangedTouches();
+        if (touches.size() > 0) {
+            auto changeTouch = touches.front();
+            resultType = changeTouch.GetTouchType();
+        }
+    });
+    hoverState.nodeTransparent.emplace_back(frameNode2);
+    touchEvent.type = TouchType::HOVER_MOVE;
+    bool transformed = false;
+    // 4. has nodeTransparent, transformed false,
+    // currentHoveringId == INVALID_NODE_ID, lastHoveringId == INVALID_NODE_ID
+    // point not in node， can not find root
+    PointF point2(-1, -1);
+    param = {INVALID_NODE_ID, INVALID_NODE_ID, point2};
+    accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(
+        transformed, frameNode3, param, touchEvent, hoverState);
+    EXPECT_EQ(processFlag, true);
+    EXPECT_EQ(resultType, TouchType::HOVER_EXIT);
+}
 /**
 * @tc.name: AccessibilityRectTest001
 * @tc.desc: AccessibilityRect

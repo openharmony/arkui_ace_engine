@@ -146,14 +146,28 @@ bool CheckPointIsInNode(const RefPtr<FrameNode>& root, const RefPtr<FrameNode>& 
 {
     CHECK_NULL_RETURN(root, false);
     CHECK_NULL_RETURN(targetNode, false);
-    PointF pointNode(point);
-    auto covertResult = AccessibilityManagerNG::ConvertPointFromAncestorToNode(root, targetNode, point, pointNode);
-    CHECK_NE_RETURN(covertResult, true, false);
-    auto renderContext = targetNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto rect = AccessibilityProperty::UpdateHoverTestRect(targetNode);
-    renderContext->GetPointWithRevert(pointNode);
-    return rect.IsInnerRegion(pointNode);
+    std::vector<RefPtr<NG::FrameNode>> path;
+    RefPtr<NG::FrameNode> curr = targetNode;
+    while (curr != nullptr && curr->GetId() != root->GetId()) {
+        path.push_back(curr);
+        curr = curr->GetAncestorNodeOfFrame(true);
+    }
+    // curr == null means can not find root
+    CHECK_NULL_RETURN(curr, false);
+    path.push_back(root);
+    PointF selfPoint = point;
+    bool hitSelf = false;
+    for (auto nodePtr = path.rbegin(); nodePtr != path.rend(); ++nodePtr) {
+        CHECK_NULL_CONTINUE(*nodePtr);
+        auto renderContext = (*nodePtr)->GetRenderContext();
+        CHECK_NULL_CONTINUE(renderContext);
+        renderContext->GetPointWithRevert(selfPoint);
+        auto rect = AccessibilityProperty::UpdateHoverTestRect(*nodePtr);
+        hitSelf = rect.IsInnerRegion(selfPoint);
+        auto orginRect = renderContext->GetPaintRectWithoutTransform();
+        selfPoint = selfPoint - orginRect.GetOffset();
+    }
+    return hitSelf;
 }
 
 bool IsInSentTransparentNode(const RefPtr<FrameNode>& node, AccessibilityHoverState& hoverState)
@@ -319,6 +333,7 @@ bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool tr
 {
     CHECK_NE_RETURN(param.lastHoveringId, INVALID_NODE_ID, false);
     bool needSendExit = false;
+    bool result = false;
     for (auto& transparentWeak : hoverState.nodeTransparent) {
         auto transparentNode = transparentWeak.Upgrade();
         CHECK_NULL_CONTINUE(transparentNode);
@@ -328,7 +343,7 @@ bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool tr
         CHECK_NULL_CONTINUE(callback);
         
         if (((param.currentHoveringId != INVALID_NODE_ID)
-            && (param.currentHoveringId != transparentNode->GetAccessibilityId()))
+            && (param.currentHoveringId != transparentNode->GetId()))
             || transformed) {
             needSendExit = true;
         } else {
@@ -345,12 +360,12 @@ bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool tr
 
     if ((!transformed) && (param.currentHoveringId == INVALID_NODE_ID)
         && !IsHoverTransparentCallbackListEmpty(root)) {
-        return ExecuteChildNodeHoverTransparentCallback(root, param.point, event, hoverState);
+        result = ExecuteChildNodeHoverTransparentCallback(root, param.point, event, hoverState);
     }
     if (needSendExit) {
         hoverState.nodeTransparent.clear();
     }
-    return false;
+    return result;
 }
 
 HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
@@ -368,12 +383,12 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState.time).count());
 
     if (eventType == AccessibilityHoverEventType::CANCEL) {
-        hoverStateManager_.ResetHoverState(hoverState);
         HandleTransparentCallbackParam callbackParam = {
             .currentHoveringId = INVALID_NODE_ID,
             .lastHoveringId = INVALID_NODE_ID,
             .point = param.point};
         HandleAccessibilityHoverTransparentCallback(false, root, callbackParam, event, hoverState);
+        hoverStateManager_.ResetHoverState(hoverState);
         return HandleHoverRet::HOVER_HIT;
     }
 
