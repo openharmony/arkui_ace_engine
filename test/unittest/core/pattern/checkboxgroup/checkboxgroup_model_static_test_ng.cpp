@@ -106,7 +106,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg001, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -139,7 +139,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg002, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -172,7 +172,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg003, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -205,7 +205,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg004, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -238,7 +238,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg005, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -271,7 +271,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg006, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
@@ -304,7 +304,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg007, TestSize.Level
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create checkboxgroup paintProperty.
      */
