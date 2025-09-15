@@ -47,6 +47,7 @@
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
+#include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
@@ -621,6 +622,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
+    { "Picker", JSContainerPicker::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "TimePickerDialog", JSTimePickerDialog::JSBind },

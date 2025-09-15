@@ -228,6 +228,7 @@ enum AceLogTag : uint8_t {
     ACE_DYNAMIC_COMPONENT = 95,    // C0395F
     ACE_DRAWABLE_DESCRIPTOR = 96,  // C03960
     ACE_LAZY_GRID = 97,            // C03961
+    ACE_CONTAINER_PICKER = 98,     // C03962
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
