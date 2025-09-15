@@ -186,6 +186,12 @@ public:
     {
         return true;
     }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     void SetBuilderFunc(CheckBoxGroupMakeCallback&& makeFunc)
     {
         if (makeFunc == nullptr) {
