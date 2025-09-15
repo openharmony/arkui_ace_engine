@@ -101,6 +101,7 @@ constexpr char BEFORE_PAN_END[] = "beforePanEnd";
 constexpr char AFTER_PAN_START[] = "afterPanStart";
 constexpr char AFTER_PAN_END[] = "afterPanEnd";
 constexpr char NODE_RENDER_STATE[] = "nodeRenderState";
+constexpr char TEXT_CHANGE[] = "textChange";
 constexpr char NODE_RENDER_STATE_REGISTER_ERR_MSG[] =
     "The count of nodes monitoring render state is over the limitation";
 
@@ -387,6 +388,7 @@ ObserverProcess::ObserverProcess()
         { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndRegister },
         { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndRegister },
         { NODE_RENDER_STATE, &ObserverProcess::ProcessNodeRenderStateRegister },
+        { TEXT_CHANGE, &ObserverProcess::ProcessTextChangeEventRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -405,6 +407,7 @@ ObserverProcess::ObserverProcess()
         { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndUnRegister },
         { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndUnRegister },
         { NODE_RENDER_STATE, &ObserverProcess::ProcessNodeRenderStateUnRegister },
+        { TEXT_CHANGE, &ObserverProcess::ProcessTextChangeEventUnRegister },
     };
 }
 
@@ -1440,6 +1443,59 @@ napi_value ObserverProcess::ProcessNodeRenderStateUnRegister(napi_env env, napi_
         callback = argv[PARAM_INDEX_TWO];
     }
     UIObserver::UnRegisterNodeRenderStateChangeCallback(frameNode, callback, monitor);
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessTextChangeEventRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isTextChangeEventHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(&UIObserver::HandleTextChangeEvent);
+        isTextChangeEventHandleFuncSetted_ = true;
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterTextChangeEventCallback(listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            UIObserver::RegisterTextChangeEventCallback(id, listener);
+        }
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessTextChangeEventUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterTextChangeEventCallback(nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterTextChangeEventCallback(argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            std::string id;
+            if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+                UIObserver::UnRegisterTextChangeEventCallback(id, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterTextChangeEventCallback(id, argv[PARAM_INDEX_TWO]);
+        }
+    }
     return nullptr;
 }
 

@@ -437,6 +437,12 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     navDestinationSwitchHandleFunc_(info, switchInfo);
 }
 
+void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
+{
+    CHECK_NULL_VOID(textChangeEventHandleFunc_);
+    textChangeEventHandleFunc_(info);
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
@@ -535,6 +541,11 @@ void UIObserverHandler::SetDidClickHandleFuncForAni(DidClickHandleFuncForAni fun
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
 {
     tabContentStateHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)
+{
+    textChangeEventHandleFunc_ = std::move(func);
 }
 
 napi_value UIObserverHandler::GetUIContextValue()
