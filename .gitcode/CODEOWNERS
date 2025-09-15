@@ -1,14 +1,14 @@
 # Code owners for ArkUI ace_engine
 
 [Default]
-adapter/ @arkui-featrue-manager
-advanced_ui_component/ @arkui-featrue-manager
-component_ext/ @arkui-featrue-manager
-examples/ @arkui-featrue-manager
-figures/ @arkui-featrue-manager
-frameworks/ @arkui-featrue-manager
-interfaces/ @arkui-featrue-manager
-test/ @arkui-featrue-manager
+adapter/ @arkui-feature-manager
+advanced_ui_component/ @arkui-feature-manager
+component_ext/ @arkui-feature-manager
+examples/ @arkui-feature-manager
+figures/ @arkui-feature-manager
+frameworks/ @arkui-feature-manager
+interfaces/ @arkui-feature-manager
+test/ @arkui-feature-manager
 
 [Config Files]
 .clang-format @arkui_architecture
@@ -20,9 +20,9 @@ figures/ @arkui_architecture
 OAT.xml @arkui_architecture
 README.md @arkui_architecture
 README_zh.md @arkui_architecture
-.gitee/ @arkui_architecture
-.gitee/CODEOWNERS @liyujie43
-.gitee/owner_config.json @liyujie43
+.gitcode/ @arkui_architecture
+.gitcode/CODEOWNERS @liyujie43
+.gitcode/owner_config.json @liyujie43
 
 [OpenHarmony adapter]
 adapter/ohos/build/ @arkui_architecture
@@ -2343,7 +2343,7 @@ frameworks/core/components_v2/inspector/time_picker_dialog_composed_element.h @a
 frameworks/core/components_v2/inspector/toggle_composed_element.cpp @arkuipopupwindow_all
 frameworks/core/components_v2/inspector/toggle_composed_element.h @arkuipopupwindow_all
 frameworks/core/components_v2/inspector/utils.cpp @ArkUI_ability_group
-frameworks/core/components_v2/inspector/utils.h @ArkUI_ability_groups
+frameworks/core/components_v2/inspector/utils.h @ArkUI_ability_group
 frameworks/core/components_v2/inspector/water_flow_composed_element.cpp @arkuiscroll
 frameworks/core/components_v2/inspector/water_flow_composed_element.h @arkuiscroll
 frameworks/core/components_v2/inspector/water_flow_item_composed_element.cpp @arkuiscroll
