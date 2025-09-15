@@ -117,7 +117,6 @@ private:
                               .append(std::to_string(nodeInfo_.canvasNodeId_))
                               .append("-")
                               .append(std::to_string(srcType_))
-
                               .append("]");
     }
 
@@ -131,7 +130,6 @@ private:
                            .append(std::to_string(nodeInfo_.canvasNodeId_))
                            .append("-")
                            .append(std::to_string(srcType_))
-
                            .append("]-[")
                            .append(imageSrc_)
                            .append("]");
