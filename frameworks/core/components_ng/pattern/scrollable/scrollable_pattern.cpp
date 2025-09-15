@@ -1205,8 +1205,9 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
         bool userFlingBeforeDrag = scrollable->GetIsUserFling();
-        if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
+        if (scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
         if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
@@ -1219,7 +1220,8 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
         scrollable->SetIsScrollBarDragging(false);
@@ -1507,8 +1509,9 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
         bool userFlingBeforeDrag = scrollable->GetIsUserFling();
-        if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
+        if (scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
         if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
@@ -1519,7 +1522,8 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
         scrollable->SetIsScrollBarDragging(false);
