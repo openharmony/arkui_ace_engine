@@ -21,6 +21,14 @@ function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value:
   return InteropExtractorModule.makeBuilderParameterStaticProxy(name, value, sourceGetter);
 }
 
+function startStaticHook(source: Object, addRef: () => void): Object | undefined {
+  if ('__static_interop_hook' in source) {
+    source['__static_interop_hook'] = addRef;
+    return source;
+  }
+  return undefined;
+}
+
 /**
 * 
 * @param staticBuilder ArkTS1.2builder, return the pointer of PeerNode
