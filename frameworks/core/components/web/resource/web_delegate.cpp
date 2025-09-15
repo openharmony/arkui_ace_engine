@@ -607,6 +607,14 @@ int ContextMenuParamOhos::GetMediaTypeV2() const
     return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
 }
 
+int ContextMenuParamOhos::GetContextMenuMediaType() const
+{
+    if (param_) {
+        return param_->GetContextMenuMediaType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuDataMediaType::CMD_MT_NONE;
+}
+
 int ContextMenuParamOhos::GetInputFieldType() const
 {
     if (param_) {
