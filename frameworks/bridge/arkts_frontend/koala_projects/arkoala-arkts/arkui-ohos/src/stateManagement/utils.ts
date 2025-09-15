@@ -22,13 +22,12 @@ export class UIUtils {
     static getTarget<T>(source: T): T {
         return uiUtils.getTarget(source) as T;
     }
-    static makeBindingReadonly<T>(getter: () => T): Binding<T> {
+    static makeBinding<T>(getter: () => T): Binding<T> {
         return uiUtils.makeBindingReadonly(getter);
     }
-    static makeBindingMutable<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
+    static makeBinding<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
         return uiUtils.makeBindingMutable(getter, setter);
     }
-    static overload makeBinding { makeBindingReadonly, makeBindingMutable }
 }
 
 /**
