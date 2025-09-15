@@ -1246,5 +1246,26 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.applicationError(error);
       throw new Error(error);
   }
+
+  protected mutableBuilderImpl<Args extends Object[]>(
+    builder: () => MutableBuilder<Args>, ...args: Args): void {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+        If.create();
+        const _wb = builder();
+        // WeakMap that stores Builder and has builderID number for it.
+        let builderId = this.builderIdMap_.get(_wb);
+
+        if (builderId === undefined) {
+            builderId = this.nextBuilderId_++;
+            this.builderIdMap_.set(_wb, builderId);
+        }
+        // Create branch for each Builder to ensure UI updating.
+        this.ifElseBranchUpdateFunction(
+            builderId,
+            () => _wb.builder.bind(this)(...args)
+        );
+        If.pop();
+    }, If);
+  }
 } // class ViewPU
 

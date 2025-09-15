@@ -899,4 +899,25 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // transpiler will try to give a warning to hint that it will downgrade to normal V1
         stateMgmtConsole.error(`${this.debugInfo__()}: Recycle not supported for ComponentV2 instance`);
     }
+
+    protected mutableBuilderImpl<Args extends Object[]>(
+        builder: () => MutableBuilder<Args>, ...args: Args): void {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            const _wb = builder();
+            // WeakMap that stores Builder and has builderID number for it.
+            let builderId = this.builderIdMap_.get(_wb);
+
+            if (builderId === undefined) {
+                builderId = this.nextBuilderId_++;
+                this.builderIdMap_.set(_wb, builderId);
+            }
+            // Create branch for each Builder to ensure UI updating.
+            this.ifElseBranchUpdateFunction(
+                builderId,
+                () => _wb.builder.bind(this)(...args)
+            );
+            If.pop();
+        }, If);
+    }
 }
