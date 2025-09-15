@@ -94,6 +94,10 @@ function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);
 }
 
+function viewV2Create(component: ViewV2): void {
+    ViewV2.create(component);
+}
+
 function getRawObjectForInterop(value: Object): Object {
     if ((Array.isArray(value) || value instanceof Set || value instanceof Date || value instanceof Map) &&
         ObservedObject.IsObservedObject(value)) {
