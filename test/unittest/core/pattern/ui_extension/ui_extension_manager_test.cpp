@@ -552,6 +552,13 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager009
+ * @tc.desc: Verify RecycleExtensionId boundary cases, placeholder visibility, multiple AddAliveUIExtension,
+ *           UpdateSessionViewportConfig execution and NotifyOccupiedAreaChangeInfo with zero height, then
+ *           proper removal of alive extensions.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -589,6 +596,13 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager010
+ * @tc.desc: Verify provider notification logic (NotifyUECProviderIfNeedded) with different alive counts, window
+ *           mode notify, page mode send/request, UpdateWMSUIExtProperty without registered callbacks, adding
+ *           security extensions and transferring rect info.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -630,6 +644,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager011
+ * @tc.desc: Verify RegisterListenerIfNeeded / UnregisterListenerIfNeeded behavior under UIExtension window
+ *           state transitions and idempotency of repeated register/unregister calls.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -651,6 +671,13 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager012
+ * @tc.desc: Validate creation of UIExtension node/pattern, adding normal & security extensions, placeholder
+ *           decision, avoid area transfer, size change notify path, occupied area change handling with and
+ *           without valid session wrapper.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -693,6 +720,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager013
+ * @tc.desc: Verify multiple UpdateSessionViewportConfig calls (transform/orientation changes), foreground
+ *           state check, session wrapper null safety, and retention of previous config fields.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager013, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -736,6 +769,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager013, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: UIExtensionManager014
+ * @tc.desc: Verify business property update with page mode request param, rect transfer, window
+ *           mode notify, registering business data send callback and triggering send returning false path.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager014, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -789,6 +828,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager014, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: TestUpdateWMSUIExtPropertyByPersistentId
+ * @tc.desc: Verify UpdateWMSUIExtPropertyByPersistentId applies only to matching persistentIds while keeping
+ *           alive extension list size unchanged when some IDs do not match.
+ * @tc.type: FUNC
+ */
 HWTEST_F(UIExtensionManagerNg, TestUpdateWMSUIExtPropertyByPersistentId, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
