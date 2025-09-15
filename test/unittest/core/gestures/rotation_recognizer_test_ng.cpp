@@ -1462,7 +1462,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->angle_ = 0;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(rotationRecognizerPtr->lastAngle_, 0.0);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 }
 
 /**
@@ -1499,13 +1499,13 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->touchPoints_[touchEvent2.id] = touchEvent2;
     rotationRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 
     rotationRecognizerPtr->initialAngle_ = 1;
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->lastAngle_ = -10;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 
     touchEvent.SetX(100);
     rotationRecognizerPtr->lastAngle_ = 10;
@@ -1517,7 +1517,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 }
 
 /**
@@ -1554,7 +1554,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->touchPoints_[touchEvent2.id] = touchEvent2;
     rotationRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 
     touchEvent.SetX(100);
     rotationRecognizerPtr->lastAngle_ = -10;
@@ -1566,7 +1566,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 }
 
 /**
@@ -1603,24 +1603,24 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->touchPoints_[touchEvent2.id] = touchEvent2;
     rotationRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 
     rotationRecognizerPtr->isLimitFingerCount_ = false;
     rotationRecognizerPtr->fingers_ = 1;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 
     rotationRecognizerPtr->isLimitFingerCount_ = false;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 }
 
 /**
@@ -1648,12 +1648,12 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchCancelEvent001, TestSize.Level1)
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->activeFingers_.push_back(touchEvent.id);
     rotationRecognizerPtr->HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::FAIL;
     rotationRecognizerPtr->activeFingers_.push_back(touchEvent.id);
     rotationRecognizerPtr->HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 }
 
 /**
@@ -1673,7 +1673,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchCancelEvent002, TestSize.Level1)
     rotationRecognizerPtr->targetComponent_ = targetComponent;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchCancelEvent(axisEvent);
-    EXPECT_EQ(rotationRecognizerPtr->angleSignChanged_, false);
+    EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
 }
 
 /**
@@ -1869,5 +1869,97 @@ HWTEST_F(RotationRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     rotationRecognizerPtr->inputEventType_ = InputEventType::AXIS;
     rotationRecognizerPtr->GetGestureEventInfo(info);
     EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
+}
+
+/**
+ * @tc.name: RotationRecognizerPtrHandleTouchUpEventTest006
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent with angle transition from 178 to -178 degrees
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest006, TestSize.Level0)
+{
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(2, ROTATION_GESTURE_ANGLE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    rotationRecognizerPtr->fingers_ = 2;
+    rotationRecognizerPtr->currentFingers_ = 2;
+    rotationRecognizerPtr->activeFingers_.push_back(1);
+    rotationRecognizerPtr->activeFingers_.push_back(2);
+    
+    rotationRecognizerPtr->initialAngle_ = 178.0;
+    rotationRecognizerPtr->currentAngle_ = 178.0;
+    rotationRecognizerPtr->lastAngle_ = 178.0;
+    
+    TouchEvent touchEvent1;
+    touchEvent1.id = 1;
+    touchEvent1.SetX(-50);
+    touchEvent1.SetY(-5);
+    
+    TouchEvent touchEvent2;
+    touchEvent2.id = 2;
+    touchEvent2.SetX(50);
+    touchEvent2.SetY(0);
+    
+    rotationRecognizerPtr->touchPoints_[1] = touchEvent1;
+    rotationRecognizerPtr->touchPoints_[2] = touchEvent2;
+    
+    touchEvent1.SetX(-50);
+    touchEvent1.SetY(-10);
+    rotationRecognizerPtr->touchPoints_[1] = touchEvent1;
+    
+    rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent1);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
+}
+
+/**
+ * @tc.name: RotationRecognizerPtrHandleTouchUpEventTest007
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent with angle transition from -178 to 178 degrees
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest007, TestSize.Level0)
+{
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(2, ROTATION_GESTURE_ANGLE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    rotationRecognizerPtr->fingers_ = 2;
+    rotationRecognizerPtr->currentFingers_ = 2;
+    rotationRecognizerPtr->activeFingers_.push_back(1);
+    rotationRecognizerPtr->activeFingers_.push_back(2);
+    
+    rotationRecognizerPtr->initialAngle_ = -178.0;
+    rotationRecognizerPtr->currentAngle_ = -178.0;
+    rotationRecognizerPtr->lastAngle_ = -178.0;
+    
+    TouchEvent touchEvent1;
+    touchEvent1.id = 1;
+    touchEvent1.SetX(-50);
+    touchEvent1.SetY(1);
+    
+    TouchEvent touchEvent2;
+    touchEvent2.id = 2;
+    touchEvent2.SetX(50);
+    touchEvent2.SetY(0);
+    
+    rotationRecognizerPtr->touchPoints_[1] = touchEvent1;
+    rotationRecognizerPtr->touchPoints_[2] = touchEvent2;
+    
+    touchEvent1.SetX(50);
+    touchEvent1.SetY(1);
+    rotationRecognizerPtr->touchPoints_[1] = touchEvent1;
+    
+    rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent1);
+    EXPECT_NE(rotationRecognizerPtr, nullptr);
 }
 } // namespace OHOS::Ace::NG

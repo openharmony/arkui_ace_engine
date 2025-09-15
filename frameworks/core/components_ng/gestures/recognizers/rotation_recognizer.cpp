@@ -30,7 +30,6 @@ namespace {
 constexpr int32_t MAX_ROTATION_FINGERS = 5;
 constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
 constexpr double ONE_CIRCLE = 360.0;
-constexpr double QUARTER_CIRCLE = 90.0;
 constexpr double RANGE_MIN = -180.0;
 constexpr double RANGE_MAX = 180.0;
 
@@ -104,6 +103,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         initialAngle_ = ComputeAngle();
+        currentAngle_ = initialAngle_;
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -203,38 +203,30 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+    if (!IsActiveFinger(event.id)) {
         touchPoints_[event.id] = event;
-        lastAngle_ = 0.0;
-        angleSignChanged_ = false;
         return;
     }
     touchPoints_[event.id] = event;
+    lastAngle_ = currentAngle_;
     currentAngle_ = ComputeAngle();
     time_ = event.time;
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
         lastAngle_ = 0.0;
-        angleSignChanged_ = false;
+        cumulativeAngle_ = 0.0;
         return;
     }
 
     if (refereeState_ == RefereeState::DETECTING) {
-        auto trueAngle = currentAngle_;
-        if (currentAngle_ * lastAngle_ < 0 && fabs(currentAngle_) > QUARTER_CIRCLE) {
-            angleSignChanged_ = !angleSignChanged_;
+        double trueAngle = currentAngle_ - lastAngle_;
+        if (trueAngle > RANGE_MAX) {
+            trueAngle -= ONE_CIRCLE;
+        } else if (trueAngle < RANGE_MIN) {
+            trueAngle += ONE_CIRCLE;
         }
-        if (angleSignChanged_) {
-            if (initialAngle_ > 0.0) {
-                trueAngle += ONE_CIRCLE;
-            } else {
-                trueAngle -= ONE_CIRCLE;
-            }
-        }
-        lastAngle_ = currentAngle_;
-        double diffAngle = fabs((trueAngle - initialAngle_));
-        if (GreatOrEqual(diffAngle, angle_)) {
+        cumulativeAngle_ += trueAngle;
+        if (GreatOrEqual(fabs(cumulativeAngle_), angle_) && currentFingers_ >= fingers_) {
             lastAngle_ = 0.0;
-            angleSignChanged_ = false;
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
             if (CheckLimitFinger()) {
                 extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
@@ -247,9 +239,8 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
-    } else if (refereeState_ == RefereeState::SUCCEED) {
+    } else if (refereeState_ == RefereeState::SUCCEED && currentFingers_ >= fingers_) {
         lastAngle_ = 0.0;
-        angleSignChanged_ = false;
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
@@ -356,7 +347,7 @@ void RotationRecognizer::OnResetStatus()
     currentAngle_ = 0.0;
     resultAngle_ = 0.0;
     lastAngle_ = 0.0;
-    angleSignChanged_ = false;
+    cumulativeAngle_ = 0.0;
     localMatrix_.clear();
 }
 
