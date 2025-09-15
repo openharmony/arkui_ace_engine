@@ -8951,7 +8951,7 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     }
     auto* fullImpl = GetFullImpl();
     ArkUI_SwiperArrowStyle* arrowStyle = reinterpret_cast<ArkUI_SwiperArrowStyle*>(item->object);
-    double displayArrow[ALLOW_SIZE_9] = { 1, 0, 0, DEFAULT_SIZE_24, 0, DEFAULT_SIZE_18, 0, 0, 1 };
+    double displayArrow[ALLOW_SIZE_12] = { 1, 0, 0, DEFAULT_SIZE_24, 0, DEFAULT_SIZE_18, 0, 0, 1 };
     double showBackground = 0.0;
     double showSidebarMiddle = 0.0;
     double backgroundSize = 0.0;
@@ -8968,6 +8968,8 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
         backgroundColor = arrowStyle->backgroundColor.value;
         arrowSize = arrowStyle->arrowSize.value;
         arrowColor = arrowStyle->arrowColor.value;
+        displayArrow[NUM_10] = arrowStyle->arrowColor.isSet;
+        displayArrow[NUM_11] = arrowStyle->backgroundColor.isSet;
     }
     if (item->value[0].i32 == ArkUI_SwiperArrow::ARKUI_SWIPER_ARROW_SHOW_ON_HOVER) {
         displayArrow[NUM_0] = DISPLAY_ARROW_TRUE;

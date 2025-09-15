@@ -368,7 +368,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     }
     std::string displayArrowStr = displayArrowValueStr + "|" + showBackgroundStr + "|" + isSidebarMiddleStr + "|" +
                                   backgroundSizeStr + "|" + backgroundColorStr + "|" + arrowSizeStr + "|" +
-                                  arrowColorStr + "|" + isHoverShowStr + "|";
+                                  arrowColorStr + "|" + isHoverShowStr + "|1|1|1|1|1|";
     if (SystemProperties::ConfigChangePerform()) {
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperDisplayArrowRaw(nativeNode, displayArrowStr.c_str(),
             static_cast<void*>(&resObjs));
