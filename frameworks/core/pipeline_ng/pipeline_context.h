@@ -914,7 +914,6 @@ public:
     const RefPtr<PostEventManager>& GetPostEventManager();
 
     RefPtr<FrameNode> GetContainerModalNode();
-    bool CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node);
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();

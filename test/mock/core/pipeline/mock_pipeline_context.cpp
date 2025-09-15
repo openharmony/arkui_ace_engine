@@ -1152,21 +1152,6 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     CHECK_NULL_RETURN(rootNode_, nullptr);
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
 }
-
-bool PipelineContext::CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_RETURN(node, false);
-    auto containerNode = GetContainerModalNode();
-    CHECK_NULL_RETURN(containerNode, false);
-    auto parent = node->GetParent();
-    while (parent) {
-        if (parent->GetTag() == V2::TOOLBARITEM_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParent();
-    }
-    return false;
-}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
