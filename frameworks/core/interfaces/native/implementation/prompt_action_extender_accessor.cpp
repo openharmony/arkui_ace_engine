@@ -516,6 +516,7 @@ void OpenMenuImpl(Ark_VMContext vmContext,
     int targetId = INVALID_ID;
     auto result = ParseTargetInfo(target, targetId);
     if (result == ERROR_CODE_NO_ERROR) {
+        frameNode->MarkModifyDone();
         result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
     }
     if (result == ERROR_CODE_INTERNAL_ERROR) {
