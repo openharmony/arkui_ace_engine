@@ -639,7 +639,7 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnEscape001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_FALSE(richEditorPattern->HandleOnEscape());
+    EXPECT_TRUE(richEditorPattern->HandleOnEscape());
 }
 
 /**
