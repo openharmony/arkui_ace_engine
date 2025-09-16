@@ -2092,4 +2092,37 @@ HWTEST_F(ScrollEventTestNg, onWillStopDragging002, TestSize.Level1)
     EXPECT_TRUE(isOnWillStopDraggingCallBack);
     EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
+
+/**
+ * @tc.name: onWillStartDragging001
+ * @tc.desc: Test onWillStartDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, onWillStartDragging001, TestSize.Level1)
+{
+    bool isOnWillStartDraggingCallBack = false;
+    auto onWillStartDragging = [&isOnWillStartDraggingCallBack]() {
+        isOnWillStartDraggingCallBack = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStartDragging(onWillStartDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStartDraggingCallBack);
+}
 } // namespace OHOS::Ace::NG
