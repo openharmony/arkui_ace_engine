@@ -1478,7 +1478,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
             (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
-        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
+        (!menuPattern->IsSelectMenu())) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }
@@ -1517,7 +1517,7 @@ bool OverlayManager::CheckSelectSubWindowToClose(
     CHECK_NULL_RETURN(menuPattern, false);
     auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProp, false);
-    if (expandDisplay && menuPattern->GetTargetTag() == V2::SELECT_ETS_TAG &&
+    if (expandDisplay && !menuPattern->IsSelectMenu() &&
         menuLayoutProp->GetShowInSubWindowValue(false)) {
         auto subWindowManager = SubwindowManager::GetInstance();
         CHECK_NULL_RETURN(subWindowManager, false);

@@ -4313,7 +4313,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
                         menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                         targetNodePosition.GetY() };
     }
-    if (menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuPosition);
         return ERROR_CODE_NO_ERROR;
     }
@@ -4432,7 +4432,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (expandDisplay && menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
@@ -4466,8 +4466,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
-        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
