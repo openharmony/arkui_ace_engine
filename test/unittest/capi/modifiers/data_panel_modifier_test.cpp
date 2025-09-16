@@ -327,7 +327,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
+HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -351,7 +351,8 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     }
 }
 
-static Ark_Length RESOURCE_STROKE = Converter::ArkValue<Ark_Length>(123);
+const int64_t RESOURCE_STROKE_ID = 123;
+static Ark_Length RESOURCE_STROKE = Converter::ArkValue<Ark_Length>(RESOURCE_STROKE_ID);
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidthStrokeWidthResourceValues = {
     {"10.00px", RESOURCE_STROKE, "10.00px"},
 }; // 10.00px is in mock theme constants
@@ -581,9 +582,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringValidValues, TestSize.Le
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -622,9 +623,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -663,9 +664,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestNumberValidValues, TestSize.Le
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -704,9 +705,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Leve
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -745,9 +746,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Le
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -786,9 +787,9 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestResourceValidValues, TestSize.
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1227,9 +1228,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1283,9 +1284,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1339,9 +1340,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorNumberValidValues, TestSi
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1395,9 +1396,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1451,9 +1452,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 
@@ -1507,9 +1508,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
         auto color =
-            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
     }
 

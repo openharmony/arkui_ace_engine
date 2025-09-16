@@ -134,12 +134,12 @@ std::vector<std::tuple<Ark_String, Color, bool>> STYLE_STRING_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>(""), Color(), false },
     { Converter::ArkValue<Ark_String>("invalid color"), Color(), false },
 };
-std::vector<std::tuple<Ark_Number, Color>> STYLE_NUMBER_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Number>(0xff0000ff), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_Number>(0x00000000), Color(0xff000000) },
-    { Converter::ArkValue<Ark_Number>(0x80ffffff), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_Number>(0xffffffff), Color(0xffffffff) },
-    { Converter::ArkValue<Ark_Number>(0x11111111), Color(0x11111111) },
+std::vector<std::tuple<Ark_Int32, Color>> STYLE_NUMBER_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Int32>(0xff0000ff), Color(0xff0000ff) },
+    { Converter::ArkValue<Ark_Int32>(0x00000000), Color(0xff000000) },
+    { Converter::ArkValue<Ark_Int32>(0x80ffffff), Color(0x80ffffff) },
+    { Converter::ArkValue<Ark_Int32>(0xffffffff), Color(0xffffffff) },
+    { Converter::ArkValue<Ark_Int32>(0x11111111), Color(0x11111111) },
 };
 class MockPixelMap : public PixelMap {
 public:
@@ -296,7 +296,7 @@ public:
         pipelineContext->SetDensity(density);
         // Re-create peer for density to have effect
         finalyzer_(peer_);
-        peer_ = accessor_->ctor();
+        peer_ = accessor_->construct();
         reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer_)->SetRenderingContext2DModel(
             renderingModel_);
     }
@@ -430,7 +430,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setLineJoinTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setPixelMap, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
     Ace::ImageInfo target;
     EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
@@ -650,7 +650,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0SvgTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage0, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     for (const auto& actualX : NUMBER_TEST_PLAN) {
@@ -659,7 +659,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage0(peer_, &image, &dx, &dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -850,7 +850,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -860,7 +860,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage1(peer_, &image, &dx, &dy, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -879,7 +879,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -889,7 +889,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dw = Converter::ArkValue<Ark_Number>(actualX);
             auto dh = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage1(peer_, &image, &dv, &dv, &dw, &dh);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1250,7 +1250,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1260,7 +1260,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dx, &dy, &dv, &dv, &dv, &dv, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1279,7 +1279,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1289,7 +1289,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dx, &dy, &dv, &dv, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1308,7 +1308,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1318,7 +1318,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dx, &dy, &dv, &dv);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1337,7 +1337,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
 HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     arkPixelMap->pixelMap = pixelMap;
     const Ark_Number dv = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
@@ -1347,7 +1347,7 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
             EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             auto dx = Converter::ArkValue<Ark_Number>(actualX);
             auto dy = Converter::ArkValue<Ark_Number>(actualY);
-            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_PixelMap>(arkPixelMap);
+            auto image = Converter::ArkUnion<Ark_Union_ImageBitmap_PixelMap, Ark_image_PixelMap>(arkPixelMap);
             accessor_->drawImage2(peer_, &image, &dv, &dv, &dv, &dv, &dv, &dv, &dx, &dy);
 
             ASSERT_NE(target.pixelMap, nullptr);
@@ -1440,13 +1440,13 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleStringTest, TestSize.Level1)
             bool targetFlag = false;
             EXPECT_CALL(*renderingModel_, SetFillColor(_, _))
                 .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setFillStyle(peer_, &style);
             EXPECT_EQ(target, expected);
             EXPECT_TRUE(targetFlag);
         } else {
             EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).Times(0);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setFillStyle(peer_, &style);
         }
     }
@@ -1464,7 +1464,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleNumberTest, TestSize.Level1)
         Ace::Color target;
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_Number>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_Int32>(actual);
         accessor_->setFillStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
@@ -1485,7 +1485,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleGradientTest, TestSize.Level1)
     std::shared_ptr<Ace::Gradient> target;
     EXPECT_CALL(*renderingModel_, SetFillGradient(_)).WillOnce(DoAll(SaveArg<0>(&target)));
     auto style =
-        Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
+        Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
     accessor_->setFillStyle(peer_, &style);
 
     EXPECT_EQ(target.get(), gradient.get());
@@ -1522,7 +1522,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternStrTest, TestSize.Level
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setFillStyle(peer_, &style);
 
@@ -1570,7 +1570,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternWHTest, TestSize.Level1
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setFillStyle(peer_, &style);
 
@@ -1602,13 +1602,13 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleStringTest, TestSize.Level1)
             bool targetFlag = false;
             EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
                 .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setStrokeStyle(peer_, &style);
             EXPECT_EQ(target, expected);
             EXPECT_TRUE(targetFlag);
         } else {
             EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _)).Times(0);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setStrokeStyle(peer_, &style);
         }
     }
@@ -1627,7 +1627,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleNumberTest, TestSize.Level1)
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
             .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_Number>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_Int32>(actual);
         accessor_->setStrokeStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
@@ -1648,7 +1648,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleGradientTest, TestSize.Level
     std::shared_ptr<Ace::Gradient> target;
     EXPECT_CALL(*renderingModel_, SetStrokeGradient(_)).WillOnce(DoAll(SaveArg<0>(&target)));
     auto style =
-        Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
+        Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
     accessor_->setStrokeStyle(peer_, &style);
     EXPECT_EQ(target.get(), gradient.get());
 }
@@ -1684,7 +1684,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternStrTest, TestSize.Lev
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setStrokeStyle(peer_, &style);
 
@@ -1732,7 +1732,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternWHTest, TestSize.Leve
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setStrokeStyle(peer_, &style);
 

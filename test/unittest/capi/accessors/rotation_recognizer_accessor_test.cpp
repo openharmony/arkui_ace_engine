@@ -34,7 +34,7 @@ class RotationRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUIRo
  */
 HWTEST_F(RotationRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->ctor, nullptr);
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 

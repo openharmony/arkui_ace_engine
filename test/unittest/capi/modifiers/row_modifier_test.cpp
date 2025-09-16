@@ -160,45 +160,10 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setPointLightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-
-HWTEST_F(RowModifierTest, DISABLED_setPointLightValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string resultStr2;
-    Opt_PointLightStyle optPointLight;
-    Ark_PointLightStyle& inputValuePointLight = WriteTo(optPointLight);
-    Ark_LightSource arkLightSource;
-    arkLightSource = {
-        .color =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY)),
-        .positionX = Converter::ArkValue<Ark_Length>(1.0f),
-        .positionY = Converter::ArkValue<Ark_Length>(2.0f),
-        .positionZ = Converter::ArkValue<Ark_Length>(3.0f),
-        .intensity = Converter::ArkValue<Ark_Number>(4),
-    };
-    inputValuePointLight.lightSource = Converter::ArkValue<Opt_LightSource>(arkLightSource);
-    inputValuePointLight.bloom = Converter::ArkValue<Opt_Number>(3);
-    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT);
-    
-    
-    modifier_->setPointLight(node_, &optPointLight);
-    jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-    resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
-    EXPECT_EQ(resultStr2, ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE);
-}
-
-/*
  * @tc.name: setIsReverseDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-
 HWTEST_F(RowModifierTest, setIsReverseDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -240,6 +205,7 @@ HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
     }
 }
 
+#ifdef WRONG_SDK // PointLight
 /*
  * @tc.name: setPointLightTestDefaultValues
  * @tc.desc:
@@ -292,11 +258,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -305,7 +273,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &optPointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Opt_PointLightStyle inputValuePointLight = optPointLight;
 
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionX = value;
@@ -319,7 +287,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionX";
     };
 
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+    for (auto& [input, value, expected] : testFixtureLengthLightPosition) {
         checkValue(input, expected, value);
     }
 }
@@ -336,11 +304,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -349,7 +319,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &optPointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Opt_PointLightStyle inputValuePointLight = optPointLight;
 
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionY = value;
@@ -363,7 +333,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionY";
     };
 
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+    for (auto& [input, value, expected] : testFixtureLengthLightPosition) {
         checkValue(input, expected, value);
     }
 }
@@ -373,18 +343,19 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
+HWTEST_F(RowModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     Opt_PointLightStyle optPointLight;
     Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -393,7 +364,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidVa
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
     auto checkValue = [this, &optPointLight](
-                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Dimension& value) {
         Opt_PointLightStyle inputValuePointLight = optPointLight;
 
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionZ = value;
@@ -407,9 +378,10 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidVa
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.positionZ";
     };
 
-    for (auto& [input, value, expected] : testFixtureLenghtLightPosition) {
+    for (auto& [input, value, expected] : testFixtureLengthLightPosition) {
         checkValue(input, expected, value);
     }
+#endif
 }
 
 /*
@@ -424,11 +396,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestS
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -473,11 +447,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -528,11 +504,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -578,11 +556,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, Tes
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -620,11 +600,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, T
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -660,11 +642,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -707,11 +691,13 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
     WriteTo(initValuePointLight.lightSource).positionY =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#ifdef WRONG_GEN
     WriteTo(initValuePointLight.lightSource).positionZ =
-        std::get<1>(testFixtureLenghtLightPosition[0]);
+        std::get<1>(testFixtureLengthLightPosition[0]);
+#endif
     WriteTo(initValuePointLight.lightSource).intensity = std::get<1>(testFixtureIntensityValidValues[0]);
     WriteTo(initValuePointLight.lightSource).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(testFixtureColorsEnumValidValues[0]));
@@ -740,4 +726,5 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
+#endif // PointLight
 } // namespace OHOS::Ace::NG

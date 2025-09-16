@@ -34,7 +34,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const auto ATTRIBUTE_RESPONSE_REGION_NAME = "responseRegion";
 const auto ATTRIBUTE_CONSTRAINT_SIZE_NAME = "constraintSize";
-const auto ATTRIBUTE_TOUCHABLE_NAME = "touchable";
 const auto ATTRIBUTE_LAYOUT_WEIGHT_NAME = "layoutWeight";
 const auto ATTRIBUTE_HIT_TEST_MODE_NAME = "hitTestBehavior";
 const auto ATTRIBUTE_OPACITY_NAME = "opacity";
@@ -46,9 +45,7 @@ const auto ATTRIBUTE_DISPLAY_PRIORITY_NAME = "displayPriority";
 const auto ATTRIBUTE_Z_INDEX_NAME = "zIndex";
 const auto ATTRIBUTE_DIRECTION_NAME = "direction";
 const auto ATTRIBUTE_ALIGN_NAME = "align";
-#ifdef WRONG_GEN
 const auto ATTRIBUTE_POSITION_NAME = "position";
-#endif
 const auto ATTRIBUTE_ENABLED_NAME = "enabled";
 const auto ATTRIBUTE_ASPECT_RATIO_NAME = "aspectRatio";
 const auto ATTRIBUTE_SHADOW_NAME = "shadow";
@@ -394,7 +391,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnKeyEvent0, nullptr);
+    ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
@@ -421,7 +418,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
 
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(checkCallback, expectedResId);
     auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Void>(arkCallback);
-    modifier_->setOnKeyEvent0(node_, &optCallback);
+    modifier_->setOnKeyEvent(node_, &optCallback);
 
     auto callOnKeyEvent = focusHub->GetOnKeyCallback();
     ASSERT_NE(callOnKeyEvent, nullptr);
@@ -442,7 +439,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnKeyEvent1, nullptr);
+    ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
@@ -472,7 +469,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1
 
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
     auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Boolean>(arkCallback);
-    modifier_->setOnKeyEvent1(node_, &optCallback);
+    modifier_->setOnKeyPreIme(node_, &optCallback);
 
     auto callOnKeyEvent = focusHub->GetOnKeyCallback();
     ASSERT_NE(callOnKeyEvent, nullptr);
@@ -608,7 +605,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    ASSERT_NE(modifier_->setBackgroundBlurStyle, nullptr);
 
     const BlurStyleOption expected {
         .blurStyle = BlurStyle::BACKGROUND_REGULAR,
@@ -634,7 +631,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValu
             .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
         }
     );
-    modifier_->setBackgroundBlurStyle0(node_, &inputStyleValid, &inputOptionValid);
+    modifier_->setBackgroundBlurStyle(node_, &inputStyleValid, &inputOptionValid, nullptr);
 
     auto renderMock = GetMockRenderContext();
     ASSERT_NE(renderMock, nullptr);
@@ -791,10 +788,10 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
 {
     Ark_Union_Array_Rectangle_Rectangle inputValue;
     inputValue.selector = 1;
-    inputValue.value1.x = Converter::ArkValue<Opt_Length>(0.0_vp);
-    inputValue.value1.y = Converter::ArkValue<Opt_Length>(0.0_vp);
-    inputValue.value1.width = Converter::ArkValue<Opt_Length>(20.0_vp);
-    inputValue.value1.height = Converter::ArkValue<Opt_Length>(20.0_vp);
+    inputValue.value1.x = Converter::ArkValue<Opt_Length>("0.0vp");
+    inputValue.value1.y = Converter::ArkValue<Opt_Length>("0.0vp");
+    inputValue.value1.width = Converter::ArkValue<Opt_Length>("20.0vp");
+    inputValue.value1.height = Converter::ArkValue<Opt_Length>("20.0vp");
     auto optInputValue = Converter::ArkValue<Opt_Union_Array_Rectangle_Rectangle>(inputValue);
     modifier_->setResponseRegion(node_, &optInputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_RESPONSE_REGION_NAME);
@@ -806,15 +803,15 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
     inputValue.value0.array = new Ark_Rectangle[] {
         {
             Converter::ArkValue<Opt_Length>(),
-            Converter::ArkValue<Opt_Length>(20.0_vp),
-            Converter::ArkValue<Opt_Length>(50.0_vp),
+            Converter::ArkValue<Opt_Length>("20.0vp"),
+            Converter::ArkValue<Opt_Length>("50.0vp"),
             Converter::ArkValue<Opt_Length>(),
         },
         {
-            Converter::ArkValue<Opt_Length>(-100.0_vp),
-            Converter::ArkValue<Opt_Length>(-100.0_vp),
-            Converter::ArkValue<Opt_Length>(200.0_vp),
-            Converter::ArkValue<Opt_Length>(200.0_vp),
+            Converter::ArkValue<Opt_Length>("-100.0vp"),
+            Converter::ArkValue<Opt_Length>("-100.0vp"),
+            Converter::ArkValue<Opt_Length>("200.0vp"),
+            Converter::ArkValue<Opt_Length>("200.0vp"),
         }
     };
     optInputValue = Converter::ArkValue<Opt_Union_Array_Rectangle_Rectangle>(inputValue);
@@ -834,33 +831,15 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
 {
     Ark_ConstraintSizeOptions inputValue;
-    inputValue.minWidth = Converter::ArkValue<Opt_Length>(10.0_vp);
-    inputValue.maxWidth = Converter::ArkValue<Opt_Length>(370.0_vp);
-    inputValue.minHeight = Converter::ArkValue<Opt_Length>(10.0_vp);
-    inputValue.maxHeight = Converter::ArkValue<Opt_Length>(55.0_vp);
+    inputValue.minWidth = Converter::ArkValue<Opt_Length>("10.0vp");
+    inputValue.maxWidth = Converter::ArkValue<Opt_Length>("370.0vp");
+    inputValue.minHeight = Converter::ArkValue<Opt_Length>("10.0vp");
+    inputValue.maxHeight = Converter::ArkValue<Opt_Length>("55.0vp");
     auto optInputValue = Converter::ArkValue<Opt_ConstraintSizeOptions>(inputValue);
     modifier_->setConstraintSize(node_, &optInputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
     EXPECT_EQ(strResult, "{\"minWidth\":\"10.00vp\",\"minHeight\":\"10.00vp\","
                          "\"maxWidth\":\"370.00vp\",\"maxHeight\":\"55.00vp\"}");
-}
-
-/*
- * @tc.name: setTouchable
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setTouchable, TestSize.Level1)
-{
-    Opt_Boolean inputValue = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setTouchable(node_, &inputValue);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_TOUCHABLE_NAME);
-    EXPECT_EQ(strResult, "true");
-
-    inputValue = Converter::ArkValue<Opt_Boolean>(false);
-    modifier_->setTouchable(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TOUCHABLE_NAME);
-    EXPECT_EQ(strResult, "false");
 }
 
 /*
@@ -911,7 +890,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehavior, TestSize.Level1
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
 {
     auto inputValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(0.7001);
-    modifier_->setOpacity0(node_, &inputValue);
+    modifier_->setOpacity(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_OPACITY_NAME);
     EXPECT_EQ(strResult.substr(0, 3), "0.7");
 }
@@ -952,16 +931,10 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
             Ark_ColoringStrategy::ARK_COLORING_STRATEGY_PRIMARY), "#00000001" },
     };
 
-    ASSERT_NE(modifier_->setForegroundColor0, nullptr);
+    ASSERT_NE(modifier_->setForegroundColor, nullptr);
 
     for (const auto &[value, expected]: testPlan) {
-        modifier_->setForegroundColor0(node_, &value);
-        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
-        EXPECT_EQ(checkColor, expected);
-    }
-
-    for (const auto &[optValue, expected]: testPlan) {
-        modifier_->setForegroundColor1(node_, &optValue);
+        modifier_->setForegroundColor(node_, &value);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
@@ -1145,10 +1118,9 @@ HWTEST_F(CommonMethodModifierTest2, setAlign, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setPosition, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     auto position = Ark_Position {
-        .x = Converter::ArkValue<Opt_Length>(42.0_vp),
-        .y = Converter::ArkValue<Opt_Length>(12.0_px),
+        .x = Converter::ArkUnion<Opt_Length, Ark_String>(Converter::ArkValue<Ark_String>("42.0vp")),
+        .y = Converter::ArkUnion<Opt_Length, Ark_String>(Converter::ArkValue<Ark_String>("12.0px")),
     };
     auto optInputValue = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
     modifier_->setPosition(node_, &optInputValue);
@@ -1162,10 +1134,10 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setPosition, TestSize.Level1)
     EXPECT_EQ(strResult, "{\"x\":\"0.00px\",\"y\":\"13.00%\"}");
 
     auto edges = Ark_Edges {
-        .bottom = Converter::ArkValue<Opt_Length>(42.0_px),
-        .left = Converter::ArkValue<Opt_Length>(43.0_vp),
-        .right = Converter::ArkValue<Opt_Length>(44.0_fp),
-        .top = Converter::ArkValue<Opt_Length>("45.00%"),
+        .bottom = Converter::ArkValue<Opt_Dimension>("42.0px"),
+        .left = Converter::ArkValue<Opt_Dimension>("43.0vp"),
+        .right = Converter::ArkValue<Opt_Dimension>("44.0fp"),
+        .top = Converter::ArkValue<Opt_Dimension>("45.00%"),
     };
     optInputValue = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
     modifier_->setPosition(node_, &optInputValue);
@@ -1173,14 +1145,13 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setPosition, TestSize.Level1)
     EXPECT_EQ(strResult, "{\"x\":\"\",\"y\":\"\"}");
 
     edges = Ark_Edges {
-        .bottom = Converter::ArkValue<Opt_Length>(1.0_px),
-        .top = Converter::ArkValue<Opt_Length>("50.00%"),
+        .bottom = Converter::ArkValue<Opt_Dimension>("1.0px"),
+        .top = Converter::ArkValue<Opt_Dimension>("50.00%"),
     };
     optInputValue = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
     modifier_->setPosition(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_POSITION_NAME);
     EXPECT_EQ(strResult, "{\"x\":\"\",\"y\":\"\"}");
-#endif
 }
 
 /*
@@ -1235,7 +1206,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
         .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(14),
     };
     auto inputValue = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
-    modifier_->setShadow0(node_, &inputValue);
+    modifier_->setShadow(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_SHADOW_NAME);
     EXPECT_EQ(strResult, "{\"radius\":\"14.000000\",\"color\":\"#FF008000\",\"offsetX\":\"6.000000\","
                          "\"offsetY\":\"10.000000\",\"type\":\"1\",\"fill\":\"1\"}");
@@ -1258,7 +1229,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Le
             }),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
     });
-    modifier_->setBackgroundBlurStyle0(node_, &style, &options);
+    modifier_->setBackgroundBlurStyle(node_, &style, &options, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_BLUR_STYLE_NAME);
     EXPECT_EQ(strResult, "{\"value\":\"BlurStyle.COMPONENT_ULTRA_THIN\","
                          "\"options\":{\"colorMode\":\"ThemeColorMode.Dark\","
@@ -1286,22 +1257,22 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
     };
     auto optOptions = Converter::ArkValue<Opt_ForegroundBlurStyleOptions>(options);
-    modifier_->setForegroundBlurStyle0(node_, &style, &optOptions);
+    modifier_->setForegroundBlurStyle(node_, &style, &optOptions, nullptr);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_FOREGROUND_BLUR_STYLE_NAME);
     EXPECT_EQ(strResult, "");
 }
 
 /*
- * @tc.name: setBlur0Valid1
+ * @tc.name: setBlurValid1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlur0Valid1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurValid1, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     auto value = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
     Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(Ark_Empty());
-    modifier_->setBlur0(node_, &value, &optionOpt);
+    modifier_->setBlur(node_, &value, &optionOpt, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
     double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
@@ -1311,11 +1282,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Valid1, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlur0Valid2
+ * @tc.name: setBlurValid2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlur0Valid2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurValid2, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     int32_t grayCoeff1 = 7;
@@ -1328,7 +1299,7 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Valid2, TestSize.Level1)
         }
     };
     Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    modifier_->setBlur0(node_, &value, &optionOpt);
+    modifier_->setBlur(node_, &value, &optionOpt, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
     double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
@@ -1340,11 +1311,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Valid2, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlur0Invalid1
+ * @tc.name: setBlurInvalid1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurInvalid1, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     int32_t grayCoeff1 = GRAYSCALE_MIN - 1;
@@ -1357,7 +1328,7 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid1, TestSize.Level1)
         }
     };
     Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    modifier_->setBlur0(node_, &value, &optionOpt);
+    modifier_->setBlur(node_, &value, &optionOpt, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
     double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
@@ -1369,11 +1340,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid1, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlur0Invalid2
+ * @tc.name: setBlurInvalid2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurInvalid2, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     int32_t grayCoeff1 = GRAYSCALE_MAX + 1;
@@ -1386,119 +1357,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid2, TestSize.Level1)
         }
     };
     Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    modifier_->setBlur0(node_, &value, &optionOpt);
+    modifier_->setBlur(node_, &value, &optionOpt, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
     double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
     EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
-    auto renderMock = GetMockRenderContext();
-    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
-}
-
-/*
- * @tc.name: setBlur1Valid1
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest2, setBlur1Valid1, TestSize.Level1)
-{
-    double blurRadiusBefore = 3.1415;
-    auto value = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
-    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(Ark_Empty());
-    auto sysOpts = Converter::ArkValue<Opt_SystemAdaptiveOptions>();
-    modifier_->setBlur1(node_, &value, &optionOpt, &sysOpts);
-    auto json = GetJsonValue(node_);
-    ASSERT_NE(json, nullptr);
-    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
-    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
-    auto renderMock = GetMockRenderContext();
-    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 0);
-}
-
-/*
- * @tc.name: setBlur1Valid2
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest2, setBlur1Valid2, TestSize.Level1)
-{
-    double blurRadiusBefore = 3.1415;
-    int32_t grayCoeff1 = 7;
-    int32_t grayCoeff2 = 14;
-    auto value = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
-    Ark_BlurOptions options = {
-        .grayscale = {
-            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
-            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
-        }
-    };
-    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    auto sysOpts = Converter::ArkValue<Opt_SystemAdaptiveOptions>();
-    modifier_->setBlur1(node_, &value, &optionOpt, &sysOpts);
-    auto json = GetJsonValue(node_);
-    ASSERT_NE(json, nullptr);
-    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
-    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
-    auto renderMock = GetMockRenderContext();
-    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], grayCoeff1, FLT_EPSILON);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], grayCoeff2, FLT_EPSILON);
-}
-
-/*
- * @tc.name: setBlur1Invalid1
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid1, TestSize.Level1)
-{
-    int32_t grayCoeff1 = GRAYSCALE_MIN - 1;
-    int32_t grayCoeff2 = GRAYSCALE_MAX + 1;
-    auto value = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    Ark_BlurOptions options = {
-        .grayscale = {
-            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
-            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
-        }
-    };
-    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    auto sysOpts = Converter::ArkValue<Opt_SystemAdaptiveOptions>();
-    modifier_->setBlur1(node_, &value, &optionOpt, &sysOpts);
-    auto json = GetJsonValue(node_);
-    ASSERT_NE(json, nullptr);
-    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
-    EXPECT_NEAR(0, blurRadiusAfter, FLT_EPSILON);
-    auto renderMock = GetMockRenderContext();
-    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
-    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
-}
-
-/*
- * @tc.name: setBlur1Invalid2
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid2, TestSize.Level1)
-{
-    int32_t grayCoeff1 = GRAYSCALE_MAX + 1;
-    int32_t grayCoeff2 = GRAYSCALE_MIN - 1;
-    auto value = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    Ark_BlurOptions options = {
-        .grayscale = {
-            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
-            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
-        }
-    };
-    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
-    auto sysOpts = Converter::ArkValue<Opt_SystemAdaptiveOptions>();
-    modifier_->setBlur1(node_, &value, &optionOpt, &sysOpts);
-    auto json = GetJsonValue(node_);
-    ASSERT_NE(json, nullptr);
-    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
-    EXPECT_NEAR(0, blurRadiusAfter, FLT_EPSILON);
     auto renderMock = GetMockRenderContext();
     ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
     EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
@@ -1544,9 +1407,9 @@ HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
                 .selector = 0,
                 .value0 = {
                     .left = Converter::ArkValue<Opt_Length>("8.00%"),
-                    .top = Converter::ArkValue<Opt_Length>(9.0_fp),
-                    .right = Converter::ArkValue<Opt_Length>(8.0_px),
-                    .bottom = Converter::ArkValue<Opt_Length>(6.0_vp),
+                    .top = Converter::ArkValue<Opt_Length>("9.0fp"),
+                    .right = Converter::ArkValue<Opt_Length>("8.0px"),
+                    .bottom = Converter::ArkValue<Opt_Length>("6.0vp"),
                 }
             }
         },
@@ -1555,15 +1418,15 @@ HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
                 .selector = 0,
                 .value0 = {
                     .left = Converter::ArkValue<Opt_Length>("8.00%"),
-                    .top = Converter::ArkValue<Opt_Length>(4.0_fp),
-                    .right = Converter::ArkValue<Opt_Length>(3.0_px),
-                    .bottom = Converter::ArkValue<Opt_Length>(1.0_vp),
+                    .top = Converter::ArkValue<Opt_Length>("4.0fp"),
+                    .right = Converter::ArkValue<Opt_Length>("3.0px"),
+                    .bottom = Converter::ArkValue<Opt_Length>("1.0vp"),
                 }
             }
         },
-        .radius = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>(5.0_px) }},
+        .radius = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>("5.0px") }},
         .style = { .value = { .selector = 1, .value1 = ARK_BORDER_STYLE_DASHED }},
-        .width = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>(10.0_px) }}
+        .width = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>("10.0px") }}
     };
     auto inputValue = Converter::ArkValue<Opt_BorderOptions>(arkInputValue);
     modifier_->setBorder(node_, &inputValue);
@@ -1605,9 +1468,9 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
 {
     auto arkWidth = Ark_EdgeWidths {
         .left = Converter::ArkValue<Opt_Length>("8.00%"),
-        .top = Converter::ArkValue<Opt_Length>(4.0_fp),
-        .right = Converter::ArkValue<Opt_Length>(3.0_px),
-        .bottom = Converter::ArkValue<Opt_Length>(1.0_vp),
+        .top = Converter::ArkValue<Opt_Length>("4.0fp"),
+        .right = Converter::ArkValue<Opt_Length>("3.0px"),
+        .bottom = Converter::ArkValue<Opt_Length>("1.0vp"),
     };
     auto width = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_EdgeWidths>(arkWidth);
     modifier_->setBorderWidth(node_, &width);
@@ -1640,9 +1503,9 @@ HWTEST_F(CommonMethodModifierTest2, setBorderRadius, TestSize.Level1)
 {
     auto arkRadius =  Ark_BorderRadiuses {
         .topLeft = Converter::ArkValue<Opt_Length>("8.00%"),
-        .topRight = Converter::ArkValue<Opt_Length>(7.0_px),
-        .bottomRight = Converter::ArkValue<Opt_Length>(6.0_vp),
-        .bottomLeft = Converter::ArkValue<Opt_Length>(5.0_fp),
+        .topRight = Converter::ArkValue<Opt_Length>("7.0px"),
+        .bottomRight = Converter::ArkValue<Opt_Length>("6.0vp"),
+        .bottomLeft = Converter::ArkValue<Opt_Length>("5.0fp"),
     };
     auto radius = Converter::ArkUnion<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_BorderRadiuses>(
         arkRadius);
@@ -1661,10 +1524,10 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
 {
     auto arkImage = Ark_BorderImageOption {
         .fill =  Converter::ArkValue<Opt_Boolean>(true),
-        .outset = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>(3.0_fp),
+        .outset = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>("3.0fp"),
         .repeat = Converter::ArkValue<Opt_RepeatMode>(ARK_REPEAT_MODE_SPACE),
-        .slice = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>(4.0_vp),
-        .source = Converter::ArkUnion<Opt_Union_String_Resource_LinearGradienOptions, Ark_String>(
+        .slice = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>("4.0vp"),
+        .source = Converter::ArkUnion<Opt_Union_String_Resource_LinearGradientOptions, Ark_String>(
             "some_test_image.png"),
         .width = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_Length>("1.00%"),
     };
@@ -1696,7 +1559,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
         .colors = colorStepsHolder.ArkValue()
     };
     auto inputValue = Converter::ArkValue<Opt_LinearGradientOptions>(arkInputValue);
-    modifier_->setLinearGradient0(node_, &inputValue);
+    modifier_->setLinearGradient(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_GRADIENT_NAME);
     EXPECT_EQ(strResult, "{\"angle\":\"77.00vp\",\"direction\":\"GradientDirection.LeftBottom\","
                          "\"colors\":[[\"#FFFF0000\",\"0.100000\"],[\"#FF008000\",\"0.500000\"],"
@@ -1727,7 +1590,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
     };
     auto inputValue = Converter::ArkValue<Opt_SweepGradientOptions>(arkInputValue);
 
-    modifier_->setSweepGradient0(node_, &inputValue);
+    modifier_->setSweepGradient(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_SWEEP_GRADIENT_NAME);
     EXPECT_EQ(strResult, "{\"center\":[\"30.00%\",\"42.00%\"],\"start\":\"10.00vp\",\"end\":\"100.00%\","
                          "\"colors\":[[\"#FFFF0000\",\"0.100000\"],[\"#FF008000\",\"0.500000\"],[\"#FF0000FF\","
@@ -1751,7 +1614,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setValues, TestSize.Level1)
         Converter::ArkValue<Ark_Number>(grayCoeff2));
     auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
-    modifier_->setBackdropBlur0(node_, &radius, &options);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1777,7 +1640,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullRadiusValue, TestSize.L
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
-    modifier_->setBackdropBlur0(node_, nullptr, &options);
+    modifier_->setBackdropBlur(node_, nullptr, &options, nullptr);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1800,7 +1663,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setBadRadiusValue, TestSize.Le
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
 
-    modifier_->setBackdropBlur0(node_, &radius, &options);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1819,7 +1682,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullOption, TestSize.Level1
     double blurRadiusBefore = 3.1415;
     auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
 
-    modifier_->setBackdropBlur0(node_, &radius, nullptr);
+    modifier_->setBackdropBlur(node_, &radius, nullptr, nullptr);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1846,7 +1709,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level
     Ark_Number faultyNumber = Converter::ArkValue<Ark_Number>(0);
     auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
     auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur0(node_, &radius, &options);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1861,7 +1724,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level
     auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
     grayscale = Converter::ArkValue(goodNumber, faultyNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur0(node_, &radius, &options);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1875,7 +1738,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level
     renderMock->backdropBlurOption.grayscale.clear();
     grayscale = Converter::ArkValue(faultyNumber, goodNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur0(node_, &radius, &options);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1905,7 +1768,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setValues, TestSize.Level1)
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1933,7 +1796,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullRadiusValue, TestSize.L
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, nullptr, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, nullptr, &options, &sysOptions);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1958,7 +1821,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setBadRadiusValue, TestSize.Le
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1979,7 +1842,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullOption, TestSize.Level1
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, &radius, nullptr, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, nullptr, &sysOptions);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2009,7 +1872,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2024,7 +1887,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level
     auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
     grayscale = Converter::ArkValue(goodNumber, faultyNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2038,7 +1901,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level
     renderMock->backdropBlurOption.grayscale.clear();
     grayscale = Converter::ArkValue(faultyNumber, goodNumber);
     options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2062,7 +1925,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullSysOption, TestSize.Lev
     auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
     auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
     auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
-    modifier_->setBackdropBlur1(node_, &radius, &options, nullptr);
+    modifier_->setBackdropBlur(node_, &radius, &options, nullptr);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2089,7 +1952,7 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setSysOption, TestSize.Level1)
     auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
         .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
     });
-    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+    modifier_->setBackdropBlur(node_, &radius, &options, &sysOptions);
 
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -2244,14 +2107,14 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadBothValues, TestSize.Lev
 }
 
 static const std::vector<std::pair<Ark_Length, std::string>> LENGTH_TEST_PLAN_1 = {
-    { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
-    { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
-    { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
-    { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
-    { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
-    { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
-    { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
-    { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
+    { Converter::ArkValue<Ark_Length>("22.35px"), "22.35px" },
+    { Converter::ArkValue<Ark_Length>("-22.35px"), "-22.35px" },
+    { Converter::ArkValue<Ark_Length>("1.65vp"), "1.65vp" },
+    { Converter::ArkValue<Ark_Length>("-1.65vp"), "-1.65vp" },
+    { Converter::ArkValue<Ark_Length>("65.0fp"), "65.00fp" },
+    { Converter::ArkValue<Ark_Length>("-65.0fp"), "-65.00fp" },
+    { Converter::ArkValue<Ark_Length>("4.3fp"), "4.30fp" },
+    { Converter::ArkValue<Ark_Length>("-4.3fp"), "-4.30fp" },
     { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
 };
 /*
@@ -2277,11 +2140,11 @@ HWTEST_F(CommonMethodModifierTest2, setMarkAnchorTestValidValues, TestSize.Level
 }
 
 /*
- * @tc.name: setFocusScopeId0TestDefaultValues
+ * @tc.name: setFocusScopeIdTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeId0TestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -2331,7 +2194,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestFocusScopeIdValidValues, 
         Opt_Boolean inputValueIsGroup = initValueIsGroup;
 
         inputValueFocusScopeId = value;
-        modifier_->setFocusScopeId0(node_, &inputValueFocusScopeId, &inputValueIsGroup);
+        modifier_->setFocusScopeId(node_, &inputValueFocusScopeId, &inputValueIsGroup, nullptr);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2369,7 +2232,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestS
         Opt_Boolean inputValueIsGroup = initValueIsGroup;
 
         inputValueIsGroup = value;
-        modifier_->setFocusScopeId0(node_, &inputValueFocusScopeId, &inputValueIsGroup);
+        modifier_->setFocusScopeId(node_, &inputValueFocusScopeId, &inputValueIsGroup, nullptr);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_GROUP_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -2409,7 +2272,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsArrowStepOutVa
         Opt_Boolean inputValueArrowStepOut = initValueArrowStepOut;
 
         inputValueArrowStepOut = value;
-        modifier_->setFocusScopeId1(node_, &inputValueFocusScopeId, &inputValueIsGroup,
+        modifier_->setFocusScopeId(node_, &inputValueFocusScopeId, &inputValueIsGroup,
             &inputValueArrowStepOut);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME);

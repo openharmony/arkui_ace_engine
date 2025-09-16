@@ -53,6 +53,21 @@ enum ResID {
     RES_DATA_FOR_LENGTH_9_ID,
     RES_DATA_FOR_LENGTH_10_ID,
     RES_DATA_FOR_LENGTH_11_ID,
+    DIMENSIONS_RES_ANY_0_ID,
+    DIMENSIONS_RES_ANY_1_ID,
+    DIMENSIONS_RES_ANY_2_ID,
+    DIMENSIONS_RES_ANY_3_ID,
+    DIMENSIONS_RES_ANY_4_ID,
+    DIMENSIONS_RES_ANY_5_ID,
+    DIMENSIONS_RES_ANY_6_ID,
+    DIMENSIONS_RES_ANY_7_ID,
+    DIMENSIONS_RES_ANY_8_ID,
+    DIMENSIONS_RES_ANY_9_ID,
+    DIMENSIONS_RES_ANY_10_ID,
+    DIMENSIONS_RES_ANY_11_ID,
+    DIMENSIONS_RES_ANY_12_ID,
+    DIMENSIONS_RES_ANY_13_ID,
+    DIMENSIONS_RES_ANY_14_ID,
     DIMENSIONS_RES_NON_NEG_0_ID,
     DIMENSIONS_RES_NON_NEG_1_ID,
     DIMENSIONS_RES_NON_NEG_2_ID,
@@ -101,6 +116,18 @@ enum ResID {
     MIN_FONT_SCALE_RES_0_ID,
     MIN_FONT_SCALE_RES_1_ID,
     MIN_FONT_SCALE_RES_2_ID,
+    FONT_WEIGHT_RES_STRINGS_0_ID,
+    FONT_WEIGHT_RES_STRINGS_1_ID,
+    FONT_WEIGHT_RES_STRINGS_2_ID,
+    FONT_WEIGHT_RES_STRINGS_3_ID,
+    FONT_WEIGHT_RES_STRINGS_4_ID,
+    FONT_WEIGHT_RES_STRINGS_5_ID,
+    FONT_WEIGHT_RES_STRINGS_6_ID,
+    FONT_WEIGHT_RES_STRINGS_7_ID,
+    FONT_WEIGHT_RES_STRINGS_8_ID,
+    FONT_WEIGHT_RES_STRINGS_9_ID,
+    FONT_WEIGHT_RES_STRINGS_10_ID,
+    FONT_WEIGHT_RES_STRINGS_11_ID,
     SCROLLABLE_FRICTION_RES_0_ID,
     SCROLLABLE_FRICTION_RES_1_ID,
     SCROLLABLE_FRICTION_RES_2_ID,
@@ -122,6 +149,37 @@ enum ResID {
     FRICTION_RESOURCE_5_ID,
     FRICTION_RESOURCE_6_ID,
     FRICTION_RESOURCE_7_ID,
+    TIME_FORMAT_RES_0_ID,
+    TIME_FORMAT_RES_1_ID,
+    TIME_FORMAT_RES_2_ID,
+    TIME_FORMAT_RES_3_ID,
+    TIME_FORMAT_RES_4_ID,
+    TIME_FORMAT_RES_5_ID,
+    TIME_FORMAT_RES_6_ID,
+    TIME_FORMAT_RES_7_ID,
+    TIME_FORMAT_RES_8_ID,
+    TIME_FORMAT_RES_9_ID,
+    TIME_FORMAT_RES_10_ID,
+    TIME_FORMAT_RES_11_ID,
+    TIME_FORMAT_RES_12_ID,
+    TIME_FORMAT_RES_13_ID,
+    TIME_FORMAT_RES_14_ID,
+    TIME_FORMAT_RES_15_ID,
+    TIME_FORMAT_RES_16_ID,
+    TIME_FORMAT_RES_17_ID,
+    TIME_FORMAT_RES_18_ID,
+    TIME_FORMAT_RES_19_ID,
+    TIME_FORMAT_RES_20_ID,
+    TIME_FORMAT_RES_21_ID,
+    TIME_FORMAT_RES_22_ID,
+    TIME_FORMAT_RES_23_ID,
+    TIME_FORMAT_RES_24_ID,
+    TIME_FORMAT_RES_25_ID,
+    TIME_FORMAT_RES_26_ID,
+    TIME_FORMAT_RES_27_ID,
+    TIME_FORMAT_RES_28_ID,
+    TIME_FORMAT_RES_29_ID,
+    TIME_FORMAT_RES_30_ID,
     SHADOW_RADIUS_RES_0_ID,
     SHADOW_RADIUS_RES_1_ID,
     SHADOW_RADIUS_RES_2_ID,
@@ -164,6 +222,21 @@ inline constexpr auto RES_DATA_FOR_LENGTH_8_STR = "RES_DATA_FOR_LENGTH_8_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_9_STR = "RES_DATA_FOR_LENGTH_9_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_10_STR = "RES_DATA_FOR_LENGTH_10_STR";
 inline constexpr auto RES_DATA_FOR_LENGTH_11_STR = "RES_DATA_FOR_LENGTH_11_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_0_STR = "DIMENSIONS_RES_ANY_0_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_1_STR = "DIMENSIONS_RES_ANY_1_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_2_STR = "DIMENSIONS_RES_ANY_2_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_3_STR = "DIMENSIONS_RES_ANY_3_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_4_STR = "DIMENSIONS_RES_ANY_4_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_5_STR = "DIMENSIONS_RES_ANY_5_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_6_STR = "DIMENSIONS_RES_ANY_6_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_7_STR = "DIMENSIONS_RES_ANY_7_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_8_STR = "DIMENSIONS_RES_ANY_8_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_9_STR = "DIMENSIONS_RES_ANY_9_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_10_STR = "DIMENSIONS_RES_ANY_10_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_11_STR = "DIMENSIONS_RES_ANY_11_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_12_STR = "DIMENSIONS_RES_ANY_12_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_13_STR = "DIMENSIONS_RES_ANY_13_STR";
+inline constexpr auto DIMENSIONS_RES_ANY_14_STR = "DIMENSIONS_RES_ANY_14_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_0_STR = "DIMENSIONS_RES_NON_NEG_0_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_1_STR = "DIMENSIONS_RES_NON_NEG_1_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_2_STR = "DIMENSIONS_RES_NON_NEG_2_STR";
@@ -212,6 +285,18 @@ inline constexpr auto MAX_FONT_SCALE_RES_2_STR = "MAX_FONT_SCALE_RES_2_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_0_STR = "MIN_FONT_SCALE_RES_0_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_1_STR = "MIN_FONT_SCALE_RES_1_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_2_STR = "MIN_FONT_SCALE_RES_2_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_0_STR = "FONT_WEIGHT_RES_STRINGS_0_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_1_STR = "FONT_WEIGHT_RES_STRINGS_1_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_2_STR = "FONT_WEIGHT_RES_STRINGS_2_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_3_STR = "FONT_WEIGHT_RES_STRINGS_3_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_4_STR = "FONT_WEIGHT_RES_STRINGS_4_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_5_STR = "FONT_WEIGHT_RES_STRINGS_5_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_6_STR = "FONT_WEIGHT_RES_STRINGS_6_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_7_STR = "FONT_WEIGHT_RES_STRINGS_7_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_8_STR = "FONT_WEIGHT_RES_STRINGS_8_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_9_STR = "FONT_WEIGHT_RES_STRINGS_9_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_10_STR = "FONT_WEIGHT_RES_STRINGS_10_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_11_STR = "FONT_WEIGHT_RES_STRINGS_11_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_0_STR = "SCROLLABLE_FRICTION_RES_0_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_1_STR = "SCROLLABLE_FRICTION_RES_1_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_2_STR = "SCROLLABLE_FRICTION_RES_2_STR";
@@ -233,6 +318,37 @@ inline constexpr auto FRICTION_RESOURCE_4_STR = "FRICTION_RESOURCE_4_STR";
 inline constexpr auto FRICTION_RESOURCE_5_STR = "FRICTION_RESOURCE_5_STR";
 inline constexpr auto FRICTION_RESOURCE_6_STR = "FRICTION_RESOURCE_6_STR";
 inline constexpr auto FRICTION_RESOURCE_7_STR = "FRICTION_RESOURCE_7_STR";
+inline constexpr auto TIME_FORMAT_RES_0_STR = "TIME_FORMAT_RES_0_STR";
+inline constexpr auto TIME_FORMAT_RES_1_STR = "TIME_FORMAT_RES_1_STR";
+inline constexpr auto TIME_FORMAT_RES_2_STR = "TIME_FORMAT_RES_2_STR";
+inline constexpr auto TIME_FORMAT_RES_3_STR = "TIME_FORMAT_RES_3_STR";
+inline constexpr auto TIME_FORMAT_RES_4_STR = "TIME_FORMAT_RES_4_STR";
+inline constexpr auto TIME_FORMAT_RES_5_STR = "TIME_FORMAT_RES_5_STR";
+inline constexpr auto TIME_FORMAT_RES_6_STR = "TIME_FORMAT_RES_6_STR";
+inline constexpr auto TIME_FORMAT_RES_7_STR = "TIME_FORMAT_RES_7_STR";
+inline constexpr auto TIME_FORMAT_RES_8_STR = "TIME_FORMAT_RES_8_STR";
+inline constexpr auto TIME_FORMAT_RES_9_STR = "TIME_FORMAT_RES_9_STR";
+inline constexpr auto TIME_FORMAT_RES_10_STR = "TIME_FORMAT_RES_10_STR";
+inline constexpr auto TIME_FORMAT_RES_11_STR = "TIME_FORMAT_RES_11_STR";
+inline constexpr auto TIME_FORMAT_RES_12_STR = "TIME_FORMAT_RES_12_STR";
+inline constexpr auto TIME_FORMAT_RES_13_STR = "TIME_FORMAT_RES_13_STR";
+inline constexpr auto TIME_FORMAT_RES_14_STR = "TIME_FORMAT_RES_14_STR";
+inline constexpr auto TIME_FORMAT_RES_15_STR = "TIME_FORMAT_RES_15_STR";
+inline constexpr auto TIME_FORMAT_RES_16_STR = "TIME_FORMAT_RES_16_STR";
+inline constexpr auto TIME_FORMAT_RES_17_STR = "TIME_FORMAT_RES_17_STR";
+inline constexpr auto TIME_FORMAT_RES_18_STR = "TIME_FORMAT_RES_18_STR";
+inline constexpr auto TIME_FORMAT_RES_19_STR = "TIME_FORMAT_RES_19_STR";
+inline constexpr auto TIME_FORMAT_RES_20_STR = "TIME_FORMAT_RES_20_STR";
+inline constexpr auto TIME_FORMAT_RES_21_STR = "TIME_FORMAT_RES_21_STR";
+inline constexpr auto TIME_FORMAT_RES_22_STR = "TIME_FORMAT_RES_22_STR";
+inline constexpr auto TIME_FORMAT_RES_23_STR = "TIME_FORMAT_RES_23_STR";
+inline constexpr auto TIME_FORMAT_RES_24_STR = "TIME_FORMAT_RES_24_STR";
+inline constexpr auto TIME_FORMAT_RES_25_STR = "TIME_FORMAT_RES_25_STR";
+inline constexpr auto TIME_FORMAT_RES_26_STR = "TIME_FORMAT_RES_26_STR";
+inline constexpr auto TIME_FORMAT_RES_27_STR = "TIME_FORMAT_RES_27_STR";
+inline constexpr auto TIME_FORMAT_RES_28_STR = "TIME_FORMAT_RES_28_STR";
+inline constexpr auto TIME_FORMAT_RES_29_STR = "TIME_FORMAT_RES_29_STR";
+inline constexpr auto TIME_FORMAT_RES_30_STR = "TIME_FORMAT_RES_30_STR";
 inline constexpr auto SHADOW_RADIUS_RES_0_STR = "SHADOW_RADIUS_RES_0_STR";
 inline constexpr auto SHADOW_RADIUS_RES_1_STR = "SHADOW_RADIUS_RES_1_STR";
 inline constexpr auto SHADOW_RADIUS_RES_2_STR = "SHADOW_RADIUS_RES_2_STR";
@@ -363,39 +479,35 @@ extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::stri
     testFixtureImageRotateOrientationValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureImageRotateOrientationInvalidValues;
 
-// Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
+// Fixture 'LengthNonNegNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonNegNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonNegNonPctInvalidValues;
 
-// Fixture 'LengthPositivel' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositivelValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositivelInvalidValues;
+// Fixture 'LengthPositivel' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPositivelValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPositivelInvalidValues;
 
-// Fixture 'LengthPosNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPosNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPosNonPctInvalidValues;
+// Fixture 'LengthPosNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPosNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPosNonPctInvalidValues;
 
-// Fixture 'LengthNonPct' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonPctValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonPctInvalidValues;
+// Fixture 'LengthNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonPctInvalidValues;
 
-// Fixture 'LengthNonNeg' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidValues;
+// Fixture 'LengthNonNeg' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthNonNegInvalidValues;
 
-// Fixture 'LengthPositive' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositiveValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositiveInvalidValues;
+// Fixture 'LengthPositive' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthPositiveValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureLengthPositiveInvalidValues;
 
 // Fixture 'ResDataForLength' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDataForLengthValidValues;
 
-// Fixture 'LengthResPositive' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthResPositiveValidValues;
-extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthResPositiveInvalidValues;
-
-// Fixture 'LengthAny' for type 'Ark_Length'
-extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthAnyValidValues;
+// Fixture 'LengthAny' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureLengthAnyValidValues;
 
 // Fixture 'LengthMetricsNonNeg_' for type 'Ark_LengthMetrics'
 extern std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNeg_ValidValues;
@@ -422,9 +534,6 @@ extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;
 
-// Fixture 'FlexBasisValid' for type 'Ark_Number'
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlexBasisValidValidValues;
-
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonPercInvalidValues;
@@ -439,6 +548,9 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStr
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegNonPctInvalidValues;
+
+// Fixture 'DimensionsResAny' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResAnyValidValues;
 
 // Fixture 'DimensionsResNonNeg' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegValidValues;
@@ -476,8 +588,17 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;
 
-// Fixture 'NumberFloatPositive' for type 'Ark_Number'
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatPositiveValidValues;
+// Fixture 'StringFloatAnything' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringFloatAnythingValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureStringFloatAnythingInvalidValues;
+
+// Fixture 'NumberFloatNonNeg' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberFloatNonNegInvalidValues;
+
+// Fixture 'NumberFloatPos' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatPosValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberFloatPosInvalidValues;
 
 // Fixture 'NumberIntFloor' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberIntFloorValidValues;
@@ -522,6 +643,10 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNum
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontWeightStringsValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInvalidValues;
 
+// Fixture 'FontWeightResStrings' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFontWeightResStringsValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureFontWeightResStringsInvalidValues;
+
 // Fixture 'ScrollableFrictionNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureScrollableFrictionNumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNumInvalidValues;
@@ -562,9 +687,17 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues;
 
-// Fixture 'FontFeature' for type 'Ark_String'
-extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues;
-extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureInvalidValues;
+// Fixture 'TimeFormatRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureTimeFormatResValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureTimeFormatResInvalidValues;
+
+// Fixture 'FontFeatureNum' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureNumValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureNumInvalidValues;
+
+// Fixture 'FontFeatureStr' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureStrValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureStrInvalidValues;
 
 // Fixture 'TextInputCaretPosition' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues;
@@ -590,5 +723,8 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureTimerInputCou
 // Fixture 'TextTimerDateFormat' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextTimerDateFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTextTimerDateFormatInvalidValues;
+
+// Fixture 'ImageContent' for type 'Ark_ImageContent'
+extern std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureImageContentValidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

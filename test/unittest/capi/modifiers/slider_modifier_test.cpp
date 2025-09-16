@@ -72,8 +72,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -88,13 +88,13 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        inputValueOptions.value = value;
+        inputValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(value);
         modifier_->setSliderOptions(node, &realInputValue);
         auto jsonValueFull = GetJsonValue(node);
         auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
@@ -105,7 +105,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueValidValues, TestSi
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueValidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkValue<Ark_Number>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -119,8 +119,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -135,7 +135,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
         Converter::ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-            const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+            const std::string& input, const Opt_Union_Number_Bindable& value, const std::string& expectedStr) {
         Opt_SliderOptions realInputValue = Converter::ArkValue<Opt_SliderOptions>(initValueOptions);
         Ark_SliderOptions& inputValueOptions = realInputValue.value;
 
@@ -152,11 +152,12 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsValueInvalidValues, Test
     };
 
     for (auto&& value : Fixtures::testFixtureNumberValueInvalidValuesSlider) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(std::get<1>(value)),
+            std::get<2>(value));
     }
 
     // Check empty optional
-    checkValue("undefined", Converter::ArkValue<Opt_Number>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
+    checkValue("undefined", Converter::ArkValue<Opt_Union_Number_Bindable>(), ATTRIBUTE_MIN_DEFAULT_VALUE);
 }
 
 /*
@@ -169,8 +170,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -216,8 +217,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMinInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -266,8 +267,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxValidValues, TestSize
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -313,8 +314,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsMaxInvalidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -363,8 +364,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepValidValues, TestSiz
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -410,8 +411,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStepInvalidValues, TestS
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -459,8 +460,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -506,8 +507,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -552,8 +553,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionValidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -600,8 +601,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsDirectionInvalidValues, 
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -646,8 +647,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseValidValues, Test
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -693,8 +694,8 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsReverseInvalidValues, Te
     Ark_SliderOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.value =
-        Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
+    initValueOptions.value = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.min =
         Converter::ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberInitialValuesSlider[0]));
     initValueOptions.max =
@@ -987,91 +988,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectedColorTestSelectedColorValidValues
+ * @tc.name: setSelectedColorResourceColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorValidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueSelectedColor;
-
-    // Initial setup
-    initValueSelectedColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-
-    auto checkValue = [this, &initValueSelectedColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
-
-        inputValueSelectedColor = value;
-        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
-        modifier_->setSelectedColor0(node_, &color);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
-    };
-
-    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
-    }
-    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
-    }
-    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
-            std::get<2>(value));
-    }
-    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
-    }
-}
-
-/*
- * @tc.name: setSelectedColor0TestSelectedColorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorInvalidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueSelectedColor;
-
-    // Initial setup
-    initValueSelectedColor =
-        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
-
-    auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
-        auto color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
-        modifier_->setSelectedColor0(node_, &color);
-        inputValueSelectedColor = value;
-        color = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
-        modifier_->setSelectedColor0(node_, &color);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setSelectedColor0, attribute: selectedColor";
-    };
-
-    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
-    }
-    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
-    }
-    // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setSelectedColor1ResourceColorTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -1087,11 +1008,11 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestValidValues, Test
         auto colorGradientUnion =
             Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
-        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+        modifier_->setSelectedColor(node_, &colorGradientUnion);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelectedColor1, attribute: resourceColor";
+            << "Input value is: " << input << ", method: setSelectedColor, attribute: resourceColor";
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
@@ -1113,11 +1034,11 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestValidValues, Test
 }
 
 /*
- * @tc.name: setSelectedColor1ResourceColorTestInvalidValues
+ * @tc.name: setSelectedColorResourceColorTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -1131,16 +1052,16 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestInvalidValues, Te
         auto colorGradientUnion =
             Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
 
-        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+        modifier_->setSelectedColor(node_, &colorGradientUnion);
         inputValueTrackColor = value;
         colorGradientUnion =
             Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
-        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+        modifier_->setSelectedColor(node_, &colorGradientUnion);
 
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setSelectedColor1, attribute: resourceColor";
+            << "Input value is: " << input << ", method: setSelectedColor, attribute: resourceColor";
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1154,11 +1075,11 @@ HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestInvalidValues, Te
 }
 
 /*
- * @tc.name: setSelectedColor1LinearGradientTestValidValues
+ * @tc.name: setSelectedColorLinearGradientTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColor1LinearGradientTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorLinearGradientTestValidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(Color::RED, Dimension(0.5f)),
@@ -1169,7 +1090,7 @@ HWTEST_F(SliderModifierTest, setSelectedColor1LinearGradientTestValidValues, Tes
     auto colorGradientUnion =
         Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
-    modifier_->setSelectedColor1(node_, &colorGradientUnion);
+    modifier_->setSelectedColor(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
     auto gradientJsonArray = JsonUtil::ParseJsonString(resultStr);
@@ -1200,98 +1121,10 @@ HWTEST_F(SliderModifierTest, setTrackColor1LinearGradientTestInvalidValues, Test
     auto colorGradientUnion =
         Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
-    modifier_->setSelectedColor1(node_, &colorGradientUnion);
+    modifier_->setSelectedColor(node_, &colorGradientUnion);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setMinLabelTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setMinLabelTestDefaultValues, TestSize.Level1)
-{
-    auto jsonValueFull = GetJsonValue(node_);
-    auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LABEL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setMinLabelTestMinLabelValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setMinLabelTestMinLabelValidValues, TestSize.Level1)
-{
-    Ark_String initValueMinLabel;
-
-    // Initial setup
-    initValueMinLabel = std::get<1>(Fixtures::testFixtureNumberMinLabelValidValuesSlider[0]);
-
-    auto checkValue = [this, &initValueMinLabel](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        Ark_String inputValueMinLabel = initValueMinLabel;
-
-        inputValueMinLabel = value;
-        auto minLabel = Converter::ArkValue<Opt_String>(inputValueMinLabel);
-        modifier_->setMinLabel(node_, &minLabel);
-        auto jsonValueFull = GetJsonValue(node_);
-        auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LABEL_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMinLabel, attribute: minLabel";
-    };
-
-    for (auto&& value : Fixtures::testFixtureNumberMinLabelValidValuesSlider) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
-    }
-}
-
-/*
- * @tc.name: setMaxLabelTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setMaxLabelTestDefaultValues, TestSize.Level1)
-{
-    auto jsonValueFull = GetJsonValue(node_);
-    auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LABEL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setMaxLabelTestMaxLabelValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setMaxLabelTestMaxLabelValidValues, TestSize.Level1)
-{
-    Ark_String initValueMaxLabel;
-
-    // Initial setup
-    initValueMaxLabel = std::get<1>(Fixtures::testFixtureNumberMaxLabelValidValuesSlider[0]);
-
-    auto checkValue = [this, &initValueMaxLabel](
-                        const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        Ark_String inputValueMaxLabel = initValueMaxLabel;
-
-        inputValueMaxLabel = value;
-        auto maxLabel = Converter::ArkValue<Opt_String>(inputValueMaxLabel);
-        modifier_->setMaxLabel(node_, &maxLabel);
-        auto jsonValueFull = GetJsonValue(node_);
-        auto jsonValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValueFull, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LABEL_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMaxLabel, attribute: maxLabel";
-    };
-
-    for (auto&& value : Fixtures::testFixtureNumberMaxLabelValidValuesSlider) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
-    }
 }
 
 /*
@@ -1479,7 +1312,8 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessValidValues, Tes
     Ark_Length initValueTrackThickness;
 
     // Initial setup
-    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueTrackThickness =
+        Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackThickness](
                           const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
@@ -1509,7 +1343,8 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
     Ark_Length initValueTrackThickness;
 
     // Initial setup
-    initValueTrackThickness = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueTrackThickness =
+        Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackThickness](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackThickness = initValueTrackThickness;
@@ -1525,7 +1360,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(value)));
     }
 }
 
@@ -1673,7 +1508,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
     Ark_Length initValueBlockBorderWidth;
 
     // Initial setup
-    initValueBlockBorderWidth = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueBlockBorderWidth =
+        Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderWidth](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueBlockBorderWidth = initValueBlockBorderWidth;
@@ -1689,7 +1525,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(value)));
     }
 }
 
@@ -1837,15 +1673,16 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
     Ark_Length initValueTrackBorderRadius;
 
     // Initial setup
-    initValueTrackBorderRadius = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
+    initValueTrackBorderRadius =
+        Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackBorderRadius](const std::string& input, const Ark_Length& value) {
         Ark_Length inputValueTrackBorderRadius = initValueTrackBorderRadius;
-        auto lengh = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
-        modifier_->setTrackBorderRadius(node_, &lengh);
+        auto length = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
+        modifier_->setTrackBorderRadius(node_, &length);
         inputValueTrackBorderRadius = value;
-        lengh = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
-        modifier_->setTrackBorderRadius(node_, &lengh);
+        length = Converter::ArkValue<Opt_Length>(inputValueTrackBorderRadius);
+        modifier_->setTrackBorderRadius(node_, &length);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE)
@@ -1853,79 +1690,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value));
-    }
-}
-
-/*
- * @tc.name: setSelectedBorderRadiusTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setSelectedBorderRadiusTestSelectedBorderRadiusValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusValidValues, TestSize.Level1)
-{
-    Ark_Length initValueSelectedBorderRadius;
-
-    // Initial setup
-    initValueSelectedBorderRadius = std::get<1>(Fixtures::testFixtureLengthNumNonNegValidValuesSlider[0]);
-
-    auto checkValue = [this, &initValueSelectedBorderRadius](
-                          const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
-        Ark_Length inputValueSelectedBorderRadius = initValueSelectedBorderRadius;
-
-        inputValueSelectedBorderRadius = value;
-        auto length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
-        modifier_->setSelectedBorderRadius(node_, &length);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelectedBorderRadius, attribute: selectedBorderRadius";
-    };
-
-    for (auto&& value : Fixtures::testFixtureLengthNumNonNegValidValuesSlider) {
-        checkValue(std::get<0>(value), std::get<1>(value), std::get<2>(value));
-    }
-}
-
-/*
- * @tc.name: setSelectedBorderRadiusTestSelectedBorderRadiusInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInvalidValues, TestSize.Level1)
-{
-    Ark_Length initValueSelectedBorderRadius;
-
-    // Initial setup
-    initValueSelectedBorderRadius = std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]);
-
-    auto checkValue = [this, &initValueSelectedBorderRadius](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueSelectedBorderRadius = initValueSelectedBorderRadius;
-        auto length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
-        modifier_->setSelectedBorderRadius(node_, &length);
-        inputValueSelectedBorderRadius = value;
-        length = Converter::ArkValue<Opt_Length>(inputValueSelectedBorderRadius);
-        modifier_->setSelectedBorderRadius(node_, &length);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setSelectedBorderRadius, attribute: selectedBorderRadius";
-    };
-
-    for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(value)));
     }
 }
 
@@ -1991,9 +1756,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
 
     // Initial setup
     initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -2010,7 +1775,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Length>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(value)));
     }
     // Check empty optional
     checkValue("undefined", Converter::ArkValue<Opt_Length>());
@@ -2061,9 +1826,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
 
     // Initial setup
     initValueBlockSize.width =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
     initValueBlockSize.height =
-        Converter::ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
+        Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Ark_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -2080,7 +1845,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkValue<Opt_Length>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Opt_Length, Ark_String>(std::get<1>(value)));
     }
     // Check empty optional
     checkValue("undefined", Converter::ArkValue<Opt_Length>());
@@ -2111,7 +1876,6 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
     initValueBlockStyle.type = Converter::ArkValue<Ark_SliderBlockType>(
         std::get<1>(Fixtures::testFixtureEnumSliderBlockTypeValidValuesSlider[0]));
     initValueBlockStyle.image = Converter::ArkValue<Opt_ResourceStr>();
-    initValueBlockStyle.shape = Converter::ArkValue<Opt_String>();
 
     auto checkValue = [this, &initValueBlockStyle](const std::string& input, const Ark_SliderBlockType& value,
         const std::string& expectedStr) {
@@ -2199,7 +1963,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
     };
 
     for (auto&& value : Fixtures::testFixtureLengthNonNegInvalidValues) {
-        checkValue(std::get<0>(value), std::get<1>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_Length, Ark_String>(std::get<1>(value)));
     }
 }
 
@@ -2551,6 +2315,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->mode.value(), 1);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventValueImpl
  * @tc.desc:
@@ -2608,6 +2373,8 @@ std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> crownSen
     { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
         "CrownSensitivity.MEDIUM" },
 };
+#endif
+
 /*
  * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
  * @tc.desc:

@@ -184,21 +184,21 @@ const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<ImageFit>>
 };
 
 const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues = {
-    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), 123.0_vp },
-    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), 0.0_vp },
-    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), 1.23_vp },
-    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), 123.0_fp },
-    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), 0.0_fp },
-    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), 1.23_fp },
-    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), 123.0_px },
-    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), 0.0_px },
-    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), 1.23_px },
-    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp), -2.3_vp },
-    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5_fp },
-    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px), -5.6_px },
-    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), 0.5_pct },
-    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct), 0.0_pct },
-    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), -0.8_pct }
+    { "123.0vp", Converter::ArkValue<Ark_Length>("123.0vp"), 123.0_vp },
+    { "0.0vp", Converter::ArkValue<Ark_Length>("0.0vp"), 0.0_vp },
+    { "1.23vp", Converter::ArkValue<Ark_Length>("1.23vp"), 1.23_vp },
+    { "123.0fp", Converter::ArkValue<Ark_Length>("123.0fp"), 123.0_fp },
+    { "0.0fp", Converter::ArkValue<Ark_Length>("0.0fp"), 0.0_fp },
+    { "1.23fp", Converter::ArkValue<Ark_Length>("1.23fp"), 1.23_fp },
+    { "123.0px", Converter::ArkValue<Ark_Length>("123.0px"), 123.0_px },
+    { "0.0px", Converter::ArkValue<Ark_Length>("0.0px"), 0.0_px },
+    { "1.23px", Converter::ArkValue<Ark_Length>("1.23px"), 1.23_px },
+    { "-2.3vp", Converter::ArkValue<Ark_Length>("-2.3vp"), -2.3_vp },
+    { "-4.5fp", Converter::ArkValue<Ark_Length>("-4.5fp"), -4.5_fp },
+    { "-5.6px", Converter::ArkValue<Ark_Length>("-5.6px"), -5.6_px },
+    { "50%", Converter::ArkValue<Ark_Length>("50%"), 0.5_pct },
+    { "0%", Converter::ArkValue<Ark_Length>("0%"), 0.0_pct },
+    { "-80%", Converter::ArkValue<Ark_Length>("-80%"), -0.8_pct }
 };
 
 const std::vector<std::tuple<int64_t, std::string, ResRawValue>> resourceInitTable = {
@@ -254,21 +254,21 @@ const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegative
 };
 
 const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLengthAnyValidValues = {
-    { "123.0_vp", 123.0_vp, Converter::ArkValue<Ark_Length>(123.0_vp) },
-    { "0.0_vp", 0.0_vp, Converter::ArkValue<Ark_Length>(0.0_vp) },
-    { "1.23_vp", 1.23_vp, Converter::ArkValue<Ark_Length>(1.23_vp) },
-    { "123.0_fp", 123.0_fp, Converter::ArkValue<Ark_Length>(123.0_fp) },
-    { "0.0_fp", 0.0_fp, Converter::ArkValue<Ark_Length>(0.0_fp) },
-    { "1.23_fp", 1.23_fp, Converter::ArkValue<Ark_Length>(1.23_fp) },
-    { "123.0_px", 123.0_px, Converter::ArkValue<Ark_Length>(123.0_px) },
-    { "0.0_px", 0.0_px, Converter::ArkValue<Ark_Length>(0.0_px) },
-    { "1.23_px", 1.23_px, Converter::ArkValue<Ark_Length>(1.23_px) },
-    { "-2.3_vp", -2.3_vp, Converter::ArkValue<Ark_Length>(-2.3_vp) },
-    { "-4.5_fp", -4.5_fp, Converter::ArkValue<Ark_Length>(-4.5_fp) },
-    { "-5.6_px", -5.6_px, Converter::ArkValue<Ark_Length>(-5.6_px) },
-    { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>(0.5_pct) },
-    { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>(0.0_pct) },
-    { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>(-0.8_pct) },
+    { "123.0_vp", 123.0_vp, Converter::ArkValue<Ark_Length>("123.0vp") },
+    { "0.0_vp", 0.0_vp, Converter::ArkValue<Ark_Length>("0.0vp") },
+    { "1.23_vp", 1.23_vp, Converter::ArkValue<Ark_Length>("1.23vp") },
+    { "123.0_fp", 123.0_fp, Converter::ArkValue<Ark_Length>("123.0fp") },
+    { "0.0_fp", 0.0_fp, Converter::ArkValue<Ark_Length>("0.0fp") },
+    { "1.23_fp", 1.23_fp, Converter::ArkValue<Ark_Length>("1.23fp") },
+    { "123.0_px", 123.0_px, Converter::ArkValue<Ark_Length>("123.0px") },
+    { "0.0_px", 0.0_px, Converter::ArkValue<Ark_Length>("0.0px") },
+    { "1.23_px", 1.23_px, Converter::ArkValue<Ark_Length>("1.23px") },
+    { "-2.3_vp", -2.3_vp, Converter::ArkValue<Ark_Length>("-2.3vp") },
+    { "-4.5_fp", -4.5_fp, Converter::ArkValue<Ark_Length>("-4.5fp") },
+    { "-5.6_px", -5.6_px, Converter::ArkValue<Ark_Length>("-5.6px") },
+    { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>("50%") },
+    { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>("0%") },
+    { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>("-80%") },
 };
 
 // Fixture 'String' for type 'Ark_String'
@@ -290,8 +290,8 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensi
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues = {
     { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
-    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0_fp"), "0.00fp" },
-    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23_fp"), "1.23fp" },
+    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0fp"), "0.00fp" },
+    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
 };
 
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'

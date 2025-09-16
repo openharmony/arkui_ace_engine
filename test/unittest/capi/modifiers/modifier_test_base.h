@@ -23,11 +23,23 @@
 #include "arkoala_api_generated.h"
 
 #include "core/interfaces/native/utility/peer_utils.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+namespace OHOS::Ace {
+inline void PrintTo(const Dimension& dim, std::ostream* os)
+{
+    *os << dim.ToString();
+}
+inline void PrintTo(const CalcDimension& dim, std::ostream* os)
+{
+    *os << dim.ToString();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 
@@ -112,6 +124,7 @@ public:
         themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
+        g_isResourceDecoupling = false;
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
@@ -223,7 +236,8 @@ protected:
         = fullAPI_ ? fullAPI_->getNodeModifiers() : nullptr;
 
     const Modifier *modifier_
-        = nodeModifiers_ && GetModifierFunc ? (nodeModifiers_->*GetModifierFunc)() : nullptr;
+        = nodeModifiers_ && GetModifierFunc && nodeModifiers_->*GetModifierFunc ?
+            (nodeModifiers_->*GetModifierFunc)() : nullptr;
 
     const GENERATED_ArkUICommonMethodModifier *commonModifier_
         = nodeModifiers_ ? (nodeModifiers_->getCommonMethodModifier)() : nullptr;

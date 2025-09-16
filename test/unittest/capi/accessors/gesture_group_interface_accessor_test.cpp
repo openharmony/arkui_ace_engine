@@ -55,7 +55,7 @@ public:
     {
         Ark_GestureMode mode = ARK_GESTURE_MODE_SEQUENCE;
         Array_GestureType gesture{};
-        return accessor_->ctor(mode, &gesture);
+        return accessor_->construct(mode, &gesture);
     }
     void SetUp(void) override
     {
@@ -73,7 +73,7 @@ public:
  */
 HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 {
-    auto peer = accessor_->ctor(static_cast<Ark_GestureMode>(100), nullptr);
+    auto peer = accessor_->construct(static_cast<Ark_GestureMode>(100), nullptr);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->gesture, nullptr);
     auto mode = peer->gesture->GetMode();
@@ -97,7 +97,7 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestMode, TestSize.Level1)
     };
 
     for (auto& value : TEST_PLAN) {
-        auto peer = accessor_->ctor(value.first, nullptr);
+        auto peer = accessor_->construct(value.first, nullptr);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto mode = peer->gesture->GetMode();
@@ -119,19 +119,19 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestGestures, TestSize.Level1)
     std::vector<Ark_GestureType> vectorData;
     std::vector<GestureTypeName> vectorGestureType;
 
-    auto tapGestureInterfacePeer = fullAPI_->getAccessors()->getTapGestureInterfaceAccessor()->ctor(nullptr);
-    vectorData.push_back({ .selector = 0, .value0 = tapGestureInterfacePeer });
+    auto tapGestureInterfacePeer = fullAPI_->getAccessors()->getTapGestureInterfaceAccessor()->construct(nullptr);
+    vectorData.push_back(Converter::ArkUnion<Ark_GestureType, Ark_Gesture>(tapGestureInterfacePeer));
     vectorGestureType.push_back(GestureTypeName::TAP_GESTURE);
 
     auto longPressGestureInterfacePeer =
-        fullAPI_->getAccessors()->getLongPressGestureInterfaceAccessor()->ctor(nullptr);
-    vectorData.push_back({ .selector = 1, .value1 = longPressGestureInterfacePeer });
+        fullAPI_->getAccessors()->getLongPressGestureInterfaceAccessor()->construct(nullptr);
+    vectorData.push_back(Converter::ArkUnion<Ark_GestureType, Ark_Gesture>(longPressGestureInterfacePeer));
     vectorGestureType.push_back(GestureTypeName::LONG_PRESS_GESTURE);
 
     Converter::ArkArrayHolder<Array_GestureType> vectorHolder(vectorData);
     Array_GestureType gestureArray = vectorHolder.ArkValue();
 
-    auto peer = accessor_->ctor(someMode, &gestureArray);
+    auto peer = accessor_->construct(someMode, &gestureArray);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->gesture, nullptr);
     auto mode = peer->gesture->GetMode();

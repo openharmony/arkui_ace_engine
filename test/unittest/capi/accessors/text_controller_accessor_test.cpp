@@ -118,7 +118,7 @@ HWTEST_F(TextControllerAccessorTest, setStyledStringTest, TestSize.Level1)
 
     auto styledStringAccessor = GeneratedModifier::GetStyledStringAccessor();
     ASSERT_NE(styledStringAccessor, nullptr);
-    Ark_StyledString styledString = styledStringAccessor->ctor(&value, &styles);
+    Ark_StyledString styledString = styledStringAccessor->construct(&value, &styles);
     accessor_->setStyledString(peer_, styledString);
     EXPECT_EQ(g_actualSpanString, expectedStrValue);
     styledStringAccessor->destroyPeer(styledString);

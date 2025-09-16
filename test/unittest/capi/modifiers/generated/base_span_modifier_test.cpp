@@ -20,6 +20,8 @@
 #include "test_fixtures.h"
 #include "type_helpers.h"
 
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -40,8 +42,6 @@ const auto ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME = "bottom
 const auto ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME = "bottomRight";
 const auto ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_BASELINE_OFFSET_NAME = "baselineOffset";
-const auto ATTRIBUTE_BASELINE_OFFSET_DEFAULT_VALUE = "0.00px";
 } // namespace
 
 class BaseSpanModifierTest : public ModifierTestBase<GENERATED_ArkUIBaseSpanModifier,
@@ -55,6 +55,12 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
+    }
+    void SetUp() override
+    {
+        ModifierTestBase::SetUp();
+        static auto pattern = AceType::MakeRefPtr<TextPattern>();
+        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(pattern);
     }
 };
 
@@ -100,25 +106,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestDefaultValues, TestSize
  */
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColorValidValues, TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
-        inputValueTextBackgroundStyle.color = value;
+        WriteTo(inputValueTextBackgroundStyle).color = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -150,25 +156,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColo
  */
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColorInvalidValues, TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
-        inputValueTextBackgroundStyle.color = value;
+        WriteTo(inputValueTextBackgroundStyle).color = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -199,25 +205,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColo
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftValidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topLeft = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -231,8 +237,14 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
             << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topLeft";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -244,25 +256,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftInvalidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](const std::string& input, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topLeft = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -277,8 +289,16 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
 }
@@ -291,25 +311,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightValidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topRight = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -323,8 +343,14 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
             << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topRight";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -336,25 +362,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightInvalidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](const std::string& input, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topRight = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -369,8 +395,16 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
 }
@@ -383,25 +417,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftValidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomLeft = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -415,8 +449,14 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
             << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomLeft";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -428,25 +468,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftInvalidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](const std::string& input, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomLeft = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -461,8 +501,16 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
 }
@@ -475,25 +523,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightValidValues,
     TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomRight = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -507,8 +555,14 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
             << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomRight";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Length>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
 
@@ -520,25 +574,25 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 HWTEST_F(BaseSpanModifierTest,
     setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightInvalidValues, TestSize.Level1)
 {
-    Ark_TextBackgroundStyle initValueTextBackgroundStyle;
+    Opt_TextBackgroundStyle initValueTextBackgroundStyle;
 
     // Initial setup
-    initValueTextBackgroundStyle.color =
+    WriteTo(initValueTextBackgroundStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).topRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomLeft =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_BorderRadiuses>(WriteTo(initValueTextBackgroundStyle.radius)).bottomRight =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomLeft =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+    WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).bottomRight =
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](const std::string& input, const Opt_Length& value) {
-        Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
+        Opt_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
-        WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomRight = value;
+        WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultTextBackgroundStyle =
@@ -553,33 +607,17 @@ HWTEST_F(BaseSpanModifierTest,
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
-}
-
-/*
- * @tc.name: setBaselineOffsetTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BASELINE_OFFSET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BASELINE_OFFSET_DEFAULT_VALUE) << "Default value for attribute 'baselineOffset'";
-}
-
-/*
- * @tc.name: setBaselineOffsetTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 } // namespace OHOS::Ace::NG

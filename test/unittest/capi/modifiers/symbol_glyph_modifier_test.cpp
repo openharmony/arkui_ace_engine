@@ -525,39 +525,19 @@ std::vector<std::tuple<std::string, OHOS::Ace::ScopeType, std::string>> testSymb
     { "ScopeType::WHOLE", OHOS::Ace::ScopeType::WHOLE, "1" },
 };
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleScope, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestScaleScope, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(value, CommonSubType::DOWN));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect0(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect0, attribute: symbolEffect.scope";
-    };
-
-    for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectScope) {
-        checkValue(input, value, expected);
-    }
-}
-
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect1TestScaleScope, TestSize.Level1)
-{
-    auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
-        const std::string& expectedStr) {
-        auto peer = static_cast<SymbolEffectPeer*>(
-            PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(value, CommonSubType::DOWN));
-        auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect1(node_, &arkPeer, nullptr);
-        auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
-        auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect1, attribute: symbolEffect.scope";
+            << "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.scope";
     };
 
     for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectScope) {
@@ -570,19 +550,19 @@ std::vector<std::tuple<std::string, CommonSubType, std::string>> testSymbolGlyph
     { "CommonSubType::UP", CommonSubType::UP, "1" },
 };
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleDirection, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestScaleDirection, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const CommonSubType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(OHOS::Ace::ScopeType::LAYER, value));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect0(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "commonSubType");
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect0, attribute: symbolEffect.direction";
+            << "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.direction";
     };
 
     for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectDirection) {
@@ -590,59 +570,19 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleDirection, TestSize.L
     }
 }
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect1TestScaleDirection, TestSize.Level1)
-{
-    auto checkValue = [this](const std::string& input, const CommonSubType& value,
-        const std::string& expectedStr) {
-        auto peer = static_cast<SymbolEffectPeer*>(
-            PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(OHOS::Ace::ScopeType::LAYER, value));
-        auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect1(node_, &arkPeer, nullptr);
-        auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
-        auto resultStr = GetAttrValue<std::string>(symbolEffect, "commonSubType");
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect1, attribute: symbolEffect.direction";
-    };
-
-    for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectDirection) {
-        checkValue(input, value, expected);
-    }
-}
-
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestReplaceScope, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect0(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
         EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect0, attribute: symbolEffect.scope";
-    };
-
-    for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectScope) {
-        checkValue(input, value, expected);
-    }
-}
-
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect1TestReplaceScope, TestSize.Level1)
-{
-    auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
-        const std::string& expectedStr) {
-        auto peer = static_cast<SymbolEffectPeer*>(
-            PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value));
-        auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect1(node_, &arkPeer, nullptr);
-        auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
-        auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSymbolEffect1, attribute: symbolEffect.scope";
+            << "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.scope";
     };
 
     for (auto& [input, value, expected] : testSymbolGlyphSymbolEffectScope) {

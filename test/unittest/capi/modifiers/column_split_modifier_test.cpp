@@ -33,10 +33,10 @@ namespace  {
     const auto ATTRIBUTE_DIVIDER_END_MARGIN = "endMargin";
     const auto ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE = "";
 
-    static const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>("-1234.00px");
-    static const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
-    static const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
-    static const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>("2147483648.00px");
+    static const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Dimension>("-1234.00px");
+    static const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Dimension>("0.00px");
+    static const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Dimension>("1234.00px");
+    static const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Dimension>("2147483648.00px");
 
     static const std::string EXPECTED_NUM_NEG_PX("-1234.00px");
     static const std::string EXPECTED_NUM_VILID_PX("1234.00px");
@@ -47,7 +47,7 @@ namespace  {
 class ColumnSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIColumnSplitModifier,
     &GENERATED_ArkUINodeModifiers::getColumnSplitModifier, GENERATED_ARKUI_COLUMN_SPLIT> {
     public:
-    void checkDividerLengthAttr(std::vector<std::tuple<std::string, Opt_Length, std::string>> styleArray,
+    void checkDividerLengthAttr(std::vector<std::tuple<std::string, Opt_Dimension, std::string>> styleArray,
         std::string attribute)
     {
         std::unique_ptr<JsonValue> jsonValue;
@@ -128,7 +128,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDefaultValues, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> dividerStartMarginValidValues = {
     {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
     {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
@@ -136,7 +136,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStar
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> dividerEndMarginValidValues = {
     {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
     {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},

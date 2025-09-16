@@ -105,6 +105,13 @@ const std::vector<CalendarAlignTest> CALENDAR_ALIGN_TEST_PLAN = {
         .offset = offset2, .expectedDx = "25.00vp", .expectedDy = "40.00vp"
     }
 };
+
+std::vector<std::tuple<std::string, Opt_Boolean, std::string>> testFixtureBooleanValidValues = {
+    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
+    { "false", Converter::ArkValue<Opt_Boolean>(false), "false" },
+    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
+    { "Ark_Empty", Converter::ArkValue<Opt_Boolean>(Ark_Empty()), "false" },
+};
 } // namespace
 
 class CalendarPickerModifierTest : public ModifierTestBase<
@@ -135,12 +142,12 @@ public:
  */
 HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setEdgeAlign0, nullptr);
+    ASSERT_NE(modifier_->setEdgeAlign, nullptr);
 
     for (const auto& data: CALENDAR_ALIGN_TEST_PLAN) {
         auto optOffset = ArkValue<Opt_Offset>(data.offset);
         auto align = Converter::ArkValue<Opt_CalendarAlign>(data.calendarAlignType);
-        modifier_->setEdgeAlign0(node_, &align, &optOffset);
+        modifier_->setEdgeAlign(node_, &align, &optOffset);
 
         auto fullJson = GetJsonValue(node_);
 
@@ -198,7 +205,7 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -212,7 +219,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
     for (auto color : COLOR_TEST_PLAN) {
         pickerStyle.color = color.first;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_COLOR_NAME);
@@ -227,7 +234,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -242,7 +249,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -260,7 +267,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontWeightTest, TestSize.Level1
  */
 HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
@@ -275,7 +282,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
         font.size = size.first;
         pickerStyle.font.value = font;
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optPickerStyle);
+        modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
@@ -334,7 +341,7 @@ const std::vector<PickerDateTest> CHANGE_EVENT_TEST_PLAN = {
  */
 HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnChange0, nullptr);
+    ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
@@ -353,7 +360,7 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
         .call = onChange
     };
     auto optFunk = Converter::ArkValue<Opt_Callback_Date_Void>(func);
-    modifier_->setOnChange0(node_, &optFunk);
+    modifier_->setOnChange(node_, &optFunk);
 
     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
         std::string testStr = testValue.first.ToString(true);
@@ -379,13 +386,6 @@ HWTEST_F(CalendarPickerModifierTest, setMarkTodayTestDefaultValues, TestSize.Lev
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_TODAY_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_MARK_TODAY_DEFAULT_VALUE) << "Default value for attribute 'markToday'";
 }
-
-std::vector<std::tuple<std::string, Opt_Boolean, std::string>> testFixtureBooleanValidValues = {
-    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
-    { "false", Converter::ArkValue<Opt_Boolean>(false), "false" },
-    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
-    { "Ark_Empty", Converter::ArkValue<Opt_Boolean>(Ark_Empty()), "false" },
-};
 
 /*
  * @tc.name: setMarkTodayTestMarkTodayValidValues

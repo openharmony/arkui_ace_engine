@@ -76,7 +76,7 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataTest, TestSize.Level1)
     EXPECT_EQ("", Converter::Convert<std::string>(accessor_->getResponseData(peer_)));
 
     std::string responseData = "responseData";
-    auto data = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_String>(responseData);
+    auto data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>(responseData);
     accessor_->setResponseData(peer_, &data);
 
     EXPECT_EQ(responseData, Converter::Convert<std::string>(accessor_->getResponseData(peer_)));
@@ -92,8 +92,8 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx1Test, TestSize.Level
 {
     ASSERT_NE(accessor_->getResponseDataEx, nullptr);
 
-    auto dataString = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_String>("text");
-    auto dataNumber = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Int32>(5);
+    auto dataString = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>("text");
+    auto dataNumber = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Number>(5);
 
     accessor_->setResponseData(peer_, &dataString);
     auto data = accessor_->getResponseDataEx(peer_);
@@ -111,7 +111,7 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx1Test, TestSize.Level
     data = accessor_->getResponseDataEx(peer_);
     int32_t intResult = 0;
     Converter::VisitUnion(data,
-        [&intResult](const Ark_Int32& responseData) {
+        [&intResult](const Ark_Number& responseData) {
             intResult = Converter::Convert<int32_t>(responseData);
         },
         [](const auto& value) {},
@@ -131,12 +131,12 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx2Test, TestSize.Level
     Ark_Resource resource {
         .bundleName = Converter::ArkValue<Ark_String>("bundleName"),
         .moduleName = Converter::ArkValue<Ark_String>("moduleName"),
-        .id = Converter::ArkValue<Ark_Int32>(8)
+        .id = Converter::ArkValue<Ark_Number>(8)
     };
 
     auto testStr = std::string("buffer");
-    auto dataBuffer = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Buffer>(testStr);
-    auto dataRes = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Resource>(resource);
+    auto dataBuffer = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(testStr);
+    auto dataRes = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(resource);
 
     accessor_->setResponseData(peer_, &dataBuffer);
     auto data = accessor_->getResponseDataEx(peer_);
@@ -276,17 +276,17 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseCodeTest, TestSize.Level1)
  */
 HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
 {
-    Ark_Union_String_Int32_Resource_Buffer data;
+    Ark_Union_String_Number_Resource_Buffer data;
 
     ASSERT_NE(accessor_->setResponseData, nullptr);
 
     std::string responseData = "responseData";
-    data = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_String>(responseData);
+    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>(responseData);
     accessor_->setResponseData(peer_, &data);
     EXPECT_EQ(responseData, peer_->handler->GetData());
 
     int32_t fd = 7;
-    data = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Int32>(fd);
+    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Number>(fd);
     accessor_->setResponseData(peer_, &data);
     EXPECT_EQ(fd, peer_->handler->GetFileHandle());
 }
@@ -298,7 +298,7 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
  */
 HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.Level1)
 {
-    Ark_Union_String_Int32_Resource_Buffer initvalueResponse;
+    Ark_Union_String_Number_Resource_Buffer initvalueResponse;
     ASSERT_NE(accessor_->setResponseData, nullptr);
     // Initial setup
     AddResource(RES_NAME_ID, RES_DATA_URL);
@@ -307,11 +307,11 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.
     AddResource(RES_NUMBER_ID, RES_DATA_URL_OTHER);
     AddResource(RES_INVALID_ID, RES_DATA_URL);
     auto responseData = std::get<1>(resourceTestPlan[0]);
-    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Resource>(responseData);
+    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(responseData);
     auto checkValue = [this, &initvalueResponse](
         const std::string& input, const Ark_Resource& value, const std::string& expectedStr) {
-        Ark_Union_String_Int32_Resource_Buffer data = initvalueResponse;
-        data = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Resource>(value);
+        Ark_Union_String_Number_Resource_Buffer data = initvalueResponse;
+        data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(value);
         accessor_->setResponseData(peer_, &data);
         auto result = peer_->handler->GetResourceUrl();
         EXPECT_EQ(result, expectedStr);
@@ -328,15 +328,15 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.
  */
 HWTEST_F(WebResourceResponseAccessorTest, setResponseDataArrayBufferTest, TestSize.Level1)
 {
-    Ark_Union_String_Int32_Resource_Buffer initvalueResponse;
+    Ark_Union_String_Number_Resource_Buffer initvalueResponse;
     ASSERT_NE(accessor_->setResponseData, nullptr);
     // Initial setup
     auto responseData = std::get<1>(responseBufferTestPlan[0]);
-    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Buffer>(responseData);
+    initvalueResponse = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(responseData);
     auto checkValue = [this, &initvalueResponse](
         const std::string& input, const Ark_Buffer& value, const std::string& expectedStr) {
-        Ark_Union_String_Int32_Resource_Buffer data = initvalueResponse;
-        data = Converter::ArkUnion<Ark_Union_String_Int32_Resource_Buffer, Ark_Buffer>(value);
+        Ark_Union_String_Number_Resource_Buffer data = initvalueResponse;
+        data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(value);
         accessor_->setResponseData(peer_, &data);
         auto result = peer_->handler->GetData();
         EXPECT_EQ(result, expectedStr);
@@ -426,7 +426,7 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseCodeTest, TestSize.Level1)
     ASSERT_NE(accessor_->setResponseCode, nullptr);
 
     int32_t statusCode = 404;
-    Ark_Int32 data = Converter::ArkValue<Ark_Int32>(statusCode);
+    Ark_Number data = Converter::ArkValue<Ark_Number>(statusCode);
     accessor_->setResponseCode(peer_, &data);
     EXPECT_EQ(statusCode, peer_->handler->GetStatusCode());
 }

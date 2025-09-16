@@ -307,7 +307,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues2, TestSize.Level1)
 {
 }
 

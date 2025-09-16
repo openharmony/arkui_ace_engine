@@ -99,7 +99,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
 
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
-    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
+    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->construct(&colorStopArray));
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues.size(); idx++) {
@@ -127,7 +127,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
 
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
-    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
+    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->construct(&colorStopArray));
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues2.size(); idx++) {
@@ -155,7 +155,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
 
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
-    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
+    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->construct(&colorStopArray));
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues3.size(); idx++) {
@@ -183,7 +183,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
 
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
-    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
+    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->construct(&colorStopArray));
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < validValues4.size(); idx++) {
@@ -212,7 +212,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
 
     Converter::ArkArrayHolder<Array_ColorStop> vectorHolder(vectorData);
     Array_ColorStop colorStopArray = vectorHolder.ArkValue();
-    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->ctor(&colorStopArray));
+    peer_ = reinterpret_cast<LinearGradientPeer*>(accessor_->construct(&colorStopArray));
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStops = peer_->colorStops;
 
     for (size_t idx = 0; idx < invalidValues.size(); idx++) {

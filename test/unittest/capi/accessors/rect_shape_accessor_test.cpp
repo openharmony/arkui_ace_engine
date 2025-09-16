@@ -29,7 +29,7 @@ public:
     void* CreatePeerInstance() override
     {
         auto options = Converter::ArkValue<Opt_Union_RectShapeOptions_RoundRectShapeOptions>();
-        return this->accessor_->ctor(&options);
+        return this->accessor_->construct(&options);
     }
 };
 
@@ -53,7 +53,7 @@ HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptions, TestSize.Level1)
     auto unionOptions = Converter::ArkUnion<Ark_Union_RectShapeOptions_RoundRectShapeOptions, Ark_RectShapeOptions>(
         rectShapeOptions);
     auto options = Converter::ArkValue<Opt_Union_RectShapeOptions_RoundRectShapeOptions>(unionOptions);
-    RectShapePeer* peer = accessor_->ctor(&options);
+    RectShapePeer* peer = accessor_->construct(&options);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->shape, nullptr);
     EXPECT_EQ(peer->shape->GetWidth(), Dimension(testWidth, DimensionUnit::VP));
@@ -101,7 +101,7 @@ HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptionsArray, TestSize.Level1)
     auto unionOptions = Converter::ArkUnion<Ark_Union_RectShapeOptions_RoundRectShapeOptions, Ark_RectShapeOptions>(
         rectShapeOptions);
     auto options = Converter::ArkValue<Opt_Union_RectShapeOptions_RoundRectShapeOptions>(unionOptions);
-    RectShapePeer* peer = accessor_->ctor(&options);
+    RectShapePeer* peer = accessor_->construct(&options);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->shape, nullptr);
 
@@ -146,7 +146,7 @@ HWTEST_F(RectShapeAccessorTest, CtorTestRoundRectShapeOptions, TestSize.Level1)
     auto unionOptions = Converter::ArkUnion<Ark_Union_RectShapeOptions_RoundRectShapeOptions,
         Ark_RoundRectShapeOptions>(roundRectShapeOptions);
     auto options = Converter::ArkValue<Opt_Union_RectShapeOptions_RoundRectShapeOptions>(unionOptions);
-    RectShapePeer* peer = accessor_->ctor(&options);
+    RectShapePeer* peer = accessor_->construct(&options);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->shape, nullptr);
     EXPECT_EQ(peer->shape->GetWidth(), Dimension(testWidth, DimensionUnit::VP));

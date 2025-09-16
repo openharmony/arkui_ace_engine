@@ -105,16 +105,16 @@ HWTEST_F(CommonMethodModifierTest12, DISABLED_setDragPreview0TestDragItemInfoTes
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     // PixelMap
     Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
-    PixelMapPeer pixelMapPeer;
+    image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
-    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
+    Ark_image_PixelMap expectedPixelMap = &pixelMapPeer;
     // ExtraInfo
     std::string expectedExtraInfo{"extraInfo"};
     // struct DragItemInfo
     Ark_DragItemInfo dragItemInfo = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder),
         .extraInfo = Converter::ArkValue<Opt_String>(expectedExtraInfo),
-        .pixelMap = Converter::ArkValue<Opt_PixelMap>(expectedPixelMap)};
+        .pixelMap = Converter::ArkValue<Opt_image_PixelMap>(expectedPixelMap)};
 
     auto unionValue = Converter::ArkUnion<Opt_Union_CustomBuilder_DragItemInfo_String,
         Ark_DragItemInfo>(dragItemInfo);

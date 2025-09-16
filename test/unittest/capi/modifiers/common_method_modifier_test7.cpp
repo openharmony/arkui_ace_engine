@@ -199,9 +199,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(
+    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_Opt_String_Void>(
         nullptr, onDragFunc, frameNode->GetId());
-    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_String_Void>(arkCallBackValue);
+    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_Opt_String_Void>(arkCallBackValue);
 
     checkEvent = std::nullopt;
     modifier_->setOnDragEnter(node_, &callBackValue);
@@ -246,9 +246,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(
+    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_Opt_String_Void>(
         nullptr, onDragFunc, frameNode->GetId());
-    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_String_Void>(arkCallBackValue);
+    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_Opt_String_Void>(arkCallBackValue);
 
     checkEvent = std::nullopt;
     modifier_->setOnDragMove(node_, &callBackValue);
@@ -293,9 +293,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(
+    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_Opt_String_Void>(
         nullptr, onDragFunc, frameNode->GetId());
-    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_String_Void>(arkCallBackValue);
+    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_Opt_String_Void>(arkCallBackValue);
 
     checkEvent = std::nullopt;
     modifier_->setOnDragLeave(node_, &callBackValue);
@@ -340,9 +340,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDrop0Test, TestSize.Level1)
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(
+    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_Opt_String_Void>(
         nullptr, onDragFunc, frameNode->GetId());
-    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_String_Void>(arkCallBackValue);
+    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_Opt_String_Void>(arkCallBackValue);
 
     checkEvent = std::nullopt;
     modifier_->setOnDrop0(node_, &callBackValue);
@@ -386,9 +386,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEndTest, TestSize.Level1)
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_String_Void>(
+    auto arkCallBackValue = Converter::ArkValue<Callback_DragEvent_Opt_String_Void>(
         nullptr, onDragFunc, frameNode->GetId());
-    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_String_Void>(arkCallBackValue);
+    auto callBackValue = Converter::ArkValue<Opt_Callback_DragEvent_Opt_String_Void>(arkCallBackValue);
 
     checkEvent = std::nullopt;
     modifier_->setOnDragEnd(node_, &callBackValue);
@@ -444,9 +444,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestCOPY, TestSize.Le
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
+    auto arkCallback = Converter::ArkValue<Type_CommonMethod_onDragStart>(nullptr,
         callSyncFunc, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Type_CommonMethod_onDragStart>(arkCallback);
     modifier_->setOnDragStart(node_, &optCallback);
 
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
@@ -504,9 +504,9 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestMOVE, TestSize.Le
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
+    auto arkCallback = Converter::ArkValue<Type_CommonMethod_onDragStart>(nullptr,
         callSyncFunc, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Type_CommonMethod_onDragStart>(arkCallback);
     modifier_->setOnDragStart(node_, &optCallback);
 
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();

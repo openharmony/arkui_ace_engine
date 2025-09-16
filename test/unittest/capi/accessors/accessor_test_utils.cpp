@@ -15,35 +15,15 @@
 
 #include "accessor_test_utils.h"
 
-#include <fstream>
-#include <iostream>
-
-#include "gtest/gtest.h"
-
 namespace OHOS::Ace::NG {
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::ResourceType type)
+Ark_Resource CreateResource(int64_t id, ResourceType type)
 {
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(""),
-        .bundleName = Converter::ArkValue<Ark_String>(""),
-        .params = Converter::ArkValue<Opt_Array_String>(),
-    };
+    return Converter::ArkCreate<Ark_Resource>(id, type);
 }
 
-Ark_Resource CreateResource(const char *name, OHOS::Ace::ResourceType type)
+Ark_Resource CreateResource(const std::string& name, ResourceType type)
 {
-    static std::vector<std::unique_ptr<Ark_String>> s_strCache;
-    s_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));
-    Array_String params = {.length = 1, .array = s_strCache.back().get()};
-    return {
-        .id = Converter::ArkValue<Ark_Number>(-1),
-        .type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(""),
-        .bundleName = Converter::ArkValue<Ark_String>(""),
-        .params = Converter::ArkValue<Opt_Array_String>(params),
-    };
+    static Converter::ConvContext s_ctx;
+    return Converter::ArkCreate<Ark_Resource>(name, type, &s_ctx);
 }
-
 } // namespace OHOS::Ace::NG
