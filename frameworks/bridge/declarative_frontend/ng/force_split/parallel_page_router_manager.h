@@ -45,7 +45,7 @@ private:
     bool CheckSecondaryPageNeedClear(bool isPush);
     bool CheckStackSize(const RouterPageInfo& target, bool needClearSecondaryPage);
     void NotifyForceFullScreenChangeIfNeeded(
-        const std::string& curTopPageName, const RefPtr<PipelineContext>& context);
+        const std::string& curTopPageName, const RefPtr<PipelineContext>& context) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPageRouterManager);
 };

@@ -302,6 +302,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
         if (pageInfoByUrl.second) {
+            NotifyForceFullScreenChangeIfNeeded(target.url, pageInfoByUrl.second->GetContextRefPtr());
             // find page in stack, move postion and update params.
             auto pagePattern = pageInfoByUrl.second->GetPattern<PagePattern>();
             if (pagePattern) {
@@ -1196,6 +1197,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
+            NotifyForceFullScreenChangeIfNeeded(info.url, pageInfo.second->GetContextRefPtr());
             // find page in stack, move postion and update params.
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
@@ -1275,6 +1277,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
+            NotifyForceFullScreenChangeIfNeeded(info.url, pageInfo.second->GetContextRefPtr());
             // find page in stack, move postion and update params.
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
@@ -1305,6 +1308,7 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
+            NotifyForceFullScreenChangeIfNeeded(info.url, pageInfo.second->GetContextRefPtr());
             // find page in stack, move postion and update params.
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
@@ -1662,7 +1666,6 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     if (target.errorCallback != nullptr) {
         target.errorCallback("", ERROR_CODE_NO_ERROR);
     }
-
     // update param first.
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
@@ -2215,6 +2218,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #endif
             popIndex = popIndex - 1;
             findPage = true;
+            NotifyForceFullScreenChangeIfNeeded(info.url, pageInfo.second->GetContextRefPtr());
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
                 pagePattern->FireOnNewParam(info.params);
@@ -2434,6 +2438,7 @@ void PageRouterManager::RunIntentPage()
         if (!fireNavigationIntentActivelySuccess) {
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
+                NotifyForceFullScreenChangeIfNeeded(pagePattern->GetPageUrl(), pageInfo.second->GetContextRefPtr());
                 pagePattern->FireOnNewParam(intentInfo_.value().param);
             }
         }
