@@ -37,7 +37,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
@@ -79,7 +79,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
 
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;

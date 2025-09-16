@@ -81,7 +81,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
     }
     ani_object error = WrapStsError(env, msg);

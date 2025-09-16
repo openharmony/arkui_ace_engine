@@ -145,12 +145,12 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "dd:", &sizeCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -172,12 +172,12 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
 {
     ani_status status;
     ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "dd:", &sizeInPixelCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -199,12 +199,12 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 
     // DrawContext object
     ani_class drawContextClass;
-    if ((status = env->FindClass("Larkui/Graphics/DrawContext;", &drawContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
         HILOGE("FindClass DrawContext failed, %{public}d", status);
         return nullptr;
     }
     ani_method drawContextCtor;
-    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":V", &drawContextCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":", &drawContextCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod drawContextClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -309,7 +309,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFu
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -334,7 +334,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentF
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -360,7 +360,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun
             }
             env->Object_CallMethodByName_Void(
                 reinterpret_cast<ani_fn_object>(object), "drawFront",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
             std::vector<ani_ref> params = {};
             ani_ref ret = nullptr;
             callbackAni->Call(env, params.size(), params.data(), &ret);
@@ -789,7 +789,7 @@ ani_string GetCustomProperty(
 void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
 {
     ani_enum enumType;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.Alignment", &enumType)) {
         return;
     }
 
@@ -831,13 +831,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }

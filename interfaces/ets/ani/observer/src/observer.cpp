@@ -31,8 +31,8 @@ constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "@ohos.arkui.observer.uiObserve
 constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "arkui.component.navDestination.NavDestinationMode";
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTER_UPDATE[] = "routerPageUpdate";
-constexpr char ANI_ROUTER_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/RouterPageInfo;";
-constexpr char ANI_ROUTER_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/RouterPageState;";
+constexpr char ANI_ROUTER_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
+constexpr char ANI_ROUTER_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.RouterPageState";
 constexpr char NAVDESTINATION_PARAM_WITHID[] =
     "C{std.core.String}C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Object}:";
 } // namespace
@@ -637,10 +637,10 @@ public:
         env->Object_SetPropertyByName_Ref(res, "state", routerStateItem);
 
         ani_class uiContextUtil;
-        env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextUtil);
+        env->FindClass("arkui.handwritten.UIContextUtil.UIContextUtil", &uiContextUtil);
         ani_static_method getUiContext;
         env->Class_FindStaticMethod(
-            uiContextUtil, "getOrCreateUIContextById", "I:L@ohos/arkui/UIContext/UIContext;", &getUiContext);
+            uiContextUtil, "getOrCreateUIContextById", "i:C{@ohos.arkui.UIContext.UIContext}", &getUiContext);
         ani_int instanceId = Container::CurrentIdSafelyWithCheck();
         ani_ref uiContext;
         env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);

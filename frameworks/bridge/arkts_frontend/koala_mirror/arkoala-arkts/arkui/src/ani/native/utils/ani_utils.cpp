@@ -21,13 +21,13 @@ namespace OHOS::Ace::Ani {
 ani_object AniUtils::CreateDouble(ani_env *env, double value)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char *className = "Lstd/core/Double;";
+    static const char *className = "std.core.Double";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
         return nullptr;
     }
     ani_method infoCtor;
-    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &infoCtor)) {
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &infoCtor)) {
         return nullptr;
     }
     ani_object personInfoObj;
@@ -110,7 +110,7 @@ bool AniUtils::IsString(ani_env* env, ani_object obj)
 {
     CHECK_NULL_RETURN(env, false);
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
 
     ani_boolean isString;
     env->Object_InstanceOf(obj, stringClass, &isString);
@@ -121,7 +121,7 @@ bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 {
     CHECK_NULL_RETURN(env, false);
     ani_class numberClass;
-    env->FindClass("Lstd/core/Double;", &numberClass);
+    env->FindClass("std.core.Double", &numberClass);
 
     ani_boolean isNumber;
     env->Object_InstanceOf(obj, numberClass, &isNumber);
@@ -176,11 +176,11 @@ ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -196,11 +196,11 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = WrapBusinessError(env, msg, code);
@@ -253,7 +253,7 @@ bool AniUtils::GetBigIntValue(ani_env* env, ani_object object, int64_t& longValu
     CHECK_NULL_RETURN(env, false);
     auto status = ANI_OK;
     ani_long value;
-    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":J", &value)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &value)) != ANI_OK) {
         return false;
     }
     longValue = value;

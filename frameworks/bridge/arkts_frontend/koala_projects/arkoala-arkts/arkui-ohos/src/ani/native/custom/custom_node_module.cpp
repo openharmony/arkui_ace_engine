@@ -28,7 +28,7 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ArkUIAniCustomNodeModule;";
+        "arkui.ani.arkts.ArkUIAniCustomNodeModule.ArkUIAniCustomNodeModule";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         HILOGE("BindNativeCustomComponent FindClass failed, className: %{public}s", className);

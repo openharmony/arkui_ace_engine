@@ -44,13 +44,13 @@ ani_string CreateSurfaceIdAni(ani_env* env, const std::string& surfaceId)
 ani_object CreateSurfaceRectAni(ani_env* env, float width, float height, float offsetX, float offsetY)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "Larkui/component/xcomponent/SurfaceRectAniInternal;";
+    static const char* className = "arkui.component.xcomponent.SurfaceRectAniInternal";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "DDDD:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
         return nullptr;
     }
     ani_object surfaceRectRef;

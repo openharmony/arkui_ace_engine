@@ -45,7 +45,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionModal;";
+        "arkui.ani.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUiextensionModal";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -105,7 +105,7 @@ ani_status NativeUiExtension::SetUiextensionOption(
     }
 
     std::string optionClassName =
-        "Larkui/ani/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
+        "arkui.ani.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUIExtensionOptions";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType %{public}s failed when SetUiextensionOption",
@@ -143,7 +143,7 @@ ani_status NativeUiExtension::SetUiextensionWant(
     }
 
     std::string wantClassName =
-        "L@ohos/app/ability/Want/Want;";
+        "@ohos.app.ability.Want.Want";
     if (!AniUtils::CheckType(env, obj, wantClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType failed when SetUiextensionWant");

@@ -45,10 +45,10 @@ ani_object WrapStsError(ani_env* env, const std::string& msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -63,11 +63,11 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = WrapStsError(env, msg);
@@ -92,7 +92,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
@@ -133,7 +133,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
 
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
