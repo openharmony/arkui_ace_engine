@@ -1160,6 +1160,7 @@ private:
     void SetOnHiddenChangeForParent();
     void ReportOnItemStopEvent();
     virtual void ResetForExtScroll() {};
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;

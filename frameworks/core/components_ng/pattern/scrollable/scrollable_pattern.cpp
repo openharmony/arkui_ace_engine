@@ -4685,4 +4685,32 @@ float ScrollablePattern::FireObserverOnWillScroll(float offset)
     CHECK_NULL_RETURN(context, result.offset.ConvertToPx());
     return context->NormalizeToPx(result.offset);
 }
+
+void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& safeAreaOpts = layoutProperty->GetSafeAreaExpandOpts();
+    if (!safeAreaOpts || !safeAreaOpts->Expansive()) {
+        return;
+    }
+
+    auto overlay = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlay);
+    auto overlayGeometryNode = overlay->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetFrameSize(true) != overlayGeometryNode->GetFrameSize(true)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
 } // namespace OHOS::Ace::NG
