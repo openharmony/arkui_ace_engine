@@ -485,7 +485,7 @@ bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto id = host->GetInspectorId();
-    if (id.has_value()) {
+    if (id.has_value() && !id.value().empty()) {
         std::string result = std::string("id:") + id.value();
         pixelMap->SetMemoryName(result);
         hasSetPixelMapMemoryName_ = true;

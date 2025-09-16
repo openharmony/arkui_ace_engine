@@ -2548,6 +2548,38 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetPixelMapMemoryName003
+ * @tc.desc: SetPixelMapMemoryName003
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, SetPixelMapMemoryName003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    frameNode->UpdateInspectorId("");
+    /**
+     * @tc.steps: step2. call SetPixelMapMemoryName.
+     * @tc.expected: Returned value is true.
+     */
+    EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), false);
+    EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, false);
+}
+
+/**
  * @tc.name: TestKeyEvent001
  * @tc.desc: Test KeyEvent001
  * @tc.type: FUNC
