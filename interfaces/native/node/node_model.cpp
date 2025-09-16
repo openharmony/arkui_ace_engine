@@ -888,22 +888,6 @@ void* GetParseJsMedia()
     return reinterpret_cast<void*>(parseJsMedia);
 }
 
-uint32_t GetDrawableType(void* object)
-{
-    void* module = FindModule();
-    if (!module) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
-        return 0;
-    }
-    uint32_t (*getType)(void* object) = nullptr;
-    getType = reinterpret_cast<uint32_t (*)(void*)>(FindFunction(module, "OHOS_ACE_GetDrawableDescriptorType"));
-    if (!getType) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_GetDrawableDescriptorType");
-        return 0;
-    }
-    return getType(object);
-}
-
 void IncreaseRefDrawable(void* object)
 {
     void* module = FindModule();
