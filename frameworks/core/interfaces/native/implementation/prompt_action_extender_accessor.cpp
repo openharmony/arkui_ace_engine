@@ -168,7 +168,22 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    auto borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    if (borderRadius.has_value() && (borderRadius.value().radiusTopLeft.has_value()
+        || borderRadius.value().radiusTopRight.has_value()
+        || borderRadius.value().radiusBottomLeft.has_value()
+        || borderRadius.value().radiusBottomRight.has_value())) {
+        menuParam.borderRadius = borderRadius;
+    }
+    Converter::VisitUnion(
+        menuOptions.preview,
+        [&menuParam](const Ark_MenuPreviewMode& value) {
+            auto mode = Converter::OptConvert<MenuPreviewMode>(value);
+            if (mode && mode.value() == MenuPreviewMode::IMAGE) {
+                menuParam.previewMode = MenuPreviewMode::IMAGE;
+            }
+        },
+        [](const CustomNodeBuilder& value) {}, []() {});
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
     menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
@@ -523,7 +538,11 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
     }
     MenuParam menuParam;
     auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
-    if (isPartialUpdate) {
+    if (!isPartialUpdate.has_value()) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (isPartialUpdate.value()) {
         auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
         if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
             ReturnPromise(outputArgumentForReturningPromise, result);
