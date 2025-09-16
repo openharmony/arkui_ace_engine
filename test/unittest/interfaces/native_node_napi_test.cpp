@@ -731,17 +731,13 @@ HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest003, TestSize.Leve
     nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
     value[2].i32 = -1;
     ArkUI_AttributeItem backgroundImagePosition2 = { .value = value, .size = 3 };
-    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
-    auto ret2 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
-    EXPECT_EQ(ret2->value[2].i32, 0);
-    EXPECT_EQ(ret2->value[3].i32, 3);
+    auto ret2 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
     value[2].i32 = 9;
     ArkUI_AttributeItem backgroundImagePosition3 = { .value = value, .size = 3 };
-    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
-    auto ret3 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
-    EXPECT_EQ(ret3->value[2].i32, 0);
-    EXPECT_EQ(ret3->value[3].i32, 3);
+    auto ret3 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -792,15 +788,11 @@ HWTEST_F(NativeNodeNapiTest, NativeBackgroundImagePositionTest004, TestSize.Leve
     nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
     value[3].i32 = -1;
     ArkUI_AttributeItem backgroundImagePosition2 = { .value = value, .size = 4 };
-    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
-    auto ret2 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
-    EXPECT_EQ(ret2->value[2].i32, 0);
-    EXPECT_EQ(ret2->value[3].i32, 3);
+    auto ret2 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition2);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->resetAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
     value[3].i32 = 2;
     ArkUI_AttributeItem backgroundImagePosition3 = { .value = value, .size = 4 };
-    nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
-    auto ret3 = nodeAPI->getAttribute(row, NODE_BACKGROUND_IMAGE_POSITION);
-    EXPECT_EQ(ret3->value[2].i32, 0);
-    EXPECT_EQ(ret3->value[3].i32, 3);
+    auto ret3 = nodeAPI->setAttribute(row, NODE_BACKGROUND_IMAGE_POSITION, &backgroundImagePosition3);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
