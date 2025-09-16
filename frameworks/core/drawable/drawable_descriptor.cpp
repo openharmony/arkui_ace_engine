@@ -263,15 +263,6 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateDrawableDescriptorByType(uint32
     return nullptr;
 }
 
-extern "C" ACE_FORCE_EXPORT uint32_t OHOS_ACE_GetDrawableDescriptorType(void* object)
-{
-    auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);
-    if (drawable) {
-        return static_cast<uint32_t>(drawable->GetDrawableType());
-    }
-    return 0;
-}
-
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_IncreaseRefDrawableDescriptor(void* object)
 {
     auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);

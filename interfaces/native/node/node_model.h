@@ -187,7 +187,6 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
-uint32_t GetDrawableType(void* object);
 void IncreaseRefDrawable(void* object);
 void DecreaseRefDrawable(void* object);
 void* CreateDrawable(uint32_t type);

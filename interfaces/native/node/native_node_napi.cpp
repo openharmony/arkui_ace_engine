@@ -23,8 +23,29 @@
 #include "core/components_ng/base/frame_node.h"
 
 extern "C" {
-
-constexpr uint32_t ANIMATED_TYPE = 2;
+void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
+{
+    napi_valuetype valueType;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_string) {
+        result.clear();
+        return;
+    }
+    size_t bufferSize = 0;
+    napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &bufferSize);
+    if (status != napi_ok || bufferSize == 0) {
+        result.clear();
+        return;
+    }
+    auto buffer = std::make_unique<char[]>(bufferSize + 1);
+    size_t stringLength;
+    status = napi_get_value_string_utf8(env, value, buffer.get(), bufferSize + 1, &stringLength);
+    if (status == napi_ok && stringLength > 0) {
+        result = std::string(buffer.get(), stringLength);
+    } else {
+        result.clear();
+    }
+}
 
 int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle)
 {
@@ -220,17 +241,22 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     }
     ArkUI_DrawableDescriptor* drawable =
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
-    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
-    if (!descriptor) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    if (OHOS::Ace::NodeModel::GetDrawableType(objectNapi) == ANIMATED_TYPE) {
-        // set animated drawable
+    napi_value typeName;
+    napi_get_named_property(env, value, "typename", &typeName);
+    std::string typenameStr;
+    GetStringFromNapiValue(env, typeName, typenameStr);
+    if (typenameStr == "AnimatedDrawableDescriptor") {
+        OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
         drawable->newDrawableDescriptor = objectNapi;
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
+    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
+    if (!descriptor) {
+        delete drawable;
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
