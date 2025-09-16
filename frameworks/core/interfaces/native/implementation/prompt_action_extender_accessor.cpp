@@ -445,12 +445,17 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
     auto result = ViewAbstractModelStatic::GetPopupParam(oldParam, frameNode);
     if (result == ERROR_CODE_NO_ERROR) {
         auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
-        if (isPartialUpdate.has_value() && isPartialUpdate.value()) {
-            popupParam = oldParam;
-            popupParam->SetIsPartialUpdate(isPartialUpdate.value());
+        if (isPartialUpdate.has_value()) {
+            if (isPartialUpdate.value()) {
+                popupParam = oldParam;
+                popupParam->SetIsPartialUpdate(isPartialUpdate.value());
+            } else {
+                popupParam->SetTargetId(oldParam->GetTargetId());
+                popupParam->SetIsPartialUpdate(false);
+            }
         } else {
-            popupParam->SetTargetId(oldParam->GetTargetId());
-            popupParam->SetIsPartialUpdate(false);
+            ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_PARAM_INVALID);
+            return;
         }
     } else {
         ReturnPromise(outputArgumentForReturningPromise, result);
