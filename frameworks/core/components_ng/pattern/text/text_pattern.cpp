@@ -3149,15 +3149,20 @@ void TextPattern::AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& r
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    if (isSpanStringMode_) {
-        std::vector<uint8_t> arr;
-        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_,
-            false, true, false);
-        dragSpanString->EncodeTlv(arr);
-        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-    } else {
+    if (!isSpanStringMode_) {
         ProcessNormalUdmfData(unifiedData);
+        event->SetData(unifiedData);
+        return;
     }
+
+    TAG_LOGI(AceLogTag::ACE_TEXT, "AddUdmfData spanstring");
+    ProcessNormalUdmfData(unifiedData);
+    std::vector<uint8_t> arr;
+    auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_,
+        false, true, false);
+    dragSpanString->EncodeTlv(arr);
+    UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    UdmfClient::GetInstance()->SetTagProperty(unifiedData, "records_to_entries_data_format");
     event->SetData(unifiedData);
 }
 
