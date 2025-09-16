@@ -1364,7 +1364,7 @@ bool DialogPattern::InvertShadowColor()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(contentRenderContext_, false);
-    CHECK_NULL_RETURN(dialogProperties_.hasCustomShadowColor, false);
+    CHECK_NULL_RETURN(dialogProperties_.hasInvertColor.hasShadowColor, false);
     if (SystemProperties::ConfigChangePerform() && dialogProperties_.shadow.has_value()) {
         auto shadow = dialogProperties_.shadow.value();
         Color shadowColor = shadow.GetColor();

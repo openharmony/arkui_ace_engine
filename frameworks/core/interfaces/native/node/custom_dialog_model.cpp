@@ -223,7 +223,7 @@ void ParseDialogMask(DialogProperties& dialogProperties, ArkUIDialogHandle contr
     if (!controllerHandler->maskRect) {
         return;
     }
-    dialogProperties.hasCustomMaskColor = controllerHandler->hasCustomMaskColor;
+    dialogProperties.hasInvertColor.hasMaskColor = controllerHandler->hasCustomMaskColor;
     DimensionRect maskRect;
     maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
         Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
@@ -340,7 +340,10 @@ void ParseDialogBorderColor(DialogProperties& dialogProperties, ArkUIDialogHandl
     if (!controllerHandler->borderColors) {
         return;
     }
-    dialogProperties.hasCustomBorderColor = controllerHandler->hasCustomBorderColor;
+    dialogProperties.hasInvertColor.hasBorderTopColor = controllerHandler->hasCustomBorderColor;
+    dialogProperties.hasInvertColor.hasBorderBottomColor = controllerHandler->hasCustomBorderColor;
+    dialogProperties.hasInvertColor.hasBorderLeftColor = controllerHandler->hasCustomBorderColor;
+    dialogProperties.hasInvertColor.hasBorderRightColor = controllerHandler->hasCustomBorderColor;
     NG::BorderColorProperty color;
     color.topColor = Color(controllerHandler->borderColors->top);
     color.rightColor = Color(controllerHandler->borderColors->right);
@@ -401,7 +404,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
-    dialogProperties.hasCustomBackgroundColor = controllerHandler->hasCustomBackgroundColor;
+    dialogProperties.hasInvertColor.hasBackgroundColor = controllerHandler->hasCustomBackgroundColor;
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
     dialogProperties.dialogLevelMode = static_cast<LevelMode>(controllerHandler->levelMode);
@@ -409,12 +412,17 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
     dialogProperties.backgroundBlurStyle = controllerHandler->blurStyle;
     dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
+    dialogProperties.hasInvertColor.hasBlurStyleOptionInactiveColor =
+        controllerHandler->hasCustomBlurStyleOptionInactiveColor;
     dialogProperties.effectOption = controllerHandler->effectOption;
+    dialogProperties.hasInvertColor.hasEffectOptionColor = controllerHandler->hasCustomEffectOptionColor;
+    dialogProperties.hasInvertColor.hasEffectOptionInactiveColor =
+        controllerHandler->hasCustomEffectOptionInactiveColor;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
-        dialogProperties.hasCustomShadowColor= controllerHandler->hasCustomShadowColor;
+        dialogProperties.hasInvertColor.hasShadowColor = controllerHandler->hasCustomShadowColor;
     }
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
@@ -1097,6 +1105,9 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, A
     blurStyleOption.blurOption.grayscale = greyVec;
     blurStyleOption.inactiveColor = Color((*uintArray)[NUM_2]);
     blurStyleOption.isValidColor = isValidColor;
+    if (isValidColor) {
+        controllerHandler->hasCustomBlurStyleOptionInactiveColor = true;
+    }
     if (!controllerHandler->blurStyleOption.has_value()) {
         controllerHandler->blurStyleOption.emplace();
     }
@@ -1105,7 +1116,7 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, A
 }
 
 ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float32 (*floatArray)[3],
-    ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+    ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool (*boolArray)[2])
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     CalcDimension radius((*floatArray)[NUM_0], DimensionUnit::VP);
@@ -1116,10 +1127,12 @@ ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float
     effectOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_0]);
     effectOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_1]);
     effectOption.color = Color((*uintArray)[NUM_0]);
+    controllerHandler->hasCustomEffectOptionColor = boolArray[NUM_0];
     std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
     effectOption.blurOption.grayscale = greyVec;
     effectOption.inactiveColor = Color((*uintArray)[NUM_3]);
-    effectOption.isValidColor = isValidColor;
+    effectOption.isValidColor = boolArray[NUM_1];
+    controllerHandler->hasCustomEffectOptionInactiveColor = boolArray[NUM_1];
     if (!controllerHandler->effectOption.has_value()) {
         controllerHandler->effectOption.emplace();
     }
