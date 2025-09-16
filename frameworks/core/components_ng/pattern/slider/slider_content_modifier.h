@@ -56,7 +56,8 @@ public:
         std::optional<Color> blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters, UpdateImageCenterCallback updateImageCenter);
+    explicit SliderContentModifier(const Parameters& parameters, UpdateImageCenterCallback updateImageCenter,
+        const RefPtr<SliderTheme>& theme = nullptr);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
