@@ -1,268 +1,303 @@
-import { ArkRadioComponent, RadioConfiguration } from "#generated"
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { memo } from "@koalaui/runtime/annotations"
 import { ContentModifierHelper } from "#generated"
-import { ContentModifier, CustomBuilderT } from "#generated"
-import { KPointer, nullptr, toPeerPtr } from "@koalaui/interop";
-import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { BuilderNode } from "arkui.BuilderNode"
-import { FrameNode } from 'arkui.FrameNode'
-import { int32 } from "@koalaui/common"
-import { WrappedBuilder } from "#generated"
+import { ContentModifier } from "#generated"
+import { KPointer } from "@koalaui/interop";
 import { ArkButtonComponent, ButtonConfiguration } from "#generated"
 import { ArkCheckboxComponent, CheckBoxConfiguration } from "#generated"
-import { ArkToggleComponent, ToggleConfiguration } from "#generated"
+import { ArkDataPanelComponent, DataPanelConfiguration } from "#generated"
+import { ArkGaugeComponent, GaugeConfiguration } from "#generated"
+import { ArkLoadingProgressComponent, LoadingProgressConfiguration } from "#generated"
+import { ArkProgressComponent, ProgressConfiguration } from "#generated"
+import { ArkRadioComponent, RadioConfiguration } from "#generated"
 import { ArkRatingComponent, RatingConfiguration } from "#generated"
+import { ArkSelectComponent, MenuItemConfiguration } from "#generated"
 import { ArkSliderComponent, SliderConfiguration } from "#generated"
+import { ArkTextClockComponent, TextClockConfiguration } from "#generated"
+import { ArkTextTimerComponent, TextTimerConfiguration } from "#generated"
+import { ArkToggleComponent, ToggleConfiguration } from "#generated"
+import { CustomBuilder } from "#generated"
+import { CallbackTransformer } from "../../CallbackTransformer"
 
-export class HookContentModifier {
-    static radioNodeMap_: Map<int32, BuilderNode<RadioConfiguration>> = new Map<int32, BuilderNode<RadioConfiguration>>();
-    static buttonNodeMap_: Map<int32, BuilderNode<ButtonConfiguration>> = new Map<int32, BuilderNode<ButtonConfiguration>>();
-    static checkboxNodeMap_: Map<int32, BuilderNode<CheckBoxConfiguration>> = new Map<int32, BuilderNode<CheckBoxConfiguration>>();
-    static toggleNodeMap_: Map<int32, BuilderNode<ToggleConfiguration>> = new Map<int32, BuilderNode<ToggleConfiguration>>();
-    static ratingNodeMap_: Map<int32, BuilderNode<RatingConfiguration>> = new Map<int32, BuilderNode<RatingConfiguration>>();
-    static sliderNodeMap_: Map<int32, BuilderNode<SliderConfiguration>> = new Map<int32, BuilderNode<SliderConfiguration>>();
-    //Radio
-    static getRadioBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<RadioConfiguration>>, config: RadioConfiguration): BuilderNode<RadioConfiguration> {
-        if (HookContentModifier.radioNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.radioNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<RadioConfiguration>(uiContext)
-        HookContentModifier.radioNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
-    }
+function memoWrapper<Args>(
+    @memo
+    builder: ((args: Args) => void), args: Args
+): CustomBuilder {
+    @memo
+    const wrapper = () => { builder(args) }
+    return wrapper
+}
 
-    static removeRadioBuilderNode(peerId: int32): void {
-        if (HookContentModifier.radioNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.radioNodeMap_.get(peerId)!
-            HookContentModifier.radioNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookButtonContentModifier(
+    receiver: ArkButtonComponent, value?: ContentModifier<ButtonConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierButton(ptr)
+        return
     }
-    //Button
-    static getButtonBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<ButtonConfiguration>>, config: ButtonConfiguration): BuilderNode<ButtonConfiguration> {
-        if (HookContentModifier.buttonNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.buttonNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<ButtonConfiguration>(uiContext)
-        HookContentModifier.buttonNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
     }
+    const buttonBuilder = (parentNode: KPointer, config: ButtonConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierButton(ptr, value!, buttonBuilder)
+    }
+}
 
-    static removeButtonBuilderNode(peerId: int32): void {
-        if (HookContentModifier.buttonNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.buttonNodeMap_.get(peerId)!
-            HookContentModifier.buttonNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookCheckBoxContentModifier(
+    receiver: ArkCheckboxComponent, value?: ContentModifier<CheckBoxConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierCheckBox(ptr)
+        return
     }
-    //Checkbox
-    static getCheckboxBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<CheckBoxConfiguration>>, config: CheckBoxConfiguration): BuilderNode<CheckBoxConfiguration> {
-        if (HookContentModifier.checkboxNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.checkboxNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<CheckBoxConfiguration>(uiContext)
-        HookContentModifier.checkboxNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
     }
+    const checkboxBuilder = (parentNode: KPointer, config: CheckBoxConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierCheckBox(ptr, value!, checkboxBuilder)
+    }
+}
 
-    static removeCheckboxBuilderNode(peerId: int32): void {
-        if (HookContentModifier.checkboxNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.checkboxNodeMap_.get(peerId)!
-            HookContentModifier.checkboxNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookDataPanelContentModifier(
+    receiver: ArkDataPanelComponent, value?: ContentModifier<DataPanelConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierDataPanel(ptr)
+        return
     }
-    //Toggle
-    static getToggleBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<ToggleConfiguration>>, config: ToggleConfiguration): BuilderNode<ToggleConfiguration> {
-        if (HookContentModifier.toggleNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.toggleNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<ToggleConfiguration>(uiContext)
-        HookContentModifier.toggleNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
     }
+    const dataPanelBuilder = (parentNode: KPointer, config: DataPanelConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierDataPanel(ptr, value!, dataPanelBuilder)
+    }
+}
 
-    static removeToggleBuilderNode(peerId: int32): void {
-        if (HookContentModifier.toggleNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.toggleNodeMap_.get(peerId)!
-            HookContentModifier.toggleNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookGaugeContentModifier(
+    receiver: ArkGaugeComponent, value?: ContentModifier<GaugeConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierGauge(ptr)
+        return
     }
-    //Rating
-    static getRatingBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<RatingConfiguration>>, config: RatingConfiguration): BuilderNode<RatingConfiguration> {
-        if (HookContentModifier.ratingNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.ratingNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<RatingConfiguration>(uiContext)
-        HookContentModifier.ratingNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
     }
+    const gaugeBuilder = (parentNode: KPointer, config: GaugeConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierGauge(ptr, value!, gaugeBuilder)
+    }
+}
 
-    static removeRatingBuilderNode(peerId: int32): void {
-        if (HookContentModifier.ratingNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.ratingNodeMap_.get(peerId)!
-            HookContentModifier.ratingNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookLoadingProgressContentModifier(
+    receiver: ArkLoadingProgressComponent, value?: ContentModifier<LoadingProgressConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierLoadingProgress(ptr)
+        return
     }
-    //Slider
-    static getSliderBuilderNode(peerId: int32, builder: WrappedBuilder<CustomBuilderT<SliderConfiguration>>, config: SliderConfiguration): BuilderNode<SliderConfiguration> {
-        if (HookContentModifier.sliderNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.sliderNodeMap_.get(peerId)!
-            builderNode.update(config)
-            return builderNode
-        }
-        let uiContext = UIContextUtil.getOrCreateCurrentUIContext()
-        let builderNode = new BuilderNode<SliderConfiguration>(uiContext)
-        HookContentModifier.sliderNodeMap_.set(peerId, builderNode)
-        builderNode!.build(builder, config)
-        return builderNode
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
     }
+    const loadingProgressBuilder = (parentNode: KPointer, config: LoadingProgressConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierLoadingProgress(ptr, value!, loadingProgressBuilder)
+    }
+}
 
-    static removeSliderBuilderNode(peerId: int32): void {
-        if (HookContentModifier.sliderNodeMap_.has(peerId)) {
-            let builderNode = HookContentModifier.sliderNodeMap_.get(peerId)!
-            HookContentModifier.sliderNodeMap_.delete(peerId)
-            builderNode.dispose()
-        }
+export function hookProgressContentModifier(
+    receiver: ArkProgressComponent, value?: ContentModifier<ProgressConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierProgress(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const progressBuilder = (parentNode: KPointer, config: ProgressConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierProgress(ptr, value!, progressBuilder)
     }
 }
 
 export function hookRadioContentModifier(
-    receiver: ArkRadioComponent, value: ContentModifier<RadioConfiguration> | undefined): void {
-    let peerId = receiver.getPeer().getId()
+    receiver: ArkRadioComponent, value?: ContentModifier<RadioConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
     if (!value) {
-        HookContentModifier.removeRadioBuilderNode(peerId);
-        ContentModifierHelper.resetContentModifierRadio(receiver.getPeer().peer.ptr)
+        ContentModifierHelper.resetContentModifierRadio(ptr)
+        return
     }
-    let wrappedBuilder = value!.applyContent()
+    const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
     }
-    let radioBuilder = (parentNode: KPointer, config: RadioConfiguration): KPointer => {
-        config.contentModifier = value!
-        let builderNode = HookContentModifier.getRadioBuilderNode(peerId, wrappedBuilder!, config)
-        let returnNode = builderNode!.getFrameNode()
-        if (returnNode) {
-            return toPeerPtr(returnNode as FrameNode)
-        }
-        return nullptr
+    const radioBuilder = (parentNode: KPointer, config: RadioConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
     }
-    ContentModifierHelper.contentModifierRadio(receiver.getPeer().peer.ptr, value!, radioBuilder)
-}
-
-export function hookButtonContentModifier(
-    receiver: ArkButtonComponent, value: ContentModifier<ButtonConfiguration> | undefined): void {
-    let peerId = receiver.getPeer().getId()
-    if (!value) {
-        HookContentModifier.removeButtonBuilderNode(peerId);
-        ContentModifierHelper.resetContentModifierButton(receiver.getPeer().peer.ptr)
+    if (value) {
+        ContentModifierHelper.contentModifierRadio(ptr, value!, radioBuilder)
     }
-
-    let wrappedBuilder = value!.applyContent()
-    if (!wrappedBuilder) {
-        return
-    }
-    let buttonBuilder = (parentNode: KPointer, config: ButtonConfiguration): KPointer => {
-        config.contentModifier = value!
-        let builderNode = HookContentModifier.getButtonBuilderNode(peerId, wrappedBuilder!, config)
-        let returnNode = builderNode!.getFrameNode()
-        if (returnNode) {
-            return toPeerPtr(returnNode as FrameNode)
-        }
-        return nullptr
-    }
-    ContentModifierHelper.contentModifierButton(receiver.getPeer().peer.ptr, value!, buttonBuilder)
-}
-
-export function hookToggleContentModifier(
-    receiver: ArkToggleComponent, value: ContentModifier<ToggleConfiguration> | undefined): void {
-    let peerId = receiver.getPeer().getId()
-    if (!value) {
-        HookContentModifier.removeRadioBuilderNode(peerId);
-        ContentModifierHelper.resetContentModifierToggle(receiver.getPeer().peer.ptr)
-    }
-
-    let wrappedBuilder = value!.applyContent()
-    if (!wrappedBuilder) {
-        return
-    }
-    let toggleBuilder = (parentNode: KPointer, config: ToggleConfiguration): KPointer => {
-        config.contentModifier = value!
-        let builderNode = HookContentModifier.getToggleBuilderNode(peerId, wrappedBuilder!, config)
-        let returnNode = builderNode!.getFrameNode()
-        if (returnNode) {
-            return toPeerPtr(returnNode as FrameNode)
-        }
-        return nullptr
-    }
-    ContentModifierHelper.contentModifierToggle(receiver.getPeer().peer.ptr, value!, toggleBuilder)
 }
 
 export function hookRatingContentModifier(
-    receiver: ArkRatingComponent, value: ContentModifier<RatingConfiguration> | undefined): void {
-    let peerId = receiver.getPeer().getId()
+    receiver: ArkRatingComponent, value?: ContentModifier<RatingConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
     if (!value) {
-        HookContentModifier.removeRatingBuilderNode(peerId);
-        ContentModifierHelper.resetContentModifierRating(receiver.getPeer().peer.ptr)
+        ContentModifierHelper.resetContentModifierRating(ptr)
+        return
     }
-
-    let wrappedBuilder = value!.applyContent()
+    const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
     }
-    let ratingBuilder = (parentNode: KPointer, config: RatingConfiguration): KPointer => {
-        config.contentModifier = value!
-        let builderNode = HookContentModifier.getRatingBuilderNode(peerId, wrappedBuilder!, config)
-        let returnNode = builderNode!.getFrameNode()
-        if (returnNode) {
-            return toPeerPtr(returnNode as FrameNode)
-        }
-        return nullptr
+    const ratingBuilder = (parentNode: KPointer, config: RatingConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
     }
-    ContentModifierHelper.contentModifierRating(receiver.getPeer().peer.ptr, value!, ratingBuilder)
+    if (value) {
+        ContentModifierHelper.contentModifierRating(ptr, value!, ratingBuilder)
+    }
+}
+
+export function hookSelectContentModifier(
+    receiver: ArkSelectComponent, value?: ContentModifier<MenuItemConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierMenuItem(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const menuItemBuilder = (parentNode: KPointer, config: MenuItemConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierMenuItem(ptr, value!, menuItemBuilder)
+    }
 }
 
 export function hookSliderContentModifier(
-    receiver: ArkSliderComponent, value: ContentModifier<SliderConfiguration> | undefined): void {
-    let peerId = receiver.getPeer().getId()
+    receiver: ArkSliderComponent, value?: ContentModifier<SliderConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
     if (!value) {
-        HookContentModifier.removeSliderBuilderNode(peerId);
-        ContentModifierHelper.resetContentModifierSlider(receiver.getPeer().peer.ptr)
+        ContentModifierHelper.resetContentModifierSlider(ptr)
+        return
     }
-
-    let wrappedBuilder = value!.applyContent()
+    const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
     }
-    let sliderBuilder = (parentNode: KPointer, config: SliderConfiguration): KPointer => {
-        config.contentModifier = value!
-        let builderNode = HookContentModifier.getSliderBuilderNode(peerId, wrappedBuilder!, config)
-        let returnNode = builderNode!.getFrameNode()
-        if (returnNode) {
-            return toPeerPtr(returnNode as FrameNode)
-        }
-        return nullptr
+    const sliderBuilder = (parentNode: KPointer, config: SliderConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
     }
-    ContentModifierHelper.contentModifierSlider(receiver.getPeer().peer.ptr, value!, sliderBuilder)
+    if (value) {
+        ContentModifierHelper.contentModifierSlider(ptr, value!, sliderBuilder)
+    }
+}
+
+export function hookTextClockContentModifier(
+    receiver: ArkTextClockComponent, value?: ContentModifier<TextClockConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierTextClock(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const textClockBuilder = (parentNode: KPointer, config: TextClockConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierTextClock(ptr, value!, textClockBuilder)
+    }
+}
+
+export function hookTextTimerContentModifier(
+    receiver: ArkTextTimerComponent, value?: ContentModifier<TextTimerConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierTextTimer(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const textTimerBuilder = (parentNode: KPointer, config: TextTimerConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierTextTimer(ptr, value!, textTimerBuilder)
+    }
+}
+
+export function hookToggleContentModifier(
+    receiver: ArkToggleComponent, value?: ContentModifier<ToggleConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierToggle(ptr)
+        return
+    }
+    const wrappedBuilder = value?.applyContent()
+    if (!wrappedBuilder) {
+        return
+    }
+    const toggleBuilder = (parentNode: KPointer, config: ToggleConfiguration): KPointer => {
+        return CallbackTransformer.transformToPeerFromCustomBuilder(
+            memoWrapper(wrappedBuilder!.builder, config))
+    }
+    if (value) {
+        ContentModifierHelper.contentModifierToggle(ptr, value!, toggleBuilder)
+    }
 }

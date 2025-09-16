@@ -71,4 +71,11 @@ void RatingModelStatic::SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }
+
+void RatingModelStatic::TriggerChange(FrameNode* frameNode, double value)
+{
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRatingScore(value);
+}
 } // namespace OHOS::Ace::NG
