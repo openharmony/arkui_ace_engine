@@ -208,6 +208,7 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
     JSClass<JSPasteButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
     JSClass<JSPasteButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
+    JSClass<JSPasteButton>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
