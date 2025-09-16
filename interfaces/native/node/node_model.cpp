@@ -521,6 +521,12 @@ void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
     uiEvent.inputEvent = &(innerEvent->clickEvent);
 }
 
+void HandleCoastingAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_COASTING_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->coastingAxisEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -564,6 +570,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_CLICK_EVENT, HandleClickEvent},
             {NODE_ON_HOVER_EVENT, HandleHoverEvent},
             {NODE_ON_HOVER_MOVE, HandleTouchEvent},
+            {NODE_ON_COASTING_AXIS_EVENT, HandleCoastingAxisEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -635,6 +642,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
             break;
         case HOVER_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->hoverEvent.subKind);
+            break;
+        case COASTING_AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->coastingAxisEvent.subKind);
             break;
         default:
             break; /* Empty */

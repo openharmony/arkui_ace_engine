@@ -11883,6 +11883,29 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
 }
 
+void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](CoastingAxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COASTING_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.coastingAxisEvent.subKind = ON_COASTING_AXIS_EVENT;
+        event.coastingAxisEvent.phase = static_cast<int32_t>(info.GetPhase());
+        event.coastingAxisEvent.timeStamp = static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count());
+        event.coastingAxisEvent.deltaY = static_cast<float>(info.GetVerticalAxis());
+        event.coastingAxisEvent.deltaX = static_cast<float>(info.GetHorizontalAxis());
+        event.coastingAxisEvent.stopPropagation = info.IsStopPropagation();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.coastingAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnCoastingAxisEvent(frameNode, onEvent);
+}
+
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12022,6 +12045,13 @@ void ResetOnAxisEvent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnAxisEvent(frameNode);
+}
+
+void ResetOnCoastingAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnCoastingAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

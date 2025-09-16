@@ -4228,6 +4228,30 @@
         "name": "OH_ArkUI_NativeModule_GetNavDestinationAniParam"
     },
     {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_UIInputEvent_GetCoastingAxisEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetEventTime"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetPhase"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaX"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_GetDeltaY"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_CoastingAxisEvent_SetPropagation"
+    },
+    {
         "first_introduced": "22",
         "name": "OH_ArkUI_Swiper_FinishAnimation"
     },

@@ -323,6 +323,20 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
     return info.IsStopPropagation();
 }
 
+void AxisEventTarget::SetOnCoastingAxisCallback(OnCoastingAxisEventFunc&& onCoastingAxisCallback)
+{
+    onCoastingAxisCallback_ = std::move(onCoastingAxisCallback);
+}
+
+bool AxisEventTarget::HandleCoastingAxisEvent(CoastingAxisInfo& info)
+{
+    if (!onCoastingAxisCallback_) {
+        return false;
+    }
+    onCoastingAxisCallback_(info);
+    return info.IsStopPropagation();
+}
+
 bool AxisEventChecker::IsAxisEventSequenceCorrect(const AxisEvent& event)
 {
     if (event.sourceType == SourceType::MOUSE) { // wheel on mouse or touch pad

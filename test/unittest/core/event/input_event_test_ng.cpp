@@ -628,6 +628,47 @@ HWTEST_F(InputEventTestNg, OnCollectAxisEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnCollectCoastingAxisEvent001
+ * @tc.desc: test InputEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectCoastingAxisEvent001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->coastingAxisEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    AxisTestResult result;
+    inputEventHub->coastingAxisEventActuator_->OnCollectCoastingAxisEvent(result);
+    EXPECT_EQ(result.size(), 0);
+    OnCoastingAxisEventFunc onCoastingAxis = [](CoastingAxisInfo& info) {info.SetHorizontalAxis(100);};
+    auto onCoastingAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onCoastingAxis));
+    inputEventHub->coastingAxisEventActuator_->userCallback_ = onCoastingAxisEvent;
+
+    inputEventHub->coastingAxisEventActuator_->OnCollectCoastingAxisEvent(result);
+    EXPECT_EQ(result.size(), 1);
+    inputEventHub->coastingAxisEventActuator_->inputEvents_.emplace_back(onCoastingAxisEvent);
+
+    inputEventHub->coastingAxisEventActuator_->OnCollectCoastingAxisEvent(result);
+    EXPECT_EQ(result.size(), 2);
+    inputEventHub->coastingAxisEventActuator_->userCallback_ = onCoastingAxisEvent;
+    inputEventHub->coastingAxisEventActuator_->OnCollectCoastingAxisEvent(result);
+    EXPECT_EQ(result.size(), 3);
+
+    CoastingAxisInfo info;
+    EXPECT_EQ(info.GetHorizontalAxis(), 0);
+    inputEventHub->coastingAxisEventActuator_->coastingAxisEventTarget_->onCoastingAxisCallback_(info);
+    EXPECT_EQ(info.GetHorizontalAxis(), 100);
+    info.SetHorizontalAxis(0);
+    inputEventHub->coastingAxisEventActuator_->userCallback_ = nullptr;
+    inputEventHub->coastingAxisEventActuator_->coastingAxisEventTarget_->onCoastingAxisCallback_(info);
+    EXPECT_EQ(info.GetHorizontalAxis(), 0);
+}
+
+/**
  * @tc.name: ProcessTipsMouseTestHit001
  * @tc.desc: test ProcessTipsMouseTestHit
  * @tc.type: FUNC

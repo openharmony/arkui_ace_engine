@@ -379,6 +379,15 @@ struct ArkUIAxisEvent {
     ArkUI_Uint32 axes;
 };
 
+struct ArkUICoastingAxisEvent {
+    ArkUI_Int64 timeStamp;
+    ArkUI_Float32 deltaX;
+    ArkUI_Float32 deltaY;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 phase;
+    bool stopPropagation;
+};
+
 struct ArkUIDragEvent {
     void* unifiedData;
     void* unifiedDataSummary;
@@ -1157,6 +1166,7 @@ enum ArkUIEventCategory {
     HOVER_EVENT = 16,
     CLICK_EVENT = 17,
     AXIS_EVENT = 18,
+    COASTING_AXIS_EVENT = 19,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1195,6 +1205,7 @@ enum ArkUIEventSubKind {
     ON_HOVER_EVENT,
     ON_HOVER_MOVE,
     ON_SIZE_CHANGE,
+    ON_COASTING_AXIS_EVENT,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
@@ -1639,6 +1650,7 @@ struct ArkUINodeEvent {
         ArkUIClickEvent clickEvent;
         ArkUIHoverEvent hoverEvent;
         ArkUIAxisEvent axisEvent;
+        ArkUICoastingAxisEvent coastingAxisEvent;
     };
 };
 

@@ -51,6 +51,7 @@ public:
 class RenderNode;
 class Element;
 class TextOverlayManager;
+class CoastingAxisEventGenerator;
 using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
 using OutOfRectGetRectCallback = std::function<void(std::vector<Rect>&)>;
 using OutOfRectTouchCallback = std::function<void(void)>;
@@ -398,6 +399,9 @@ public:
     }
     void FalsifyCancelEventWithDifferentDeviceId(const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch = true);
     bool HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
+    void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node = nullptr) const;
+    bool OnTouchpadInteractionBegin() const;
+    void NotifyCoastingAxisEventStop() const;
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -436,6 +440,7 @@ private:
     void CheckMousePendingRecognizersState(const TouchEvent& event);
     void ExecuteTouchTestDoneCallback(const TouchEvent& touchEvent, const ResponseLinkResult& responseLinkRecognizers);
     void ExecuteTouchTestDoneCallback(const AxisEvent& axisEvent, const ResponseLinkResult& responseLinkRecognizers);
+    void InitCoastingAxisEventGenerator();
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;
@@ -476,6 +481,7 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
+    RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;

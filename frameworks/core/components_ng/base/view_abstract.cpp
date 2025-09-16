@@ -2396,6 +2396,13 @@ void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
     eventHub->ClearUserOnAxisEvent();
 }
 
+void ViewAbstract::DisableOnCoastingAxisEvent(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnCoastingAxisEvent();
+}
+
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -8043,6 +8050,13 @@ void ViewAbstract::SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxis
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
+void ViewAbstract::SetOnCoastingAxisEvent(FrameNode* frameNode, OnCoastingAxisEventFunc&& onCoastingAxisEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCoastingAxisEvent(std::move(onCoastingAxisEventFunc));
 }
 
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)

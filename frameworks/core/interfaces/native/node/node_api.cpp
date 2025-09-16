@@ -450,6 +450,9 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnHoverMove,
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnCoastingAxisEvent,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -686,6 +689,9 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     nullptr,
     NodeModifier::ResetOnHoverMove,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnCoastingAxisEvent,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

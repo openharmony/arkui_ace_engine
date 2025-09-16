@@ -7715,6 +7715,22 @@ typedef enum {
     NODE_ON_SIZE_CHANGE = 30,
 
     /**
+     * @brief Defines the coasting axis event.
+     *
+     * The event is triggered when user swipes with two fingers on the touchpad, the system constructs
+     * sliding events based on the speed at the moment the fingers are lifted, according to a certain
+     * decay curve. You can listen for such events to handle the flick effect immediately after the
+     * regular axis events. \n
+     * When the event callback occurs, the {@link ArkUI_UIInputEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object through {@link OH_ArkUI_NodeEvent_GetInputEvent}.
+     * And the {@link ArkUI_CoastingAxisEvent} object can be obtained from the {@link ArkUI_UIInputEvent}
+     * object through {@link OH_ArkUI_UIInputEvent_GetCoastingAxisEvent}. \n
+     *
+     * @since 21
+     */
+    NODE_ON_COASTING_AXIS_EVENT = 31,
+
+    /**
      * @brief Triggers onDetectResultUpdate callback
      * when the text is set to TextDataDetectorConfig and recognized successfully.
      *

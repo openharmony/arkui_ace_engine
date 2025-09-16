@@ -400,6 +400,16 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
+    auto&& touchpadInteractionBeginCallback = [weak, id = instanceId_](const NonPointerEvent& event,
+                                                  const std::function<void()>& ignoreMark) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask([context, event]() { context->OnNonPointerEvent(event); },
+            TaskExecutor::TaskType::UI, "ArkUITouchpadInteractionBegin");
+    };
+    aceView_->RegisterTouchpadInteractionBeginCallback(touchpadInteractionBeginCallback);
+
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();

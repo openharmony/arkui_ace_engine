@@ -24,6 +24,7 @@
 
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #include "core/pipeline/base/constants.h"

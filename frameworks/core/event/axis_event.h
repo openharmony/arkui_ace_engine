@@ -167,7 +167,62 @@ private:
     Offset globalDisplayLocation_;
 };
 
+class CoastingAxisInfo {
+public:
+    CoastingAxisInfo() = default;
+    ~CoastingAxisInfo() = default;
+
+    const TimeStamp& GetTimeStamp() const
+    {
+        return timeStamp_;
+    }
+    void SetTimeStamp(const TimeStamp& timeStamp)
+    {
+        timeStamp_ = timeStamp;
+    }
+    void SetPhase(CoastingAxisPhase phase)
+    {
+        phase_ = phase;
+    }
+    CoastingAxisPhase GetPhase() const
+    {
+        return phase_;
+    }
+    bool IsStopPropagation() const
+    {
+        return stopPropagation_;
+    }
+    void SetStopPropagation(bool stopPropagation)
+    {
+        stopPropagation_ = stopPropagation;
+    }
+    float GetHorizontalAxis() const
+    {
+        return horizontalAxis_;
+    }
+    float GetVerticalAxis() const
+    {
+        return verticalAxis_;
+    }
+    void SetHorizontalAxis(float axis)
+    {
+        horizontalAxis_ = axis;
+    }
+    void SetVerticalAxis(float axis)
+    {
+        verticalAxis_ = axis;
+    }
+
+private:
+    TimeStamp timeStamp_;
+    float horizontalAxis_ = 0.0;
+    float verticalAxis_ = 0.0;
+    CoastingAxisPhase phase_ = CoastingAxisPhase::NONE;
+    bool stopPropagation_ = true;
+};
+
 using OnAxisEventFunc = std::function<void(AxisInfo&)>;
+using OnCoastingAxisEventFunc = std::function<void(CoastingAxisInfo&)>;
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
 class AxisEventTarget : public virtual AceType {
@@ -190,9 +245,12 @@ public:
     {
         return frameId_;
     }
+    void SetOnCoastingAxisCallback(OnCoastingAxisEventFunc&& onCoastingAxisCallback);
+    bool HandleCoastingAxisEvent(CoastingAxisInfo& info);
 
 private:
     OnAxisEventFunc onAxisCallback_;
+    OnCoastingAxisEventFunc onCoastingAxisCallback_;
     NG::OffsetF coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string frameName_ = "Unknown";
