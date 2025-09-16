@@ -1847,8 +1847,8 @@ HWTEST_F(ListPatternTestNg, AnimateTo002, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->currentOffset_, 4500);
     
     /**
-     * @tc.steps: step2. AnimateTo the top
-     * @tc.expected: AnimateTo the top
+     * @tc.steps: step2. AnimateTo the 100
+     * @tc.expected: AnimateTo the 100
      */
     MockAnimationManager::GetInstance().SetTicks(4);
     pattern_->AnimateTo(100, -1, nullptr, true);
