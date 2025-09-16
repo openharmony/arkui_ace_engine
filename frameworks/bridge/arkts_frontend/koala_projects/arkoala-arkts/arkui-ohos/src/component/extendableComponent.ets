@@ -47,6 +47,8 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
+    __removeChildWhenDispose__IExtendableComponent_Internal(): void;
+    __addMeToParent__IExtendableComponent_Internal(): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -58,12 +60,41 @@ export abstract class ExtendableComponent implements LifeCycle {
     private delegate_?: IExtendableComponent;
     private localStoragebackStore_?: LocalStorage | undefined = undefined;
     private backLocalStorage_?: LocalStorage | undefined = undefined;
-    private useSharedStorage_?: boolean | undefined = undefined;;
+    private useSharedStorage_?: boolean | undefined = undefined;
+    private childrenWeakRefMap_: Map<int32, WeakRef<ExtendableComponent>> = new Map<int32, WeakRef<ExtendableComponent>>();
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
         this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
+    }
+
+    addMeToParent(): void {
+        this.parent_?.addChild(this);
+    }
+
+    addChild(child: ExtendableComponent): void {
+        this.childrenWeakRefMap_.set(child.getUniqueId(), new WeakRef<ExtendableComponent>(child));
+    }
+
+    setParent(parent: ExtendableComponent | undefined): void {
+        this.parent_ = parent;
+    }
+
+    removeChildById(id: int32): void {
+        this.childrenWeakRefMap_.delete(id);
+    }
+
+    removeMeFromParent(): void {
+        this.parent_?.removeChildById(this.getUniqueId());
+    }
+
+    removeAllChild(): void {
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.setParent(undefined);
+        });
+        this.childrenWeakRefMap_.clear();
     }
 
     setDelegate(delegate: IExtendableComponent): void {

@@ -26,6 +26,7 @@ import { ArkUIAniModule, ArkUIAniCustomNodeModule } from "arkui.ani"
 
 import { int32, int64, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { IExtendableComponent } from './extendableComponent';
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -52,9 +53,14 @@ export class ArkComponentRootPeer extends PeerNode {
     }
 }
 export class ArkCustomComponentRootPeer extends PeerNode {
+    private component?: IExtendableComponent;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
-    }  
+    }
+    setComponent(component: IExtendableComponent) {
+        this.component = component;
+        this.component!.__addMeToParent__IExtendableComponent_Internal();
+    }
     public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
         const peerId  = PeerNode.nextId();
         if (component.isCustomLayout) {
@@ -64,6 +70,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             }
             const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
             component.setPeer(_peer);
+            _peer.setComponent(component as IExtendableComponent);
             return _peer;
         } else {
             const _peerPtr = ArkUIAniModule._CustomNode_Construct(peerId, component);
@@ -72,8 +79,13 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             }
             const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
             component.setPeer(_peer);
+            _peer.setComponent(component as IExtendableComponent);
             return _peer;
          }
+    }
+    dispose() {
+        this.component?.__removeChildWhenDispose__IExtendableComponent_Internal();
+        super.dispose();
     }
 }
 export interface Root {
