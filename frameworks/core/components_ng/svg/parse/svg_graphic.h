@@ -79,7 +79,7 @@ protected:
                     path_->ConvertToSVGString().c_str(), smoothEdge);
             }
             if (!path_->IsValid()) {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
+                TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             DumpDrawPathInfo(path_.value());
             if (GreatNotEqual(smoothEdge, 0.0f)) {
@@ -159,7 +159,7 @@ protected:
                     path_->ConvertToSVGString().c_str(), smoothEdge);
             }
             if (!path_->IsValid()) {
-                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
+                TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
