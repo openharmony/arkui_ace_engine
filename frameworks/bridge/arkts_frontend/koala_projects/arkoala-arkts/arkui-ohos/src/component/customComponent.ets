@@ -60,6 +60,15 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance instanceof LayoutCallback;
     }
 
+    __removeChildWhenDispose__IExtendableComponent_Internal(): void {
+        this.instance.removeMeFromParent();
+        this.instance.removeAllChild();
+    }
+
+    __addMeToParent__IExtendableComponent_Internal(): void {
+        this.instance.addMeToParent();
+    }
+
     queryNavigationInfo(): uiObserver.NavigationInfo {
         return ArkUIAniModule._CustomNode_QueryNavigationInfo(this.getPeer()!.peer.ptr);
     }
