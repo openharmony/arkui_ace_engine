@@ -20,6 +20,7 @@ import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
 import { OBSERVE } from "./stateManagement";
 import { PeerNode } from "./PeerNode"
+import { RecordData } from "@ohos.base"
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
@@ -39,7 +40,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         throw new Error("Not supported yet");
     }
 
-    aboutToReuse(initializers?: T_Options): void {}
+    aboutToReuse(param: RecordData, initializers?: T_Options): void { }
     aboutToRecycle(): void {}
 
     // Can be overridden as an effect of @Prop, @Watch etc
@@ -79,7 +80,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         content?: () => void,
         initializers?: T_Options
     ): void {
-        ArkComponentRoot(this, () => {
+        ArkComponentRoot(this, (node: PeerNode) => {
             this.__updateStruct(initializers);
             this.isV2()
                 ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
@@ -89,6 +90,15 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             remember(() => {
                 this.onDidBuild();
             });
+            node.setOnRecycle(() =>
+                this.aboutToRecycle()
+            )
+            node.setOnReuse(
+                (param?: RecordData) => {
+                    this.aboutToReuse(param, initializers)
+                }
+            )
+
         })
     }
 
@@ -112,8 +122,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 return instance
             });
             node.setOnReuse(
-                () => {
-                    component.aboutToReuse(initializers)
+                (param?: RecordData) => {
+                    component.aboutToReuse(param, initializers)
                 }
             )
             component._buildWrapper(content, initializers);

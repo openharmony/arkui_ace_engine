@@ -20,6 +20,7 @@ import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
 import { StateUpdateLoop } from "./stateManagement"  
+import { RecordData } from "@ohos.base"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -35,7 +36,7 @@ export class PeerNode extends IncrementalNode {
     protected static currentId: int32 = INITIAL_ID
     static nextId(): int32 { return PeerNode.currentId++ }
     private id: int32
-    private _onReuse?: () => void
+    private _onReuse?: (param?: RecordData) => void
     private _onRecycle?: () => void
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
@@ -59,17 +60,31 @@ export class PeerNode extends IncrementalNode {
         return this.id
     }
 
-    onReuse(): void {
-        if (!this._reusable) {
+    onReuse(needRecurs: boolean, param?: RecordData): void {
+        if (!this._reusable && !needRecurs) {
             return
         }
-        if (this._onReuse) {
-            scheduleCallback(() => { this._onReuse?.() }) // could change states
+        if (this._onReuse && !needRecurs) {
+            scheduleCallback(() => { this._onReuse?.(param) }) // could change states
+        } else if (needRecurs) {
+            this._onReuse?.(param);
+            for (let child = this.firstChild; child; child = child!.nextSibling) {
+                if (child?.isKind(PeerNodeType)) {
+                    (child as PeerNode)!.onReuse(needRecurs, param);
+                }
+            }
         }
     }
 
-    onRecycle(): void {
+    onRecycle(needRecurs?: boolean): void {
         this._onRecycle?.()
+        if (needRecurs) {
+            for (let child = this.firstChild; child; child = child!.nextSibling) {
+                if (child?.isKind(PeerNodeType)) {
+                    (child as PeerNode)!.onRecycle(needRecurs);
+                }
+            }
+        }
     }
 
     private isRootNode() {
@@ -133,7 +148,7 @@ export class PeerNode extends IncrementalNode {
     setOnRecycle(cb: () => void): void {
         this._onRecycle = cb
     }
-    setOnReuse(cb: () => void): void {
+    setOnReuse(cb: (param?: RecordData) => void): void {
         this._onReuse = cb
     }
 
@@ -175,7 +190,11 @@ export class PeerNode extends IncrementalNode {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
-                peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount
+                if (peer._reusable) {
+                    peer!.onReuse(false)
+                } else {
+                    peer._reusable = true // becomes reusable after initial mount
+                }
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {

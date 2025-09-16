@@ -18,6 +18,7 @@ import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
 import { Disposable } from '@koalaui.runtime.states.Disposable';
 import { NativePeerNode } from 'arkui/NativePeerNode';
 import { int64 } from '@koalaui/compat';
+import { RecordData } from "@ohos.base"
 
 type pointer = int64
 
@@ -37,13 +38,13 @@ export declare class PeerNode extends IncrementalNode {
     public getPeerPtr(): pointer;
     public setId(id: int32): void;
     public getId(): int32;
-    public onReuse(): void;
-    public onRecycle(): void;
+    public onReuse(sync: boolean, param?: RecordData): void;
+    public onRecycle(needRecurs?: boolean): void;
     /* reuse and recycle object on RootPeers */
     public reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined;
     public recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean;
     public setOnRecycle(cb: () => void): void;
-    public setOnReuse(cb: () => void): void;
+    public setOnReuse(cb: (param?: RecordData) => void): void;
     public static findPeerByNativeId(id: number): PeerNode | undefined;
     public setInsertMark(mark: pointer, upDirection: boolean): void;
     public applyAttributes(attrs: Object): void;
