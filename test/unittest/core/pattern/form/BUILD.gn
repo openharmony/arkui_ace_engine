@@ -17,6 +17,8 @@ ace_unittest("form_test_ng") {
   flutter_skia = true
   render = true
   type = "new"
+  module_name = "form_fwk"
+  module_output = ""
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -66,7 +68,8 @@ ace_unittest("form_node_test") {
   flutter_skia = true
   render = true
   type = "new"
-
+  module_name = "form_fwk"
+  module_output = ""
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -116,7 +119,8 @@ ace_unittest("form_pattern_test") {
   flutter_skia = true
   render = true
   type = "new"
-
+  module_name = "form_fwk"
+  module_output = ""
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -163,7 +167,7 @@ ace_unittest("form_pattern_test") {
 }
 
 ohos_unittest("form_special_style_test") {
-  module_out_path = pattern_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
