@@ -1522,6 +1522,10 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     EXPECT_TRUE(overlayManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    /**
+     * @tc.steps: step3. set visibility gone and call ShowMenuAnimation.
+     * @tc.expected: visibility will change to VISIBLE.
+     */
     layoutProperty->UpdateVisibility(VisibleType::GONE, true);
     overlayManager->ShowMenuAnimation(menuNode);
     overlayManager->UpdateMenuVisibility(menuNode);
@@ -1534,7 +1538,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     EXPECT_TRUE(menuHelper);
 
     /**
-     * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
+     * @tc.steps: step4. call HideMenu related functions after menuNode already erased.
      * @tc.expected: return normally
      */
     overlayManager->HideAllMenus();
@@ -1545,7 +1549,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 
     /**
-     * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
+     * @tc.steps: step5. call DeleteMenu again after menuNode already erased.
      * @tc.expected: return normally
      */
     overlayManager->RemoveMenu(menuNode);
