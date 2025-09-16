@@ -5235,10 +5235,12 @@ void SetBindSheetImpl(Ark_NativePointer node,
         BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.isTitleBuilder = false;
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
                 sheetStyle.sheetSubtitle = OptConvert<std::string>(value.subtitle.value);
             },
-            [frameNode, node, &cbs](const CustomNodeBuilder& value) {
+            [&sheetStyle, frameNode, node, &cbs](const CustomNodeBuilder& value) {
+                sheetStyle.isTitleBuilder = true;
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
                     auto uiNode = callback.BuildSync(node);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
@@ -5251,23 +5253,17 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle,
-        titleBuilder = std::move(cbs.titleBuilder), onAppear = std::move(cbs.onAppear),
-        onDisappear = std::move(cbs.onDisappear), shouldDismiss = std::move(cbs.shouldDismiss),
-        onWillDismiss = std::move(cbs.onWillDismiss), onWillAppear = std::move(cbs.onWillAppear),
-        onWillDisappear = std::move(cbs.onWillDisappear), onHeightDidChange = std::move(cbs.onHeightDidChange),
-        onDetentsDidChange = std::move(cbs.onDetentsDidChange), onWidthDidChange = std::move(cbs.onWidthDidChange),
-        onTypeDidChange = std::move(cbs.onTypeDidChange), sheetSpringBack = std::move(cbs.sheetSpringBack)](
+    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, cb = std::move(cbs)](
         const RefPtr<UINode>& uiNode) mutable {
         auto buildFunc = [frameNode, uiNode]() {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             ViewStackProcessor::GetInstance()->Push(uiNode);
         };
         ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
-            std::move(titleBuilder), sheetStyle, std::move(onAppear), std::move(onDisappear),
-            std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
-            std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
-            std::move(onTypeDidChange), std::move(sheetSpringBack));
+            std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
+            std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
+            std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),
+            std::move(cb.onWidthDidChange), std::move(cb.onTypeDidChange), std::move(cb.sheetSpringBack));
         }, node);
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
