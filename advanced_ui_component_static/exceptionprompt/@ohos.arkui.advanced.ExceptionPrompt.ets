@@ -224,7 +224,7 @@ export struct ExceptionPrompt {
 
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `ExceptionPrompt Faild to get environment param error`);
@@ -243,7 +243,7 @@ export struct ExceptionPrompt {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.off('environment', this.callbackId as Int, (err: BusinessError<void> | null): void => {
+        this.applicationContext.offEnvironment(this.callbackId as Int, (err: BusinessError<void> | null): void => {
           hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
         })
       }
