@@ -130,13 +130,15 @@ Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetPinchAxisScale();
+    float value = peer->GetBaseInfo()->GetPinchAxisScale();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisPinchImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisPinch)
 {
-    LOGE("BaseEventAccessor.SetAxisPinchImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisPinch);
+    peer->GetBaseInfo()->SetPinchAxisScale(Converter::Convert<float>(*axisPinch));
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
