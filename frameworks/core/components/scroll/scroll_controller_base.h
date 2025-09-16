@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
@@ -129,6 +130,11 @@ public:
     virtual int32_t GetItemIndex(double x, double y) const
     {
         return -1;
+    }
+    
+    virtual NG::SizeF ContentSize() const
+    {
+        return NG::SizeF();
     }
 
     virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const

@@ -285,7 +285,6 @@ public:
 
     // maximum content height encountered so far
     float maxHeight_ = 0.0f;
-    float footerHeight_ = 0.0f;
 
     // record the new startIndex_ after changing the datasource, corresponding to the old startIndex_.
     int32_t newStartIndex_ = EMPTY_NEW_START_INDEX;
