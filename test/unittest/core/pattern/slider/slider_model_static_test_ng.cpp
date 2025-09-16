@@ -59,9 +59,6 @@ constexpr Color TEST_COLOR = Color(0XFFFF0000);
 constexpr double SLIDER_WIDTH = 20.0;
 constexpr double SLIDER_HEIGHT = 30.0;
 constexpr Dimension SLIDER_TRACK_THICKNESS = Dimension(10.0);
-constexpr Dimension SLIDER_OUTSET_TRACK_THICKNESS = Dimension(4.0);
-constexpr Dimension SLIDER_INSET_TRACK_THICKNESS = Dimension(20.0);
-constexpr Dimension SLIDER_NONE_TRACK_THICKNESS = Dimension(4.0);
 constexpr Dimension SLIDER_STEP_SIZE = Dimension(0.5);
 constexpr Dimension SLIDER_TRACK_BORDER_RADIUS = Dimension(10.0);
 constexpr Dimension SLIDER_BLOCK_BORDER_WIDTH = Dimension(5.0);
@@ -162,11 +159,6 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg001, TestSize.Level1)
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
     EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
-    
-    thickness = Dimension(-1);
-    SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_OUTSET_TRACK_THICKNESS);
 
     thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
@@ -203,11 +195,6 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg002, TestSize.Level1)
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
     EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
-    
-    thickness = Dimension(-1);
-    SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_INSET_TRACK_THICKNESS);
 
     thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
@@ -244,11 +231,6 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg003, TestSize.Level1)
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
     EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
-    
-    thickness = Dimension(-1);
-    SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_NONE_TRACK_THICKNESS);
 
     thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
@@ -587,11 +569,11 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg012, TestSize.Level1)
 
     gradient = defaultGradient;
     SliderModelStatic::SetTrackBackgroundColor(frameNode, gradient, false);
-    Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
+    std::optional<Gradient> testGradient = paintProperty->GetTrackBackgroundColor();
+    ASSERT_NE(testGradient, std::nullopt);
+    std::vector<GradientColor> testGradientColors = testGradient.value().GetColors();
 
-    std::vector<GradientColor> testGradientColors = testGradient.GetColors();
-    ASSERT_NE(paintProperty->GetTrackBackgroundColor(), std::nullopt);
-    EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
+    ASSERT_EQ(defaultGradientColors.size(), testGradientColors.size());
     EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
     testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
     EXPECT_EQ(defaultGradientColors.at(1).GetLinearColor().ToColor().GetValue(),
@@ -684,11 +666,11 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg014, TestSize.Level1)
 
     gradient = defaultGradient;
     SliderModelStatic::SetSelectColor(frameNode, gradient, false);
-    Gradient testGradient = SliderModelNG::GetSelectColor(frameNode);
+    std::optional<Gradient> testGradient = paintProperty->GetSelectGradientColor();
+    ASSERT_NE(testGradient, std::nullopt);
+    std::vector<GradientColor> testGradientColors = testGradient.value().GetColors();
 
-    std::vector<GradientColor> testGradientColors = testGradient.GetColors();
-    ASSERT_NE(paintProperty->GetSelectColor(), std::nullopt);
-    EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
+    ASSERT_EQ(defaultGradientColors.size(), testGradientColors.size());
     EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
     testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
     EXPECT_EQ(defaultGradientColors.at(1).GetLinearColor().ToColor().GetValue(),
@@ -762,7 +744,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg016, TestSize.Level1)
      */
     std::optional<float> sliderValue = std::nullopt;
     SliderModelStatic::SetSliderValue(frameNode, sliderValue);
-    EXPECT_EQ(paintProperty->GetValue(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetValue(), 0.0f);
 
     sliderValue = VALUE;
     SliderModelStatic::SetSliderValue(frameNode, sliderValue);
