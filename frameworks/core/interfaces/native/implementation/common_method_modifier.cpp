@@ -38,9 +38,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
-#endif
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -109,20 +106,6 @@ const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
 
 namespace OHOS::Ace::NG {
 namespace {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
-#endif
-
 Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     Ark_GestureRecognizer peer = nullptr;
@@ -4435,11 +4418,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
     CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
             CHECK_NULL_VOID(uiNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-                return CreateProxyNode(uiNode);
-#else
                 return uiNode;
-#endif
             };
             ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
         }, node);
