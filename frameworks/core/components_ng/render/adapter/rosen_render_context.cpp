@@ -4459,9 +4459,11 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     CHECK_NULL_RETURN(rsNode, false);
     std::list <RefPtr<FrameNode>> childChildrenList;
     node->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
+    // A NodeContainer node exist mounted to multiple parent nodes.
+    // If NodeContainers are deleted in this scenario, compatibility issues may occur.
     if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
         || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
-        || node->GetTag() == V2::STAGE_ETS_TAG) {
+        || node->GetTag() == V2::STAGE_ETS_TAG || node->GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
         return false;
     }
     return true;
