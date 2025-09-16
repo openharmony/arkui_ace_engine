@@ -292,7 +292,7 @@ void WindowPattern::CreateAppWindow()
     tempWindow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     tempWindow->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
+    auto surfaceNode = session_->GetSurfaceNode(true);
     if (surfaceNode) {
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(tempWindow->GetRenderContext());
         CHECK_NULL_VOID(context);
