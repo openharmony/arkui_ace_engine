@@ -85,8 +85,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     getDialogController(): promptAction.DialogController | undefined {
-        return undefined;
-        // return promptAction.getDialogController(this.getPeer()!.peer.ptr);
+        return promptAction.getDialogController(this.getPeer()!.peer.ptr);
     }
 
     aboutToAppear(): void {

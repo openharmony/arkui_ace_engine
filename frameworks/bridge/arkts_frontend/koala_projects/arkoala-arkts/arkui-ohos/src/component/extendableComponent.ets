@@ -24,6 +24,7 @@ import {
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
+import promptAction from '@ohos/promptAction'
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -47,6 +48,7 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
+    getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
 }
@@ -154,6 +156,10 @@ export abstract class ExtendableComponent implements LifeCycle {
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo();
+    }
+
+    getDialogController(): promptAction.DialogController | undefined {
+        return this.delegate_!.getDialogController();
     }
 
     public get localStorage_(): LocalStorage {
