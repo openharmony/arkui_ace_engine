@@ -58,10 +58,10 @@ constexpr bool IS_REVERSE = true;
 constexpr Color TEST_COLOR = Color(0XFFFF0000);
 constexpr double SLIDER_WIDTH = 20.0;
 constexpr double SLIDER_HEIGHT = 30.0;
-constexpr Dimension SLIDER_TRACK_THICKNRESS = Dimension(10.0);
-constexpr Dimension SLIDER_OUTSET_TRACK_THICKNRESS = Dimension(4.0);
-constexpr Dimension SLIDER_INSET_TRACK_THICKNRESS = Dimension(20.0);
-constexpr Dimension SLIDER_NONE_TRACK_THICKNRESS = Dimension(4.0);
+constexpr Dimension SLIDER_TRACK_THICKNESS = Dimension(10.0);
+constexpr Dimension SLIDER_OUTSET_TRACK_THICKNESS = Dimension(4.0);
+constexpr Dimension SLIDER_INSET_TRACK_THICKNESS = Dimension(20.0);
+constexpr Dimension SLIDER_NONE_TRACK_THICKNESS = Dimension(4.0);
 constexpr Dimension SLIDER_STEP_SIZE = Dimension(0.5);
 constexpr Dimension SLIDER_TRACK_BORDER_RADIUS = Dimension(10.0);
 constexpr Dimension SLIDER_BLOCK_BORDER_WIDTH = Dimension(5.0);
@@ -161,18 +161,17 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg001, TestSize.Level1)
     SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::OUTSET);
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_OUTSET_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
     
     thickness = Dimension(-1);
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_OUTSET_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_OUTSET_TRACK_THICKNESS);
 
-    thickness = SLIDER_TRACK_THICKNRESS;
+    thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNESS);
 }
 
 /**
@@ -203,18 +202,17 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg002, TestSize.Level1)
     SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::INSET);
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_INSET_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
     
     thickness = Dimension(-1);
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_INSET_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_INSET_TRACK_THICKNESS);
 
-    thickness = SLIDER_TRACK_THICKNRESS;
+    thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNESS);
 }
 
 /**
@@ -245,18 +243,17 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg003, TestSize.Level1)
     SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::NONE);
     std::optional<Dimension> thickness = std::nullopt;
     SliderModelStatic::SetThickness(frameNode, thickness);
-    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_NONE_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness(), std::nullopt);
     
     thickness = Dimension(-1);
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_NONE_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_NONE_TRACK_THICKNESS);
 
-    thickness = SLIDER_TRACK_THICKNRESS;
+    thickness = SLIDER_TRACK_THICKNESS;
     SliderModelStatic::SetThickness(frameNode, thickness);
     ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNRESS);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_TRACK_THICKNESS);
 }
 
 /**
@@ -286,7 +283,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg004, TestSize.Level1)
      */
     std::optional<Dimension> stepSize = std::nullopt;
     SliderModelStatic::SetStepSize(frameNode, stepSize);
-    ASSERT_NE(paintProperty->GetStepSize(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetStepSize(), std::nullopt);
 
     stepSize = SLIDER_STEP_SIZE;
     SliderModelStatic::SetStepSize(frameNode, stepSize);
@@ -321,7 +318,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg005, TestSize.Level1)
      */
     std::optional<SliderModel::BlockStyleType> blockType = std::nullopt;
     SliderModelStatic::SetBlockType(frameNode, blockType);
-    ASSERT_NE(paintProperty->GetBlockType(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetBlockType(), std::nullopt);
 
     blockType = SliderModelNG::BlockStyleType::SHAPE;
     SliderModelStatic::SetBlockType(frameNode, blockType);
@@ -357,15 +354,15 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg006, TestSize.Level1)
     std::optional<Dimension> width = std::nullopt;
     std::optional<Dimension> height = std::nullopt;
     SliderModelStatic::SetBlockSize(frameNode, width, height);
-    ASSERT_NE(layoutProperty->GetBlockSize(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetBlockSize(), std::nullopt);
 
     width = Dimension(SLIDER_WIDTH);
     height = Dimension(SLIDER_HEIGHT);
     SliderModelStatic::SetBlockSize(frameNode, width, height);
-    ASSERT_NE(layoutProperty->GetBlockSize(), std::nullopt);
     SizeT<Dimension> blockSize;
     blockSize.SetWidth(Dimension(SLIDER_WIDTH));
     blockSize.SetHeight(Dimension(SLIDER_HEIGHT));
+    ASSERT_NE(layoutProperty->GetBlockSize(), std::nullopt);
     EXPECT_EQ(layoutProperty->GetBlockSize().value(), blockSize);
 }
 
@@ -396,7 +393,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg007, TestSize.Level1)
      */
     std::optional<Dimension> trackBorderRadius = std::nullopt;
     SliderModelStatic::SetTrackBorderRadius(frameNode, trackBorderRadius);
-    ASSERT_NE(paintProperty->GetTrackBorderRadius(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetTrackBorderRadius(), std::nullopt);
 
     trackBorderRadius = SLIDER_TRACK_BORDER_RADIUS;
     SliderModelStatic::SetTrackBorderRadius(frameNode, trackBorderRadius);
@@ -431,7 +428,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg008, TestSize.Level1)
      */
     std::optional<Color> stepColor = std::nullopt;
     SliderModelStatic::SetStepColor(frameNode, stepColor);
-    ASSERT_NE(paintProperty->GetStepColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetStepColor(), std::nullopt);
 
     stepColor = TEST_COLOR;
     SliderModelStatic::SetStepColor(frameNode, stepColor);
@@ -466,7 +463,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg009, TestSize.Level1)
      */
     std::optional<Color> blockBorderColor = std::nullopt;
     SliderModelStatic::SetBlockBorderColor(frameNode, blockBorderColor);
-    ASSERT_NE(paintProperty->GetBlockBorderColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetBlockBorderColor(), std::nullopt);
 
     blockBorderColor = TEST_COLOR;
     SliderModelStatic::SetBlockBorderColor(frameNode, blockBorderColor);
@@ -501,7 +498,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg010, TestSize.Level1)
      */
     std::optional<Dimension> blockBorderWidth = std::nullopt;
     SliderModelStatic::SetBlockBorderWidth(frameNode, blockBorderWidth);
-    ASSERT_NE(paintProperty->GetBlockBorderWidth(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetBlockBorderWidth(), std::nullopt);
 
     blockBorderWidth = SLIDER_BLOCK_BORDER_WIDTH;
     SliderModelStatic::SetBlockBorderWidth(frameNode, blockBorderWidth);
@@ -536,7 +533,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg011, TestSize.Level1)
      */
     std::optional<Color> blockColor = std::nullopt;
     SliderModelStatic::SetBlockColor(frameNode, blockColor);
-    ASSERT_NE(paintProperty->GetBlockColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetBlockColor(), std::nullopt);
 
     blockColor = TEST_COLOR;
     SliderModelStatic::SetBlockColor(frameNode, blockColor);
@@ -571,7 +568,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg012, TestSize.Level1)
      */
     std::optional<Gradient> gradient = std::nullopt;
     SliderModelStatic::SetTrackBackgroundColor(frameNode, gradient, false);
-    ASSERT_NE(paintProperty->GetBlockColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundColor(), std::nullopt);
 
     Gradient defaultGradient;
     GradientColor gradientColor1;
@@ -593,7 +590,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg012, TestSize.Level1)
     Gradient testGradient = SliderModelNG::GetTrackBackgroundColor(frameNode);
 
     std::vector<GradientColor> testGradientColors = testGradient.GetColors();
-    ASSERT_NE(paintProperty->GetBlockColor(), std::nullopt);
+    ASSERT_NE(paintProperty->GetTrackBackgroundColor(), std::nullopt);
     EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
     EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
     testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
@@ -633,7 +630,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg013, TestSize.Level1)
      */
     std::optional<Color> selectColor = std::nullopt;
     SliderModelStatic::SetSelectColor(frameNode, selectColor);
-    ASSERT_NE(paintProperty->GetSelectColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetSelectColor(), std::nullopt);
 
     selectColor = TEST_COLOR;
     SliderModelStatic::SetSelectColor(frameNode, selectColor);
@@ -668,7 +665,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg014, TestSize.Level1)
      */
     std::optional<Gradient> gradient = std::nullopt;
     SliderModelStatic::SetSelectColor(frameNode, gradient, false);
-    ASSERT_NE(paintProperty->GetBlockColor(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetSelectColor(), std::nullopt);
 
     Gradient defaultGradient;
     GradientColor gradientColor1;
@@ -690,7 +687,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg014, TestSize.Level1)
     Gradient testGradient = SliderModelNG::GetSelectColor(frameNode);
 
     std::vector<GradientColor> testGradientColors = testGradient.GetColors();
-    ASSERT_NE(paintProperty->GetBlockColor(), std::nullopt);
+    ASSERT_NE(paintProperty->GetSelectColor(), std::nullopt);
     EXPECT_EQ(defaultGradientColors.size(), testGradientColors.size());
     EXPECT_EQ(defaultGradientColors.at(0).GetLinearColor().ToColor().GetValue(),
     testGradientColors.at(0).GetLinearColor().ToColor().GetValue());
@@ -730,7 +727,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg015, TestSize.Level1)
      */
     std::optional<SliderModel::SliderInteraction> sliderInteractionMode = std::nullopt;
     SliderModelStatic::SetSliderInteractionMode(frameNode, sliderInteractionMode);
-    ASSERT_NE(paintProperty->GetSliderInteractionMode(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetSliderInteractionMode(), std::nullopt);
 
     sliderInteractionMode = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     SliderModelStatic::SetSliderInteractionMode(frameNode, sliderInteractionMode);
@@ -765,7 +762,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg016, TestSize.Level1)
      */
     std::optional<float> sliderValue = std::nullopt;
     SliderModelStatic::SetSliderValue(frameNode, sliderValue);
-    ASSERT_NE(paintProperty->GetValue(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetValue(), std::nullopt);
 
     sliderValue = VALUE;
     SliderModelStatic::SetSliderValue(frameNode, sliderValue);
@@ -800,7 +797,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg017, TestSize.Level1)
      */
     std::optional<float> minLabel = std::nullopt;
     SliderModelStatic::SetMinLabel(frameNode, minLabel);
-    ASSERT_NE(paintProperty->GetMin(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetMin(), std::nullopt);
 
     minLabel = MIN_LABEL;
     SliderModelStatic::SetMinLabel(frameNode, minLabel);
@@ -835,7 +832,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg018, TestSize.Level1)
      */
     std::optional<float> maxLabel = std::nullopt;
     SliderModelStatic::SetMaxLabel(frameNode, maxLabel);
-    ASSERT_NE(paintProperty->GetMax(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetMax(), std::nullopt);
 
     maxLabel = MAX_LABEL;
     SliderModelStatic::SetMaxLabel(frameNode, maxLabel);
@@ -872,8 +869,8 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg019, TestSize.Level1)
      */
     std::optional<SliderModel::SliderMode> sliderMode = std::nullopt;
     SliderModelStatic::SetSliderMode(frameNode, sliderMode);
-    ASSERT_NE(paintProperty->GetSliderMode(), std::nullopt);
-    ASSERT_NE(layoutProperty->GetSliderMode(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetSliderMode(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetSliderMode(), std::nullopt);
 
     sliderMode = SliderModelNG::SliderMode::OUTSET;
     SliderModelStatic::SetSliderMode(frameNode, sliderMode);
@@ -912,8 +909,8 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg020, TestSize.Level1)
      */
     std::optional<Axis> direction = std::nullopt;
     SliderModelStatic::SetDirection(frameNode, direction);
-    ASSERT_NE(paintProperty->GetDirection(), std::nullopt);
-    ASSERT_NE(layoutProperty->GetDirection(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetDirection(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetDirection(), std::nullopt);
 
     direction = Axis::VERTICAL;
     SliderModelStatic::SetDirection(frameNode, direction);
@@ -952,8 +949,8 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg021, TestSize.Level1)
      */
     std::optional<bool> direction = std::nullopt;
     SliderModelStatic::SetReverse(frameNode, direction);
-    ASSERT_NE(paintProperty->GetReverse(), std::nullopt);
-    ASSERT_NE(layoutProperty->GetReverse(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetReverse(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetReverse(), std::nullopt);
 
     direction = IS_REVERSE;
     SliderModelStatic::SetReverse(frameNode, direction);
