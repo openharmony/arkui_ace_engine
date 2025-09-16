@@ -1552,6 +1552,7 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RETURN_TO_UICONTEXT = 3] = 'RETURN_TO_UICONTEXT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 let KeyboardAppearance;
