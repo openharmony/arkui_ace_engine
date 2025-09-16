@@ -1683,6 +1683,178 @@ HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusMoveOnKey007
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 3, nextMargin 50vp, non-loop mode and 10 items
+     * @tc.expected: Swiper is created successfully with 4 visible items
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    SwiperModelNG::SetNextMargin(AceType::RawPtr(frameNode_), 50.0_vp, true);
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), false);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_FALSE(SwiperModelNG::GetLoop(AceType::RawPtr(frameNode_)));
+    /**
+     * @tc.steps: step2. Press right key multiple times to move focus
+     * @tc.expected: currentFocusIndex_ changes from 0 to 3, currentIndex_ remains 0
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 1);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 2);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 3);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step3. Continue pressing right key
+     * @tc.expected: currentFocusIndex_ changes from 3 to 4, currentIndex_ changes from 0 to 1
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 4);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey008
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4, swipeByGroup and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), false);
+    SwiperModelNG::SetPreviousMargin(AceType::RawPtr(frameNode_), 50.0_vp, true);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_FALSE(SwiperModelNG::GetLoop(AceType::RawPtr(frameNode_)));
+    /**
+     * @tc.steps: step2. Make the second child not enabled and press right key.
+     * @tc.expected: currentIndex_ is not changed, currentFocusIndex_ change from 0 to 2.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 1);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 2);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step3. Continue pressing right key
+     * @tc.expected: currentFocusIndex_ is not changed, currentIndex_ change from 0 to 1.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 3);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    pattern_->HandleFocusInternal();
+    EXPECT_EQ(pattern_->currentFocusIndex_, 3);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey009
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 3, nextMargin 50vp, non-loop mode and 10 items
+     * @tc.expected: Swiper is created successfully
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    SwiperModelNG::SetNextMargin(AceType::RawPtr(frameNode_), 50.0_vp, true);
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), false);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Change to last page (index 9)
+     * @tc.expected: currentFocusIndex_ is 7, currentIndex_ is 7
+     */
+    ChangeIndex(9);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 7);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    EXPECT_FALSE(SwiperModelNG::GetLoop(AceType::RawPtr(frameNode_)));
+    /**
+     * @tc.steps: step3. Press left key to move focus backward
+     * @tc.expected: currentFocusIndex_ changes from 7 to 6, currentIndex_ remains 7
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 6);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    /**
+     * @tc.steps: step4. Press left key again and handle focus
+     * @tc.expected: After handling focus, currentFocusIndex_ remains 6, currentIndex_ changes to 6
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    pattern_->HandleFocusInternal();
+    EXPECT_EQ(pattern_->currentFocusIndex_, 6);
+    EXPECT_EQ(pattern_->currentIndex_, 6);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey0010
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 3, previousMargin 50vp, non-loop mode and 10 items
+     * @tc.expected: Swiper is created successfully
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), false);
+    // SwiperModelNG::SetNextMargin(AceType::RawPtr(frameNode_), 50.0_vp, true);
+    SwiperModelNG::SetPreviousMargin(AceType::RawPtr(frameNode_), 50.0_vp, true);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Change to last page (index 9)
+     * @tc.expected: currentFocusIndex_ is 7, currentIndex_ is 7
+     */
+    ChangeIndex(9);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 7);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    EXPECT_FALSE(SwiperModelNG::GetLoop(AceType::RawPtr(frameNode_)));
+    /**
+     * @tc.steps: step3. Press left key to move focus backward
+     * @tc.expected: currentFocusIndex_ changes from 7 to 6, currentIndex_ remains 7
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 6);
+    EXPECT_EQ(pattern_->currentIndex_, 7);
+    /**
+     * @tc.steps: step4. Press left key again to trigger page change
+     * @tc.expected: currentFocusIndex_ changes to 5, currentIndex_ changes from 7 to 6
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 5);
+    EXPECT_EQ(pattern_->currentIndex_, 6);
+}
+
+/**
  * @tc.name: HandleTouchBottomLoop001
  * @tc.desc: Test SwiperPattern HandleTouchBottomLoop
  * @tc.type: FUNC
