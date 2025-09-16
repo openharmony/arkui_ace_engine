@@ -6993,6 +6993,8 @@ struct ArkUIFrameNodeModifier {
     void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp);
     void (*getPositionToScreen)(ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp);
     void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2], ArkUI_Bool useVp);
+    ArkUI_Bool (*convertPoint)(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUINodeHandle targetnode,
+        ArkUI_Float32 (*targetNodePositionOffset)[2]);
     void (*getGlobalPositionOnDisplay)(
         ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp);
     void (*getPositionToParentWithTransform)(

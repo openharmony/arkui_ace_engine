@@ -18,6 +18,10 @@
 
 #include "base/log/log.h"
 #include "ui/base/utils/utils.h"
+namespace OHOS::Ace::NG {
+class FrameNode;
+RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
     std::string ReadFileToString(const std::string& packagePathStr, const std::string& fileName);

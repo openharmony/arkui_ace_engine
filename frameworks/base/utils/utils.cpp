@@ -14,6 +14,7 @@
  */
 
 #include <climits>
+#include "core/components_ng/base/frame_node.h"
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <shlwapi.h>
@@ -78,4 +79,36 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
 
     return fileData;
 }
+
+namespace NG {
+RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB)
+{
+    if (!nodeA || !nodeB) {
+        return nullptr;
+    }
+    std::vector<RefPtr<FrameNode>> ancestorsA;
+    RefPtr<FrameNode> current = nodeA;
+
+    while (current) {
+        ancestorsA.push_back(current);
+        if (current->CheckTopWindowBoundary()) {
+            break;
+        }
+        current = current->GetAncestorNodeOfFrame(false);
+    }
+    current = nodeB;
+    while (current) {
+        for (const auto& ancestor : ancestorsA) {
+            if (ancestor == current) {
+                return current;
+            }
+        }
+        if (current->CheckTopWindowBoundary()) {
+            break;
+        }
+        current = current->GetAncestorNodeOfFrame(false);
+    }
+    return nullptr;
+}
+} // namespace NG
 }
