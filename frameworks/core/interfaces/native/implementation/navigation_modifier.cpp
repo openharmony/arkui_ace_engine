@@ -66,13 +66,14 @@ void SetNavigationOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pathInfos);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
-#ifdef WRONG_GEN
-    auto navigationStack = pathInfos->GetNavPathStack();
+    auto pathStack = pathInfos->value;
+    CHECK_NULL_VOID(pathStack);
+    auto navigationStack = pathStack->GetNavPathStack();
     navigationPattern->SetNavigationStack(navigationStack);
     navigationStack->SetOnStateChangedCallback(nullptr);
-#endif
 }
 } // namespace NavigationInterfaceModifier
 
