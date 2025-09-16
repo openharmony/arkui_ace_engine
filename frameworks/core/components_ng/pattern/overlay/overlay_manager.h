@@ -627,16 +627,6 @@ public:
 
     void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
-    void SetSheetHeight(float height)
-    {
-        sheetHeight_ = height;
-    }
-
-    float GetSheetHeight() const
-    {
-        return sheetHeight_;
-    }
-
     const WeakPtr<UINode>& GetRootNode() const;
     const RefPtr<GroupManager>& GetGroupManager() const;
 
@@ -1007,7 +997,6 @@ private:
     std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback_ = nullptr;
     std::unordered_map<int32_t, RefPtr<NG::ClickEvent>> sheetMaskClickEventMap_; // Key: maskNodeId
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
-    float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     WeakPtr<PipelineContext> context_;
     int32_t dialogCount_ = 0;
