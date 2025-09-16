@@ -514,7 +514,9 @@ HWTEST_F(SliderTestNg, SliderTestNg006, TestSize.Level1)
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
@@ -2213,7 +2215,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest001, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 1.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
@@ -2266,7 +2271,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest002, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 2.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());

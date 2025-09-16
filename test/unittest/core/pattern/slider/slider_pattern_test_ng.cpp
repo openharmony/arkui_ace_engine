@@ -633,17 +633,20 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest007, TestSize.Level1)
      * @tc.steps: step2. set attribute and call function.
      */
     auto offset = BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
-    sliderPattern->direction_ = Axis::HORIZONTAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::HORIZONTAL);
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
-    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 
     sliderPattern->sliderContentModifier_ =
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
-    sliderPattern->direction_ = Axis::HORIZONTAL;
+    sliderModelNG.SetDirection(node, Axis::HORIZONTAL);
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
-    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 }
 
@@ -1300,7 +1303,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest001, TestSize.Level1
     EXPECT_EQ(hSize.Width(), pointNodeWidth);
     EXPECT_EQ(hSize.Height(), contentRect.Height());
 
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     /**
      * @tc.steps: step4 Get virtual nodes size in vertical.
      */
