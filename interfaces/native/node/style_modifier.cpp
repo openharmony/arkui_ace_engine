@@ -2938,11 +2938,19 @@ int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeI
     ArkUI_Int32 alignMode[] = { ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START, ArkUI_Direction::ARKUI_DIRECTION_AUTO };
     auto isAlign = false;
     if (actualSize >= 3) {
+        int32_t alignment = item->value[NUM_2].i32;
+        if (alignment < 0 || alignment > 8) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         isAlign = true;
-        alignMode[0] = item->value[NUM_2].i32;
+        alignMode[0] = alignment;
     }
     if (actualSize == 4) {
-        alignMode[1] = item->value[NUM_3].i32;
+        int32_t direction = item->value[NUM_3].i32;
+        if (direction < 0 || (direction > 1 && direction != 3)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        alignMode[1] = direction;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
         node->uiNodeHandle, values, units, alignMode, isAlign, actualSize, nullptr, nullptr);
