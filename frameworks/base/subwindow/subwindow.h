@@ -277,7 +277,7 @@ public:
     virtual void SetNodeId(int32_t nodeId) = 0;
     virtual int32_t GetNodeId() const = 0;
     virtual void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) = 0;
-
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     // ArkTS 1.2
     virtual void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
@@ -286,6 +286,7 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void OpenCustomDialogStatic(DialogProperties &dialogProps,
         std::function<void(int32_t)> &&callback) = 0;
+#endif
 
 private:
     int32_t subwindowId_ = 0;
