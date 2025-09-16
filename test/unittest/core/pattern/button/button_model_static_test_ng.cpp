@@ -196,7 +196,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg003, TestSize.Level1)
      */
     std::optional<ControlSize> buttonControlSize = std::nullopt;
     ButtonModelStatic::SetControlSize(frameNode, buttonControlSize);
-    EXPECT_EQ(layoutProperty->GetControlSize(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetControlSize(), ControlSize::NORMAL);
     buttonControlSize = ControlSize::SMALL;
     ButtonModelStatic::SetControlSize(frameNode, buttonControlSize);
     EXPECT_EQ(layoutProperty->GetControlSizeValue(), ControlSize::SMALL);
@@ -378,7 +378,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg009, TestSize.Level1)
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     ButtonModelStatic::SetFontWeight(frameNode, fontWeight);
-    EXPECT_EQ(layoutProperty->GetFontWeight(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::NORMAL);
     fontWeight = std::make_optional(BUTTON_BOLD_FONT_WEIGHT_VALUE);
     ButtonModelStatic::SetFontWeight(frameNode, fontWeight);
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), BUTTON_BOLD_FONT_WEIGHT_VALUE);
@@ -410,7 +410,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg010, TestSize.Level1)
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     std::optional<Ace::FontStyle> fontStyleValue = std::nullopt;
     ButtonModelStatic::SetFontStyle(frameNode, fontStyleValue);
-    EXPECT_EQ(layoutProperty->GetFontStyle(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontStyle(), Ace::FontStyle::NORMAL);
     fontStyleValue = std::make_optional(BUTTON_ITALIC_FONT_STYLE_VALUE);
     ButtonModelStatic::SetFontStyle(frameNode, fontStyleValue);
     EXPECT_EQ(layoutProperty->GetFontStyleValue(), BUTTON_ITALIC_FONT_STYLE_VALUE);
@@ -474,7 +474,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg012, TestSize.Level1)
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     std::optional<Color> fontColorValue = std::nullopt;
     ButtonModelStatic::SetFontColor(frameNode, fontColorValue);
-    EXPECT_EQ(layoutProperty->GetFontColor(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontColor(), Color::BLACK);
     fontColorValue = std::make_optional(BUTTON_TEXT_COLOR_VALUE);
     ButtonModelStatic::SetFontColor(frameNode, fontColorValue);
     EXPECT_EQ(layoutProperty->GetFontColorValue(), BUTTON_TEXT_COLOR_VALUE);

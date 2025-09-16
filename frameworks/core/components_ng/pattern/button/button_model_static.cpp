@@ -69,15 +69,15 @@ void ButtonModelStatic::SetButtonStyle(FrameNode* frameNode, const std::optional
     SetFontColor(frameNode, textColor);
 }
 
-void ButtonModelStatic::SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+void ButtonModelStatic::SetButtonSize(FrameNode* frameNode, const ControlSize& controlSize,
     RefPtr<ButtonTheme> buttonTheme)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto padding = buttonTheme->GetPadding(controlSize.value());
+    auto padding = buttonTheme->GetPadding(controlSize);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     PaddingProperty defaultPadding;
-    if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
+    if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::SMALL) {
         float leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
         float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
         defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding),
@@ -92,16 +92,15 @@ void ButtonModelStatic::SetButtonSize(FrameNode* frameNode, const std::optional<
 void ButtonModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
     CHECK_NULL_VOID(frameNode);
-    if (controlSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value(), frameNode);
-        auto context = frameNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        SetButtonSize(frameNode, controlSize, buttonTheme);
-        Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
-        SetFontSize(frameNode, fontSize);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize,
+        controlSize.value_or(ControlSize::NORMAL), frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    SetButtonSize(frameNode, controlSize.value_or(ControlSize::NORMAL), buttonTheme);
+    Dimension fontSize = buttonTheme->GetTextSize(controlSize.value_or(ControlSize::NORMAL));
+    SetFontSize(frameNode, fontSize);
 }
 
 void ButtonModelStatic::SetLabel(FrameNode* frameNode, const char* label)
@@ -177,7 +176,7 @@ void ButtonModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Di
     if (fontSize) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, frameNode);
+        ResetButtonFontSize(frameNode);
     }
     CHECK_NULL_VOID(frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
@@ -190,20 +189,18 @@ void ButtonModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Di
 
 void ButtonModelStatic::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& fontWeight)
 {
-    if (fontWeight) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, frameNode);
-    }
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateFontWeight(fontWeight.value_or(FontWeight::NORMAL));
 }
 
 void ButtonModelStatic::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& fontStyle)
 {
-    if (fontStyle) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, fontStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, frameNode);
-    }
+    CHECK_NULL_VOID(frameNode);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateFontStyle(fontStyle.value_or(Ace::FontStyle::NORMAL));
 }
 
 void ButtonModelStatic::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamily)
@@ -211,18 +208,18 @@ void ButtonModelStatic::SetFontFamily(FrameNode* frameNode, const std::optional<
     if (fontFamily && fontFamily->size() > 0) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, frameNode);
+        ResetFontFamily(frameNode);
     }
 }
 
 void ButtonModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Color>& textColor)
 {
+    CHECK_NULL_VOID(frameNode);
     if (textColor) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ResetButtonFontColor(frameNode);
     }
 }
 
@@ -430,6 +427,7 @@ void ButtonModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optiona
     if (optValue) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, optValue.value(), frameNode);
     } else {
+        ResetButtonTextFontSize(frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, frameNode);
     }
 }
@@ -440,6 +438,7 @@ void ButtonModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optiona
     if (optValue) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, optValue.value(), frameNode);
     } else {
+        ResetButtonTextFontSize(frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, frameNode);
     }
 }
@@ -476,5 +475,54 @@ void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, c
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
+}
+
+void ButtonModelStatic::ResetButtonTextFontSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetFontSize();
+}
+
+void ButtonModelStatic::ResetFontFamily(FrameNode* frameNode)
+{
+    std::vector<std::string> fontFamilies;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamilies, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorSetByUser, true, frameNode);
+}
+
+void ButtonModelStatic::ResetButtonFontColor(FrameNode* frameNode)
+{
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    Color textColor = buttonTheme->GetTextStyle().GetTextColor();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);
+}
+
+void ButtonModelStatic::ResetButtonFontSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    Dimension buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) ?
+        buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
+    textLayoutProperty->UpdateFontSize(buttonFontSize);
 }
 } // namespace OHOS::Ace::NG
