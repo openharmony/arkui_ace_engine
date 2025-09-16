@@ -2256,4 +2256,21 @@ HWTEST_F(RichEditorSelectionTestNg, DeleteByRange001, TestSize.Level1)
     richEditorPattern->DeleteByRange(nullptr, 1, 2);
     EXPECT_TRUE(value == richEditorPattern->lastSelectionRange_);
 }
+
+/**
+ * @tc.name: MarkContentNodeForRender001
+ * @tc.desc: test MarkContentNodeForRender func
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, MarkContentNodeForRender001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->MarkContentNodeForRender();
+    auto paintProp = richEditorNode_->GetPaintProperty<NG::Property>();
+    ASSERT_TRUE(paintProp);
+    auto changeFlag = paintProp->GetPropertyChangeFlag() | NG::PROPERTY_UPDATE_RENDER;
+    EXPECT_EQ(paintProp->GetPropertyChangeFlag(), changeFlag);
+}
 } // namespace OHOS::Ace::NG

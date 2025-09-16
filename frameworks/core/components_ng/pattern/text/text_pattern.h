@@ -922,6 +922,7 @@ public:
     }
 
     void UpdateStyledStringByColorMode();
+    virtual void MarkContentNodeForRender() {};
 
 protected:
     int32_t GetClickedSpanPosition()

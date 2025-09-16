@@ -74,6 +74,7 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
             auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
             selectedRects = CalculateSelectedRect(rects, contentRect.Width());
         }
+        overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
         overlayMod->SetSelectedRects(selectedRects);
         return;
     }
