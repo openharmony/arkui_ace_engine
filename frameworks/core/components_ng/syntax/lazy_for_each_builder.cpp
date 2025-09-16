@@ -864,8 +864,7 @@ namespace OHOS::Ace::NG {
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
-        auto tempCachedItems = cachedItems_;
-        for (auto& [index, node] : tempCachedItems) {
+        for (auto& [index, node] : cachedItems_) {
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start)));
             if (!isInRange) {
@@ -876,7 +875,6 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(false);
                 }
-                cachedItems_[index] = LazyForEachChild(node.first, nullptr);
                 auto tempNode = node.second;
                 auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 if (!pair.second) {
@@ -901,7 +899,6 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(true);
                 }
-                cachedItems_[index] = node;
             }
             needBuild = true;
         }
