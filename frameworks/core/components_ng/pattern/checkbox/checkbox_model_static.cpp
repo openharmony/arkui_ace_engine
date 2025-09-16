@@ -121,4 +121,11 @@ void CheckBoxModelStatic::SetChangeEvent(FrameNode* frameNode, ChangeEvent&& onC
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
+
+void CheckBoxModelStatic::TriggerChange(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateUIStatus(value);
+}
 } // namespace OHOS::Ace::NG

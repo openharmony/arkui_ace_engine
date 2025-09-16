@@ -46,58 +46,10 @@ import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty } from "#generated";
 
 import { AnimateParam } from "#generated";
-import { ArkButtonComponent, ButtonConfiguration } from "#generated";
-import { ArkCheckboxComponent, CheckBoxConfiguration } from "#generated";
-import { ArkDataPanelComponent, DataPanelConfiguration } from "#generated";
-import { ArkGaugeComponent, GaugeConfiguration } from "#generated";
-import {
-  ArkLoadingProgressComponent,
-  LoadingProgressConfiguration,
-} from "#generated";
-import { ArkProgressComponent, ProgressConfiguration } from "#generated";
-import { ArkRadioComponent, RadioConfiguration } from "#generated";
-import { ArkRatingComponent, RatingConfiguration } from "#generated";
-import { ArkSelectComponent, MenuItemConfiguration } from "#generated";
-import { ArkSliderComponent, SliderConfiguration } from "#generated";
-import { ArkTextClockComponent, TextClockConfiguration } from "#generated";
-import { ArkTextTimerComponent, TextTimerConfiguration } from "#generated";
-import { ArkToggleComponent, ToggleConfiguration, ContentModifier, GestureModifier } from "#generated";
+import { GestureModifier } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
-
-export function hookCheckBoxContentModifier(
-  receiver: ArkCheckboxComponent,
-  value?: ContentModifier<CheckBoxConfiguration>
-) {}
-export function hookDataPanelContentModifier(
-  receiver: ArkDataPanelComponent,
-  value?: ContentModifier<DataPanelConfiguration>
-) {}
-export function hookGaugeContentModifier(
-  receiver: ArkGaugeComponent,
-  value?: ContentModifier<GaugeConfiguration>
-) {}
-export function hookLoadingProgressContentModifier(
-  receiver: ArkLoadingProgressComponent,
-  value?: ContentModifier<LoadingProgressConfiguration>
-) {}
-export function hookProgressContentModifier(
-  receiver: ArkProgressComponent,
-  value?: ContentModifier<ProgressConfiguration>
-) {}
-export function hookSelectContentModifier(
-  receiver: ArkSelectComponent,
-  value?: ContentModifier<MenuItemConfiguration>
-) {}
-export function hookTextClockContentModifier(
-  receiver: ArkTextClockComponent,
-  value?: ContentModifier<TextClockConfiguration>
-) {}
-export function hookTextTimerContentModifier(
-  receiver: ArkTextTimerComponent,
-  value?: ContentModifier<TextTimerConfiguration>
-) {}
 
 export function hookId(component: object, value?: string) {}
 
