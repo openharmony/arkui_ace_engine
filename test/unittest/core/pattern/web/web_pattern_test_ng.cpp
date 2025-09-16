@@ -5019,7 +5019,7 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_003, TestSize.Level1)
     EXPECT_EQ(mouseInfoQueue.size(), 1);
 
     auto uiCallback = [](const std::shared_ptr<BaseEventInfo>& info) {};
-    webPattern->delegate_->OnNativeEmbedGestureEventV2_ = uiCallback;
+    webPattern->delegate_->OnNativeEmbedMouseEventV2_ = uiCallback;
     info.SetButton(MouseButton::NONE_BUTTON);
     info.SetAction(MouseAction::PRESS);
     webPattern->HandleMouseEvent(info);
