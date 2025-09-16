@@ -41,7 +41,7 @@ Ark_Boolean IsRepeatImpl(Ark_LongPressRecognizer peer)
 }
 Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DURATION);
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_LONG_PRESS_DURATION);
     CHECK_NULL_RETURN(peer, errorValue);
     return Converter::ArkValue<Ark_Number>(peer->GetDuration());
 }

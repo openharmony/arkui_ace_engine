@@ -76,6 +76,6 @@ export declare namespace componentUtils {
         rotate: RotateResult
         transform: Matrix4Result
     }
-    
-    export function getRectangleById(id: string): ComponentInfo;
+    // rename 'rectId' back to 'id' when libarkts gets updated
+    export function getRectangleById(rectId: string): ComponentInfo;
 }

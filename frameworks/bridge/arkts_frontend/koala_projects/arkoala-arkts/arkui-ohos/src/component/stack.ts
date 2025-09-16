@@ -22,14 +22,16 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { Alignment } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkStackNode } from '../handwritten/modifiers/ArkStackNode';
+import { ArkStackAttributeSet, StackModifier } from '../StackModifier';
 
 export class ArkStackPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkStackPeer {
@@ -92,7 +94,7 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
     }
     public pointLight(value: PointLightStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkStackComponent extends ArkCommonMethodComponent implements StackAttribute {
     getPeer(): ArkStackPeer {

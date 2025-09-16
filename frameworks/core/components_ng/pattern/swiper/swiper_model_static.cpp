@@ -351,12 +351,45 @@ void SwiperModelStatic::SetCustomContentTransition(FrameNode* frameNode, SwiperC
     pattern->SetSwiperCustomContentTransition(transition);
 }
 
+void SwiperModelStatic::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelStatic::SetOnUnselected(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelStatic::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void SwiperModelStatic::SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
 }
 
 void SwiperModelStatic::SetIndicatorInteractive(FrameNode* frameNode, bool interactive)
@@ -445,5 +478,9 @@ void SwiperModelStatic::SetOnChangeEvent(FrameNode* frameNode,
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
+}
+void SwiperModelStatic::SetBindIndicator(FrameNode* frameNode, bool bind)
+{
+    SwiperModelNG::SetBindIndicator(frameNode, bind);
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,9 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <string>
+
+#include "ui/base/macros.h"
 
 #define ANI_CALL(env, call, onFail...)                                                                 \
     if (env) {                                                                                         \
@@ -53,9 +56,10 @@ typedef struct __ani_env ani_env;
 typedef class __ani_object* ani_object;
 typedef class __ani_ref* ani_ref;
 typedef struct __ani_vm ani_vm;
+typedef class __ani_string* ani_string;
 
 namespace OHOS::Ace {
-class ArktsAniUtils final {
+class ACE_FORCE_EXPORT ArktsAniUtils final {
 public:
     /**
      * Create std/core/Boolean.
@@ -76,6 +80,14 @@ public:
      * Get ani env from ani vm.
      */
     static ani_env* GetAniEnv(ani_vm* vm);
+    /**
+     * Get std/core/Double.
+     */
+    static ani_object CreateDoubleObject(ani_env* env, double value);
+    /**
+     * Get std/core/Double by float.
+     */
+    static ani_object FloatToNumberObject(ani_env* env, const float& value);
 };
 } // namespace OHOS::Ace
 

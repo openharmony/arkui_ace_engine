@@ -373,8 +373,10 @@ void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 
 void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
 {
-    gridItemStyle_ = gridItemStyle;
     auto host = GetHost();
+    // call UpdateGridItemStyleMultiThread by multi thread;
+    FREE_NODE_CHECK(host, UpdateGridItemStyle, gridItemStyle);
+    gridItemStyle_ = gridItemStyle;
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);

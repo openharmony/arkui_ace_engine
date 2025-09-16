@@ -15,9 +15,8 @@
 
 #include "drag_event.h"
 
-#if defined(ACE_STATIC)
 #include "frameworks/core/components_ng/event/gesture_event_hub.h"
-#endif
+
 
 namespace OHOS::Ace {
 void DragEvent::SetData(const RefPtr<UnifiedData>& unifiedData)
@@ -40,7 +39,6 @@ RefPtr<UnifiedData>& DragEvent::GetDragInfo()
     return dragInfo_;
 }
 
-#if defined(ACE_STATIC)
 RefPtr<PixelMap> DragEvent::GetDragDropInfoPixelMap() const
 {
     return dragDropInfoPixelMap_;
@@ -70,6 +68,5 @@ void DragEvent::SetDragDropInfoCustomNode(void* customNode)
 {
     dragDropInfoCustomNode_ = customNode;
 }
-#endif
 
 } // namespace OHOS::Ace

@@ -708,6 +708,9 @@ private:
     // the interface supports multithreading
     void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
 
+    // the interface supports multithreading
+    void SetAccessibilityNextFocusInspectorKeyMultiThread(const std::string& accessibilityNextFocusInspectorKey);
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;

@@ -29,7 +29,9 @@ import { Resource } from "global.resource"
 import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Frame } from "../Graphics"
+import { Frame, Size } from "../Graphics"
+import { TouchEvent, DragItemInfo, CustomBuilder, OnDragEventCallback, PreviewConfiguration, DropOptions, OverlayOptions } from "./common"
+import { DragEvent } from '../component'
 
 export class BaseContextInternal {
     public static fromPtr(ptr: KPointer): BaseContext {
@@ -74,6 +76,86 @@ export class BaseContext implements MaterializedBase {
     }
     private setStageMode_serialize(stageMode: boolean): void {
         ArkUIGeneratedNativeModule._BaseContext_setStageMode(this.peer!.ptr, stageMode ? 1 : 0)
+    }
+}
+export class BuilderNodeOpsInternal {
+    public static fromPtr(ptr: KPointer): BuilderNodeOps {
+        const obj : BuilderNodeOps = new BuilderNodeOps()
+        obj.peer = new Finalizable(ptr, BuilderNodeOps.getFinalizer())
+        return obj
+    }
+}
+export class BuilderNodeOps implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static ctor_buildernodeops(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_ctor()
+        return retval
+    }
+    constructor() {
+        const ctorPtr : KPointer = BuilderNodeOps.ctor_buildernodeops()
+        this.peer = new Finalizable(ctorPtr, BuilderNodeOps.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._BuilderNodeOps_getFinalizer()
+    }
+    public create(buildFunc: (() => void)): void {
+        const buildFunc_casted = buildFunc as ((() => void))
+        this.create_serialize(buildFunc_casted)
+        return
+    }
+    public disposeNode(): void {
+        this.disposeNode_serialize()
+        return
+    }
+    public setUpdateConfigurationCallback(configurationUpdateFunc: (() => void)): void {
+        const configurationUpdateFunc_casted = configurationUpdateFunc as ((() => void))
+        this.setUpdateConfigurationCallback_serialize(configurationUpdateFunc_casted)
+        return
+    }
+    public setOptions(options: BuilderNodeOptions): void {
+        const options_casted = options as (BuilderNodeOptions)
+        this.setOptions_serialize(options_casted)
+        return
+    }
+    public postTouchEvent(event: TouchEvent): boolean {
+        const event_casted = event as (TouchEvent)
+        return this.postTouchEvent_serialize(event_casted)
+    }
+    public setRootFrameNodeInBuilderNode(node: KPointer): KPointer {
+        const node_casted = node as (KPointer)
+        return this.setRootFrameNodeInBuilderNode_serialize(node_casted)
+    }
+    private create_serialize(buildFunc: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(buildFunc)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_create(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private disposeNode_serialize(): void {
+        ArkUIGeneratedNativeModule._BuilderNodeOps_disposeNode(this.peer!.ptr)
+    }
+    private setUpdateConfigurationCallback_serialize(configurationUpdateFunc: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(configurationUpdateFunc)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_setUpdateConfigurationCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private setOptions_serialize(options: BuilderNodeOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeBuilderNodeOptions(options)
+        ArkUIGeneratedNativeModule._BuilderNodeOps_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private postTouchEvent_serialize(event: TouchEvent): boolean {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_postTouchEvent(this.peer!.ptr, toPeerPtr(event))
+        return retval
+    }
+    private setRootFrameNodeInBuilderNode_serialize(node: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_setRootFrameNodeInBuilderNode(this.peer!.ptr, node)
+        return retval
     }
 }
 export class UnifiedDataInternal {
@@ -949,6 +1031,128 @@ export class StateStylesOps {
     }
 }
 
+export class DragDropOps {
+    public static registerOnDragStart(node: KPointer, onDragStart: Callback_onDragStart): void {
+        const node_casted = node as (KPointer)
+        const onDragStart_casted = onDragStart as (Callback_onDragStart)
+        DragDropOps.registerOnDragStart_serialize(node_casted, onDragStart_casted)
+        return
+    }
+    public static registerDragPreview(node: KPointer, preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
+        const node_casted = node as (KPointer)
+        const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
+        const config_casted = config as (PreviewConfiguration | undefined)
+        DragDropOps.registerDragPreview_serialize(node_casted, preview_casted, config_casted)
+        return
+    }
+    public static registerOnDrop(node: KPointer, eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): void {
+        const node_casted = node as (KPointer)
+        const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
+        const dropOptions_casted = dropOptions as (DropOptions | undefined)
+        DragDropOps.registerOnDrop_serialize(node_casted, eventCallback_casted, dropOptions_casted)
+        return
+    }
+    private static registerOnDragStart_serialize(node: KPointer, onDragStart: Callback_onDragStart): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(onDragStart)
+        ArkUIGeneratedNativeModule._DragDropOps_registerOnDragStart(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static registerDragPreview_serialize(node: KPointer, preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let preview_type : int32 = RuntimeType.UNDEFINED
+        preview_type = runtimeType(preview)
+        thisSerializer.writeInt8(preview_type as int32)
+        if ((RuntimeType.UNDEFINED) != (preview_type)) {
+            const preview_value  = preview!
+            let preview_value_type : int32 = RuntimeType.UNDEFINED
+            preview_value_type = runtimeType(preview_value)
+            if (RuntimeType.FUNCTION == preview_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const preview_value_0  = preview_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(preview_value_0))
+            }
+            else if (TypeChecker.isDragItemInfo(preview_value, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const preview_value_1  = preview_value as DragItemInfo
+                thisSerializer.writeDragItemInfo(preview_value_1)
+            }
+            else if (RuntimeType.STRING == preview_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const preview_value_2  = preview_value as string
+                thisSerializer.writeString(preview_value_2)
+            }
+        }
+        let config_type : int32 = RuntimeType.UNDEFINED
+        config_type = runtimeType(config)
+        thisSerializer.writeInt8(config_type as int32)
+        if ((RuntimeType.UNDEFINED) != (config_type)) {
+            const config_value  = config!
+            thisSerializer.writePreviewConfiguration(config_value)
+        }
+        ArkUIGeneratedNativeModule._DragDropOps_registerDragPreview(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static registerOnDrop_serialize(node: KPointer, eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let eventCallback_type : int32 = RuntimeType.UNDEFINED
+        eventCallback_type = runtimeType(eventCallback)
+        thisSerializer.writeInt8(eventCallback_type as int32)
+        if ((RuntimeType.UNDEFINED) != (eventCallback_type)) {
+            const eventCallback_value  = eventCallback!
+            thisSerializer.holdAndWriteCallback(eventCallback_value)
+        }
+        let dropOptions_type : int32 = RuntimeType.UNDEFINED
+        dropOptions_type = runtimeType(dropOptions)
+        thisSerializer.writeInt8(dropOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dropOptions_type)) {
+            const dropOptions_value  = dropOptions!
+            thisSerializer.writeDropOptions(dropOptions_value)
+        }
+        ArkUIGeneratedNativeModule._DragDropOps_registerOnDrop(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
+export class OverlayOps {
+    public static setOverlayAttribute(node: KPointer, value: string | CustomBuilder | undefined, options?: OverlayOptions): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (string | CustomBuilder | undefined)
+        const options_casted = options as (OverlayOptions | undefined)
+        OverlayOps.setOverlayAttribute_serialize(node_casted, value_casted, options_casted)
+        return
+    }
+    private static setOverlayAttribute_serialize(node: KPointer, value: string | CustomBuilder | undefined, options?: OverlayOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeOverlayOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._OverlayOps_setOverlayAttribute(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
@@ -996,54 +1200,13 @@ export class UIContextDispatchKeyEvent {
 }
 
 export type Context_getGroupDir_Callback = (result: string) => void;
-export enum PointerStyle {
-    DEFAULT = 0,
-    EAST = 1,
-    WEST = 2,
-    SOUTH = 3,
-    NORTH = 4,
-    WEST_EAST = 5,
-    NORTH_SOUTH = 6,
-    NORTH_EAST = 7,
-    NORTH_WEST = 8,
-    SOUTH_EAST = 9,
-    SOUTH_WEST = 10,
-    NORTH_EAST_SOUTH_WEST = 11,
-    NORTH_WEST_SOUTH_EAST = 12,
-    CROSS = 13,
-    CURSOR_COPY = 14,
-    CURSOR_FORBID = 15,
-    COLOR_SUCKER = 16,
-    HAND_GRABBING = 17,
-    HAND_OPEN = 18,
-    HAND_POINTING = 19,
-    HELP = 20,
-    MOVE = 21,
-    RESIZE_LEFT_RIGHT = 22,
-    RESIZE_UP_DOWN = 23,
-    SCREENSHOT_CHOOSE = 24,
-    SCREENSHOT_CURSOR = 25,
-    TEXT_CURSOR = 26,
-    ZOOM_IN = 27,
-    ZOOM_OUT = 28,
-    MIDDLE_BTN_EAST = 29,
-    MIDDLE_BTN_WEST = 30,
-    MIDDLE_BTN_SOUTH = 31,
-    MIDDLE_BTN_NORTH = 32,
-    MIDDLE_BTN_NORTH_SOUTH = 33,
-    MIDDLE_BTN_NORTH_EAST = 34,
-    MIDDLE_BTN_NORTH_WEST = 35,
-    MIDDLE_BTN_SOUTH_EAST = 36,
-    MIDDLE_BTN_SOUTH_WEST = 37,
-    MIDDLE_BTN_NORTH_SOUTH_WEST_EAST = 38,
-    HORIZONTAL_TEXT_CURSOR = 39,
-    CURSOR_CROSS = 40,
-    CURSOR_CIRCLE = 41,
-    LOADING = 42,
-    RUNNING = 43
-}
+
 export type Callback_RangeUpdate = (start: int32, end: int32) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
+export interface LengthMetricsCustom {
+    unit: number;
+    value: number;
+}
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;
@@ -1129,6 +1292,13 @@ export interface SystemBarStyle {
     statusBarContentColor?: string;
 }
 export type Callback_StateStylesChange = (currentState: int32) => void;
+export type Callback_Size_Void = (size: Size) => void;
+export type Callback_onDragStart = (node: KPointer, dragEvent: DragEvent, extraParam: string) => void;
+export interface BuilderNodeOptions {
+    selfIdealSize?: Size;
+    type?: number;
+    surfaceId?: string;
+}
 export class ContextInternal {
     public static fromPtr(ptr: KPointer): Context {
         const obj : Context = new Context()

@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG::Converter {
 struct TextSpanOptionsForUpdate {
-    int32_t start;
-    int32_t end;
+    int32_t start = -1;
+    int32_t end = -1;
     std::optional<TextStyle> textStyle;
     ImageSpanAttribute imageSpanAttribute;
 };
@@ -35,8 +35,8 @@ struct TextDecorationStruct {
 };
 
 struct UpdateParagraphStyleForUpdate {
-    int32_t start;
-    int32_t end;
+    int32_t start = -1;
+    int32_t end = -1;
     std::optional<UpdateParagraphStyle> style;
 };
 

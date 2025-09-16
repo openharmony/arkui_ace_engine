@@ -1,0 +1,52 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_copy("copy_arkui_ets") {
+  sources = [
+    "./arkui/ComponentBase.d.ets",
+    "./arkui/NativePeerNode.d.ets",
+    "./arkui/PeerNode.d.ets",
+    "./arkui/ReusablePool.d.ets",
+  ]
+  sources += [
+    "./arkui/component.d.ets",
+    "./arkui/component/common.d.ets",
+    "./arkui/component/listItem.d.ets",
+    "./arkui/component/navDestination.d.ets",
+    "./arkui/component/navigation.d.ets",
+    "./arkui/component/tabs.d.ets",
+    "./arkui/component/text.d.ets",
+  ]
+  sources += [
+    "./@koalaui/common.d.ets",
+    "./@koalaui/common/koalaKey.d.ets",
+  ]
+  sources += [ "./@koalaui/compat.d.ets" ]
+  sources += [ "./@koalaui/interop.d.ets" ]
+  sources += [ "./@koalaui/interop/Finalizable.d.ets" ]
+  sources += [
+    "./@koalaui/runtime/memo/node.d.ets",
+    "./@koalaui/runtime/memo/remember.d.ets",
+  ]
+  sources += [
+    "./@ohos/router.d.ets",
+    "./arkui/handwritten/Router.ts",
+  ]
+  outputs = [ "$ohos_ets_inner_path/{{source_target_relative}}" ]
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
+}

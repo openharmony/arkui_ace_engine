@@ -21,6 +21,7 @@
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
@@ -107,6 +108,7 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
     } else {
         auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
     }
     return result;

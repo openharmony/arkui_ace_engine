@@ -1,9 +1,0 @@
-node_modules
-oh_modules
-.preview
-build
-.cxx
-.test
-app/arkoala/*.d.ts
-app/arkoala/*.js
-command-line-tools

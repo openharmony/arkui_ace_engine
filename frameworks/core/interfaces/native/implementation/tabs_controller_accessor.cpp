@@ -16,6 +16,8 @@
 #include "tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -52,14 +54,29 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(indices);
-    auto indexVectOpt = Converter::OptConvert<std::vector<int32_t>>(*indices);
+
+    auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
+    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
     if (indexVectOpt) {
         std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
         peerImpl->TriggerPreloadItems(indexSet);
+        } else {
+            peerImpl->TriggerPreloadItems({});
     }
+    };
+    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
+
+    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise.Resolve();
+        } else {
+            promise.Reject({std::to_string(errCode), errStr});
+        }
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
 }
 void SetTabBarTranslateImpl(Ark_TabsController peer,
                             const Ark_TranslateOptions* translate)

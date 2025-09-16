@@ -28,7 +28,7 @@ import { Callback_Number_Void } from "./alphabetIndexer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { StepperOpsHandWritten } from "./../handwritten"
+import { StepperOpsHandWritten, hookStepperSetStepperOptionsImpl } from "./../handwritten"
 
 export class ArkStepperPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -176,7 +176,7 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
     public setStepperOptions(value?: StepperOptions): this {
         if (this.checkPriority("setStepperOptions")) {
             const value_casted = value as (StepperOptions | undefined)
-            this.getPeer()?.setStepperOptionsAttribute(value_casted)
+            hookStepperSetStepperOptionsImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this

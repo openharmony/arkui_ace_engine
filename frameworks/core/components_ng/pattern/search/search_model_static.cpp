@@ -269,7 +269,7 @@ void SearchModelStatic::SetPlaceholderColor(FrameNode* frameNode, const std::opt
         SearchModelNG::SetPlaceholderColor(frameNode, optColor.value());
         return;
     }
-    TextFieldModelNG::ResetPlaceholderColor(frameNode);
+    SearchModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -349,9 +349,6 @@ void SearchModelStatic::SetCancelImageIcon(FrameNode *frameNode, std::optional<N
         }
         if (!iconOptions.value().GetSize().has_value()) {
             iconOptions.value().UpdateSize(theme->GetIconHeight());
-        }
-        if (!iconOptions.value().GetSrc().has_value()) {
-            iconOptions.value().UpdateSrc("", "", "");
         }
     } else {
         iconOptions = IconOptions(theme->GetSearchIconColor(), theme->GetIconHeight(), "", "", "");
@@ -579,8 +576,8 @@ void SearchModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    // textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
-    //     nullptr);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        nullptr);
 }
 
 void SearchModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest)
@@ -626,4 +623,16 @@ void SearchModelStatic::SetOnChangeEvent(FrameNode* frameNode,
     };
     eventHub->SetOnChangeEvent(std::move(searchChangeFunc));
 }
+
+void SearchModelStatic::SetSearchSymbolIcon(FrameNode *frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetSearchIconSymbol(iconSymbol);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchSymbolIcon();
+}
+
 } // namespace OHOS::Ace::NG

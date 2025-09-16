@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { WatchIdType, ISubscribedWatches } from '../../decorator';
+import { IObservedObject, RenderIdType } from '../../decorator';
+import { SubscribedWatches } from '../../decoratorImpl/decoratorWatch';
+import { IMutableStateMeta } from '../../decorator';
+import { STATE_MGMT_FACTORY } from '../../decorator';
+import { OBSERVE } from '../../decorator';
+import { NullableObject } from '../../base/types';
+import { UIUtils } from '../../utils';
+import { uiUtils } from '../../base/uiUtilsImpl';
+
+export class InterfaceProxyHandler<T extends Object> 
+    extends proxy.DefaultProxyHandler<T>
+    implements IObservedObject, ISubscribedWatches {
+    private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
+    private subscribedWatches: SubscribedWatches = new SubscribedWatches();
+    private ____V1RenderId: RenderIdType = 0;
+    private allowDeep_: boolean;
+    constructor(allowDeep: boolean) {
+        this.allowDeep_ = allowDeep;
+    }
+    public addWatchSubscriber(watchId: WatchIdType): void {
+        this.subscribedWatches.addWatchSubscriber(watchId);
+    }
+    public removeWatchSubscriber(watchId: WatchIdType): boolean {
+        return this.subscribedWatches.removeWatchSubscriber(watchId);
+    }
+    public executeOnSubscribingWatches(propertyName: string): void {
+        this.subscribedWatches.executeOnSubscribingWatches(propertyName);
+    }
+    public setV1RenderId(renderId: RenderIdType): void {
+        this.____V1RenderId = renderId;
+    }
+    public shouldAddRef(): boolean {
+        return this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId);
+    }
+    public get(target: T, name: string): Any {
+        const value = super.get(target, name)
+        if (typeof value !== 'function' && this.shouldAddRef()) {
+            this.__meta.addRef();
+        }
+        return uiUtils.makeObserved(value, this.allowDeep_);
+    }
+    public set(target: T, name: string, newValue: Any): boolean {
+        if (super.get(target, name) !== newValue) {
+            const result = super.set(target, name, newValue);
+            this.__meta.fireChange();
+            this.executeOnSubscribingWatches(name);
+            return result;
+        }
+        return true;
+    }
+
+    public invoke(target: T, method: Method, args: FixedArray<Any>): Any {
+        return method.invoke(target, args);
+    }
+}

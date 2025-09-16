@@ -19,7 +19,7 @@ import { int32 } from "@koalaui/compat"
  * Adds statistics for constructing/disposing of the TreeNode instances.
  * It is disabled by default because collecting such data affects performance.
  */
-const DEBUG_WITH_NODE_STATS = false
+let DEBUG_WITH_NODE_STATS = false
 
 export class KoalaProfiler {
     private static readonly map = DEBUG_WITH_NODE_STATS
@@ -149,7 +149,7 @@ export class KoalaProfiler {
         if (ms - this.lastTime <= 1000) {
             this.frames++
         } else {
-            this.lastFPS = Math.round(this.frames * 1000 / (ms - this.lastTime)) as int32
+            this.lastFPS = Math.round(this.frames * 1000 / (ms - this.lastTime)).toInt()
             this.frames = 1
             this.lastTime = ms
         }

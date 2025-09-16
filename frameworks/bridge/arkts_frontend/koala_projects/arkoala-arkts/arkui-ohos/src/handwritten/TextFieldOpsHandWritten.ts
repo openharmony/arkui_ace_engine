@@ -18,7 +18,7 @@ import { TextFieldOps, Bindable, ResourceStr, Length, LayoutPolicy, BorderRadius
 
 export class TextFieldOpsHandWritten {
     static hookTextFieldInputValueImpl(node: KPointer, value: Bindable<ResourceStr>) {
-        TextFieldOps.registerTextFieldValueCallback(node, value.value, (v) => {
+        TextFieldOps.registerTextFieldValueCallback(node, value.value, (v : ResourceStr) => {
             value.onChange(v)
         })
     }

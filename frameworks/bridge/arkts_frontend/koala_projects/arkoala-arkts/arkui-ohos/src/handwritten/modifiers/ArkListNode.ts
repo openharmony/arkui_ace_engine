@@ -14,12 +14,11 @@
  */
 
 import { InteropNativeModule } from "@koalaui/interop";
-
 import { ArkBaseNode } from "./ArkBaseNode";
 import { CustomBuilder, ListAttribute, ListItemAlign, Axis, BarState, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign,
     NestedScrollOptions, ChildrenMainSize, OnScrollVisibleContentChangeCallback, OnScrollCallback, ItemDragInfo, OnWillScrollCallback, ScrollState,
     Literal_Number_offsetRemain, Dimension, LengthConstrain, EdgeEffect, Color, ContentClipMode, RectShape, CrownSensitivity, FadingEdgeOptions,
-    EdgeEffectOptions
+    EdgeEffectOptions, OnScrollFrameBeginCallback
 } from "../../component";
 import { ArkListPeer, ListOptions } from "../../component";
 import { Resource } from "global.resource"
@@ -55,7 +54,7 @@ export class ArkListNode extends ArkBaseNode  implements ListAttribute  {
     contentEndOffset(value: number | undefined): this {
         return this;
     }
-    divider(value: ListDividerOptions | undefined): this {
+    divider(value: ListDividerOptions | null | undefined): this {
         return this;
     }
     editMode(value: boolean | undefined): this {
@@ -64,7 +63,10 @@ export class ArkListNode extends ArkBaseNode  implements ListAttribute  {
     multiSelectable(value: boolean | undefined): this {
         return this;
     }
-    cachedCount(count: number | undefined, show?: boolean): this {
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        return this;
+    }
+    cachedCount(count: number | undefined): this {
         return this;
     }
     chainAnimation(value: boolean | undefined): this {
@@ -145,7 +147,7 @@ export class ArkListNode extends ArkBaseNode  implements ListAttribute  {
     onWillScroll(value: OnWillScrollCallback | undefined): this {
         return this;
     }
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this;
     }
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {

@@ -26,12 +26,7 @@ static const std::string ENTRY_SUFFIX = "/__EntryWrapper";
 
 ani_object EntryLoader::GetPageEntryObj()
 {
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("EntryLoader GetPageEntryObj failed, container is null");
-        return nullptr;
-    }
-    const std::string moduleName = container->GetModuleName();
+    const std::string moduleName = Container::Current()->GetModuleName();
     std::string entryPointName;
     entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
     entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
@@ -106,15 +101,15 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ani_type stringCls;
     ANI_CALL(env, Object_GetType(abcModulePathStr, &stringCls), return);
 
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(stringCls, 1, abcModulePathStr, &refArray), return);
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/AbcRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
@@ -127,23 +122,20 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_array_byte byteArray;
-    ANI_CALL(env, Array_New_Byte(abcContent.size(), &byteArray), return);
-    ANI_CALL(env, Array_SetRegion_Byte(
-        byteArray, 0, abcContent.size(), reinterpret_cast<const ani_byte*>(abcContent.data())), return);
+    ani_fixedarray_byte byteArray;
+    ANI_CALL(env, FixedArray_New_Byte(abcContent.size(), &byteArray), return);
+    const auto *data = reinterpret_cast<const ani_byte *>(abcContent.data());
+    ANI_CALL(env, FixedArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
 
-    ani_type byteArrayCls;
-    ANI_CALL(env, Object_GetType(byteArray, &byteArrayCls), return);
-
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(byteArrayCls, 1, byteArray, &refArray), return);
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, byteArray, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/MemoryRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[[B:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
@@ -166,6 +158,11 @@ ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
     ANI_CALL(env_, Object_New(static_cast<ani_class>(entryClass), entryCtor, &entryObject), return {});
 
     return entryObject;
+}
+
+ani_object EntryLoader::GetLinkObj()
+{
+    return runtimeLinkerObj_;
 }
 }
 } // namespace OHOS::Ace

@@ -42,7 +42,7 @@ export class Point3 {
     }
 
     normalize(): Point3 {
-        const mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z) as float32
+        const mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z).toFloat()
         const tolerance = (1.0 / (1 << 12))
         if (mag < tolerance) {
             // This semicolon after return this is a workaround for ArkTS bug

@@ -155,6 +155,7 @@ template("ace_osal_ohos_source_set") {
         "input:libmmi-client",
         "napi:ace_napi",
         "resource_management:global_resmgr",
+        "runtime_core:ani",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {

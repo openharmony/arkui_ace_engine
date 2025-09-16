@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/pipeline/pipeline_base.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -120,10 +125,6 @@ void SetDynamicDimmingImpl(Ark_UIContext peer,
                            const Ark_Number* value)
 {
 }
-Ark_Union_String_Undefined GetWindowNameImpl(Ark_UIContext peer)
-{
-    return {};
-}
 void OpenBindSheetImpl(Ark_VMContext vmContext,
                        Ark_UIContext peer,
                        Ark_ComponentContent bindSheetContent,
@@ -155,6 +156,28 @@ Ark_Number GetMaxFontScaleImpl(Ark_UIContext peer)
 {
     return {};
 }
+Ark_String GetWindowNameImpl(const Ark_Number* instanceId)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, {});
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, {});
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    std::string windowName = window->GetWindowName();
+    return Converter::ArkValue<Ark_String>(windowName, Converter::FC);
+}
+Ark_Number GetWindowWidthBreakpoint(const Ark_Number* instanceId)
+{
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    int32_t windowWidthBreakpoint = ViewAbstractModelStatic::GetWindowWidthBreakpoint();
+    return Converter::ArkValue<Ark_Number>(windowWidthBreakpoint);
+}
+Ark_Number GetWindowHeightBreakpoint(const Ark_Number* instanceId)
+{
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    int32_t windowHeightBreakpoint = ViewAbstractModelStatic::GetWindowHeightBreakpoint();
+    return Converter::ArkValue<Ark_Number>(windowHeightBreakpoint);
+}
 } // UIContextAccessor
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
 {
@@ -180,13 +203,15 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
         UIContextAccessor::Px2lpxImpl,
         UIContextAccessor::GetHostContextImpl,
         UIContextAccessor::SetDynamicDimmingImpl,
-        UIContextAccessor::GetWindowNameImpl,
         UIContextAccessor::OpenBindSheetImpl,
         UIContextAccessor::UpdateBindSheetImpl,
         UIContextAccessor::CloseBindSheetImpl,
         UIContextAccessor::ClearResourceCacheImpl,
         UIContextAccessor::IsFollowingSystemFontScaleImpl,
         UIContextAccessor::GetMaxFontScaleImpl,
+        UIContextAccessor::GetWindowNameImpl,
+        UIContextAccessor::GetWindowWidthBreakpoint,
+        UIContextAccessor::GetWindowHeightBreakpoint,
     };
     return &UIContextAccessorImpl;
 }

@@ -23,7 +23,6 @@ import {
 } from "./ArkPageTransitionData"
 import { PageTransitionOptions } from "../component"
 
-// TODO: import it when panda is fixed.
 enum RouterTransitionVisibility {
     Hidden,
     Visible,
@@ -34,20 +33,7 @@ enum RouterTransitionVisibility {
 /** @memo */
 function NotifyPageTransition(pageId: int32, style: ArkPageTransitionData, state: RouterTransitionVisibility) {
     const node = contextNode<PeerNode>(PeerNodeType)
-    // console.log("NotifyPageTransition: shall notify", "page", pageId, "state is", RouterTransitionVisibility[state])
     scheduleCallback(() => {
-        // TODO: make it driven by actual animation.
-        /*
-            TODO SHOPPING: time: int32 (params.duration is double)
-         */
-        // const time: int32 = (style.params.duration ?? 300) + (style.params.delay ?? 0)
-        // if (time > 0) {
-        //     setTimeout(() => {
-        //         router?.onPageTransitionEnd(pageId)
-        //     }, time)
-        // } else {
-        //     router?.onPageTransitionEnd(pageId)
-        // }
     })
 }
 

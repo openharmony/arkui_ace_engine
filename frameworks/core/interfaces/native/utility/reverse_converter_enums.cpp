@@ -407,6 +407,8 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
+        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
@@ -438,6 +440,7 @@ void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
         case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
         case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
         case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        case AxisAction::CANCEL: dst = ARK_AXIS_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_AxisAction>(-1);
             LOGE("Unexpected enum value in AxisAction: %{public}d", src);
@@ -839,6 +842,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD; break;
+        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
@@ -932,6 +937,7 @@ void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
     switch (src) {
         case SourceType::NONE: dst = Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN; break;
         case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
+        case SourceType::JOYSTICK: dst = Ark_KeySource::ARK_KEY_SOURCE_JOYSTICK; break;
         default: dst = static_cast<Ark_KeySource>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
@@ -1027,6 +1033,15 @@ void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
         case valuePart: dst = ARK_SELECT_STATUS_PART; break;
         case valueNone: dst = ARK_SELECT_STATUS_NONE; break;
         default: dst = static_cast<Ark_SelectStatus>(-1);
+    }
+}
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src)
+{
+    switch (src) {
+        case OHOS::Ace::CanvasUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case OHOS::Ace::CanvasUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

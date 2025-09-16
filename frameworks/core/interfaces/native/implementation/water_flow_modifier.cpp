@@ -123,23 +123,15 @@ void ItemConstraintSizeImpl(Ark_NativePointer node,
         return;
     }
     auto minWidth = Converter::OptConvert<Dimension>(optValue->minWidth);
-    Validator::ValidateNonNegative(minWidth);
-    Validator::ValidateNonPercent(minWidth);
     WaterFlowModelStatic::SetItemMinWidth(frameNode, minWidth);
 
     auto minHeight = Converter::OptConvert<Dimension>(optValue->minHeight);
-    Validator::ValidateNonNegative(minHeight);
-    Validator::ValidateNonPercent(minHeight);
     WaterFlowModelStatic::SetItemMinHeight(frameNode, minHeight);
 
     auto maxWidth = Converter::OptConvert<Dimension>(optValue->maxWidth);
-    Validator::ValidateNonNegative(maxWidth);
-    Validator::ValidateNonPercent(maxWidth);
     WaterFlowModelStatic::SetItemMaxWidth(frameNode, maxWidth);
 
     auto maxHeight = Converter::OptConvert<Dimension>(optValue->maxHeight);
-    Validator::ValidateNonNegative(maxHeight);
-    Validator::ValidateNonPercent(maxHeight);
     WaterFlowModelStatic::SetItemMaxHeight(frameNode, maxHeight);
 }
 

@@ -9,9 +9,11 @@ export interface AnimatorOptions {
     end: number;
 }
 
+export declare class SimpleAnimatorOptions {
+}
 export declare class Animator {
-    static create(options: AnimatorOptions): AnimatorResult;
+    static create(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult;
 }
 
-export interface AnimatorResult {
+export declare class AnimatorResult {
 }

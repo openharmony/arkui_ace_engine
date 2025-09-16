@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ShapeClip, Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from "../../Graphics"
+import { ShapeBaseTransfer } from "./ShapeBaseTransfer";
+
+export class ShapeClipTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            throw Error("The ShapeClip is not object convert fail.");
+        }
+        let shapeClip = new ShapeClip();
+        if (!(ESValue.wrap(input).getProperty("rect").isNull() || 
+            ESValue.wrap(input).getProperty("rect").isUndefined())) {
+            const rectValue = ESValue.wrap(input).getProperty("rect");
+            shapeClip.rect = ShapeBaseTransfer.transferRectStatic(rectValue);
+        }
+        if (!(ESValue.wrap(input).getProperty("roundRect").isNull() || 
+            ESValue.wrap(input).getProperty("roundRect").isUndefined())) {
+            const roundRectValue = ESValue.wrap(input).getProperty("roundRect");
+            shapeClip.roundRect = ShapeBaseTransfer.transferRoundRectStatic(roundRectValue);
+        }
+        if (!(ESValue.wrap(input).getProperty("circle").isNull() || 
+            ESValue.wrap(input).getProperty("circle").isUndefined())) {
+            const circleValue = ESValue.wrap(input).getProperty("circle");
+            shapeClip.circle = ShapeBaseTransfer.transferCircleStatic(circleValue);
+        }
+        if (!(ESValue.wrap(input).getProperty("oval").isNull() || 
+            ESValue.wrap(input).getProperty("oval").isUndefined())) {
+            const ovalValue = ESValue.wrap(input).getProperty("oval");
+            shapeClip.oval = ShapeBaseTransfer.transferRectStatic(ovalValue);
+        }
+        if (!(ESValue.wrap(input).getProperty("path").isNull() || 
+            ESValue.wrap(input).getProperty("path").isUndefined())) {
+            const pathValue = ESValue.wrap(input).getProperty("path");
+            shapeClip.path = ShapeBaseTransfer.transferPathStatic(pathValue);
+        }
+        return shapeClip;
+    }
+    static transferDynamic(input: Object): Any {
+        if (input == null) {
+            throw Error("The ShapeClip is null, convert fail.");
+        }
+        if (input == undefined) {
+            throw Error("The ShapeClip is undefined, convert fail.");
+        }
+        let staticValue = input as ShapeClip
+        if (staticValue == null) {
+            throw Error("Not a ShapeClip object, convert fail.");
+        }
+        if (staticValue == undefined) {
+            throw Error("Not a ShapeClip object, convert fail.");
+        }
+        let nodeModule = ESValue.load("@ohos.arkui.node");
+        let shapeClipModule = nodeModule.getProperty("ShapeClip");
+        let ret = shapeClipModule.instantiate();
+        if (staticValue.rect != null) {
+            let staticRectValue = staticValue.rect as Rect;
+            ret.setProperty('rect', ShapeBaseTransfer.transferRectDynamic(staticRectValue));
+        } else {
+            ret.setProperty('rect', null);
+        }
+        if (staticValue.roundRect != null) {
+            let staticRoundRectValue = staticValue.roundRect as RoundRect;
+            ret.setProperty('roundRect', ShapeBaseTransfer.transferRoundRectDynamic(staticRoundRectValue));
+        } else {
+            ret.setProperty('roundRect', null);
+        }
+        if (staticValue.circle != null) {
+            let staticCircleValue = staticValue.circle as Circle;
+            ret.setProperty('circle', ShapeBaseTransfer.transferCircleDynamic(staticCircleValue));
+        } else {
+            ret.setProperty('circle', null);
+        }
+        if (staticValue.oval != null) {
+            let staticRectValue = staticValue.oval as Rect;
+            ret.setProperty('oval', ShapeBaseTransfer.transferRectDynamic(staticRectValue));
+        } else {
+            ret.setProperty('oval', null);
+        }
+        if (staticValue.path != null) {
+            let staticPathValue = staticValue.path as CommandPath;
+            ret.setProperty('path', ShapeBaseTransfer.transferPathDynamic(staticPathValue));
+        } else {
+            ret.setProperty('path', null);
+        }
+        return ret.unwrap();
+    }
+}

@@ -344,6 +344,7 @@ public:
     }
 
     virtual void SetFriction(double friction);
+    void SetFrictionMultiThread(double friction);
 
     double GetFriction() const
     {
@@ -935,6 +936,7 @@ public:
 
 protected:
     void SuggestOpIncGroup(bool flag);
+    void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -1063,7 +1065,6 @@ private:
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
 
-    void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,

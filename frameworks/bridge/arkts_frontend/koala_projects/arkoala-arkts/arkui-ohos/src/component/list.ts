@@ -31,9 +31,9 @@ import { LengthConstrain, Dimension, PX, VP, FP, LPX, Percentage, Length, Resour
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Scroller, ScrollerInternal, ScrollAlign } from "./scroll"
-
+import { OnScrollFrameBeginCallback, Scroller, ScrollerInternal, ScrollAlign } from "./scroll"
 import { Deserializer } from "./peers/Deserializer"
+import { hookListChildrenMainSizeImpl } from "./../handwritten"
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -117,7 +117,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_contentEndOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: ListDividerOptions | undefined): void {
+    dividerAttribute(value: ListDividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -483,7 +483,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_onItemDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onScrollFrameBeginAttribute(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): void {
+    onScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -648,10 +648,11 @@ export interface ListAttribute extends ScrollableCommonMethod {
     scrollBar(value: BarState | undefined): this
     contentStartOffset(value: number | undefined): this
     contentEndOffset(value: number | undefined): this
-    divider(value: ListDividerOptions | undefined): this
+    divider(value: ListDividerOptions | null | undefined): this
     editMode(value: boolean | undefined): this
     multiSelectable(value: boolean | undefined): this
-    cachedCount(count: number | undefined, show?: boolean): this
+    cachedCount(count: number | undefined, show: boolean | undefined): this
+    cachedCount(value: number | undefined): this
     chainAnimation(value: boolean | undefined): this
     chainAnimationOptions(value: ChainAnimationOptions | undefined): this
     sticky(value: StickyStyle | undefined): this
@@ -676,7 +677,7 @@ export interface ListAttribute extends ScrollableCommonMethod {
     onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     onWillScroll(value: OnWillScrollCallback | undefined): this
     onDidScroll(value: OnScrollCallback | undefined): this
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
@@ -688,7 +689,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     scrollBar_value?: BarState | undefined
     contentStartOffset_value?: number | undefined
     contentEndOffset_value?: number | undefined
-    divider_value?: ListDividerOptions | undefined
+    divider_value?: ListDividerOptions | null | undefined
     editMode_value?: boolean | undefined
     multiSelectable_value?: boolean | undefined
     cachedCount_value?: number | undefined
@@ -716,7 +717,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onItemDragMove_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
     onItemDragLeave_value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
     onItemDrop_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
-    onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     public alignListItem(value: ListItemAlign | undefined): this {
@@ -734,7 +735,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     public contentEndOffset(value: number | undefined): this {
         return this
     }
-    public divider(value: ListDividerOptions | undefined): this {
+    public divider(value: ListDividerOptions | null | undefined): this {
         return this
     }
     public editMode(value: boolean | undefined): this {
@@ -743,7 +744,10 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     public multiSelectable(value: boolean | undefined): this {
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
         return this
     }
     public chainAnimation(value: boolean | undefined): this {
@@ -818,7 +822,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
     public onWillScroll(value: OnWillScrollCallback | undefined): this {
@@ -832,7 +836,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
-        }
+    }
 }
 export class ArkListComponent extends ArkScrollableCommonMethodComponent implements ListAttribute {
     getPeer(): ArkListPeer {
@@ -886,9 +890,9 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public divider(value: ListDividerOptions | undefined): this {
+    public divider(value: ListDividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (ListDividerOptions | undefined)
+            const value_casted = value as (ListDividerOptions | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }
@@ -910,19 +914,33 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
             const show_type = runtimeType(show)
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+                (RuntimeType.UNDEFINED == show_type)) {
                 const value_casted = count as (number | undefined)
                 this.getPeer()?.cachedCount0Attribute(value_casted)
                 return this
             }
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+                ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
                 const count_casted = count as (number | undefined)
                 const show_casted = show as (boolean | undefined)
                 this.getPeer()?.cachedCount1Attribute(count_casted, show_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const count_type = runtimeType(value)
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type))) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.cachedCount0Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -987,8 +1005,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     }
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
-            const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.childrenMainSizeAttribute(value_casted)
+            hookListChildrenMainSizeImpl(this, (value as ChildrenMainSize | undefined));
             return this
         }
         return this
@@ -1121,9 +1138,9 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
-            const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }
@@ -1148,7 +1165,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
         if (this.checkPriority("lanes")) {
             const value_casted = value as (number | LengthConstrain | undefined)
-            const gutter_casted = gutter as (Dimension)
+            const gutter_casted = gutter as (Dimension | undefined)
             this.getPeer()?.lanesAttribute(value_casted, gutter_casted)
             return this
         }
@@ -1157,7 +1174,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         if (this.checkPriority("edgeEffect")) {
             const value_casted = value as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(value_casted, options_casted)
             return this
         }
@@ -1231,8 +1248,15 @@ export class ListScroller extends Scroller implements MaterializedBase {
         return this.getVisibleListContentInfo_serialize(x_casted, y_casted)
     }
     private getItemRectInGroup_serialize(index: number, indexInGroup: number): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
@@ -1256,20 +1280,27 @@ export class ListScroller extends Scroller implements MaterializedBase {
         thisSerializer.release()
     }
     private closeAllSwipeActions_serialize(options?: CloseSwipeActionOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let options_type: int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type as int32)
         if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
+            const options_value = options!
             thisSerializer.writeCloseSwipeActionOptions(options_value)
         }
         ArkUIGeneratedNativeModule._ListScroller_closeAllSwipeActions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getVisibleListContentInfo_serialize(x: number, y: number): VisibleListContentInfo {
-        const retval  = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : VisibleListContentInfo = retvalDeserializer.readVisibleListContentInfo()
         return returnResult
     }

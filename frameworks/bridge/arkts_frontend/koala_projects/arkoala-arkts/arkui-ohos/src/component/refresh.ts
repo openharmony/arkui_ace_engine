@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Callback_Boolean_Void } from "./navigation"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -30,6 +30,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceStr } from "./units"
 import { ComponentContent } from "./arkui-custom"
+import { RefreshOpsHandWritten } from "./../handwritten"
 
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -140,7 +141,7 @@ export enum RefreshStatus {
     Done = 4
 }
 export interface RefreshOptions {
-    refreshing: boolean;
+    refreshing: boolean | Bindable<boolean>;
     offset?: number | string;
     friction?: number | string;
     promptText?: ResourceStr;
@@ -185,17 +186,30 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     }
     public _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkRefreshComponent extends ArkCommonMethodComponent implements RefreshAttribute {
     getPeer(): ArkRefreshPeer {
         return (this.peer as ArkRefreshPeer)
     }
+    RefreshOptionsValueIsBindable(value: RefreshOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
+            const options_boolean  = value!.refreshing;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_boolean))) {
+                const options_boolean_value  = options_boolean!;
+                return TypeChecker.isBindableBoolean(options_boolean_value);
+            }
+        }
+        return false;
+    }
     public setRefreshOptions(value: RefreshOptions): this {
         if (this.checkPriority("setRefreshOptions")) {
             const value_casted = value as (RefreshOptions)
             this.getPeer()?.setRefreshOptionsAttribute(value_casted)
-            return this
+        }
+        if (this.RefreshOptionsValueIsBindable(value)) {
+            RefreshOpsHandWritten.hookRefreshAttributeRefreshingImpl(this.getPeer().peer.ptr,
+                (value!.refreshing as Bindable<boolean>));
         }
         return this
     }

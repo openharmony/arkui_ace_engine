@@ -40,6 +40,13 @@ ElementIdType ElementRegister::MakeUniqueId()
     return ElementRegister::nextUniqueElementId_++;
 }
 
+ElementIdType ElementRegister::RequireArkoalaNodeId(int32_t capacity)
+{
+    int32_t nodeId = ElementRegister::nextUniqueElementId_.load();
+    ElementRegister::nextUniqueElementId_ += capacity;
+    return nodeId;
+}
+
 RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {

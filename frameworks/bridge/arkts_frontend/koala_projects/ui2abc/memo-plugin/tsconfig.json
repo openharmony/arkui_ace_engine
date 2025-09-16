@@ -1,0 +1,16 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "baseUrl": ".",
+        "outDir": "./lib",
+        "module": "ESNext",
+    },
+    "include": [
+        "./src/**/*.ts",
+    ],
+    "references": [
+        { "path": "../../incremental/compat" },
+        { "path": "../../incremental/common" }
+    ]
+}

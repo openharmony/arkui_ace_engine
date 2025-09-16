@@ -102,6 +102,13 @@ public:
     void Clear();
 
     ACE_FORCE_EXPORT ElementIdType MakeUniqueId();
+    /**
+     * For ArkTS 1.2
+     *
+     * Based on the incoming capacity, generate the starting value for arkoala node IDs
+     * and adjust the nextUniqueElementId_ value.
+     */
+    ACE_FORCE_EXPORT ElementIdType RequireArkoalaNodeId(int32_t capacity);
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
         const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);

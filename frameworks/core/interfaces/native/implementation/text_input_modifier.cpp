@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -153,7 +153,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void PlaceholderFontImpl(Ark_NativePointer node,
@@ -906,6 +909,8 @@ void AutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetAutoCapitalizationMode(frameNode, convValue);
 }
 void HalfLeadingImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -940,12 +945,6 @@ void OnWillChangeImpl(Ark_NativePointer node,
     }
     auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {
         Converter::ConvContext ctx;
-        Ark_TextChangeOptions textChangeOptions = {
-            .rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
-            .rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
-            .oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
-            .oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
-        };
         Ark_EditableTextChangeValue changeValue = {
             .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
             .previewText = {
@@ -954,7 +953,10 @@ void OnWillChangeImpl(Ark_NativePointer node,
             },
             .options = {
                 .tag = INTEROP_TAG_OBJECT,
-                .value = textChangeOptions
+                .value.rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
+                .value.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
+                .value.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
+                .value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
             }
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)

@@ -15,7 +15,7 @@
 
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -81,14 +81,14 @@ BarrierInfo Convert(const Ark_BarrierStyle& src)
 template<>
 BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
 {
-    // LocalizedBarrierInfo info;
-    // info.id = Convert<std::string>(src.id);
-    // info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
-    // auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
-    // if (direction.has_value()) {
-    //     info.direction = direction.value();
-    // }
-    return {};
+    LocalizedBarrierInfo info;
+    info.id = Convert<std::string>(src.id);
+    info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
+    auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
+    if (direction.has_value()) {
+        info.direction = direction.value();
+    }
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

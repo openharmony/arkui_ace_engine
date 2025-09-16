@@ -28,13 +28,14 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
 import { ResourceStr, Length } from "./units"
-import { PixelMap } from "./arkui-pixelmap"
-import { SymbolGlyphModifier } from "./arkui-external"
+import { PixelMap } from "#external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { SystemBarStyle } from "./arkui-custom"
 import { Scroller } from "./scroll"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight, Curve } from "./enums"
+import { hookNavDestinationBackButtonIconImpl, hookNavDestinationOnNewParamImpl, hookNavDestinationOnReadyImpl, hookNavDestinationOnWillAppearImpl, hookNavDestinationOnWillDisappearImpl, hookNavDestinationOnWillHideImpl, hookNavDestinationOnWillShowImpl, hookNavDestinationTitleImpl } from "./../handwritten"
 
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
@@ -956,7 +957,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     }
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         return this
-        }
+    }
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
 export type Callback_NavDestinationContext_Void = (parameter: NavDestinationContext) => void;
@@ -1043,17 +1044,11 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
             const icon_type = runtimeType(icon)
             const accessibilityText_type = runtimeType(accessibilityText)
             if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && (RuntimeType.UNDEFINED == accessibilityText_type)) {
+                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.UNDEFINED == accessibilityText_type) ||
+                (RuntimeType.STRING == accessibilityText_type) || (RuntimeType.OBJECT == accessibilityText_type))) {
                 const value_casted = icon as (ResourceStr | PixelMap | SymbolGlyphModifier | undefined)
-                this.getPeer()?.backButtonIcon0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.STRING == accessibilityText_type) ||
-                (RuntimeType.OBJECT == accessibilityText_type))) {
-                const icon_casted = icon as (ResourceStr | PixelMap | SymbolGlyphModifier | undefined)
-                const accessibilityText_casted = accessibilityText as (ResourceStr)
-                this.getPeer()?.backButtonIcon1Attribute(icon_casted, accessibilityText_casted)
+                const accessibilityText_casted = accessibilityText as (ResourceStr | undefined)
+                hookNavDestinationBackButtonIconImpl(this.getPeer().peer.ptr, value_casted, accessibilityText_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1082,7 +1077,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onReady(value: Callback<NavDestinationContext> | undefined): this {
         if (this.checkPriority("onReady")) {
             const value_casted = value as (Callback<NavDestinationContext> | undefined)
-            this.getPeer()?.onReadyAttribute(value_casted)
+            hookNavDestinationOnReadyImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1090,7 +1085,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onWillAppear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillAppear")) {
             const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.onWillAppearAttribute(value_casted)
+            hookNavDestinationOnWillAppearImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1098,7 +1093,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onWillDisappear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillDisappear")) {
             const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.onWillDisappearAttribute(value_casted)
+            hookNavDestinationOnWillDisappearImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1106,7 +1101,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onWillShow(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillShow")) {
             const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.onWillShowAttribute(value_casted)
+            hookNavDestinationOnWillShowImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1114,7 +1109,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onWillHide(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillHide")) {
             const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.onWillHideAttribute(value_casted)
+            hookNavDestinationOnWillHideImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1186,7 +1181,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
     public onNewParam(value: ((parameter: Object | null | undefined) => void) | undefined): this {
         if (this.checkPriority("onNewParam")) {
             const value_casted = value as (((parameter: Object | null | undefined) => void) | undefined)
-            this.getPeer()?.onNewParamAttribute(value_casted)
+            hookNavDestinationOnNewParamImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
@@ -1211,7 +1206,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("title")) {
             const value_casted = value as (string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined)
             const options_casted = options as (NavigationTitleOptions | undefined)
-            this.getPeer()?.titleAttribute(value_casted, options_casted)
+            hookNavDestinationTitleImpl(this.getPeer().peer.ptr, value_casted, options_casted)
             return this
         }
         return this

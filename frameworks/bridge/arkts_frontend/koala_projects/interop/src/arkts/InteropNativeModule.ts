@@ -54,5 +54,7 @@ export class InteropNativeModule {
     native static _Free(data: KPointer): void
     @ani.unsafe.Quick
     native static _CopyArray(data: KPointer, length: int64, args: KUint8ArrayPtr): void
+    @ani.unsafe.Quick
+    native static _CopyBuffer(data: KPointer, length: int64, args: KPointer): void
 }
 

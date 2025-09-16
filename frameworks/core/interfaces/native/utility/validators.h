@@ -57,6 +57,7 @@ void ValidateNonNegative(std::optional<CalcLength>& opt);
 void ValidateNonPercent(std::optional<CalcLength>& opt);
 void ValidatePickerDate(PickerDate& date);
 void ValidateAnimationOption(AnimationOption& opt, bool isForm);
+void ValidateDegree(std::optional<float>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 

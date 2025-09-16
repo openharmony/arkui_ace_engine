@@ -16,10 +16,18 @@
 #pragma once
 
 #include "core/gestures/drag_event.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 struct DragEventPeer {
     virtual ~DragEventPeer() = default;
 
     OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> dragInfo;
+
+    static DragEventPeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::DragEvent>& src)
+    {
+        auto dragEventPeer = new DragEventPeer;
+        CHECK_NULL_RETURN(dragEventPeer, nullptr);
+        dragEventPeer->dragInfo = src;
+        return dragEventPeer;
+    }
 };

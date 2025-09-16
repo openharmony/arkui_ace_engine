@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "es2015",
+        "moduleResolution": "node",
+        "paths": {
+            "@koalaui/common": [
+                "../../incremental/common/src/index.ts"
+            ],
+            "@koalaui/interop": [
+                "../../interop/src/interop",
+                "../../interop/src/arkts"
+            ],
+            "@koalaui/runtime": [
+                "../../incremental/runtime/src"
+            ],
+            "@koalaui/compat": [
+                "../../incremental/compat/src/arkts"
+            ],
+            "@component_handwritten/*": [
+                "src/handwritten/component/*"
+            ],
+        },
+    }
+}

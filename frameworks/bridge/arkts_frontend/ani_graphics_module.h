@@ -24,13 +24,17 @@ typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
+typedef int32_t ani_int;
 
 namespace OHOS::Ace::Framework {
 class AniGraphicsModule final {
 public:
     static void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj);
-    static void SetDrawModifier(ani_env* env, ani_long ptr, ani_object fnObj);
+    static void SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
     static void Invalidate(ani_env* env, ani_long ptr);
+    static void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    static void OnMeasureInnerMeasure(ani_env* env, ani_long ptr);
+    static void OnLayoutInnerLayout(ani_env* env, ani_long ptr);
 
 private:
     static ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context);

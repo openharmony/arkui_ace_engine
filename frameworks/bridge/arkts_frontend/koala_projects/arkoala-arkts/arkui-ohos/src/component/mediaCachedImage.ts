@@ -23,9 +23,9 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { ResourceStr } from "./units"
-import { DrawableDescriptor } from "./arkui-drawabledescriptor"
+import { DrawableDescriptor } from "#external"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -68,11 +68,6 @@ export class ArkMediaCachedImagePeer extends ArkImagePeer {
                 thisSerializer.writeResource(src_1_1)
             }
         }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
-        }
         else if (TypeChecker.isASTCResource(src, false, false)) {
             thisSerializer.writeInt8(3 as int32)
             const src_3  = src as ASTCResource
@@ -103,7 +98,7 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

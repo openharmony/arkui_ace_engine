@@ -327,9 +327,9 @@ struct NavDestinationTransition {
 
 enum class LaunchMode {
     STANDARD = 0,
-    MOVE_TO_TOP_SINGLETON,
-    POP_TO_TOP_SINGLETON,
-    NEW_INSTANCE,
+    MOVE_TO_TOP_SINGLETON = 1,
+    POP_TO_SINGLETON = 2,
+    NEW_INSTANCE = 3,
 };
 
 struct NavigationOptions {

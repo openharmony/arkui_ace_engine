@@ -1,5 +1,0 @@
-{
-    "scripts": {
-        "run": "bash ../../incremental/tools/panda/arkts/arktsc --arktsconfig ./arktsconfig.json"
-    }
-}

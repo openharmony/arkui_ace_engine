@@ -120,6 +120,34 @@ public:
             }
         }
     }
+
+    void Swap(const Key& left, const Key& right)
+    {
+        if (left == right) {
+            return;
+        }
+        auto leftIt = keyToValue.find(left);
+        auto rightIt = keyToValue.find(right);
+        if (leftIt == keyToValue.end() || rightIt == keyToValue.end()) {
+            return;
+        }
+
+        std::swap(leftIt->second, rightIt->second);
+
+        // Update valueToKey accordingly
+        valueToKey[leftIt->second] = left;
+        valueToKey[rightIt->second] = right;
+    }
+
+    // Iterator support for range-based for loops (only allow const operation)
+    auto begin() const
+    {
+        return keyToValue.begin();
+    }
+    auto end() const
+    {
+        return keyToValue.end();
+    }
 };
 } // namespace OHOS::Ace
 

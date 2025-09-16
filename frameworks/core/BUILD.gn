@@ -89,6 +89,7 @@ template("ace_core_source_set") {
       "accessibility/accessibility_utils.cpp",
       "accessibility/native_interface_accessibility_impl.cpp",
       "accessibility/native_interface_accessibility_provider.cpp",
+      "accessibility/static/accessibility_static_utils.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -129,6 +130,7 @@ template("ace_core_source_set") {
       "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
+      "common/color_inverter.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
@@ -143,8 +145,8 @@ template("ace_core_source_set") {
       "common/multi_thread_build_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
-      "common/resource/resource_manager.cpp",
       "common/resource/pattern_resource_manager.cpp",
+      "common/resource/resource_manager.cpp",
       "common/resource/resource_parse_utils.cpp",
       "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
@@ -160,7 +162,6 @@ template("ace_core_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
-      "common/color_inverter.cpp",
 
       # declaration
       "components/declaration/badge/badge_declaration.cpp",
@@ -507,9 +508,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
-    deps += [
-      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
-    ]
+    deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
 
     if (qrcodegen_support) {
       deps += [
@@ -735,6 +734,7 @@ template("ace_core_ng_source_set") {
       "accessibility/accessibility_utils.cpp",
       "accessibility/native_interface_accessibility_impl.cpp",
       "accessibility/native_interface_accessibility_provider.cpp",
+      "accessibility/static/accessibility_static_utils.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -772,6 +772,7 @@ template("ace_core_ng_source_set") {
       "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
+      "common/color_inverter.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
@@ -786,8 +787,8 @@ template("ace_core_ng_source_set") {
       "common/multi_thread_build_manager.cpp",
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
-      "common/resource/resource_manager.cpp",
       "common/resource/pattern_resource_manager.cpp",
+      "common/resource/resource_manager.cpp",
       "common/resource/resource_parse_utils.cpp",
       "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
@@ -803,7 +804,6 @@ template("ace_core_ng_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
-      "common/color_inverter.cpp",
 
       # event
       "event/axis_event.cpp",
@@ -1061,9 +1061,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
-    deps += [
-      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
-    ]
+    deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
@@ -1103,16 +1101,14 @@ template("ace_core_ng_source_set") {
           "init:libbegetutil",
           "ipc:ipc_core",
           "napi:ace_napi",
-          "webview:libnweb",
           "webview:cj_webview_ffi",
+          "webview:libnweb",
           "webview:ohos_base_glue_source",
           "window_manager:libwm",
         ]
         if (defined(global_parts_info) &&
-          defined(global_parts_info.web_webview)) {
-          external_deps += [
-            "webview:libarkweb_utils",
-          ]
+            defined(global_parts_info.web_webview)) {
+          external_deps += [ "webview:libarkweb_utils" ]
         }
       } else {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]

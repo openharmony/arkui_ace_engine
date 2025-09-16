@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
     {
         switch (src) {
+            case ARK_DRAG_RESULT_UNKNOWN: dst = DragRet::DRAG_DEFAULT; break;
             case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
             case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
             case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
@@ -42,9 +43,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DragResult& dst, const DragRet& src)
     {
         switch (src) {
+            case DragRet::DRAG_DEFAULT: dst = ARK_DRAG_RESULT_UNKNOWN; break;
             case DragRet::DRAG_SUCCESS: dst = ARK_DRAG_RESULT_DRAG_SUCCESSFUL; break;
             case DragRet::DRAG_FAIL: dst = ARK_DRAG_RESULT_DRAG_FAILED; break;
-            case DragRet::DRAG_CANCEL: dst = ARK_DRAG_RESULT_DRAG_CANCELED; break;\
+            case DragRet::DRAG_CANCEL: dst = ARK_DRAG_RESULT_DRAG_CANCELED; break;
             case DragRet::ENABLE_DROP: dst = ARK_DRAG_RESULT_DROP_ENABLED; break;
             case DragRet::DISABLE_DROP: dst = ARK_DRAG_RESULT_DROP_DISABLED; break;
             default:
@@ -55,10 +57,10 @@ namespace OHOS::Ace::NG::Converter {
 
     void AssignArkValue(Ark_Rectangle& dst, const Rect& src)
     {
-        dst.x = ArkValue<Opt_Length>(src.Left());
-        dst.y = ArkValue<Opt_Length>(src.Top());
-        dst.width = ArkValue<Opt_Length>(src.Width());
-        dst.height = ArkValue<Opt_Length>(src.Height());
+        dst.x = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Left()));
+        dst.y = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Top()));
+        dst.width = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Width()));
+        dst.height = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(src.Height()));
     }
 } // namespace Converter
 
@@ -100,14 +102,16 @@ Ark_Number GetWindowXImpl(Ark_DragEvent peer)
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    return ArkValue<Ark_Number>(peer->dragInfo->GetX());
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetX());
+    return ArkValue<Ark_Number>(value);
 }
 Ark_Number GetWindowYImpl(Ark_DragEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    return ArkValue<Ark_Number>(peer->dragInfo->GetY());
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetY());
+    return ArkValue<Ark_Number>(value);
 }
 Ark_Number GetXImpl(Ark_DragEvent peer)
 {

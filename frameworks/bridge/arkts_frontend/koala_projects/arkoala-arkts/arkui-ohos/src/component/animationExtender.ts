@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AnimateParam, TranslateOptions, ICurve } from "./common"
+import { AnimateParam, TranslateOptions, ICurve, KeyframeAnimateParam, KeyframeState } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -36,9 +36,21 @@ export class AnimationExtender {
         AnimationExtender.SetClipRect_serialize(node_casted, x_casted, y_casted, width_casted, height_casted)
         return
     }
+    public static KeyframeAnimationImpl(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        const param_casted = param as (KeyframeAnimateParam)
+        const keyframes_casted = keyframes as KeyframeState[];
+        AnimationExtender.KeyFrameAnimation_serialize(param_casted, keyframes_casted)
+        return
+    }
     public static OpenImplicitAnimation(param: AnimateParam): void {
         const param_casted = param as (AnimateParam)
         AnimationExtender.OpenImplicitAnimation_serialize(param_casted)
+        return
+    }
+    public static AnimateToImmediatelyImpl(param: AnimateParam, event: (() => void)): void {
+        const param_casted = param as (AnimateParam)
+        const event__casted = event as (() => void)
+        AnimationExtender.OpenImplicitAnimation_serializeImmediately(param_casted, event__casted)
         return
     }
     public static CloseImplicitAnimation(): void {
@@ -60,10 +72,95 @@ export class AnimationExtender {
     private static SetClipRect_serialize(node: KPointer, x: float32, y: float32, width: float32, height: float32): void {
         ArkUIGeneratedNativeModule._AnimationExtender_SetClipRect(node, x, y, width, height)
     }
+    private static KeyFrameAnimation_serialize(value: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        const valueSerializer: Serializer = Serializer.hold()
+        const value_delay = value.delay
+        let value_delay_type: int32 = RuntimeType.UNDEFINED
+        value_delay_type = runtimeType(value_delay)
+        valueSerializer.writeInt8(value_delay_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_delay_type)) {
+            const value_delay_value = value_delay!
+            valueSerializer.writeNumber(value_delay_value)
+        }
+        const value_iterations = value.iterations
+        let value_iterations_type: int32 = RuntimeType.UNDEFINED
+        value_iterations_type = runtimeType(value_iterations)
+        valueSerializer.writeInt8(value_iterations_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_iterations_type)) {
+            const value_iterations_value = value_iterations!
+            valueSerializer.writeNumber(value_iterations_value)
+        }
+        const value_onFinish = value.onFinish
+        let value_onFinish_type: int32 = RuntimeType.UNDEFINED
+        value_onFinish_type = runtimeType(value_onFinish)
+        valueSerializer.writeInt8(value_onFinish_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_onFinish_type)) {
+            const value_onFinish_value = value_onFinish!
+            valueSerializer.holdAndWriteCallback(value_onFinish_value)
+        }
+        valueSerializer.writeInt32(keyframes.length as int32)
+        keyframes.forEach((value) => {
+            const value_duration = value.duration
+            let value_duration_type: int32 = RuntimeType.UNDEFINED
+            value_duration_type = runtimeType(value_duration)
+            valueSerializer.writeInt8(value_duration_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
+                const value_duration_value = value_duration!
+                valueSerializer.writeNumber(value_duration_value)
+            }
+            const value_curve = value.curve
+            let value_curve_type: int32 = RuntimeType.UNDEFINED
+            value_curve_type = runtimeType(value_curve)
+            valueSerializer.writeInt8(value_curve_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_curve_type)) {
+                const value_curve_value = value_curve!
+                let value_curve_value_type: int32 = RuntimeType.UNDEFINED
+                value_curve_value_type = runtimeType(value_curve_value)
+                if (TypeChecker.isCurve(value_curve_value)) {
+                    valueSerializer.writeInt8(0 as int32)
+                    const value_curve_value_0 = value_curve_value as Curve
+                    valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_value_0))
+                }
+                else if (RuntimeType.STRING == value_curve_value_type) {
+                    valueSerializer.writeInt8(1 as int32)
+                    const value_curve_value_1 = value_curve_value as string
+                    valueSerializer.writeString(value_curve_value_1)
+                }
+                else if (RuntimeType.OBJECT == value_curve_value_type) {
+                    valueSerializer.writeInt8(2 as int32)
+                    const value_curve_value_2 = value_curve_value as ICurve
+                    valueSerializer.writeICurve(value_curve_value_2)
+                }
+            }
+            const value_event = value.event
+            let value_event_type: int32 = RuntimeType.UNDEFINED
+            value_event_type = runtimeType(value_event)
+            valueSerializer.writeInt8(value_event_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_event_type)) {
+                const value_event_value = value_event!
+                valueSerializer.holdAndWriteCallback(value_event_value)
+            }
+        });
+        ArkUIGeneratedNativeModule._AnimationExtender_KeyFrameAnimation(valueSerializer.asBuffer(), valueSerializer.length())
+        valueSerializer.release()
+    }
     private static OpenImplicitAnimation_serialize(param: AnimateParam): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAnimateParam(param)
         ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static OpenImplicitAnimation_serializeImmediately(param: AnimateParam, event: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeAnimateParam(param)
+        let callback__type : int32 = RuntimeType.UNDEFINED
+        callback__type = runtimeType(event)
+        thisSerializer.writeInt8(callback__type as int32)
+        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+            const callback__value  = event!
+            thisSerializer.holdAndWriteCallback(callback__value)
+        }
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimationImmediately(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static CloseImplicitAnimation_serialize(): void {

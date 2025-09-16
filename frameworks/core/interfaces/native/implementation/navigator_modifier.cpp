@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG {
 struct NavigatorOptions {
@@ -117,6 +117,8 @@ void ParamsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigatorModelNG::SetParams(frameNode, convValue);
     LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier

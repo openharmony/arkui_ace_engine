@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { IndicatorComponentController } from "./indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "./enums"
 import { Callback_Number_Void, Callback_Opt_Number_Void } from "./alphabetIndexer"
@@ -35,6 +35,7 @@ import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { LengthMetrics } from "../Graphics"
+import { SwiperOpsHandWritten } from "./../handwritten"
 export class SwiperControllerInternal {
     public static fromPtr(ptr: KPointer): SwiperController {
         const obj : SwiperController = new SwiperController()
@@ -280,7 +281,7 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
     }
 }
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSwiperPeer {
@@ -879,15 +880,16 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
-    index(value: number | undefined): this
+    index(value: number | Bindable<number> | undefined): this
     autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this
     interval(value: number | undefined): this
-    indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
+    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
     loop(value: boolean | undefined): this
     duration(value: number | undefined): this
     vertical(value: boolean | undefined): this
     itemSpace(value: number | string | undefined): this
     displayMode(value: SwiperDisplayMode | undefined): this
+    cachedCount(count: number | undefined): this
     cachedCount(count: number | undefined, isShown?: boolean): this
     effectMode(value: EdgeEffect | undefined): this
     disableSwipe(value: boolean | undefined): this
@@ -938,7 +940,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
-    public index(value: number | undefined): this {
+    public index(value: number | Bindable<number> | undefined): this {
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
@@ -947,7 +949,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     public interval(value: number | undefined): this {
         return this
     }
-    public indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
+    public indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
         return this
     }
     public loop(value: boolean | undefined): this {
@@ -963,6 +965,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
         return this
     }
     public displayMode(value: SwiperDisplayMode | undefined): this {
+        return this
+    }
+    public cachedCount(count: number | undefined): this {
         return this
     }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
@@ -1056,12 +1061,16 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public index(value: number | undefined): this {
-        if (this.checkPriority("index")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.indexAttribute(value_casted)
-            return this
+    public index(value: number | Bindable<number> | undefined): this {
+        if (typeof value === 'number' || typeof value === 'undefined') {
+            if (this.checkPriority("index")) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.indexAttribute(value_casted)
+                return this
+            }
         }
+        SwiperOpsHandWritten.hookSwiperAttributeIndexImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
@@ -1091,14 +1100,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
+    public indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
         if (this.checkPriority("indicator")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (DotIndicator | DigitIndicator | boolean | undefined)
-                this.getPeer()?.indicator0Attribute(value_casted)
-                return this
-            }
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined)
                 this.getPeer()?.indicator1Attribute(value_casted)
@@ -1148,22 +1152,20 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
+    public cachedCount(count: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const value_casted = count as (number | undefined)
+            this.getPeer()?.cachedCount0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
     public cachedCount(count: number | undefined, isShown?: boolean): this {
         if (this.checkPriority("cachedCount")) {
-            const count_type = runtimeType(count)
-            const isShown_type = runtimeType(isShown)
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == isShown_type)) {
-                const value_casted = count as (number | undefined)
-                this.getPeer()?.cachedCount0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == isShown_type) || (RuntimeType.UNDEFINED == isShown_type))) {
-                const count_casted = count as (number | undefined)
-                const isShown_casted = isShown as (boolean | undefined)
-                this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const count_casted = count as (number | undefined)
+            const isShown_casted = isShown as (boolean | undefined)
+            this.getPeer()?.cachedCount1Attribute(count_casted, isShown_casted)
+            return this
         }
         return this
     }
@@ -1298,7 +1300,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
         if (this.checkPriority("displayArrow")) {
             const value_casted = value as (ArrowStyle | boolean | undefined)
-            const isHoverShow_casted = isHoverShow as (boolean)
+            const isHoverShow_casted = isHoverShow as (boolean | undefined)
             this.getPeer()?.displayArrowAttribute(value_casted, isHoverShow_casted)
             return this
         }
@@ -1307,7 +1309,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         if (this.checkPriority("displayCount")) {
             const value_casted = value as (number | string | SwiperAutoFill | undefined)
-            const swipeByGroup_casted = swipeByGroup as (boolean)
+            const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
             this.getPeer()?.displayCountAttribute(value_casted, swipeByGroup_casted)
             return this
         }
@@ -1316,7 +1318,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("prevMargin")) {
             const value_casted = value as (Length | undefined)
-            const ignoreBlank_casted = ignoreBlank as (boolean)
+            const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.prevMarginAttribute(value_casted, ignoreBlank_casted)
             return this
         }
@@ -1325,7 +1327,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("nextMargin")) {
             const value_casted = value as (Length | undefined)
-            const ignoreBlank_casted = ignoreBlank as (boolean)
+            const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.nextMarginAttribute(value_casted, ignoreBlank_casted)
             return this
         }
@@ -1363,7 +1365,7 @@ export function Swiper(
         receiver.applyAttributesFinish()
     })
 }
-export class Indicator {
+export class Indicator<T> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1378,32 +1380,32 @@ export class Indicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length): T {
         this._left = value
-        return this
+        return this as Object as T
     }
-    top(value: Length): this {
+    top(value: Length): T {
         this._top = value
-        return this
+        return this as Object as T
     }
-    right(value: Length): this {
+    right(value: Length): T {
         this._right = value
-        return this
+        return this as Object as T
     }
-    bottom(value: Length): this {
+    bottom(value: Length): T {
         this._bottom = value
-        return this
+        return this as Object as T
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics): T {
         this._start = value
-        return this
+        return this as Object as T
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics): T {
         this._end = value
-        return this
+        return this as Object as T
     }
 }
-export class DotIndicator {
+export class DotIndicator extends Indicator<DotIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1420,6 +1422,7 @@ export class DotIndicator {
     _maxDisplayCount?: number | undefined
     _space?: LengthMetrics | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()
@@ -1488,7 +1491,7 @@ export class DotIndicator {
         return this
     }
 }
-export class DigitIndicator {
+export class DigitIndicator extends Indicator<DigitIndicator> {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
@@ -1500,6 +1503,7 @@ export class DigitIndicator {
     _digitFont?: Font | undefined
     _selectedDigitFont?: Font | undefined
     constructor() {
+        super()
     }
     static dot(): DotIndicator {
         return new DotIndicator()

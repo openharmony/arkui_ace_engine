@@ -35,7 +35,7 @@ generate_static_abc("runtime_compile_abc") {
   ui_enable = "True"
   only_memo = "True"
   dependencies = [ ":runtime_annotate" ]
-  dst_file = target_out_dir + "/runtime_compile_abc"
+  dst_file = target_out_dir + "/runtime_compile_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/runtime_compile_abc/modules_static.abc" ]
 }
 

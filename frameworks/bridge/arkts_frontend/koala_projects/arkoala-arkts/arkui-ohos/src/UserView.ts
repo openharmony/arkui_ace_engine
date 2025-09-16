@@ -36,6 +36,7 @@ export class UserView {
     static getNativeLog(group: int32): string {
         let ptr = InteropNativeModule._GetGroupedLog(group)
         let length = InteropNativeModule._StringLength(ptr)
+        // @ts-ignore
         let data = new byte[length];
         // @ts-ignore
         InteropNativeModule._StringData(ptr, data, length)
@@ -53,9 +54,21 @@ export class UserView {
     }
 }
 
+export interface NavInterface {
+    bundleName: string;
+    moduleName: string;
+    pagePath: string;
+    pageFullPath: string;
+    integratedHsp: string;
+}
+
 export class EntryPoint {
     constructor() {}
     /** @memo */
     entry(): void {
+    }
+
+    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
+        
     }
 }

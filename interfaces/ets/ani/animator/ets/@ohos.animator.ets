@@ -14,6 +14,28 @@
  */
 
 import { ExpectedFrameRateRange } from './arkui.component.common'
+import { FillMode, PlayMode } from './arkui.component.enums'
+
+export class SimpleAnimatorOptions {
+
+  static { loadLibrary("animator_ani") }
+
+  SimpleAnimatorOptionsResult:long = 0;
+
+  public native constructor(begin: number, end: number);
+
+  public native duration(duration: number): SimpleAnimatorOptions;
+
+  public native easing(curve: string): SimpleAnimatorOptions;
+
+  public native delay(delay: number): SimpleAnimatorOptions;
+
+  public native fill(fillMode: FillMode): SimpleAnimatorOptions;
+
+  public native direction(direction: PlayMode): SimpleAnimatorOptions;
+
+  public native iterations(iterations: number): SimpleAnimatorOptions;
+}
 
 interface AnimatorOptions {
     duration: number;
@@ -28,7 +50,7 @@ interface AnimatorOptions {
 
 export default class Animator {
     static { loadLibrary("animator_ani") }
-    static native create(options: AnimatorOptions): AnimatorResult;
+    static native create(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult;
 }
 
 export interface AnimatorResult {
@@ -47,6 +69,11 @@ export interface AnimatorResult {
 }
 
 class AnimatorResultInner implements AnimatorResult {
+
+    static {
+        loadLibrary("animator_ani");
+    }
+
     animatorResult:long = 0;
     constructor(result:long) {
         if(this.animatorResult == 0){
@@ -61,7 +88,29 @@ class AnimatorResultInner implements AnimatorResult {
     public native update(options: AnimatorOptions): void;
     public native reset(options: AnimatorOptions): void;
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
-    
+
+    static animatorTransferStatic(input: Any): Object {
+        return AnimatorResultInner.nativeTransferStatic(ESValue.wrap(input));
+    }
+
+    private static native nativeTransferStatic(input: ESValue): Object;
+
+    static animatorTransferDynamic(input: Any): Any {
+        let animatorRet = input as AnimatorResultInner;
+        if (animatorRet) {
+            let addr = animatorRet.animatorResult;
+            let module = ESValue.load("@ohos.animator");
+            let initFunc = module.getProperty("__createTransfer__")
+            if (initFunc) {
+                let animatorRet = initFunc.invoke(ESObject.wrap(addr));
+                return animatorRet;
+            } else {
+                console.error("AceAnimation:: invoke func not exit")
+            }
+        }
+        return undefined;
+    }
+
     // set and get onFinish
     private native setOnFinish(value: () => void) : void;
     set onFinish(value: () => void) {

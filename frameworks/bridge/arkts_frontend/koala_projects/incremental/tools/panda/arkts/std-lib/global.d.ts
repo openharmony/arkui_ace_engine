@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 declare type int32 = number
 declare type int8 = number
 declare type float32 = number
@@ -10,6 +25,10 @@ declare class StringBuilder {
     append(value: string): StringBuilder
 }
 
+declare class Type {
+    static from<T>(): Type
+    getName(): string
+}
 
 declare const console: {
     assert(value: any, message?: string, ...optionalParams: any[]): void;
@@ -58,11 +77,10 @@ declare const console: {
 
 }
 
-declare function setTimeout(func: () => void, delayMs?: int32): int32
+declare function setTimeout(func: () => void, delayMs: int32): int32
 
-declare function setInterval(func: () => void, delayMs?: int32): int32
+declare function setInterval(func: () => void, delayMs: int32): int32
 
 declare function clearInterval(timerId: int32): void
 
 declare function clearTimeout(timerId: int32): void
-    

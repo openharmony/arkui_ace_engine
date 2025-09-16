@@ -22,15 +22,26 @@ export type ReleaseCallback = (code: number) => void;
 export type ErrorCallback = (code: number, name: string, message: string) => void;
 export type ReciveCallback = (param: Record<string, Object>) => void;
 export type TerminationCallback = (code: number, want: Want) => void;
+export type DrawReadyCallback = () => void;
 
 export class ArkUIAniUIExtensionOptions {
     constructor() {
         this.isTransferringCaller = false;
+        this.isWindowModeFollowHost = false;
         this.dpiFollowStrategy = 0;
+        this.initPlaceholder = 0;
+        this.undefinedPlaceholder = 0;
+        this.rotationPlaceholder = 0;
+        this.flodPlaceholder = 0;
     }
 
     isTransferringCaller: boolean;
+    isWindowModeFollowHost: boolean;
     dpiFollowStrategy: KInt;
+    initPlaceholder: KLong;
+    undefinedPlaceholder: KLong;
+    rotationPlaceholder: KLong;
+    flodPlaceholder: KLong;
 }
 
 export class ArkUIAniUiextensionProxyModal {
@@ -47,11 +58,12 @@ export class ArkUIAniUiextensionModal {
         ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
     }
 
-    native static _Uiextension_Set_Option(nodePointer: KLong, option: ArkUIAniUIExtensionOptions): void
-    native static _Uiextension_Set_Want(nodePointer: KLong, want: Want): void
-    native static _Uiextension_Set_OnResultCallback(nodePointer: KLong, value: ResultCallback) : void;
-    native static _Uiextension_Set_OnErrorCallback(nodePointer: KLong, value: ErrorCallback) : void;
-    native static _Uiextension_Set_OnReciveCallback(nodePointer: KLong, value: ReciveCallback) : void;
-    native static _Uiextension_Set_OnTerminationCallback(nodePointer: KLong, value: TerminationCallback) : void;
-    native static _Uiextension_Set_OnReleaseCallback(nodePointer: KLong, value: ReleaseCallback) : void;
+    native static _Uiextension_Set_Option(nodePointer: KLong, option: ArkUIAniUIExtensionOptions): void;
+    native static _Uiextension_Set_Want(nodePointer: KLong, want: Want): void;
+    native static _Uiextension_Set_OnResultCallback(nodePointer: KLong, value?: ResultCallback) : void;
+    native static _Uiextension_Set_OnErrorCallback(nodePointer: KLong, value?: ErrorCallback) : void;
+    native static _Uiextension_Set_OnReciveCallback(nodePointer: KLong, value?: ReciveCallback) : void;
+    native static _Uiextension_Set_OnTerminationCallback(nodePointer: KLong, value?: TerminationCallback) : void;
+    native static _Uiextension_Set_OnReleaseCallback(nodePointer: KLong, value?: ReleaseCallback) : void;
+    native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value: DrawReadyCallback) : void;
 }

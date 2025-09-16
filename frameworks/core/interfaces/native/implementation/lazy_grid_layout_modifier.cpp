@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,7 +24,10 @@ namespace LazyGridLayoutModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = LazyGridLayoutModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // LazyGridLayoutModifier
 namespace LazyGridLayoutAttributeModifier {
@@ -31,12 +36,18 @@ void RowsGapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue =  Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    LazyGridLayoutModelStatic::SetRowGap(frameNode, convValue);
 }
 void ColumnsGapImpl(Ark_NativePointer node,
                     const Opt_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue =  Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
 }
 } // LazyGridLayoutAttributeModifier
 const GENERATED_ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier()

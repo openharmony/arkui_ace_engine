@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { ResourceColor, Length } from "./units"
 import { LineCapStyle, LineJoinStyle, Color } from "./enums"
 import { Resource } from "global.resource"
@@ -31,8 +31,10 @@ import { ArkUIAniModule } from "arkui.ani"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ShapeModifier } from "../ShapeModifier"
 
 export class ArkShapePeer extends ArkCommonMethodPeer {
+    _attributeSet?: ShapeModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -306,14 +308,14 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_antiAlias(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    meshAttribute(value: Array<number>, column: number, row: number): void {
+    meshAttribute(value: Array<number>, column: int32, row: int32): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeInt32(value.length as int32)
         for (let i = 0; i < value.length; i++) {
             const value_element : number = value[i]
             thisSerializer.writeNumber(value_element)
         }
-        ArkUIGeneratedNativeModule._ShapeAttribute_mesh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), column, row)
+        ArkUIGeneratedNativeModule._ShapeAttribute_mesh(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), column as number, row as number)
         thisSerializer.release()
     }
 }
@@ -336,7 +338,8 @@ export interface ShapeAttribute extends CommonMethod {
     fillOpacity(value: number | string | Resource | undefined): this
     strokeWidth(value: number | string | undefined): this
     antiAlias(value: boolean | undefined): this
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
+    mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this
+    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
     viewPort_value?: ViewportRect | undefined
@@ -387,9 +390,9 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     public antiAlias(value: boolean | undefined): this {
         return this
     }
-    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    public mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         return this
-        }
+    }
 }
 export class ArkShapeComponent extends ArkCommonMethodComponent implements ShapeAttribute {
     getPeer(): ArkShapePeer {
@@ -397,15 +400,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     }
     public setShapeOptions(value?: PixelMap): this {
         if (this.checkPriority("setShapeOptions")) {
-            const value_casted = value as (PixelMap | undefined);
-            const value_type = runtimeType(value)
-            if ((RuntimeType.UNDEFINED) != (value_type)) {
-                const pixelMap = value_casted as PixelMap;
-                this.getPeer()?.setShapeOptions0Attribute(pixelMap)
-            } else {
-                this.getPeer()?.setShapeOptions1Attribute()
-            }
-            return this
+            hookSetShapeOptions(this, value);
         }
         return this
     }
@@ -505,14 +500,14 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         }
         return this
     }
-    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    public mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         if (value == undefined || column == undefined || row == undefined) {
             return this;
         }
         if (this.checkPriority("mesh")) {
             const value_casted = value as (Array<number>)
-            const column_casted = column as (number)
-            const row_casted = row as (number)
+            const column_casted = column as (int32)
+            const row_casted = row as (int32)
             this.getPeer()?.meshAttribute(value_casted, column_casted, row_casted)
             return this
         }
@@ -522,6 +517,11 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookShapeAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

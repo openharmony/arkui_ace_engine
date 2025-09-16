@@ -72,7 +72,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
 }
 Ark_Number Vp2pxImpl(const Ark_Number* value)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    auto invalid = Converter::ArkValue<Ark_Number>(0.0);
     CHECK_NULL_RETURN(value, invalid);
     double vpValue = Converter::Convert<double>(*value);
     double density = PipelineBase::GetCurrentDensity();
@@ -241,9 +241,9 @@ void CursorControl_restoreDefaultImpl()
     if (!pipelineContext->GetTaskExecutor()) {
         return;
     }
-    // pipelineContext->GetTaskExecutor()->PostSyncTask(
-    //     [pipelineContext]() { pipelineContext->RestoreDefault(); },
-    //     TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
 }
 Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 {

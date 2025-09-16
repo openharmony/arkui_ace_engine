@@ -40,13 +40,13 @@ public:
     CallbackHelper() = default;
 
     CallbackHelper(const CallbackType &callback, Ark_VMContext vmcontext)
-        : callback_(callback), vmContext_(vmcontext)
+        : callback_(callback)
     {
         if (callback_.resource.hold) {
             (*callback_.resource.hold)(callback_.resource.resourceId);
         }
     }
-    CallbackHelper(const CallbackHelper &other): callback_(other.callback_), vmContext_(other.vmContext_)
+    CallbackHelper(const CallbackHelper &other): callback_(other.callback_)
     {
         if (callback_.resource.hold) {
             (*callback_.resource.hold)(callback_.resource.resourceId);
@@ -73,7 +73,7 @@ public:
     void InvokeSync(Params&&... args) const
     {
         if (callback_.callSync) {
-            (*callback_.callSync)(vmContext_, callback_.resource.resourceId, std::forward<Params>(args)...);
+            (*callback_.callSync)(GetVMContext(), callback_.resource.resourceId, std::forward<Params>(args)...);
         }
     }
 
@@ -153,18 +153,17 @@ public:
 
     static Ark_VMContext GetVMContext()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto rootNode = pipeline->GetRootElement();
-        CHECK_NULL_RETURN(rootNode, nullptr);
-        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(rootNode));
-        CHECK_NULL_RETURN(rootPtr, nullptr);
-        auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr);
-        CHECK_NULL_RETURN(companionNode, nullptr);
-        return companionNode->GetVMContext();
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto frontEnd = container->GetFrontend();
+        CHECK_NULL_RETURN(frontEnd, nullptr);
+        if (!frontEnd->GetEnv() && container->GetSubFrontend()) {
+            frontEnd = container->GetSubFrontend(); // return ArktsFrontend when 1.1 hybrid 1.2
+        }
+        return Ark_VMContext(frontEnd->GetEnv());
     }
 
-    const CallbackType GetCallback()
+    const CallbackType& GetCallback()
     {
         return callback_;
     }
@@ -174,7 +173,6 @@ protected:
         .call = nullptr,
         .callSync = nullptr
     };
-    Ark_VMContext vmContext_;
 };
 } // namespace OHOS::Ace::NG
 

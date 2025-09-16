@@ -19,9 +19,10 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { VP, ResourceStr, Dimension } from "./units"
+import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
 import { ImageFit, Curve } from "./enums"
 import { ICurve } from "./common"
+import { Vector2T, LengthMetrics } from "../Graphics"
 export type ParticleTuple<T1,T2> = [
     T1,
     T2
@@ -38,23 +39,18 @@ export interface ImageParticleParameters {
     size: ParticleTuple<Dimension, Dimension>;
     objectFit?: ImageFit;
 }
-export interface ParticleConfigs {
-}
-export interface EmitterProperty {
-    stub: string;
-}
-export interface EmitterParticleOptions<PARTICLE> {
-    type: PARTICLE;
-    config: string;
+export type ParticleConfigs = PointParticleParameters | ImageParticleParameters;
+export interface EmitterParticleOptions {
+    type: ParticleType;
+    config: ParticleConfigs;
     count: number;
     lifetime?: number;
     lifetimeRange?: number;
 }
-export interface ParticlePropertyUpdaterConfigs<T> {
-}
-export interface ParticleUpdaterOptions<TYPE,UPDATER> {
-    type: UPDATER;
-    config: string;
+export type ParticlePropertyUpdaterConfigs = [ number, number ] | Array<ParticlePropertyAnimation<number>> | undefined;
+export interface ParticleUpdaterOptions {
+    type: ParticleUpdater;
+    config: ParticlePropertyUpdaterConfigs;
 }
 export interface ParticleColorOptions {
     r: ParticleTuple<number, number>;
@@ -62,12 +58,11 @@ export interface ParticleColorOptions {
     b: ParticleTuple<number, number>;
     a: ParticleTuple<number, number>;
 }
-export interface ParticleColorUpdaterOptions<UPDATER> {
-    type: UPDATER;
-    config: string;
+export interface ParticleColorUpdaterOptions {
+    type: ParticleUpdater;
+    config: ParticleColorPropertyUpdaterConfigs;
 }
-export interface ParticleColorPropertyUpdaterConfigs {
-}
+export type ParticleColorPropertyUpdaterConfigs = ParticleColorOptions | Array<ParticlePropertyAnimation<ResourceColor>> | undefined;
 export interface ParticlePropertyAnimation<T> {
     from: T;
     to: T;
@@ -97,4 +92,11 @@ export enum DisturbanceFieldShape {
     RECT = 0,
     CIRCLE = 1,
     ELLIPSE = 2
+}
+export interface ParticleAnnulusRegion {
+    center?: Vector2T<LengthMetrics>;
+    outerRadius: LengthMetrics;
+    innerRadius: LengthMetrics;
+    startAngle?: number;
+    endAngle?: number;
 }

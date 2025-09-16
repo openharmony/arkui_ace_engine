@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG::Converter {
             case ARK_AXIS_ACTION_BEGIN: dst = AxisAction::BEGIN; break;
             case ARK_AXIS_ACTION_UPDATE: dst = AxisAction::UPDATE; break;
             case ARK_AXIS_ACTION_END: dst = AxisAction::END; break;
+            case ARK_AXIS_ACTION_CANCEL: dst = AxisAction::CANCEL; break;
             default: LOGE("Unexpected enum value in Ark_AxisAction: %{public}d", src);
         }
     }

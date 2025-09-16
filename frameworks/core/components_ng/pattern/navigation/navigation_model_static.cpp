@@ -408,13 +408,14 @@ void NavigationModelStatic::SetNavBarPosition(FrameNode* frameNode, const std::o
 void NavigationModelStatic::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto minContentWidth = value.IsNonPositive() ? DEFAULT_MIN_CONTENT_WIDTH : value;
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetIfNeedInit(true);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    auto layoutProp = frameNode->GetLayoutPropertyPtr<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateMinContentWidth(value);
 }
 
 void NavigationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
@@ -426,6 +427,14 @@ void NavigationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color&
     CHECK_NULL_VOID(pattern);
     RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
     pattern->SetSystemBarStyle(style);
+}
+
+void NavigationModelStatic::SetOnNavBarWidthChangeEvent(FrameNode* frameNode, OnNavBarWidthChangeEvent event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNavBarWidthChangeEvent(std::move(event));
 }
 
 void NavigationModelStatic::SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode)
@@ -932,5 +941,37 @@ void NavigationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimension
     }
     navBarLayoutProperty->UpdateHideBackButton(true);
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
+}
+
+void NavigationModelStatic::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
+void NavigationModelStatic::SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
+}
+
+void NavigationModelStatic::SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetRecoverable(recoverable.value_or(false));
+}
+
+void NavigationModelStatic::SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable, frameNode);
 }
 } // namespace OHOS::Ace::NG

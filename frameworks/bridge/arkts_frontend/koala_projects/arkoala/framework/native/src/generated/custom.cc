@@ -15,6 +15,8 @@
 
 #include "DeserializerBase.h"
 
+#include "securec.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -31,10 +33,11 @@ struct MyDeserializer : CustomDeserializer {
     virtual InteropCustomObject deserialize(DeserializerBase* deserializer, const std::string& kind) {
         InteropString value = deserializer->readString();
         (void)value;
+        //fprintf(stderr, "native deserialize() for %s, got %s\n", kind.c_str(), value.chars);
         InteropCustomObject result;
-        strcpy_s(result.kind, sizeof(result.kind), "NativeError");
+        strcpy(result.kind, "NativeError");
         result.id = 0;
-        strcat_s(result.kind, sizeof(result.kind), kind.c_str());
+        strncat_s(result.kind, sizeof(result.kind), kind.c_str());
         return result;
     }
 

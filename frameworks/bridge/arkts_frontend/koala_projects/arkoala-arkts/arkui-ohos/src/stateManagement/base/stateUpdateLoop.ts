@@ -14,6 +14,7 @@
  */
 export class StateUpdateLoop {
     private static callbacks: Array<() => void> = new Array<() => void>();
+    public static canRequestFrame: boolean = true;
     public static add(callback: () => void): void {
         StateUpdateLoop.callbacks.push(callback);
     }

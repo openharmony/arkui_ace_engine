@@ -17,11 +17,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_static.h"
-#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "frameworks/core/components/list/list_theme.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_static.h"
 #include "frameworks/core/components_v2/list/list_properties.h"
@@ -53,26 +53,6 @@ namespace OHOS::Ace::NG::Converter {
         options.forward = Converter::OptConvert<NestedScrollMode>(src.scrollForward);
         options.backward = Converter::OptConvert<NestedScrollMode>(src.scrollBackward);
         return options;
-    }
-
-    template<>
-    V2::ItemDivider Convert(const Ark_ListDividerOptions& src)
-    {
-        auto dst = V2::ItemDivider{}; // this struct is initialized by default
-        dst.strokeWidth = Convert<Dimension>(src.strokeWidth);
-        auto colorOpt = OptConvert<Color>(src.color);
-        if (colorOpt.has_value()) {
-            dst.color = colorOpt.value();
-        }
-        auto startMarginOpt = OptConvert<Dimension>(src.startMargin);
-        if (startMarginOpt.has_value()) {
-            dst.startMargin = startMarginOpt.value();
-        }
-        auto endMarginOpt = OptConvert<Dimension>(src.endMargin);
-        if (endMarginOpt.has_value()) {
-            dst.endMargin = endMarginOpt.value();
-        }
-        return dst;
     }
 
     template<>
@@ -138,6 +118,14 @@ namespace OHOS::Ace::NG::Converter {
             .offset = Convert<Dimension>(src.offsetRemain)
         };
     }
+
+    template<>
+    inline void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
+    {
+        ScrollFrameResult ret;
+        ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
+        dst = ret;
+    }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListModifier {
@@ -148,6 +136,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+}
+
+RefPtr<ListTheme> GetListTheme(FrameNode* node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto context = node->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTheme<ListTheme>();
 }
 } // ListModifier
 namespace ListInterfaceModifier {
@@ -231,9 +227,26 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListModelStatic::SetDivider(frameNode, divider);
+    auto options = value ? Converter::OptConvert<Ark_ListDividerOptions>(*value) : std::nullopt;
+    V2::ItemDivider dividerAns;
+    if (options.has_value()) {
+        auto widthOpt = Converter::OptConvert<Dimension>(options->strokeWidth);
+        dividerAns.strokeWidth = widthOpt.value_or(0.0_vp);
+        auto startMarginOpt = Converter::OptConvert<Dimension>(options->startMargin);
+        dividerAns.startMargin = startMarginOpt.value_or(0.0_vp);
+        auto endMarginOpt = Converter::OptConvert<Dimension>(options->endMargin);
+        dividerAns.endMargin = endMarginOpt.value_or(0.0_vp);
+        auto colorOpt = Converter::OptConvert<Color>(options->color);
+        if (colorOpt.has_value()) {
+            dividerAns.color = colorOpt.value();
+        } else {
+            auto listTheme = ListModifier::GetListTheme(frameNode);
+            if (listTheme) {
+                dividerAns.color = listTheme->GetDividerColor();
+            }
+        }
+    }
+    ListModelStatic::SetDivider(frameNode, dividerAns);
 }
 void EditModeImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -277,6 +290,9 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto countValue = Converter::OptConvert<int>(*count);
+    auto showValue = Converter::OptConvert<bool>(*show);
+    ListModelStatic::SetCachedCount(frameNode, countValue, showValue);
 }
 void ChainAnimationImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -369,17 +385,15 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    ListModelStatic::SetListMaintainVisibleContentPosition(frameNode, *convValue);
+    ListModelStatic::SetListMaintainVisibleContentPosition(frameNode, convValue);
 }
 void StackFromEndImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Number_Void* value)
@@ -626,7 +640,7 @@ void OnItemDropImpl(Ark_NativePointer node,
     ListModelStatic::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                            const Opt_OnScrollFrameBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -635,18 +649,17 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onScrollFrameBegin = [callback = CallbackHelper(*optValue)](
-            const Dimension& offset, const ScrollState& state
-        ) -> ScrollFrameResult {
-        auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
-        auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
-            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
-        return {
-            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
-        };
+    auto onScrollFrameEvent = [callback = CallbackHelper(*optValue)](
+        Dimension dimension, ScrollState state) -> ScrollFrameResult {
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        ScrollFrameResult result { .offset = dimension};
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
+            Callback_OnScrollFrameBeginHandlerResult_Void>(arkValue, arkState)
+            .value_or(result);
     };
-    ListModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+    ListModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_OnWillScrollCallback* value)
@@ -728,12 +741,18 @@ void EdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<bool> alwaysEnabled;
-    if (options != nullptr) {
-        alwaysEnabled = Converter::OptConvert<bool>(*options);
-    }
     std::optional<EdgeEffect> effect = Converter::OptConvert<EdgeEffect>(*value);
-    ScrollableModelStatic::SetEdgeEffect(frameNode, effect, alwaysEnabled, EffectEdge::ALL);
+    std::optional<bool> alwaysEnabled;
+    std::optional<EffectEdge> effectEdge;
+    auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
+    if (edgeEffectOptions) {
+        alwaysEnabled = Converter::OptConvert<bool>(edgeEffectOptions.value().alwaysEnabled);
+        auto value = Converter::OptConvert<int32_t>(edgeEffectOptions.value().effectEdge);
+        if (value.has_value()) {
+            effectEdge = static_cast<EffectEdge>(value.value());
+        }
+    }
+    ListModelStatic::SetEdgeEffect(frameNode, effect, alwaysEnabled, effectEdge);
 }
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()

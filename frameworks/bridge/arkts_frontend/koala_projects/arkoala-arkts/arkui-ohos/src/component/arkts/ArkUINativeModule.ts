@@ -106,4 +106,6 @@ export class ArkUINativeModule {
     @ani.unsafe.Direct
     native static _ReleaseCallbackResource(resourceId: int32): void
     native static _LoadUserView(userClass: string, params: string): Object
+    @ani.unsafe.Direct
+    native static _Hook_onClick0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
 }

@@ -92,8 +92,10 @@ public:
     void CreateImageData(
         std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height);
     void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
+    void GetImageData(const ImageSize& imageSize, uint8_t* buffer);
     RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
     void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
+    void PutImageData(const Ace::ImageData& imageData);
     std::vector<double> GetLineDash();
     void SetLineDash(const std::vector<double>& segments);
     void ClearRect(const double x, const double y, const double width, const double height);
@@ -146,6 +148,15 @@ public:
     void SetTextBaseline(const std::string& baselineStr);
     void SetLetterSpacing(const std::string& letterSpacing);
     void SetLetterSpacing(const Ace::Dimension& letterSpacing);
+    void Path2DArc(const ArcParam& params) override;
+    void Path2DArcTo(const ArcToParam& params) override;
+    void Path2DBezierCurveTo(const BezierCurveToParam& params) override;
+    void Path2DClosePath() override;
+    void Path2DEllipse(const EllipseParam& params) override;
+    void Path2DLineTo(double x, double y) override;
+    void Path2DMoveTo(double x, double y) override;
+    void Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y) override;
+    void Path2DRect(double x, double y, double width, double height) override;
 
     // inheritance
     void ResetPaintState();
@@ -215,7 +226,7 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params, bool isImage);
+    void ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params);
     Dimension GetDimensionValue(const std::string& str);
     Dimension GetDimensionValue(const Dimension& dimension);
     Ace::Pattern GetPattern(unsigned int id);

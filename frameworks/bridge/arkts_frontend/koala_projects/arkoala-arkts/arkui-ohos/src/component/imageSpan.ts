@@ -25,15 +25,16 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { ColorFilter, ResourceStr } from "./units"
-import { DrawingColorFilter } from "./arkui-drawing"
 import { ImageErrorCallback, ImageError } from "./image"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { drawing } from "@ohos/graphics/drawing"
+
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -85,7 +86,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._ImageSpanAttribute_verticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    colorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+    colorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -98,11 +99,6 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ColorFilter
                 thisSerializer.writeColorFilter(value_value_0)
-            }
-            else if (TypeChecker.isDrawingColorFilter(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as DrawingColorFilter
-                thisSerializer.writeDrawingColorFilter(value_value_1)
             }
         }
         ArkUIGeneratedNativeModule._ImageSpanAttribute_colorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -160,7 +156,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
 export type ImageSpanInterface = (value: ResourceStr | PixelMap) => ImageSpanAttribute;
 export interface ImageSpanAttribute extends BaseSpan {
     verticalAlign(value: ImageSpanAlignment | undefined): this
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
     objectFit(value: ImageFit | undefined): this
     onComplete(value: ImageCompleteCallback | undefined): this
     onError(value: ImageErrorCallback | undefined): this
@@ -168,7 +164,7 @@ export interface ImageSpanAttribute extends BaseSpan {
 }
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined
-    colorFilter_value?: ColorFilter | DrawingColorFilter | undefined
+    colorFilter_value?: ColorFilter | drawing.ColorFilter | undefined
     objectFit_value?: ImageFit | undefined
     onComplete_value?: ImageCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
@@ -176,7 +172,7 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
@@ -190,7 +186,7 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     }
     public alt(value: PixelMap | undefined): this {
         return this
-        }
+    }
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
 export interface ImageLoadResult {
@@ -210,8 +206,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
     public setImageSpanOptions(value: ResourceStr | PixelMap): this {
         if (this.checkPriority("setImageSpanOptions")) {
-            const value_casted = value as (ResourceStr | PixelMap)
-            this.getPeer()?.setImageSpanOptionsAttribute(value_casted)
+            hookSetImageSpanOptions(this, value)
             return this
         }
         return this
@@ -224,10 +219,9 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         }
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
-            const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
-            this.getPeer()?.colorFilterAttribute(value_casted)
+            hookSetColorFilter(this, value);
             return this
         }
         return this
@@ -258,8 +252,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
     public alt(value: PixelMap | undefined): this {
         if (this.checkPriority("alt")) {
-            const value_casted = value as (PixelMap | undefined)
-            this.getPeer()?.altAttribute(value_casted)
+            hookSetAlt(this, value)
             return this
         }
         return this

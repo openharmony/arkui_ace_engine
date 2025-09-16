@@ -17,7 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
+// #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "arkoala_api_generated.h"
 #include "base/image/pixel_map.h"

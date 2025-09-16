@@ -27,7 +27,8 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogButtonStyle, WordBreak, BorderStyle } from "./enums"
 import { ResourceStr, ResourceColor, VoidCallback, Offset, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./actionSheet"
+import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos/promptAction"
 export class AlertDialog {
     public static show(value: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): undefined {
         const value_casted = value as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
@@ -96,11 +97,8 @@ export interface AlertDialogButtonBaseOptions {
 export interface AlertDialogButtonOptions extends AlertDialogButtonBaseOptions {
     primary?: boolean;
 }
-export interface TextStyle_alert_dialog {
+export interface AlertDialogTextStyleOptions {
     wordBreak?: WordBreak;
-}
-export interface LevelOrder {
-    _LevelOrderStub: string;
 }
 export interface AlertDialogParam {
     title?: ResourceStr;
@@ -127,13 +125,13 @@ export interface AlertDialogParam {
     borderColor?: ResourceColor | EdgeColors | LocalizedEdgeColors;
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
-    textStyle?: TextStyle_alert_dialog;
+    textStyle?: AlertDialogTextStyleOptions;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
-    onDidAppear?: (() => void);
-    onDidDisappear?: (() => void);
-    onWillAppear?: (() => void);
-    onWillDisappear?: (() => void);
+    onDidAppear?: ((data: undefined) => void);
+    onDidDisappear?: ((data: undefined) => void);
+    onWillAppear?: ((data: undefined) => void);
+    onWillDisappear?: ((data: undefined) => void);
     levelMode?: LevelMode;
     levelUniqueId?: number;
     immersiveMode?: ImmersiveMode;

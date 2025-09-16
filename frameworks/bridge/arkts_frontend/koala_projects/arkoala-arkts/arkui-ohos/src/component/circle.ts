@@ -22,12 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: CircleModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -57,6 +58,7 @@ export interface CircleOptions {
 }
 export type CircleInterface = (value?: CircleOptions) => CircleAttribute;
 export interface CircleAttribute extends CommonShapeMethod {
+    attributeModifier(modifier: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
 }
@@ -75,6 +77,10 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookCircleAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

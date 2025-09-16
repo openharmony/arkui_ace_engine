@@ -23,18 +23,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LetterSpacingStyleAccessor {
 void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
+    auto peer = PeerUtils::CreatePeer<LetterSpacingStylePeer>();
     std::optional<Dimension> spacing;
     Dimension defaultSpacing = Dimension(0, DimensionUnit::VP);
     if (value) {
         spacing = Converter::OptConvert<Dimension>(value);
         Validator::ValidateNonPercent(spacing);
     }
-    RefPtr<LetterSpacingSpan> span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));
-    return new LetterSpacingStylePeer{ .span = span };
+    peer->span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -7,8 +7,6 @@
         "./memo-plugin",
         "./loader",
         "./har",
-        "../arkoala/arkui-common",
-        "../arkoala/ets-plugin",
         "./ets-harness",
         "../incremental/build-common",
         "../incremental/compiler-plugin",
@@ -17,7 +15,7 @@
         "../interop"
     ],
     "devDependencies": {
-        "@koalaui/fast-arktsc": "file:../incremental/tools/fast-arktsc",
+        "@koalaui/fast-arktsc": "file:../ui2abc/fast-arktsc",
         "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc",
         "@types/chai": "^4.3.1",
         "@types/mocha": "^9.1.0",
@@ -44,7 +42,6 @@
     "scripts": {
         "panda:sdk:install": "npm run panda:sdk:install --prefix ../incremental/tools/panda",
         "panda:sdk:check-install": "npm run panda:sdk:check-install --prefix ../incremental/tools/panda",
-        "ohos-sdk": "npm run interface-sdk:download --prefix ../arkoala/arkui-common && npm run download --prefix ../arkoala/ohos-sdk",
         "ets-plugin": "npm run arkoala:plugin --prefix ..",
         "prerequisites": "npm run panda:sdk:check-install && npm run ohos-sdk && npm run ets-plugin",
         "compile:native:node-host": "npm run compile:native-panda-with-node-host --prefix ../arkoala/framework",
@@ -60,9 +57,6 @@
         "build:interop:inc": "npm run build:interop:inc --prefix ../interop",
         "clean:common": "npm run clean:common --prefix ../incremental/common",
         "clean:interop": "npm run clean:interop --prefix ../interop",
-        "build:arkui-common": "npm run build:arkui-common --prefix ../arkoala/arkui-common",
-        "build:arkui-common:inc": "npm run build:arkui-common:inc --prefix ../arkoala/arkui-common",
-        "clean:arkui-common": "npm run clean:arkui-common --prefix ../arkoala/arkui-common",
         "build:arkui-no-common": "npm run build:arkui-no-common --prefix arkui",
         "build:arkui-no-common:inc": "npm run build:arkui-no-common:inc --prefix arkui",
         "clean:arkui-no-common": "npm run clean:arkui-no-common --prefix arkui",
@@ -70,7 +64,11 @@
         "build:arkoala:components:inc": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui-no-common:inc",
         "build:arkoala": "npm run panda:sdk:check-install && npm run build:arkoala:components && npm run link:arkoala",
         "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
-        "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui-no-common.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
+        "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui-no-common.abc ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
+
+        "build:arkoala:m3:gn": "npm run build:m3:inc:ui2abc",
+        "link:arkoala:m3:gn": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./build/arkui.abc ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
+        "build:m3:inc:ui2abc": "node ../ui2abc/fast-arktsc --config ./ui2abcconfig-m3-merged.json --compiler ../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-impl/build.ninja -k 1200 && mkdir -p ./build && cp ./build-m3-impl/arkui-m3.abc ./build/arkui.abc",
         "aot:host:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && npm run aot:host:stdlib && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc",
         "aot:arm32:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc --aot-target arm",
         "aot:arm64:arkoala": "npm run link:arkoala && npm run -C ../incremental/tools/fast-arktsc compile && node ../incremental/tools/fast-arktsc --only-aot build/arkoala.abc --aot-target arm64",
@@ -110,7 +108,7 @@
         "clean": "rimraf build && rimraf arkui-ohos-preprocess",
         "clean:native": "npm run clean --prefix ../arkoala/framework",
         "clean:arkui-ohos": "npm run clean --prefix arkui-ohos",
-        "clean:all": "npm run clean && npm run clean:common && npm run clean:incremental && npm run clean:interop && npm run clean:arkui-common && npm run clean:arkui-no-common && npm run clean:native && npm run clean --prefix har && npm run clean --prefix trivial/user && npm run clean:shopping && npm run clean:arkui-ohos",
+        "clean:all": "npm run clean && npm run clean:common && npm run clean:incremental && npm run clean:interop && npm run clean:native && npm run clean:arkui-ohos",
         "perf:trivial": "npm run build:user && ACE_LIBRARY_PATH=build PANDA_HOME=../incremental/tools/panda/node_modules/@panda/sdk valgrind --tool=cachegrind --valgrind-stacksize=8000000 --main-stacksize=100000000 node build/index.js panda:TrivialApp 2>/dev/null && ls -lh cachegrind.out.* && echo 'Use cg_annotate to inspect'",
         "libarkts:clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin",
         "libarkts:build:all": "npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix memo-plugin",
@@ -124,6 +122,6 @@
         "build:arkoala:ohos": "npm run build:arkoala:components:ohos && npm run link:arkoala:ohos",
         "build:arkoala:components:ohos": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui-components",
         "build:arkui-components": "npm run build:arkui-components --prefix arkui-ohos-preprocess",
-        "link:arkoala:ohos": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui-ohos-preprocess/build/arkui-components.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc"
+        "link:arkoala:ohos": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui-ohos-preprocess/build/arkui-components.abc ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc"
     }
 }

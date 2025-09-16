@@ -38,7 +38,7 @@ Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
     CHECK_NULL_RETURN(peer, nullptr);
     auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
     auto options = peer->GetPanGestureOptions();
-    CHECK_NULL_RETURN(options, reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer));
+    CHECK_NULL_RETURN(options, nullptr);
     panGestureOptionsPeer->handler = options;
     return reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer);
 }

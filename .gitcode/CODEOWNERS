@@ -3152,8 +3152,62 @@ interfaces/napi/kits/router/ @arkui_superman
 interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkuiframework
 
+[Arkoala]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkuiframework
+
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniModule.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/module.cpp @arkui_architecture
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkuiframework
+
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
+frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
+frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
+frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/arkts_frontend.h @arkuiframework
+frameworks/bridge/arkts_frontend/entry/ @arkuiframework
+
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @arkuievent
+frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @arkuievent
+frameworks/core/interfaces/native/implementation/drag_event_peer.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/drag_ani_modifier.h @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @arkuievent
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @arkuievent
+
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
+frameworks/core/interfaces/native/ani/web_ani_modifier.h @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/client_authentication_handler_accessor.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/client_authentication_handler_peer_impl.h @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/component_root_modifier.cpp  @arkuiframework
@@ -3205,6 +3259,7 @@ frameworks/core/interfaces/native/implementation/web_resource_response_accessor.
 frameworks/core/interfaces/native/implementation/web_resource_response_peer_impl.h @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/webview_controller_accessor.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/implementation/web/webview_controller_peer_impl.h @arkwebinarkuireview
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/web @arkwebinarkuireview
 
 [ArkTS static]
 frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll

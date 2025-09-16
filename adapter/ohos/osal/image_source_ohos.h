@@ -36,6 +36,11 @@ public:
     RefPtr<PixelMap> CreatePixelMap(
         uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) override;
     RefPtr<PixelMap> CreatePixelMap() override;
+    /**
+     * Only for ArkTS 1.2
+     *
+     * @param options: DecodeOptions media decode options
+     **/
     RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options) override;
     Size GetImageSize() override;
     uint32_t GetFrameCount() override;

@@ -97,7 +97,7 @@ export class ArkLocationButtonStyle extends ArkSecurityComponentMethodStyle impl
     onClick_value?: LocationButtonCallback | undefined
     public onClick(value: LocationButtonCallback | undefined): this {
         return this
-        }
+    }
 }
 export class ArkLocationButtonComponent extends ArkSecurityComponentMethodComponent implements LocationButtonAttribute {
     getPeer(): ArkLocationButtonPeer {

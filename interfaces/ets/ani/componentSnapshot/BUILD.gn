@@ -14,18 +14,29 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
 #构建ANI库
 ohos_shared_library("componentSnapshot_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [ "./src/componentSnapshot.cpp" ]
   external_deps = [
-    "image_framework:image_ani",
+    "image_framework:image",
+    "image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   configs = [ "$ace_root:ace_config" ]
+  defines = []
+  if (pixel_map_support) {
+    defines += [ "PIXEL_MAP_SUPPORTED" ]
+  }
+  if (enable_rosen_backend) {
+    defines += [ "ENABLE_ROSEN_BACKEND" ]
+  }
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"
@@ -34,7 +45,7 @@ ohos_shared_library("componentSnapshot_ani") {
 #构建abc
 generate_static_abc("componentSnapshot") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.componentSnapshot.ets" ]
+  files = [ "./ets/@ohos.arkui.componentSnapshot.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/componentSnapshot.abc"
 }

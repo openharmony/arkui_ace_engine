@@ -22,12 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { RatingOpsHandWritten, hookRatingContentModifier } from "./../handwritten"
+import { ResourceStr } from "./units"
 
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -148,7 +149,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RatingAttribute_onChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier0Attribute(value: ContentModifier | undefined): void {
+    contentModifier0Attribute(value: ContentModifier<RatingConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -160,7 +161,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RatingAttribute_contentModifier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier1Attribute(value: ContentModifier | undefined): void {
+    contentModifier1Attribute(value: ContentModifier<RatingConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -180,16 +181,16 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RatingOptions {
-    rating: number;
+    rating: number | Bindable<number>;
     indicator?: boolean;
 }
 export interface StarStyleOptions {
-    backgroundUri: string;
-    foregroundUri: string;
-    secondaryUri?: string;
+    backgroundUri: ResourceStr;
+    foregroundUri: ResourceStr;
+    secondaryUri?: ResourceStr;
 }
 export type RatingInterface = (options?: RatingOptions) => RatingAttribute;
-export interface RatingConfiguration extends CommonConfiguration {
+export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {
     rating: number;
     indicator: boolean;
     stars: number;
@@ -202,7 +203,7 @@ export interface RatingAttribute extends CommonMethod {
     stepSize(value: number | undefined): this
     starStyle(value: StarStyleOptions | undefined): this
     onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this
     _onChangeEvent_rating(callback: ((index: number) => void)): void
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
@@ -210,7 +211,7 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     stepSize_value?: number | undefined
     starStyle_value?: StarStyleOptions | undefined
     onChange_value?: ((index: number) => void) | undefined
-    contentModifier_value?: ContentModifier | undefined
+    contentModifier_value?: ContentModifier<RatingConfiguration> | undefined
     public stars(value: number | undefined): this {
         return this
     }
@@ -223,22 +224,35 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     public onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         return this
     }
     public _onChangeEvent_rating(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkRatingComponent extends ArkCommonMethodComponent implements RatingAttribute {
     getPeer(): ArkRatingPeer {
         return (this.peer as ArkRatingPeer)
     }
+    RatingOptionsRatingIsBindable(options?: RatingOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_rating  = options!.rating;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_rating))) {
+                const options_rating_value  = options_rating!;
+                return TypeChecker.isBindableNumber(options_rating_value);
+            }
+        }
+        return false;
+    }
     public setRatingOptions(options?: RatingOptions): this {
         if (this.checkPriority("setRatingOptions")) {
             const options_casted = options as (RatingOptions | undefined)
             this.getPeer()?.setRatingOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.RatingOptionsRatingIsBindable(options)) {
+            RatingOpsHandWritten.hookRatingAttributeRatingImpl(this.getPeer().peer.ptr,
+                (options!.rating as Bindable<number>));
         }
         return this
     }
@@ -310,20 +324,9 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookRatingContentModifier(this, value)
         }
         return this
     }

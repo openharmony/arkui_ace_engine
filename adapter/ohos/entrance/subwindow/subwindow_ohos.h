@@ -249,7 +249,7 @@ public:
     void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
     Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
 
-#if defined(ACE_STATIC)
+    // ArkTS 1.2
     void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
     void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) override;
     void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback) override;
@@ -257,7 +257,7 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void OpenCustomDialogStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback) override;
-#endif
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -337,7 +337,12 @@ private:
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
     std::list<int32_t> followParentWindowLayoutNodeIds_;
-#if defined(ACE_STATIC)
+
+    // ArkTS 1.2
+    void ShowToastForAbilityStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastForServiceStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    std::function<void()> GetInitToastDelayTaskStatic(const NG::ToastInfo& toastInfo,
+        std::function<void(int32_t)>&& callback);
     void ShowDialogForAbilityStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
     void ShowDialogForServiceStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForAbilityStatic(DialogProperties& dialogProps,
@@ -348,7 +353,6 @@ private:
         std::function<void(int32_t)>&& callback);
     void OpenCustomDialogForServiceStatic(DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback);
-#endif
 };
 
 class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {

@@ -38,7 +38,7 @@ void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspecto
     });
 }
 
-void UpdateBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
+void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
     const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
@@ -99,6 +99,7 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
     int32_t expectedUpdateInterval)
 {
     CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
     constexpr uint32_t minInterval = 100; // 100ms
     if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
         expectedUpdateInterval = minInterval;
@@ -112,7 +113,6 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
         callback, ratioList]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->CleanVisibleAreaUserCallback(true);
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
