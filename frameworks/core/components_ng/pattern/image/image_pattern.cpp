@@ -1266,7 +1266,7 @@ bool ImagePattern::RecycleImageData()
     if (!rsRenderContext) {
         return false;
     }
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
@@ -2238,7 +2238,7 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
@@ -2255,7 +2255,7 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetAltImage",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetAltImage",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
