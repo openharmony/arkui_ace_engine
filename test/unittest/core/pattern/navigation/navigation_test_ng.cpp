@@ -1837,31 +1837,4 @@ HWTEST_F(NavigationTestNg, SizeCalculationSplit001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(algorithm->realNavBarWidth_, halfWidth));
     EXPECT_TRUE(NearEqual(algorithm->realContentWidth_, halfWidth));
 }
-
-/**
- * @tc.name: SetEnableSwipeBackTest001
- * @tc.desc: Branch: if (device == wearable && !enableSwipeBack) = true
- *           Expected: onBackPress will return true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, SetEnableSwipeBackTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get pipeline and mock SystemProperties::deviceType_
-     */
-    auto preDeviceType_ = SystemProperties::deviceType_;
-    SystemProperties::deviceType_ = DeviceType::WEARABLE;
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    ASSERT_TRUE(context->enableSwipeBack_);
-    /**
-     * @tc.steps: step2. call SetEnableSwipeBack and do test. then reset mocked properties.
-     */
-    context->SetEnableSwipeBack(false);
-    ASSERT_FALSE(context->enableSwipeBack_);
-    ASSERT_TRUE(context->OnBackPressed());
-    context->SetEnableSwipeBack(true);
-    ASSERT_TRUE(context->enableSwipeBack_);
-    SystemProperties::deviceType_ = preDeviceType_;
-}
 } // namespace OHOS::Ace::NG

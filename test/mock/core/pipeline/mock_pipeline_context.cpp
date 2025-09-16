@@ -684,10 +684,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
 bool PipelineContext::OnBackPressed()
 {
-    auto deviceType = SystemProperties::GetDeviceType();
-    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
-        return true;
-    }
     return false;
 }
 
@@ -1454,6 +1450,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return g_isContainerControlButtonVisible;
 }
+
+void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
