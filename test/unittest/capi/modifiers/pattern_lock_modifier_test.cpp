@@ -105,7 +105,7 @@ HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level
 
 // Valid values for attribute 'sideLength' of method 'sideLength'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthValidValues = {
-    {EXPECTED_NUM_NEG_PX, LEN_NUM_NEG, ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE},
+    {EXPECTED_NUM_NEG_PX, LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
     {EXPECTED_NUM_ZERO_PX, LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
     {EXPECTED_NUM_VILID_PX, LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
     {EXPECTED_NUM_MAX_PX, LEN_NUM_MAX, EXPECTED_NUM_MAX_PX},

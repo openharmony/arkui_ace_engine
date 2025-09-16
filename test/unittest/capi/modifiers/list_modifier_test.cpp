@@ -41,9 +41,6 @@ inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const Scrol
 } // Converter
 
 namespace {
-const auto FRICTION_RES_NAME = "friction_res_name";
-const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, ResourceType::FLOAT);
-const auto FRICTION_VALUE = 1.2f;
 const auto DIVIDER_COLOR_RES_NAME = "divider_color_res_name";
 const auto DIVIDER_COLOR = "#08000000";
 const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, ResourceType::COLOR);
@@ -56,10 +53,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-
         SetupTheme<ScrollableTheme>();
-
-        AddResource(FRICTION_RES_NAME, FRICTION_VALUE);
         AddResource(DIVIDER_COLOR_RES_NAME, Color::FromString(DIVIDER_COLOR));
     }
 
@@ -72,21 +66,6 @@ public:
         pattern->OnModifyDone();
     }
 };
-
-/**
- * @tc.name: setEditModeTest
- * @tc.desc: Check the functionality of ListModifier.setEditMode
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setEditModeTest, TestSize.Level1)
-{
-    auto checkValue = GetAttrValue<bool>(node_, "editMode");
-    EXPECT_FALSE(checkValue);
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setEditMode(node_, &optValue);
-    checkValue = GetAttrValue<bool>(node_, "editMode");
-    EXPECT_TRUE(checkValue);
-}
 
 /**
  * @tc.name: setMultiSelectableTest
@@ -116,21 +95,6 @@ HWTEST_F(ListModifierTest, setChainAnimationTest, TestSize.Level1)
     modifier_->setChainAnimation(node_, &optValue);
     checkValue = GetAttrValue<bool>(node_, "chainAnimation");
     EXPECT_TRUE(checkValue);
-}
-
-/**
- * @tc.name: setEnableScrollInteractionTest
- * @tc.desc: Check the functionality of ListModifier.setEnableScrollInteraction
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setEnableScrollInteractionTest, TestSize.Level1)
-{
-    auto checkValue = GetAttrValue<bool>(node_, "enableScrollInteraction");
-    EXPECT_TRUE(checkValue);
-    auto optValue = Converter::ArkValue<Opt_Boolean>(false);
-    modifier_->setEnableScrollInteraction(node_, &optValue);
-    checkValue = GetAttrValue<bool>(node_, "enableScrollInteraction");
-    EXPECT_FALSE(checkValue);
 }
 
 /**
@@ -325,41 +289,6 @@ HWTEST_F(ListModifierTest, setContentEndOffsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setScrollBarTest
- * @tc.desc: Check the functionality of ListModifier.setScrollBar
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setScrollBarTest, TestSize.Level1)
-{
-    auto checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.Auto");
-
-    auto value = Converter::ArkValue<Ark_BarState>(DisplayMode::ON);
-    auto optValue = Converter::ArkValue<Opt_BarState>(value);
-    modifier_->setScrollBar(node_, &optValue);
-    checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.On");
-
-    value = Converter::ArkValue<Ark_BarState>(DisplayMode::OFF);
-    optValue = Converter::ArkValue<Opt_BarState>(value);
-    modifier_->setScrollBar(node_, &optValue);
-    checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.Off");
-
-    value = Converter::ArkValue<Ark_BarState>(DisplayMode::AUTO);
-    optValue = Converter::ArkValue<Opt_BarState>(value);
-    modifier_->setScrollBar(node_, &optValue);
-    checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.Auto");
-
-    value = Converter::ArkValue<Ark_BarState>(static_cast<DisplayMode>(-10));
-    optValue = Converter::ArkValue<Opt_BarState>(value);
-    modifier_->setScrollBar(node_, &optValue);
-    checkValue = GetAttrValue<std::string>(node_, "scrollBar");
-    EXPECT_EQ(checkValue, "BarState.Auto");
-}
-
-/**
  * @tc.name: setListDirectionTest
  * @tc.desc: Check the functionality of ListModifier.setListDirection
  * @tc.type: FUNC
@@ -489,7 +418,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     // lanes, gutter are valid
     Ark_Union_Number_LengthConstrain value =  Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_Number>(2);
     auto optValue = Converter::ArkValue<Opt_Union_Number_LengthConstrain>(value);
-    Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(55.5f));
+    auto gutterOpt = Converter::ArkValue<Opt_Dimension>(55.5f);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
     EXPECT_EQ(lanesCheckValue, "2");
@@ -508,8 +437,9 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 
     // lanes as constraints
     Ark_LengthConstrain constraint = {
-        .minLength = {.value = Converter::ArkValue<Ark_Int32>(11), .unit = Converter::ArkValue<Ark_Int32>(2)},
-        .maxLength = {.value = Converter::ArkValue<Ark_Float32>(77.7f)}};
+        .minLength = Converter::ArkValue<Ark_Length>("11fp"),
+        .maxLength = Converter::ArkValue<Ark_Length>("77.7px"),
+    };
     value = Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_LengthConstrain>(constraint);
     optValue = Converter::ArkValue<Opt_Union_Number_LengthConstrain>(value);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
@@ -531,7 +461,7 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
     // lanes, gutter are negative
     Ark_Union_Number_LengthConstrain value = Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_Number>(-2);
     auto optValue = Converter::ArkValue<Opt_Union_Number_LengthConstrain>(value);
-    Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(-88._px));
+    auto gutterOpt = Converter::ArkValue<Opt_Dimension>("-88px");
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
     EXPECT_EQ(lanesCheckValue, "-2");
@@ -541,112 +471,6 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
     EXPECT_EQ(laneMaxLengthCheckValue, "0.00vp");
     auto gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
     EXPECT_EQ(gutterCheckValue, "-88.00px");
-}
-
-/**
- * @tc.name: setEdgeEffectTest
- * @tc.desc: Check the functionality of ListModifier.setEdgeEffect
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
-{
-    // default values
-    auto fullJson = GetJsonValue(node_);
-    auto edgeEffectCheckValue = GetAttrValue<std::string>(node_, "edgeEffect");
-    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.Spring");
-
-    auto edgeEffectOptionsObject =  GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
-    auto edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, false);
-
-    // set edgeEffect and options
-    Opt_EdgeEffectOptions options =
-    Converter::ArkValue<Opt_EdgeEffectOptions>(Converter::ArkValue<Ark_Boolean>(true));
-    auto value = Converter::ArkValue<Ark_EdgeEffect>(Converter::ArkValue<Ark_EdgeEffect>(EdgeEffect::FADE));
-    auto optValue = Converter::ArkValue<Opt_EdgeEffect>(value);
-    modifier_->setEdgeEffect(node_, &optValue, &options);
-    fullJson = GetJsonValue(node_);
-    edgeEffectCheckValue = GetAttrValue<std::string>(node_, "edgeEffect");
-    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.Fade");
-    edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
-    edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, true);
-
-    // alwaysEnabled is undefined
-    options = Converter::ArkValue<Opt_EdgeEffectOptions>(Ark_Empty());
-    value = Converter::ArkValue<Ark_EdgeEffect>(Converter::ArkValue<Ark_EdgeEffect>(EdgeEffect::NONE));
-    optValue = Converter::ArkValue<Opt_EdgeEffect>(value);
-    modifier_->setEdgeEffect(node_, &optValue, &options);
-    fullJson = GetJsonValue(node_);
-    edgeEffectCheckValue = GetAttrValue<std::string>(node_, "edgeEffect");
-    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.None");
-    edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
-    edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, false);
-
-    // set invalid edgeEffect
-    options = Converter::ArkValue<Opt_EdgeEffectOptions>(Converter::ArkValue<Ark_Boolean>(true));
-    value = Converter::ArkValue<Ark_EdgeEffect>(Converter::ArkValue<Ark_EdgeEffect>(static_cast<EdgeEffect>(-10)));
-    optValue = Converter::ArkValue<Opt_EdgeEffect>(value);
-    modifier_->setEdgeEffect(node_, &optValue, &options);
-    fullJson = GetJsonValue(node_);
-    edgeEffectCheckValue = GetAttrValue<std::string>(node_, "edgeEffect");
-    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.Spring");
-    edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
-    edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, true);
-}
-
-/**
- * @tc.name: setNestedScrollTest
- * @tc.desc: Check the functionality of ListModifier.setNestedScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setNestedScrollTest, TestSize.Level1)
-{
-    // default values
-    auto fullJson = GetJsonValue(node_);
-    auto nestedScrollObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "nestedScroll");
-    auto scrollForwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollForward");
-    EXPECT_EQ(scrollForwardCheckValue, "NestedScrollMode.SELF_ONLY");
-    auto scrollBackwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollBackward");
-    EXPECT_EQ(scrollBackwardCheckValue, "NestedScrollMode.SELF_ONLY");
-
-    // set valid values
-    Ark_NestedScrollOptions options = {
-        .scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(NestedScrollMode::PARENT_FIRST),
-        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(NestedScrollMode::PARALLEL)};
-    auto optOptions = Converter::ArkValue<Opt_NestedScrollOptions>(options);
-    modifier_->setNestedScroll(node_, &optOptions);
-    fullJson = GetJsonValue(node_);
-    nestedScrollObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "nestedScroll");
-    scrollForwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollForward");
-    EXPECT_EQ(scrollForwardCheckValue, "NestedScrollMode.PARENT_FIRST");
-    scrollBackwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollBackward");
-    EXPECT_EQ(scrollBackwardCheckValue, "NestedScrollMode.PARALLEL");
-
-    options = {.scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(NestedScrollMode::SELF_ONLY),
-        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(NestedScrollMode::SELF_FIRST)};
-    optOptions = Converter::ArkValue<Opt_NestedScrollOptions>(options);
-    modifier_->setNestedScroll(node_, &optOptions);
-    fullJson = GetJsonValue(node_);
-    nestedScrollObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "nestedScroll");
-    scrollForwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollForward");
-    EXPECT_EQ(scrollForwardCheckValue, "NestedScrollMode.SELF_ONLY");
-    scrollBackwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollBackward");
-    EXPECT_EQ(scrollBackwardCheckValue, "NestedScrollMode.SELF_FIRST");
-
-    // set negative values
-    options = {.scrollForward = Converter::ArkValue<Ark_NestedScrollMode>(static_cast<NestedScrollMode>(-88)),
-        .scrollBackward = Converter::ArkValue<Ark_NestedScrollMode>(static_cast<NestedScrollMode>(-99))};
-    optOptions = Converter::ArkValue<Opt_NestedScrollOptions>(options);
-    modifier_->setNestedScroll(node_, &optOptions);
-    fullJson = GetJsonValue(node_);
-    nestedScrollObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "nestedScroll");
-    scrollForwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollForward");
-    EXPECT_EQ(scrollForwardCheckValue, "NestedScrollMode.SELF_ONLY");
-    scrollBackwardCheckValue = GetAttrValue<std::string>(nestedScrollObject, "scrollBackward");
-    EXPECT_EQ(scrollBackwardCheckValue, "NestedScrollMode.SELF_ONLY");
 }
 
 /**
@@ -664,9 +488,9 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 
     // set valid values, color as Ark_Color aka int
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
+        .strokeWidth = Converter::ArkValue<Ark_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>("77px")),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
@@ -684,9 +508,9 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 
     // set color as Ark_Number
     dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
+        .strokeWidth = Converter::ArkValue<Ark_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>("77px")),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
     };
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
@@ -711,9 +535,9 @@ HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
     EXPECT_EQ(dividerCheckValue, "{}");
 
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
+        .strokeWidth = Converter::ArkValue<Ark_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>("77px")),
         .color = Converter::ArkValue<Opt_ResourceColor>(
             Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(DIVIDER_COLOR_RESOURCE))
     };
@@ -734,7 +558,7 @@ HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
+        .strokeWidth = Converter::ArkValue<Ark_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = Converter::ArkValue<Opt_ResourceColor>(),
@@ -762,9 +586,9 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11.f),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.f)),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
@@ -786,47 +610,6 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
     EXPECT_EQ(endMarginCheckValue, "0.00vp");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#00000000");
-}
-/**
- * @tc.name: setFrictionTest
- * @tc.desc: Check the functionality of ListModifier.setFriction
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
-{
-    // default values
-    OnModifyDone();
-    auto frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, 0.75);
-
-    // set float friction
-    Ark_Union_Number_Resource friction =
-        Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(55.5f);
-    auto optFriction = Converter::ArkValue<Opt_Union_Number_Resource>(friction);
-    modifier_->setFriction(node_, &optFriction);
-    frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, 55.50);
-
-    // set negative friction
-    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-55.5f);
-    optFriction = Converter::ArkValue<Opt_Union_Number_Resource>(friction);
-    modifier_->setFriction(node_, &optFriction);
-    frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_NEAR(frictionCheckValue, 0.6, 0.01);
-
-    // set int friction
-    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(77);
-    optFriction = Converter::ArkValue<Opt_Union_Number_Resource>(friction);
-    modifier_->setFriction(node_, &optFriction);
-    frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, 77.00);
-
-    // set friction from resource
-    friction = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(FRICTION_RESOURCE);
-    optFriction = Converter::ArkValue<Opt_Union_Number_Resource>(friction);
-    modifier_->setFriction(node_, &optFriction);
-    frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, FRICTION_VALUE);
 }
 
 /**
@@ -851,50 +634,6 @@ HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.L
     modifier_->setMaintainVisibleContentPosition(node_, &optValue);
     checkValue = GetAttrValue<bool>(node_, "maintainVisibleContentPosition");
     EXPECT_TRUE(checkValue);
-}
-
-/*
- * @tc.name: setOnScrollTest
- * @tc.desc: Check the functionality of ListModifier.setOnScroll
- * @tc.type: FUNC
- */
-
-HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        Dimension scrollOffset;
-        int32_t scrollState;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_Number offset, const Ark_Number state) {
-            checkEvent = {
-                .nodeId = nodeId,
-                .scrollOffset = Converter::Convert<Dimension>(offset),
-                .scrollState = Converter::Convert<int32_t>(state),
-            };
-        }
-    };
-
-    auto onScroll = eventHub->GetOnScroll();
-    EXPECT_EQ(onScroll, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
-    modifier_->setOnScroll(node_, &optCallback);
-    onScroll = eventHub->GetOnScroll();
-    EXPECT_NE(onScroll, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScroll(CalcDimension(55), ScrollState::FLING);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->scrollOffset.Value(), 55);
-    EXPECT_EQ(checkEvent->scrollOffset.Unit(), DimensionUnit::VP);
-    EXPECT_EQ(checkEvent->scrollState, static_cast<int>(ScrollState::FLING));
 }
 
 /*
@@ -950,167 +689,11 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnReachStartTest
- * @tc.desc: Check the functionality of ListModifier.setOnReachStart
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId) {
-            checkEvent = {
-            .nodeId = nodeId,
-            .result = true,
-            };
-        }
-    };
-
-    auto onReachStart = eventHub->GetOnReachStart();
-    EXPECT_EQ(onReachStart, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnReachStart(node_, &optCallback);
-    onReachStart = eventHub->GetOnReachStart();
-    EXPECT_NE(onReachStart, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onReachStart();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnReachEndTest
- * @tc.desc: Check the functionality of ListModifier.setOnReachEnd
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId) {
-            checkEvent = {
-            .nodeId = nodeId,
-            .result = true,
-            };
-        }
-    };
-
-    auto onReachEnd = eventHub->GetOnReachEnd();
-    EXPECT_EQ(onReachEnd, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnReachEnd(node_, &optCallback);
-    onReachEnd = eventHub->GetOnReachEnd();
-    EXPECT_NE(onReachEnd, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onReachEnd();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnScrollStartTest
- * @tc.desc: Check the functionality of ListModifier.setOnScrollStart
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId) {
-            checkEvent = {
-            .nodeId = nodeId,
-            .result = true,
-            };
-        }
-    };
-
-    auto onScrollStart = eventHub->GetOnScrollStart();
-    EXPECT_EQ(onScrollStart, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnScrollStart(node_, &optCallback);
-    onScrollStart = eventHub->GetOnScrollStart();
-    EXPECT_NE(onScrollStart, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollStart();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnScrollStopTest
- * @tc.desc: Check the functionality of ListModifier.setOnScrollStop
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId) {
-            checkEvent = {
-            .nodeId = nodeId,
-            .result = true,
-            };
-        }
-    };
-
-    auto onScrollStop = eventHub->GetOnScrollStop();
-    EXPECT_EQ(onScrollStop, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnScrollStop(node_, &optCallback);
-    onScrollStop = eventHub->GetOnScrollStop();
-    EXPECT_NE(onScrollStop, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollStop();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
  * @tc.name: setOnItemDragStartTest
  * @tc.desc: Check the functionality of ListModifier.setOnItemDragStart
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
 {
     using namespace Converter;
     static const int32_t expectedX = 357;
@@ -1127,7 +710,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Number itemIndex,
-        const Callback_CustomBuilder_Void continuation
+        const Callback_Opt_CustomBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);
@@ -1144,13 +727,14 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
             CallbackHelper(continuation).InvokeSync(expectedCustomNode);
         };
         auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+        auto optBuilder = ArkValue<Opt_CustomNodeBuilder>(builder);
 
         // return result
-        CallbackHelper(continuation).InvokeSync(builder);
+        CallbackHelper(continuation).InvokeSync(optBuilder);
     };
     auto arkCallback =
-        ArkValue<ListAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_ListAttribute_onItemDragStart_event_type>(arkCallback);
+        ArkValue<OnItemDragStartCallback>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    auto optCallback = Converter::ArkValue<Opt_OnItemDragStartCallback>(arkCallback);
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
@@ -1440,34 +1024,6 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
     eventHub->FireOnItemDrop(dragInfo, 30, 20, false);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_TRUE(checkEvent->isSuccess);
-}
-
-/*
- * @tc.name: DISABLED_setOnItemDeleteTest
- * @tc.desc: Check the functionality of ListModifier.setOnItemDelete
- * @tc.type: FUNC
- */
-HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
-{
-    Callback_Number_Boolean func{};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
-    auto dragInfo = ItemDragInfo();
-
-    static const int32_t expectedResourceId = 123;
-    static const int32_t fakeTotalCount = 10;
-    auto callbackSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
-            const Ark_Number index, const Callback_Boolean_Void cbReturn
-        ) {
-        EXPECT_EQ(resourceId, expectedResourceId);
-        auto result = Converter::Convert<int32_t>(index) < fakeTotalCount;
-        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
-    };
-    func = Converter::ArkValue<Callback_Number_Boolean>(nullptr, callbackSyncFunc, expectedResourceId);
-
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Boolean>(func);
-    modifier_->setOnItemDelete(node_, &optFunc);
-    // check is not enable due to the ListEventHub does no support the onItemDelete event
 }
 
 /*

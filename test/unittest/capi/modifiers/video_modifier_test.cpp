@@ -53,8 +53,10 @@ namespace  {
     const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME = "enableShortcutKey";
     const auto ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE = "false";
+#ifdef WRONG_SDK
     const auto ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME = "surfaceBackgroundColor";
     const auto ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE = "#FF000000";
+#endif
 
     const std::string TEST_COLOR_RED = "#FFFF0000";
     const std::string TEST_COLOR_BLACK = "#FF000000";
@@ -97,7 +99,7 @@ HWTEST_F(VideoModifierTest, setOptionsSrcTestValidValues, TestSize.Level1)
     options.src = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("source_str"));
     options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
-    options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
+    options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
     modifier_->setVideoOptions(node_, &options);
@@ -128,60 +130,56 @@ HWTEST_F(VideoModifierTest, setOptionsProgressRateTestDefaultValues, TestSize.Le
 }
 
 // Valid values for attribute 'objectFit' of method 'objectFit'
-static std::vector<std::tuple<std::string, Opt_Union_Number_String_PlaybackSpeed, double>>
+static std::vector<std::tuple<std::string, Opt_Union_F64_String_PlaybackSpeed, double>>
     playbackSpeedEnumValidValues = {
     {
         "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            Converter::ArkValue<Ark_PlaybackSpeed>(ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X),
         0.75
     },
     {
         "ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            Converter::ArkValue<Ark_PlaybackSpeed>(ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X),
         1.0
     },
     {
         "ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            Converter::ArkValue<Ark_PlaybackSpeed>(ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X),
         1.25
     },
     {
         "ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            Converter::ArkValue<Ark_PlaybackSpeed>(ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X),
         1.75
     },
     {
         "ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            Converter::ArkValue<Ark_PlaybackSpeed>(ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X),
         2.0
     },
     {
         "3.5",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_String>(
-            Converter::ArkValue<Ark_String>("3.5")),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_String>("3.5"),
         3.5
     },
     {
         "4.0",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_String>(
-            Converter::ArkValue<Ark_String>("4.0")),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_String>("4.0"),
         4.0
     },
     {
         "4.25",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_Number>(
-            Converter::ArkValue<Ark_Number>(4.25f)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_Float64>(4.25),
         4.25
     },
     {
         "5.0",
-        Converter::ArkUnion<Opt_Union_Number_String_PlaybackSpeed, Ark_Number>(
-            Converter::ArkValue<Ark_Number>(5.0f)),
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_Float64>(5.0),
         5.0
     },
 };
@@ -198,7 +196,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setOptionsProgressRateTestValidValues, Test
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
     options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
-    options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
+    options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
@@ -242,7 +240,7 @@ HWTEST_F(VideoModifierTest, setOptionsPreviewUriTestValidValues, TestSize.Level1
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
     options.previewUri = Converter::ArkUnion<Opt_Union_String_PixelMap_Resource, Ark_String>(
         Converter::ArkValue<Ark_String>("preview_uri_source"));
-    options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
+    options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.controller = Converter::ArkValue<Opt_VideoController>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
     modifier_->setVideoOptions(node_, &options);
@@ -269,11 +267,11 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
     options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
-    options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
+    options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
     auto controllerPtr =
-        fullAPI_->getAccessors()->getVideoControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getVideoControllerAccessor()->construct();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::VideoControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -307,7 +305,7 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestInvalidValues, TestSize
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
     options.previewUri = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(Ark_Empty());
-    options.currentProgressRate = Converter::ArkValue<Opt_Union_Number_String_PlaybackSpeed>(Ark_Empty());
+    options.currentProgressRate = Converter::ArkValue<Opt_Union_F64_String_PlaybackSpeed>(Ark_Empty());
     options.imageAIOptions = Converter::ArkValue<Opt_ImageAIOptions>(Ark_Empty());
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -768,14 +766,14 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        float duration;
+        int32_t duration;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onPrepared = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PreparedInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
-            .duration = Converter::Convert<float>(parameter.duration),
+            .duration = Converter::Convert<int32_t>(parameter.duration),
         };
     };
 
@@ -788,12 +786,12 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
     eventHub->FirePreparedEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->duration, 1.25f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->duration, 1);
 
     eventHub->FirePreparedEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->duration, 3.75f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->duration, 3);
 }
 
 /*
@@ -808,7 +806,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        float time;
+        int32_t time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onSeeking = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
@@ -816,7 +814,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
         printf("CHECK ");
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
-            .time = Converter::Convert<float>(parameter.time),
+            .time = Converter::Convert<int32_t>(parameter.time),
         };
     };
 
@@ -830,12 +828,12 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
     eventHub->FireSeekingEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 1);
 
     eventHub->FireSeekingEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 3);
 }
 
 /*
@@ -850,14 +848,14 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        float time;
+        int32_t time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onSeeked = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
-            .time = Converter::Convert<float>(parameter.time),
+            .time = Converter::Convert<int32_t>(parameter.time),
         };
     };
 
@@ -871,12 +869,12 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
     eventHub->FireSeekedEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 1);
 
     eventHub->FireSeekedEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 3);
 }
 
 /*
@@ -891,14 +889,14 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t nodeId;
-        float time;
+        int32_t time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onUpdate = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
-            .time = Converter::Convert<float>(parameter.time),
+            .time = Converter::Convert<int32_t>(parameter.time),
         };
     };
 
@@ -911,12 +909,12 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
     eventHub->FireUpdateEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 1);
 
     eventHub->FireUpdateEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->time, 3);
 }
 
 /*
@@ -973,8 +971,8 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onStop, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<VoidCallback>(onStop, frameNode->GetId());
+    auto optCallback = Converter::ArkValue<Opt_VoidCallback>(arkCallback);
     modifier_->setOnStop(node_, &optCallback);
 
     EXPECT_FALSE(checkEvent);
@@ -1103,6 +1101,7 @@ static std::vector<std::tuple<std::string, uint32_t, std::string>> setSurfaceBac
  */
 HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColor, TestSize.Level1)
 {
+#ifdef WRONG_SDK
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE);
@@ -1118,5 +1117,6 @@ HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColor, TestSize.Level1)
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+#endif
 }
 } // namespace OHOS::Ace::NG

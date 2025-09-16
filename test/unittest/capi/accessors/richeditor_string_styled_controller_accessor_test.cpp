@@ -87,9 +87,9 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, setAndGetStyledStringTest
     ASSERT_NE(accessor_->getStyledString, nullptr);
     const auto stringAccessor = accessors_->getMutableStyledStringAccessor();
     ASSERT_NE(stringAccessor, nullptr);
-    ASSERT_NE(stringAccessor->ctor, nullptr);
+    ASSERT_NE(stringAccessor->construct, nullptr);
     ASSERT_NE(stringAccessor->destroyPeer, nullptr);
-    const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->ctor(nullptr, nullptr));
+    const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->construct(nullptr, nullptr));
     const auto refString = AceType::MakeRefPtr<MutableSpanString>(TEST_TEXT);
     stringPeer->spanString = refString;
 
@@ -133,9 +133,6 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_onContentChanged
 
     auto eventHub = frameNodeRaw->GetOrCreateEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-
-    auto testHub = patternRaw->GetOrCreateEventHub<NG::RichEditorEventHub>();
-    ASSERT_NE(testHub, nullptr);
 
     auto onWillChangeCallback = [](const Ark_Int32 resourceId,
         const Ark_StyledStringChangeValue parameter, const Callback_Boolean_Void continuation) {

@@ -43,7 +43,7 @@ namespace  {
     const std::string CHECK_RESOURCE_THEME_STR("www.example.test/image_source.png");
     const std::string CHECK_RESOURCE_LOCAL_STR("path/to/image/image_source.png");
     const std::string IMAGE_RESOURCE_THEME_KEY = "image_source";
-    const auto IMAGE_RES_ID = 555;
+    const int64_t IMAGE_RES_ID = 555;
 
 } // namespace
 
@@ -106,16 +106,7 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     std::string expectedStr = CHECK_RESOURCE_THEME_STR;
-    std::vector<std::string> paramsVector = {IMAGE_RESOURCE_THEME_KEY};
-    Converter::ArkArrayHolder<Array_String> paramsStringArrayHolder(paramsVector);
-    Array_String paramsArkArrayValues = paramsStringArrayHolder.ArkValue();
-    Ark_Resource expectedArkResource = {
-        .bundleName = Converter::ArkValue<Ark_String>("testBundle"),
-        .moduleName = Converter::ArkValue<Ark_String>("testModule"),
-        .id = Converter::ArkValue<Ark_Number>(IMAGE_RES_ID),
-        .params = Converter::ArkValue<Opt_Array_String>(paramsArkArrayValues),
-        .type = Converter::ArkValue<Opt_Number>(10003) // ResourceType::STRING = 10003
-    };
+    auto expectedArkResource = Converter::ArkCreate<Ark_Resource>(IMAGE_RES_ID, ResourceType::STRING);
     auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_Resource>(expectedArkResource);
     auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputArkResource);
     modifier_->setAlt(frameNode, &optInputArkResource);
@@ -136,11 +127,11 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
-    PixelMapPeer pixelMapPeer;
+    image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
-    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
-    auto inputArkPixelMap = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(expectedPixelMap);
-    auto optInputArkPixelMap = Converter::ArkValue<Opt_Union_String_Resource_PixelMap>(inputArkPixelMap);
+    Ark_image_PixelMap expectedPixelMap = &pixelMapPeer;
+    auto optInputArkPixelMap = Converter::ArkUnion<Opt_Union_String_Resource_PixelMap,
+        Ark_image_PixelMap>(expectedPixelMap);
     modifier_->setAlt(frameNode, &optInputArkPixelMap);
 
     auto imageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
@@ -161,9 +152,9 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest2, setImageMatrixTest, TestSize.Level1)
 {
-    Matrix4TransitPeer* matrix4transit = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    matrix4_Matrix4TransitPeer* matrix4transit = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     matrix4transit->matrix = Matrix4::CreateScale(11.0, 7.0, 1.0);
-    auto optValue = Converter::ArkValue<Opt_Matrix4Transit>(matrix4transit);
+    auto optValue = Converter::ArkValue<Opt_matrix4_Matrix4Transit>(matrix4transit);
 
     modifier_->setImageMatrix(node_, &optValue);
 

@@ -31,7 +31,7 @@ class HierarchicalSymbolEffectAccessorTest
     &GENERATED_ArkUIAccessors::getHierarchicalSymbolEffectAccessor, HierarchicalSymbolEffectPeer> {
     void* CreatePeerInstance() override
     {
-        return accessor_->ctor(nullptr);
+        return accessor_->construct(nullptr);
     }
 };
 
@@ -67,7 +67,7 @@ HWTEST_F(HierarchicalSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
         {nullptr, PeerUtils::CreatePeer<HierarchicalSymbolEffectPeer>(std::nullopt)},
     };
     for (auto [value, expected] : testPlan) {
-        Ark_HierarchicalSymbolEffect peer = accessor_->ctor(value);
+        Ark_HierarchicalSymbolEffect peer = accessor_->construct(value);
         ASSERT_NE(peer, nullptr);
         EXPECT_EQ(*peer, *expected);
     }
@@ -103,15 +103,16 @@ HWTEST_F(HierarchicalSymbolEffectAccessorTest, setFillStyleTest, TestSize.Level1
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     const std::vector<std::tuple<
-        Ark_HierarchicalSymbolEffect, Ark_EffectFillStyle, std::optional<OHOS::Ace::FillStyle>
+        Ark_HierarchicalSymbolEffect, Opt_EffectFillStyle, std::optional<OHOS::Ace::FillStyle>
     >> testPlan {
-        {peer_, ARK_EFFECT_FILL_STYLE_CUMULATIVE, OHOS::Ace::FillStyle::CUMULATIVE},
-        {peer_, ARK_EFFECT_FILL_STYLE_ITERATIVE, OHOS::Ace::FillStyle::ITERATIVE},
-        {nullptr, ARK_EFFECT_FILL_STYLE_CUMULATIVE, std::nullopt},
+        {peer_, ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_CUMULATIVE), OHOS::Ace::FillStyle::CUMULATIVE},
+        {peer_, ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_ITERATIVE), OHOS::Ace::FillStyle::ITERATIVE},
+        {peer_, ArkValue<Opt_EffectFillStyle>(), std::nullopt},
+        {nullptr, ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_CUMULATIVE), std::nullopt},
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->fillStyle.reset();
-        accessor_->setFillStyle(peer, value);
+        accessor_->setFillStyle(peer, &value);
         EXPECT_EQ(peer_->fillStyle, expected);
     }
 }

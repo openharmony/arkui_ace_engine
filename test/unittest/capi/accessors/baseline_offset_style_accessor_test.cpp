@@ -18,7 +18,7 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-  
+
 namespace OHOS::Ace::NG {
 namespace {
     const double EPSILON = 0.00001;
@@ -40,17 +40,17 @@ namespace {
         { "-0.8_pct", Converter::ArkValue<Ark_LengthMetrics>(-0.8_pct), 0.0_vp },
     };
 } // namespace
-  
+
 using namespace testing;
 using namespace testing::ext;
- 
+
 class BaselineOffsetStyleAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIBaselineOffsetStyleAccessor,
         &GENERATED_ArkUIAccessors::getBaselineOffsetStyleAccessor, BaselineOffsetStylePeer> {
 public:
     void* CreatePeerInstance() override
     {
-        return accessor_->ctor(nullptr);
+        return accessor_->construct(nullptr);
     }
     void DestroyPeer(BaselineOffsetStylePeer* peer)
     {
@@ -58,7 +58,7 @@ public:
         peer = nullptr;
     }
 };
-  
+
 /**
  * @tc.name: getBaselineOffsetTest
  * @tc.desc:
@@ -69,7 +69,7 @@ HWTEST_F(BaselineOffsetStyleAccessorTest, getBaselineOffsetTest, TestSize.Level1
     ASSERT_NE(accessor_->getBaselineOffset, nullptr);
     for (auto& [input, value, expected] : testFixtureOffsetValues) {
         DestroyPeer(peer_);
-        peer_ = accessor_->ctor(value);
+        peer_ = accessor_->construct(value);
         auto offset = accessor_->getBaselineOffset(peer_);
         EXPECT_NEAR(expected.ConvertToVp(), Converter::Convert<double>(offset), EPSILON) <<
             "Input value is: " << input << ", method: getType";

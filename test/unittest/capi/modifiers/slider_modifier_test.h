@@ -180,19 +180,19 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureNumberM
 };
 
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesThicknessSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), "4.00vp" },
+    { "123", Converter::ArkValue<Ark_Length>("123px"), "123.00px" },
+    { "0", Converter::ArkValue<Ark_Length>("0px"), "4.00vp" },
     { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
 };
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), "0.00px" },
+    { "123", Converter::ArkValue<Ark_Length>("123px"), "123.00px" },
+    { "0", Converter::ArkValue<Ark_Length>("0px"), "0.00px" },
     { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
 };
 
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNumNonNegValidValuesBlockSizeSlider = {
-    { "123", Converter::ArkValue<Ark_Length>(123._px), "123.00px" },
-    { "0", Converter::ArkValue<Ark_Length>(0._px), ATTRIBUTE_BLOCK_SIZE_WIDTH_DEFAULT_VALUE },
+    { "123", Converter::ArkValue<Ark_Length>("123px"), "123.00px" },
+    { "0", Converter::ArkValue<Ark_Length>("0px"), ATTRIBUTE_BLOCK_SIZE_WIDTH_DEFAULT_VALUE },
     { "1.23f", Converter::ArkValue<Ark_Length>(1.23f), "1.23vp" },
 };
 

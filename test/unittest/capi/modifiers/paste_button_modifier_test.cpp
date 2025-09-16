@@ -412,8 +412,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         checkEvent.reset();
         gestureEventHub->ActClick(createJson(input));
         ASSERT_TRUE(checkEvent);
-        ASSERT_TRUE(checkEvent->result);
-        EXPECT_EQ(checkEvent->result.value(), expected);
+        EXPECT_EQ(checkEvent->result, expected);
         EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetX), OFFSET_X);
         EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetY), OFFSET_Y);
     };

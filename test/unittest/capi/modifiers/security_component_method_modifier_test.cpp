@@ -54,17 +54,45 @@ std::vector<std::tuple<std::string, Opt_Length, std::string>> positionYValidValu
 };
 
 // Valid values for attribute 'width'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> widthValidValues = {
-    { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
+static std::vector<std::tuple<std::string, Opt_Length, std::string>> widthValidValues = {
+    { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID),
+        Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
 
-static std::vector<std::tuple<std::string, Ark_Length>> widthInvalidValues = {
-    {"-10", Converter::ArkValue<Ark_Length>(-10.)},
+static std::vector<std::tuple<std::string, Opt_Length>> widthInvalidValues = {
+    {"-10", Converter::ArkValue<Opt_Length>(-10.f)},
+};
+
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> widthValidValuesDim = {
+    { "60.25f", ArkValue<Opt_Dimension>(60.25f), "60.25vp" },
+    {
+        "ResId:FLOAT_RES_0_ID",
+        Converter::ArkValue<Opt_Dimension>(FLOAT_RES_0_ID),
+        "70.50px"
+    }
+};
+
+static std::vector<std::tuple<std::string, Opt_Union_Dimension_BorderRadiuses,
+    std::string>> borderRadiusValidValues = {
+    { "60.25f", ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(60.25f), "60.25vp" },
+    {
+        "ResId:FLOAT_RES_0_ID",
+        Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(FLOAT_RES_0_ID),
+        "70.50px"
+    }
+};
+
+static std::vector<std::tuple<std::string, Opt_Dimension>> widthInvalidValuesDim = {
+    {"-10", Converter::ArkValue<Opt_Dimension>(-10.f)},
+};
+
+static std::vector<std::tuple<std::string,
+    Opt_Union_Dimension_BorderRadiuses>> borderRadiusInvalidValuesDim = {
+    {"-10", Converter::ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(-10.f)},
 };
 
 /*
@@ -82,9 +110,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestDefaultValues, Test
 }
 
 // Valid values for attribute 'iconSize' of method 'iconSize'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> iconSizeIconSizeValidValues = {
-    { "60.25f", ArkValue<Opt_Length>(60.25f), "60.25vp" },
-    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Opt_Length>(FLOAT_RES_0_ID), "70.50px" }
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> iconSizeIconSizeValidValues = {
+    { "60.25f", ArkValue<Opt_Dimension>(60.25f), "60.25vp" },
+    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Opt_Dimension>(FLOAT_RES_0_ID), "70.50px" }
 };
 
 /*
@@ -97,8 +125,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestValidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Length inputValueIconSize;
-    Opt_Length initValueIconSize;
+    Opt_Dimension inputValueIconSize;
+    Opt_Dimension initValueIconSize;
 
     // Initial setup
     initValueIconSize = std::get<1>(iconSizeIconSizeValidValues[0]);
@@ -118,8 +146,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestValidValues, TestSi
 }
 
 // Invalid values for attribute 'iconSize'
-static std::vector<std::tuple<std::string, Opt_Length>> iconSizeInvalidValues = {
-    { "-15", ArkValue<Opt_Length>(-15.) },
+static std::vector<std::tuple<std::string, Opt_Dimension>> iconSizeInvalidValues = {
+    { "-15", ArkValue<Opt_Dimension>(-15.f) },
 };
 
 /*
@@ -132,8 +160,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestInvalidValues, Test
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Length inputValueIconSize;
-    Opt_Length initValueIconSize;
+    Opt_Dimension inputValueIconSize;
+    Opt_Dimension initValueIconSize;
     std::string initValueStr;
 
     // Initial setup
@@ -503,9 +531,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestDefaultValues, Test
 }
 
 // Valid values for attribute 'fontSize' of method 'fontSize'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> fontSizeFontSizeValidValues = {
-    { "22.25fp", ArkValue<Ark_Length>(22.25f), "22.25vp" },
-    { "ResId:FLOAT_RES_1_ID", Converter::ArkValue<Ark_Length>(FLOAT_RES_1_ID), "19.50fp" }
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> fontSizeFontSizeValidValues = {
+    { "22.25", ArkValue<Opt_Dimension>(22.25f), "22.25vp" },
+    { "ResId:FLOAT_RES_1_ID", Converter::ArkValue<Opt_Dimension>(FLOAT_RES_1_ID), "19.50fp" }
 };
 
 /*
@@ -518,18 +546,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestValidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueFontSize;
-    Ark_Length initValueFontSize;
-
-    // Initial setup
-    initValueFontSize = std::get<1>(fontSizeFontSizeValidValues[0]);
+    Opt_Dimension inputValueFontSize;
 
     // Verifying attribute's  values
-    inputValueFontSize = initValueFontSize;
     for (auto&& value: fontSizeFontSizeValidValues) {
         inputValueFontSize = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Length>(inputValueFontSize);
-        modifier_->setFontSize(node_, &convValue);
+        modifier_->setFontSize(node_, &inputValueFontSize);
         OnModifyDone();
 
         jsonValue = GetJsonValue(node_);
@@ -540,8 +562,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestValidValues, TestSi
 }
 
 // Invalid values for attribute 'fontSize'
-static std::vector<std::tuple<std::string, Ark_Length>> fontSizeInvalidValues = {
-    { "-15", ArkValue<Ark_Length>(-15.) },
+static std::vector<std::tuple<std::string, Opt_Dimension>> fontSizeInvalidValues = {
+    { "-15", ArkValue<Opt_Dimension>(-15.f) },
 };
 
 /*
@@ -554,8 +576,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, Test
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueFontSize;
-    Ark_Length initValueFontSize;
+    Opt_Dimension inputValueFontSize;
+    Opt_Dimension initValueFontSize;
     std::string initValueStr;
 
     // Initial setup
@@ -565,13 +587,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, Test
     // Verifying attribute's  values
     for (auto&& value: fontSizeInvalidValues) {
         inputValueFontSize = initValueFontSize;
-        auto convValue = ArkValue<Opt_Length>(inputValueFontSize);
-        modifier_->setFontSize(node_, &convValue);
+        modifier_->setFontSize(node_, &inputValueFontSize);
         OnModifyDone();
 
         inputValueFontSize = std::get<1>(value);
-        convValue = ArkValue<Opt_Length>(inputValueFontSize);
-        modifier_->setFontSize(node_, &convValue);
+        modifier_->setFontSize(node_, &inputValueFontSize);
         OnModifyDone();
 
         jsonValue = GetJsonValue(node_);
@@ -684,12 +704,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestDefaultValues, Te
     EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
 }
 
-using FontWeightT = Ark_Union_Number_FontWeight_String;
+using FontWeightT = Opt_Union_I32_FontWeight_String;
 static std::vector<std::tuple<std::string, FontWeightT, std::string>> fontWeightValidValues = {
     { "ARK_FONT_WEIGHT_BOLD", ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "FontWeight.Bold" },
     { "ARK_FONT_WEIGHT_REGULAR", ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "FontWeight.Regular" },
-    { "100", ArkUnion<FontWeightT, Ark_Number>(100), "100" },
-    { "300.00f", ArkUnion<FontWeightT, Ark_Number>(300.00f), "300" },
+    { "100", ArkUnion<FontWeightT, Ark_Int32>(100), "100" },
     { "700", ArkUnion<FontWeightT, Ark_String>("700"), "700" },
     { "bold", ArkUnion<FontWeightT, Ark_String>("bold"), "FontWeight.Bold" },
 };
@@ -714,8 +733,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestValidValues, Test
     inputValueFontWeight = initValueFontWeight;
     for (auto&& value: fontWeightValidValues) {
         inputValueFontWeight = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Union_Number_FontWeight_String>(inputValueFontWeight);
-        modifier_->setFontWeight(node_, &convValue);
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -725,8 +743,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestValidValues, Test
 }
 
 static std::vector<std::tuple<std::string, FontWeightT>> fontWeightInvalidValues = {
-    { "-111", ArkUnion<FontWeightT, Ark_Number>(-111) },
-    { "-123.456f", ArkUnion<FontWeightT, Ark_Number>(-123.456f) },
+    { "-111", ArkUnion<FontWeightT, Ark_Int32>(-111) },
     { "InvalidData!", ArkUnion<FontWeightT, Ark_String>("InvalidData!") },
     { "invalid union", ArkUnion<FontWeightT, Ark_Empty>(nullptr) },
 };
@@ -751,12 +768,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestInvalidValues, Te
     // Verifying attribute's  values
     for (auto&& value: fontWeightInvalidValues) {
         inputValueFontWeight = initValueFontWeight;
-        auto convValue = ArkValue<Opt_Union_Number_FontWeight_String>(inputValueFontWeight);
-        modifier_->setFontWeight(node_, &convValue);
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
         OnModifyDone();
         inputValueFontWeight = std::get<1>(value);
-        convValue = ArkValue<Opt_Union_Number_FontWeight_String>(inputValueFontWeight);
-        modifier_->setFontWeight(node_, &convValue);
+        modifier_->setFontWeight(node_, &inputValueFontWeight);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -1201,18 +1216,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestValidValues, Tes
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBorderWidth;
-    Ark_Length initValueBorderWidth;
+    Opt_Dimension inputValueBorderWidth;
+    Opt_Dimension initValueBorderWidth;
 
     // Initial setup
-    initValueBorderWidth = std::get<1>(widthValidValues[0]);
+    initValueBorderWidth = std::get<1>(widthValidValuesDim[0]);
 
     // Verifying attribute's  values
     inputValueBorderWidth = initValueBorderWidth;
-    for (auto&& value: widthValidValues) {
+    for (auto&& value: widthValidValuesDim) {
         inputValueBorderWidth = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Length>(inputValueBorderWidth);
-        modifier_->setBorderWidth(node_, &convValue);
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
@@ -1231,22 +1245,20 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestInvalidValues, T
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBorderWidth;
-    Ark_Length initValueBorderWidth;
+    Opt_Dimension inputValueBorderWidth;
+    Opt_Dimension initValueBorderWidth;
 
     // Initial setup
-    initValueBorderWidth = std::get<1>(widthValidValues[0]);
-    expectedStr = std::get<2>(widthValidValues[0]);
+    initValueBorderWidth = std::get<1>(widthValidValuesDim[0]);
+    expectedStr = std::get<2>(widthValidValuesDim[0]);
 
     inputValueBorderWidth = initValueBorderWidth;
-    for (auto&& value: widthInvalidValues) {
+    for (auto&& value: widthInvalidValuesDim) {
         inputValueBorderWidth = initValueBorderWidth;
-        auto convValue = ArkValue<Opt_Length>(inputValueBorderWidth);
-        modifier_->setBorderWidth(node_, &convValue);
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
         OnModifyDone();
         inputValueBorderWidth = std::get<1>(value);
-        convValue = ArkValue<Opt_Length>(inputValueBorderWidth);
-        modifier_->setBorderWidth(node_, &convValue);
+        modifier_->setBorderWidth(node_, &inputValueBorderWidth);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
@@ -1369,18 +1381,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, Te
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBorderRadius;
-    Ark_Length initValueBorderRadius;
+    Opt_Union_Dimension_BorderRadiuses inputValueBorderRadius;
+    Opt_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
-    initValueBorderRadius = std::get<1>(widthValidValues[0]);
+    initValueBorderRadius = std::get<1>(borderRadiusValidValues[0]);
 
     // Verifying attribute's  values
     inputValueBorderRadius = initValueBorderRadius;
-    for (auto&& value: widthValidValues) {
+    for (auto&& value: borderRadiusValidValues) {
         inputValueBorderRadius = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Length>(inputValueBorderRadius);
-        modifier_->setBorderRadius0(node_, &convValue);
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
@@ -1399,26 +1410,36 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestInvalidValues, 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBorderRadius;
-    Ark_Length initValueBorderRadius;
+    Opt_Union_Dimension_BorderRadiuses inputValueBorderRadius;
+    Opt_Union_Dimension_BorderRadiuses initValueBorderRadius;
 
     // Initial setup
-    initValueBorderRadius = std::get<1>(widthValidValues[0]);
-    expectedStr = std::get<2>(widthValidValues[0]); // invalid value should be ignored
+    initValueBorderRadius = std::get<1>(borderRadiusValidValues[0]);
+    expectedStr = std::get<2>(borderRadiusValidValues[0]);
 
     inputValueBorderRadius = initValueBorderRadius;
-    for (auto&& value: widthInvalidValues) {
+    for (auto&& value: borderRadiusInvalidValuesDim) {
         inputValueBorderRadius = initValueBorderRadius;
-        auto convValue = ArkValue<Opt_Length>(inputValueBorderRadius);
-        modifier_->setBorderRadius0(node_, &convValue);
-        OnModifyDone();
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        std::optional<BorderRadiusProperty> resultBorderRadius = layoutProperty->GetBackgroundBorderRadius();
+        ASSERT_TRUE(resultBorderRadius.has_value());
+        ASSERT_TRUE(resultBorderRadius->radiusTopLeft.has_value());
+        EXPECT_EQ(resultBorderRadius->radiusTopLeft.value().ToString(), expectedStr);
+
         inputValueBorderRadius = std::get<1>(value);
-        convValue = ArkValue<Opt_Length>(inputValueBorderRadius);
-        modifier_->setBorderRadius0(node_, &convValue);
-        OnModifyDone();
-        jsonValue = GetPatternJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        modifier_->setBorderRadius(node_, &inputValueBorderRadius);
+        layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        resultBorderRadius = layoutProperty->GetBackgroundBorderRadius();
+        if (resultBorderRadius.has_value()) {
+            EXPECT_FALSE(resultBorderRadius->radiusTopLeft.has_value());
+            EXPECT_FALSE(resultBorderRadius->radiusTopRight.has_value());
+            EXPECT_FALSE(resultBorderRadius->radiusBottomRight.has_value());
+            EXPECT_FALSE(resultBorderRadius->radiusBottomLeft.has_value());
+        }
     }
 }
 
@@ -1437,9 +1458,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestDefau
 }
 
 // Valid values for attribute 'textIconSpace' of method 'textIconSpace'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> textIconSpaceTextIconSpaceValidValues = {
-    { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
-    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID), "70.50px" }
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> textIconSpaceTextIconSpaceValidValues = {
+    { "60.25f", ArkValue<Opt_Dimension>(60.25f), "60.25vp" },
+    { "ResId:FLOAT_RES_0_ID", Converter::ArkValue<Opt_Dimension>(FLOAT_RES_0_ID), "70.50px" }
 };
 
 /*
@@ -1452,8 +1473,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, T
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueTextIconSpace;
-    Ark_Length initValueTextIconSpace;
+    Opt_Dimension inputValueTextIconSpace;
+    Opt_Dimension initValueTextIconSpace;
 
     // Initial setup
     initValueTextIconSpace = std::get<1>(textIconSpaceTextIconSpaceValidValues[0]);
@@ -1462,8 +1483,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, T
     inputValueTextIconSpace = initValueTextIconSpace;
     for (auto&& value: textIconSpaceTextIconSpaceValidValues) {
         inputValueTextIconSpace = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Length>(inputValueTextIconSpace);
-        modifier_->setTextIconSpace(node_, &convValue);
+        modifier_->setTextIconSpace(node_, &inputValueTextIconSpace);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ICON_SPACE_NAME);
@@ -1473,8 +1493,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, T
 }
 
 // Invalid values for attribute 'textIconSpace'
-static std::vector<std::tuple<std::string, Ark_Length>> textIconSpaceInvalidValues = {
-    { "-15", ArkValue<Ark_Length>(-15.) },
+static std::vector<std::tuple<std::string, Opt_Dimension>> textIconSpaceInvalidValues = {
+    { "-15", ArkValue<Opt_Dimension>(-15.f) },
 };
 
 /*
@@ -1487,8 +1507,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInval
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueTextIconSpace;
-    Ark_Length initValueTextIconSpace;
+    Opt_Dimension inputValueTextIconSpace;
+    Opt_Dimension initValueTextIconSpace;
 
     // Initial setup
     initValueTextIconSpace = std::get<1>(textIconSpaceTextIconSpaceValidValues[0]);
@@ -1496,13 +1516,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInval
     // Verifying attribute's  values
     for (auto&& value: textIconSpaceInvalidValues) {
         inputValueTextIconSpace = initValueTextIconSpace;
-        auto convValue = ArkValue<Opt_Length>(inputValueTextIconSpace);
-        modifier_->setTextIconSpace(node_, &convValue);
+        modifier_->setTextIconSpace(node_, &inputValueTextIconSpace);
         OnModifyDone();
 
         inputValueTextIconSpace = std::get<1>(value);
-        convValue = ArkValue<Opt_Length>(inputValueTextIconSpace);
-        modifier_->setTextIconSpace(node_, &convValue);
+        modifier_->setTextIconSpace(node_, &inputValueTextIconSpace);
         OnModifyDone();
 
         jsonValue = GetJsonValue(node_);
@@ -1585,8 +1603,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueWidth;
-    Ark_Length initValueWidth;
+    Opt_Length inputValueWidth;
+    Opt_Length initValueWidth;
 
     // Initial setup
     initValueWidth = std::get<1>(widthValidValues[0]);
@@ -1595,8 +1613,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
     inputValueWidth = initValueWidth;
     for (auto&& value: widthValidValues) {
         inputValueWidth = std::get<1>(value);
-        auto convValue = ArkValue<Opt_Length>(inputValueWidth);
-        modifier_->setWidth(node_, &convValue);
+        modifier_->setWidth(node_, &inputValueWidth);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
@@ -1614,8 +1631,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueWidth;
-    Ark_Length initValueWidth;
+    Opt_Length inputValueWidth;
+    Opt_Length initValueWidth;
 
     // Initial setup
     initValueWidth = std::get<1>(widthValidValues[0]);
@@ -1623,11 +1640,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues
     inputValueWidth = initValueWidth;
     for (auto&& value: widthInvalidValues) {
         inputValueWidth = initValueWidth;
-        auto convValue = ArkValue<Opt_Length>(inputValueWidth);
-        modifier_->setWidth(node_, &convValue);
+        modifier_->setWidth(node_, &inputValueWidth);
         inputValueWidth = std::get<1>(value);
-        convValue = ArkValue<Opt_Length>(inputValueWidth);
-        modifier_->setWidth(node_, &convValue);
+        modifier_->setWidth(node_, &inputValueWidth);
         jsonValue = GetJsonValue(node_);
         expectedStr = ATTRIBUTE_WIDTH_DEFAULT_VALUE;
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
@@ -2238,12 +2253,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestDefaultValu
     EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE);
 }
 
-std::vector<std::tuple<std::string, Ark_Length, std::string>> paddingValidValues = {
-    { "60.25f", ArkValue<Ark_Length>(60.25f), "60.25vp" },
-    { "-40.5f", ArkValue<Ark_Length>(-40.5f), "-40.50vp" },
+std::vector<std::tuple<std::string, Ark_Dimension, std::string>> paddingValidValues = {
+    { "60.25f", ArkValue<Ark_Dimension>(60.25f), "60.25vp" },
+    { "-40.5f", ArkValue<Ark_Dimension>(-40.5f), "-40.50vp" },
     {
         "ResId:FLOAT_RES_0_ID",
-        Converter::ArkValue<Ark_Length>(FLOAT_RES_0_ID),
+        Converter::ArkValue<Ark_Dimension>(FLOAT_RES_0_ID),
         "70.50px"
     }
 };
@@ -2262,11 +2277,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestValidValues, TestSiz
     std::string resultStrTop;
     std::string resultStrBottom;
     std::string expectedStr;
-    Ark_Length inputValuePadding;
+    Ark_Dimension inputValuePadding;
 
     for (auto&& value: paddingValidValues) {
         inputValuePadding = std::get<1>(value);
-        auto unionValue = ArkUnion<Opt_Union_Padding_Dimension, Ark_Length>(inputValuePadding);
+        auto unionValue = ArkUnion<Opt_Union_Padding_Dimension, Ark_Dimension>(inputValuePadding);
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
@@ -2404,15 +2419,15 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestInvalidValu
     std::string expectedStrRight;
     std::string expectedStrTop;
     std::string expectedStrBottom;
-    Ark_Length inputValuePadding;
-    Ark_Length initValuePadding;
+    Ark_Dimension inputValuePadding;
+    Ark_Dimension initValuePadding;
     Opt_Union_Padding_Dimension unionValue;
 
     // Initial setup
     initValuePadding = std::get<1>(paddingValidValues[0]);
 
     inputValuePadding = initValuePadding;
-    unionValue = ArkUnion<Opt_Union_Padding_Dimension, Ark_Length>(inputValuePadding);
+    unionValue = ArkUnion<Opt_Union_Padding_Dimension, Ark_Dimension>(inputValuePadding);
     modifier_->setPadding(node_, &unionValue);
     OnModifyDone();
 

@@ -31,43 +31,18 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
-namespace {
 const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
 const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME = "autocapitalizationMode";
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE = "AutoCapitalizationMode.NONE";
 
-std::vector<std::tuple<std::string, Opt_KeyboardAppearance, std::string>> testFixtureEnumKeyboardAppearanceTestPlan = {
-    { "KeyboardAppearance.NONE_IMMERSIVE",
-        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
-    { "KeyboardAppearance.IMMERSIVE",
-        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
-    { "KeyboardAppearance.LIGHT_IMMERSIVE",
-        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
-    { "-1", Converter::ArkValue<Opt_KeyboardAppearance>(INVALID_ENUM_VAL<Ark_KeyboardAppearance>),
-        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
-    { "INT_MAX", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(INT_MAX)),
-        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
-};
-
-std::vector<std::tuple<std::string, Opt_AutoCapitalizationMode, std::string>>
-    testFixtureEnumAutoCapitalizationModeTestPlan = {
-        { "AutoCapitalizationMode.NONE", Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::NONE),
-            "AutoCapitalizationMode.NONE" },
-        { "AutoCapitalizationMode.WORDS",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::WORDS),
-            "AutoCapitalizationMode.WORDS" },
-        { "AutoCapitalizationMode.SENTENCES",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::SENTENCES),
-            "AutoCapitalizationMode.SENTENCES" },
-        { "AutoCapitalizationMode.ALL_CHARACTERS",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::ALL_CHARACTERS),
-            "AutoCapitalizationMode.ALL_CHARACTERS" },
-        { "AutoCapitalizationMode.INVALID",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>),
-            ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE },
-    };
-} // namespace
+namespace Converter {
+    template<>
+    PreviewText Convert(const Ark_PreviewText& src)
+    {
+        PreviewText previewText = {.value = Convert<std::u16string>(src.value),
+                                   .offset = Convert<int32_t>(src.offset)};
+        return previewText;
+    }
+} // namespace Converter
 
 class SearchModifierTest2 : public ModifierTestBase<GENERATED_ArkUISearchModifier,
                                &GENERATED_ArkUINodeModifiers::getSearchModifier, GENERATED_ARKUI_SEARCH> {
@@ -82,31 +57,6 @@ public:
 };
 
 /*
- * @tc.name: setAutoCapitalizationModeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
-{
-    ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
-    auto jsonValue = GetJsonValue(node_);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_AutoCapitalizationMode& value) {
-        modifier_->setAutoCapitalizationMode(node_, &value);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    };
-    for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setCustomKeyboard_CustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
@@ -119,7 +69,7 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const auto builder = ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setCustomKeyboard(frameNode, &builder, nullptr);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -147,7 +97,7 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const auto builder = ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -172,6 +122,19 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceDefaultValuesTest, TestSize.L
         << "Default value for attribute 'keyboardAppearance'";
 }
 
+std::vector<std::tuple<std::string, Opt_KeyboardAppearance, std::string>> testFixtureEnumKeyboardAppearanceTestPlan = {
+    { "KeyboardAppearance.NONE_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
+    { "KeyboardAppearance.IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
+    { "KeyboardAppearance.LIGHT_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
+    { "-1", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(-1)),
+        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
+    { "INT_MAX", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(INT_MAX)),
+        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
+};
+
 /*
  * @tc.name: setKeyboardAppearanceValuesTest
  * @tc.desc:
@@ -195,10 +158,10 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnWillChangeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
++ * @tc.name: setOnWillChangeTest
++ * @tc.desc:
++ * @tc.type: FUNC
++ */
 HWTEST_F(SearchModifierTest2, setOnWillChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnWillChange, nullptr);

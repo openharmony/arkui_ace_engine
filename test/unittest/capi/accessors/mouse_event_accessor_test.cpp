@@ -328,88 +328,6 @@ HWTEST_F(MouseEventAccessorTest, SetWindowYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetScreenXTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(MouseEventAccessorTest, GetScreenXTest, TestSize.Level1)
-{
-    for (auto& [input, expected, value] : testFixtureNumberValues) {
-        auto info = peer_->GetEventInfo();
-        ASSERT_NE(info, nullptr);
-        Offset globalLocation;
-        globalLocation.SetX(value);
-        info->SetGlobalLocation(globalLocation);
-        auto arkRes = accessor_->getScreenX(peer_);
-        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
-            "Input value is: " << input << ", method: GetScreenX";
-    }
-}
-
-/**
- * @tc.name: SetScreenXTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(MouseEventAccessorTest, SetScreenXTest, TestSize.Level1)
-{
-    auto info = peer_->GetEventInfo();
-    ASSERT_NE(info, nullptr);
-    auto globalLocation = info->GetGlobalLocation();
-    auto x = globalLocation.GetX();
-    EXPECT_EQ(x, 0);
-    for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setScreenX(peer_, &value);
-        auto info = peer_->GetEventInfo();
-        ASSERT_NE(info, nullptr);
-        globalLocation = info->GetGlobalLocation();
-        EXPECT_NEAR(globalLocation.GetX(), expected, EPSILON) <<
-            "Input value is: " << input << ", method: SetScreenX";
-    }
-}
-
-/**
- * @tc.name: GetScreenYTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(MouseEventAccessorTest, GetScreenYTest, TestSize.Level1)
-{
-    for (auto& [input, expected, value] : testFixtureNumberValues) {
-        auto info = peer_->GetEventInfo();
-        ASSERT_NE(info, nullptr);
-        Offset globalLocation;
-        globalLocation.SetY(value);
-        info->SetGlobalLocation(globalLocation);
-        auto arkRes = accessor_->getScreenY(peer_);
-        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
-            "Input value is: " << input << ", method: GetScreenY";
-    }
-}
-
-/**
- * @tc.name: SetScreenYTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(MouseEventAccessorTest, SetScreenYTest, TestSize.Level1)
-{
-    auto info = peer_->GetEventInfo();
-    ASSERT_NE(info, nullptr);
-    auto globalLocation = info->GetGlobalLocation();
-    auto y = globalLocation.GetY();
-    EXPECT_EQ(y, 0);
-    for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setScreenY(peer_, &value);
-        auto info = peer_->GetEventInfo();
-        ASSERT_NE(info, nullptr);
-        globalLocation = info->GetGlobalLocation();
-        EXPECT_NEAR(globalLocation.GetY(), expected, EPSILON) <<
-            "Input value is: " << input << ", method: SetScreenY";
-    }
-}
-
-/**
  * @tc.name: GetXTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -503,7 +421,8 @@ HWTEST_F(MouseEventAccessorTest, SetRawDeltaXTest, TestSize.Level1)
     auto deltaX = info->GetRawDeltaX();
     EXPECT_EQ(deltaX, 0);
     for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setRawDeltaX(peer_, &value);
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        accessor_->setRawDeltaX(peer_, &optValue);
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         auto deltaX = info->GetRawDeltaX();
@@ -541,7 +460,8 @@ HWTEST_F(MouseEventAccessorTest, SetRawDeltaYTest, TestSize.Level1)
     auto deltaY = info->GetRawDeltaY();
     EXPECT_EQ(deltaY, 0);
     for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setRawDeltaY(peer_, &value);
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        accessor_->setRawDeltaY(peer_, &optValue);
         auto info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         auto deltaY = info->GetRawDeltaY();
@@ -598,10 +518,9 @@ HWTEST_F(MouseEventAccessorTest, SetPressedButtonsTest, TestSize.Level1)
 {
     auto eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
-    Array_MouseButton pressedButtons;
-    Ark_MouseButton arr[] ={Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT};
-    pressedButtons.array = arr;
-    pressedButtons.length = 2;
+    std::array arr{Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT};
+    Converter::ConvContext ctx;
+    auto pressedButtons = Converter::ArkValue<Opt_Array_MouseButton>(arr, &ctx);
     accessor_->setPressedButtons(peer_, &pressedButtons);
     auto buttons = eventInfo->GetPressedButtons();
     EXPECT_EQ(buttons[0], MouseButton::LEFT_BUTTON);

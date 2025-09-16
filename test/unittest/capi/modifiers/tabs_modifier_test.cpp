@@ -129,7 +129,7 @@ const std::vector<BoolStrTestStep> BOOL_STR_TEST_PLAN = {
     { 25, "true" },
     { false, "false" }
 };
-const Ark_Int32 FAKE_RES_ID(1234);
+const int64_t FAKE_RES_ID(1234);
 const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 typedef std::pair<Ark_ScrollableBarModeOptions, std::string> ScrollableBarModeTestStep;
 const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {

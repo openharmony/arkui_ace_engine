@@ -23,10 +23,16 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+// Converters from accessor implementation
+namespace Converter {
+template<> Point Convert(const Ark_matrix4_Matrix4TransformPoint& src);
+void AssignArkValue(Ark_matrix4_Matrix4TransformPoint& dst, const Point& src, ConvContext *ctx);
+} // namespace Converter
+
 class Matrix4TransitAccessorTest : public AccessorTestBase<
-    GENERATED_ArkUIMatrix4TransitAccessor,
-    &GENERATED_ArkUIAccessors::getMatrix4TransitAccessor,
-    Matrix4TransitPeer> {
+    GENERATED_ArkUIMatrix4_Matrix4TransitAccessor,
+    &GENERATED_ArkUIAccessors::getMatrix4_Matrix4TransitAccessor,
+    matrix4_Matrix4TransitPeer> {
 public:
     void SetUp() override
     {
@@ -48,7 +54,7 @@ HWTEST_F(Matrix4TransitAccessorTest, copyTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateTranslate(7.0, 8.0, 0.0);
 
-    Matrix4TransitPeer* result = accessor_->copy(peer_);
+    matrix4_Matrix4TransitPeer* result = accessor_->copy(peer_);
     EXPECT_NE(result, peer_); // check that new object is created
 
     EXPECT_EQ(result->matrix, peer_->matrix);
@@ -63,7 +69,7 @@ HWTEST_F(Matrix4TransitAccessorTest, invertTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateScale(4.0, 5.0, 1.0);
 
-    Matrix4TransitPeer* result = accessor_->invert(peer_);
+    matrix4_Matrix4TransitPeer* result = accessor_->invert(peer_);
     EXPECT_EQ(result, peer_);
 
     auto expected = Matrix4::CreateScale(0.25, 0.2, 1.0);
@@ -78,10 +84,10 @@ HWTEST_F(Matrix4TransitAccessorTest, invertTest, TestSize.Level1)
 HWTEST_F(Matrix4TransitAccessorTest, combineTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateScale(3.0, 2.0, 1.0);
-    Matrix4TransitPeer* other = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    matrix4_Matrix4TransitPeer* other = PeerUtils::CreatePeer<matrix4_Matrix4TransitPeer>();
     other->matrix = Matrix4::CreateTranslate(7.0, 8.0, 0.0);
 
-    Matrix4TransitPeer* result = accessor_->combine(peer_, other);
+    matrix4_Matrix4TransitPeer* result = accessor_->combine(peer_, other);
     EXPECT_EQ(result, peer_);
 
     Matrix4 expected(
@@ -102,12 +108,12 @@ HWTEST_F(Matrix4TransitAccessorTest, translateTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateIdentity();
 
-    Ark_TranslateOption options = {
-        .x = Converter::ArkValue<Opt_Number>(5.0f),
-        .y = Converter::ArkValue<Opt_Number>(7.0f)
+    Ark_TranslateOptions options = {
+        .x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(5.0f),
+        .y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(7.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->translate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->translate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(0.0, 0.0);
@@ -128,12 +134,12 @@ HWTEST_F(Matrix4TransitAccessorTest, translateTestExistingMatrixIsUsed, TestSize
 {
     peer_->matrix = Matrix4::CreateScale(3.0, 2.0, 1.0);
 
-    Ark_TranslateOption options = {
-        .x = Converter::ArkValue<Opt_Number>(5.0f),
-        .y = Converter::ArkValue<Opt_Number>(7.0f)
+    Ark_TranslateOptions options = {
+        .x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(5.0f),
+        .y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(7.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->translate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->translate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Matrix4 expected(
@@ -154,15 +160,15 @@ HWTEST_F(Matrix4TransitAccessorTest, scaleTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateIdentity();
 
-    Ark_ScaleOption options = {
+    Ark_ScaleOptions options = {
         .x = Converter::ArkValue<Opt_Number>(2.0f),
         .y = Converter::ArkValue<Opt_Number>(5.0f),
         .z = Converter::ArkValue<Opt_Number>(),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
     };
 
-    Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(3.0, 2.0);
@@ -179,15 +185,15 @@ HWTEST_F(Matrix4TransitAccessorTest, scaleTestExistingMatrixIsUsed, TestSize.Lev
 {
     peer_->matrix = Matrix4::CreateScale(3.0, 2.0, 1.0);
 
-    Ark_ScaleOption options = {
+    Ark_ScaleOptions options = {
         .x = Converter::ArkValue<Opt_Number>(2.0f),
         .y = Converter::ArkValue<Opt_Number>(5.0f),
         .z = Converter::ArkValue<Opt_Number>(),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
     };
 
-    Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Matrix4 expected(
@@ -208,15 +214,15 @@ HWTEST_F(Matrix4TransitAccessorTest, scaleTestCenterSpecified, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateIdentity();
 
-    Ark_ScaleOption options = {
+    Ark_ScaleOptions options = {
         .x = Converter::ArkValue<Opt_Number>(2.0f),
         .y = Converter::ArkValue<Opt_Number>(0.5f),
         .z = Converter::ArkValue<Opt_Number>(),
-        .centerX = Converter::ArkValue<Opt_Number>(1.0f),
-        .centerY = Converter::ArkValue<Opt_Number>(2.0f),
+        .centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.0f),
+        .centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2.0f),
     };
 
-    Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->scale(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(3.0, 1.0);
@@ -236,7 +242,7 @@ HWTEST_F(Matrix4TransitAccessorTest, skewTest, TestSize.Level1)
     auto factorX = Converter::ArkValue<Ark_Number>(2.0f);
     auto factorY = Converter::ArkValue<Ark_Number>(3.0f);
 
-    Matrix4TransitPeer* result = accessor_->skew(peer_, &factorX, &factorY);
+    matrix4_Matrix4TransitPeer* result = accessor_->skew(peer_, &factorX, &factorY);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(5.0, 7.0);
@@ -256,7 +262,7 @@ HWTEST_F(Matrix4TransitAccessorTest, skewTestExistingMatrixIsUsed, TestSize.Leve
     auto factorX = Converter::ArkValue<Ark_Number>(4.0f);
     auto factorY = Converter::ArkValue<Ark_Number>(5.0f);
 
-    Matrix4TransitPeer* result = accessor_->skew(peer_, &factorX, &factorY);
+    matrix4_Matrix4TransitPeer* result = accessor_->skew(peer_, &factorX, &factorY);
     EXPECT_EQ(result, peer_);
 
     Matrix4 expected(
@@ -278,16 +284,16 @@ HWTEST_F(Matrix4TransitAccessorTest, rotateTestAxisX, TestSize.Level1)
     peer_->matrix = Matrix4::CreateIdentity();
 
     // Rotate by 30 degrees around X-axis
-    Ark_RotateOption options = {
+    Ark_RotateOptions options = {
         .x = Converter::ArkValue<Opt_Number>(1.0f),
         .y = Converter::ArkValue<Opt_Number>(),
         .z = Converter::ArkValue<Opt_Number>(),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
-        .angle = Converter::ArkValue<Opt_Number>(30.0f)
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
+        .angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(30.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(2.0, 1.0);
@@ -305,16 +311,16 @@ HWTEST_F(Matrix4TransitAccessorTest, rotateTestAxisY, TestSize.Level1)
     peer_->matrix = Matrix4::CreateIdentity();
 
     // Rotate by 30 degrees around Y-axis
-    Ark_RotateOption options = {
+    Ark_RotateOptions options = {
         .x = Converter::ArkValue<Opt_Number>(),
         .y = Converter::ArkValue<Opt_Number>(1.0f),
         .z = Converter::ArkValue<Opt_Number>(),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
-        .angle = Converter::ArkValue<Opt_Number>(30.0f)
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
+        .angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(30.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(2.0, 1.0);
@@ -332,16 +338,16 @@ HWTEST_F(Matrix4TransitAccessorTest, rotateTestAxisZ, TestSize.Level1)
     peer_->matrix = Matrix4::CreateIdentity();
 
     // Rotate by 45 degrees around Z-axis
-    Ark_RotateOption options = {
+    Ark_RotateOptions options = {
         .x = Converter::ArkValue<Opt_Number>(),
         .y = Converter::ArkValue<Opt_Number>(),
         .z = Converter::ArkValue<Opt_Number>(1.0f),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
-        .angle = Converter::ArkValue<Opt_Number>(45.0f)
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
+        .angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(45.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(1.0, 0.0);
@@ -359,16 +365,16 @@ HWTEST_F(Matrix4TransitAccessorTest, rotateTestExistingMatrixIsUsed, TestSize.Le
     peer_->matrix = Matrix4::CreateTranslate(7.0, 8.0, 0.0);
 
     // Rotate by 180 degrees around Z-axis
-    Ark_RotateOption options = {
+    Ark_RotateOptions options = {
         .x = Converter::ArkValue<Opt_Number>(),
         .y = Converter::ArkValue<Opt_Number>(),
         .z = Converter::ArkValue<Opt_Number>(1.0f),
-        .centerX = Converter::ArkValue<Opt_Number>(),
-        .centerY = Converter::ArkValue<Opt_Number>(),
-        .angle = Converter::ArkValue<Opt_Number>(180.0f)
+        .centerX = Converter::ArkValue<Opt_Union_Number_String>(),
+        .centerY = Converter::ArkValue<Opt_Union_Number_String>(),
+        .angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(180.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Matrix4 expected(
@@ -390,16 +396,16 @@ HWTEST_F(Matrix4TransitAccessorTest, rotateTestCenterSpecified, TestSize.Level1)
     peer_->matrix = Matrix4::CreateIdentity();
 
     // Rotate by 45 degrees around Z-axis
-    Ark_RotateOption options = {
+    Ark_RotateOptions options = {
         .x = Converter::ArkValue<Opt_Number>(),
         .y = Converter::ArkValue<Opt_Number>(),
         .z = Converter::ArkValue<Opt_Number>(1.0f),
-        .centerX = Converter::ArkValue<Opt_Number>(2.0f),
-        .centerY = Converter::ArkValue<Opt_Number>(1.0f),
-        .angle = Converter::ArkValue<Opt_Number>(45.0f)
+        .centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2.0f),
+        .centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.0f),
+        .angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(45.0f)
     };
 
-    Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
+    matrix4_Matrix4TransitPeer* result = accessor_->rotate(peer_, &options);
     EXPECT_EQ(result, peer_);
 
     Point point = result->matrix * Point(3.0, 1.0);
@@ -416,9 +422,9 @@ HWTEST_F(Matrix4TransitAccessorTest, transformPointTest, TestSize.Level1)
 {
     peer_->matrix = Matrix4::CreateTranslate(10.0, 20.0, 0.0);
 
-    auto options = Converter::ArkValue<Ark_Tuple_Number_Number>(Point(3.0, 5.0));
+    auto options = Converter::ArkValue<Ark_matrix4_Matrix4TransformPoint>(Point(3.0, 5.0));
 
-    Ark_Tuple_Number_Number result = accessor_->transformPoint(peer_, &options);
+    auto result = accessor_->transformPoint(peer_, &options);
     auto point = Converter::Convert<Point>(result);
     EXPECT_FLOAT_EQ(point.GetX(), 13.0f);
     EXPECT_FLOAT_EQ(point.GetY(), 25.0f);

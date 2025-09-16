@@ -105,10 +105,8 @@ namespace {
         { CreateResourceUnion<Opt_Union_Number_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
     };
 
-    const Ark_Int32 FAKE_RES_ID(1234);
+    const int64_t FAKE_RES_ID(1234);
     const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
-
-    const auto DEFAULT_FRICTION = 0.75; // Value valid for API12+
 } // namespace
 
 class GridModifierTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
@@ -225,7 +223,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSiz
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level1)
 {
-    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->construct();
     auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -259,7 +257,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Level1)
 {
-    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->construct();
     auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -667,73 +665,6 @@ HWTEST_F(GridModifierTest, setScrollBarWidthTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setScrollBarWidthTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarWidthTestValidValues, TestSize.Level1)
-{
-    std::string strResult;
-
-    typedef std::pair<Opt_Union_Number_String, std::string> OneTestStep;
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1), "1.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("5px"), "5.00px" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("22.35px"), "22.35px" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("7vp"), "7.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("65fp"), "65.00fp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("11lpx"), "11.00lpx" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("0.5lpx"), "0.50lpx" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("3"), "3.00fp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("10.65"), "10.65fp" },
-    };
-
-    for (const auto &[optResColor, expected]: testPlan) {
-        modifier_->setScrollBarWidth(node_, &optResColor);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected);
-    }
-}
-
-/*
- * @tc.name: setScrollBarWidthTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarWidthTestInvalidValues, TestSize.Level1)
-{
-    std::string strResult;
-
-    typedef std::pair<Opt_Union_Number_String, std::string> OneTestStep;
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-1), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-3.56f), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("invalid value"), "0.00fp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-8px"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-15.6px"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("23%"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-21vp"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-8.6vp"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-32fp"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-9.99fp"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-22lpx"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-1.23lpx"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-6"), "" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-16.2"), "" },
-    };
-
-    for (const auto &[optResColor, expected]: testPlan) {
-        modifier_->setScrollBarWidth(node_, &optResColor);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected.length() > 0 ? expected : ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE);
-    }
-}
-
-/*
  * @tc.name: setScrollBarColorTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -747,135 +678,6 @@ HWTEST_F(GridModifierTest, setScrollBarColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setScrollBarColorTestValidColorValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarColorTestValidColorValues, TestSize.Level1)
-{
-    // test is disabled because Ark_Color can`t be converted to Color
-    std::string strResult;
-
-    typedef std::pair<Opt_Union_Color_Number_String, std::string> OneTestStep;
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
-    };
-
-    for (const auto &[optResColor, expected]: testPlan) {
-        modifier_->setScrollBarColor(node_, &optResColor);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-        EXPECT_EQ(strResult, expected);
-    }
-}
-
-/*
- * @tc.name: setScrollBarColorTestValidNumberValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarColorTestValidNumberValues, TestSize.Level1)
-{
-    std::string strResult;
-
-    typedef std::pair<Opt_Union_Color_Number_String, std::string> OneTestStep;
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffffffff), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xff000000), "#FF000000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xff0000ff), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xff808080), "#FF808080" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xff008000), "#FF008000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffffa500), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffff0000), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0xffffff00), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_Number>(0x00000000), "#00000000" },
-    };
-
-    for (const auto &[optResColor, expected]: testPlan) {
-        modifier_->setScrollBarColor(node_, &optResColor);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-        EXPECT_EQ(strResult, expected);
-    }
-}
-
-/*
- * @tc.name: setScrollBarColorTestValidStringValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarColorTestValidStringValues, TestSize.Level1)
-{
-    std::string strResult;
-
-    typedef std::pair<Opt_Union_Color_Number_String, std::string> OneTestStep;
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#FFFFFFFF"), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ff000000"), "#FF000000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ff0000ff"), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ffa52a2a"), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ff808080"), "#FF808080" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ff008000"), "#FF008000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ffffa500"), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ffffc0cb"), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ffff0000"), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#ffffff00"), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_Union_Color_Number_String, Ark_String>("#00000000"), "#00000000" },
-    };
-
-    for (const auto &[optResColor, expected]: testPlan) {
-        modifier_->setScrollBarColor(node_, &optResColor);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-        EXPECT_EQ(strResult, expected);
-    }
-}
-
-/*
- * @tc.name: DISABLED_setScrollBarColorTestInvalidColorValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, DISABLED_setScrollBarColorTestInvalidColorValues, TestSize.Level1)
-{
-    // test is disabled because Ark_Color can`t be converted to Color
-}
-
-
-/*
- * @tc.name: setScrollBarColorTestInvalidNumberValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarColorTestInvalidNumberValues, TestSize.Level1)
-{
-    std::string strResult;
-    Ark_Union_Color_Number_String inputValue;
-
-    inputValue = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffffff + 1);
-    auto optInputValue = Converter::ArkValue<Opt_Union_Color_Number_String>(inputValue);
-    modifier_->setScrollBarColor(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-    EXPECT_EQ(strResult, "#00000000");
-
-    inputValue = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0x00000000 - 1);
-    optInputValue = Converter::ArkValue<Opt_Union_Color_Number_String>(inputValue);
-    modifier_->setScrollBarColor(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-    EXPECT_EQ(strResult, "#FFFFFFFF");
-}
-
-/*
  * @tc.name: setScrollBarTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -886,63 +688,6 @@ HWTEST_F(GridModifierTest, setScrollBarTestDefaultValues, TestSize.Level1)
 
     strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setScrollBarTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarTestValidValues, TestSize.Level1)
-{
-    std::string strResult;
-    Ark_BarState inputValue;
-
-    // check Auto mode (default is Off mode)
-    inputValue = ARK_BAR_STATE_AUTO;
-    auto optInputValue = Converter::ArkValue<Opt_BarState>(inputValue);
-    modifier_->setScrollBar(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, "BarState.Auto");
-
-    // check On mode
-    inputValue = ARK_BAR_STATE_ON;
-    optInputValue = Converter::ArkValue<Opt_BarState>(inputValue);
-    modifier_->setScrollBar(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, "BarState.On");
-
-    // check Off mode
-    inputValue = ARK_BAR_STATE_OFF;
-    optInputValue = Converter::ArkValue<Opt_BarState>(inputValue);
-    modifier_->setScrollBar(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, "BarState.Off");
-}
-
-/*
- * @tc.name: setScrollBarTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setScrollBarTestInvalidValues, TestSize.Level1)
-{
-    std::string strResult;
-    Ark_BarState inputValue;
-
-    // test invalid value which less then normal range
-    inputValue = static_cast<Ark_BarState>(-1);
-    auto optInputValue = Converter::ArkValue<Opt_BarState>(inputValue);
-    modifier_->setScrollBar(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, "BarState.Auto");
-
-    // test invalid value which more then normal range
-    inputValue = static_cast<Ark_BarState>(3);
-    optInputValue = Converter::ArkValue<Opt_BarState>(inputValue);
-    modifier_->setScrollBar(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, "BarState.Auto");
 }
 
 /*
@@ -1463,87 +1208,6 @@ HWTEST_F(GridModifierTest, setEdgeEffectTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setEdgeEffectTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setEdgeEffectTestValidValues, TestSize.Level1)
-{
-    std::string strResult;
-    bool boolResult;
-    Ark_EdgeEffect inputValue0;
-    Opt_EdgeEffectOptions inputValue1;
-
-    // EdgeEffect - Fade, alwaysEnabled - true
-    inputValue0 = ARK_EDGE_EFFECT_FADE;
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(true);
-    auto optInputValue0 = Converter::ArkValue<Opt_EdgeEffect>(inputValue0);
-    modifier_->setEdgeEffect(node_, &optInputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, "EdgeEffect.Fade");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_TRUE(boolResult);
-
-    // EdgeEffect - None, alwaysEnabled - undefined
-    inputValue0 = ARK_EDGE_EFFECT_NONE;
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(Ark_Empty());
-    optInputValue0 = Converter::ArkValue<Opt_EdgeEffect>(inputValue0);
-    modifier_->setEdgeEffect(node_, &optInputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, "EdgeEffect.None");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_FALSE(boolResult);
-
-    // EdgeEffect - Spring, alwaysEnabled - false
-    inputValue0 = ARK_EDGE_EFFECT_SPRING;
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(false);
-    optInputValue0 = Converter::ArkValue<Opt_EdgeEffect>(inputValue0);
-    modifier_->setEdgeEffect(node_, &optInputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, "EdgeEffect.Spring");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_FALSE(boolResult);
-}
-
-/*
- * @tc.name: setEdgeEffectTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setEdgeEffectTestInvalidValues, TestSize.Level1)
-{
-    std::string strResult;
-    bool boolResult;
-    Ark_EdgeEffect inputValue0;
-    Opt_EdgeEffectOptions inputValue1;
-
-    // EdgeEffect - less then possible range, alwaysEnabled - undefined
-    inputValue0 = static_cast<Ark_EdgeEffect>(-1);
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(Ark_Empty());
-    auto optInputValue0 = Converter::ArkValue<Opt_EdgeEffect>(inputValue0);
-    modifier_->setEdgeEffect(node_, &optInputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, "EdgeEffect.None");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_FALSE(boolResult);
-
-    // EdgeEffect - more then possible range, alwaysEnabled - undefined
-    inputValue0 = static_cast<Ark_EdgeEffect>(3);
-    inputValue1 = Converter::ArkValue<Opt_EdgeEffectOptions>(Ark_Empty());
-    optInputValue0 = Converter::ArkValue<Opt_EdgeEffect>(inputValue0);
-    modifier_->setEdgeEffect(node_, &optInputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, "EdgeEffect.None");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_FALSE(boolResult);
-}
-
-/*
  * @tc.name: setNestedScrollTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1560,65 +1224,6 @@ HWTEST_F(GridModifierTest, setNestedScrollTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setNestedScrollTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setNestedScrollTestValidValues, TestSize.Level1)
-{
-    std::string strResult;
-    NestedScrollOptions nestedScrollOptions;
-
-    nestedScrollOptions = {
-        .forward = NestedScrollMode::SELF_FIRST,
-        .backward = NestedScrollMode::PARALLEL,
-    };
-    auto optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
-    modifier_->setNestedScroll(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
-    std::string strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
-    std::string strScrollBackward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(strScrollForward, "NestedScrollMode.SELF_FIRST");
-    EXPECT_EQ(strScrollBackward, "NestedScrollMode.PARALLEL");
-
-    nestedScrollOptions = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_ONLY,
-    };
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
-    modifier_->setNestedScroll(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
-    strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
-    strScrollBackward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(strScrollForward, "NestedScrollMode.PARENT_FIRST");
-    EXPECT_EQ(strScrollBackward, "NestedScrollMode.SELF_ONLY");
-
-    nestedScrollOptions = {
-        .forward = NestedScrollMode::PARALLEL,
-        .backward = NestedScrollMode::PARENT_FIRST,
-    };
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
-    modifier_->setNestedScroll(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
-    strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
-    strScrollBackward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(strScrollForward, "NestedScrollMode.PARALLEL");
-    EXPECT_EQ(strScrollBackward, "NestedScrollMode.PARENT_FIRST");
-
-    nestedScrollOptions = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    optInputValue = Converter::ArkValue<Opt_NestedScrollOptions>(nestedScrollOptions);
-    modifier_->setNestedScroll(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
-    strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
-    strScrollBackward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(strScrollForward, "NestedScrollMode.SELF_ONLY");
-    EXPECT_EQ(strScrollBackward, "NestedScrollMode.SELF_FIRST");
-}
-
-/*
  * @tc.name: setEnableScrollInteractionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1629,31 +1234,6 @@ HWTEST_F(GridModifierTest, setEnableScrollInteractionTestDefaultValues, TestSize
 
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
     EXPECT_EQ(boolResult, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setEnableScrollInteractionTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setEnableScrollInteractionTestValidValues, TestSize.Level1)
-{
-    bool boolResult;
-    Ark_Boolean inputValue;
-
-    // check false value
-    inputValue = Converter::ArkValue<Ark_Boolean>(false);
-    auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
-    modifier_->setEnableScrollInteraction(node_, &optInputValue);
-    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-    EXPECT_FALSE(boolResult);
-
-    // check true value
-    inputValue = Converter::ArkValue<Ark_Boolean>(true);
-    optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
-    modifier_->setEnableScrollInteraction(node_, &optInputValue);
-    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-    EXPECT_TRUE(boolResult);
 }
 
 /*
@@ -1672,85 +1252,6 @@ HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_DOUBLE_EQ(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setFrictionTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setFrictionTestValidValues, TestSize.Level1)
-{
-    double doubleResult;
-    Ark_Union_Number_Resource inputValue;
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.1f);
-    auto optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, 0.1f);
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.9f);
-    optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, 0.9f);
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.1f);
-    optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, 1.1f);
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(123456);
-    optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, 123456.f);
-}
-
-/*
- * @tc.name: setFrictionTestValidResourceValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setFrictionTestValidResourceValues, TestSize.Level1)
-{
-    double doubleResult;
-    for (const auto &[value, expectVal]: UNION_NUMBER_RES_TEST_PLAN) {
-        modifier_->setFriction(node_, &value);
-        doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_DOUBLE_EQ(doubleResult, expectVal);
-    }
-}
-
-/*
- * @tc.name: setFrictionTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, setFrictionTestInvalidValues, TestSize.Level1)
-{
-    double doubleResult;
-    Ark_Union_Number_Resource inputValue;
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0);
-    auto optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
-    optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
-
-    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-0.1f);
-    optInputValue = Converter::ArkValue<Opt_Union_Number_Resource>(inputValue);
-    modifier_->setFriction(node_, &optInputValue);
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, DEFAULT_FRICTION);
 }
 
 /*

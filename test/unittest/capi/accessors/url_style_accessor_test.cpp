@@ -30,7 +30,7 @@ class UrlStyleAccessorTest
 public:
     void SetUp() override
     {
-        ASSERT_NE(this->accessor_->ctor, nullptr);
+        ASSERT_NE(this->accessor_->construct, nullptr);
         AccessorTestBaseParent::SetUp();
     }
     void TearDown() override
@@ -50,7 +50,7 @@ HWTEST_F(UrlStyleAccessorTest, CtorAndGetUrlTest, TestSize.Level1)
     };
     for (auto& str : TEST_PLAN) {
         Ark_String arkStr = Converter::ArkValue<Ark_String>(str);
-        peer_ = accessor_->ctor(&arkStr);
+        peer_ = accessor_->construct(&arkStr);
         ASSERT_NE(peer_, nullptr);
         ASSERT_NE(peer_->span, nullptr);
         EXPECT_EQ(peer_->span->GetUrlSpanAddress(), str);

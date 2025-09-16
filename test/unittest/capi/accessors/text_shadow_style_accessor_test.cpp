@@ -34,7 +34,7 @@ class TextShadowStyleAccessorTest
 public:
     void SetUp() override
     {
-        ASSERT_NE(this->accessor_->ctor, nullptr);
+        ASSERT_NE(this->accessor_->construct, nullptr);
         AccessorTestBaseParent::SetUp();
     }
     void TearDown() override
@@ -53,7 +53,7 @@ HWTEST_F(TextShadowStyleAccessorTest, CtorAndGetTextShadowTest, TestSize.Level1)
         Color::FromRGB(0, 0, 0xff), ShadowStyle::None);
     auto arg = Converter::ArkValue<Ark_ShadowOptions>(expected, Converter::FC);
     auto argUnion = Converter::ArkUnion<Ark_Union_ShadowOptions_Array_ShadowOptions, Ark_ShadowOptions>(arg);
-    peer_ = accessor_->ctor(&argUnion);
+    peer_ = accessor_->construct(&argUnion);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->span, nullptr);
     auto shadows = peer_->span->GetTextShadow();

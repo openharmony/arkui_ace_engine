@@ -90,17 +90,17 @@ HWTEST_F(PolylineModifierTest, setPointsTestValidValues, TestSize.Level1)
     ASSERT_TRUE(points.has_value());
     ASSERT_EQ(arkPoints.size(), points->size());
     for (int i = 0; i < points->size(); ++i) {
-        EXPECT_EQ(Converter::Convert<Dimension>(arkPoints[i].value0), (*points)[i].first);
-        EXPECT_EQ(Converter::Convert<Dimension>(arkPoints[i].value1), (*points)[i].second);
+        EXPECT_EQ(Converter::OptConvert<Dimension>(arkPoints[i].value0), (*points)[i].first);
+        EXPECT_EQ(Converter::OptConvert<Dimension>(arkPoints[i].value1), (*points)[i].second);
     }
 }
 
 /*
- * @tc.name: setPointsTestInalidValues
+ * @tc.name: setPointsTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PolylineModifierTest, setPointsTestInalidValues, TestSize.Level1)
+HWTEST_F(PolylineModifierTest, setPointsTestInvalidValues, TestSize.Level1)
 {
     auto arkPoints = std::array {
         Ark_ShapePoint {

@@ -86,6 +86,7 @@ UpdateSpanStyle GetUpdateSpanStyle()
     ret.updateItalicFontStyle = FONT_STYLE;
     ret.updateFontWeight = FONT_WEIGHT;
     ret.updateFontFamily= FONT_FAMILIES;
+    ret.isInitDecoration = true;
     ret.updateTextDecoration = TEXT_DECOR;
     ret.updateTextDecorationColor = FONT_COLOR;
     ret.updateTextDecorationStyle = TEXT_DECOR_STYLE;
@@ -110,7 +111,7 @@ void CheckRichEditorTextStyle(Ark_RichEditorTextStyle &style)
     ASSERT_EQ(valOptFontWeight.value_or(OHOS::Ace::FontWeight::W100), FONT_WEIGHT);
     auto valOptFontFamily = Converter::OptConvert<std::string>(style.fontFamily);
     ASSERT_EQ(valOptFontFamily.value_or(""), FONT_FAMILIES[0]);
-    
+
     auto arkDecor = Converter::OptConvert<Ark_DecorationStyleInterface>(style.decoration);
     ASSERT_NE(arkDecor, std::nullopt);
     valOptColor = Converter::OptConvert<Color>(arkDecor->color);
@@ -310,7 +311,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
  * @tc.desc: Check the functionality of setTypingStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, DISABLED_getTypingStyleTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, getTypingStyleTest, TestSize.Level1)
 {
     SetUp2();
     ASSERT_NE(accessor_->getTypingStyle, nullptr);

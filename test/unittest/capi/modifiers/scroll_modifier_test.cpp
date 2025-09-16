@@ -57,10 +57,9 @@ std::optional<std::string> getStringScrollable(std::unique_ptr<JsonValue>& json,
     return std::nullopt;
 }
 
-Opt_Union_Dimension_Array_Dimension createSnapSet(Array_Length&& arrayHolder)
+Opt_Union_Dimension_Array_Dimension createSnapSet(const Array_Dimension& arrayHolder)
 {
-    auto dimAr = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Array_Length>(arrayHolder);
-    return Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(dimAr);
+    return Converter::ArkUnion<Opt_Union_Dimension_Array_Dimension, Array_Dimension>(arrayHolder);
 }
 
 Opt_Union_Dimension_Array_Dimension createEmptySnapSet()
@@ -79,24 +78,6 @@ public:
         SetupTheme<ScrollBarTheme>();
     }
 };
-
-/**
- * @tc.name: Scrollable_SetDirectionOnSlide
- * @tc.desc: Test ScrollableImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestSize.Level1)
-{
-    auto direction = Converter::ArkValue<Opt_ScrollDirection>(Ark_ScrollDirection::ARK_SCROLL_DIRECTION_FREE);
-    modifier_->setScrollable(node_, &direction);
-
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    // json has 2 values with the key "scrollable" one is boolean and one is string (we need the later one)
-    auto afterState = getStringScrollable(json, "scrollable");
-    ASSERT_TRUE(afterState);
-    ASSERT_EQ("ScrollDirection.Free", afterState.value());
-}
 
 /**
  * @tc.name: Scrollable_SetBadDirectionOnSlide
@@ -200,41 +181,6 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
     ASSERT_TRUE(eventHub->GetOnScrollStart());
 
     eventHub->GetOnScrollStart()();
-    ASSERT_TRUE(state.has_value());
-    ASSERT_TRUE(state->state);
-    ASSERT_EQ(frameNode->GetId(), state->nodeId);
-}
-
-/**
- * @tc.name: SetOnScrollEnd_SetCallBack
- * @tc.desc: Test OnScrollEndImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_FALSE(eventHub->GetScrollEndEvent());
-
-    static std::optional<ScrollStateValue> state;
-    Callback_Void callback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId) {
-            state = {
-                .nodeId = nodeId,
-                .state = true
-            };
-        }
-    };
-    auto arkCallback = Converter::ArkValue<Opt_Callback_Void>(callback);
-
-    modifier_->setOnScrollEnd(node_, &arkCallback);
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_TRUE(eventHub->GetScrollEndEvent());
-
-    eventHub->GetScrollEndEvent()();
     ASSERT_TRUE(state.has_value());
     ASSERT_TRUE(state->state);
     ASSERT_EQ(frameNode->GetId(), state->nodeId);
@@ -575,11 +521,9 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetAValue, testing::ext::TestSize.Lev
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    Dimension x(22);
-    Dimension y(7);
     auto offset = Converter::ArkValue<Opt_OffsetOptions>(Ark_OffsetOptions {
-        .xOffset = Converter::ArkValue<Opt_Length>(x),
-        .yOffset = Converter::ArkValue<Opt_Length>(y)});
+        .xOffset = Converter::ArkValue<Opt_Dimension>(22.0f),
+        .yOffset = Converter::ArkValue<Opt_Dimension>(7.0f)});
     modifier_->setInitialOffset(node_, &offset);
 
     auto json = GetJsonValue(node_);
@@ -589,8 +533,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetAValue, testing::ext::TestSize.Lev
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
 
-    ASSERT_EQ(x.ToString(), xAfter);
-    ASSERT_EQ(y.ToString(), yAfter);
+    EXPECT_EQ(xAfter, "22.00vp");
+    EXPECT_EQ(yAfter, "7.00vp");
 }
 
 /**
@@ -611,8 +555,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetBothCoordinatesDisabled, testing::
     auto yBefore = GetAttrValue<std::string>(initialOffset, "yOffset");
 
     auto offset = Converter::ArkValue<Opt_OffsetOptions>(Ark_OffsetOptions {
-        .xOffset = Converter::ArkValue<Opt_Length>(),
-        .yOffset = Converter::ArkValue<Opt_Length>()});
+        .xOffset = Converter::ArkValue<Opt_Dimension>(),
+        .yOffset = Converter::ArkValue<Opt_Dimension>()});
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -642,10 +586,9 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     auto xBefore = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yBefore = GetAttrValue<std::string>(initialOffset, "yOffset");
     // disabled y will be set to some defined by lower levels value (we expect that it will the same as after start)
-    Dimension x(22);
     auto offset = Converter::ArkValue<Opt_OffsetOptions>(Ark_OffsetOptions {
-        .xOffset = Converter::ArkValue<Opt_Length>(x),
-        .yOffset = Converter::ArkValue<Opt_Length>()});
+        .xOffset = Converter::ArkValue<Opt_Dimension>(22.f),
+        .yOffset = Converter::ArkValue<Opt_Dimension>()});
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -654,13 +597,12 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     ASSERT_TRUE(initialOffset);
     auto xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     auto yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    ASSERT_EQ(x.ToString(), xAfter);
-    ASSERT_EQ(yBefore, yAfter);
+    EXPECT_EQ(xAfter, "22.00vp");
+    EXPECT_EQ(yBefore, yAfter);
     // disabled x will be set to some defined by lower levels value (we expect that it will the same as after start)
-    Dimension y(7);
     offset = Converter::ArkValue<Opt_OffsetOptions>(Ark_OffsetOptions {
-        .xOffset = Converter::ArkValue<Opt_Length>(),
-        .yOffset = Converter::ArkValue<Opt_Length>(y)});
+        .xOffset = Converter::ArkValue<Opt_Dimension>(),
+        .yOffset = Converter::ArkValue<Opt_Dimension>(7.f)});
     modifier_->setInitialOffset(node_, &offset);
 
     json = GetJsonValue(node_);
@@ -669,8 +611,8 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     ASSERT_TRUE(initialOffset);
     xAfter = GetAttrValue<std::string>(initialOffset, "xOffset");
     yAfter = GetAttrValue<std::string>(initialOffset, "yOffset");
-    ASSERT_EQ(xBefore, xAfter);
-    ASSERT_EQ(y.ToString(), yAfter);
+    EXPECT_EQ(xBefore, xAfter);
+    EXPECT_EQ(yAfter, "7.00vp");
 }
 
 /**
@@ -751,7 +693,7 @@ HWTEST_F(ScrollModifierTest, DISABLED_EdgeEffect_SetBadValues, testing::ext::Tes
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
-    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->construct();
     auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     ASSERT_NE(peerImplPtr, nullptr);
 
@@ -784,7 +726,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
 {
-    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
+    auto peer = fullAPI_->getAccessors()->getScrollerAccessor()->construct();
     auto peerImplPtr = static_cast<ScrollerPeer *>(peer);
     ASSERT_NE(peerImplPtr, nullptr);
 
@@ -880,8 +822,8 @@ HWTEST_F(ScrollModifierTest, NestedScroll_SetDefectiveNestedScrollOptions, testi
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions, testing::ext::TestSize.Level1)
 {
-    std::vector<int> testSet{1, 2, 3, 4};
-    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
+    std::vector<float> testSet{1, 2, 3, 4};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
@@ -923,8 +865,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setSnapAlignOption, testi
     auto snapAlign = GetStringAttribute(node_, "scrollSnapAlign");
     ASSERT_EQ(std::string("ScrollSnapAlign.NONE"), snapAlign);
 
-    auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
-    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
+    auto intervalLen = Converter::ArkValue<Ark_Dimension>(1234.f);
+    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Dimension>(intervalLen);
     auto options = Ark_ScrollSnapOptions {
         .enableSnapToStart = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
         .enableSnapToEnd = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
@@ -979,13 +921,9 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
 
     auto state = GetJsonValue(node_);
     ASSERT_TRUE(state);
-    auto scrollSnap = state->GetObject("scrollSnap");
+    auto scrollSnap = GetAttrValue<std::unique_ptr<JsonValue>>(state, "scrollSnap");
     ASSERT_TRUE(scrollSnap);
-    auto snapPagination = scrollSnap->GetValue("snapPagination");
-    ASSERT_TRUE(snapPagination);
-    ASSERT_FALSE(snapPagination->IsArray());
-    Dimension dim;
-    ASSERT_EQ(dim.ToString(), GetAttrValue<std::string>(scrollSnap, "snapPagination"));
+    ASSERT_EQ(GetAttrValue<std::string>(scrollSnap, "snapPagination"), "0.00vp");
 }
 
 /**
@@ -995,8 +933,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_DefaultSnapPagination, te
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing::ext::TestSize.Level1)
 {
-    auto intervalLen = Converter::ArkValue<Ark_Length>(1234);
-    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
+    auto intervalLen = Converter::ArkValue<Ark_Dimension>(1234.f);
+    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Dimension>(intervalLen);
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(interval)
@@ -1018,8 +956,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setIntervalSize, testing:
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, testing::ext::TestSize.Level1)
 {
-    auto intervalLen = Converter::ArkValue<Ark_Length>(-1234._px);
-    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Length>(intervalLen);
+    auto intervalLen = Converter::ArkValue<Ark_Dimension>("-1234px");
+    auto interval = Converter::ArkUnion<Ark_Union_Dimension_Array_Dimension, Ark_Dimension>(intervalLen);
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = Converter::ArkValue<Opt_Union_Dimension_Array_Dimension>(interval)
@@ -1040,8 +978,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setNegativeIntervalSize, 
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, testing::ext::TestSize.Level1)
 {
-    std::vector<int> testSet{10, 45, 6, 9};
-    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
+    std::vector<float> testSet{10, 45, 6, 9};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
@@ -1070,8 +1008,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setArrayOfPositions, test
  */
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagination, testing::ext::TestSize.Level1)
 {
-    std::vector<double> testSet{10., 45., -6., 9.};
-    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
+    std::vector<float> testSet{10., 45., -6., 9.};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
 
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
@@ -1096,8 +1034,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_NegativeValuesInSnapPagin
 HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions, testing::ext::TestSize.Level1)
 {
     // set up some initial, non default state
-    std::vector<int> testSet{10, 45, 6, 9};
-    Converter::ArkArrayHolder<Array_Length> arrayHolder(testSet);
+    std::vector<float> testSet{10, 45, 6, 9};
+    Converter::ArkArrayHolder<Array_Dimension> arrayHolder(testSet);
     auto opt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_CENTER,
         .snapPagination = createSnapSet(arrayHolder.ArkValue()),
@@ -1107,8 +1045,8 @@ HWTEST_F(ScrollModifierTest, ScrollSnap_SetSnapOptions_setEmptyArrayOfPositions,
     auto jsonBefore = GetJsonValue(node_);
     ASSERT_TRUE(jsonBefore);
 
-    std::vector<int> emptySet;
-    Converter::ArkArrayHolder<Array_Length> emptyArrayHolder(emptySet);
+    std::vector<float> emptySet;
+    Converter::ArkArrayHolder<Array_Dimension> emptyArrayHolder(emptySet);
     auto newOpt = Converter::ArkValue<Opt_ScrollSnapOptions>(Ark_ScrollSnapOptions {
         .snapAlign = Ark_ScrollSnapAlign::ARK_SCROLL_SNAP_ALIGN_END,
         .snapPagination = createSnapSet(emptyArrayHolder.ArkValue()),
@@ -1332,12 +1270,12 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
         const Ark_Number yOffset,
         Ark_ScrollState scrollState,
         Ark_ScrollSource scrollSource,
-        const Callback_OffsetResult_Void continuation) {
+        const Callback_Opt_OffsetResult_Void continuation) {
         otherState = {scrollState, scrollSource, resourceId};
         Ark_OffsetResult retVal;
         retVal.xOffset = xOffset;
         retVal.yOffset = yOffset;
-        CallbackHelper(continuation).InvokeSync(retVal);
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Opt_OffsetResult>(retVal));
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
@@ -1350,11 +1288,11 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
     modifier_->setOnWillScroll(node_, &apiCall);
 
     ASSERT_TRUE(eventHub->GetOnWillScrollEvent());
-    Dimension x(212);
-    Dimension y(984);
+    Dimension x(212, DimensionUnit::VP);
+    Dimension y(984, DimensionUnit::VP);
     auto returnValue = eventHub->GetOnWillScrollEvent()(x, y, ScrollState::FLING, ScrollSource::SCROLL_BAR);
-    EXPECT_EQ(returnValue.xOffset.Value(), 212);
-    EXPECT_EQ(returnValue.yOffset.Value(), 984);
+    EXPECT_EQ(returnValue.xOffset.ToString(), "212.00vp");
+    EXPECT_EQ(returnValue.yOffset.ToString(), "984.00vp");
     ASSERT_TRUE(otherState.has_value());
     EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_FLING, otherState->state);
     EXPECT_EQ(Ark_ScrollSource::ARK_SCROLL_SOURCE_SCROLL_BAR, otherState->source);

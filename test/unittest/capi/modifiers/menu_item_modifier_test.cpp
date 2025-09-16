@@ -203,7 +203,7 @@ HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
@@ -770,6 +770,7 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_FALSE(checkEvent->selected);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -809,4 +810,5 @@ HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
@@ -36,11 +35,8 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace::NG::Converter;
 
 namespace {
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME = "autocapitalizationMode";
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE = "AutoCapitalizationMode.NONE";
 const auto ATTRIBUTE_PLACEHOLDER_NAME = "placeholder";
 const auto ATTRIBUTE_TEXT_NAME = "text";
 const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
@@ -60,85 +56,85 @@ const auto WRONG_COLOR_NAME = NamedResourceId("color_name", ResourceType::STRING
 const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
 const std::string TEST_CONTENT_ONE = "ContentTestOne";
 const std::string TEST_CONTENT_TWO = "ContentTestTwo";
-typedef std::tuple<Opt_ResourceColor, std::string> ColorTestStep;
+typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#330000FF" },
-    { ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#33123456" },
-    { ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f), "#33000000" },
-    { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-    { ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#3300FFFF" },
-    { ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT },
-    { ArkUnion<Opt_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT }
+    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-    { CreateResourceUnion<Opt_ResourceColor>(COLOR_NAME),
+    { CreateResourceUnion<Ark_ResourceColor>(COLOR_NAME),
         COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColorByName
-    { CreateResourceUnion<Opt_ResourceColor>(COLOR_ID),
+    { CreateResourceUnion<Ark_ResourceColor>(COLOR_ID),
         COLOR_RED }, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    { CreateResourceUnion<Opt_ResourceColor>(WRONG_COLOR_NAME),
+    { CreateResourceUnion<Ark_ResourceColor>(WRONG_COLOR_NAME),
         COLOR_BLACK } // Should be Color::RED, but converter from Resource works incorrect now.
                       // So modifier pass Color::BLACK to divider component in this case
 };
 
 
-typedef std::tuple<Opt_Boolean, bool> BoolTestStep;
+typedef std::tuple<Ark_Boolean, bool> BoolTestStep;
 const std::vector<BoolTestStep> BOOL_TEST_PLAN = {
-    { ArkValue<Opt_Boolean>(false), false },
-    { ArkValue<Opt_Boolean>(true), true },
-    { ArkValue<Opt_Boolean>(0), false },
-    { ArkValue<Opt_Boolean>(-25), false },
-    { ArkValue<Opt_Boolean>(0), false },
-    { ArkValue<Opt_Boolean>(25), false },
-    { ArkValue<Opt_Boolean>(false), false }};
+    { false, false },
+    { true, true },
+    { 0, false },
+    { -25, true },
+    { 0, false },
+    { 25, true },
+    { false, false }};
 
 const Ark_Int32 AINT32_POS(70);
 const Ark_Int32 AINT32_NEG(INT_MIN);
-const Ark_Int32 FAKE_RES_ID(1234);
+const int64_t FAKE_RES_ID(1234);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
 
-typedef std::tuple<Opt_Length, std::string> ArkLengthTestStep;
+typedef std::tuple<Ark_Length, std::string> ArkLengthTestStep;
 const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN = {
-    { ArkValue<Opt_Length>("70.00px"), "70.00px" },
-    { ArkValue<Opt_Length>("-2147483648.00px"), "-2147483648.00px" },
-    { ArkValue<Opt_Length>("1.23px"), "1.23px" },
-    { ArkValue<Opt_Length>("-5.68px"), "-5.68px" },
-    { ArkValue<Opt_Length>("70.00vp"), "70.00vp" },
-    { ArkValue<Opt_Length>("-2147483648.00vp"), "-2147483648.00vp" },
-    { ArkValue<Opt_Length>("1.23vp"), "1.23vp" },
-    { ArkValue<Opt_Length>("-5.68vp"), "-5.68vp" },
-    { ArkValue<Opt_Length>("1.23px"), "1.23px" },
-    { ArkValue<Opt_Length>("70.00%"), "70.00%" },
-    { ArkValue<Opt_Length>("-70.00%"), "-70.00%" },
+    { Converter::ArkValue<Ark_Length>("70.00px"), "70.00px" },
+    { Converter::ArkValue<Ark_Length>("-2147483648.00px"), "-2147483648.00px" },
+    { Converter::ArkValue<Ark_Length>("1.23px"), "1.23px" },
+    { Converter::ArkValue<Ark_Length>("-5.68px"), "-5.68px" },
+    { Converter::ArkValue<Ark_Length>("70.00vp"), "70.00vp" },
+    { Converter::ArkValue<Ark_Length>("-2147483648.00vp"), "-2147483648.00vp" },
+    { Converter::ArkValue<Ark_Length>("1.23vp"), "1.23vp" },
+    { Converter::ArkValue<Ark_Length>("-5.68vp"), "-5.68vp" },
+    { Converter::ArkValue<Ark_Length>("1.23px"), "1.23px" },
+    { Converter::ArkValue<Ark_Length>("70.00%"), "70.00%" },
+    { Converter::ArkValue<Ark_Length>("-70.00%"), "-70.00%" },
 };
 const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN_RES = {
-    { ArkValue<Opt_Length>(FAKE_RES_ID),
+    { Converter::ArkValue<Ark_Length>(FAKE_RES_ID),
         "0.00px" } // Work with resource dos not have final solution. Test step can be changed.
 };
 
-typedef std::pair<Opt_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
-const Ark_String STR_NAME = ArkValue<Ark_String>("min_font_size");
+typedef std::pair<Ark_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
+const Ark_String STR_NAME = Converter::ArkValue<Ark_String>("min_font_size");
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN = {
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(123), "123.00fp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-123), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-45px"), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("10%"), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-10%"), "0.00px" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
-    { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-123), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-45px"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("10%"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-10%"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
 };
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN_RES = {
-    { CreateResourceUnion<Opt_Union_Number_String_Resource>(IntResourceId(1234, ResourceType::STRING)),
+    { CreateResourceUnion<Ark_Union_Number_String_Resource>(IntResourceId(1234, ResourceType::STRING)),
         "0.00px" }
 };
 
@@ -155,96 +151,96 @@ const std::vector<TextDeleteDirection> DELETE_DIRECTION_TEST_PLAN = {
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
-    { ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
-    { ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle.Italic" },
-    { ArkValue<Opt_FontStyle>(INVALID_ENUM_VAL<Ark_FontStyle>), "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle.Italic" },
+    { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle.Normal" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER),
         "FontWeight.Lighter" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL),
         "FontWeight.Normal" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR),
         "FontWeight.Regular" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM),
         "FontWeight.Medium" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
         "FontWeight.Bold" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
         "FontWeight.Bolder" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(1000)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(1000)),
         "FontWeight.Normal" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("lighter")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("lighter")),
         "FontWeight.Lighter" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("normal")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("normal")),
         "FontWeight.Normal" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("regular")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("regular")),
         "FontWeight.Regular" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("medium")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("medium")),
         "FontWeight.Medium" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("bold")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("bold")),
         "FontWeight.Bold" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("bolder")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("bolder")),
         "FontWeight.Bolder" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("1000")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("1000")),
         "FontWeight.Normal" }
 };
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(100)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(100)),
         "100" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(200)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(200)),
         "200" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(300)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(300)),
         "300" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(400)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(400)),
         "400" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(500)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(500)),
         "500" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(600)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(600)),
         "600" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(700)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(700)),
         "700" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(800)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(800)),
         "800" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(900)),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(900)),
         "900" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("100")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("100")),
         "100" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("200")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("200")),
         "200" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("300")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("300")),
         "300" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("400")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("400")),
         "400" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("500")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("500")),
         "500" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("600")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("600")),
         "600" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("700")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("700")),
         "700" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("800")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("800")),
         "800" },
-    { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("900")),
+    { Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("900")),
         "900" }
 };
 
-const auto RES_CONTENT = ArkValue<Ark_String>("aa.bb.cc");
+const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
 const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
 const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
-    { ArkUnion<Opt_Union_String_Resource, Ark_String>(RES_CONTENT), CHECK_RESOURCE_STR },
+    { Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(RES_CONTENT), CHECK_RESOURCE_STR },
     { OPT_UNION_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
 };
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> OPT_LENGTH_TEST_PLAN = {
-    { ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
-    { ArkValue<Opt_Length>(AFLT32_POS), "1.23vp" } };
+    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
+    { Converter::ArkValue<Opt_Length>(AFLT32_POS), "1.23vp" } };
 
 typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTestStep;
 std::vector<DecorationTypeTestStep> TEXT_DECORATION_TYPE_TEST_PLAN = {
@@ -278,24 +274,6 @@ std::vector<TextOverflowTestStep> TEXT_OVERFLOW_VALID_TEST_PLAN = {
     { "ARK_TEXT_OVERFLOW_ELLIPSIS", ARK_TEXT_OVERFLOW_ELLIPSIS, "TextOverflow.Ellipsis" },
     { "ARK_TEXT_OVERFLOW_MARQUEE", ARK_TEXT_OVERFLOW_MARQUEE, "TextOverflow.Marquee" },
 };
-
-std::vector<std::tuple<std::string, Opt_AutoCapitalizationMode, std::string>>
-    testFixtureEnumAutoCapitalizationModeTestPlan = {
-        { "AutoCapitalizationMode.NONE", ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::NONE),
-            "AutoCapitalizationMode.NONE" },
-        { "AutoCapitalizationMode.WORDS",
-            ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::WORDS),
-            "AutoCapitalizationMode.WORDS" },
-        { "AutoCapitalizationMode.SENTENCES",
-            ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::SENTENCES),
-            "AutoCapitalizationMode.SENTENCES" },
-        { "AutoCapitalizationMode.ALL_CHARACTERS",
-            ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::ALL_CHARACTERS),
-            "AutoCapitalizationMode.ALL_CHARACTERS" },
-        { "AutoCapitalizationMode.INVALID",
-            ArkValue<Opt_AutoCapitalizationMode>(INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>),
-            ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE },
-    };
 
 // events
 const auto CHECK_TEXT(u"test_text");
@@ -352,32 +330,6 @@ public:
     }
 };
 
-/*
- * @tc.name: setAutoCapitalizationModeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, setAutoCapitalizationModeTest, TestSize.Level1)
-{
-    ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
-    auto jsonValue = GetJsonValue(node_);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_AutoCapitalizationMode& value) {
-        modifier_->setAutoCapitalizationMode(node_, &value);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    };
-    for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
-        checkValue(input, expected, value);
-    }
-}
-
-
 /**
  * placeholderColorTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderColor
@@ -385,15 +337,15 @@ HWTEST_F(TextAreaModifierTest, setAutoCapitalizationModeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("placeholderColor");
+    static const std::string propName("placeholderColor");
     ASSERT_NE(modifier_->setPlaceholderColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         modifier_->setPlaceholderColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -405,15 +357,15 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTest, TestSize.Level1
  */
 HWTEST_F(TextAreaModifierTest, setCaretColorTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("caretColor");
+    static const std::string propName("caretColor");
     ASSERT_NE(modifier_->setCaretColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         modifier_->setCaretColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
     }
 }
 
@@ -424,15 +376,15 @@ HWTEST_F(TextAreaModifierTest, setCaretColorTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setFontColorTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("fontColor");
+    static const std::string propName("fontColor");
     ASSERT_NE(modifier_->setFontColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         modifier_->setFontColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -444,15 +396,15 @@ HWTEST_F(TextAreaModifierTest, setFontColorTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("selectedBackgroundColor");
+    static const std::string propName("selectedBackgroundColor");
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         modifier_->setSelectedBackgroundColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -464,15 +416,15 @@ HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("enablePreviewText");
+    static const std::string propName("enablePreviewText");
     ASSERT_NE(modifier_->setEnablePreviewText, nullptr);
 
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
-        modifier_->setEnablePreviewText(node_, &value);
-        checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setEnablePreviewText(node_, value);
+        checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -484,15 +436,15 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setEnableAutoFillTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("enableAutoFill");
+    static const std::string propName("enableAutoFill");
     ASSERT_NE(modifier_->setEnableAutoFill, nullptr);
 
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
-        modifier_->setEnableAutoFill(node_, &value);
-        checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setEnableAutoFill(node_, value);
+        checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -504,15 +456,15 @@ HWTEST_F(TextAreaModifierTest, setEnableAutoFillTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setSelectionMenuHiddenTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("selectionMenuHidden");
+    static const std::string propName("selectionMenuHidden");
     ASSERT_NE(modifier_->setSelectionMenuHidden, nullptr);
 
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, false);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
-        modifier_->setSelectionMenuHidden(node_, &value);
-        checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setSelectionMenuHidden(node_, value);
+        checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -524,15 +476,15 @@ HWTEST_F(TextAreaModifierTest, setSelectionMenuHiddenTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("enableKeyboardOnFocus");
+    static const std::string propName("enableKeyboardOnFocus");
     ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
 
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
-        modifier_->setEnableKeyboardOnFocus(node_, &value);
-        checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setEnableKeyboardOnFocus(node_, value);
+        checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -545,15 +497,15 @@ HWTEST_F(TextAreaModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
 {
     static const std::string DEFAULT_TEXT_INDENT("0.00vp");
-    static const std::string PROP_NAME("textIndent");
+    static const std::string propName("textIndent");
     ASSERT_NE(modifier_->setTextIndent, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, DEFAULT_TEXT_INDENT);
 
     for (const auto& [value, expectVal] : ARK_LENGTH_TEST_PLAN) {
         modifier_->setTextIndent(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -567,12 +519,12 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
 {
     static const std::string DEFAULT_CARET_COLOR("#FF000000");
     static const std::string DEFAULT_CARET_WIDTH("0.00px");
-    static const std::string PROP_NAME("caretStyle");
+    static const std::string propName("caretStyle");
     static const std::string PROP_COLOR("color");
     static const std::string PROP_WIDTH("width");
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
 
-    auto value = GetStringAttribute(node_, PROP_NAME);
+    auto value = GetStringAttribute(node_, propName);
     auto caretStyleObj = JsonUtil::ParseJsonString(value);
     auto defaultCaretColor = caretStyleObj->GetString(PROP_COLOR);
     auto defaultCaretWidth = caretStyleObj->GetString(PROP_WIDTH);
@@ -580,29 +532,29 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTest, TestSize.Level1)
     EXPECT_EQ(defaultCaretWidth, DEFAULT_CARET_WIDTH);
 
     typedef std::pair<std::string, std::string> CheckCaretValue;
-    typedef std::pair<Opt_CaretStyle, CheckCaretValue> TestCaretStyle;
+    typedef std::pair<Ark_CaretStyle, CheckCaretValue> TestCaretStyle;
 
     std::vector<TestCaretStyle> testPlanCaretStyle;
     for (auto testLength : ARK_LENGTH_TEST_PLAN) {
         for (auto testColor : COLOR_TEST_PLAN) {
             Ark_CaretStyle arkCaretStyle = {
-                .color = std::get<0>(testColor),
-                .width = std::get<0>(testLength),
+                .color = Converter::ArkValue<Opt_ResourceColor>(std::get<0>(testColor)),
+                .width = Converter::ArkValue<Opt_Length>(std::get<0>(testLength)),
             };
             CheckCaretValue caretValue = { std::get<1>(testColor), std::get<1>(testLength) };
-            auto artLength = OptConvert<Ark_Length>(std::get<0>(testLength));
-            if (artLength && (LessNotEqual(artLength->value, 0.0f) ||
-                                 (artLength->unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
+            auto length = std::get<0>(testLength).value;
+            auto unit = std::get<0>(testLength).unit;
+            if ((LessNotEqual(length, 0.0f) || (unit == static_cast<int32_t>(DimensionUnit::PERCENT)))) {
                 caretValue = { std::get<1>(testColor), DEFAULT_CARET_WIDTH };
             }
-            TestCaretStyle testCaretStyle = { ArkValue<Opt_CaretStyle>(arkCaretStyle), caretValue };
+            TestCaretStyle testCaretStyle = { arkCaretStyle, caretValue };
             testPlanCaretStyle.push_back(testCaretStyle);
         }
     }
 
     for (auto caretStyle : testPlanCaretStyle) {
         modifier_->setCaretStyle(node_, &caretStyle.first);
-        value = GetStringAttribute(node_, PROP_NAME);
+        value = GetStringAttribute(node_, propName);
         caretStyleObj = JsonUtil::ParseJsonString(value);
         auto caretColor = caretStyleObj->GetString(PROP_COLOR);
         auto caretWidth = caretStyleObj->GetString(PROP_WIDTH);
@@ -623,9 +575,8 @@ HWTEST_F(TextAreaModifierTest, setOnEditChangeTest, TestSize.Level1)
         [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
             g_isEditChangeTest = isEditChange;
         };
-    auto func = ArkValue<Callback_Boolean_Void>(onEditChange, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_Boolean_Void>(func);
-    modifier_->setOnEditChange(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_Boolean_Void>(onEditChange, CONTEXT_ID);
+    modifier_->setOnEditChange(node_, &func);
     auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_isEditChangeTest, true);
     ASSERT_NE(textFieldEventHub, nullptr);
@@ -647,9 +598,8 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit0Test, TestSize.Level1)
         [](Ark_Int32 nodeId, const Ark_EnterKeyType enterKey) {
             g_EventTestKey = enterKey;
         };
-    auto func = ArkValue<Callback_EnterKeyType_Void>(onSubmit0, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_EnterKeyType_Void>(func);
-    modifier_->setOnSubmit0(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_EnterKeyType_Void>(onSubmit0, CONTEXT_ID);
+    modifier_->setOnSubmit0(node_, &func);
     auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);
@@ -690,7 +640,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
     auto onSubmitFunc = [](
         Ark_VMContext, Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event
     ) {
-        auto eventValue = OptConvert<Ark_SubmitEvent>(event);
+        auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
         auto peer = eventValue.value();
         ASSERT_NE(peer, nullptr);
@@ -702,9 +652,8 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
         g_EventTestKey = enterKeyType;
     };
 
-    auto func = ArkValue<TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
-    auto optFunc = ArkValue<Opt_TextAreaSubmitCallback>(func);
-    modifier_->setOnSubmit1(node_, &optFunc);
+    auto func = Converter::ArkValue<TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
+    modifier_->setOnSubmit1(node_, &func);
     TextFieldCommonEvent event;
     event.SetText(testValue);
     eventHub->FireOnSubmit(111, event);
@@ -746,9 +695,8 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
             g_EventTestOffset = PREVIEW_TEXT.offset;
             g_EventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
         };
-    auto func = ArkValue<EditableTextOnChangeCallback>(onChange, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_EditableTextOnChangeCallback>(func);
-    modifier_->setOnChange(node_, &optFunc);
+    auto func = Converter::ArkValue<EditableTextOnChangeCallback>(onChange, CONTEXT_ID);
+    modifier_->setOnChange(node_, &func);
     textFieldEventHub->FireOnChange({CHECK_TEXT, PREVIEW_TEXT});
     std::u16string checkString = CHECK_TEXT;
     checkString.append(PREVIEW_TEXT.value);
@@ -763,23 +711,23 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setMaxLengthTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("maxLength");
+    static const std::string propName("maxLength");
     ASSERT_NE(modifier_->setMaxLength, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "INF");
 
-    typedef std::pair<Opt_Number, std::string> ArkNumberTestStep;
+    typedef std::pair<Ark_Number, std::string> ArkNumberTestStep;
     static const std::vector<ArkNumberTestStep> arkNumberTestPlan = {
-        { ArkValue<Opt_Number>(20), "20" },
-        { ArkValue<Opt_Number>(0), "0" },
-        { ArkValue<Opt_Number>(22.5f), "22" },
-        { ArkValue<Opt_Number>(-20), "INF" },
-        { ArkValue<Opt_Number>(0.0f), "0" },
-        { ArkValue<Opt_Number>(-22.5f), "INF" } };
+        { Converter::ArkValue<Ark_Number>(20), "20" },
+        { Converter::ArkValue<Ark_Number>(0), "0" },
+        { Converter::ArkValue<Ark_Number>(22.5f), "22" },
+        { Converter::ArkValue<Ark_Number>(-20), "INF" },
+        { Converter::ArkValue<Ark_Number>(0.0f), "0" },
+        { Converter::ArkValue<Ark_Number>(-22.5f), "INF" } };
 
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
         modifier_->setMaxLength(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -791,15 +739,15 @@ HWTEST_F(TextAreaModifierTest, setMaxLengthTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setMinFontSizeTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("minFontSize");
+    static const std::string propName("minFontSize");
     ASSERT_NE(modifier_->setMinFontSize, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "0.00px");
 
     for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMinFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -811,15 +759,15 @@ HWTEST_F(TextAreaModifierTest, setMinFontSizeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setMaxFontSizeTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("maxFontSize");
+    static const std::string propName("maxFontSize");
     ASSERT_NE(modifier_->setMaxFontSize, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "0.00px");
 
     for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMaxFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -831,35 +779,35 @@ HWTEST_F(TextAreaModifierTest, setMaxFontSizeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setLineHeightTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("lineHeight");
+    static const std::string propName("lineHeight");
     ASSERT_NE(modifier_->setLineHeight, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "0.00vp");
 
     const std::vector<UnionNumStrResTestStep> testPlan = {
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(123), "123.00fp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-123), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-45px"), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("10%"), "10.00%" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("-10%"), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
-        { ArkUnion<Opt_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-123), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-45px"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("10%"), "10.00%" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-10%"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" },
     };
 
     for (const auto& [value, expectVal] : testPlan) {
         modifier_->setLineHeight(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -871,24 +819,26 @@ HWTEST_F(TextAreaModifierTest, setLineHeightTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setTextAlignTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("textAlign");
+    static const std::string propName("textAlign");
     ASSERT_NE(modifier_->setTextAlign, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "TextAlign.Start");
 
-    typedef std::pair<Opt_TextAlign, std::string> TextAlignTestStep;
+    typedef std::pair<Ark_TextAlign, std::string> TextAlignTestStep;
     const std::vector<TextAlignTestStep> testPlan = {
-        { ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_CENTER), "TextAlign.Center" },
-        { ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_START), "TextAlign.Start" },
-        { ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_END), "TextAlign.End" },
-        { ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_JUSTIFY), "TextAlign.Justify" },
-        { ArkValue<Opt_TextAlign>(INVALID_ENUM_VAL<Ark_TextAlign>), "TextAlign.Start" },
+        { ARK_TEXT_ALIGN_CENTER, "TextAlign.Center" },
+        { ARK_TEXT_ALIGN_START, "TextAlign.Start" },
+        { ARK_TEXT_ALIGN_END, "TextAlign.End" },
+        { ARK_TEXT_ALIGN_JUSTIFY, "TextAlign.Justify" },
+        { static_cast<Ark_TextAlign>(-100), "TextAlign.Start" },
+        { static_cast<Ark_TextAlign>(3), "TextAlign.Justify" },
+        { static_cast<Ark_TextAlign>(100), "TextAlign.Start" }
     };
 
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setTextAlign(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setTextAlign(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -900,25 +850,29 @@ HWTEST_F(TextAreaModifierTest, setTextAlignTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("enterKeyType");
+    static const std::string propName("enterKeyType");
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
 
-    typedef std::pair<Opt_EnterKeyType, std::string> EnterKeyTypeTestStep;
+    typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTestStep;
     const std::vector<EnterKeyTypeTestStep> testPlan = {
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_NEXT), "EnterKeyType.Next" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_DONE), "EnterKeyType.Done" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_PREVIOUS), "EnterKeyType.PREVIOUS" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_NEW_LINE), "EnterKeyType.NEW_LINE" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_SEND), "EnterKeyType.Send" },
-        { ArkValue<Opt_EnterKeyType>(INVALID_ENUM_VAL<Ark_EnterKeyType>), "EnterKeyType.NEW_LINE" },
+        { ARK_ENTER_KEY_TYPE_NEXT, "EnterKeyType.Next" },
+        { ARK_ENTER_KEY_TYPE_DONE, "EnterKeyType.Done" },
+        { ARK_ENTER_KEY_TYPE_PREVIOUS, "EnterKeyType.PREVIOUS" },
+        { ARK_ENTER_KEY_TYPE_NEW_LINE, "EnterKeyType.NEW_LINE" },
+        { ARK_ENTER_KEY_TYPE_SEND, "EnterKeyType.Send" },
+        { static_cast<Ark_EnterKeyType>(0), "EnterKeyType.NEW_LINE" },
+        { ARK_ENTER_KEY_TYPE_GO, "EnterKeyType.Go" },
+        { static_cast<Ark_EnterKeyType>(1), "EnterKeyType.NEW_LINE" },
+        { ARK_ENTER_KEY_TYPE_SEARCH, "EnterKeyType.Search" },
+        { static_cast<Ark_EnterKeyType>(9), "EnterKeyType.NEW_LINE" },
     };
 
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setEnterKeyType(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setEnterKeyType(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -930,13 +884,13 @@ HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest2, TestSize.Level1)
 {
-    static const std::string PROP_NAME("enterKeyType");
+    static const std::string propName("enterKeyType");
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
     ASSERT_NE(modifier_->setMaxLines, nullptr);
-    auto maxLines = ArkValue<Opt_Number>(1);
-    modifier_->setMaxLines(node_, &maxLines);
+    auto maxLines = Converter::ArkValue<Ark_Number>(1);
+    modifier_->setMaxLines(node_, const_cast<Ark_Number*>(&maxLines));
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
 
     // Additional conditions
@@ -944,22 +898,26 @@ HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest2, TestSize.Level1)
     checkVal = GetStringAttribute(node_, "maxLines");
     EXPECT_EQ(checkVal, "1");
 
-    checkVal = GetStringAttribute(node_, PROP_NAME);
+    checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.Done");
 
-    typedef std::pair<Opt_EnterKeyType, std::string> EnterKeyTypeTestStep;
+    typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTestStep;
     const std::vector<EnterKeyTypeTestStep> testPlan = {
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_NEXT), "EnterKeyType.Next" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_DONE), "EnterKeyType.Done" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_PREVIOUS), "EnterKeyType.PREVIOUS" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_NEW_LINE), "EnterKeyType.NEW_LINE" },
-        { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_SEND), "EnterKeyType.Send" },
-        { ArkValue<Opt_EnterKeyType>(INVALID_ENUM_VAL<Ark_EnterKeyType>), "EnterKeyType.Done" },
+        { ARK_ENTER_KEY_TYPE_NEXT, "EnterKeyType.Next" },
+        { ARK_ENTER_KEY_TYPE_DONE, "EnterKeyType.Done" },
+        { ARK_ENTER_KEY_TYPE_PREVIOUS, "EnterKeyType.PREVIOUS" },
+        { ARK_ENTER_KEY_TYPE_NEW_LINE, "EnterKeyType.NEW_LINE" },
+        { ARK_ENTER_KEY_TYPE_SEND, "EnterKeyType.Send" },
+        { static_cast<Ark_EnterKeyType>(0), "EnterKeyType.Done" },
+        { ARK_ENTER_KEY_TYPE_GO, "EnterKeyType.Go" },
+        { static_cast<Ark_EnterKeyType>(1), "EnterKeyType.Done" },
+        { ARK_ENTER_KEY_TYPE_SEARCH, "EnterKeyType.Search" },
+        { static_cast<Ark_EnterKeyType>(9), "EnterKeyType.Done" },
     };
 
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setEnterKeyType(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setEnterKeyType(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -971,29 +929,29 @@ HWTEST_F(TextAreaModifierTest, setEnterKeyTypeTest2, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setMaxLinesTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("maxLines");
+    static const std::string propName("maxLines");
     static const std::string DEFAULT_MAX_VIEW_LINES("3");
     ASSERT_NE(modifier_->setMaxLines, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "INF");
 
     TextFieldModelNG::SetInputStyle(reinterpret_cast<FrameNode*>(node_), InputStyle::INLINE);
-    checkVal = GetStringAttribute(node_, PROP_NAME);
+    checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, DEFAULT_MAX_VIEW_LINES);
 
-    typedef std::pair<Opt_Number, std::string> ArkNumberTestStep;
+    typedef std::pair<Ark_Number, std::string> ArkNumberTestStep;
     static const std::vector<ArkNumberTestStep> testPlan = {
-        { ArkValue<Opt_Number>(20), "20" },
-        { ArkValue<Opt_Number>(0), "0" },
-        { ArkValue<Opt_Number>(22.5f), "22" },
-        { ArkValue<Opt_Number>(-20), DEFAULT_MAX_VIEW_LINES },
-        { ArkValue<Opt_Number>(0.0f), "0" },
-        { ArkValue<Opt_Number>(-22.5f), DEFAULT_MAX_VIEW_LINES } };
+        { Converter::ArkValue<Ark_Number>(20), "20" },
+        { Converter::ArkValue<Ark_Number>(0), "0" },
+        { Converter::ArkValue<Ark_Number>(22.5f), "22" },
+        { Converter::ArkValue<Ark_Number>(-20), DEFAULT_MAX_VIEW_LINES },
+        { Converter::ArkValue<Ark_Number>(0.0f), "0" },
+        { Converter::ArkValue<Ark_Number>(-22.5f), DEFAULT_MAX_VIEW_LINES } };
 
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setMaxLines(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setMaxLines(node_, const_cast<Ark_Number*>(&value));
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -1005,22 +963,44 @@ HWTEST_F(TextAreaModifierTest, setMaxLinesTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setTypeTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("type");
+    static const std::string propName("type");
     ASSERT_NE(modifier_->setType, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "TextAreaType.NORMAL");
-    typedef std::pair<Opt_TextAreaType, std::string> typeTestStep;
+    typedef std::pair<Ark_TextAreaType, std::string> typeTestStep;
     const std::vector<typeTestStep> testPlan = {
-        { ArkValue<Opt_TextAreaType>(ARK_TEXT_AREA_TYPE_NORMAL), "TextAreaType.NORMAL" },
-        { ArkValue<Opt_TextAreaType>(ARK_TEXT_AREA_TYPE_EMAIL), "TextAreaType.EMAIL" },
-        { ArkValue<Opt_TextAreaType>(ARK_TEXT_AREA_TYPE_PHONE_NUMBER), "TextAreaType.PHONE_NUMBER" },
-        { ArkValue<Opt_TextAreaType>(ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL), "TextAreaType.NUMBER_DECIMAL" },
-        { ArkValue<Opt_TextAreaType>(ARK_TEXT_AREA_TYPE_URL), "TextAreaType.URL" },
-        { ArkValue<Opt_TextAreaType>(INVALID_ENUM_VAL<Ark_TextAreaType>), "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::EMAIL_ADDRESS), "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::BEGIN), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::UNSPECIFIED), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { ARK_TEXT_AREA_TYPE_NORMAL, "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::MULTILINE), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_NUMBER, "TextAreaType.NUMBER" },
+        { ARK_TEXT_AREA_TYPE_PHONE_NUMBER, "TextAreaType.PHONE_NUMBER" },
+        { static_cast<Ark_TextAreaType>(TextInputType::DATETIME), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::URL), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::VISIBLE_PASSWORD), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::NUMBER_PASSWORD), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::SCREEN_LOCK_PASSWORD), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::USER_NAME), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::NEW_PASSWORD), "TextAreaType.NORMAL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL, "TextAreaType.NUMBER_DECIMAL" },
+        { ARK_TEXT_AREA_TYPE_URL, "TextAreaType.URL" },
+        { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+        { static_cast<Ark_TextAreaType>(TextInputType::END), "TextAreaType.URL" },
     };
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setType(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setType(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -1032,35 +1012,35 @@ HWTEST_F(TextAreaModifierTest, setTypeTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setFontFeatureTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("fontFeature");
+    static const std::string propName("fontFeature");
     ASSERT_NE(modifier_->setFontFeature, nullptr);
     std::string checkVal = "";
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> array = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME);
+    std::unique_ptr<JsonValue> array = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, propName);
     auto jsonArray = array.get();
     ASSERT_NE(jsonArray, nullptr);
     checkVal = jsonArray->ToString();
     EXPECT_EQ(checkVal, "");
-    typedef std::pair<Opt_String, std::string> FontFeatureTestStep;
+    typedef std::pair<Ark_String, std::string> FontFeatureTestStep;
     const std::vector<FontFeatureTestStep> testPlan = {
-        { ArkValue<Opt_String>("\"ss01\" on"), "\"ss01\" 1" },
-        { ArkValue<Opt_String>("\"ss01\" off"), "\"ss01\" 0" },
-        { ArkValue<Opt_String>("\"ss01\" 1"), "\"ss01\" 1" },
-        { ArkValue<Opt_String>("\"ss01\" 0"), "\"ss01\" 0" },
-        { ArkValue<Opt_String>("ss01 1"), "" },
-        { ArkValue<Opt_String>("\"ss01\" on, \"ss02\" on"), "\"ss01\" 1,\"ss02\" 1" },
-        { ArkValue<Opt_String>("\"ss01\" on, \"ss02\" off"), "\"ss01\" 1,\"ss02\" 0" },
-        { ArkValue<Opt_String>("\"ss01\" on, ss02 off"),  "\"ss01\" 1" },
-        { ArkValue<Opt_String>("ss01 on, ss02 off"), "" },
-        { ArkValue<Opt_String>("\"ss01\" on"),  "\"ss01\" 1" },
-        { ArkValue<Opt_String>("\"incorrect\" on"), "" },
-        { ArkValue<Opt_String>("\"ss01\" on"),  "\"ss01\" 1" },
-        { ArkValue<Opt_String>("invalid"), "" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on"), "\"ss01\" 1" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" off"), "\"ss01\" 0" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" 1"), "\"ss01\" 1" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" 0"), "\"ss01\" 0" },
+        { Converter::ArkValue<Ark_String>("ss01 1"), "" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on, \"ss02\" on"), "\"ss01\" 1,\"ss02\" 1" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on, \"ss02\" off"), "\"ss01\" 1,\"ss02\" 0" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on, ss02 off"),  "\"ss01\" 1" },
+        { Converter::ArkValue<Ark_String>("ss01 on, ss02 off"), "" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on"),  "\"ss01\" 1" },
+        { Converter::ArkValue<Ark_String>("\"incorrect\" on"), "" },
+        { Converter::ArkValue<Ark_String>("\"ss01\" on"),  "\"ss01\" 1" },
+        { Converter::ArkValue<Ark_String>("invalid"), "" },
     };
 
     for (const auto& [value, expectVal] : testPlan) {
         modifier_->setFontFeature(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -1077,12 +1057,11 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
     auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
         const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Convert<std::u16string>(data.insertValue), CHECK_TEXT);
-        auto result = Convert<int32_t>(data.insertOffset) > 0;
-        CallbackHelper(cbReturn).InvokeSync(ArkValue<Ark_Boolean>(result));
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.insertValue), CHECK_TEXT);
+        auto result = Converter::Convert<int32_t>(data.insertOffset) > 0;
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
-    auto func = ArkValue<Callback_InsertValue_Boolean>(nullptr, onWillInsertHandler, expectedResId);
-    auto arkFunc = ArkValue<Opt_Callback_InsertValue_Boolean>(func);
+    auto arkFunc = Converter::ArkValue<Callback_InsertValue_Boolean>(nullptr, onWillInsertHandler, expectedResId);
     modifier_->setOnWillInsert(node_, &arkFunc);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -1120,12 +1099,11 @@ HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestOffset, 0);
     auto onDidInsert =
         [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Convert<std::u16string>(data.insertValue);
-            g_EventTestOffset = Convert<int32_t>(data.insertOffset);
+            g_EventTestString = Converter::Convert<std::u16string>(data.insertValue);
+            g_EventTestOffset = Converter::Convert<int32_t>(data.insertOffset);
         };
-    auto func = ArkValue<Callback_InsertValue_Void>(onDidInsert, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_InsertValue_Void>(func);
-    modifier_->setOnDidInsert(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_InsertValue_Void>(onDidInsert, CONTEXT_ID);
+    modifier_->setOnDidInsert(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
         textFieldEventHub->FireOnDidInsertValueEvent(checkValue);
@@ -1148,15 +1126,14 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
     auto onWillDeleteHandler = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_DeleteValue data, const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Convert<std::u16string>(data.deleteValue), CHECK_TEXT);
-        EXPECT_EQ(Convert<int32_t>(data.deleteOffset), expectedOffset);
-        auto willDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.deleteValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<int32_t>(data.deleteOffset), expectedOffset);
+        auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
         auto result = willDeleteDirection == TextDeleteDirection::FORWARD;
-        CallbackHelper(cbReturn).InvokeSync(ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
-    auto arkFunc = ArkValue<Callback_DeleteValue_Boolean>(nullptr, onWillDeleteHandler, expectedResId);
-    auto optFunc = ArkValue<Opt_Callback_DeleteValue_Boolean>(arkFunc);
-    modifier_->setOnWillDelete(node_, &optFunc);
+    auto arkFunc = Converter::ArkValue<Callback_DeleteValue_Boolean>(nullptr, onWillDeleteHandler, expectedResId);
+    modifier_->setOnWillDelete(node_, &arkFunc);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
@@ -1199,16 +1176,15 @@ HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
     EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
     auto onDidDelete =
         [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Convert<std::u16string>(data.deleteValue);
-            g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
-            auto didDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
+            g_EventTestString = Converter::Convert<std::u16string>(data.deleteValue);
+            g_EventTestOffset = Converter::Convert<int32_t>(data.deleteOffset);
+            auto didDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
             if (didDeleteDirection) {
                 g_deleteDirection = didDeleteDirection.value();
             }
         };
-    auto func = ArkValue<Callback_DeleteValue_Void>(onDidDelete, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_DeleteValue_Void>(func);
-    modifier_->setOnDidDelete(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_DeleteValue_Void>(onDidDelete, CONTEXT_ID);
+    modifier_->setOnDidDelete(node_, &func);
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
         for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
             DeleteValueInfo checkValue = {
@@ -1234,15 +1210,14 @@ HWTEST_F(TextAreaModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onTextSelectionChange =
         [](Ark_Int32 nodeId, Ark_Number selectionStart, Ark_Number selectionEnd) {
-            g_startValue = Convert<int32_t>(selectionStart);
-            g_endValue = Convert<int32_t>(selectionEnd);
+            g_startValue = Converter::Convert<int32_t>(selectionStart);
+            g_endValue = Converter::Convert<int32_t>(selectionEnd);
         };
-    auto func = ArkValue<Callback_Number_Number_Void>(onTextSelectionChange, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_Number_Number_Void>(func);
+    auto func = Converter::ArkValue<Callback_Number_Number_Void>(onTextSelectionChange, CONTEXT_ID);
     auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
 
     for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        modifier_->setOnTextSelectionChange(node_, &optFunc);
+        modifier_->setOnTextSelectionChange(node_, &func);
         textFieldEventHub->FireOnSelectionChange(value, value);
         EXPECT_EQ(g_startValue, expectVal);
         EXPECT_EQ(g_endValue, expectVal);
@@ -1265,12 +1240,11 @@ HWTEST_F(TextAreaModifierTest, setOnCopyTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     auto onCopy =
         [](Ark_Int32 nodeId, Ark_String value) {
-            auto textString = Convert<std::u16string>(value);
+            auto textString = Converter::Convert<std::u16string>(value);
             g_EventTestString = textString;
         };
-    auto func = ArkValue<Callback_String_Void>(onCopy, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_String_Void>(func);
-    modifier_->setOnCopy(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_String_Void>(onCopy, CONTEXT_ID);
+    modifier_->setOnCopy(node_, &func);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -1291,11 +1265,10 @@ HWTEST_F(TextAreaModifierTest, setOnCutTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     auto onCut =
         [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Convert<std::u16string>(value);
+            g_EventTestString = Converter::Convert<std::u16string>(value);
         };
-    auto func = ArkValue<Callback_String_Void>(onCut, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_String_Void>(func);
-    modifier_->setOnCut(node_, &optFunc);
+    auto func = Converter::ArkValue<Callback_String_Void>(onCut, CONTEXT_ID);
+    modifier_->setOnCut(node_, &func);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
 }
@@ -1312,11 +1285,10 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onContentScroll =
         [](Ark_Int32 nodeId, Ark_Number totalOffsetX, Ark_Number totalOffsetY) {
-            g_scrollX = Convert<float>(totalOffsetX);
-            g_scrollY = Convert<float>(totalOffsetY);
+            g_scrollX = Converter::Convert<float>(totalOffsetX);
+            g_scrollY = Converter::Convert<float>(totalOffsetY);
         };
-    auto func = ArkValue<Callback_Number_Number_Void>(onContentScroll, CONTEXT_ID);
-    auto optFunc = ArkValue<Opt_Callback_Number_Number_Void>(func);
+    auto func = Converter::ArkValue<Callback_Number_Number_Void>(onContentScroll, CONTEXT_ID);
     auto textFieldEventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
 
     typedef std::pair<float, float> ArkNumberFloatTestStep;
@@ -1326,7 +1298,7 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
     };
 
     for (const auto& [value, expectVal] : floatNumberTestPlan) {
-        modifier_->setOnContentScroll(node_, &optFunc);
+        modifier_->setOnContentScroll(node_, &func);
         textFieldEventHub->FireOnScrollChangeEvent(value, value);
         EXPECT_EQ(g_scrollX, expectVal);
         EXPECT_EQ(g_scrollY, expectVal);
@@ -1340,23 +1312,23 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setCopyOptionTest, TestSize.Level1)
 {
-    static const std::string PROP_NAME("copyOption");
+    static const std::string propName("copyOption");
     ASSERT_NE(modifier_->setCopyOption, nullptr);
 
-    typedef std::pair<Opt_CopyOptions, std::string> CopyOptionTestStep;
+    typedef std::pair<Ark_CopyOptions, std::string> CopyOptionTestStep;
     const std::vector<CopyOptionTestStep> copyOptionTestPlan = {
-        { ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_NONE), "CopyOptions.None" },
-        { ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_IN_APP), "CopyOptions.InApp" },
-        { ArkValue<Opt_CopyOptions>(INVALID_ENUM_VAL<Ark_CopyOptions>), "CopyOptions.Local" },
-        { ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_CROSS_DEVICE), "CopyOptions.Distributed" },
-        { ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_LOCAL_DEVICE), "CopyOptions.Local" }
+        { ARK_COPY_OPTIONS_NONE, "CopyOptions.None" },
+        { ARK_COPY_OPTIONS_IN_APP, "CopyOptions.InApp" },
+        { static_cast<Ark_CopyOptions>(4), "CopyOptions.Local" },
+        { ARK_COPY_OPTIONS_CROSS_DEVICE, "CopyOptions.Distributed" },
+        { ARK_COPY_OPTIONS_LOCAL_DEVICE, "CopyOptions.Local" }
     };
 
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "CopyOptions.Local");
     for (const auto& [value, expectVal] : copyOptionTestPlan) {
-        modifier_->setCopyOption(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setCopyOption(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -1377,7 +1349,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
     auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
         checkEvent = CheckEvent{
             .nodeId = nodeId,
-            .error = Convert<std::u16string>(error)
+            .error = Converter::Convert<std::u16string>(error)
         };
     };
 
@@ -1391,12 +1363,12 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
         },
         .call = onErrorChange
     };
-    auto optCallbackValue = ArkValue<Opt_Callback_String_Void>(callBackValue);
-    ConvContext ctx;
-    auto sendString = ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
-    auto sendResource = ArkUnion<Opt_ResourceStr, Ark_String>(sendString);
-    sendString = ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
-    auto sendResource2 = ArkUnion<Opt_ResourceStr, Ark_String>(sendString);
+    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>(callBackValue);
+    Converter::ConvContext ctx;
+    auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
+    auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+    sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
+    auto sendResource2 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
 
     modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
     EXPECT_FALSE(checkEvent.has_value());
@@ -1428,9 +1400,12 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
-    auto optCallbackValue = ArkValue<Opt_Callback_String_Void>();
-    auto sendResource = ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, Converter::FC);
-    auto sendResource2 = ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, Converter::FC);
+    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>();
+    Converter::ConvContext ctx;
+    auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
+    auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+    sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
+    auto sendResource2 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
 
     modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
     eventHub->FireOnInputFilterError(ERROR_TEXT);
@@ -1464,8 +1439,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        auto optFont = ArkValue<Opt_Font>(font);
-        modifier_->setPlaceholderFont(node_, &optFont);
+        modifier_->setPlaceholderFont(node_, &font);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
@@ -1500,8 +1474,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        auto optFont = ArkValue<Opt_Font>(font);
-        modifier_->setPlaceholderFont(node_, &optFont);
+        modifier_->setPlaceholderFont(node_, &font);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
@@ -1536,8 +1509,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        auto optFont = ArkValue<Opt_Font>(font);
-        modifier_->setPlaceholderFont(node_, &optFont);
+        modifier_->setPlaceholderFont(node_, &font);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
@@ -1572,8 +1544,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest4, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        auto optFont = ArkValue<Opt_Font>(font);
-        modifier_->setPlaceholderFont(node_, &optFont);
+        modifier_->setPlaceholderFont(node_, &font);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
@@ -1606,18 +1577,17 @@ HWTEST_F(TextAreaModifierTest, setDecorationTest, TestSize.Level1)
     auto defaultColor = defaultDecoration->GetString(decorationColorAttr);
     EXPECT_EQ(defaultType, "TextDecorationType.None");
     EXPECT_EQ(defaultStyle, "TextDecorationStyle.SOLID");
-    EXPECT_EQ(defaultColor, COLOR_TRANSPARENT);
+    EXPECT_EQ(defaultColor, COLOR_BLACK);
 
     for (const auto& [decorationType, expectDecorationType] : TEXT_DECORATION_TYPE_TEST_PLAN) {
         for (const auto& [decorationStyle, expectDecorationStyle] : TEXT_DECORATION_STYLE_TEST_PLAN) {
             for (const auto& [decorationColor, expectColor] : COLOR_TEST_PLAN) {
                 Ark_TextDecorationOptions options = {
-                    .color = ArkValue<Opt_ResourceColor>(decorationColor),
+                    .color = Converter::ArkValue<Opt_ResourceColor>(decorationColor),
                     .type = decorationType,
-                    .style = ArkValue<Opt_TextDecorationStyle>(decorationStyle),
+                    .style = Converter::ArkValue<Opt_TextDecorationStyle>(decorationStyle),
                 };
-                auto optOptions = ArkValue<Opt_TextDecorationOptions>(options);
-                modifier_->setDecoration(node_, &optOptions);
+                modifier_->setDecoration(node_, &options);
                 auto decorationJSON = GetStringAttribute(node_, decorationsAttrs);
                 auto decoration = JsonUtil::ParseJsonString(decorationJSON);
                 auto type = decoration->GetString(decorationTypeAttr);
@@ -1651,7 +1621,6 @@ HWTEST_F(TextAreaModifierTest, setLetterSpacingTest, TestSize.Level1)
     }
 }
 
-#ifdef NEED_PRIVATE
 /**
  * @tc.name: setContentTypeTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setContentType
@@ -1659,41 +1628,40 @@ HWTEST_F(TextAreaModifierTest, setLetterSpacingTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setContentTypeTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("contentType");
+    const std::string propName("contentType");
     ASSERT_NE(modifier_->setContentType, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
+    auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "TextContentType.UNSPECIFIED");
-    typedef std::pair<Opt_ContentType, std::string> TypeTestStep;
-    const std::vector<TypeTestStep> testPlan = { { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_USER_NAME),
-                                                     "TextContentType.USER_NAME" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PASSWORD), "TextContentType.VISIBLE_PASSWORD" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_NEW_PASSWORD), "TextContentType.NEW_PASSWORD" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_FULL_STREET_ADDRESS), "TextContentType.FULL_STREET_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_HOUSE_NUMBER), "TextContentType.HOUSE_NUMBER" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_DISTRICT_ADDRESS), "TextContentType.DISTRICT_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_CITY_ADDRESS), "TextContentType.CITY_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PROVINCE_ADDRESS), "TextContentType.PROVINCE_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_COUNTRY_ADDRESS), "TextContentType.COUNTRY_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PERSON_FULL_NAME), "TextContentType.PERSON_FULL_NAME" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PERSON_LAST_NAME), "TextContentType.PERSON_LAST_NAME" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PERSON_FIRST_NAME), "TextContentType.PERSON_FIRST_NAME" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_PHONE_NUMBER), "TextContentType.PHONE_NUMBER" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_FULL_PHONE_NUMBER), "TextContentType.FULL_PHONE_NUMBER" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_EMAIL_ADDRESS), "TextContentType.EMAIL_ADDRESS" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_BANK_CARD_NUMBER), "TextContentType.BANK_CARD_NUMBER" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_ID_CARD_NUMBER), "TextContentType.ID_CARD_NUMBER" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_NICKNAME), "TextContentType.NICKNAME" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET),
-            "TextContentType.DETAIL_INFO_WITHOUT_STREET" },
-        { Convert<Opt_ContentType>(ARK_CONTENT_TYPE_FORMAT_ADDRESS), "TextContentType.FORMAT_ADDRESS" },
-        { Convert<Opt_ContentType>(INVALID_ENUM_VAL<Ark_ContentType>), "TextContentType.UNSPECIFIED" } };
+    typedef std::pair<Ark_ContentType, std::string> TypeTestStep;
+    const std::vector<TypeTestStep> testPlan = {
+        { ARK_CONTENT_TYPE_USER_NAME, "TextContentType.USER_NAME" },
+        { ARK_CONTENT_TYPE_PASSWORD, "TextContentType.VISIBLE_PASSWORD" },
+        { ARK_CONTENT_TYPE_NEW_PASSWORD, "TextContentType.NEW_PASSWORD" },
+        { ARK_CONTENT_TYPE_FULL_STREET_ADDRESS, "TextContentType.FULL_STREET_ADDRESS" },
+        { ARK_CONTENT_TYPE_HOUSE_NUMBER, "TextContentType.HOUSE_NUMBER" },
+        { ARK_CONTENT_TYPE_DISTRICT_ADDRESS, "TextContentType.DISTRICT_ADDRESS" },
+        { ARK_CONTENT_TYPE_CITY_ADDRESS, "TextContentType.CITY_ADDRESS" },
+        { ARK_CONTENT_TYPE_PROVINCE_ADDRESS, "TextContentType.PROVINCE_ADDRESS" },
+        { ARK_CONTENT_TYPE_COUNTRY_ADDRESS, "TextContentType.COUNTRY_ADDRESS" },
+        { ARK_CONTENT_TYPE_PERSON_FULL_NAME, "TextContentType.PERSON_FULL_NAME" },
+        { ARK_CONTENT_TYPE_PERSON_LAST_NAME, "TextContentType.PERSON_LAST_NAME" },
+        { ARK_CONTENT_TYPE_PERSON_FIRST_NAME, "TextContentType.PERSON_FIRST_NAME" },
+        { ARK_CONTENT_TYPE_PHONE_NUMBER, "TextContentType.PHONE_NUMBER" },
+        { ARK_CONTENT_TYPE_FULL_PHONE_NUMBER, "TextContentType.FULL_PHONE_NUMBER" },
+        { ARK_CONTENT_TYPE_EMAIL_ADDRESS, "TextContentType.EMAIL_ADDRESS" },
+        { ARK_CONTENT_TYPE_BANK_CARD_NUMBER, "TextContentType.BANK_CARD_NUMBER" },
+        { ARK_CONTENT_TYPE_ID_CARD_NUMBER, "TextContentType.ID_CARD_NUMBER" },
+        { ARK_CONTENT_TYPE_NICKNAME, "TextContentType.NICKNAME" },
+        { ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET, "TextContentType.DETAIL_INFO_WITHOUT_STREET" },
+        { ARK_CONTENT_TYPE_FORMAT_ADDRESS, "TextContentType.FORMAT_ADDRESS" },
+        { static_cast<Ark_ContentType>(10000), "TextContentType.UNSPECIFIED" }
+    };
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setContentType(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
+        modifier_->setContentType(node_, value);
+        checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
-#endif
 
 /**
  * @tc.name: setTextAreaOptionsTest
@@ -1706,14 +1674,14 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
 
     // assume nothing bad with invalid and empty options
     modifier_->setTextAreaOptions(node_, nullptr);
-    auto optionsUndef = ArkValue<Opt_TextAreaOptions>();
+    auto optionsUndef = Converter::ArkValue<Opt_TextAreaOptions>();
     modifier_->setTextAreaOptions(node_, &optionsUndef);
 
     Ark_TextAreaOptions optionsInvalid;
-    optionsInvalid.text = ArkValue<Opt_ResourceStr>();
-    optionsInvalid.placeholder = ArkValue<Opt_ResourceStr>();
-    optionsInvalid.controller = ArkValue<Opt_TextAreaController>();
-    auto optionsInvalidDef = ArkValue<Opt_TextAreaOptions>();
+    optionsInvalid.text = Converter::ArkValue<Opt_ResourceStr>();
+    optionsInvalid.placeholder = Converter::ArkValue<Opt_ResourceStr>();
+    optionsInvalid.controller = Converter::ArkValue<Opt_TextAreaController>();
+    auto optionsInvalidDef = Converter::ArkValue<Opt_TextAreaOptions>();
     modifier_->setTextAreaOptions(node_, &optionsInvalidDef);
 
     // set the invoke checker to the internal controller
@@ -1722,7 +1690,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     std::optional<std::u16string> placeholder;
     std::optional<std::u16string> text;
-    auto internalController = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    auto internalController = TextFieldModelNG::GetController(frameNode, placeholder, text);
     ASSERT_NE(internalController, nullptr);
     internalController->SetStopEditing([&checkInvoke]() {
         checkInvoke = true;
@@ -1731,10 +1699,10 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     // create the external TextAreaController peer and attach modifier to it
     TextAreaControllerPeer peer;
     Ark_TextAreaOptions options;
-    options.text = ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE);
-    options.placeholder = ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
-    options.controller = ArkValue<Opt_TextAreaController>(&peer);
-    auto optionsDef = ArkValue<Opt_TextAreaOptions>(options);
+    options.text = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE);
+    options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
+    options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
+    auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
     modifier_->setTextAreaOptions(node_, &optionsDef);
 
     // check initial state of invoke checker
@@ -1762,7 +1730,7 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextAreaOptions, nullptr);
     Opt_ResourceStr initValue =
-        ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
     auto checkValue = [this, &initValue](const std::string& input,
             const std::string& expectedStr, const Opt_ResourceStr& value) {
         Ark_TextAreaOptions options;
@@ -1771,8 +1739,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
         inputValue = value;
         options.text = inputValue;
         options.placeholder = inputValue;
-        options.controller = ArkValue<Opt_TextAreaController>(&peer);
-        auto optionsDef = ArkValue<Opt_TextAreaOptions>(options);
+        options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
+        auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
         modifier_->setTextAreaOptions(node_, &optionsDef);
 
         auto jsonValue = GetJsonValue(node_);
@@ -1788,10 +1756,10 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
 }
 
@@ -1813,9 +1781,9 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = CheckEvent{
             .resourceId = resourceId,
-            .content = Convert<std::u16string>(content)
+            .content = Converter::Convert<std::u16string>(content)
         };
-        auto arkCallback = OptConvert<Callback_Void>(event.preventDefault);
+        auto arkCallback = Converter::OptConvert<Callback_Void>(event.preventDefault);
         if (arkCallback) {
             auto helper = CallbackHelper(*arkCallback);
             helper.Invoke();
@@ -1824,10 +1792,9 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
-    auto arkCallback = ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
-    auto optCallback = ArkValue<Opt_Callback_String_PasteEvent_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnPaste(node_, &optCallback);
+    modifier_->setOnPaste(node_, &arkCallback);
     EXPECT_FALSE(checkEvent);
     EXPECT_FALSE(event.IsPreventDefault());
     eventHub->FireOnPasteWithEvent(testString, event);
@@ -1855,16 +1822,15 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTest, TestSize.Level1)
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = CheckEvent{
             .resourceId = resourceId,
-            .content = Convert<std::u16string>(content)
+            .content = Converter::Convert<std::u16string>(content)
         };
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
-    auto arkCallback = ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
-    auto optCallback = ArkValue<Opt_Callback_String_PasteEvent_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
     ASSERT_NE(eventHub, nullptr);
-    modifier_->setOnPaste(node_, &optCallback);
+    modifier_->setOnPaste(node_, &arkCallback);
     EXPECT_FALSE(checkEvent);
     EXPECT_FALSE(event.IsPreventDefault());
     eventHub->FireOnPasteWithEvent(testString, event);
@@ -1888,8 +1854,10 @@ HWTEST_F(TextAreaModifierTest, setTextOverflowTestTextOverflowValidValues, TestS
 
     auto checkValue = [this, &initValueTextOverflow](
                           const std::string& input, const std::string& expectedStr, const Ark_TextOverflow& value) {
-        auto inputValueTextOverflow = ArkValue<Opt_TextOverflow>(value);
-        modifier_->setTextOverflow(node_, &inputValueTextOverflow);
+        Ark_TextOverflow inputValueTextOverflow = initValueTextOverflow;
+
+        inputValueTextOverflow = value;
+        modifier_->setTextOverflow(node_, inputValueTextOverflow);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1936,18 +1904,17 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
         }
     };
     KeyboardOptions keyboardOptions = { .supportAvoidance = true };
-    auto optKeyboardOptions = ArkValue<Opt_KeyboardOptions>(keyboardOptions);
-    auto optCustomBuilder = ArkValue<Opt_CustomNodeBuilder>(customBuilder);
+    auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 
-    modifier_->setCustomKeyboard(node_, &optCustomBuilder, &optKeyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_EQ(actualParentNode, expectedParentNode);
     ASSERT_TRUE(pattern->GetCustomKeyboardOption());
 
     keyboardOptions = { .supportAvoidance = false };
-    optKeyboardOptions = ArkValue<Opt_KeyboardOptions>(keyboardOptions);
-    modifier_->setCustomKeyboard(node_, &optCustomBuilder, &optKeyboardOptions);
+    optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
     ASSERT_EQ(actualParentNode, expectedParentNode);
     ASSERT_FALSE(pattern->GetCustomKeyboardOption());
 }
@@ -1973,11 +1940,11 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_ResourceStr parameter) {
         checkEvent = CheckEvent{
             .nodeId = resourceId,
-            .value = OptConvert<std::string>(parameter)
+            .value = Converter::OptConvert<std::string>(parameter)
         };
     };
 
-    Callback_ResourceStr_Void arkCallback = ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
+    Callback_ResourceStr_Void arkCallback = Converter::ArkValue<Callback_ResourceStr_Void>(checkCallback, contextId);
 
     modifier_->set_onChangeEvent_text(node_, &arkCallback);
 
@@ -1995,7 +1962,6 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->value.value(), "test_2");
 }
 
-#ifdef NEED_PRIVATE
 /**
  * @tc.name: setEditMenuOptionsTest
  * @tc.desc: setEditMenuOptions test
@@ -2016,21 +1982,21 @@ HWTEST_F(TextAreaModifierTest, setEditMenuOptionsTest, TestSize.Level1)
     auto testOnCreateMenuCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation) {
         checkEvent = CheckEvent{
-            .resourceId = Convert<int32_t>(resourceId),
+            .resourceId = Converter::Convert<int32_t>(resourceId),
         };
         CallbackHelper(continuation).Invoke(menuItems);
     };
-    auto arkCreateCallback = ArkValue<
+    auto arkCreateCallback = Converter::ArkValue<
         AsyncCallback_Array_TextMenuItem_Array_TextMenuItem>(testOnCreateMenuCallback, testID);
 
     auto testOnMenuItemClickCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation) {
-        auto item = OptConvert<MenuOptionsParam>(menuItem);
+        auto item = Converter::OptConvert<MenuOptionsParam>(menuItem);
         ASSERT_TRUE(item.has_value());
         ASSERT_TRUE(item->content.has_value());
-        CallbackHelper(continuation).Invoke(ArkValue<Ark_Boolean>(*item->content == TEST_CONTENT_ONE));
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(*item->content == TEST_CONTENT_ONE));
     };
-    auto arkClickCallback = ArkValue<
+    auto arkClickCallback = Converter::ArkValue<
         AsyncCallback_TextMenuItem_TextRange_Boolean>(testOnMenuItemClickCallback, testID);
 
     Ark_EditMenuOptions options {
@@ -2042,8 +2008,7 @@ HWTEST_F(TextAreaModifierTest, setEditMenuOptionsTest, TestSize.Level1)
     auto params = GetMenuItemParams();
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
-    auto optOptions = ArkValue<Opt_EditMenuOptions>(options);
-    modifier_->setEditMenuOptions(node_, &optOptions);
+    modifier_->setEditMenuOptions(node_, &options);
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
     selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
@@ -2054,5 +2019,4 @@ HWTEST_F(TextAreaModifierTest, setEditMenuOptionsTest, TestSize.Level1)
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
 }
-#endif
 } // namespace OHOS::Ace::NG

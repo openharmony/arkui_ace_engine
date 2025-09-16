@@ -34,7 +34,7 @@ namespace {
     const auto ATTRIBUTE_SRC_NAME("src");
     const auto ATTRIBUTE_SRC_DEFAULT_VALUE("");
 
-    using imageOptions = Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
+    using imageOptions = Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 } // namespace
 
 class MediaCachedImageModifierTest : public ModifierTestBase<GENERATED_ArkUIMediaCachedImageModifier,
@@ -94,10 +94,10 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
     ASSERT_TRUE(frameNode);
     std::string imagesSrc = "test";
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
-    PixelMapPeer pixelMapPeer;
+    image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
 
-    auto arkValue = ArkUnion<imageOptions, Ark_PixelMap>(&pixelMapPeer);
+    auto arkValue = ArkUnion<imageOptions, Ark_image_PixelMap>(&pixelMapPeer);
     modifier_->setMediaCachedImageOptions(node_, &arkValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -113,7 +113,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResouce, TestSize.Level1)
+HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMediaCachedImageOptions, nullptr);
     imageOptions initValueSrc;

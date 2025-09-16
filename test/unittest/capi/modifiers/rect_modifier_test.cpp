@@ -72,8 +72,8 @@ public:
 Opt_Union_RectOptions_RoundedRectOptions BuildRectOptions(int width, int height, int radius)
 {
     Ark_RectOptions radiusOpt;
-    radiusOpt.width = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(width);
-    radiusOpt.height = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(height);
+    radiusOpt.width = Converter::ArkUnion<Opt_Length, Ark_Number>(width);
+    radiusOpt.height = Converter::ArkUnion<Opt_Length, Ark_Number>(height);
     radiusOpt.radius = Converter::ArkUnion<Opt_Union_Length_Array_RadiusItem, Ark_Length>(radius);
     return Converter::ArkUnion<Opt_Union_RectOptions_RoundedRectOptions,
         Ark_RectOptions>(radiusOpt);

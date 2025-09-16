@@ -85,13 +85,20 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
     auto space = GetAttrValue<std::string>(node_, "space");
     EXPECT_EQ(space, "0.00vp");
 
+    auto arg = Converter::ArkValue<Opt_ListItemGroupOptions>(Ark_Empty());
+    modifier_->setListItemGroupOptions(node_, &arg);
+    style = GetAttrValue<std::string>(node_, "itemGroupStyle");
+    EXPECT_EQ(style, "ListItemGroupStyle.NONE");
+    space = GetAttrValue<std::string>(node_, "space");
+    EXPECT_EQ(space, "0.00vp");
+
     Ark_ListItemGroupOptions groupOptions = {
         .style = Converter::ArkValue<Opt_ListItemGroupStyle>
             (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
         .space = Converter::ArkValue<Opt_Union_Number_String>
             (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(10)),
     };
-    Opt_ListItemGroupOptions arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
+    arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemGroupStyle");
     EXPECT_EQ(style, "ListItemGroupStyle.CARD");
@@ -109,14 +116,7 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
     style = GetAttrValue<std::string>(node_, "itemGroupStyle");
     EXPECT_EQ(style, "ListItemGroupStyle.CARD");
     space = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(space, "20.00fp");
-
-    arg = Converter::ArkValue<Opt_ListItemGroupOptions>(Ark_Empty());
-    modifier_->setListItemGroupOptions(node_, &arg);
-    style = GetAttrValue<std::string>(node_, "itemGroupStyle");
-    EXPECT_EQ(style, "ListItemGroupStyle.CARD");
-    space = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(space, "20.00fp");
+    EXPECT_EQ(space, "20.00vp");
 
     groupOptions = {
         .style = Converter::ArkValue<Opt_ListItemGroupStyle>(Ark_Empty()),

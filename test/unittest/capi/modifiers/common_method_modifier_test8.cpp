@@ -35,8 +35,8 @@ namespace {
     const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_RESTORE_ID_NAME = "restoreId";
     const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
-    const auto ATTRIBUE_MONOPOLIZE_EVENTS_NAME = "monopolizeEvents";
-    const auto ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_MONOPOLIZE_EVENTS_NAME = "monopolizeEvents";
+    const auto ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE = "false";
     const auto ACTUAL_TRUE = true;
     const auto ACTUAL_FALSE = false;
     const auto EXPECTED_TRUE = "true";
@@ -53,7 +53,7 @@ namespace {
         { Converter::ArkValue<Opt_ModalTransition>(static_cast<Ark_ModalTransition>(-1)), ModalTransition::DEFAULT },
         { Converter::ArkValue<Opt_ModalTransition>(Ark_Empty()), ModalTransition::DEFAULT },
     };
-    std::vector<std::pair<uint32_t, std::optional<BindSheetDismissReason>>> bindSheetDissmisReasonTestPlan = {
+    std::vector<std::pair<uint32_t, std::optional<BindSheetDismissReason>>> bindSheetDismissReasonTestPlan = {
         { std::underlying_type_t<BindSheetDismissReason>(BindSheetDismissReason::BACK_PRESSED),
             std::make_optional(BindSheetDismissReason::BACK_PRESSED) },
         { std::underlying_type_t<BindSheetDismissReason>(BindSheetDismissReason::TOUCH_OUTSIDE),
@@ -163,7 +163,7 @@ public:
             Converter::ArkValue<CustomNodeBuilder>(checkCallbackAsync, checkCallback, EXPECTED_CONTEXT_ID);
         return customBuilder;
     }
-    Opt_Callback_DismissContentCoverAction_Void CreateDissmisCallback(FrameNode* frameNode)
+    Opt_Callback_DismissContentCoverAction_Void CreateDismissCallback(FrameNode* frameNode)
     {
         checkNestedEvent.reset();
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissContentCoverAction parameter) {
@@ -171,12 +171,9 @@ public:
                 .resourceId = resourceId,
                 .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
             };
-            auto arkCallback = Converter::OptConvert<Callback_Void>(parameter.dismiss);
-            if (arkCallback) {
-                auto helper = CallbackHelper(*arkCallback);
-                checkNestedEvent->fired = true;
-                helper.Invoke();
-            }
+            auto helper = CallbackHelper(parameter.dismiss);
+            checkNestedEvent->fired = true;
+            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
@@ -262,19 +259,19 @@ HWTEST_F(CommonMethodModifierTest8, setMonopolizeEventsTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     auto fullJson = GetJsonValue(node_);
-    auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
+    auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
+    EXPECT_EQ(resultValue, ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
 
     auto arkTrueValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     modifier_->setMonopolizeEvents(node_, &arkTrueValue);
     fullJson = GetJsonValue(node_);
-    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
+    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
     EXPECT_EQ(resultValue, EXPECTED_TRUE);
 
     auto arkFalseValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
     modifier_->setMonopolizeEvents(node_, &arkFalseValue);
     fullJson = GetJsonValue(node_);
-    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUE_MONOPOLIZE_EVENTS_NAME);
+    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
     EXPECT_EQ(resultValue, EXPECTED_FALSE);
 }
 
@@ -289,7 +286,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto optModal = Converter::ArkValue<Opt_ModalTransition>(ARK_MODAL_TRANSITION_ALPHA);
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
@@ -297,7 +294,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &optModal);
@@ -315,10 +312,10 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransition
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShowTrue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
-        modifier_->setBindContentCover0(node_, &arkShowTrue, &customBuilder, &actual);
+        modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &actual);
         auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
         EXPECT_NE(modal, nullptr);
         auto pattern = modal->GetPattern<ModalPresentationPattern>();
@@ -342,7 +339,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, Tes
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(Ark_Empty());
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
@@ -350,7 +347,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, Tes
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
@@ -376,12 +373,12 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, T
             .nodeId = nodeId,
         };
     };
-    auto arkOnAppearCalback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
-    auto optOnAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCalback);
+    auto arkOnAppearCallback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
+    auto optOnAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCallback);
 
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
-        .onAppear = optOnAppearCalback,
+        .onAppear = optOnAppearCallback,
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
@@ -419,12 +416,12 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest
             .nodeId = nodeId,
         };
     };
-    auto arkOnDisAppearCalback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
-    auto optOnDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCalback);
+    auto arkOnDisAppearCallback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
+    auto optOnDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCallback);
 
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
-        .onDisappear = optOnDisAppearCalback,
+        .onDisappear = optOnDisAppearCallback,
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
@@ -467,12 +464,12 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTes
             .nodeId = nodeId,
         };
     };
-    auto arkOnWillAppearCalback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
-    auto optOnWillAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCalback);
+    auto arkOnWillAppearCallback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
+    auto optOnWillAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCallback);
 
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
-        .onWillAppear = optOnWillAppearCalback,
+        .onWillAppear = optOnWillAppearCallback,
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
@@ -508,11 +505,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
             .nodeId = nodeId,
         };
     };
-    auto arkOnWillDisAppearCalback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
-    auto optOnWillDisAppearCalback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCalback);
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkOnWillDisAppearCallback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
+    auto optOnWillDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCallback);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
-        .onWillDisappear = optOnWillDisAppearCalback,
+        .onWillDisappear = optOnWillDisAppearCallback,
     };
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(arkOptions);
     auto modal = AceType::DynamicCast<FrameNode>(node->GetParent());
@@ -541,16 +538,16 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DissmisCallbackTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallbackTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto onDismissCallback = CreateDissmisCallback(frameNode);
+    auto onDismissCallback = CreateDismissCallback(frameNode);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDismiss = onDismissCallback
     };
@@ -564,7 +561,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DissmisCallback
     EXPECT_NE(modal, nullptr);
     auto pattern = modal->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(pattern, nullptr);
-    for (auto& [actual, expected] : bindSheetDissmisReasonTestPlan) {
+    for (auto& [actual, expected] : bindSheetDismissReasonTestPlan) {
         checkNestedEvent.reset();
         EXPECT_FALSE(checkNestedEvent.has_value());
         pattern->CallOnWillDismiss(actual);
@@ -589,7 +586,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColor
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : colorTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
@@ -620,7 +617,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransition
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
@@ -649,7 +646,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffec
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
         for (auto& [actualS, expectedS] : arkNumberTestPlan) {
@@ -660,7 +657,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffec
                 .y = actualS,
                 .z = actualS,
             };
-            const auto accessor = GeneratedModifier::GetFullAPI()->getAccessors()->getTransitionEffectAccessor();
+            const auto accessor = fullAPI_->getAccessors()->getTransitionEffectAccessor();
             auto peer = accessor->scale(&arkScale);
             auto arkOptions = Ark_ContentCoverOptions {
                 .transition = Converter::ArkValue<Opt_TransitionEffect>(peer)
@@ -701,8 +698,8 @@ HWTEST_F(CommonMethodModifierTest8, setKeyboardShortcutTest, TestSize.Level1)
         };
     };
     const int32_t contextId = 123;
-    auto arkCalback = Converter::ArkValue<Callback_Void>(callback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCalback);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(callback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
 
     std::vector<Ark_ModifierKey> modifiers = {
         Ark_ModifierKey::ARK_MODIFIER_KEY_ALT,

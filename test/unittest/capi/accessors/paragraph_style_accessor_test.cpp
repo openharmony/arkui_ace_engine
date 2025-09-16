@@ -57,7 +57,7 @@ public:
     {
         auto& interface = TypeHelper::WriteTo(param_);
         interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
-        interface.textIndent.value = LengthMetricsPeer::Create(Dimension(TEST_MARGIN));
+        interface.textIndent.value = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_MARGIN));
         interface.maxLines = Converter::ArkValue<Opt_Number>(TEST_LINES_NUM);
         interface.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
         interface.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
@@ -66,17 +66,17 @@ public:
         NG::LeadingMargin margin {.size = LeadingMarginSize(Dimension(TEST_MARGIN), Dimension(TEST_MARGIN_2))};
         margin.pixmap = AceType::MakeRefPtr<MockPixelMap>();
 
-        auto arkPlaceHolder = Converter::ArkValue<Ark_LeadingMarginPlaceholder>(margin);
         auto leadingMargin = Converter::ArkUnion<Ark_Union_LengthMetrics_LeadingMarginPlaceholder,
-            Ark_LeadingMarginPlaceholder>(arkPlaceHolder);
+            Ark_LeadingMarginPlaceholder>(margin, &ctx_);
         auto& holder = TypeHelper::WriteTo(interface.leadingMargin);
         holder = leadingMargin;
 
-        return accessor_->ctor(&param_);
+        return accessor_->construct(&param_);
     }
 
 private:
     Opt_ParagraphStyleInterface param_ = {};
+    Converter::ConvContext ctx_;
 };
 
 /**

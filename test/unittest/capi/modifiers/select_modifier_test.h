@@ -83,7 +83,7 @@ const Color THEME_FONT_COLOR(0xFFAABBC3);
 const Color THEME_SELECTED_OPTION_FONT_COLOR(0xFFAABBC4);
 const Color DEFAULT_FONT_COLOR = THEME_FONT_COLOR.BlendOpacity(THEME_FONT_OPACITY);
 
-const auto DEFAULT_FONT_SIZE = "14.00px";
+const auto DEFAULT_FONT_SIZE = "16.00fp";
 const auto DEFAULT_FONT_WEIGHT = "FontWeight.Normal";
 const auto DEFAULT_FONT_FAMILY = "";
 const auto DEFAULT_FONT_STYLE = "FontStyle.Normal";
@@ -92,8 +92,8 @@ const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
 const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
 const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
 
-const auto SELECTED_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1);
-const auto INVALID_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
+const auto SELECTED_INDEX = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(1);
+const auto INVALID_INDEX = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(-1);
 
 // length values
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -102,6 +102,8 @@ const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
 const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
 const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
+const auto OPT_DIM_VP_POS = ArkValue<Opt_Dimension>(AFLT32_POS);
+const auto OPT_DIM_VP_NEG = ArkValue<Opt_Dimension>(AFLT32_NEG);
 
 // check length
 const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
@@ -201,7 +203,7 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberN
 extern std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable;
 
 const Ark_Font TEST_ARK_FONT = {
-    .size = ArkValue<Opt_Length>(12._px),
+    .size = ArkValue<Opt_Length>("12.0px"),
     .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
     .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
     .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),

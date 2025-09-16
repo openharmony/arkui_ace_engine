@@ -53,25 +53,24 @@ namespace OHOS::Ace::NG::PointLight {
     const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME = "bloom";
     const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = 0.f;
 
-    // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
-    const std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLenghtLightPosition = {
-        { "123.0_vp", ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
-        { "0.0_vp", ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
-        { "1.23_vp", ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
-        { "123.0_fp", ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
-        { "0.0_fp", ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
-        { "1.23_fp", ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
-        { "123.0_px", ArkValue<Ark_Length>(123.0_px), "123.00px" },
-        { "0.0_px", ArkValue<Ark_Length>(0.0_px), "0.00px" },
-        { "1.23_px", ArkValue<Ark_Length>(1.23_px), "1.23px" },
-        { "-1", ArkValue<Ark_Length>(-1._px), "-1.00px" },
-        { "-2.f", ArkValue<Ark_Length>(-2.f), "-2.00vp" },
-        { "-2.3_vp", ArkValue<Ark_Length>(-2.3_vp), "-2.30vp" },
-        { "-4.5_fp", ArkValue<Ark_Length>(-4.5_fp), "-4.50fp" },
-        { "-5.6_px", ArkValue<Ark_Length>(-5.6_px), "-5.60px" },
-        { "0.5_pct", ArkValue<Ark_Length>(0.5_pct), "50.00%" },
-        { "0.0_pct", ArkValue<Ark_Length>(0.0_pct), "0.00%" },
-        { "-0.8_pct", ArkValue<Ark_Length>(-0.8_pct), "-80.00%" },
+    // Fixture 'LengthNonNegNonPct' for type 'Ark_Dimension'
+    const std::vector<std::tuple<std::string, Ark_Dimension, std::string>> testFixtureLengthLightPosition = {
+        { "123.0vp", ArkValue<Ark_Dimension>("123.0vp"), "123.00vp" },
+        { "0.0vp", ArkValue<Ark_Dimension>("0.0vp"), "0.00vp" },
+        { "1.23vp", ArkValue<Ark_Dimension>("1.23vp"), "1.23vp" },
+        { "123.0fp", ArkValue<Ark_Dimension>("123.0fp"), "123.00fp" },
+        { "0.0fp", ArkValue<Ark_Dimension>("0.0fp"), "0.00fp" },
+        { "1.23fp", ArkValue<Ark_Dimension>("1.23fp"), "1.23fp" },
+        { "123.0px", ArkValue<Ark_Dimension>("123.0px"), "123.00px" },
+        { "0.0px", ArkValue<Ark_Dimension>("0.0px"), "0.00px" },
+        { "1.23px", ArkValue<Ark_Dimension>("1.23px"), "1.23px" },
+        { "-2.f", ArkValue<Ark_Dimension>(-2.f), "-2.00vp" },
+        { "-2.3vp", ArkValue<Ark_Dimension>("-2.3vp"), "-2.30vp" },
+        { "-4.5fp", ArkValue<Ark_Dimension>("-4.5fp"), "-4.50fp" },
+        { "-5.6px", ArkValue<Ark_Dimension>("-5.6px"), "-5.60px" },
+        { "50.00%", ArkValue<Ark_Dimension>("50.00%"), "50.00%" },
+        { "0.00%", ArkValue<Ark_Dimension>("0.00%"), "0.00%" },
+        { "-80.00%", ArkValue<Ark_Dimension>("-80.00%"), "-80.00%" },
     };
 
     // Fixture 'NumberAnything' for type 'Ark_Number'
