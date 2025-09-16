@@ -120,16 +120,16 @@ export class UIUtilsImpl {
         if (value instanceof ObserveWrappedBase) {
             return value as T;
         }
-        if (value instanceof Array) {
+        if (value instanceof Array && Type.of(value).getName() === 'escompat.Array') {
             return UIUtilsImpl.makeObservedArray(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Date) {
+        if (value instanceof Date && Type.of(value).getName() === 'escompat.Date') {
             return UIUtilsImpl.makeObservedDate(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Map) {
+        if (value instanceof Map && Type.of(value).getName() === 'escompat.Map') {
             return UIUtilsImpl.makeObservedMap(value, allowDeep, isAPI) as T;
         }
-        if (value instanceof Set) {
+        if (value instanceof Set && Type.of(value).getName() === 'escompat.Set') {
             return UIUtilsImpl.makeObservedSet(value, allowDeep, isAPI) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
