@@ -2914,7 +2914,9 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
-    for (const auto& child : rootNode->GetChildren()) {
+    CHECK_NULL_VOID(rootNode);
+    auto children = rootNode->GetChildren();
+    for (const auto& child : children) {
         auto node = DynamicCast<FrameNode>(child);
         if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             PopMenuAnimation(node, showPreviewAnimation, startDrag);
