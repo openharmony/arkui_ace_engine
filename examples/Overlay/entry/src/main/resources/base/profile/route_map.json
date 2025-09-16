@@ -367,6 +367,11 @@
       "buildFunction": "PopupTestBuilder"
     },
     {
+      "name": "PopupDoubleBorderTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupDoubleBorderTest.ets",
+      "buildFunction": "PopupDoubleBorderBuilder"
+    },
+    {
       "name": "MenuComplex",
       "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
       "buildFunction": "MenuComplexBuilder"
