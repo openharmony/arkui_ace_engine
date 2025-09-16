@@ -96,7 +96,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg001, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create radio paintProperty.
      */
@@ -129,7 +129,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg002, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create radio paintProperty.
      */
@@ -162,7 +162,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg003, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create radio paintProperty.
      */
@@ -195,7 +195,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg004, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create radio paintProperty.
      */
@@ -228,7 +228,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg005, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(node, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. create radio paintProperty.
      */
