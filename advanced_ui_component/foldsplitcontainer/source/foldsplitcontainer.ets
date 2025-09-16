@@ -16,14 +16,14 @@
 import display from '@ohos.display';
 import window from '@ohos.window';
 import hilog from '@ohos.hilog';
-import { LengthMetrics, Position, Size } from '@ohos.arkui.node';
+import { LengthMetrics, NodePosition, Size } from '@ohos.arkui.node';
 import curves from '@ohos.curves';
 import { Callback } from '@ohos.base';
 import mediaQuery from '@ohos.mediaquery';
 
 interface Layout {
   size: Size;
-  position: Position;
+  position: NodePosition;
 }
 
 interface RegionLayout {

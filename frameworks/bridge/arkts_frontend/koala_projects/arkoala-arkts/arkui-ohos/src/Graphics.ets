@@ -46,7 +46,7 @@ export interface Frame {
     width: number;
     height: number;
 }
-export type Position = Vector2;
+export type NodePosition = Vector2;
 export interface Vector2 {
     x: number;
     y: number;
