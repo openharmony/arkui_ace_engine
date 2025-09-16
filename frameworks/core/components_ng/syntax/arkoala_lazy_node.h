@@ -25,6 +25,8 @@
 
 namespace OHOS::Ace::NG {
 
+using RangeType = std::pair<int32_t, int32_t>;
+
 /**
  * @brief Backend node representation to access and manage lazy items in Arkoala frontend
  *
@@ -33,7 +35,8 @@ class ArkoalaLazyNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(ArkoalaLazyNode, ForEachBaseNode);
 
 public:
-    explicit ArkoalaLazyNode(int32_t id) : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, id) {}
+    explicit ArkoalaLazyNode(int32_t id, bool isRepeat = false);
+    ~ArkoalaLazyNode() override = default;
 
     using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
@@ -80,6 +83,8 @@ public:
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type);
 
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
+
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetOnMoveFromTo(std::function<void(int32_t, int32_t)>&& onMoveFromTo);
@@ -90,7 +95,15 @@ public:
     void InitAllChildrenDragManager(bool init);
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
 
+    void DumpInfo() override;
+
 private:
+    bool IsNodeInRange(int32_t index, const RangeType range)
+    {
+        return index >= range.first && index <= range.second;
+    }
+    void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
+
     void UpdateMoveFromTo(int32_t from, int32_t to);
     void UpdateItemsForOnMove();
     void ResetMoveFromTo()
@@ -100,15 +113,22 @@ private:
 
     // convert index by moveFromTo_.
     int32_t ConvertFromToIndex(int32_t index) const;
-
     // revert converted-index to origin index.
     int32_t ConvertFromToIndexRevert(int32_t index) const;
 
-    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> items_;
+    bool isRepeat_ = false;
+    // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
+    bool isActive_ = false;
+
+    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
-    std::function<void(int32_t, int32_t)> onMoveFromTo_;
     int32_t totalCount_ = 0;
+
+    // for tracking reused/recycled nodes
+    std::unordered_set<int32_t> recycleNodeIds_;
+
+    std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.
     std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
 };

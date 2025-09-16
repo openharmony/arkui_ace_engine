@@ -99,7 +99,7 @@ function createLazyNode(isRepeat: boolean): PeerNode {
     NodeAttach(
         () => {
             const peerId = PeerNode.nextId()
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
             if (!_peerPtr) {
                 throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
             }

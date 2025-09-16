@@ -547,7 +547,7 @@ struct ArkUIAniContentSlotModifier {
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
 struct ArkUIAniLazyForEachNodeModifier {
-    ani_long (*constructLazyForEachNode)(ani_int);
+    ani_long (*constructLazyForEachNode)(ani_int, ani_boolean);
 };
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowSection)(
@@ -705,7 +705,8 @@ struct ArkUIAniSyntaxItemModifier {
     ani_long (*constructSyntaxItem)(ani_int);
 };
 struct ArkUIAniForEachNodeModifier {
-    ani_long (*constructForEachNode)(ani_int);
+    ani_long (*construct)(ani_int, ani_boolean);
+    void (*finishRender)(ani_long);
 };
 
 struct ArkUIAniComponent3DModifier {

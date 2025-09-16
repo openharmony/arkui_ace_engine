@@ -248,7 +248,7 @@ export class SyntaxItemPeer extends PeerNode {
 export class ForEachNodePeer extends PeerNode {
     public static create(isRepeat: boolean = false): ForEachNodePeer {
         const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId);
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId, isRepeat);
         if (!_peerPtr) {
             throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
         }
@@ -299,6 +299,7 @@ function virtualRender<T>(
         attributes.onMove_, attributes.itemDragEvent_);
 }
 
+// onMoveFromTo has no operation in non-virtual mode
 function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
@@ -324,6 +325,8 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     };
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
         RepeatByArray<T>(arr, keyGen, action);
-            nodeHolder.node = node;
+        nodeHolder.node = node;
     });
+
+    ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }

@@ -396,7 +396,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_LazyForEachNode_Construct",
-            "I:J",
+            "IZ:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
@@ -1213,8 +1213,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_ForEachNode_Construct",
-            "I:J",
+            "IZ:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_ForEach_FinishRender",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ForEachFinishRender)
         },
         ani_native_function {
             "_Component3D_SetScene",

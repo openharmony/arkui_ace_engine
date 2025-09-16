@@ -21,17 +21,27 @@
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructForEachNode(ani_int id)
+ani_long Construct(ani_int id, ani_boolean isRepeat)
 {
-    auto node = AceType::MakeRefPtr<ArkoalaForEachNode>(id);
+    auto node = AceType::MakeRefPtr<ArkoalaForEachNode>(id, isRepeat);
     CHECK_NULL_RETURN(node, 0);
     node->IncRefCount();
     return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
+void FinishRender(ani_long node)
+{
+    auto* forEachNode = reinterpret_cast<NG::ArkoalaForEachNode*>(node);
+    CHECK_NULL_VOID(forEachNode);
+    forEachNode->FinishRender();
+}
+
 const ArkUIAniForEachNodeModifier* GetForEachNodeAniModifier()
 {
-    static const ArkUIAniForEachNodeModifier impl = { .constructForEachNode = ConstructForEachNode };
+    static const ArkUIAniForEachNodeModifier impl = {
+        .construct = Construct,
+        .finishRender = FinishRender
+    };
     return &impl;
 }
 

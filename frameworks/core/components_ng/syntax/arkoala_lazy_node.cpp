@@ -14,49 +14,76 @@
  */
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
-
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
+    isRepeat ? V2::JS_REPEAT_ETS_TAG : V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId), isRepeat_(isRepeat) {}
+
 void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "nodeId: %{public}d: DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
-    struct Range {
-        int32_t start;
-        int32_t end;
-    };
-    const Range liveRange { start - cacheStart, end + cacheEnd };
+    // range of screen node & preload node
+    const RangeType cacheRange { start - cacheStart, end + cacheEnd };
     if (updateRange_) {
-        updateRange_(liveRange.start, liveRange.end);
+        // trigger TS-side
+        updateRange_(cacheRange.first, cacheRange.second);
     }
 
-    const auto activeRange = showCache ? liveRange : Range { start, end };
+    // range of screen node
+    const RangeType activeRange = showCache ? cacheRange : std::make_pair(start, end);
     std::list<RefPtr<UINode>> toRemove;
-    for (const auto& [index, nodeWeak] : items_) {
+    for (const auto& [index, nodeWeak] : node4Index_) {
         auto node = nodeWeak.Upgrade();
         if (!node) {
             continue;
         }
         const auto indexMapped = ConvertFromToIndexRevert(index);
-        if (indexMapped < liveRange.start || indexMapped > liveRange.end) {
+        const bool isInCacheRange = IsNodeInRange(indexMapped, cacheRange);
+        const bool isInActiveRange = IsNodeInRange(indexMapped, activeRange);
+        if (!isInCacheRange) {
             RemoveChild(node);
-        } else {
-            node->SetActive(indexMapped >= activeRange.start && indexMapped <= activeRange.end);
+        }
+        node->SetActive(isInActiveRange);
+        if (isRepeat_) {
+            // trigger onReuse/onRecycle
+            UpdateIsCache(node, isInCacheRange);
         }
     }
 
-    items_.RemoveIf([liveRange, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
+    node4Index_.RemoveIf([cacheRange, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         auto arkoalaLazyNode = weak.Upgrade();
         if (!arkoalaLazyNode) {
-            return idx < liveRange.start || idx > liveRange.end;
+            return true;
         }
         const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(idx);
-        return indexMapped < liveRange.start || indexMapped > liveRange.end;
+        return !arkoalaLazyNode->IsNodeInRange(indexMapped, cacheRange);
     });
+}
+
+void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger)
+{
+    if (!shouldTrigger) {
+        return;
+    }
+    CHECK_NULL_VOID(node);
+    auto child = node->GetFrameChildByIndex(0, false);
+    CHECK_NULL_VOID(child);
+    if (isCache) {
+        if (recycleNodeIds_.erase(child->GetId()) == 0) {
+            return;
+        }
+        child->OnReuse();
+    } else {
+        if (recycleNodeIds_.emplace(child->GetId()).second == false) {
+            return;
+        }
+        child->OnRecycle();
+    }
 }
 
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
@@ -68,24 +95,33 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
         static_cast<int32_t>(addToRenderTree));
 
     const auto indexMapped = ConvertFromToIndex(indexCasted);
-    auto item = GetChildByIndex(indexMapped);
-    if (!item && !needBuild) {
+    auto child = GetChildByIndex(indexMapped);
+    if (!child && !needBuild) {
         return nullptr;
     }
     if (createItem_) {
-        item = createItem_(indexMapped);
+        child = createItem_(indexMapped);
     }
-    CHECK_NULL_RETURN(item, nullptr);
-    items_.Put(indexMapped, item);
-    AddChild(item);
+    CHECK_NULL_RETURN(child, nullptr);
+    node4Index_.Put(indexMapped, child);
 
     if (isCache) {
-        item->SetJSViewActive(false, true);
+        child->SetJSViewActive(false, !isRepeat_);
+        if (!isRepeat_) {
+            child->SetParent(WeakClaim(this));
+            return child->GetFrameChildByIndex(0, needBuild);
+        }
     } else if (addToRenderTree) {
-        item->SetActive(true);
+        child->SetActive(true);
     }
 
-    auto childNode = item->GetFrameChildByIndex(0, needBuild);
+    if (isActive_) {
+        child->SetJSViewActive(true, !isRepeat_);
+    }
+
+    AddChild(child);
+
+    auto childNode = child->GetFrameChildByIndex(0, needBuild);
     if (onMoveEvent_) {
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
@@ -94,8 +130,8 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 
 RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
-    auto item = items_.Get(index);
-    return item ? item->Upgrade() : nullptr;
+    auto node = node4Index_.Get(index);
+    return node ? node->Upgrade() : nullptr;
 }
 
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
@@ -106,13 +142,13 @@ RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
 void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
 {
     // temp: naive data reset
-    for (const auto& [index, nodeWeak] : items_) {
+    for (const auto& [index, nodeWeak] : node4Index_) {
         auto node = nodeWeak.Upgrade();
         if (index >= changeIndex) {
             RemoveChild(node);
         }
     }
-    items_.RemoveIf([changeIndex](const uint32_t& k, const auto& _) {
+    node4Index_.RemoveIf([changeIndex](const uint32_t& k, const auto& _) {
         const auto idx = static_cast<int32_t>(k);
         return idx >= changeIndex;
     });
@@ -123,6 +159,18 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
         parent->NotifyChange(changeIndex, count, accessibilityId, type);
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+{
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+        "ArkoalaLazyNode.SetJSViewActive: %{public}s ...", active ? "true" : "false");
+    for (const auto& [index, nodeWeak] : node4Index_) {
+        auto node = nodeWeak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->SetJSViewActive(active);
+    }
+    isActive_ = active;
 }
 
 void ArkoalaLazyNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
@@ -166,7 +214,7 @@ void ArkoalaLazyNode::MoveData(int32_t from, int32_t to)
         return;
     }
     auto startIter = children.begin();
-    auto startOpt = items_.GetKey(*startIter);
+    auto startOpt = node4Index_.GetKey(*startIter);
     if (!startOpt.has_value()) {
         TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "cannot find start child in items.");
         return;
@@ -196,8 +244,8 @@ int32_t ArkoalaLazyNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /
         TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "GetFrameNodeIndex node is null");
         return -1;
     }
-    // todo: if repeat and lazyforeach can be distinguished, index can be get directly from items_ map.
-    for (const auto& [index, nodeWeak] : items_) {
+    // todo: if repeat and lazyforeach can be distinguished, index can be get directly from node4Index_ map.
+    for (const auto& [index, nodeWeak] : node4Index_) {
         auto iterNode = nodeWeak.Upgrade();
         if (!iterNode) {
             continue;
@@ -224,7 +272,7 @@ void ArkoalaLazyNode::UpdateMoveFromTo(int32_t from, int32_t to)
 
 void ArkoalaLazyNode::FireOnMove(int32_t from, int32_t to)
 {
-    // 1. update items_ map.
+    // 1. update node4Index_ map.
     UpdateItemsForOnMove();
     // 2. reset moveFromTo_.
     ResetMoveFromTo();
@@ -249,19 +297,19 @@ void ArkoalaLazyNode::UpdateItemsForOnMove()
 
     int32_t rangeStart = std::min(from, to);
     int32_t rangeEnd = std::max(from, to);
-    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> tempItems = std::move(items_);
-    items_.Clear();
+    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> tempItems = std::move(node4Index_);
+    node4Index_.Clear();
     for (const auto& [index, nodeWeak] : tempItems) {
         auto node = nodeWeak.Upgrade();
         if (!node) {
             continue;
         }
         if (index < rangeStart || index > rangeEnd) {
-            items_.Put(index, node);
+            node4Index_.Put(index, node);
             continue;
         }
         int32_t newIndex = ConvertFromToIndexRevert(index);
-        items_.Put(newIndex, node);
+        node4Index_.Put(newIndex, node);
     }
 }
 
@@ -319,7 +367,7 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
     if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
         return;
     }
-    for (const auto& [index, nodeWeak] : items_) {
+    for (const auto& [index, nodeWeak] : node4Index_) {
         auto child = nodeWeak.Upgrade();
         if (!child) {
             continue;
@@ -339,6 +387,13 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
         } else {
             pattern->DeInitDragManager();
         }
+    }
+}
+
+void ArkoalaLazyNode::DumpInfo()
+{
+    if (isRepeat_) {
+        DumpLog::GetInstance().AddDesc("VirtualScroll: true");
     }
 }
 } // namespace OHOS::Ace::NG
