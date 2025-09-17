@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "ui/base/ace_type.h"
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -3090,6 +3091,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    AceType::Claim(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
@@ -7247,6 +7249,7 @@ void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& va
 void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
 {
     CHECK_NULL_VOID(frameNode);
+    AceType::Claim(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);

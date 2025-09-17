@@ -127,6 +127,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindSheetShowInPageTest1, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(targetNode);
     NG::SheetStyle sheetStyle;
     sheetStyle.showInPage = true;
+
     viewAbstractModelNG.BindSheet(false, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     auto pagePatern = pageNode->GetPattern<PagePattern>();
