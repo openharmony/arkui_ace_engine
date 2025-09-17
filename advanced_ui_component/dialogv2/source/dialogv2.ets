@@ -240,12 +240,17 @@ export struct TipsDialogV2 {
     .onClick(() => {
       this.checkedInner = !this.checkedInner;
       try {
+        let hostContext: Context | undefined = this.getUIContext()?.getHostContext();
+        let resourceManager: resourceManager.ResourceManager | undefined = hostContext?.resourceManager;
+        let bundleName: string = (hostContext as common.UIAbilityContext)?.abilityInfo?.bundleName ??
+          (hostContext as common.UIExtensionContext)?.extensionAbilityInfo?.bundleName;
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
-          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          bundleName: bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
-          getContext().resourceManager.getStringSync(125833935)
+          textAnnouncedForAccessibility: this.checkedInner ?
+            resourceManager?.getStringSync(125833934) :
+            resourceManager?.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
       } catch (exception) {
@@ -780,12 +785,17 @@ export struct ConfirmDialogV2 {
     .onClick(() => {
       this.checkedInner = !this.checkedInner;
       try {
+        let hostContext: Context | undefined = this.getUIContext()?.getHostContext();
+        let resourceManager: resourceManager.ResourceManager | undefined = hostContext?.resourceManager;
+        let bundleName: string = (hostContext as common.UIAbilityContext)?.abilityInfo?.bundleName ??
+          (hostContext as common.UIExtensionContext)?.extensionAbilityInfo?.bundleName;
         let eventInfo: accessibility.EventInfo = ({
           type: 'announceForAccessibility',
-          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          bundleName: bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
-          getContext().resourceManager.getStringSync(125833935)
+          textAnnouncedForAccessibility: this.checkedInner ?
+            resourceManager?.getStringSync(125833934) :
+            resourceManager?.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
       } catch (exception) {
