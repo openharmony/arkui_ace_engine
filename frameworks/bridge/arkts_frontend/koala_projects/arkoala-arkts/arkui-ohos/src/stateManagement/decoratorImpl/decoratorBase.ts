@@ -25,6 +25,7 @@ import {
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { WatchFunc } from './decoratorWatch';
+import { StateUpdateLoop } from '../base/stateUpdateLoop';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
@@ -163,14 +164,24 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             }
         }
     }
+    
+    public isViewActive(): boolean {
+        return this.owningComponent_!.isActive_ < 1;
+    }
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(_: string = ''): void {
-        if (this._watchFuncs.size > 0) {
-            this._watchFuncs.forEach((watchFunc, id) => {
-                watchFunc.execute(this.varName);
-            });
+        if (this.owningComponent_ && this.isViewActive()) {
+            StateUpdateLoop.addFreezeTask(this.owningComponent_!.getUniqueId(), this.onObservedObjectChangeExecWatchFuncs_.id());
         }
+        else {
+            if (this._watchFuncs.size > 0) {
+                this._watchFuncs.forEach((watchFunc, id) => {
+                    watchFunc.execute(this.varName);
+                });
+            }
+        }
+        
     }
 
     public registerWatchToSource(watchOwner: IDecoratedV1Variable<T>): WatchIdType {

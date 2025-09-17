@@ -526,6 +526,7 @@ struct  ArkUICustomNodeInfo {
     std::function<void()> pageTransitionFunc;
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
+    std::function<void(bool, bool)> setActiveFunc;
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int id, ArkUICustomNodeInfo&& customNodeInfo);
