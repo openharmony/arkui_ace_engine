@@ -19,6 +19,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyBuildAccessor {
+void ApplyLazyBuilderImpl()
+{
+}
+void SetListItemLazyBuilderImpl(Ark_NativePointer node,
+                                const CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    // undefinedModelNG::SetSetListItemLazyBuilder(frameNode, convValue);
+}
 void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
                                   const CustomNodeBuilder* builder)
 {
@@ -32,6 +44,8 @@ void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor()
 {
     static const GENERATED_ArkUILazyBuildAccessor LazyBuildAccessorImpl {
+        LazyBuildAccessor::ApplyLazyBuilderImpl,
+        LazyBuildAccessor::SetListItemLazyBuilderImpl,
         LazyBuildAccessor::SetTabContentLazyBuilderImpl,
     };
     return &LazyBuildAccessorImpl;

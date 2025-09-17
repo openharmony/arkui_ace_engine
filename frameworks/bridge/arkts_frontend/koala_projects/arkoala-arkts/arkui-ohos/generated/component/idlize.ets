@@ -1436,11 +1436,30 @@ export class IUIContext {
     }
 }
 export class LazyBuild {
+    static ApplyLazyBuilder_serialize(): void {
+        ArkUIGeneratedNativeModule._LazyBuild_ApplyLazyBuilder()
+    }
+    static SetListItemLazyBuilder_serialize(node: KPointer, builder: CustomBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder))
+        ArkUIGeneratedNativeModule._LazyBuild_SetListItemLazyBuilder(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     static SetTabContentLazyBuilder_serialize(node: KPointer, builder: CustomBuilder): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder))
         ArkUIGeneratedNativeModule._LazyBuild_SetTabContentLazyBuilder(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    public static ApplyLazyBuilder(): void {
+        LazyBuild.ApplyLazyBuilder_serialize()
+        return
+    }
+    public static SetListItemLazyBuilder(node: KPointer, builder: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder)
+        LazyBuild.SetListItemLazyBuilder_serialize(node_casted, builder_casted)
+        return
     }
     public static SetTabContentLazyBuilder(node: KPointer, builder: CustomBuilder): void {
         const node_casted = node as (KPointer)

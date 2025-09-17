@@ -4382,6 +4382,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LayoutPolicy_getMatchParent(): KPointer
     @ani.unsafe.Direct
+    native static _LazyBuild_ApplyLazyBuilder(): void
+    @ani.unsafe.Direct
+    native static _LazyBuild_SetListItemLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _LazyBuild_SetTabContentLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _LazyForEachOps_Sync(node: KPointer, totalCount: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
