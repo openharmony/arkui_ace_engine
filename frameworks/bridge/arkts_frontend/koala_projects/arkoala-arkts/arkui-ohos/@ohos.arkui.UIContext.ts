@@ -43,7 +43,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { CustomBuilder, DragItemInfo, Callback } from 'arkui/framework'
+import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework'
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
 import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
@@ -372,16 +372,16 @@ export class PromptAction {
         throw Error("openCustomDialogWithController not implemented in PromptAction!")
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
         options?: promptAction.DialogOptions): Promise<number> {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         throw Error("getTopOrder not implemented in PromptAction!")
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
