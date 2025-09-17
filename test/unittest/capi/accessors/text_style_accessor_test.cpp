@@ -14,7 +14,7 @@
  */
 
 #include "accessor_test_base.h"
-#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -33,7 +33,7 @@ const std::string g_fontWeight = "200";
 const Ace::FontStyle g_fontStyle = Ace::FontStyle::ITALIC;
 } // namespace
 
-class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyleAccessor,
+class TextStyleAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyleAccessor,
     &GENERATED_ArkUIAccessors::getTextStyleAccessor, TextStylePeer> {
 public:
     static void SetUpTestCase()
@@ -64,7 +64,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, emptyOptionsTest, TestSize.Level1)
 {
     // finalize base peer
     finalyzer_(peer_);
@@ -82,7 +82,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, getFontFamilyTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontFamilyTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontFamily, nullptr);
     EXPECT_EQ(Converter::OptConvert<std::string>(accessor_->getFontFamily(peer_)), g_fontFamily);
@@ -93,7 +93,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontFamilyTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, getFontSizeTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontSize, nullptr);
     auto fontSize = Converter::OptConvert<float>(accessor_->getFontSize(peer_));
@@ -106,7 +106,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontSizeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, getFontWeightTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontWeightTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontWeight, nullptr);
     EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getFontWeight(peer_)),
@@ -118,7 +118,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontWeightTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontStyleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontStyle, nullptr);
     std::optional<Ace::FontStyle> fontStyleOpt = Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_));
@@ -131,7 +131,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleStyledStringAccessorTest, getFontColorTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontColor, nullptr);
     auto arkResColor = accessor_->getFontColor(peer_);

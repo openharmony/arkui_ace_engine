@@ -141,7 +141,7 @@ ace_unittest("capi_all_accessors_test") {
     "text_menu_item_id_accessor_test.cpp",
     # "text_picker_dialog_accessor_test.cpp",
     "text_shadow_style_accessor_test.cpp",
-    "text_style_styled_string_accessor_test.cpp",
+    "text_style_accessor_test.cpp",
     "text_timer_controller_accessor_test.cpp",
     # "time_picker_dialog_accessor_test.cpp",
     # "toggle_content_modifier_accessor_test.cpp",
