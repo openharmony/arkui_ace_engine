@@ -1797,4 +1797,61 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
     listItemGroupLayoutAlgorithm->CheckRecycle(layoutWrapperNode, 200.0f, 300.0f, 0.0f, true);
     EXPECT_EQ(listItemGroupLayoutAlgorithm->recycledItemPosition_.size(), 1);
 }
+
+/**
+ * @tc.name: TestWhetherCacheItemLayouted
+ * @tc.desc: Test whether the cached item is layouted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, TestWhetherCacheItemLayouted, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup, set cachedCount to (1, false).
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1, false);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. FlushIdleTask
+     * @tc.expected: The cached item is inactive and layouted.
+     */
+    FlushIdleTask(pattern_);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto itemNode = AceType::DynamicCast<FrameNode>(groupNode->GetChildAtIndex(4));
+    EXPECT_TRUE(itemNode->IsActive());
+    auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+    EXPECT_TRUE(itemPattern->isLayouted_);
+    auto cachedItemNode = AceType::DynamicCast<FrameNode>(groupNode->GetChildAtIndex(5));
+    EXPECT_FALSE(cachedItemNode->IsActive());
+    auto cachedItemPattern = cachedItemNode->GetPattern<ListItemPattern>();
+    EXPECT_TRUE(cachedItemPattern->isLayouted_);
+
+    /**
+     * @tc.steps: step3. Create List and ListItemGroup, set cachedCount to (1, true).
+     */
+    ClearOldNodes();
+    model = CreateList();
+    model.SetCachedCount(1, true);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step4. FlushIdleTask
+     * @tc.expected: The cached item is active and layouted.
+     */
+    FlushIdleTask(pattern_);
+    groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    itemNode = AceType::DynamicCast<FrameNode>(groupNode->GetChildAtIndex(4));
+    EXPECT_TRUE(itemNode->IsActive());
+    itemPattern = itemNode->GetPattern<ListItemPattern>();
+    EXPECT_TRUE(itemPattern->isLayouted_);
+    cachedItemNode = AceType::DynamicCast<FrameNode>(groupNode->GetChildAtIndex(5));
+    EXPECT_TRUE(cachedItemNode->IsActive());
+    cachedItemPattern = cachedItemNode->GetPattern<ListItemPattern>();
+    EXPECT_TRUE(cachedItemPattern->isLayouted_);
+}
 } // namespace OHOS::Ace::NG

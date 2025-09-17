@@ -1650,7 +1650,11 @@ void ListItemGroupLayoutAlgorithm::LayoutCacheItem(LayoutWrapper* layoutWrapper,
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         auto host = wrapper->GetHostNode();
         if (wrapper->CheckNeedForceMeasureAndLayout() && host && !host->IsLayoutComplete()) {
+            wrapper->SetActive();
             wrapper->Layout();
+            if (!show) {
+                wrapper->SetActive(false);
+            }
         } else {
             SyncGeometry(wrapper);
         }
