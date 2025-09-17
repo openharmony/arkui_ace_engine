@@ -29,7 +29,6 @@ import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
 import { OutlineStyle } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
-import { ArkUIAniModule } from "arkui.ani"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         return new ColorFilter(false, ptr)
@@ -59,53 +58,6 @@ export class ColorFilter implements MaterializedBase {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ColorFilter_getFinalizer()
-    }
-    static transferStatic(input: Any): Any {
-        if (typeof (input) !== 'object' || input === null) {
-            return undefined;
-        }
-        let esValue: ESValue = input as ESValue;
-        const global = ESValue.getGlobal();
-        const getColorFilterPointerFunc = global.getProperty('GetColorFilterPointer');
-        if (getColorFilterPointerFunc.isNull() || getColorFilterPointerFunc.isUndefined()) {
-            return undefined;
-        }
-        const pointer = getColorFilterPointerFunc.invoke(esValue);
-        if (!pointer.isNumber()) {
-            return undefined;
-        }
-        let pointerVal = pointer.toNumber() as long;
-        let ctorPtr = ArkUIAniModule._Image_ColorFilter_TransferStatic(pointerVal);
-        if (ctorPtr === 0) {
-            return undefined;
-        }
-        let colorFilter = new ColorFilter(false, ctorPtr);
-        return colorFilter;
-    }
-    static transferDynamic(input: Object): Any {
-        if (input === null) {
-            return undefined;
-        }
-        if (!(input instanceof ColorFilter)) {
-            return undefined;
-        }
-        let colorFilter = input as ColorFilter;
-        let colorFilterObj = ESValue.instantiateEmptyObject();
-        const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapColorFilterPointer');
-        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
-            return undefined;
-        }
-        let peerPtr = colorFilter?.peer?.ptr;
-        if (peerPtr === undefined) {
-            return undefined;
-        }
-        let pointer = ArkUIAniModule._Image_ColorFilter_TransferDynamic(peerPtr);
-        if (pointer === 0) {
-            return undefined;
-        }
-        wrapFunc.invoke(colorFilterObj, ESObject.wrap(pointer));
-        return colorFilterObj;
     }
 }
 export { Resource } from "global.resource"
