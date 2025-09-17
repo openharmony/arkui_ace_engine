@@ -3837,7 +3837,7 @@ HWTEST_F(SelectPatternTestNg, InitSpinner002, TestSize.Level1)
     selectTheme->SetFontSize(Dimension(16.0, DimensionUnit::PX));
 
     /**
-     * @tc.steps: step2.Create a SelectTheme instance and set its font size to 16px.
+     * @tc.steps: step3.Create a IconTheme instance.
      */
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     ASSERT_NE(iconTheme, nullptr);
