@@ -277,7 +277,7 @@ class AllowForceDarkModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('allowForceDark');
   applyPeer(node: KNode, reset: boolean): void {
-    getUINativeModule().common.allowForceDark(node);
+    getUINativeModule().common.allowForceDark(node, this.value);
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);

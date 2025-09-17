@@ -209,7 +209,7 @@ class AllowForceDarkModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    getUINativeModule().common.allowForceDark(node);
+    getUINativeModule().common.allowForceDark(node, this.value);
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);

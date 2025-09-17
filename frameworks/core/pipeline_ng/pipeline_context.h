@@ -1122,7 +1122,7 @@ public:
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
 
-    void AddNeedReloadNodes(const WeakPtr<UINode>& node);
+    void AddNeedReloadNodes(UINode* node);
     void ReloadNodesResource();
 
     void NeedReloadResource(bool needReloadResource)
