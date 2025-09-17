@@ -44,7 +44,7 @@
 #endif
 
 #include "core/common/udmf/udmf_client.h"
-#include "form_pattern.h"
+#include "form_util.h"
 
 static const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
@@ -434,6 +434,17 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    if (!pixelMap) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is null");
+        return;
+    }
+    
+    if (!isDynamic_ && FormUtil::IsTransparent(pixelMap)) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is transparent");
+        needSnapshotAgain_ = true;
+        return;
+    }
+
     auto uiTaskExecutor =
         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
@@ -447,6 +458,7 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "call.");
     CHECK_NULL_VOID(pixelMap);
+
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
     isSnapshot_ = true;

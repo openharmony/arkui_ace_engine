@@ -28,6 +28,7 @@ ace_unittest("form_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -79,6 +80,7 @@ ace_unittest("form_node_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -130,6 +132,7 @@ ace_unittest("form_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -162,6 +165,7 @@ ace_unittest("form_pattern_test") {
       "icu:shared_icuuc",
       "input:libmmi-client",
       "resource_management:global_resmgr",
+      "image_framework:image_native",
     ]
   }
 }

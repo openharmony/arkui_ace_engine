@@ -24,7 +24,7 @@
 
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
-#include "test/mock/base/mock_pixel_map.h"
+#include "mock/mock_pixel_map.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -497,8 +497,19 @@ HWTEST_F(FormPatternTest, FormPatternTest_012, TestSize.Level1)
     pattern->OnSnapshot(pixelMap);
     EXPECT_EQ(pattern->isSnapshot_, false);
     weak.refCounter_ = refBak;
-}
 
+    pattern->isDynamic_ = false;
+    std::shared_ptr<Media::MockPixelMap> mockPixelMap = std::make_shared<Media::MockPixelMap>();
+    EXPECT_CALL(*mockPixelMap, GetWidth()).WillRepeatedly(Return(-200));
+    pattern->OnSnapshot(mockPixelMap);
+    EXPECT_EQ(pattern->needSnapshotAgain_, true);
+
+    EXPECT_CALL(*mockPixelMap, GetWidth()).WillRepeatedly(Return(200));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).WillRepeatedly(Return(200));
+    pattern->needSnapshotAgain_ = false;
+    pattern->OnSnapshot(mockPixelMap);
+    EXPECT_EQ(pattern->needSnapshotAgain_, true);
+}
 
 /**
  * @tc.name: FormPatternTest_014
