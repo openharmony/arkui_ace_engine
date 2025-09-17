@@ -1626,6 +1626,7 @@ frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h @arkui_frame
 frameworks/bridge/declarative_frontend/ng/entry_page_info.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ng/force_split/ @arkui_navigation
 frameworks/bridge/declarative_frontend/ng/page_router_manager.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h @arkui_navigation
@@ -2567,6 +2568,7 @@ frameworks/core/components_ng/pattern/slider/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/stack/ @arkuilayout1
 frameworks/core/components_ng/pattern/stage/content_root_pattern.cpp @ArkUI_Event
 frameworks/core/components_ng/pattern/stage/content_root_pattern.h @ArkUI_Event
+frameworks/core/components_ng/pattern/stage/force_split/ @arkui_navigation
 frameworks/core/components_ng/pattern/stage/page_event_hub.cpp @arkui_navigation
 frameworks/core/components_ng/pattern/stage/page_event_hub.h @arkui_navigation
 frameworks/core/components_ng/pattern/stage/page_info.h @arkui_navigation
