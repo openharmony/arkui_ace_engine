@@ -136,6 +136,7 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
 
 void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap)
 {
+    auto oldEndLine = endMainLineIndex_;
     auto remainSize = mainSize - overScrollOffset;
     for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
         remainSize -= (lineHeightMap_[i] + mainGap);
@@ -146,6 +147,17 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             endIndex_ = endLine->second.rbegin()->second;
             endMainLineIndex_ = i;
             break;
+        }
+    }
+    // last line height maybe zero
+    if (NearZero(remainSize + mainGap) && endMainLineIndex_ < oldEndLine) {
+        auto newEndLine = endMainLineIndex_ + 1;
+        if (NearZero(lineHeightMap_[newEndLine])) {
+            auto endLine = gridMatrix_.find(newEndLine);
+            CHECK_NULL_VOID(endLine != gridMatrix_.end());
+            CHECK_NULL_VOID(!endLine->second.empty());
+            endIndex_ = endLine->second.rbegin()->second;
+            endMainLineIndex_ = newEndLine;
         }
     }
 }
