@@ -32253,6 +32253,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LayoutPolicyAccessor
     namespace LazyBuildAccessor {
+    void ApplyLazyBuilderImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("ApplyLazyBuilder(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetListItemLazyBuilderImpl(Ark_NativePointer node,
+                                    const CustomNodeBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("SetListItemLazyBuilder(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
                                       const CustomNodeBuilder* builder)
     {
@@ -44696,6 +44720,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor()
     {
         static const GENERATED_ArkUILazyBuildAccessor LazyBuildAccessorImpl {
+            LazyBuildAccessor::ApplyLazyBuilderImpl,
+            LazyBuildAccessor::SetListItemLazyBuilderImpl,
             LazyBuildAccessor::SetTabContentLazyBuilderImpl,
         };
         return &LazyBuildAccessorImpl;

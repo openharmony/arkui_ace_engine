@@ -24613,6 +24613,9 @@ typedef struct GENERATED_ArkUILayoutPolicyAccessor {
 } GENERATED_ArkUILayoutPolicyAccessor;
 
 typedef struct GENERATED_ArkUILazyBuildAccessor {
+    void (*ApplyLazyBuilder)();
+    void (*SetListItemLazyBuilder)(Ark_NativePointer node,
+                                   const CustomNodeBuilder* builder);
     void (*SetTabContentLazyBuilder)(Ark_NativePointer node,
                                      const CustomNodeBuilder* builder);
 } GENERATED_ArkUILazyBuildAccessor;

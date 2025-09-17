@@ -13824,6 +13824,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LayoutPolicyAccessor
     namespace LazyBuildAccessor {
+    void ApplyLazyBuilderImpl()
+    {
+    }
+    void SetListItemLazyBuilderImpl(Ark_NativePointer node,
+                                    const CustomNodeBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
                                       const CustomNodeBuilder* builder)
     {
@@ -19441,6 +19450,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor()
     {
         static const GENERATED_ArkUILazyBuildAccessor LazyBuildAccessorImpl {
+            LazyBuildAccessor::ApplyLazyBuilderImpl,
+            LazyBuildAccessor::SetListItemLazyBuilderImpl,
             LazyBuildAccessor::SetTabContentLazyBuilderImpl,
         };
         return &LazyBuildAccessorImpl;

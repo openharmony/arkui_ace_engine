@@ -30336,6 +30336,16 @@ Ark_NativePointer impl_LayoutPolicy_getMatchParent() {
         return GetAccessors()->getLayoutPolicyAccessor()->getMatchParent();
 }
 KOALA_INTEROP_DIRECT_0(LayoutPolicy_getMatchParent, Ark_NativePointer)
+void impl_LazyBuild_ApplyLazyBuilder() {
+        GetAccessors()->getLazyBuildAccessor()->ApplyLazyBuilder();
+}
+KOALA_INTEROP_DIRECT_V0(LazyBuild_ApplyLazyBuilder)
+void impl_LazyBuild_SetListItemLazyBuilder(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        CustomNodeBuilder builderValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};;
+        GetAccessors()->getLazyBuildAccessor()->SetListItemLazyBuilder(node, static_cast<CustomNodeBuilder*>(&builderValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(LazyBuild_SetListItemLazyBuilder, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_LazyBuild_SetTabContentLazyBuilder(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         CustomNodeBuilder builderValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};;
