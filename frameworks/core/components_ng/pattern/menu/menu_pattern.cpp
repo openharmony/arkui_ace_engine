@@ -1727,7 +1727,6 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     contentOpacityOption.SetDelay(STACK_SUB_MENU_APPEAR_DELAY);
     contentOpacityOption.SetDuration(STACK_MENU_APPEAR_DURATION);
     auto titleContentNode = GetTitleContentNode(subMenuNode);
-    CHECK_NULL_VOID(titleContentNode);
     AnimationUtils::Animate(contentOpacityOption, [otherMenuItemContext, titleContentNode]() {
         for (auto menuItemContext : otherMenuItemContext) {
             CHECK_NULL_CONTINUE(menuItemContext);
@@ -2037,7 +2036,10 @@ std::vector<RefPtr<RenderContext>> MenuPattern::GetOtherMenuItemContext(const Re
         return {};
     }
     auto child = children.begin();
-    for (advance(child, 1); child != children.end(); ++child) {
+    if (GetTitleContentNode(subMenuNode)) {
+        advance(child, 1);
+    }
+    for (; child != children.end(); ++child) {
         auto menuItem = DynamicCast<FrameNode>(*child);
         CHECK_NULL_RETURN(menuItem, {});
         auto menuItemContext = menuItem->GetRenderContext();
@@ -2051,21 +2053,20 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
 {
     CHECK_NULL_VOID(subMenuNode);
     auto titleContentNode = GetTitleContentNode(subMenuNode);
-    CHECK_NULL_VOID(titleContentNode);
     auto otherMenuItemContext = GetOtherMenuItemContext(subMenuNode);
     AnimationOption contentOpacityOption = AnimationOption();
     contentOpacityOption.SetCurve(Curves::FRICTION);
     double subMenuDisappearDuration = 200.0f;
     contentOpacityOption.SetDuration(subMenuDisappearDuration);
     AnimationUtils::Animate(contentOpacityOption, [otherMenuItemContext, titleContentNode]() {
+        for (auto menuItemContext : otherMenuItemContext) {
+            menuItemContext->UpdateOpacity(0.0f);
+        }
         CHECK_NULL_VOID(titleContentNode);
         auto textProperty = titleContentNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         textProperty->UpdateFontWeight(FontWeight::MEDIUM);
         titleContentNode->MarkDirtyNode();
-        for (auto menuItemContext : otherMenuItemContext) {
-            menuItemContext->UpdateOpacity(0.0f);
-        }
     }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
 
     ShowArrowReverseRotateAnimation();
@@ -2312,6 +2313,7 @@ RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
     auto mainMenuUINode = wrapperFrameNode->GetChildAtIndex(0);
     CHECK_NULL_RETURN(mainMenuUINode, nullptr);
     auto mainMenuFrameNode = AceType::DynamicCast<FrameNode>(mainMenuUINode);
+    CHECK_NULL_RETURN(mainMenuFrameNode, nullptr);
     return mainMenuFrameNode->GetPattern<MenuPattern>();
 }
 

@@ -1761,6 +1761,7 @@ void MenuItemPattern::InitLongPressEvent()
     CHECK_NULL_VOID(gesture);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto itemPattern = weak.Upgrade();
+        CHECK_NULL_VOID(itemPattern);
         auto menuWrapper = itemPattern->GetMenuWrapper();
         CHECK_NULL_VOID(menuWrapper);
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();

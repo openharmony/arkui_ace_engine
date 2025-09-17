@@ -320,6 +320,7 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
 std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const RefPtr<FrameNode>& host) const
 {
     std::list<WeakPtr<UINode>> itemsAndGroups;
+    CHECK_NULL_RETURN(host, itemsAndGroups);
     auto pattern = host->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, itemsAndGroups);
     auto menu = pattern->GetMenu();

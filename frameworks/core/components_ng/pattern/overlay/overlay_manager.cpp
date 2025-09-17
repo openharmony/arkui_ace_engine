@@ -2811,7 +2811,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         CHECK_NULL_RETURN(menuChild, false);
         menuFrameNode = DynamicCast<FrameNode>(menuChild);
     }
-
+    CHECK_NULL_RETURN(menuFrameNode, false);
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
@@ -5274,6 +5274,7 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
 void OverlayManager::PlayDefaultModalIn(
     const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
 {
+    CHECK_NULL_VOID(context);
     context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -8224,6 +8225,7 @@ RefPtr<FrameNode> OverlayManager::GetPixelMapContentNodeForSubwindow() const
     CHECK_NULL_RETURN(rootNode, nullptr);
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
         if (node && node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
             continue;
         }
