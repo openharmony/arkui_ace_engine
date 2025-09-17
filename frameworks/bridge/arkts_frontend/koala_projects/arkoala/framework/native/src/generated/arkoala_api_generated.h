@@ -4486,6 +4486,14 @@ typedef struct Opt_GestureControl_GestureType {
     Ark_Tag tag;
     Ark_GestureControl_GestureType value;
 } Opt_GestureControl_GestureType;
+typedef enum Ark_GestureFocusMode {
+    ARK_GESTURE_FOCUS_MODE_DEFAULT = 0,
+    ARK_GESTURE_FOCUS_MODE_GESTURE_TAP_AND_LONG_PRESS = 1,
+} Ark_GestureFocusMode;
+typedef struct Opt_GestureFocusMode {
+    Ark_Tag tag;
+    Ark_GestureFocusMode value;
+} Opt_GestureFocusMode;
 typedef enum Ark_GestureJudgeResult {
     ARK_GESTURE_JUDGE_RESULT_CONTINUE = 0,
     ARK_GESTURE_JUDGE_RESULT_REJECT = 1,
@@ -6771,6 +6779,8 @@ typedef struct Opt_WebDarkMode {
 } Opt_WebDarkMode;
 typedef enum Ark_WebElementType {
     ARK_WEB_ELEMENT_TYPE_IMAGE = 1,
+    ARK_WEB_ELEMENT_TYPE_LINK = 2,
+    ARK_WEB_ELEMENT_TYPE_TEXT = 3,
 } Ark_WebElementType;
 typedef struct Opt_WebElementType {
     Ark_Tag tag;
@@ -6806,6 +6816,7 @@ typedef struct Opt_WebNavigationType {
 } Opt_WebNavigationType;
 typedef enum Ark_WebResponseType {
     ARK_WEB_RESPONSE_TYPE_LONG_PRESS = 1,
+    ARK_WEB_RESPONSE_TYPE_RIGHT_CLICK = 2,
 } Ark_WebResponseType;
 typedef struct Opt_WebResponseType {
     Ark_Tag tag;
@@ -18051,6 +18062,8 @@ typedef struct Ark_SelectionMenuOptionsExt {
     Opt_CustomNodeBuilder preview;
     Opt_MenuType menuType;
     Opt_PreviewMenuOptions previewMenuOptions;
+    Opt_Callback_Void onMenuShow;
+    Opt_Callback_Void onMenuHide;
 } Ark_SelectionMenuOptionsExt;
 typedef struct Opt_SelectionMenuOptionsExt {
     Ark_Tag tag;
@@ -24150,6 +24163,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_WebResponseType* responseType,
                                  const Opt_SelectionMenuOptionsExt* options);
+    void (*setGestureFocusMode)(Ark_NativePointer node,
+                                const Opt_GestureFocusMode* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

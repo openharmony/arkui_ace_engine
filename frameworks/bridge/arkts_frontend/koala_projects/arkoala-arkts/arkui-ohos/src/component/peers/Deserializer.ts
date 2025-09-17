@@ -19887,7 +19887,21 @@ export class Deserializer extends DeserializerBase {
             previewMenuOptions_buf = valueDeserializer.readPreviewMenuOptions()
         }
         const previewMenuOptions_result : PreviewMenuOptions | undefined = previewMenuOptions_buf
-        let value : SelectionMenuOptionsExt = ({onAppear: onAppear_result, onDisappear: onDisappear_result, preview: preview_result, menuType: menuType_result, previewMenuOptions: previewMenuOptions_result} as SelectionMenuOptionsExt)
+        const onMenuShow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onMenuShow_buf : (() => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (onMenuShow_buf_runtimeType))
+        {
+            onMenuShow_buf = valueDeserializer.readCallback_Void()
+        }
+        const onMenuShow_result : (() => void) | undefined = onMenuShow_buf
+        const onMenuHide_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onMenuHide_buf : (() => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (onMenuHide_buf_runtimeType))
+        {
+            onMenuHide_buf = valueDeserializer.readCallback_Void()
+        }
+        const onMenuHide_result : (() => void) | undefined = onMenuHide_buf
+        let value : SelectionMenuOptionsExt = ({onAppear: onAppear_result, onDisappear: onDisappear_result, preview: preview_result, menuType: menuType_result, previewMenuOptions: previewMenuOptions_result, onMenuShow: onMenuShow_result, onMenuHide: onMenuHide_result} as SelectionMenuOptionsExt)
         return value
     }
     readSelectOption(): SelectOption {

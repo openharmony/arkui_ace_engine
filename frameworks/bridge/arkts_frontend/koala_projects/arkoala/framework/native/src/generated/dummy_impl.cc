@@ -19995,6 +19995,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void GestureFocusModeImpl(Ark_NativePointer node,
+                              const Opt_GestureFocusMode* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("gestureFocusMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -23275,6 +23285,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::NativeEmbedOptionsImpl,
             WebAttributeModifier::RegisterNativeEmbedRuleImpl,
             WebAttributeModifier::BindSelectionMenuImpl,
+            WebAttributeModifier::GestureFocusModeImpl,
         };
         return &ArkUIWebModifierImpl;
     }

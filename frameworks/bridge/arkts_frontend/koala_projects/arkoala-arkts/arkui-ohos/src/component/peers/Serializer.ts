@@ -15926,6 +15926,22 @@ export class Serializer extends SerializerBase {
             const value_previewMenuOptions_value  = value_previewMenuOptions!
             valueSerializer.writePreviewMenuOptions(value_previewMenuOptions_value)
         }
+        const value_onMenuShow  = value.onMenuShow
+        let value_onMenuShow_type : int32 = RuntimeType.UNDEFINED
+        value_onMenuShow_type = runtimeType(value_onMenuShow)
+        valueSerializer.writeInt8(value_onMenuShow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_onMenuShow_type)) {
+            const value_onMenuShow_value  = value_onMenuShow!
+            valueSerializer.holdAndWriteCallback(value_onMenuShow_value)
+        }
+        const value_onMenuHide  = value.onMenuHide
+        let value_onMenuHide_type : int32 = RuntimeType.UNDEFINED
+        value_onMenuHide_type = runtimeType(value_onMenuHide)
+        valueSerializer.writeInt8(value_onMenuHide_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_onMenuHide_type)) {
+            const value_onMenuHide_value  = value_onMenuHide!
+            valueSerializer.holdAndWriteCallback(value_onMenuHide_value)
+        }
     }
     writeSelectOption(value: SelectOption): void {
         let valueSerializer : Serializer = this
