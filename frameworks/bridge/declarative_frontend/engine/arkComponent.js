@@ -15386,13 +15386,15 @@ class TextAreaShowCounterModifier extends ModifierWithKey {
       getUINativeModule().textArea.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
       !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
-      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextColor, this.value.counterTextColor) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextOverflowColor, this.value.counterTextOverflowColor);
   }
 }
 TextAreaShowCounterModifier.identity = Symbol('textAreaShowCounter');
@@ -16240,6 +16242,8 @@ class ArkTextAreaComponent extends ArkComponent {
     arkValue.value = value;
     arkValue.highlightBorder = options?.highlightBorder;
     arkValue.thresholdPercentage = options?.thresholdPercentage;
+    arkValue.counterTextColor = options?.counterTextColor;
+    arkValue.counterTextOverflowColor = options?.counterTextOverflowColor;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
@@ -17385,13 +17389,15 @@ class TextInputShowCounterModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
+      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
       !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
-      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextColor, this.value.counterTextColor) ||
+      !isBaseOrResourceEqual(this.stageValue.counterTextOverflowColor, this.value.counterTextOverflowColor);
   }
 }
 TextInputShowCounterModifier.identity = Symbol('textInputShowCounter');
@@ -18142,6 +18148,8 @@ class ArkTextInputComponent extends ArkComponent {
     arkValue.value = value;
     arkValue.highlightBorder = options?.highlightBorder;
     arkValue.thresholdPercentage = options?.thresholdPercentage;
+    arkValue.counterTextColor = options?.counterTextColor;
+    arkValue.counterTextOverflowColor = options?.counterTextOverflowColor;
     modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity, TextInputShowCounterModifier, arkValue);
     return this;
   }
@@ -19899,11 +19907,15 @@ class ArkTextFieldShowCounter {
     this.value = undefined;
     this.highlightBorder = undefined;
     this.thresholdPercentage = undefined;
+    this.counterTextColor = undefined;
+    this.counterTextOverflowColor = undefined;
   }
   isEqual(another) {
     return (this.value === another.value) &&
       (this.highlightBorder === another.highlightBorder) &&
-      (this.thresholdPercentage === another.thresholdPercentage);
+      (this.thresholdPercentage === another.thresholdPercentage) &&
+      (this.counterTextColor === another.counterTextColor) &&
+      (this.counterTextOverflowColor === another.counterTextOverflowColor);
   }
 }
 

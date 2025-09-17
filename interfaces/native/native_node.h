@@ -3645,6 +3645,30 @@ typedef enum {
     NODE_TEXT_INPUT_LINE_HEIGHT = 7037,
 
     /**
+     * @brief Defines the counter settings. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to show a character counter. The value <b>true</b> means to show a character counter. \n
+     * .value[1]?.f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down. \n
+     * .value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to show a character counter. \n
+     * .value[1].f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. \n
+     * .value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum.
+     * The default value is <b>true</b>. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}.\n
+     * 
+     * @since 22
+     */
+    NODE_TEXT_INPUT_SHOW_COUNTER = 7040,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3760,6 +3784,7 @@ typedef enum {
      * when the number of characters that have been entered is greater than the maximum number of characters multiplied
      * by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down. \n
      * .value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum. \n
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to show a character counter. \n
@@ -3768,7 +3793,8 @@ typedef enum {
      * by the threshold percentage value. The value range is 1 to 100. \n
      * .value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum.
      * The default value is <b>true</b>. \n
-     *
+     * .object: counter configuration. The parameter type is {@link ArkUI_ShowCounterConfig}. \n
+     * 
      */
     NODE_TEXT_AREA_SHOW_COUNTER,
 

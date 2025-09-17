@@ -5896,14 +5896,7 @@ void TextFieldPattern::HandleCounterBorder()
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
             SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
         } else {
-            if (!paintProperty->HasBorderWidthFlagByUser()) {
-                paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
-                paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
-            } else {
-                BorderColorProperty overCountBorderColor;
-                overCountBorderColor.SetColor(theme->GetOverCounterColor());
-                renderContext->UpdateBorderColor(overCountBorderColor);
-            }
+            ApplyInnerBorderColor();
         }
     } else {
         if (IsUnderlineMode() && !IsShowError()) {
@@ -5913,6 +5906,35 @@ void TextFieldPattern::HandleCounterBorder()
         } else {
             SetThemeBorderAttr();
         }
+    }
+}
+
+void TextFieldPattern::ApplyInnerBorderColor()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (!paintProperty->HasBorderWidthFlagByUser()) {
+        paintProperty->UpdateInnerBorderWidth(OVER_COUNT_BORDER_WIDTH);
+        if (layoutProperty && layoutProperty->HasCounterTextOverflowColor()) {
+            paintProperty->UpdateInnerBorderColor(layoutProperty->GetCounterTextOverflowColorValue());
+        } else {
+            paintProperty->UpdateInnerBorderColor(theme->GetOverCounterColor());
+        }
+    } else {
+        BorderColorProperty overCountBorderColor;
+        if (layoutProperty->HasCounterTextOverflowColor()) {
+            overCountBorderColor.SetColor(layoutProperty->GetCounterTextOverflowColorValue());
+        } else {
+            overCountBorderColor.SetColor(theme->GetOverCounterColor());
+        }
+        renderContext->UpdateBorderColor(overCountBorderColor);
     }
 }
 
@@ -7970,8 +7992,12 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
+    auto counterTextColor = layoutProperty->GetCounterTextColor();
+    auto counterTextOverflowColor = layoutProperty->GetCounterTextOverflowColor();
     jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
     jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
+    jsonShowCounterOptions->Put("counterTextColor", counterTextColor->ColorToString().c_str());
+    jsonShowCounterOptions->Put("counterTextOverflowColor", counterTextOverflowColor->ColorToString().c_str());
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
@@ -11564,6 +11590,8 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
+        DEFINE_PROP_HANDLER(counterTextColor, Color, UpdateCounterTextColor),
+        DEFINE_PROP_HANDLER(counterTextOverflowColor, Color, UpdateCounterTextOverflowColor),
         
         {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {

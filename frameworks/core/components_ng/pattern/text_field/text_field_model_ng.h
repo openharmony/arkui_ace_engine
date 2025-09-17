@@ -102,6 +102,10 @@ public:
     void ResetDisableUnderlineColor() override;
     void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
+    void SetCounterTextColor(const Color& value) override;
+    void ResetCounterTextColor() override;
+    void SetCounterTextOverflowColor(const Color& value) override;
+    void ResetCounterTextOverflowColor() override;
     void SetCounterType(int32_t value) override;
     void SetShowCounterBorder(bool value) override;
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override;
@@ -220,6 +224,10 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void ResetCaretColor(FrameNode* frameNode);
     static void SetShowCounter(FrameNode* frameNode, bool value);
+    static void SetCounterTextColor(FrameNode* frameNode, const Color& value);
+    static void SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value);
+    static void ResetCounterTextColor(FrameNode* frameNode);
+    static void ResetCounterTextOverflowColor(FrameNode* frameNode);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible);
     static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
@@ -272,6 +280,8 @@ public:
     static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static bool GetShowCounter(FrameNode* frameNode);
+    static Color GetCounterTextColor(FrameNode* frameNode);
+    static Color GetCounterTextOverflowColor(FrameNode* frameNode);
     static int GetCounterType(FrameNode* frameNode);
     static uint32_t GetMinLines(FrameNode* frameNode);
     static bool GetShowCounterBorder(FrameNode* frameNode);

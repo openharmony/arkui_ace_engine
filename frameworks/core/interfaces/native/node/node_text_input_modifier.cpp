@@ -1942,14 +1942,43 @@ void ResetTextInputSelectAll(ArkUINodeHandle node)
     TextFieldModelNG::SetSelectAllValue(frameNode, DEFAULT_SELECT_ALL);
 }
 
-void SetTextInputShowCounter(
-    ArkUINodeHandle node, ArkUI_Uint32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Uint32 highlightBorder)
+void SetTextInputShowCounter(ArkUINodeHandle node, ArkUIShowCountOptions* showCountOptions,
+    void* counterTextColorRawPtr, void* counterTextOverflowColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetShowCounter(frameNode, static_cast<bool>(open));
-    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentage);
-    TextFieldModelNG::SetShowCounterBorder(frameNode, static_cast<bool>(highlightBorder));
+    TextFieldModelNG::SetShowCounter(frameNode, static_cast<bool>(showCountOptions->open));
+    TextFieldModelNG::SetCounterType(frameNode, showCountOptions->thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, static_cast<bool>(showCountOptions->highlightBorder));
+    if (showCountOptions->counterTextColor != -1) {
+        TextFieldModelNG::SetCounterTextColor(frameNode, Color(showCountOptions->counterTextColor));
+    } else {
+        TextFieldModelNG::ResetCounterTextColor(frameNode);
+    }
+    if (showCountOptions->counterTextOverflowColor != -1) {
+        TextFieldModelNG::SetCounterTextOverflowColor(frameNode, Color(showCountOptions->counterTextOverflowColor));
+    } else {
+        TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (counterTextColorRawPtr) {
+            auto resObjTextColor = AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextColor", resObjTextColor, Color(showCountOptions->counterTextColor));
+        } else {
+            pattern->UnRegisterResource("counterTextColor");
+        }
+        if (counterTextOverflowColorRawPtr) {
+            auto resObjTextOverflowColor =
+                AceType::Claim(reinterpret_cast<ResourceObject*>(counterTextOverflowColorRawPtr));
+            pattern->RegisterResource<Color>(
+                "counterTextOverflowColor", resObjTextOverflowColor, Color(showCountOptions->counterTextOverflowColor));
+        } else {
+            pattern->UnRegisterResource("counterTextOverflowColor");
+        }
+    }
 }
 
 void ResetTextInputShowCounter(ArkUINodeHandle node)
@@ -1959,6 +1988,25 @@ void ResetTextInputShowCounter(ArkUINodeHandle node)
     TextFieldModelNG::SetShowCounter(frameNode, false);
     TextFieldModelNG::SetCounterType(frameNode, -1);
     TextFieldModelNG::SetShowCounterBorder(frameNode, true);
+    TextFieldModelNG::ResetCounterTextColor(frameNode);
+    TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("caretColor");
+        pattern->UnRegisterResource("counterTextOverflowColor");
+    }
+}
+
+void GetTextInputShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* options)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->open = TextFieldModelNG::GetShowCounter(frameNode);
+    options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
+    options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
+    options->counterTextColor = TextFieldModelNG::GetCounterTextColor(frameNode).GetValue();
+    options->counterTextOverflowColor = TextFieldModelNG::GetCounterTextOverflowColor(frameNode).GetValue();
 }
 
 void SetTextInputOnEditChange(ArkUINodeHandle node, void* callback)
@@ -2815,6 +2863,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .resetTextInputOnSecurityStateChange = ResetTextInputOnSecurityStateChange,
+        .getTextInputShowCounterOptions = GetTextInputShowCounterOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

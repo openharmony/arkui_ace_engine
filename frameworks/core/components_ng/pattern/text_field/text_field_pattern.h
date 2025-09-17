@@ -2064,6 +2064,7 @@ private:
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
+    void ApplyInnerBorderColor();
 
     RectF frameRect_;
     RectF textRect_;

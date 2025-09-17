@@ -235,6 +235,11 @@ struct ArkUI_DrawableDescriptor_AnimationController {
     void* controller;
 };
 
+struct ArkUI_ShowCounterConfig {
+    ArkUI_OptionalUint counterTextColor;
+    ArkUI_OptionalUint counterTextOverflowColor;
+};
+
 #ifdef __cplusplus
 };
 #endif

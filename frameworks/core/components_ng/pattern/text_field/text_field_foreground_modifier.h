@@ -37,10 +37,17 @@ public:
         innerBorderWidth_->Set(value);
     }
 
+    void SetInnerBorderColor(Color value)
+    {
+        CHECK_NULL_VOID(innerBorderColor_);
+        innerBorderColor_->Set(value);
+    }
+
 private:
     std::vector<RSPoint> MakeRRadius(const BorderRadiusProperty& border, float borderWidth) const;
     WeakPtr<Pattern> pattern_;
 
+    RefPtr<PropertyColor> innerBorderColor_;
     RefPtr<PropertyFloat> innerBorderWidth_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldForegroundModifier);
 };

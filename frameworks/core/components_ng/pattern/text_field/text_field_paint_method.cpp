@@ -261,5 +261,9 @@ void TextFieldPaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintProperty);
     textFieldForegroundModifier_->SetInnerBorderWidth(
         static_cast<float>(paintProperty->GetInnerBorderWidthValue(Dimension()).ConvertToPx()));
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    textFieldForegroundModifier_->SetInnerBorderColor(
+        paintProperty->GetInnerBorderColorValue(textFieldTheme->GetOverCounterColor()));
 }
 } // namespace OHOS::Ace::NG

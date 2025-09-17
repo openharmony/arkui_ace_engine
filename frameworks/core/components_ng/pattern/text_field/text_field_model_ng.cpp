@@ -769,6 +769,16 @@ void TextFieldModelNG::SetShowCounter(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
+void TextFieldModelNG::ResetCounterTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor);
+}
+
+void TextFieldModelNG::ResetCounterTextOverflowColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor);
+}
+
 void TextFieldModelNG::SetCounterType(int32_t value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
@@ -1090,6 +1100,16 @@ void TextFieldModelNG::SetTextDecorationColor(const Color& value)
 void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
+}
+
+void TextFieldModelNG::SetCounterTextColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, value);
+}
+
+void TextFieldModelNG::SetCounterTextOverflowColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, value);
 }
 
 void TextFieldModelNG::SetBackBorderRadius()
@@ -1520,6 +1540,30 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
 }
 
+void TextFieldModelNG::SetCounterTextColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, value, frameNode);
+}
+
+void TextFieldModelNG::SetCounterTextOverflowColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, value, frameNode);
+}
+
+void TextFieldModelNG::ResetCounterTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextColor, frameNode);
+}
+
+void TextFieldModelNG::ResetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, frameNode);
+}
+
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText, frameNode);
@@ -1853,6 +1897,21 @@ bool TextFieldModelNG::GetShowCounter(FrameNode* frameNode)
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowCounter, value, frameNode, value);
     return static_cast<int>(value);
+}
+
+Color TextFieldModelNG::GetCounterTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, CounterTextColor, value, frameNode, value);
+    return value;
+}
+
+Color TextFieldModelNG::GetCounterTextOverflowColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, CounterTextOverflowColor, value, frameNode, value);
+    return value;
 }
 
 uint32_t TextFieldModelNG::GetMinLines(FrameNode* frameNode)

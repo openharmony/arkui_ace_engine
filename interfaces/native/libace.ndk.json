@@ -4290,5 +4290,29 @@
     {
         "first_introduced": "22",
         "name": "OH_ArkUI_SurfaceHolder_SetSurfaceConfig"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_Create"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_Dispose"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_SetCounterTextColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_SetCounterTextOverflowColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_GetCounterTextColor"
+    },
+    {
+        "first_introduced": "22",
+        "name": "OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor"
     }
 ]

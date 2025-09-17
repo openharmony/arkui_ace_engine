@@ -1228,10 +1228,14 @@ class ArkTextFieldShowCounter {
   value: boolean;
   highlightBorder?: boolean;
   thresholdPercentage?: number;
+  counterTextColor?: ResourceColor;
+  counterTextOverflowColor?: ResourceColor;
   constructor() {
     this.value = undefined;
     this.highlightBorder = undefined;
     this.thresholdPercentage = undefined;
+    this.counterTextColor = undefined;
+    this.counterTextOverflowColor = undefined;
   }
   isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&

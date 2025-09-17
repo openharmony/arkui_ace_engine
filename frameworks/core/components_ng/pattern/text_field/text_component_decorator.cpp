@@ -187,9 +187,10 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     } else {
         accessibilityProperty->SetAccessibilityText("");
     }
-    TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) ?
+    TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus())?
                                 theme->GetOverCountTextStyle() :
                                 theme->GetCountTextStyle();
+    ProcessCounterColor(decoratedNode, countTextStyle);
     counterNodeLayoutProperty->UpdateContent(counterText);
     if (textFieldLayoutProperty->HasMaxFontScale()) {
         auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value();
@@ -205,6 +206,23 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     counterNodeLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment());
     counterNodeLayoutProperty->UpdateMaxLines(theme->GetCounterTextMaxline());
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
+}
+
+void CounterDecorator::ProcessCounterColor(RefPtr<FrameNode>& decoratedNode, TextStyle& countTextStyle)
+{
+    auto textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) {
+        if (textFieldLayoutProperty->HasCounterTextOverflowColor()) {
+            countTextStyle.SetTextColor(textFieldLayoutProperty->GetCounterTextOverflowColor());
+        }
+    } else {
+        if (textFieldLayoutProperty->HasCounterTextColor()) {
+            countTextStyle.SetTextColor(textFieldLayoutProperty->GetCounterTextColor());
+        }
+    }
 }
 
 std::string CounterDecorator::GetAccessibilityText(uint32_t textLength, uint32_t maxLength)

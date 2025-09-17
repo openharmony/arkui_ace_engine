@@ -1658,11 +1658,46 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             return;
         }
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
+        ParseShowCounterColor(paramObject);
         return;
     }
     TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
+    TextFieldModel::GetInstance()->ResetCounterTextColor();
+    TextFieldModel::GetInstance()->ResetCounterTextOverflowColor();
+}
+
+void JSTextField::ParseShowCounterColor(const JSRef<JSObject>& paramObject)
+{
+    auto paramColor = paramObject->GetProperty("counterTextColor");
+    Color counterTextColor;
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("counterTextColor");
+    bool isColorValid = !paramColor->IsNull() && !paramColor->IsUndefined();
+    bool colorParsed = isColorValid && ParseColorMetricsToColor(paramColor, counterTextColor, resourceObject);
+    if (colorParsed) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("counterTextColor", resourceObject, counterTextColor);
+        }
+        TextFieldModel::GetInstance()->SetCounterTextColor(counterTextColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetCounterTextColor();
+    }
+    auto paramOverflowColor = paramObject->GetProperty("counterTextOverflowColor");
+    Color counterTextOverflowColor;
+    UnregisterResource("counterTextOverflowColor");
+    bool isOverflowColorValid = !paramOverflowColor->IsNull() && !paramOverflowColor->IsUndefined();
+    bool overflowColorParsed =
+        isOverflowColorValid && ParseColorMetricsToColor(paramOverflowColor, counterTextOverflowColor, resourceObject);
+    if (overflowColorParsed) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("counterTextOverflowColor", resourceObject, counterTextOverflowColor);
+        }
+        TextFieldModel::GetInstance()->SetCounterTextOverflowColor(counterTextOverflowColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetCounterTextOverflowColor();
+    }
 }
 
 void JSTextField::SetBarState(const JSCallbackInfo& info)
