@@ -21,7 +21,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -31,6 +30,7 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+using ReadyEvent = std::function<void()>;
 class CanvasPaintMethod;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
@@ -78,11 +78,6 @@ public:
         return MakeRefPtr<CanvasLayoutAlgorithm>();
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<CanvasEventHub>();
-    }
-
     void SetCanvasSize(std::optional<SizeF> canvasSize)
     {
         canvasSize_ = canvasSize;
@@ -96,6 +91,11 @@ public:
     bool IsAttached() const
     {
         return isAttached_;
+    }
+
+    void SetOnReady(ReadyEvent&& readyEvent)
+    {
+        readyEvent_ = std::move(readyEvent);
     }
 
     void SetAntiAlias(bool isEnabled);
@@ -218,9 +218,17 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void OnModifyDone() override;
     void UpdateTextDefaultDirection();
+    void FireReadyEvent() const
+    {
+        ACE_SCOPED_TRACE("CanvasPattern::FireReadyEvent");
+        if (readyEvent_) {
+            readyEvent_();
+        }
+    }
 
     std::function<void()> onContext2DAttach_;
     std::function<void()> onContext2DDetach_;
+    ReadyEvent readyEvent_;
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };

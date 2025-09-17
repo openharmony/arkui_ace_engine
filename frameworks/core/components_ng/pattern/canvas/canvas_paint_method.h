@@ -110,9 +110,6 @@ private:
 #endif
     std::list<TaskFunc> tasks_;
 
-#ifndef ACE_UNITTEST
-    RefPtr<Ace::ImageObject> imageObj_ = nullptr;
-#endif
     OnModifierUpdateFunc onModifierUpdate_;
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     WeakPtr<FrameNode> frameNode_;
