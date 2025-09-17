@@ -1031,6 +1031,11 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         preList = navigationStack_->GetPreNavPathList();
         prePrimaryNodes_ = primaryNodes_;
     }
+    auto indexes = navigationStack_->GetAllPathIndex();
+    auto toIndex = indexes.size() - 1;
+    auto topNavPath = navigationStack_->GetTopNavPath();
+    FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
+    needSyncWithJsStack_ = false;
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();
@@ -3253,6 +3258,37 @@ void NavigationPattern::RemoveFromDumpManager()
     if (mgr) {
         mgr->RemoveNavigationDumpCallback(node->GetId(), node->GetDepth());
     }
+}
+
+void NavigationPattern::FireInterceptionBeforeLifeCycleEvent(
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath, const int32_t index)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    RefPtr<NavDestinationContext> top;
+    if (newTopPath.has_value()) {
+        auto topDestination =
+            AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(newTopPath->second));
+        if (topDestination) {
+            auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
+            top = pattern->GetNavDestinationContext();
+        }
+    }
+    NavigationOperation operation;
+    if (isReplace_ != 0) {
+        operation = NavigationOperation::REPLACE;
+    } else {
+        operation = lastPreIndex_ == -1 ? NavigationOperation::POP : NavigationOperation::PUSH;
+    }
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    // mode is split and stack size is one,don't need to do animation.
+    if ((layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT ||
+            navigationMode_ == NavigationMode::SPLIT) &&
+        !preContext_) {
+        isAnimated_ = false;
+    }
+    navigationStack_->FireNavigationInterceptionBeforeLifeCycle(navigationStack_, top, index, operation, isAnimated_);
 }
 
 void NavigationPattern::FireInterceptionEvent(bool isBefore,

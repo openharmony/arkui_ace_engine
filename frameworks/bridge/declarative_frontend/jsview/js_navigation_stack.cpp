@@ -863,6 +863,46 @@ std::vector<std::string> JSNavigationStack::DumpStackInfo() const
     return dumpInfos;
 }
 
+void JSNavigationStack::FireNavigationInterceptionBeforeLifeCycle(const RefPtr<NavigationStack>& navigationStack,
+    const RefPtr<NG::NavDestinationContext>& from, const int32_t index, NG::NavigationOperation operation,
+    bool isAnimated)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    JSRef<JSFunc> beforeFunc;
+    if (!CheckAndGetInterceptionFunc("interception", beforeFunc)) {
+        return;
+    }
+    constexpr uint8_t argsNum = 5; // 5: number of parameters.
+    JSRef<JSVal> params[argsNum];
+    auto fromDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+    if (!fromDestination) {
+        params[0] = JSRef<JSVal>::Make(ToJSValue("navBar"));
+    } else if (fromDestination->GetIsEmpty()) {
+        params[0] = JSRef<JSObject>::New();
+    } else {
+        params[0] = CreatePathInfoWithNecessaryProperty(from);
+    }
+    auto path = GetJsPathInfo(index);
+    if (path->IsEmpty()) {
+        params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
+    } else {
+        params[1] = GetJsPathInfo(index);
+    }
+    const uint8_t pathStackIndex = 2;
+    auto jsStack = AceType::DynamicCast<JSNavigationStack>(navigationStack);
+    if (jsStack) {
+        auto navPathStackObj = jsStack->GetDataSourceObj();
+        if (!navPathStackObj.IsEmpty()) {
+            params[pathStackIndex] = navPathStackObj;
+        }
+    }
+    const uint8_t operationIndex = 3;
+    params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
+    const uint8_t animatedIndex = 4;
+    params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
+    beforeFunc->Call(JSRef<JSObject>(), argsNum, params);
+}
+
 void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
     const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
 {
