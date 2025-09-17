@@ -738,6 +738,18 @@ class UIContext {
         Context.setDynamicDimming(nodePtr, number);
     }
 
+    setImageCacheCount(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setImageCacheCount(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setImageRawDataCacheSize(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setImageRawDataCacheSize(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getCursorController() {
         if (this.cursorController_ == null) {
             this.cursorController_ = new CursorController(this.instanceId_);
