@@ -16,11 +16,11 @@
 
 #include "bridge/common/utils/utils.h"
 #include "base/utils/utf_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "interfaces/native/node/node_model.h"
-#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -194,7 +194,7 @@ void ResetTextAreaCopyOption(ArkUINodeHandle node)
 
 void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextFieldModelNG::SetPlaceholderColor(frameNode, result);
@@ -205,7 +205,7 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(resRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
         if (resObj) {
             pattern->RegisterResource<Color>("placeholderColor", resObj, result);
@@ -446,7 +446,7 @@ void ResetTextAreaShowCounter(ArkUINodeHandle node)
 
 void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextFieldModelNG::SetCaretColor(frameNode, result);
@@ -455,7 +455,7 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
         if (!colorRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(colorRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -493,7 +493,7 @@ void ResetTextAreaMaxLength(ArkUINodeHandle node)
 
 void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextFieldModelNG::SetTextColor(frameNode, result);
@@ -504,7 +504,7 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(resRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
         if (resObj) {
             pattern->RegisterResource<Color>("fontColor", resObj, result);
@@ -719,7 +719,7 @@ ArkUI_Bool GetTextAreaEditing(ArkUINodeHandle node)
 
 void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextFieldModelNG::SetBackgroundColor(frameNode, result);
@@ -728,7 +728,7 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(resRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
