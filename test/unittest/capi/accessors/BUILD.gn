@@ -112,6 +112,7 @@ ace_unittest("capi_all_accessors_test") {
     "rotation_recognizer_accessor_test.cpp",
     "scale_symbol_effect_accessor_test.cpp",
     "screen_capture_handler_accessor_test.cpp",
+    "scroll_result_accessor_test.cpp",
     # "scrollable_target_info_accessor_test.cpp",
     # "scroller_accessor_test.cpp",
     "search_controller_test.cpp",
