@@ -27,7 +27,8 @@ namespace OHOS::Ace::NG {
 // main thread
 std::thread::id mainThreadId = std::this_thread::get_id();
 // global high priority queue
-std::unordered_map<pthread_t, std::unordered_map<PriorityType, std::queue<TaskExecutor::Task>>> globalTaskPriorityQueue_;
+std::unordered_map<pthread_t, std::unordered_map<PriorityType,
+                            std::queue<TaskExecutor::Task>>> globalTaskPriorityQueue_;
 static std::mutex queueMutex;
  
 static bool is_main_thread() {
@@ -136,7 +137,7 @@ void UVTaskWrapperImpl::Call(
     }, napi_eprio_high);
 }
 
-void UVTaskWrapperImpl::Call(	
+void UVTaskWrapperImpl::Call(
     const TaskExecutor::Task& task, uint32_t delayTime, PriorityType priorityType)
 {
     if (delayTime <= 0) {
