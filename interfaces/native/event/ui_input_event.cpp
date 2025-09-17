@@ -2580,6 +2580,43 @@ int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event)
     RETURN_RET_WITH_STATUS_CHECK(UI_AXIS_EVENT_ACTION_NONE, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
+int32_t OH_ArkUI_AxisEvent_HasAxis(const ArkUI_UIInputEvent* event, int32_t axis)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_AXIS | S_GESTURE_AXIS_EVENT | S_NXC_DISPATCH_AXIS_EVENT, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                break;
+            }
+            if ((axis >= UI_AXIS_TYPE_VERTICAL_AXIS) && (axis <= UI_AXIS_TYPE_PINCH_AXIS)) {
+                RETURN_RET_WITH_STATUS_CHECK(
+                    static_cast<bool>(static_cast<uint32_t>(axisEvent->axes) & (1 << static_cast<uint32_t>(axis))),
+                    ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                break;
+            }
+            if ((axis >= UI_AXIS_TYPE_VERTICAL_AXIS) && (axis <= UI_AXIS_TYPE_PINCH_AXIS)) {
+                RETURN_RET_WITH_STATUS_CHECK(
+                    static_cast<bool>(static_cast<uint32_t>(axisEvent->axes) & (1 << static_cast<uint32_t>(axis))),
+                    ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(false, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
 int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_TOUCH_INTERCEPT, event);

@@ -4248,6 +4248,13 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let AxisType;
+(function (AxisType) {
+  AxisType[AxisType.VERTICAL_AXIS = 0] = 'VERTICAL_AXIS';
+  AxisType[AxisType.HORIZONTAL_AXIS = 1] = 'HORIZONTAL_AXIS';
+  AxisType[AxisType.PINCH_AXIS = 2] = 'PINCH_AXIS';
+})(AxisType || (AxisType = {}));
+
 let WebBypassVsyncCondition;
 (function (WebBypassVsyncCondition) {
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';

@@ -219,6 +219,12 @@ enum class AxisAction : int32_t {
     END,
     CANCEL,
 };
+
+enum class AxisType : int32_t {
+    VERTICAL_AXIS = 0,
+    HORIZONTAL_AXIS,
+    PINCH_AXIS,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_CONSTANTS_H

@@ -24,11 +24,11 @@ AxisEvent AxisEvent::CreateScaleEvent(float scale) const
     if (NearZero(scale)) {
         return { id, x, y, screenX, screenY, globalDisplayX, globalDisplayY, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep };
+            pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep, axes };
     }
     return { id, x / scale, y / scale, screenX / scale, screenY / scale, globalDisplayX / scale, globalDisplayY / scale,
         verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId,
-        sourceType, sourceTool, pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep };
+        sourceType, sourceTool, pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep, axes };
 }
 
 Offset AxisEvent::GetOffset() const
@@ -128,6 +128,7 @@ AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const Ev
 {
     action_ = event.action;
     scrollStep_ = event.scrollStep;
+    axes_ = event.axes;
     verticalAxis_ = static_cast<float>(event.verticalAxis);
     horizontalAxis_ = static_cast<float>(event.horizontalAxis);
     pinchAxisScale_ = static_cast<float>(event.pinchAxisScale);
@@ -220,6 +221,21 @@ const Offset& AxisInfo::GetGlobalDisplayLocation() const
     return globalDisplayLocation_;
 }
 
+bool AxisInfo::HasAxis(AxisType axis)
+{
+    bool ret { false };
+    if ((axis >= AxisType::VERTICAL_AXIS) && (axis <= AxisType::PINCH_AXIS)) {
+        ret = static_cast<bool>(static_cast<uint32_t>(axes_) & (1 << static_cast<uint32_t>(axis)));
+    }
+    return ret;
+}
+
+uint32_t AxisInfo::GetAxes() const
+{
+    return axes_;
+}
+
+
 AxisEvent AxisInfo::ConvertToAxisEvent() const
 {
     AxisEvent axisEvent;
@@ -230,6 +246,7 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.globalDisplayX = static_cast<float>(globalDisplayLocation_.GetX());
     axisEvent.globalDisplayY = static_cast<float>(globalDisplayLocation_.GetY());
     axisEvent.scrollStep = scrollStep_;
+    axisEvent.axes = axes_;
     axisEvent.horizontalAxis = horizontalAxis_;
     axisEvent.verticalAxis = verticalAxis_;
     axisEvent.pinchAxisScale = pinchAxisScale_;
