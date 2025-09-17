@@ -540,7 +540,7 @@ export struct SubHeaderV2 {
   rightAreaClickEvent(instance: CommonMethod) {
     instance.onKeyEvent((event: KeyEvent) => {
       if (!event) {
-        return;
+        return false;
       }
       if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
         event.type === KeyType.Down) {
