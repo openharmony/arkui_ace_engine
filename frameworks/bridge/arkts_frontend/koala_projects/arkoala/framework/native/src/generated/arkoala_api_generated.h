@@ -24134,6 +24134,10 @@ typedef struct GENERATED_ArkUIWebModifier {
                                             const Opt_Boolean* value);
     void (*setEnableWebAVSession)(Ark_NativePointer node,
                                   const Opt_Boolean* value);
+    void (*setEnableDataDetector)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
+    void (*setDataDetectorConfig)(Ark_NativePointer node,
+                                  const Opt_TextDataDetectorConfig* value);
     void (*setRunJavaScriptOnDocumentStart)(Ark_NativePointer node,
                                             const Opt_Array_ScriptItem* value);
     void (*setRunJavaScriptOnDocumentEnd)(Ark_NativePointer node,

@@ -54,6 +54,8 @@ public:
     static void SetEnableFollowSystemFontWeight(FrameNode *frameNode,
         const std::optional<bool>& enableFollowSystemFontWeight);
     static void SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable);
+    static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);

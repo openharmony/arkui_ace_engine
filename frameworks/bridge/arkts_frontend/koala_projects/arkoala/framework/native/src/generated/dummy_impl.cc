@@ -19923,6 +19923,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void EnableDataDetectorImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("enableDataDetector(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DataDetectorConfigImpl(Ark_NativePointer node,
+                                const Opt_TextDataDetectorConfig* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("dataDetectorConfig(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                           const Opt_Array_ScriptItem* value)
     {
@@ -23269,6 +23289,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OptimizeParserBudgetImpl,
             WebAttributeModifier::EnableFollowSystemFontWeightImpl,
             WebAttributeModifier::EnableWebAVSessionImpl,
+            WebAttributeModifier::EnableDataDetectorImpl,
+            WebAttributeModifier::DataDetectorConfigImpl,
             WebAttributeModifier::RunJavaScriptOnDocumentStartImpl,
             WebAttributeModifier::RunJavaScriptOnDocumentEndImpl,
             WebAttributeModifier::RunJavaScriptOnHeadEndImpl,

@@ -8802,6 +8802,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_Boolean* value)
     {
     }
+    void EnableDataDetectorImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+    }
+    void DataDetectorConfigImpl(Ark_NativePointer node,
+                                const Opt_TextDataDetectorConfig* value)
+    {
+    }
     void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                           const Opt_Array_ScriptItem* value)
     {
@@ -11685,6 +11693,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OptimizeParserBudgetImpl,
             WebAttributeModifier::EnableFollowSystemFontWeightImpl,
             WebAttributeModifier::EnableWebAVSessionImpl,
+            WebAttributeModifier::EnableDataDetectorImpl,
+            WebAttributeModifier::DataDetectorConfigImpl,
             WebAttributeModifier::RunJavaScriptOnDocumentStartImpl,
             WebAttributeModifier::RunJavaScriptOnDocumentEndImpl,
             WebAttributeModifier::RunJavaScriptOnHeadEndImpl,

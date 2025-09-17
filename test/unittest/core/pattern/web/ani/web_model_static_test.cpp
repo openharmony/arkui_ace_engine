@@ -1676,6 +1676,43 @@ HWTEST_F(WebModelStaticTest, SetWebMediaAVSessionEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableDataDetector001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableDataDetector001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetEnableDataDetector(AccessibilityManager::RawPtr(frameNode), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDataDetectorConfig001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetDataDetectorConfig001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    TextDetectConfig config;
+    WebModelStatic::SetDataDetectorConfig(AccessibilityManager::RawPtr(frameNode), config);
+#endif
+}
+
+/**
  * @tc.name: SetDefaultTextEncodingFormat001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
