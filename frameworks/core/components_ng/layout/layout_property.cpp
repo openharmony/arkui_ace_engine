@@ -1038,16 +1038,16 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstrai
     return totalPadding;
 }
 
-BorderWidthPropertyF LayoutProperty::CreateBorder()
+BorderWidthPropertyF LayoutProperty::CreateBorder(bool isRoundPixel)
 {
     // no pixel rounding
     if (layoutConstraint_.has_value()) {
         return ConvertToBorderWidthPropertyF(
-            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), false);
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), isRoundPixel);
     }
 
     return ConvertToBorderWidthPropertyF(
-        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), false);
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), isRoundPixel);
 }
 
 MarginPropertyF LayoutProperty::CreateMargin()

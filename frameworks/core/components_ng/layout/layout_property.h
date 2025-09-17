@@ -315,7 +315,7 @@ public:
     PaddingPropertyF CreatePaddingAndBorder(bool includeSafeAreaPadding = true, bool forceReCreate = false);
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
-    BorderWidthPropertyF CreateBorder();
+    BorderWidthPropertyF CreateBorder(bool isRoundPixel = false);
 
     MarginPropertyF CreateMargin();
     MarginPropertyF CreateMarginWithoutCache();
