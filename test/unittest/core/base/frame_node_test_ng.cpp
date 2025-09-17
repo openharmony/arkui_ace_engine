@@ -2786,7 +2786,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
     static constexpr uint32_t AI_CALLER_INVALID = 1;
     static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
     auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps2: create AI helper
      */
