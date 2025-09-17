@@ -897,6 +897,18 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgAddExtraMas
     props.isModal = false;
     pattern->AddExtraMaskNode(props);
     EXPECT_EQ(totalChildCount, frameNode->GetTotalChildCount());
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    props.isModal = true;
+    props.maskTransitionEffect = maskTransitionEffect;
+    props.isShowInSubWindow = false;
+    pattern->AddExtraMaskNode(props);
+    EXPECT_EQ(totalChildCount + 1, frameNode->GetTotalChildCount());
 }
 
 /**
