@@ -266,6 +266,7 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
+const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
 const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor();
@@ -567,6 +568,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLayoutableAccessor,
         GetLayoutManagerAccessor,
         GetLayoutPolicyAccessor,
+        GetLazyBuildAccessor,
         GetLazyForEachOpsAccessor,
         GetLetterSpacingStyleAccessor,
         GetLifeCycleAccessor,

@@ -24497,6 +24497,11 @@ typedef struct GENERATED_ArkUILayoutPolicyAccessor {
     Ark_LayoutPolicy (*getMatchParent)();
 } GENERATED_ArkUILayoutPolicyAccessor;
 
+typedef struct GENERATED_ArkUILazyBuildAccessor {
+    void (*SetTabContentLazyBuilder)(Ark_NativePointer node,
+                                     const CustomNodeBuilder* builder);
+} GENERATED_ArkUILazyBuildAccessor;
+
 typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*Sync)(Ark_NativePointer node,
                  Ark_Int32 totalCount,
@@ -26362,6 +26367,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayoutableAccessor* (*getLayoutableAccessor)();
     const GENERATED_ArkUILayoutManagerAccessor* (*getLayoutManagerAccessor)();
     const GENERATED_ArkUILayoutPolicyAccessor* (*getLayoutPolicyAccessor)();
+    const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILifeCycleAccessor* (*getLifeCycleAccessor)();

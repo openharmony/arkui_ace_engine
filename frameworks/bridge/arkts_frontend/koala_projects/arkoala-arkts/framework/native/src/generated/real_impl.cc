@@ -13784,6 +13784,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LayoutPolicyAccessor
+    namespace LazyBuildAccessor {
+    void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
+                                      const CustomNodeBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // LazyBuildAccessor
     namespace LazyForEachOpsAccessor {
     void SyncImpl(Ark_NativePointer node,
                   Ark_Int32 totalCount,
@@ -19372,6 +19380,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LayoutPolicyPeer {
         virtual ~LayoutPolicyPeer() = default;
     };
+    const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor()
+    {
+        static const GENERATED_ArkUILazyBuildAccessor LazyBuildAccessorImpl {
+            LazyBuildAccessor::SetTabContentLazyBuilderImpl,
+        };
+        return &LazyBuildAccessorImpl;
+    }
+
     const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     {
         static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
@@ -21320,6 +21336,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLayoutableAccessor,
             GetLayoutManagerAccessor,
             GetLayoutPolicyAccessor,
+            GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
             GetLetterSpacingStyleAccessor,
             GetLifeCycleAccessor,
