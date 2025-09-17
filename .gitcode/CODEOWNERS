@@ -3476,6 +3476,7 @@ test/unittest/core/render/ @arkui_framework_xnode
 test/unittest/core/rosen/ @arkui_framework_xnode
 test/unittest/core/svg/ @arkui001
 test/unittest/core/syntax/ @arkuieco3
+test/unittest/core/base/view_abstract_model_test_ng.cpp @ArkUI_Event
 test/unittest/core/base/frame_node_test_ng_coverage.cpp @arkui_architecture
 test/unittest/core/base/inspector_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/base/observer_test_ng.cpp @arkui_framework_xnode
