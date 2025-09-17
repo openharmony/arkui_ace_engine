@@ -344,6 +344,23 @@ void GridLayoutInfo::GetLineHeights(
     }
 }
 
+void GridLayoutInfo::MakeLineHeightsAvailable(float& regularHeight, float& irregularHeight)
+{
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
+        irregularHeight = lastIrregularMainSize_;
+    } else {
+        lastIrregularMainSize_ = irregularHeight;
+    }
+    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
+        regularHeight = lastRegularMainSize_;
+    } else {
+        lastRegularMainSize_ = regularHeight;
+    }
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
+}
+
 float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const
 {
     if (options.irregularIndexes.empty()) {
@@ -435,19 +452,15 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
-        irregularHeight = lastIrregularMainSize_;
-    } else {
-        lastIrregularMainSize_ = irregularHeight;
+    if (Negative(irregularHeight) && Negative(regularHeight) && NonPositive(lastRegularMainSize_)) {
+        if (startIndex_ != 0 && !NearZero(currentHeight_)) {
+            SkipRegularLines(
+                Positive(currentOffset_ - prevHeight_), mainGap, (currentHeight_ / startIndex_) * crossCount_);
+        }
+        TAG_LOGI(ACE_GRID, "skip and reset both happend.");
+        return;
     }
-    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
-        regularHeight = lastRegularMainSize_;
-    } else {
-        lastRegularMainSize_ = regularHeight;
-    }
-    if (Negative(irregularHeight)) {
-        irregularHeight = regularHeight;
-    }
+    MakeLineHeightsAvailable(regularHeight, irregularHeight);
 
     float totalHeight = 0;
     int32_t lastIndex = -1;
@@ -473,6 +486,29 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     currentOffset_ = totalHeight + static_cast<double>(regularHeight) * lines - targetContent;
     int32_t startIdx = lines * crossCount_ + lastIndex + 1;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
+}
+
+void GridLayoutInfo::SkipRegularLines(bool forward, float mainGap, float averageHeight)
+{
+    auto lineHeight = averageHeight + mainGap;
+    if (LessOrEqual(lineHeight, 0.0)) {
+        return;
+    }
+    int32_t estimatedLines = currentOffset_ / lineHeight;
+    if (forward && startIndex_ < estimatedLines * crossCount_) {
+        startIndex_ = 0;
+        currentOffset_ = 0;
+    } else {
+        auto newIndex = startIndex_ - estimatedLines * crossCount_;
+        auto childrenCount = GetChildrenCount();
+        // keep offset and startIndex if startIndex is in the last line
+        newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
+        if (newIndex > startIndex_) {
+            estimatedLines = (newIndex - startIndex_) / crossCount_;
+            currentOffset_ += lineHeight * estimatedLines;
+            startIndex_ = newIndex;
+        }
+    }
 }
 
 float GridLayoutInfo::GetCurrentLineHeight() const

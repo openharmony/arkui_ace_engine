@@ -1392,25 +1392,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
 
 void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
 {
-    auto lineHeight = info_.GetAverageLineHeight() + mainGap_;
-    if (LessOrEqual(lineHeight, 0.0)) {
-        return;
-    }
-    int32_t estimatedLines = info_.currentOffset_ / lineHeight;
-    if (forward && info_.startIndex_ < estimatedLines * static_cast<int32_t>(crossCount_)) {
-        info_.startIndex_ = 0;
-        info_.currentOffset_ = 0;
-    } else {
-        auto newIndex = info_.startIndex_ - estimatedLines * static_cast<int32_t>(crossCount_);
-        auto childrenCount = info_.GetChildrenCount();
-        // keep offset and startIndex if startIndex is in the last line
-        newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
-        if (newIndex > info_.startIndex_) {
-            estimatedLines = (newIndex - info_.startIndex_) / static_cast<int32_t>(crossCount_);
-            info_.currentOffset_ += lineHeight * estimatedLines;
-            info_.startIndex_ = newIndex;
-        }
-    }
+    info_.SkipRegularLines(forward, mainGap_, info_.GetAverageLineHeight());
 }
 
 void GridScrollLayoutAlgorithm::SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward)
