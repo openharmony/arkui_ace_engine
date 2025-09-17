@@ -795,7 +795,8 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
                 pattern->StartTwinkling();
             }
             pattern->selectOverlay_->SetUsingMouse(pattern->selectOverlay_->IsShowMouseMenu());
-            pattern->ProcessOverlay({ .menuIsShow = pattern->selectOverlay_->IsCurrentMenuVisibile() });
+            pattern->selectOverlay_->ProcessOverlayAfterLayout(
+                { .menuIsShow = pattern->selectOverlay_->IsCurrentMenuVisibile() });
             pattern->selectOverlay_->SetUsingMouse(false);
         }
         pattern->needToRefreshSelectOverlay_ = false;
