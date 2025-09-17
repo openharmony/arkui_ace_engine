@@ -427,7 +427,7 @@ public:
     }
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     static void __init_classpath_##module() {                                                 \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath);              \
     }                                                                                         \
     namespace {                                                                               \
       struct __Init_classpath_##module {                                                      \
@@ -443,7 +443,7 @@ public:
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     __attribute__((constructor))                                                              \
     static void __init_ani_classpath_##module() {                                             \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath);              \
     }
 #endif
 

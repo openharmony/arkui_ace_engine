@@ -226,7 +226,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
     }
 
     ani_class waterflowSections;
-    if (env->FindClass("Larkui/component/waterFlow/WaterFlowSections;", &waterflowSections) != ANI_OK) {
+    if (env->FindClass("arkui.component.waterFlow.WaterFlowSections", &waterflowSections) != ANI_OK) {
         return;
     }
     ani_boolean isSections;

@@ -63,7 +63,7 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
     env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
     if (!isUnifiedData) {
         return result_obj;
@@ -90,7 +90,7 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
     ani_boolean isSummary;
     ani_class summaryClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;", &summaryClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary", &summaryClass);
     env->Object_InstanceOf(summary_obj, summaryClass, &isSummary);
     if (!isSummary) {
         return result_obj;
