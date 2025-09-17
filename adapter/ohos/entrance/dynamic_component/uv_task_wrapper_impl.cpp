@@ -103,7 +103,7 @@ UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
     }
     threadId_ = engine->GetTid();
     auto uvLoop = engine->GetUVLoop();
-    if (uvLoop && !is_main_thread()) {
+    if (uvLoop && !IsMainThread()) {
         uv_register_task_to_worker(uvLoop, (uv_execute_specify_task)PostTaskToUV);
         uv_async_send(&uvLoop->wq_async);
     }
