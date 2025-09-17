@@ -200,6 +200,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
     spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
+
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 

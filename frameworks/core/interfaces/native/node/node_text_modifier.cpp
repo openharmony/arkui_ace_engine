@@ -17,6 +17,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -28,7 +29,6 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
-#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int DEFAULT_SELECTION = -1;
@@ -246,7 +246,7 @@ void ResetTextAlign(ArkUINodeHandle node)
 
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextModelNG::SetTextColor(frameNode, Color(color));
@@ -257,7 +257,7 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
         if (!fontColorRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(fontColorRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
         }
         if (resObj) {
             pattern->RegisterResource<Color>("TextColor", resObj, result);
@@ -1172,7 +1172,7 @@ void ResetTextCaretColor(ArkUINodeHandle node)
 
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
@@ -1183,7 +1183,7 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
         if (!selectedBackgroundColorRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(selectedBackgroundColorRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(selectedBackgroundColorRawPtr));
         }
         if (resObj) {
             pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);

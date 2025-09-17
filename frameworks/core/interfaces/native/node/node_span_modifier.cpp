@@ -272,7 +272,7 @@ void ResetSpanDecoration(ArkUINodeHandle node)
 
 void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorRawPtr)
 {
-    auto *uiNode = reinterpret_cast<UINode *>(node);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     Color result = Color(textColor);
     SpanModelNG::SetTextColor(uiNode, result);
@@ -283,7 +283,7 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
         if (!fontColorRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, uiNode->GetTag());
         } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(fontColorRawPtr));
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
         }
         if (resObj) {
             spanNode->RegisterResource<Color>("fontColor", resObj, result);
