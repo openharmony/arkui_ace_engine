@@ -17,22 +17,45 @@
 #include "frameworks/base/error/error_code.h"
  
 namespace OHOS::Ace {
-void AniThrow(ani_env *env, const std::string &errMsg)
+void AniThrow(ani_env *env, const std::string &errMsg, int32_t errorCode)
 {
     ani_class errCls;
-    const char* className = "escompat.Error";
-    env->FindClass(className, &errCls);
+    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "FindClass BusinessError failed.");
+        return;
+    }
     ani_method errCtor {};
-    env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor);
- 
+    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "FindMethod escompat.Error failed.");
+        return;
+    }
     ani_string resultString {};
-    env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &resultString);
+    if (ANI_OK != env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &resultString)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Covert string to ani string failed.");
+        return;
+    }
     ani_ref undefinedRef {};
-    env->GetUndefined(&undefinedRef);
- 
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get undefined failed.");
+        return;
+    }
     ani_object errObj {};
-    env->Object_New(errCls, errCtor, &errObj, resultString, undefinedRef);
-    env->ThrowError(static_cast<ani_error>(errObj));
+    if (ANI_OK != env->Object_New(errCls, errCtor, &errObj, resultString, undefinedRef)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Create ani error object failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(errorCode))) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Set error code failed.");
+        return;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Ref(errObj, "message", resultString)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Set error message failed.");
+        return;
+    }
+    if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "Throw ani error object failed.");
+        return;
+    }
 }
  
 ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::string& str)

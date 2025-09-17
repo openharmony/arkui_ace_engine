@@ -62,6 +62,10 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED = 100019;
 constexpr int32_t ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED = 100020;
 // The uiextension transparent node detected.
 constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSPARENT = 100021;
+// The inspector get ui context failed.
+constexpr int32_t ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED = 100022;
+// The inspector parameter depth must bu greater than zero.
+constexpr int32_t ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID = 100023;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;

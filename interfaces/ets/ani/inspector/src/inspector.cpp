@@ -15,6 +15,7 @@
 #include <ani.h>
 #include <string>
 #include <unistd.h>
+#include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
@@ -276,7 +277,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "get inspector failed");
+        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;
@@ -290,7 +291,8 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filter
 static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
 {
     if (depth < 0) {
-        AniThrow(env, "invalid filter depth");
+        AniThrow(env, "The parameter depth must be greater than 0.",
+            ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID);
         return nullptr;
     }
     bool isLayoutInspector = false;
@@ -306,7 +308,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "get inspector failed");
+        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;
