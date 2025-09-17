@@ -18,6 +18,7 @@
 
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
+#include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
@@ -27,8 +28,8 @@ struct IsolatedDumpInfo {
     int64_t createLimitedWorkerTime = 0;
 };
 
-class IsolatedPattern : public PlatformPattern, public PlatformContainerHandler {
-    DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern, PlatformContainerHandler);
+class IsolatedPattern : public PlatformPattern, public PlatformContainerHandler, public PlatformAccessibilityBase {
+    DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern, PlatformContainerHandler, PlatformAccessibilityBase);
 
 public:
     IsolatedPattern();
@@ -39,30 +40,28 @@ public:
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachContext(PipelineContext* context) override;
+    void OnDetachContext(PipelineContext* context) override;
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
     void SetAdaptiveWidth(bool state);
     void SetAdaptiveHeight(bool state);
 
-    void SearchExtensionElementInfoByAccessibilityId(
-        int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    bool TransferExecuteAction(
-        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset) override;
-
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void FireOnErrorCallbackOnUI(
         int32_t code, const std::string& name, const std::string& msg);
+
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
+    void OnAccessibilityChildTreeDeregister() const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) override;
+    void OnAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) const override;
+
+    void InitializeAccessibility() override;
+    void ResetAccessibilityChildTreeCallback();
 
 private:
     void InitializeRender(void* runtime);
@@ -75,6 +74,7 @@ private:
     void HandleBlurEvent() override;
 
     void OnAttachToFrameNode() override;
+    void InitializeAccessibilityInner(bool forceReinit);
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = true;
@@ -83,8 +83,10 @@ private:
     IsolatedDumpInfo isolatedDumpInfo_;
     int32_t uiExtensionId_ = 0;
     RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
+    bool isInitedAccessibilityInInitUiContent_ = false; // wether init accessibility in init uicontent
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);
 };
 } // namespace OHOS::Ace::NG
