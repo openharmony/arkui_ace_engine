@@ -405,51 +405,47 @@ public:
     {
         CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
         Pattern::OnColorModeChange(colorMode);
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(GetHost());
-        CHECK_NULL_VOID(tabContentNode);
-        tabContentNode->UpdataTabBarItem();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TabTheme>();
         CHECK_NULL_VOID(theme);
-        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-        CHECK_NULL_VOID(tabsNode);
-        auto layout = tabsNode->GetLayoutProperty<TabContentLayoutProperty>();
+        auto layout = GetLayoutProperty<TabContentLayoutProperty>();
         CHECK_NULL_VOID(layout);
-        auto tabContentPattern = tabsNode->GetPattern<TabContentPattern>();
-        CHECK_NULL_VOID(tabContentPattern);
         if (!layout->HasIndicatorColorSetByUser() ||
             (layout->HasIndicatorColorSetByUser() && !layout->GetIndicatorColorSetByUserValue())) {
-            auto currentIndicator = tabContentPattern->GetIndicatorStyle();
+            auto currentIndicator = GetIndicatorStyle();
             currentIndicator.color = theme->GetActiveIndicatorColor();
-            tabContentPattern->SetIndicatorStyle(currentIndicator);
+            SetIndicatorStyle(currentIndicator);
         }
         if (!layout->HasLabelSelectedColorSetByUser() ||
             (layout->HasLabelSelectedColorSetByUser() && !layout->GetLabelSelectedColorSetByUserValue())) {
-            auto currentLabelStyle = tabContentPattern->GetLabelStyle();
+            auto currentLabelStyle = GetLabelStyle();
             currentLabelStyle.selectedColor = theme->GetSubTabTextOnColor();
-            tabContentPattern->SetLabelStyle(currentLabelStyle);
+            SetLabelStyle(currentLabelStyle);
         }
         if (!layout->HasLabelUnselectedColorSetByUser() ||
             (layout->HasLabelUnselectedColorSetByUser() && !layout->GetLabelUnselectedColorSetByUserValue())) {
-            auto currentLabelStyle = tabContentPattern->GetLabelStyle();
+            auto currentLabelStyle = GetLabelStyle();
             currentLabelStyle.unselectedColor = theme->GetSubTabTextOffColor();
-            tabContentPattern->SetLabelStyle(currentLabelStyle);
+            SetLabelStyle(currentLabelStyle);
         }
         if (!layout->HasIconSelectedColorSetByUser() ||
             (layout->HasIconSelectedColorSetByUser() && !layout->GetIconSelectedColorSetByUserValue())) {
-            auto currentIconStyle = tabContentPattern->GetIconStyle();
+            auto currentIconStyle = GetIconStyle();
             currentIconStyle.selectedColor = theme->GetBottomTabTextOn();
-            tabContentPattern->SetIconStyle(currentIconStyle);
+            SetIconStyle(currentIconStyle);
         }
         if (!layout->HasIconUnselectedColorSetByUser() ||
             (layout->HasIconUnselectedColorSetByUser() && !layout->GetIconUnselectedColorSetByUserValue())) {
-            auto currentIconStyle = tabContentPattern->GetIconStyle();
+            auto currentIconStyle = GetIconStyle();
             currentIconStyle.unselectedColor = theme->GetBottomTabTextOff();
-            tabContentPattern->SetIconStyle(currentIconStyle);
+            SetIconStyle(currentIconStyle);
         }
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(host);
+        CHECK_NULL_VOID(tabContentNode);
+        tabContentNode->UpdataTabBarItem();
     }
 
     Axis GetAxis() const
