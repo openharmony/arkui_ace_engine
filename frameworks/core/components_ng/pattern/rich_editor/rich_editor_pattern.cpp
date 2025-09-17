@@ -5237,6 +5237,9 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
     auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
+        std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
+        privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
+        inputMethod->SendPrivateCommand(privateCommand);
         textFieldManager->SetIsImeAttached(true);
         textFieldManager->SetAttachInputId(host->GetId());
     }
