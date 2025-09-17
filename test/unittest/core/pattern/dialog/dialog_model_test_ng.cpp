@@ -49,8 +49,11 @@ constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 constexpr float CHILD_SIZE = 300.0f;
 constexpr float CHILD_SIZE_2 = 600.0f;
+constexpr float CHILD_SIZE_OVERFLOW = 1200.0f;
 constexpr float OFFSET = 200.0f;
 constexpr float OFFSET_2 = -100.0f;
+constexpr float OFFSET_TOP_OVERFLOW = -2000.0f;
+constexpr float OFFSET_BOTTOM_OVERFLOW = 2000.0f;
 constexpr float AVOID_DISTANCE = 100000.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
@@ -2266,5 +2269,78 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest035, TestSize.Level1)
     EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
     EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
     EXPECT_EQ(static_cast<int>(renderContext->GetBackBlurStyle().value().blurStyle), backgroundBlurStyle);
+}
+
+/**
+ * @tc.name: DialogModelTestNg051
+ * @tc.desc: Test DialogLayoutAlgorithm.DialogOverflowAdjust function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg051, TestSize.Level1) {
+    /**
+     * @tc.steps: step1. create layoutAlgorithm instance.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Set safe area range.
+     */
+    SafeAreaInsets::Inset insetLeftAndRight = {};
+    SafeAreaInsets::Inset insetTop = { .start = 0.f, .end = 100.f };
+    SafeAreaInsets::Inset insetBottom = { .start = 1100.f, .end = 1200.f };
+    SafeAreaInsets SYSTEM_SAFE_AREA_INSET = { insetLeftAndRight, insetTop, insetLeftAndRight,
+        insetBottom };
+    layoutAlgorithm->safeAreaInsets_ = SYSTEM_SAFE_AREA_INSET;
+    
+    /**
+     * @tc.steps: step3. Call DialogOverflowAdjust with dialogCorrectionEnabled = false.
+     * @tc.desc: Correction disabled — no adjustment logic is applied.
+     * @tc.expected: childOffset and dialogChildSize_ remain unchanged.
+     */
+    auto childOffset = OffsetF(0.f, OFFSET_TOP_OVERFLOW);
+    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
+    bool dialogCorrectionEnabled = false;
+    layoutAlgorithm->dialogChildSize_.SetHeight(CHILD_SIZE);
+
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), OFFSET_TOP_OVERFLOW);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), CHILD_SIZE);
+    
+    /**
+     * @tc.steps: step4. Call DialogOverflowAdjust with dialogCorrectionEnabled = true.
+     * @tc.desc: Correction enabled — adjustment logic runs to modify offset and size.
+     * @tc.expected: childOffset and dialogChildSize_ are updated as asserted.
+     */
+    dialogCorrectionEnabled = true;
+
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), 150.f);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), CHILD_SIZE);
+
+    childOffset.SetY(OFFSET_BOTTOM_OVERFLOW);
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), 750.f);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), CHILD_SIZE);
+
+    childOffset.SetY(OFFSET);
+    childSize.SetHeight(CHILD_SIZE_OVERFLOW);
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), 150.f);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), 900.f);
+
+    childOffset.SetY(OFFSET_TOP_OVERFLOW);
+    childSize.SetHeight(CHILD_SIZE_OVERFLOW);
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), 150.f);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), 900.f);
+
+    childOffset.SetY(OFFSET_BOTTOM_OVERFLOW);
+    childSize.SetHeight(CHILD_SIZE_OVERFLOW);
+    layoutAlgorithm->DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
+    EXPECT_EQ(childOffset.GetY(), 150.f);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), 900.f);
 }
 } // namespace OHOS::Ace::NG
