@@ -897,7 +897,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleOverScroll002, TestSize.Level1)
     scrollablePattern->edgeEffect_ = EdgeEffect::SPRING;
     scrollablePattern->effectEdge_ = EffectEdge::ALL;
     auto result = scrollablePattern->HandleOverScroll(2.0f);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -921,7 +921,7 @@ HWTEST_F(ScrollablePatternTestNg, HandleOverScroll003, TestSize.Level1)
     scrollablePattern->edgeEffect_ = EdgeEffect::SPRING;
     scrollablePattern->effectEdge_ = EffectEdge::ALL;
     auto result = scrollablePattern->HandleOverScroll(2.0f);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 /**

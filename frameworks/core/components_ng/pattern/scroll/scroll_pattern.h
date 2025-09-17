@@ -67,9 +67,12 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         if (freeScroll_) {
-            return MakeRefPtr<ScrollLayoutAlgorithm>(freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
+            return MakeRefPtr<ScrollLayoutAlgorithm>(
+                freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
         }
-        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
+        auto scrollLayoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
+        scrollLayoutAlgorithm->SetScrollableDistance(scrollableDistance_);
+        return scrollLayoutAlgorithm;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
