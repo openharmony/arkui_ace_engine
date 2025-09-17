@@ -10572,6 +10572,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
+    void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param,
+                                      const Callback_Void* event)
+    {
+    }
+    void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param,
+                                   const Array_KeyframeState* keyfames)
+    {
+    }
     } // AnimationExtenderAccessor
     namespace AppearSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_AppearSymbolEffect peer)
@@ -12093,6 +12101,37 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // CustomDialogControllerAccessor
+    namespace CustomDialogControllerExtenderAccessor {
+    void DestroyPeerImpl(Ark_CustomDialogControllerExtender peer)
+    {
+        auto peerImpl = reinterpret_cast<CustomDialogControllerExtenderPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControllerOptionsExtender* value)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void OpenImpl(Ark_CustomDialogControllerExtender peer)
+    {
+    }
+    void CloseImpl(Ark_CustomDialogControllerExtender peer)
+    {
+    }
+    void SetOwnerViewImpl(Ark_CustomDialogControllerExtender peer,
+                          Ark_NativePointer content)
+    {
+    }
+    Ark_CustomDialogControllerExternalOptionsExtender GetExternalOptionsImpl(Ark_CustomDialogControllerExtender peer)
+    {
+        return {};
+    }
+    } // CustomDialogControllerExtenderAccessor
     namespace CustomSpanAccessor {
     void DestroyPeerImpl(Ark_CustomSpan peer)
     {
@@ -18020,6 +18059,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AnimationExtenderAccessor::CloseImplicitAnimationImpl,
             AnimationExtenderAccessor::StartDoubleAnimationImpl,
             AnimationExtenderAccessor::AnimationTranslateImpl,
+            AnimationExtenderAccessor::AnimateToImmediatelyImplImpl,
+            AnimationExtenderAccessor::KeyframeAnimationImplImpl,
         };
         return &AnimationExtenderAccessorImpl;
     }
@@ -18578,6 +18619,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct CustomDialogControllerPeer {
         virtual ~CustomDialogControllerPeer() = default;
+    };
+    const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogControllerExtenderAccessor()
+    {
+        static const GENERATED_ArkUICustomDialogControllerExtenderAccessor CustomDialogControllerExtenderAccessorImpl {
+            CustomDialogControllerExtenderAccessor::DestroyPeerImpl,
+            CustomDialogControllerExtenderAccessor::ConstructImpl,
+            CustomDialogControllerExtenderAccessor::GetFinalizerImpl,
+            CustomDialogControllerExtenderAccessor::OpenImpl,
+            CustomDialogControllerExtenderAccessor::CloseImpl,
+            CustomDialogControllerExtenderAccessor::SetOwnerViewImpl,
+            CustomDialogControllerExtenderAccessor::GetExternalOptionsImpl,
+        };
+        return &CustomDialogControllerExtenderAccessorImpl;
+    }
+
+    struct CustomDialogControllerExtenderPeer {
+        virtual ~CustomDialogControllerExtenderPeer() = default;
     };
     const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
     {
@@ -21290,6 +21348,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetContentModifierHelperAccessor,
             GetControllerHandlerAccessor,
             GetCustomDialogControllerAccessor,
+            GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,

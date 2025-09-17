@@ -220,6 +220,7 @@ const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
+const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogControllerExtenderAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
@@ -522,6 +523,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetContentModifierHelperAccessor,
         GetControllerHandlerAccessor,
         GetCustomDialogControllerAccessor,
+        GetCustomDialogControllerExtenderAccessor,
         GetCustomSpanAccessor,
         GetDataResubmissionHandlerAccessor,
         GetDatePickerDialogAccessor,

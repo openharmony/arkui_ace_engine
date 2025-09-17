@@ -3168,6 +3168,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typ
 frameworks/core/interfaces/native/implementation/action_sheet_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/alert_dialog_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/custom_dialog_controller_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/custom_dialog_controller_extender_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/dismiss_dialog_action_accessor.cpp @arkuipopupwindow_all
@@ -3178,6 +3179,8 @@ frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkui
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/mouse_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/mouse_event_peer.h @ArkUI_Event
+frameworks/core/interfaces/native/implementation/prompt_action_accessor_peer.h @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/prompt_action_extender_accessor.cpp @arkuipopupwindow_all
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkui_framework_xnode

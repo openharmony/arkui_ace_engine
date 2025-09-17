@@ -326,6 +326,9 @@ typedef struct Opt_curves_ICurve Opt_curves_ICurve;
 typedef struct CustomDialogControllerPeer CustomDialogControllerPeer;
 typedef struct CustomDialogControllerPeer* Ark_CustomDialogController;
 typedef struct Opt_CustomDialogController Opt_CustomDialogController;
+typedef struct CustomDialogControllerExtenderPeer CustomDialogControllerExtenderPeer;
+typedef struct CustomDialogControllerExtenderPeer* Ark_CustomDialogControllerExtender;
+typedef struct Opt_CustomDialogControllerExtender Opt_CustomDialogControllerExtender;
 typedef struct Opt_CustomObject Opt_CustomObject;
 typedef struct DataResubmissionHandlerPeer DataResubmissionHandlerPeer;
 typedef struct DataResubmissionHandlerPeer* Ark_DataResubmissionHandler;
@@ -879,6 +882,8 @@ typedef struct Array_ImageAnalyzerType Array_ImageAnalyzerType;
 typedef struct Opt_Array_ImageAnalyzerType Opt_Array_ImageAnalyzerType;
 typedef struct Array_ImageFrameInfo Array_ImageFrameInfo;
 typedef struct Opt_Array_ImageFrameInfo Opt_Array_ImageFrameInfo;
+typedef struct Array_KeyframeState Array_KeyframeState;
+typedef struct Opt_Array_KeyframeState Opt_Array_KeyframeState;
 typedef struct Array_Layoutable Array_Layoutable;
 typedef struct Opt_Array_Layoutable Opt_Array_Layoutable;
 typedef struct Array_LayoutSafeAreaEdge Array_LayoutSafeAreaEdge;
@@ -1720,6 +1725,8 @@ typedef struct Ark_CrownEvent Ark_CrownEvent;
 typedef struct Opt_CrownEvent Opt_CrownEvent;
 typedef struct Ark_CustomDialogControllerExternalOptions Ark_CustomDialogControllerExternalOptions;
 typedef struct Opt_CustomDialogControllerExternalOptions Opt_CustomDialogControllerExternalOptions;
+typedef struct Ark_CustomDialogControllerExternalOptionsExtender Ark_CustomDialogControllerExternalOptionsExtender;
+typedef struct Opt_CustomDialogControllerExternalOptionsExtender Opt_CustomDialogControllerExternalOptionsExtender;
 typedef struct CustomSpanPeer CustomSpanPeer;
 typedef struct CustomSpanPeer* Ark_CustomSpan;
 typedef struct Opt_CustomSpan Opt_CustomSpan;
@@ -1891,6 +1898,8 @@ typedef struct Opt_KeyboardOptions Opt_KeyboardOptions;
 typedef struct KeyEventPeer KeyEventPeer;
 typedef struct KeyEventPeer* Ark_KeyEvent;
 typedef struct Opt_KeyEvent Opt_KeyEvent;
+typedef struct Ark_KeyframeState Ark_KeyframeState;
+typedef struct Opt_KeyframeState Opt_KeyframeState;
 typedef struct Ark_LargestContentfulPaint Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint Opt_LargestContentfulPaint;
 typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
@@ -2469,6 +2478,8 @@ typedef struct Ark_ImageError Ark_ImageError;
 typedef struct Opt_ImageError Opt_ImageError;
 typedef struct Ark_ImageFrameInfo Ark_ImageFrameInfo;
 typedef struct Opt_ImageFrameInfo Opt_ImageFrameInfo;
+typedef struct Ark_KeyframeAnimateParam Ark_KeyframeAnimateParam;
+typedef struct Opt_KeyframeAnimateParam Opt_KeyframeAnimateParam;
 typedef struct LayoutablePeer LayoutablePeer;
 typedef struct LayoutablePeer* Ark_Layoutable;
 typedef struct Opt_Layoutable Opt_Layoutable;
@@ -2936,6 +2947,8 @@ typedef struct Ark_ContextMenuOptions Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions Opt_ContextMenuOptions;
 typedef struct Ark_CustomDialogControllerOptions Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerOptionsExtender Ark_CustomDialogControllerOptionsExtender;
+typedef struct Opt_CustomDialogControllerOptionsExtender Opt_CustomDialogControllerOptionsExtender;
 typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
 typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
 typedef struct Ark_DigitIndicator Ark_DigitIndicator;
@@ -6793,6 +6806,10 @@ typedef struct Opt_CustomDialogController {
     Ark_Tag tag;
     Ark_CustomDialogController value;
 } Opt_CustomDialogController;
+typedef struct Opt_CustomDialogControllerExtender {
+    Ark_Tag tag;
+    Ark_CustomDialogControllerExtender value;
+} Opt_CustomDialogControllerExtender;
 typedef struct Opt_CustomObject {
     Ark_Tag tag;
     Ark_CustomObject value;
@@ -8366,6 +8383,15 @@ typedef struct Opt_Array_ImageFrameInfo {
     Ark_Tag tag;
     Array_ImageFrameInfo value;
 } Opt_Array_ImageFrameInfo;
+typedef struct Array_KeyframeState {
+    /* kind: ContainerType */
+    Ark_KeyframeState* array;
+    Ark_Int32 length;
+} Array_KeyframeState;
+typedef struct Opt_Array_KeyframeState {
+    Ark_Tag tag;
+    Array_KeyframeState value;
+} Opt_Array_KeyframeState;
 typedef struct Array_Layoutable {
     /* kind: ContainerType */
     Ark_Layoutable* array;
@@ -12381,6 +12407,14 @@ typedef struct Opt_CustomDialogControllerExternalOptions {
     Ark_Tag tag;
     Ark_CustomDialogControllerExternalOptions value;
 } Opt_CustomDialogControllerExternalOptions;
+typedef struct Ark_CustomDialogControllerExternalOptionsExtender {
+    /* kind: Interface */
+    Opt_Boolean customStyle;
+} Ark_CustomDialogControllerExternalOptionsExtender;
+typedef struct Opt_CustomDialogControllerExternalOptionsExtender {
+    Ark_Tag tag;
+    Ark_CustomDialogControllerExternalOptionsExtender value;
+} Opt_CustomDialogControllerExternalOptionsExtender;
 typedef struct Opt_CustomSpan {
     Ark_Tag tag;
     Ark_CustomSpan value;
@@ -13078,6 +13112,16 @@ typedef struct Opt_KeyEvent {
     Ark_Tag tag;
     Ark_KeyEvent value;
 } Opt_KeyEvent;
+typedef struct Ark_KeyframeState {
+    /* kind: Interface */
+    Ark_Number duration;
+    Opt_Union_Curve_String_ICurve curve;
+    Callback_Void event;
+} Ark_KeyframeState;
+typedef struct Opt_KeyframeState {
+    Ark_Tag tag;
+    Ark_KeyframeState value;
+} Opt_KeyframeState;
 typedef struct Ark_LargestContentfulPaint {
     /* kind: Interface */
     Opt_Int64 navigationStartTime;
@@ -15934,6 +15978,17 @@ typedef struct Opt_ImageFrameInfo {
     Ark_Tag tag;
     Ark_ImageFrameInfo value;
 } Opt_ImageFrameInfo;
+typedef struct Ark_KeyframeAnimateParam {
+    /* kind: Interface */
+    Opt_Number delay;
+    Opt_Number iterations;
+    Opt_Callback_Void onFinish;
+    Opt_ExpectedFrameRateRange expectedFrameRateRange;
+} Ark_KeyframeAnimateParam;
+typedef struct Opt_KeyframeAnimateParam {
+    Ark_Tag tag;
+    Ark_KeyframeAnimateParam value;
+} Opt_KeyframeAnimateParam;
 typedef struct Opt_Layoutable {
     Ark_Tag tag;
     Ark_Layoutable value;
@@ -18636,6 +18691,51 @@ typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
     Ark_CustomDialogControllerOptions value;
 } Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerOptionsExtender {
+    /* kind: Interface */
+    CustomNodeBuilder builder;
+    Opt_Callback_Void cancel;
+    Opt_Boolean autoCancel;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_Boolean customStyle;
+    Opt_Number gridCount;
+    Opt_ResourceColor maskColor;
+    Opt_Rectangle maskRect;
+    Opt_AnimateParam openAnimation;
+    Opt_AnimateParam closeAnimation;
+    Opt_Boolean showInSubWindow;
+    Opt_ResourceColor backgroundColor;
+    Opt_Union_Dimension_BorderRadiuses cornerRadius;
+    Opt_Boolean isModal;
+    Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_Dimension width;
+    Opt_Dimension height;
+    Opt_Union_Dimension_EdgeWidths borderWidth;
+    Opt_Union_ResourceColor_EdgeColors borderColor;
+    Opt_Union_BorderStyle_EdgeStyles borderStyle;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_KeyboardAvoidMode keyboardAvoidMode;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_LengthMetrics keyboardAvoidDistance;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
+    Opt_Boolean focusable;
+} Ark_CustomDialogControllerOptionsExtender;
+typedef struct Opt_CustomDialogControllerOptionsExtender {
+    Ark_Tag tag;
+    Ark_CustomDialogControllerOptionsExtender value;
+} Opt_CustomDialogControllerOptionsExtender;
 typedef struct Ark_CustomPopupOptions {
     /* kind: Interface */
     CustomNodeBuilder builder;
@@ -23237,6 +23337,10 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
                                  const Ark_DoubleAnimationParam* param);
     void (*AnimationTranslate)(Ark_NativePointer node,
                                const Ark_TranslateOptions* options);
+    void (*AnimateToImmediatelyImpl)(const Ark_AnimateParam* param,
+                                     const Callback_Void* event);
+    void (*KeyframeAnimationImpl)(const Ark_KeyframeAnimateParam* param,
+                                  const Array_KeyframeState* keyfames);
 } GENERATED_ArkUIAnimationExtenderAccessor;
 
 typedef struct GENERATED_ArkUIAppearSymbolEffectAccessor {
@@ -23882,6 +23986,17 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     void (*close)(Ark_CustomDialogController peer);
     Ark_CustomDialogControllerExternalOptions (*getExternalOptions)(Ark_CustomDialogController peer);
 } GENERATED_ArkUICustomDialogControllerAccessor;
+
+typedef struct GENERATED_ArkUICustomDialogControllerExtenderAccessor {
+    void (*destroyPeer)(Ark_CustomDialogControllerExtender peer);
+    Ark_CustomDialogControllerExtender (*construct)(const Ark_CustomDialogControllerOptionsExtender* value);
+    Ark_NativePointer (*getFinalizer)();
+    void (*open)(Ark_CustomDialogControllerExtender peer);
+    void (*close)(Ark_CustomDialogControllerExtender peer);
+    void (*setOwnerView)(Ark_CustomDialogControllerExtender peer,
+                         Ark_NativePointer content);
+    Ark_CustomDialogControllerExternalOptionsExtender (*getExternalOptions)(Ark_CustomDialogControllerExtender peer);
+} GENERATED_ArkUICustomDialogControllerExtenderAccessor;
 
 typedef struct GENERATED_ArkUICustomSpanAccessor {
     void (*destroyPeer)(Ark_CustomSpan peer);
@@ -26321,6 +26436,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
     const GENERATED_ArkUICustomDialogControllerAccessor* (*getCustomDialogControllerAccessor)();
+    const GENERATED_ArkUICustomDialogControllerExtenderAccessor* (*getCustomDialogControllerExtenderAccessor)();
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* (*getDataResubmissionHandlerAccessor)();
     const GENERATED_ArkUIDatePickerDialogAccessor* (*getDatePickerDialogAccessor)();

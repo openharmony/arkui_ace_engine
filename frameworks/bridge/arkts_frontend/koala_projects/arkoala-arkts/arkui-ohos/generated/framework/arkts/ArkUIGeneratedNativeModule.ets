@@ -3139,6 +3139,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AnimationExtender_AnimationTranslate(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _AnimationExtender_AnimateToImmediatelyImpl(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _AnimationExtender_KeyframeAnimationImpl(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _AppearSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _AppearSymbolEffect_getFinalizer(): KPointer
@@ -3703,6 +3707,18 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_close(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_open(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_close(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _CustomDialogControllerExtender_setOwnerView(ptr: KPointer, content: KPointer): void
+    @ani.unsafe.Quick
+    native static _CustomDialogControllerExtender_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CustomSpan_construct(): KPointer
     @ani.unsafe.Direct

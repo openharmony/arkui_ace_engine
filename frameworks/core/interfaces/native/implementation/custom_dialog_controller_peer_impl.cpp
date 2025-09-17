@@ -79,10 +79,42 @@ void CustomDialogControllerPeerImpl::SetBuilder(
     };
 }
 
+void CustomDialogControllerPeerImpl::SetBuilderExtender(
+    CustomNodeBuilder builder, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    builder_ = [callback = CallbackHelper(builder), weakPeer = AceType::WeakClaim(AceType::RawPtr(peer))]() -> void {
+        auto controllerPeer = weakPeer.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
+            auto controller = weakPeer.Upgrade();
+            CHECK_NULL_VOID(controller);
+            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            CustomDialogControllerModelStatic::SetOpenDialog(
+                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
+    };
+}
+
 void CustomDialogControllerPeerImpl::SetOnCancel(
     Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer)
 {
     auto cancelOpt = TransformCallbackToFunctionVoid(cancel, peer);
+    CHECK_NULL_VOID(cancelOpt);
+    dialogProperties_.onCancel = cancelOpt;
+}
+
+void CustomDialogControllerPeerImpl::SetOnCancelExtender(
+    Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto cancelOpt = TransformCallbackToFunctionVoidExtender(cancel, peer);
     CHECK_NULL_VOID(cancelOpt);
     dialogProperties_.onCancel = cancelOpt;
 }
@@ -324,6 +356,38 @@ void CustomDialogControllerPeerImpl::SetOnWillDisappear(
     dialogProperties_.onWillDisappear = callback;
 }
 
+void CustomDialogControllerPeerImpl::SetOnDidAppearExtender(
+    Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onDidAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidAppear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnDidDisappearExtender(
+    Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onDidDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidDisappear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillAppearExtender(
+    Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onWillAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillAppear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillDisappearExtender(
+    Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoidExtender(onWillDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillDisappear = callback;
+}
+
 void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance)
 {
     auto result = Converter::OptConvert<Dimension>(keyboardAvoidDistance);
@@ -419,6 +483,24 @@ RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
 
 std::function<void()> CustomDialogControllerPeerImpl::TransformCallbackToFunctionVoid(
     Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callbackOpt = Converter::OptConvert<Callback_Void>(callback);
+    CHECK_NULL_RETURN(callbackOpt, nullptr);
+    return [callbackFunc = CallbackHelper(callbackOpt.value()), weak = AceType::WeakClaim(AceType::RawPtr(peer))]() {
+        auto controllerPeer = weak.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callbackFunc.InvokeSync();
+    };
+}
+
+std::function<void()> CustomDialogControllerPeerImpl::TransformCallbackToFunctionVoidExtender(
+    Opt_Callback_Void callback, const RefPtr<CustomDialogControllerExtenderPeer>& peer)
 {
     auto callbackOpt = Converter::OptConvert<Callback_Void>(callback);
     CHECK_NULL_RETURN(callbackOpt, nullptr);
