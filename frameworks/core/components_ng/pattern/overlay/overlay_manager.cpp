@@ -1884,7 +1884,7 @@ void OverlayManager::PopToast(int32_t toastId)
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();
             } else {
-                SubwindowManager::GetInstance()->HideToastSubWindowNG();
+                SubwindowManager::GetInstance()->HideToastSubWindowNG(context->GetInstanceId());
             }
         }
     });
