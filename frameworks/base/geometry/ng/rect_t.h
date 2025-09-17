@@ -347,6 +347,16 @@ public:
         return RectT(left, top, right - left, bottom - top);
     }
 
+    void CombineRectTInner(const RectT& other)
+    {
+        T right = std::max(Right(), other.Right());
+        T bottom = std::max(Bottom(), other.Bottom());
+        x_ = std::min(Left(), other.Left());
+        y_ = std::min(Top(), other.Top());
+        width_ = right - x_;
+        height_ = bottom - y_;
+    }
+
     OffsetT<T> MagneticAttractedBy(const RectT& magnet)
     {
         OffsetT<T> offset { 0.0, 0.0 };
