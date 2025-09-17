@@ -3079,45 +3079,6 @@ void AnimationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->IsFirstBuilding()) {
-        // the node sets attribute value for the first time. No animation is generated.
-        return;
-    }
-
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
-        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
-        TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
-        return;
-    }
-
-    auto optOption = Converter::OptConvertPtr<AnimationOption>(value);
-    if (optOption) {
-        auto option = *optOption;
-        Validator::ValidateAnimationOption(option, pipelineContextBase->IsFormRender());
-
-        if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
-            option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
-            option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
-            TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
-                static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
-        }
-
-        LOGI("ARKOALA CommonMethod::AnimationImpl: onFinish callback don`t supported yet");
-        // we need to support onFinish callback and set it to options:
-
-        if (SystemProperties::GetRosenBackendEnabled()) {
-            option.SetAllowRunningAsynchronously(true);
-        }
-        ViewContextModelNG::openAnimationInternal(option);
-    } else {
-        AnimationOption option = AnimationOption();
-        ViewContextModelNG::closeAnimationInternal(option, true);
-    }
 }
 void Transition0Impl(Ark_NativePointer node,
                      const Opt_Union_TransitionOptions_TransitionEffect* value)
@@ -5806,14 +5767,16 @@ void BindSheetImpl(Ark_NativePointer node,
         BindSheetUtil::ParseFuntionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.isTitleBuilder = false;
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
                 sheetStyle.sheetSubtitle = OptConvert<std::string>(value.subtitle.value);
             },
-            [frameNode, node, &cbs](const CustomNodeBuilder& value) {
+            [frameNode, node, &cbs, &sheetStyle](const CustomNodeBuilder& value) {
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
                     auto uiNode = callback.BuildSync(node);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
+                sheetStyle.isTitleBuilder = true;
             }, []() {});
         BindSheetUtil::ParseSheetParams(sheetStyle, sheetOptions.value());
     }
