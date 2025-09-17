@@ -290,7 +290,7 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
 
     // use menuPreview's size and offset for drag framework.
     if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
-        (GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f) ||
+        (DragAnimationHelper::ShouldSetOffsetForMenuDrag() ||
             frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {

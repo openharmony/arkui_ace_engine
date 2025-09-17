@@ -678,6 +678,16 @@ public:
     void UpdateFilterMaskType();
     void CheckAndShowAnimation();
 
+    bool IsDragMenuLiftAnimationFinish() const
+    {
+        return dragMenuLiftAnimationFinish_;
+    }
+
+    void SetDragMenuLiftAnimationFinishState(bool state)
+    {
+        dragMenuLiftAnimationFinish_ = state;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
 
@@ -772,6 +782,7 @@ private:
     bool hasCustomOutlineWidth_ = false;
     bool hasCustomOutlineColor_ = false;
     bool isClearLastMenuItem_ = true;
+    bool dragMenuLiftAnimationFinish_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG
