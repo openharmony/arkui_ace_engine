@@ -2156,7 +2156,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
-            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]， nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
@@ -2938,19 +2938,11 @@ int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeI
     ArkUI_Int32 alignMode[] = { ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START, ArkUI_Direction::ARKUI_DIRECTION_AUTO };
     auto isAlign = false;
     if (actualSize >= 3) {
-        int32_t alignment = item->value[NUM_2].i32;
-        if (alignment < 0 || alignment > 8) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
         isAlign = true;
-        alignMode[0] = alignment;
+        alignMode[0] = item->value[NUM_2].i32;
     }
     if (actualSize == 4) {
-        int32_t direction = item->value[NUM_3].i32;
-        if (direction < 0 || (direction > 1 && direction != 3)) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
-        alignMode[1] = direction;
+        alignMode[1] = item->value[NUM_3].i32;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
         node->uiNodeHandle, values, units, alignMode, isAlign, actualSize, nullptr, nullptr);
@@ -16484,6 +16476,11 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
+        if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
     std::vector<uint32_t> colorValues;
     struct ArkUIGradientType gradientObj;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
@@ -16492,14 +16489,8 @@ int32_t SetSliderBlockLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     gradientObj.color = &(*colorValues.begin());
     std::vector<ArkUILengthType> offsetValues;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
-        auto stop = colorStop->stops[i];
-        if (stop < 0) {
-            offsetValues.push_back(ArkUILengthType {.number = 0});
-        } else if (stop > 1) {
-            offsetValues.push_back(ArkUILengthType {.number = 1});
-        } else {
-            offsetValues.push_back(ArkUILengthType {.number = stop});
-        }
+        offsetValues.push_back(ArkUILengthType {
+            .number = colorStop->stops[i]});
     }
     gradientObj.offset = &(*offsetValues.begin());
     fullImpl->getNodeModifiers()->getSliderModifier()->setLinearBlockColor(
@@ -16545,19 +16536,18 @@ int32_t SetSliderSelectedLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_
     if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
+        if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
     std::vector<uint32_t> colorValues;
     std::vector<ArkUILengthType> offsetValues;
     struct ArkUIGradientType gradientObj;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
         colorValues.push_back(colorStop->colors[i]);
-        auto stop = colorStop->stops[i];
-        if (stop < 0) {
-            offsetValues.push_back(ArkUILengthType {.number = 0});
-        } else if (stop > 1) {
-            offsetValues.push_back(ArkUILengthType {.number = 1});
-        } else {
-            offsetValues.push_back(ArkUILengthType {.number = stop});
-        }
+        offsetValues.push_back(ArkUILengthType {
+            .number = colorStop->stops[i]});
     }
     gradientObj.color = &(*colorValues.begin());
     gradientObj.offset = &(*offsetValues.begin());
@@ -16604,6 +16594,11 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     if (colorLength > SLIDER_LINEAR_GRADIENT_LIMIT || colorLength < 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
+        if (colorStop->stops[i] < 0 || colorStop->stops[i] > 1) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
     std::vector<uint32_t> colorValues;
     struct ArkUIGradientType gradientObj;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
@@ -16612,14 +16607,8 @@ int32_t SetSliderTrackLinearGradientColor(ArkUI_NodeHandle node, const ArkUI_Att
     gradientObj.color = &(*colorValues.begin());
     std::vector<ArkUILengthType> offsetValues;
     for (int i = 0; i < static_cast<int32_t>(colorLength); i++) {
-        auto stop = colorStop->stops[i];
-        if (stop < 0) {
-            offsetValues.push_back(ArkUILengthType {.number = 0});
-        } else if (stop > 1) {
-            offsetValues.push_back(ArkUILengthType {.number = 1});
-        } else {
-            offsetValues.push_back(ArkUILengthType {.number = stop});
-        }
+        offsetValues.push_back(ArkUILengthType {
+            .number = colorStop->stops[i]});
     }
     gradientObj.offset = &(*offsetValues.begin());
     fullImpl->getNodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
