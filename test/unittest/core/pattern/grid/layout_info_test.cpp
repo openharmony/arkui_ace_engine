@@ -1125,4 +1125,22 @@ HWTEST_F(GridLayoutInfoTest, AllConditionsMet_ReturnsTrue, TestSize.Level1) {
     info.childrenCount_ = 6;
     EXPECT_TRUE(info.IsAllItemsMeasured());
 }
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateEndIndexWhenLastLineHeightIsZero
+ * @tc.desc: test UpdateEndIndex when last line height is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateEndIndexWhenLastLineHeightIsZero, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = { { 0, 0 } };
+    info.gridMatrix_[1] = { { 0, 1 } };
+    info.gridMatrix_[2] = { { 0, 2 } };
+    info.endMainLineIndex_ = 2;
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f }, { 2, 0.0f } };
+    info.UpdateEndIndex(0.0f, 200.0f, 0.0f);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 2);
+}
 } // namespace OHOS::Ace::NG
