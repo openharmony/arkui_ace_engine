@@ -2320,7 +2320,7 @@ void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     } else {
         json->Put("imageLoadingContext", "null");
     }
-
+    json->Put("supportSvg2", supportSvg2_);
     json->Put("draggable", enableDrag_);
     json->Put("enableAnalyzer", isEnableAnalyzer_);
 }
