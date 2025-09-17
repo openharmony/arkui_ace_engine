@@ -771,8 +771,15 @@ void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
     if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        // for backward compatible, here we activate BlendApplyType only
-        JSViewAbstract::JsBlendApplyType(args);
+        BlendMode blendMode = BlendMode::NONE;
+        BlendApplyType blendApplyType = BlendApplyType::FAST;
+        if (JSViewAbstract::ParseBlendMode(args, blendMode, blendApplyType)) {
+            // To maintain backward compatibility, we need to set blendApplyType ONLY here
+            // blendApplyType is ignored if blendMode is BlendMode::NONE
+            // so we use BlendMode::SRC_OVER, which visually matches NONE.
+            ViewAbstractModel::GetInstance()->SetBlendMode(BlendMode::SRC_OVER);
+            ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
+        }
         return;
     }
 
