@@ -3975,7 +3975,7 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
             delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         }
-        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
+        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(0));
         delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
         delegate_->UpdateAudioSessionType(GetAudioSessionTypeValue(WebAudioSessionType::AUTO));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
