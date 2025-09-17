@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("form_render_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
@@ -76,7 +76,7 @@ ohos_unittest("form_render_test") {
 }
 
 ohos_unittest("form_render_group_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
@@ -157,7 +157,7 @@ ohos_unittest("form_render_group_test") {
 }
 
 ohos_unittest("form_render_delegate_proxy_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
@@ -196,7 +196,7 @@ ohos_unittest("form_render_delegate_proxy_test") {
 }
 
 ohos_unittest("form_render_delegate_stub_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
@@ -229,7 +229,7 @@ ohos_unittest("form_render_delegate_stub_test") {
 }
 
 ohos_unittest("form_render_dispatcher_stub_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
@@ -293,7 +293,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
 }
 
 ohos_unittest("form_render_delegate_impl_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
@@ -326,7 +326,7 @@ ohos_unittest("form_render_delegate_impl_test") {
 }
 
 ohos_unittest("form_render_dispatcher_impl_test") {
-  module_out_path = interface_test_output_path
+  module_out_path = "ace_engine/form_fwk"
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
