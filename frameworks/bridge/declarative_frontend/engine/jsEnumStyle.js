@@ -1340,7 +1340,8 @@ let SourceType;
   SourceType[SourceType.Unknown = 0] = 'Unknown';
   SourceType[SourceType.Mouse = 1] = 'Mouse';
   SourceType[SourceType.TouchScreen = 2] = 'TouchScreen';
-  SourceType[SourceType.Keyboard = 4] = 'Keyboard';
+  SourceType[SourceType.Key = 4] = 'Key';
+  SourceType[SourceType.JoyStick = 5] = 'JoyStick';
 })(SourceType || (SourceType = {}));
 
 let SourceTool;

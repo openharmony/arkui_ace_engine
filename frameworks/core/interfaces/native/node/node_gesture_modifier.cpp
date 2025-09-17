@@ -555,6 +555,7 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
         ArkUIKeyEvent rawInputEvent;
         // only support deviceId when trigger by key
         rawInputEvent.deviceId = info.GetDeviceId();
+        rawInputEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
         SendArkUISyncEvent(&eventData);
         return;
