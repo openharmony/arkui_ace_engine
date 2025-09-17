@@ -1416,8 +1416,12 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
             laneGutter_ = laneGutter.value_or(0.0f);
         }
     }
+    auto oldLanes = lanes_;
     lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(
         minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter_);
+    if (oldLanes != lanes_ && layoutedItemInfo_) {
+        layoutedItemInfo_.reset();
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,

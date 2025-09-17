@@ -1373,6 +1373,49 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CalculateLanes002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculateLanes003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CalculateLanes when lanes changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CalculateLanes003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with one group.
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItemGroup();
+    CreateListItems(100);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to bottom.
+     * @tc.expected: The value of startIndex of layoutedItemInfo_ is 0, and the value of endIndex is 99.
+     */
+    ScrollTo(50 * ITEM_MAIN_SIZE);
+    LayoutedItemInfo defaultLayoutedItemInfo = { -1, 0.0f, -1, 0.0f };
+    EXPECT_EQ(pattern_->itemPosition_.rbegin()->second.endPos, HEIGHT);
+    EXPECT_EQ(itemGroupPatters_[0]->layoutedItemInfo_.value_or(defaultLayoutedItemInfo).startIndex, 0);
+    EXPECT_EQ(itemGroupPatters_[0]->layoutedItemInfo_.value_or(defaultLayoutedItemInfo).endIndex, 99);
+
+    /**
+     * @tc.steps: step3. Change lanes.
+     * @tc.expected: layoutedItemInfo_ is reset and then recalculated.
+     */
+    layoutProperty_->UpdateLanes(1);
+    FlushUITasks(frameNode_);
+    EXPECT_GT(itemGroupPatters_[0]->layoutedItemInfo_.value_or(defaultLayoutedItemInfo).startIndex, 0);
+
+    /**
+     * @tc.steps: step4. Scroll to top.
+     * @tc.expected: The value of startIndex of layoutedItemInfo_ is 0.
+     */
+    ScrollTo(0);
+    EXPECT_EQ(pattern_->itemPosition_.begin()->second.startPos, 0);
+    EXPECT_EQ(itemGroupPatters_[0]->layoutedItemInfo_.value_or(defaultLayoutedItemInfo).startIndex, 0);
+}
+
+/**
  * @tc.name: MeasureCacheItem001
  * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureCacheItem
  * @tc.type: FUNC
