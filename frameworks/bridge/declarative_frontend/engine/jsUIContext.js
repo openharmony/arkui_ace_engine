@@ -426,6 +426,10 @@ class UIContext {
         return px2lpxResult;
     }
 
+    getId() {
+        return this.instanceId_;
+    }
+
     getComponentUtils() {
         if (this.componentUtils_ == null) {
             this.componentUtils_ = new ComponentUtils(this.instanceId_);

@@ -53,6 +53,7 @@ import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { int32 } from "@koalaui/common"
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
@@ -619,6 +620,10 @@ export class UIContext {
     }
     public px2lpx(value: number): number {
         throw Error("px2lpx not implemented in UIContext!")
+    }
+
+    public getId() : int32 {
+        throw Error("getId not implemented in UIContext!")
     }
 
     public setUIStates(callback: () => void): void {

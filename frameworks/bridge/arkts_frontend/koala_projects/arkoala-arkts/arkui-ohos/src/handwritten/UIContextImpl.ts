@@ -1548,6 +1548,10 @@ export class UIContextImpl extends UIContext {
          return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
+    public getId() : int32 {
+        return this.instanceId_;
+    }
+
     private getWindowName_serialize(): string | undefined {
         return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
     }

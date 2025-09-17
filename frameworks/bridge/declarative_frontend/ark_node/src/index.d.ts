@@ -16,6 +16,7 @@
 declare class UIContext {
   instanceId_: number;
   isAvailable(): boolean;
+  getId(): number;
 }
 
 declare interface TouchEvent {
