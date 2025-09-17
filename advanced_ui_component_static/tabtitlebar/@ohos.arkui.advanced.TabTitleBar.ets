@@ -329,7 +329,7 @@ export struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
 
@@ -562,7 +562,7 @@ struct TabContentItem {
       try {
         resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
       } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -805,7 +805,7 @@ struct ImageMenuItem {
       try {
         resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
       } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -818,7 +818,7 @@ struct ImageMenuItem {
       try {
       	return resourceManager.getSysResourceManager().getStringByNameSync('ohos_toolbar_more');
 	    } catch (exception) {
-        let code: number | undefined = (exception as ClassCastError)?.code;
+        let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -1063,7 +1063,7 @@ struct TabTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (exception) {
-      let code: number | undefined = (exception as ClassCastError)?.code;
+      let code: int | undefined = (exception as ClassCastError)?.code;
       let message: string | undefined = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }

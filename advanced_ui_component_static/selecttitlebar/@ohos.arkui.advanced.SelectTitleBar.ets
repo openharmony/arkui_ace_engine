@@ -112,7 +112,7 @@ export struct SelectTitleBar {
         uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -254,7 +254,7 @@ export struct SelectTitleBar {
         resourceManager?.getIntPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new',
           this.badgeValue as Int) as string;
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to getIntPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -322,7 +322,7 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
@@ -541,7 +541,7 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
@@ -568,7 +568,7 @@ struct ImageMenuItem {
         resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
         getStringSync((resource as Resource).id) as string;
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -582,7 +582,7 @@ struct ImageMenuItem {
       try {
         return context?.resourceManager?.getStringByNameSync('icon_back');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -590,7 +590,7 @@ struct ImageMenuItem {
       try {
         return context?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -946,7 +946,7 @@ export struct SelectTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar getMainWindowSync,code: ${code},message:${message}`);
     }

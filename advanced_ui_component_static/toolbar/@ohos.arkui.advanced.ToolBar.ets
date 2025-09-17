@@ -539,7 +539,7 @@ export struct ToolBar {
         this.maxFontSizeScale = maxFontScale;
       }
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
@@ -718,7 +718,7 @@ struct ToolBarDialog {
         }
       }
     } catch (err) {
-      let code: number | undefined = (err as ClassCastError)?.code;
+      let code: int | undefined = (err as ClassCastError)?.code;
       let message: string | undefined = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `Faild to ToolBarDialog aboutToAppear, code: ${code}, message: ${message}`);
