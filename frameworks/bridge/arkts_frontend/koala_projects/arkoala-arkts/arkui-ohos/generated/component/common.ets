@@ -74,6 +74,7 @@ import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
+import { AnimationExtender } from '#generated';
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
@@ -10890,7 +10891,9 @@ export function animateTo(value: AnimateParam, event: (() => void)): void {
     // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
+    // instructive change start
+    AnimationExtender.AnimateToImmediatelyImpl(value, event)
+    // instructive change end
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)
@@ -12081,6 +12084,70 @@ export class KeyEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return KeyEventInternal.fromPtr(ptr)
+    }
+}
+export class KeyframeState_serializer {
+    public static write(buffer: SerializerBase, value: KeyframeState): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDuration  = value.duration
+        valueSerializer.writeNumber(valueHolderForDuration)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCurveTmpValue  = valueHolderForCurve!
+            if (valueHolderForCurveTmpValue instanceof curves.Curve) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
+                valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
+            } else if (valueHolderForCurveTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as string
+                valueSerializer.writeString(valueHolderForCurveTmpValueForIdx1)
+            } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForCurveTmpValueForIdx2  = valueHolderForCurveTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEvent  = value.event
+        valueSerializer.holdAndWriteCallback(valueHolderForEvent)
+    }
+    public static read(buffer: DeserializerBase): KeyframeState {
+        let valueDeserializer : DeserializerBase = buffer
+        const durationTmpResult : number = (valueDeserializer.readNumber() as number)
+        const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
+        if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const curveTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let curveTmpBuf_ : curves.Curve | string | curves.ICurve | undefined
+            if (curveTmpBuf_UnionSelector == (0).toChar()) {
+                curveTmpBuf_ = curves.Curve.fromValue(valueDeserializer.readInt32())
+            } else if (curveTmpBuf_UnionSelector == (1).toChar()) {
+                curveTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (curveTmpBuf_UnionSelector == (2).toChar()) {
+                curveTmpBuf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+            } else {
+                throw new Error("One of the branches for curveTmpBuf_ has to be chosen through deserialisation.")
+            }
+            curveTmpBuf = (curveTmpBuf_ as curves.Curve | string | curves.ICurve)
+        }
+        const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
+        const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const eventTmpResult : (() => void) = ():void => {
+            const eventTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            eventTmpBufBufArgsSerializer.writeInt32(eventTmpBufBufResource.resourceId);
+            eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCall);
+            eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCallSync);
+            InteropNativeModule._CallCallbackSync(10, -1867723152, eventTmpBufBufArgsSerializer.asBuffer(), eventTmpBufBufArgsSerializer.length());
+            eventTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : KeyframeState = ({duration: durationTmpResult, curve: curveTmpResult, event: eventTmpResult} as KeyframeState)
+        return value
     }
 }
 export class LinearGradientBlurOptions_serializer {
@@ -14225,6 +14292,83 @@ export class HistoricalPoint_serializer {
         const forceTmpResult : number = (valueDeserializer.readNumber() as number)
         const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
+        return value
+    }
+}
+export class KeyframeAnimateParam_serializer {
+    public static write(buffer: SerializerBase, value: KeyframeAnimateParam): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDelay  = value.delay
+        if (valueHolderForDelay !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDelayTmpValue  = valueHolderForDelay!
+            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForIterations  = value.iterations
+        if (valueHolderForIterations !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIterationsTmpValue  = valueHolderForIterations!
+            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnFinish  = value.onFinish
+        if (valueHolderForOnFinish !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnFinishTmpValue  = valueHolderForOnFinish!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnFinishTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForExpectedFrameRateRange  = value.expectedFrameRateRange
+        if (valueHolderForExpectedFrameRateRange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForExpectedFrameRateRangeTmpValue  = valueHolderForExpectedFrameRateRange!
+            ExpectedFrameRateRange_serializer.write(valueSerializer, valueHolderForExpectedFrameRateRangeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): KeyframeAnimateParam {
+        let valueDeserializer : DeserializerBase = buffer
+        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let delayTmpBuf : number | undefined = undefined
+        if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            delayTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const delayTmpResult : number | undefined = delayTmpBuf
+        const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iterationsTmpBuf : number | undefined = undefined
+        if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onFinishTmpBuf : (() => void) | undefined = undefined
+        if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onFinishTmpBuf = ():void => {
+                const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                onFinishTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onFinishTmpResult : (() => void) | undefined = onFinishTmpBuf
+        const expectedFrameRateRangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let expectedFrameRateRangeTmpBuf : ExpectedFrameRateRange | undefined = undefined
+        if ((expectedFrameRateRangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            expectedFrameRateRangeTmpBuf = ExpectedFrameRateRange_serializer.read(valueDeserializer)
+        }
+        const expectedFrameRateRangeTmpResult : ExpectedFrameRateRange | undefined = expectedFrameRateRangeTmpBuf
+        let value : KeyframeAnimateParam = ({delay: delayTmpResult, iterations: iterationsTmpResult, onFinish: onFinishTmpResult, expectedFrameRateRange: expectedFrameRateRangeTmpResult} as KeyframeAnimateParam)
         return value
     }
 }

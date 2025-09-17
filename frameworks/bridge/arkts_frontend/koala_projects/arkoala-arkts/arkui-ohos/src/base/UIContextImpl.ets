@@ -19,7 +19,7 @@ import { int32, int64 } from "@koalaui/common"
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
     runtimeType, Finalizable, SerializerBase, DeserializerBase } from "@koalaui/interop"
 import { _animateTo } from "arkui/base/ArkAnimation"
-import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
+import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
@@ -63,7 +63,7 @@ import { deserializeAndCallCallback } from "arkui/framework/peers/CallbackDeseri
 import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
-import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet } from '../framework';
+import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -1364,8 +1364,9 @@ export class UIContextImpl extends UIContext {
     }
 
     public keyframeAnimateTo(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
-        throw new Error("no impl");
-        
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        AnimationExtender.KeyframeAnimationImpl(param, keyframes);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
@@ -1375,10 +1376,10 @@ export class UIContextImpl extends UIContext {
     }
 
     public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        // CommonMethodHandWritten.hookCommonMethodAnimateToImmediatelyImpl(value, () => {
-        //     event(undefined);
-        // });
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        AnimationExtender.AnimateToImmediatelyImpl(value, () => {
+            event(undefined);
+        });
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

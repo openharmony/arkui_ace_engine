@@ -25928,6 +25928,27 @@ void impl_AnimationExtender_AnimationTranslate(Ark_NativePointer node, KSerializ
         GetAccessors()->getAnimationExtenderAccessor()->AnimationTranslate(node, static_cast<Ark_TranslateOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(AnimationExtender_AnimationTranslate, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_AnimationExtender_AnimateToImmediatelyImpl(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_AnimateParam paramValueTemp = AnimateParam_serializer::read(thisDeserializer);;
+        Callback_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getAnimationExtenderAccessor()->AnimateToImmediatelyImpl(static_cast<Ark_AnimateParam*>(&paramValueTemp), static_cast<Callback_Void*>(&eventValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_AnimateToImmediatelyImpl, KSerializerBuffer, int32_t)
+void impl_AnimationExtender_KeyframeAnimationImpl(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_KeyframeAnimateParam paramValueTemp = KeyframeAnimateParam_serializer::read(thisDeserializer);;
+        const Ark_Int32 keyfamesValueTempTmpBufLength = thisDeserializer.readInt32();
+        Array_KeyframeState keyfamesValueTempTmpBuf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(keyfamesValueTempTmpBuf)>::type,
+        std::decay<decltype(*keyfamesValueTempTmpBuf.array)>::type>(&keyfamesValueTempTmpBuf, keyfamesValueTempTmpBufLength);
+        for (int keyfamesValueTempTmpBufBufCounterI = 0; keyfamesValueTempTmpBufBufCounterI < keyfamesValueTempTmpBufLength; keyfamesValueTempTmpBufBufCounterI++) {
+            keyfamesValueTempTmpBuf.array[keyfamesValueTempTmpBufBufCounterI] = KeyframeState_serializer::read(thisDeserializer);
+        }
+        Array_KeyframeState keyfamesValueTemp = keyfamesValueTempTmpBuf;;
+        GetAccessors()->getAnimationExtenderAccessor()->KeyframeAnimationImpl(static_cast<Ark_KeyframeAnimateParam*>(&paramValueTemp), static_cast<Array_KeyframeState*>(&keyfamesValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_KeyframeAnimationImpl, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_AppearSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scopeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -28103,6 +28124,39 @@ KInteropReturnBuffer impl_CustomDialogController_getExternalOptions(Ark_NativePo
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(CustomDialogController_getExternalOptions, KInteropReturnBuffer, Ark_NativePointer)
+Ark_NativePointer impl_CustomDialogControllerExtender_construct(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_CustomDialogControllerOptionsExtender valueValueTemp = CustomDialogControllerOptionsExtender_serializer::read(thisDeserializer);;
+        return GetAccessors()->getCustomDialogControllerExtenderAccessor()->construct(static_cast<Ark_CustomDialogControllerOptionsExtender*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_2(CustomDialogControllerExtender_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CustomDialogControllerExtender_getFinalizer() {
+        return GetAccessors()->getCustomDialogControllerExtenderAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(CustomDialogControllerExtender_getFinalizer, Ark_NativePointer)
+void impl_CustomDialogControllerExtender_open(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogControllerExtender self = reinterpret_cast<Ark_CustomDialogControllerExtender>(thisPtr);
+        GetAccessors()->getCustomDialogControllerExtenderAccessor()->open(self);
+}
+KOALA_INTEROP_DIRECT_V1(CustomDialogControllerExtender_open, Ark_NativePointer)
+void impl_CustomDialogControllerExtender_close(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogControllerExtender self = reinterpret_cast<Ark_CustomDialogControllerExtender>(thisPtr);
+        GetAccessors()->getCustomDialogControllerExtenderAccessor()->close(self);
+}
+KOALA_INTEROP_DIRECT_V1(CustomDialogControllerExtender_close, Ark_NativePointer)
+void impl_CustomDialogControllerExtender_setOwnerView(Ark_NativePointer thisPtr, Ark_NativePointer content) {
+        Ark_CustomDialogControllerExtender self = reinterpret_cast<Ark_CustomDialogControllerExtender>(thisPtr);
+        GetAccessors()->getCustomDialogControllerExtenderAccessor()->setOwnerView(self, content);
+}
+KOALA_INTEROP_DIRECT_V2(CustomDialogControllerExtender_setOwnerView, Ark_NativePointer, Ark_NativePointer)
+KInteropReturnBuffer impl_CustomDialogControllerExtender_getExternalOptions(Ark_NativePointer thisPtr) {
+        Ark_CustomDialogControllerExtender self = reinterpret_cast<Ark_CustomDialogControllerExtender>(thisPtr);
+        const auto &retValue = GetAccessors()->getCustomDialogControllerExtenderAccessor()->getExternalOptions(self);
+        SerializerBase _retSerializer {};
+        CustomDialogControllerExternalOptionsExtender_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(CustomDialogControllerExtender_getExternalOptions, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_CustomSpan_construct() {
         return GetAccessors()->getCustomSpanAccessor()->construct();
 }
