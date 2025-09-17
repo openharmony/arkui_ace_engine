@@ -1425,8 +1425,8 @@ public:
     void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
-    double ResizeWidth() const;
-    double ResizeHeight() const;
+    bool IsBlanklessFrameValid() const;
+    void RemoveSnapshotFrameNodeIfNeeded();
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
@@ -1713,6 +1713,9 @@ private:
     bool isVisible_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+
+    uint32_t blanklessFrameWidth_ = 0;
+    uint32_t blanklessFrameHeight_ = 0;
 #endif
 };
 

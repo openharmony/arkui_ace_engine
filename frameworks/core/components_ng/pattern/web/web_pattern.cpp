@@ -109,6 +109,7 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t SNAPSHOT_DURATION_TIME = 300;
@@ -881,14 +882,12 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
         return;
     }
 
-    if (delegate_ && (width != 0) && (height != 0)) {
-        uint32_t resizeWidth = static_cast<uint32_t>(std::ceil(delegate_->ResizeWidth()));
-        uint32_t resizeHeight = static_cast<uint32_t>(std::ceil(delegate_->ResizeHeight()));
-        if ((width != resizeWidth) || (height != resizeHeight)) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is invalid", width, height);
+    if (delegate_) {
+        delegate_->RecordBlanklessFrameSize(width, height);
+        if (!delegate_->IsBlanklessFrameValid()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size is invalid!");
             return;
         }
-        delegate_->RecordBlanklessFrameSize(width, height);
     }
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
@@ -909,9 +908,14 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
     auto imageLayoutProperty = snapshotNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageRenderProperty = snapshotNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    CHECK_NULL_VOID(imageRenderProperty);
     ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + snapshotPath);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    imageLayoutProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageMatrix(WEB_SNAPSHOT_IMAGE_SCALE_MATRIX);
     snapshotNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     snapshotNode->MarkModifyDone();
 }
