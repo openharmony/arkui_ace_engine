@@ -3468,3 +3468,8 @@ frameworks/core/interfaces/native/generated/ @arkui-idlize
 
 [Koala mirror]
 test/unittest/capi/ @huaweimaxuchu
+
+[StateMgmt ArkTS1.2]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/ @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customComponent.ets @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/extendableComponent.ets @arkui_statemgmt
