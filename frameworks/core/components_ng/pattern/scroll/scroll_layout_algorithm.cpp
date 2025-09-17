@@ -279,7 +279,7 @@ void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(overlayNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto scrollFrameSize = geometryNode->GetMarginFrameSize();
+    auto scrollFrameSize = geometryNode->GetFrameSize(true);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(scrollFrameSize);
