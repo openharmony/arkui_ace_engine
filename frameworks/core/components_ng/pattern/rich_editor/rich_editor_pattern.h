@@ -1261,6 +1261,8 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = false;
     }
 
+    bool CheckIfNeedAvoidOnCaretChange(float caretPos);
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool IsTriggerAvoidOnCaretAvoidMode()

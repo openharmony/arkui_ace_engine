@@ -4142,12 +4142,20 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     showSelect_ = true;
-    if (!selectOverlay_->IsUsingMouse()) {
-        selectOverlay_->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
-    }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
     TriggerAvoidOnCaretChangeNextFrame();
+    if (!selectOverlay_->IsUsingMouse()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([selectOverlay = WeakPtr<RichEditorSelectOverlay>(selectOverlay_), isShowMenu]() {
+                auto overlay = selectOverlay.Upgrade();
+                CHECK_NULL_VOID(overlay);
+                overlay->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+            }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
+    }
     MarkContentNodeForRender();
 }
 
@@ -8390,7 +8398,8 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     }
     auto lastCaretPos = GetLastCaretPos();
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !isTriggerAvoidOnCaretAvoidMode_) {
+    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !CheckIfNeedAvoidOnCaretChange(caretPos)
+        && !isTriggerAvoidOnCaretAvoidMode_) {
         return;
     }
     SetLastCaretPos(caretPos);
@@ -8404,6 +8413,20 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
         CHECK_NULL_VOID(textFieldManager);
         textFieldManager->TriggerAvoidOnCaretChange();
     }, TaskExecutor::TaskType::UI, "ArkUIRichEditorTriggerAvoidOnCaretChange", PriorityType::VIP);
+}
+
+bool RichEditorPattern::CheckIfNeedAvoidOnCaretChange(float caretPos)
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto safeAreaMgr = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaMgr, true);
+    auto keyboard = safeAreaMgr->GetKeyboardInset();
+    return keyboard.Length() > 0 && GreatNotEqual(caretPos, keyboard.start - KEYBOARD_AVOID_OFFSET.ConvertToPx());
+#else
+    return true;
+#endif
 }
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
