@@ -3140,14 +3140,6 @@ interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkui_framework_xnode
 
 [Arkoala]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/forEach.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyForEachImpl.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyItemNode.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/RepeatImpl.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/DataChangeListener.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow_all
@@ -3468,6 +3460,15 @@ frameworks/bridge/arkts_frontend/koala_mirror/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
+
+[render-control]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/forEach.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyForEachImpl.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyItemNode.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/RepeatImpl.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/DataChangeListener.ets @arkuieco3
 
 [Koala mirror]
 test/unittest/capi/ @huaweimaxuchu
