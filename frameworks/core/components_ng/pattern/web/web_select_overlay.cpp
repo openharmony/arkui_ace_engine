@@ -174,7 +174,7 @@ void WebSelectOverlay::IsNeedResetHandleReverse(SelectHandleInfo firstHandleInfo
     bool inSameLine = GreatNotEqual(lowerHandleTop, heighterHandleRect.Top()) &&
                       LessNotEqual(lowerHandleTop, heighterHandleRect.Bottom());
     needResetHandleReverse_ = inSameLine ? GreatNotEqual(firstRect.Left(), secondRect.Left())
-                                         : GreatNotEqual(firstRect.Top(), secondRect.Top())
+                                         : GreatNotEqual(firstRect.Top(), secondRect.Top());
 }
 
 void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
@@ -1211,7 +1211,7 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->CopySelectionMenuParams(selectInfo, WebElementType::TEXT, ResponseType::LONG_PRESS);
-    selectInfo.checkHandleReverse = [](const Rect& first, const Rect& second) { return false; };
+    selectInfo.checkHandleReverse = [](const RectF& first, const RectF& second) { return false; };
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(
