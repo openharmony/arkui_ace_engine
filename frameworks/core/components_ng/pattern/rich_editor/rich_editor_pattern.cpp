@@ -7182,7 +7182,7 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 bool RichEditorPattern::HandleOnEscape()
 {
     CloseSelectOverlay();
-    return false;
+    return true;
 }
 
 void RichEditorPattern::HandleOnUndoAction()
