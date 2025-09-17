@@ -3489,6 +3489,7 @@ void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 void  AceContainer::OnFrontUpdated(
     const ConfigurationChange& configurationChange, const std::string& configuration)
 {
+    ContainerScope scope(instanceId_);
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {

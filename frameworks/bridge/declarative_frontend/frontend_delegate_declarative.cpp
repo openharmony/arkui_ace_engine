@@ -573,7 +573,7 @@ void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data
     taskExecutor_->PostSyncTask(
         [onConfigurationUpdated = onConfigurationUpdated_, data] { onConfigurationUpdated(data); },
         TaskExecutor::TaskType::JS, "ArkUIConfigurationUpdated");
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
 bool FrontendDelegateDeclarative::OnStartContinuation()
