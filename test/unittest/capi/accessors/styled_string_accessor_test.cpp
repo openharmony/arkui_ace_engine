@@ -29,7 +29,7 @@
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
-#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
