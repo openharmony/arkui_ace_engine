@@ -27,6 +27,11 @@
 
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
+std::unordered_map<int32_t, OHOS::Ace::BorderStyle> borderStyleMap = {
+    { 0, OHOS::Ace::BorderStyle::DOTTED },
+    { 1, OHOS::Ace::BorderStyle::DASHED },
+    { 2, OHOS::Ace::BorderStyle::SOLID },
+};
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
 {
@@ -545,7 +550,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
                 asyncContext->env->GetNull(&args[0]);
             } else {
-                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
+                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
             }
             args[1] = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
             ani_ref fnReturnVal {};
@@ -600,8 +605,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<Promp
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, 0, "cancel");
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
                 status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_OVERLAY,
@@ -757,7 +761,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
                 asyncContext->env->GetNull(&args[0]);
             } else {
-                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
+                args[0] = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", errorCode);
             }
             args[1] = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
             ani_ref fnReturnVal {};
@@ -812,8 +816,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(std::shared_ptr<P
                         "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
                 }
             } else {
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, 0, "cancel");
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, "cancel", 0);
                 status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
@@ -843,19 +846,26 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
     }
 
     ani_ref globalRef;
-    env->GlobalReference_Create(resultRef, &globalRef);
+    status = env->GlobalReference_Create(resultRef, &globalRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
     result = [env, globalRef](const int32_t reason, const int32_t instanceId) {
         TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
-        if (globalRef) {
-            ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
-            ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
-            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
-            ani_ref fnReturnVal {};
-            ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
-            if (status != ANI_OK) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Dissmiss dialog fail. status: %{public}d", status);
-            }
+        if (!globalRef) {
+            return;
+        }
+
+        ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
+        ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
+        ani_fn_object func = static_cast<ani_fn_object>(globalRef);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Dissmiss dialog fail. status: %{public}d", status);
         }
     };
     return true;
@@ -982,18 +992,121 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     return true;
 }
 
-std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder)
+bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderCallback)
 {
-    auto result = [env, builder]() {
-        if (builder) {
-            auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
-            CHECK_NULL_VOID(builderNode);
-            auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
-            CHECK_NULL_VOID(uiNode);
-            OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+    int64_t builderValue;
+    if (!GetInt64Param(env, object, "builder", builderValue)) {
+        return false;
+    }
+
+    builderCallback = [env, builderValue]() {
+        if (!builderValue) {
+            return;
+        }
+
+        ani_long builder = static_cast<ani_long>(builderValue);
+        auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
+        CHECK_NULL_VOID(builderNode);
+        auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
+        CHECK_NULL_VOID(uiNode);
+        OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    return true;
+}
+
+bool GetDestroyCallback(ani_env *env, ani_object object,
+    std::function<void(const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node)>& destroyCallback)
+{
+    ani_ref destroyFuncRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, destroyFuncRef)) {
+        return false;
+    }
+
+    ani_ref globalDestroyRef;
+    status = env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    destroyCallback = [env, globalDestroyRef](const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> node) {
+        if (!globalDestroyRef) {
+            return;
+        }
+
+        auto nodePtr = node.Upgrade();
+        CHECK_NULL_VOID(nodePtr);
+        auto* builderNode = OHOS::Ace::AceType::RawPtr(nodePtr);
+        CHECK_NULL_VOID(builderNode);
+        int64_t builderPtr = reinterpret_cast<int64_t>(builderNode);
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalDestroyRef);
+        ani_object builderObj = CreateANILongObject(env, builderPtr);
+        ani_ref builderRef = static_cast<ani_ref>(builderObj);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &builderRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalDestroyRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
         }
     };
-    return result;
+    return true;
+}
+
+bool GetCustomBuilderWithId(ani_env *env, ani_object object,
+    std::function<void(const int32_t dialogId)>& builderCallback)
+{
+    ani_ref builderFuncRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderWithId", &builderFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, builderFuncRef)) {
+        return false;
+    }
+
+    ani_ref globalBuilderRef;
+    status = env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    builderCallback = [env, globalBuilderRef](const int32_t dialogId) {
+        if (!globalBuilderRef) {
+            return;
+        }
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
+        ani_object dialogIdObj = CreateANIDoubleObject(env, static_cast<double>(dialogId));
+        ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
+        env->GlobalReference_Delete(globalBuilderRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            return;
+        }
+
+        ani_object builderObj = static_cast<ani_object>(fnReturnVal);
+        ani_long builder;
+        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CallMethodByName_Long fail. status: %{public}d", status);
+            return;
+        }
+
+        auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
+        CHECK_NULL_VOID(builderNode);
+        auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
+        CHECK_NULL_VOID(uiNode);
+        OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    return true;
 }
 
 bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderRadiusProperty>& result)
@@ -1145,7 +1258,13 @@ bool GetBorderStyle(ani_env* env, ani_object object, OHOS::Ace::BorderStyle& res
     if (!GetEnumInt(env, object, "Larkui/component/enums/BorderStyle;", resultInt)) {
         return false;
     }
-    result = static_cast<OHOS::Ace::BorderStyle>(resultInt);
+
+    auto iter = borderStyleMap.find(resultInt);
+    if (iter != borderStyleMap.end()) {
+        result = iter->second;
+        return true;
+    }
+    result = OHOS::Ace::BorderStyle::SOLID;
     return true;
 }
 
@@ -1155,7 +1274,13 @@ bool GetBorderStyle(ani_env* env, ani_object object, const char *name, OHOS::Ace
     if (!GetEnumInt(env, object, name, "Larkui/component/enums/BorderStyle;", resultInt)) {
         return false;
     }
-    result = static_cast<OHOS::Ace::BorderStyle>(resultInt);
+
+    auto iter = borderStyleMap.find(resultInt);
+    if (iter != borderStyleMap.end()) {
+        result = iter->second;
+        return true;
+    }
+    result = OHOS::Ace::BorderStyle::SOLID;
     return true;
 }
 
@@ -1269,8 +1394,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
                 std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, errorMsg, errorCode);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
@@ -1326,8 +1450,7 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
                 }
             } else {
                 std::string strMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, strMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(asyncContext->env, strMsg, errorCode);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
                 if (status != ANI_OK) {
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");

@@ -308,6 +308,7 @@ struct DialogProperties {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+    std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
 };
 
 struct PromptDialogAttr {

@@ -2048,6 +2048,77 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOpenDialogWithNode002
+ * @tc.desc: Test SetOpenDialogWithNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create dialogModel with theme.
+    */
+    CustomDialogControllerModelNG controllerModel;
+
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .dialogLevelUniqueId = 1,
+        .dialogLevelMode = LevelMode::EMBEDDED,
+    };
+    /**
+     * @tc.steps: step2.Build prerequisite conditions and operational parameters
+     */
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    props.isShowInSubWindow = false;
+    props.isModal = true;
+    props.isSceneBoardDialog = true;
+    /**
+     * @tc.steps: step3. Call  SetOpenDialogWithNode.
+     * @tc.desc: Covering branch dialogLevelMode is EMBEDDED
+     */
+    auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
+    EXPECT_NE(result, nullptr);
+    EXPECT_FALSE(props.isShowInSubWindow);
+    EXPECT_TRUE(props.isModal);
+}
+
+/**
+ * @tc.name: SetOpenDialogWithNode003
+ * @tc.desc: Test SetOpenDialogWithNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogModel with theme.
+     */
+    CustomDialogControllerModelNG controllerModel;
+
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+    };
+    /**
+     * @tc.steps: step2.Build prerequisite conditions and operational parameters
+     */
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    props.isShowInSubWindow = true;
+    props.isModal = true;
+    props.isSceneBoardDialog = false;
+    /**
+     * @tc.steps: step3. Call  SetOpenDialogWithNode.
+     * @tc.desc: Covering branch isSceneBoardDialog is false
+     * @tc.expected: running result(dialog) is nullptr.
+     */
+    auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
+    EXPECT_EQ(result, nullptr);
+    EXPECT_TRUE(props.isShowInSubWindow);
+    EXPECT_TRUE(props.isModal);
+}
+
+/**
  * @tc.name: DialogPatternTest032
  * @tc.desc: Test dialogPattern.BuildTitle
  * @tc.type: FUNC
