@@ -31,7 +31,8 @@ std::unordered_map<pthread_t, std::unordered_map<PriorityType,
                             std::queue<TaskExecutor::Task>>> globalTaskPriorityQueue_;
 static std::mutex queueMutex;
  
-static bool is_main_thread() {
+static bool IsMainThread()
+{
     return std::this_thread::get_id() == mainThreadId;
 }
  
