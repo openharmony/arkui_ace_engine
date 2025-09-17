@@ -854,6 +854,7 @@ public:
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
     void ReportAfterContentChangeEvent();
+    void ReportTextChange();
     void DeleteToMaxLength(std::optional<int32_t> length);
     void DeleteContent(int32_t length);
 

@@ -527,6 +527,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
+    ReportTextChange();
     if (eventHub->HasOnStyledStringDidChange()) {
         StyledStringChangeValue changeValue;
         auto changeStart = std::clamp(start, 0, GetTextContentLength());
@@ -539,6 +540,24 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
     }
     ForceTriggerAvoidOnCaretChange();
     ReportAfterContentChangeEvent();
+}
+
+void RichEditorPattern::ReportTextChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uniqueId = host->GetId();
+    std::string currentContent;
+    if (isSpanStringMode_) {
+        IF_TRUE(styledString_, currentContent = styledString_->GetString());
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        currentContent = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    auto inspectorId = host->GetInspectorId().value_or("");
+    TextChangeEventInfo info = { inspectorId, uniqueId, currentContent };
+    UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
 }
 
 void RichEditorPattern::AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo)
@@ -1512,6 +1531,7 @@ bool RichEditorPattern::BeforeAddSymbol(RichEditorChangeValue& changeValue, cons
 void RichEditorPattern::AfterContentChange(RichEditorChangeValue& changeValue)
 {
     auto eventHub = GetEventHub<RichEditorEventHub>();
+    ReportTextChange();
     if (eventHub && eventHub->HasOnDidChange()) {
         eventHub->FireOnDidChange(changeValue);
     }

@@ -2326,4 +2326,44 @@ HWTEST_F(RichEditorEditTestNg, SetMaxLinesHeight003, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), FLT_MAX);
 }
 
+/**
+ * @tc.name: ReportTextChange001
+ * @tc.desc: test ReportTextChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ReportTextChange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abcdef");
+    UIObserverHandler::TextChangeEventHandleFunc handleFunc = [](const TextChangeEventInfo& info) -> void {
+        EXPECT_EQ(info.content, "abcdef");
+    };
+    richEditorPattern->ReportTextChange();
+    UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(std::move(handleFunc));
+    UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(nullptr);
+}
+
+/**
+ * @tc.name: ReportTextChange002
+ * @tc.desc: test ReportTextChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ReportTextChange002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isSpanStringMode_ = false;
+    AddSpan(u"abcdef");
+    UIObserverHandler::TextChangeEventHandleFunc handleFunc = [](const TextChangeEventInfo& info) -> void {
+        EXPECT_EQ(info.content, "abcdef");
+    };
+    richEditorPattern->ReportTextChange();
+    UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(std::move(handleFunc));
+    UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(nullptr);
+    ClearSpan();
+}
 } // namespace OHOS::Ace::NG
