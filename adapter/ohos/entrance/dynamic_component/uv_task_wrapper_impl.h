@@ -27,8 +27,8 @@ class UVTaskWrapperImpl : public TaskWrapper {
 public:
     explicit UVTaskWrapperImpl(napi_env env);
     bool WillRunOnCurrentThread() override;
-    void Call(const TaskExecutor::Task& task,	
-        PriorityType priorityType = PriorityType::LOW) override;	
+    void Call(const TaskExecutor::Task& task,
+        PriorityType priorityType = PriorityType::LOW) override;
     void Call(const TaskExecutor::Task& task, uint32_t delayTime,
         PriorityType priorityType = PriorityType::LOW) override;
     static void CallInWorker(const TaskExecutor::Task& task, uint32_t delayTime, napi_env env);
