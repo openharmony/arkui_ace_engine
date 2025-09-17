@@ -374,13 +374,20 @@ void CovnertResourceObjectVector(std::vector<RefPtr<ResourceObject>>& objs, void
 }
 
 void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
-    ColorSpace colorSpace, void* colorRawPtr)
+    ColorSpace colorSpace, void* colorRawPtr, FrameNode* frameNode)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
     int32_t startPos = NUM_2;
     std::vector<RefPtr<ResourceObject>> objs;
+    bool isNeedCompleteResObj = SystemProperties::ConfigChangePerform() && !colorRawPtr;
+    if (isNeedCompleteResObj) {
+        objs = {
+            nullptr,  // centerX
+            nullptr,  // centerY
+        };
+    }
     CovnertResourceObjectVector(objs, colorRawPtr);
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
         auto colorValue = colors[index].u32;
@@ -393,6 +400,13 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
         Color color;
         color.SetValue(colorVal);
         color.SetColorSpace(colorSpace);
+
+        if (isNeedCompleteResObj) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            objs.emplace_back(colorResObj);
+        }
+
         gradientColor.SetColor(color);
         gradientColor.SetHasValue(hasDimension);
         if (hasDimension) {
@@ -400,7 +414,7 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+        if (SystemProperties::ConfigChangePerform() &&
             objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
@@ -408,30 +422,43 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
 }
 
 void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
-    void* colorRawPtr)
+    void* colorRawPtr, FrameNode* frameNode)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
     int32_t startPos = NUM_3;
     std::vector<RefPtr<ResourceObject>> objs;
+    bool isNeedCompleteResObj = SystemProperties::ConfigChangePerform() && !colorRawPtr;
+    if (isNeedCompleteResObj) {
+        objs = {
+            nullptr,  // centerX
+            nullptr,  // centerY
+            nullptr   // radius
+        };
+    }
     CovnertResourceObjectVector(objs, colorRawPtr);
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
         auto colorValue = colors[index].u32;
         auto colorHasDimension = colors[index + NUM_1].i32;
         auto colorDimension = colors[index + NUM_2].f32;
-        auto color = static_cast<uint32_t>(colorValue);
+        auto color = Color(static_cast<uint32_t>(colorValue));
+        if (isNeedCompleteResObj) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            objs.emplace_back(colorResObj);
+        }
         auto hasDimension = static_cast<bool>(colorHasDimension);
         auto dimension = colorDimension;
         NG::GradientColor gradientColor;
-        gradientColor.SetColor(Color(color));
+        gradientColor.SetColor(color);
         gradientColor.SetHasValue(hasDimension);
         if (hasDimension) {
             gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+        if (SystemProperties::ConfigChangePerform() &&
             objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckRadialGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
@@ -446,7 +473,7 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
  * @param colorsLength colors length
  */
 void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
-    void* colorRawPtr)
+    void* colorRawPtr, FrameNode* frameNode)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
@@ -457,18 +484,25 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
         auto colorValue = colors[index].u32;
         auto colorHasDimension = colors[index + NUM_1].i32;
         auto colorDimension = colors[index + NUM_2].f32;
-        auto color = static_cast<uint32_t>(colorValue);
+        auto color = Color(static_cast<uint32_t>(colorValue));
         auto hasDimension = static_cast<bool>(colorHasDimension);
         auto dimension = colorDimension;
+
+        if (!colorRawPtr) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            objs.emplace_back(colorResObj);
+        }
+
         NG::GradientColor gradientColor;
-        gradientColor.SetColor(Color(color));
+        gradientColor.SetColor(color);
         gradientColor.SetHasValue(hasDimension);
         if (hasDimension) {
             gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+        if (SystemProperties::ConfigChangePerform() &&
             objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
@@ -1770,6 +1804,29 @@ void CheckBackShadowResObj(const std::vector<RefPtr<ResourceObject>> objs, Shado
     }
 }
 
+std::vector<RefPtr<ResourceObject>> CreateShadowResourceObjects(uint32_t color, FrameNode* frameNode, 
+    int32_t hasColorValue, Shadow& shadow)
+{
+    std::vector<RefPtr<ResourceObject>> objs = {
+        nullptr,  // ShadowRadius
+        nullptr,  // offsetX
+        nullptr   // offsetY
+    };
+
+    // The ColorStrategy does not need to adapt to the color inversion.
+    if (hasColorValue != 2) {
+        objs.emplace_back(nullptr);
+        return objs;
+    }
+    
+    auto shadowColor = Color(color);
+    RefPtr<ResourceObject> resObj;
+    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, shadowColor, frameNode->GetTag());
+    objs.emplace_back(resObj);
+    shadow.SetColor(shadowColor);
+    return objs;
+}
+
 /**
  * @param shadows shadow value
  * shadows[0] : BlurRadius, shadows[1] : 1: has ColorStrategy; 2: has Color
@@ -1812,8 +1869,13 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        std::vector<RefPtr<ResourceObject>> objs;
+        if (!resRawPtr) {
+            objs = CreateShadowResourceObjects(color, frameNode, hasColorValue, shadow);
+        } else {
+            objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+        }
         CheckBackShadowResObj(objs, shadow);
     }
     ViewAbstract::SetBackShadow(frameNode, shadow);
@@ -2039,14 +2101,19 @@ void SetColorBlend(ArkUINodeHandle node, uint32_t color, void* colorBlendRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!SystemProperties::ConfigChangePerform() || !colorBlendRawPtr) {
-        ViewAbstract::SetColorBlend(frameNode, Color(color));
-    } else {
-        ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.colorBlend");
-        auto* colorBlend = reinterpret_cast<ResourceObject*>(colorBlendRawPtr);
-        auto colorBlendResObj = AceType::Claim(colorBlend);
-        ViewAbstract::SetColorBlend(frameNode, Color(color), colorBlendResObj);
+    auto finalColor = Color(color);
+    if (!SystemProperties::ConfigChangePerform()) {
+        ViewAbstract::SetColorBlend(frameNode, finalColor);
+        return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.colorBlend");
+    RefPtr<ResourceObject> colorBlendResObj;
+    if (!colorBlendRawPtr) {
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorBlendResObj, finalColor, frameNode->GetTag());
+    } else {
+        colorBlendResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorBlendRawPtr));
+    }
+    ViewAbstract::SetColorBlend(frameNode, finalColor, colorBlendResObj);
 }
 
 void ResetColorBlend(ArkUINodeHandle node)
@@ -2176,7 +2243,7 @@ void SetLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, 
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetLinearGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength, colorRawPtr);
+    SetGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
     ViewAbstract::SetLinearGradient(frameNode, gradient);
 }
 
@@ -2218,9 +2285,9 @@ void SetSweepGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, A
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
     SetSweepGradientValues(gradient, values, valuesLength, resRawPtr);
     if (ColorSpace::DISPLAY_P3 == colorSpace) {
-        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3, resRawPtr);
+        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3, resRawPtr, frameNode);
     } else {
-        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::SRGB, resRawPtr);
+        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::SRGB, resRawPtr, frameNode);
     }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
@@ -2260,7 +2327,7 @@ void SetRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, 
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
     SetRadialGradientValues(gradient, values, valuesLength, resRawPtr);
-    SetRadialGradientColors(gradient, colors, colorsLength, resRawPtr);
+    SetRadialGradientColors(gradient, colors, colorsLength, resRawPtr, frameNode);
     ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 
@@ -2429,7 +2496,7 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetBorderImageGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength, nullptr);
+    SetGradientColors(gradient, colors, colorsLength, nullptr, frameNode);
     ViewAbstract::SetBorderImageGradient(frameNode, gradient);
 }
 
@@ -3934,13 +4001,18 @@ void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color
     ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
     ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColorStrategy");
     if (isColor) {
-        if (SystemProperties::ConfigChangePerform() && fgColorRawPtr) {
-            auto* fgColor = reinterpret_cast<ResourceObject*>(fgColorRawPtr);
-            auto colorResObj = AceType::Claim(fgColor);
-            ViewAbstract::SetForegroundColor(frameNode, Color(color), colorResObj);
-        } else {
-            ViewAbstract::SetForegroundColor(frameNode, Color(color));
+        auto finalColor = Color(color);
+        if (!SystemProperties::ConfigChangePerform()) {
+            ViewAbstract::SetForegroundColor(frameNode, finalColor);
+            return;
         }
+        RefPtr<ResourceObject> colorResObj;
+        if (!fgColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, finalColor, frameNode->GetTag());
+        } else {
+            colorResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fgColorRawPtr));
+        }
+        ViewAbstract::SetForegroundColor(frameNode, finalColor, colorResObj);
     } else {
         auto strategy = static_cast<ForegroundColorStrategy>(color);
         ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
@@ -6330,6 +6402,39 @@ ArkUIMoveTransitionType GetMoveTransition(ArkUINodeHandle node)
     return moveAnimationStruct;
 }
 
+template<typename T>
+void AddShapeResources(FrameNode* frameNode, RefPtr<T>& shape,
+    ArkUI_Uint32& fill, ArkUI_Uint32& stroke)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    
+    // Add color resource
+    RefPtr<ResourceObject> colorResObj;
+    Color fillColor(fill);
+    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, fillColor, frameNode->GetTag());
+    fill = fillColor.GetValue();
+    auto&& colorUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shape.SetColor(color);
+    };
+    shape->AddResource("shape.color", colorResObj, std::move(colorUpdateFunc));
+
+    // Add stroke resource
+    RefPtr<ResourceObject> strokeResObj;
+    Color strokeColor(stroke);
+    ResourceParseUtils::CompleteResourceObjectFromColor(strokeResObj, strokeColor, frameNode->GetTag());
+    stroke = strokeColor.GetValue();
+    auto&& strokeUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shape.SetStrokeColor(color.GetValue());
+    };
+    shape->AddResource("shape.stroke", strokeResObj, std::move(strokeUpdateFunc));
+}
+
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
     ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
@@ -6344,6 +6449,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
         auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(unit));
         auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        AddShapeResources<ShapeRect>(frameNode, shape, fill, stroke);
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetRadiusWidth(radiusWidth);
@@ -6374,6 +6480,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         auto shape = AceType::MakeRefPtr<Circle>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
         auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        AddShapeResources<Circle>(frameNode, shape, fill, stroke);
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
@@ -6384,6 +6491,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         auto shape = AceType::MakeRefPtr<Ellipse>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
         auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        AddShapeResources<Ellipse>(frameNode, shape, fill, stroke);
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
@@ -6394,6 +6502,37 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "type are invalid");
         return;
     }
+}
+
+void AddMaskPathResources(FrameNode* frameNode, RefPtr<Path>& path, ArkUI_Uint32& fill, ArkUI_Uint32& stroke)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    // Add color resource
+    RefPtr<ResourceObject> colorResObj;
+    Color fillColor(fill);
+    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, fillColor, frameNode->GetTag());
+    fill = fillColor.GetValue();
+    auto&& colorUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shape.SetColor(color);
+    };
+    path->AddResource("maskShape.color", colorResObj, std::move(colorUpdateFunc));
+
+    // Add stroke resource
+    RefPtr<ResourceObject> strokeResObj;
+    Color strokeColor(stroke);
+    stroke = strokeColor.GetValue();
+    ResourceParseUtils::CompleteResourceObjectFromColor(strokeResObj, strokeColor, frameNode->GetTag());
+    auto&& strokeUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shape.SetStrokeColor(color.GetValue());
+    };
+    path->AddResource("maskShape.stroke", strokeResObj, std::move(strokeUpdateFunc));
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
@@ -6407,6 +6546,7 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
     auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
     std::string pathCommands(commands);
+    AddMaskPathResources(frameNode, path, fill, stroke);
     path->SetWidth(width);
     path->SetHeight(height);
     path->SetValue(StringUtils::TrimStr(pathCommands));
@@ -6414,6 +6554,26 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     path->SetStrokeColor(stroke);
     path->SetStrokeWidth(strokeWidth);
     ViewAbstract::SetMask(frameNode, path);
+}
+
+void AddProgressMaskResources(FrameNode* frameNode,
+    RefPtr<ProgressMaskProperty>& progressMask, ArkUI_Uint32& color)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    // Add progress mask color resource
+    RefPtr<ResourceObject> colorResObj;
+    Color maskColor(color);
+    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, maskColor, frameNode->GetTag());
+    color = maskColor.GetValue();
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ProgressMaskProperty& progressMask) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        progressMask.SetColor(color);
+    };
+    progressMask->AddResource("ProgressMask.color", colorResObj, std::move(updateFunc));
 }
 
 void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI_Uint32 color)
@@ -6424,6 +6584,7 @@ void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI
     auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
     int value = attribute[NUM_0];
     int total = attribute[NUM_1];
+    AddProgressMaskResources(frameNode, progressMask, color);
     progressMask->SetValue(value);
     progressMask->SetMaxValue(total);
     progressMask->SetColor(Color(color));
@@ -6435,6 +6596,7 @@ void ResetMask(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "maskShape");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "ProgressMask");
     ViewAbstract::SetMask(frameNode, nullptr);
 }
 
@@ -6553,6 +6715,31 @@ void CheckOuterBorderColorResObj(NG::BorderColorProperty& borderColors, RefPtr<R
     }
 }
 
+void ProcessOptionalColorResources(FrameNode* frameNode, 
+    const std::optional<Color>& color, std::vector<RefPtr<ResourceObject>>& vectorResObj)
+{
+    if (color.has_value()) {
+        RefPtr<ResourceObject> colorResObj;
+        auto colorVal = color.value();
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, colorVal,
+            frameNode->GetTag());
+        vectorResObj.emplace_back(colorResObj);
+    } else {
+        vectorResObj.emplace_back(nullptr);
+    }
+}
+
+std::vector<RefPtr<ResourceObject>> ProcessBorderColorResources(FrameNode* frameNode,
+    NG::BorderColorProperty& borderColors)
+{
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    ProcessOptionalColorResources(frameNode, borderColors.leftColor, vectorResObj);
+    ProcessOptionalColorResources(frameNode, borderColors.rightColor, vectorResObj);
+    ProcessOptionalColorResources(frameNode, borderColors.topColor, vectorResObj);
+    ProcessOptionalColorResources(frameNode, borderColors.bottomColor, vectorResObj);
+    return vectorResObj;
+}
+
 void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t valuesSize, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6564,8 +6751,13 @@ void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t value
     SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
-    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        std::vector<RefPtr<ResourceObject>> objs;
+        if (!resRawPtr) {
+            objs = ProcessBorderColorResources(frameNode, borderColors);
+        } else {
+            objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+        }
         if (objs.size() > NUM_3) {
             CheckOuterBorderColorResObj(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
         }
