@@ -28,6 +28,7 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
             options_casted = param[0] as (WaterFlowOptions | undefined);
         }
         this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+        this.markDirty()
         return this;
     }
     getPeer() : ArkWaterFlowPeer {
@@ -36,6 +37,7 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
     initialize(options?: WaterFlowOptions): this {
         const options_casted = options as (WaterFlowOptions | undefined)
         this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+        this.markDirty()
         return this;
     }
     allowChildTypes(): string[] {
@@ -44,46 +46,55 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
     columnsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
         this.getPeer()?.setColumnsTemplateAttribute(value_casted)
+        this.markDirty()
         return this
     }
     itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
         const value_casted = value as (ConstraintSizeOptions | undefined)
         this.getPeer()?.setItemConstraintSizeAttribute(value_casted)
+        this.markDirty()
         return this
     }
     rowsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
         this.getPeer()?.setRowsTemplateAttribute(value_casted)
+        this.markDirty()
         return this
     }
     columnsGap(value: Length | undefined): this {
         const value_casted = value as (Length | undefined)
         this.getPeer()?.setColumnsGapAttribute(value_casted)
+        this.markDirty()
         return this
     }
     rowsGap(value: Length | undefined): this {
         const value_casted = value as (Length | undefined)
         this.getPeer()?.setRowsGapAttribute(value_casted)
+        this.markDirty()
         return this
     }
     layoutDirection(value: FlexDirection | undefined): this {
         const value_casted = value as (FlexDirection | undefined)
         this.getPeer()?.setLayoutDirectionAttribute(value_casted)
+        this.markDirty()
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
         const value_casted = value as (NestedScrollOptions | undefined)
         this.getPeer()?.setNestedScrollAttribute(value_casted)
+        this.markDirty()
         return this
     }
     enableScrollInteraction(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setEnableScrollInteractionAttribute(value_casted)
+        this.markDirty()
         return this
     }
     friction(value: number | Resource | undefined): this {
         const value_casted = value as (number | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
+        this.markDirty()
         return this
     }
     cachedCount(count: number | undefined, show?: boolean): this {
@@ -92,12 +103,14 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
             const value_casted = count as (number | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
+            this.markDirty()
             return this
         }
         if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
             const count_casted = count as (number | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
+            this.markDirty()
             return this
         }
         throw new Error("Can not select appropriate overload")
@@ -107,6 +120,7 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         if ((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) {
             const value_casted = value as (number | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
+            this.markDirty()
             return this
         }
         throw new Error("Can not select appropriate overload")
@@ -114,31 +128,37 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
     onReachStart(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)
         this.getPeer()?.setOnReachStartAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onReachEnd(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)
         this.getPeer()?.setOnReachEndAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         const value_casted = value as (OnScrollFrameBeginCallback | undefined)
         this.getPeer()?.setOnScrollFrameBeginAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         const value_casted = value as (((first: number,last: number) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
         const value_casted = value as (OnWillScrollCallback | undefined)
         this.getPeer()?.setOnWillScrollAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onDidScroll(value: OnScrollCallback | undefined): this {
         const value_casted = value as (OnScrollCallback | undefined)
         this.getPeer()?.setOnDidScrollAttribute(value_casted)
+        this.markDirty()
         return this
     }
 }

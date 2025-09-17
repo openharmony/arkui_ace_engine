@@ -26,6 +26,7 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
             options_casted = param[0] as (ListItemGroupOptions | undefined);
         }
         this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+        this.markDirty()
         return this;
     }
     getPeer() : ArkListItemGroupPeer {
@@ -34,6 +35,7 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
     initialize(options?: ListItemGroupOptions): this {
         const options_casted = options as (ListItemGroupOptions | undefined)
         this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+        this.markDirty()
         return this
     }
     allowChildTypes(): string[] {
@@ -42,11 +44,13 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
     divider(value: ListDividerOptions | undefined): this {
         const value_casted = value as (ListDividerOptions | undefined)
         this.getPeer()?.setDividerAttribute(value_casted)
+        this.markDirty()
         return this
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
         const value_casted = value as (ChildrenMainSize | undefined)
         this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
+        this.markDirty()
         return this
     }
 }

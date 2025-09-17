@@ -26,6 +26,7 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
             options_casted = param[0] as (ListItemOptions | undefined);
         }
         this.getPeer()?.setListItemOptionsAttribute(options_casted)
+        this.markDirty()
         return this;
     }
     getPeer() : ArkListItemPeer {
@@ -34,6 +35,7 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     initialize(options?: ListItemOptions): this {
         const options_casted = options as (ListItemOptions | undefined)
         this.getPeer()?.setListItemOptionsAttribute(options_casted)
+        this.markDirty()
         return this
     }
     allowChildCount(): number {
@@ -42,6 +44,7 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     selectable(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setSelectableAttribute(value_casted)
+        this.markDirty()
         return this
     }
     selected(value: boolean | Bindable<boolean> | undefined): this {
@@ -49,6 +52,7 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
         if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setSelectedAttribute(value_casted)
+            this.markDirty()
             return this
         }
         return this
@@ -56,11 +60,13 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     swipeAction(value: SwipeActionOptions | undefined): this {
         const value_casted = value as (SwipeActionOptions | undefined)
         this.getPeer()?.setSwipeActionAttribute(value_casted)
+        this.markDirty()
         return this
     }
     onSelect(value: ((isVisible: boolean) => void) | undefined): this {
         const value_casted = value as (((isVisible: boolean) => void) | undefined)
         this.getPeer()?.setOnSelectAttribute(value_casted)
+        this.markDirty()
         return this
     }
 }
