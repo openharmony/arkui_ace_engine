@@ -114,7 +114,7 @@ bool UVTaskWrapperImpl::WillRunOnCurrentThread()
     return pthread_self() == threadId_;
 }
 
-void UVTaskWrapperImpl::Call(	
+void UVTaskWrapperImpl::Call(
     const TaskExecutor::Task& task, PriorityType priorityType)
 {
     if ((priorityType < PriorityType::LOW)) {
