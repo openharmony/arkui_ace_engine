@@ -637,6 +637,8 @@ private:
     RefPtr<FrameNode> GetNavBarNodeOrHomeDestination() const;
     RefPtr<FrameNode> GetContentNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
+    void FireInterceptionBeforeLifeCycleEvent(
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath, const int32_t index);
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub);
