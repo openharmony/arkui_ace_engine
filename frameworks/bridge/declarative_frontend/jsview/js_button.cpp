@@ -640,6 +640,9 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
+        if (!NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+            return;
+        }
         ButtonModel::GetInstance()->CreateWithColorResourceObj(resObj, ButtonColorType::BACKGROUND_COLOR);
     }
     ButtonModel::GetInstance()->BackgroundColor(backgroundColor, colorFlag);
