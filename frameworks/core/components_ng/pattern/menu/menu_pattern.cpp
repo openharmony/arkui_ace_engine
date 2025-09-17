@@ -998,12 +998,12 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && !IsSelectMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d. reason %{public}d", targetId_, reason);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
-    if (targetTag_ == V2::SELECT_ETS_TAG && expandDisplay && layoutProperty->GetShowInSubWindowValue(false)) {
+    if (IsSelectMenu() && expandDisplay && layoutProperty->GetShowInSubWindowValue(false)) {
         auto subWindowManager = SubwindowManager::GetInstance();
         CHECK_NULL_VOID(subWindowManager);
         auto containerId = Container::CurrentId();
