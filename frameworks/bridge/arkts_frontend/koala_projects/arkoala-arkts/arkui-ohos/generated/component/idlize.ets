@@ -48,6 +48,7 @@ import { Size, Frame } from "arkui.Graphics"
 import { default as image } from "@ohos.multimedia.image"
 import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
+import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo } from "@ohos.arkui.UIContext"
@@ -58,7 +59,6 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { default as curves } from "@ohos.curves"
 import { CustomDialogController } from "./customDialogController"
-import { CustomBuilder } from "./builder"
 import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentRootModifier } from "./../ComponentRootModifier"
@@ -1342,6 +1342,20 @@ export class IUIContext {
         const id_casted = id as (number)
         const isFrozen_casted = isFrozen as (boolean)
         IUIContext.freezeUINode1_serialize(id_casted, isFrozen_casted)
+        return
+    }
+}
+export class LazyBuild {
+    static SetTabContentLazyBuilder_serialize(node: KPointer, builder: CustomBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder))
+        ArkUIGeneratedNativeModule._LazyBuild_SetTabContentLazyBuilder(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static SetTabContentLazyBuilder(node: KPointer, builder: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder)
+        LazyBuild.SetTabContentLazyBuilder_serialize(node_casted, builder_casted)
         return
     }
 }
