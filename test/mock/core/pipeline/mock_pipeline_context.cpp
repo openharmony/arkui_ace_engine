@@ -592,7 +592,8 @@ void PipelineContext::OnRawKeyboardChangedCallback() {}
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {}
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
