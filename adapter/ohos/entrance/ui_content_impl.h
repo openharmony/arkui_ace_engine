@@ -40,6 +40,7 @@
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -580,6 +581,10 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
+    NG::WindowSizeBreakpoint lastBreakpoint_;
+
+private:
+    void ProcessWindowSizeLayoutBreakPointChange();
 };
 
 } // namespace OHOS::Ace

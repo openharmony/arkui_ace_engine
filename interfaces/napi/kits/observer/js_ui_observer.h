@@ -41,8 +41,10 @@ private:
     napi_value ProcessRouterPageRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDensityRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessWinSizeLayoutBreakpointRegister(napi_env env, napi_callback_info info);
     using Func = napi_value (ObserverProcess::*)(napi_env, napi_callback_info);
     napi_value ProcessDensityUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessWinSizeLayoutBreakpointUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDrawCommandSendRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessLayoutDoneRegister(napi_env env, napi_callback_info info);
@@ -73,6 +75,7 @@ private:
     bool isNavigationHandleFuncSetted_ = false;
     bool isScrollEventChangeFuncSetted_ = false;
     bool isDensityChangeSetted_ = false;
+    bool isWinSizeLayoutBreakpointChangeSetted_ = false;
     bool isDrawCommandSendChangeSetted_ = false;
     bool isLayoutDoneChangeSetted_ = false;
     bool isWillClickFuncSetted_ = false;

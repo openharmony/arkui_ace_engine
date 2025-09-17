@@ -274,6 +274,33 @@ void UIObserverListener::OnDensityChange(double density)
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle winSizeLayoutBreakpoint change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value widthValue;
+    napi_create_int32(env_, static_cast<int32_t>(info.widthBreakpoint), &widthValue);
+    napi_set_named_property(env_, objValue, "widthBreakpoint", widthValue);
+    napi_value heightValue;
+    napi_create_int32(env_, static_cast<int32_t>(info.heightBreakpoint), &heightValue);
+    napi_set_named_property(env_, objValue, "heightBreakpoint", heightValue);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
 void UIObserverListener::OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState)
 {
     if (!env_ || !callback_) {
