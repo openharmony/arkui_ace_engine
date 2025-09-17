@@ -201,7 +201,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    auto key = session_->GetWindowStatus();
+    auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
@@ -662,7 +662,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        auto key = session_->GetWindowStatus();
+        auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
         auto freeMultiWindow = session_->freeMultiWindow_.load();
         auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
@@ -673,10 +673,6 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = session_->GetWindowSnapshotOrientation();
-        if (matchSnapshot && (!freeMultiWindow)) {
-            auto orientation = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
-            pattern->SetOrientation(orientation);
-        }
         if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
@@ -689,11 +685,11 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key, matchSnapshot,
                 freeMultiWindow));
             auto snapshotRotation =
-                static_cast<uint32_t>(scenePersistence->rotate_[key.first][key.second]);
+                static_cast<uint32_t>(scenePersistence->rotate_[key]);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
                 "lastRotation: %{public}d windowRotation: %{public}d, snapshotRotation: %{public}d",
                 lastRotation, windowRotation, snapshotRotation);
-            if (!matchSnapshot) {
+            if (!freeMultiWindow) {
                 auto orientation = TransformOrientationForDisMatchSnapshot(lastRotation,
                     windowRotation, snapshotRotation);
                 pattern->SetOrientation(orientation);
