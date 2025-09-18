@@ -344,6 +344,38 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress008
 }
 
 /**
+ * @tc.name: HandleDoubleClickOrLongPress009
+ * @tc.desc: test touch Double Click
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress009, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    AddSpan(TEST_INSERT_VALUE);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->caretVisible_ = true;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.localLocation_ = Offset(0, 0);
+    richEditorPattern->textSelector_.aiStart = 0;
+    richEditorPattern->textSelector_.aiEnd = 0;
+    EXPECT_FALSE(richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_));
+}
+/**
  * @tc.name: HandleLongPress001
  * @tc.desc: test RichEditorPattern HandleLongPress
  * @tc.type: FUNC
