@@ -536,7 +536,7 @@ struct ImageMenuItem {
         let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
         this.applicationContext = hostContext.getApplicationContext();
         try {
-          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
         } catch (paramError) {
           hilog.error(0x3900, 'Ace',
             `EditableTitleBar Faild to get environment param error `);
