@@ -729,7 +729,7 @@ void FormPattern::OnModifyDone()
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "skip measure and layout");
+        TAG_LOGW(AceLogTag::ACE_FORM, "skip measure and layout");
         return false;
     }
     isBeenLayout_ = true;
