@@ -112,7 +112,7 @@ void SetStrokeWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidatePositive(strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ShapeModelStatic::SetStrokeWidth(frameNode, strokeWidth);
 }
