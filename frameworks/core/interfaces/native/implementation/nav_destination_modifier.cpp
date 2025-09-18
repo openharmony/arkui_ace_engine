@@ -421,11 +421,11 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enabled = false;
+    std::optional<bool> navigationIndicator;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        enabled = Converter::OptConvert<bool>(*value).value_or(false);
+        navigationIndicator = Converter::Convert<bool>(value->value);
     }
-    NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, enabled);
+    NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 void SetTitleImpl(Ark_NativePointer node,
                   const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
