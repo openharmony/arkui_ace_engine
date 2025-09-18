@@ -324,25 +324,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 }
-
-@memo
-export function TabContentImpl(
-    @memo
-    style: ((attributes: TabContentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkTabContentComponent>((): ArkTabContentComponent => {
-        return new ArkTabContentComponent()
-    })
-    NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (peer: ArkTabContentPeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
-        content_?.()
-    })
-}
-
 export class SubTabBarStyle {
     _content?: ResourceStr | ResourceStr | ComponentContent | undefined
     _indicator?: SubTabBarIndicatorStyle | undefined
