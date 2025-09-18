@@ -260,6 +260,7 @@ public:
         const std::string& extraInfo,
         const std::unordered_map<int, DragPointerEvent>& idToPoints,
         const RefPtr<FrameNode>& node);
+    void FlushDragEventVoluntarily();
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;

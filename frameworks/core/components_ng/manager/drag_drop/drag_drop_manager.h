@@ -650,6 +650,12 @@ public:
         return preDragPointerEvent_;
     }
 
+    void SetLastDragPointerEvent(const DragPointerEvent& pointerEvent, const RefPtr<NG::FrameNode>& node = nullptr)
+    {
+        lastRootNode_ = node;
+        lastDragPointerEvent_ = pointerEvent;
+    }
+
     void SetIsReDragStart(bool isReDragStart)
     {
         isReDragStart_ = isReDragStart;
@@ -678,6 +684,13 @@ public:
     {
         rootNode_ = rootNode;
     }
+    
+    void SetIsFlushDragEvent(bool isFlushed)
+    {
+        isFlushed_ = isFlushed;
+    }
+
+    void DispatchLastDragEventVoluntarily(bool isTrans);
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -751,9 +764,11 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<FrameNode> rootNode_ = nullptr;
+    RefPtr<FrameNode> lastRootNode_ = nullptr;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     DragPointerEvent preDragPointerEvent_;
+    DragPointerEvent lastDragPointerEvent_;
     uint64_t preTimeStamp_ = 0L;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
@@ -784,6 +799,7 @@ private:
     bool isDragNodeNeedClean_ = false;
     bool isAnyDraggableHit_ = false;
     bool isReDragStart_ = false;
+    bool isFlushed_ = false;
     VelocityTracker velocityTracker_;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;

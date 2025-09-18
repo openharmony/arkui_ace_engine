@@ -615,6 +615,15 @@ void PipelineContext::FlushOnceVsyncTask()
         onceVsyncListener_ = nullptr;
     }
 }
+void PipelineContext::FlushDragEventVoluntarily()
+{
+    auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "FlushDragEventVoluntarily GetDragDrapManager error, manager is nullptr");
+        return;
+    }
+    manager->DispatchLastDragEventVoluntarily(isTransFlag_);
+}
 
 void PipelineContext::FlushDragEvents()
 {
@@ -631,13 +640,19 @@ void PipelineContext::FlushDragEvents()
     if (dragEvents.empty()) {
         canUseLongPredictTask_ = true;
         nodeToPointEvent_.clear();
+        manager->SetIsFlushDragEvent(false);
         return;
     }
     std::string extraInfo = manager->GetExtraInfo();
     canUseLongPredictTask_ = false;
+    bool isFlushed = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
+        if (!isFlushed && !iter->second.empty()) {
+            isFlushed = true;
+        }
         FlushDragEvents(manager, extraInfo, iter->first, iter->second);
     }
+    manager->SetIsFlushDragEvent(isFlushed);
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
@@ -878,6 +893,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         HandleVisibleAreaChangeEvent(nanoTimestamp);
     }
     UpdateFormLinkInfos();
+    FlushDragEventVoluntarily();
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -4488,33 +4504,28 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
-    if (dragManager && !dragManager->IsDragged()) {
-        if (event.action == AxisAction::BEGIN) {
-            isBeforeDragHandleAxis_ = true;
-            TouchRestrict touchRestrict { TouchRestrict::NONE };
-            touchRestrict.sourceType = event.sourceType;
-            touchRestrict.hitTestType = SourceType::TOUCH;
-            touchRestrict.inputEventType = InputEventType::AXIS;
-            // If received rotate event, no need to touchtest.
-            if (!event.isRotationEvent) {
-                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
-                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
-                auto formEventMgr = this->GetFormEventManager();
-                if (formEventMgr) {
-                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
-                }
-                auto formGestureMgr =  this->GetFormGestureManager();
-                if (formGestureMgr) {
-                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
-                        etsSerializedGesture, eventManager_);
-                }
+    if (event.action == AxisAction::BEGIN) {
+        isBeforeDragHandleAxis_ = true;
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = event.sourceType;
+        touchRestrict.hitTestType = SourceType::TOUCH;
+        touchRestrict.inputEventType = InputEventType::AXIS;
+        // If received rotate event, no need to touchtest.
+        if (!event.isRotationEvent) {
+            eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+            auto formEventMgr = this->GetFormEventManager();
+            if (formEventMgr) {
+                formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+            }
+            auto formGestureMgr =  this->GetFormGestureManager();
+            if (formGestureMgr) {
+                formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                    etsSerializedGesture, eventManager_);
             }
         }
-        eventManager_->DispatchTouchEvent(scaleEvent);
-    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
-        eventManager_->DispatchTouchEvent(scaleEvent);
-        isBeforeDragHandleAxis_ = false;
     }
+    eventManager_->DispatchTouchEvent(scaleEvent);
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -5145,7 +5156,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
             return;
         }
     }
-
+    manager->SetLastDragPointerEvent(pointerEvent, node);
     if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
         action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
         if (!eventManager_->touchDelegatesMap_.empty()) {
