@@ -3651,7 +3651,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
         return false;
     }
     bool isBrowserUsage = nweb_->IsNWebEx();
-    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
+    if ((OHOS::system::GetDeviceType() != "2in1" && !IsPcMode()) || !isBrowserUsage) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
         return false;
     }
@@ -9268,12 +9268,7 @@ void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type)
 
 bool WebDelegate::IsPcMode()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_RETURN(container, false);
-    int32_t instanceId = container->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    return window->IsPcWindow();
+    return SystemProperties::IsPCMode();
 }
 
 class WebFreeMultiWindowListener : public OHOS::Rosen::ISwitchFreeMultiWindowListener {
