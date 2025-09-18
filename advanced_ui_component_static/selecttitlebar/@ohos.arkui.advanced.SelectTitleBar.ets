@@ -403,7 +403,7 @@ struct CollapsibleMenuSection {
           })
           .onKeyEvent((event: KeyEvent) => {
             if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-              return
+              return false
             }
             if (event.type === KeyType.Down) {
               this.isMoreIconOnClick = true
@@ -686,10 +686,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return false
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return false
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true
@@ -788,10 +788,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return false
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return false
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true

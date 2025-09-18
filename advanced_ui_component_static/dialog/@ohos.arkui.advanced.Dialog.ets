@@ -360,6 +360,7 @@ export struct TipsDialog {
                 if (event) {
                   resolveKeyEvent(event, this.contentScroller);
                 }
+                return false
               })
           }
         }
@@ -790,6 +791,7 @@ export struct ConfirmDialog {
               if (event) {
                 resolveKeyEvent(event, this.contentScroller);
               }
+              return false
             })
             .width('100%')
         }
@@ -965,6 +967,7 @@ export struct AlertDialog {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
             }
+            return false
           })
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
@@ -1714,7 +1717,7 @@ function setButtonProperties(this: ButtonAttribute, buttonOptions: ButtonOptions
   isAllFocusFalse: boolean, controller?: CustomDialogController): this {
   this.onKeyEvent((event: KeyEvent) => {
     if (!event) {
-      return;
+      return false;
     }
     if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {

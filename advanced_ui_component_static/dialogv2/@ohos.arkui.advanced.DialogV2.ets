@@ -365,6 +365,7 @@ export struct TipsDialogV2 {
                 if (event) {
                   resolveKeyEvent(event, this.contentScroller);
                 }
+                return false
               })
           }
         }
@@ -849,6 +850,7 @@ export struct ConfirmDialogV2 {
               if (event) {
                 resolveKeyEvent(event, this.contentScroller);
               }
+              return false
             })
             .width('100%')
         }
@@ -1002,6 +1004,7 @@ export struct AlertDialogV2 {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
             }
+            return false
           })
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1670,7 +1673,7 @@ function setButtonProperties(this: ButtonAttribute, buttonOptions?: AdvancedDial
   controller?: PromptActionDialogController): this {
   this.onKeyEvent((event: KeyEvent) => {
     if (!event) {
-      return;
+      return false;
     }
     if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {
