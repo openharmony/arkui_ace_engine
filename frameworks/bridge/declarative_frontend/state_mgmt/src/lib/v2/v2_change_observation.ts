@@ -91,7 +91,7 @@ class ObserveV2 {
 
   // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
-  private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
+  public id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
   // Queue of tasks to run in next idle period (used for optimization)
   public idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
@@ -151,6 +151,7 @@ class ObserveV2 {
   }
 
   // return true given value is @ObservedV2 object
+  // return true when including @Trace, but exclude @Monitor and @Computed
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
@@ -203,17 +204,16 @@ class ObserveV2 {
       this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase | PersistenceV2Impl>(cmp);
       return;
     } 
-    const weakRef = WeakRefPool.get(cmp);
+    const weakRef = WeakRefPool.getWeakRef(cmp);
     // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
     if (this.id2Others_[id] === weakRef) {
       return;
     }
     this.id2Others_[id] = weakRef;
     // register MonitorV2/ComputedV2 instance gc-callback func
-    WeakRefPool.register(cmp, id, () => {
+    WeakRefPool.addTagCallback(cmp, id, () => {
       delete this.id2Others_[id];
     });
-
   }
 
   // clear any previously created dependency view model object to elmtId
@@ -246,8 +246,8 @@ class ObserveV2 {
         };
       }
 
-      if (target) {
-        WeakRefPool.unregister(target, id);
+      if (target && !(target instanceof PUV2ViewBase)) {
+        WeakRefPool.removeTagCallback(target, id);
       }
     });
 
@@ -408,18 +408,22 @@ class ObserveV2 {
       idRefs[id].add(attrName);
     }
 
-    const weakRef = WeakRefPool.get(target);
+    const weakRef = WeakRefPool.getWeakRef(target);
     if (this.id2targets_?.[id]?.has(weakRef)) {
       return;
     }
 
     this.id2targets_[id] ??= new Set<WeakRef<Object>>();
     this.id2targets_[id].add(weakRef);
-    WeakRefPool.register(target, id, () => {
-      if (this.id2targets_?.[id]?.delete(weakRef) && this.id2targets_[id].size === 0) {
-        delete this.id2targets_[id];
-      }
-    });
+    // only observedV2 class need to register to FinalizationRegistry
+    // view can be unregistered from id2targets in aboutToBeDeletedInternal
+    if (!(target instanceof ViewBuildNodeBase)) {
+      WeakRefPool.addTagCallback(target, id, () => {
+        if (this.id2targets_?.[id]?.delete(weakRef) && this.id2targets_[id].size === 0) {
+          delete this.id2targets_[id];
+        }
+      });
+    }
   }
 
   /**
@@ -1057,12 +1061,16 @@ class ObserveV2 {
     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2 to prevent the MonitorV2 is GC
     // remember: id2others only has a WeakRef to MonitorV2 obj
     refs[funcName] = monitor;
+
+    if (!(target instanceof PUV2ViewBase)) {
+      WeakRefPool.addMonitorId(target, monitor.getWatchId());
+    }
   }
 
   public clearMonitorPath(target: object, path: string | string[], monitorFunc?: MonitorCallback): void {
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
     const paths = Array.isArray(path) ? path : [path];
-    
+
     if (monitorFunc) {
       const funcName = monitorFunc.name;
       let monitor = refs[funcName];
@@ -1132,24 +1140,25 @@ class ObserveV2 {
     if (monitor instanceof MonitorV2) {
       monitor.getValues().forEach((monitorValueV2: MonitorValueV2<unknown>) => {
         this.clearBinding(monitorValueV2.id);
+        delete this.id2Others_[monitorValueV2.id];
       })
     }
     this.clearBinding(id);
+    delete this.id2Others_[id];
   }
 
   public registerMonitor(monitor: MonitorV2, id: number): void {
-    const weakRef = WeakRefPool.get(monitor);
+    const weakRef = WeakRefPool.getWeakRef(monitor);
     // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
     if (this.id2Others_[id] === weakRef) {
       return;
     }
     this.id2Others_[id] = weakRef;
     // register MonitorV2/ComputedV2 instance gc-callback func
-    WeakRefPool.register(monitor, id, () => {
+    WeakRefPool.addTagCallback(monitor, id, () => {
       delete this.id2Others_[id];
     });
   }
-
 
   public static autoProxyObject(target: Object, key: string | symbol): any {
     let val = target[key];
@@ -1253,7 +1262,6 @@ class ObserveV2 {
     }
     );
   }
-
 
   public static usesV2Variables(proto: Object): boolean {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);

@@ -138,12 +138,6 @@ class MonitorV2 {
           ++MonitorV2.nextWatchApiId_));
       });
     }
-    // add watchId to owning ViewV2 or view model data object
-    // ViewV2 uses to call clearBinding(id)
-    // FIXME data object leave data inside ObservedV2, because they can not 
-    // call clearBinding(id) before they get deleted.
-    const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX] ??= {};
-    meta[pathsString] = this.watchId_;
   }
 
   public getTarget(): Object {
@@ -167,6 +161,9 @@ class MonitorV2 {
   public removePath(path: string): boolean {
     const monitorValue = this.values_.get(path);
     if (monitorValue) {
+      if (!(this.target_ instanceof PUV2ViewBase)) {
+        WeakRefPool.clearMonitorId(this.target_, monitorValue.id);
+      }
       ObserveV2.getObserve().clearBinding(monitorValue.id);
       delete ObserveV2.getObserve().id2Others_[monitorValue.id];
       this.values_.delete(path);
@@ -230,6 +227,9 @@ class MonitorV2 {
       // each path has its own id, and will be push into the stack
       // the state value will only collect the path id not the whole MonitorV2 id like the @Monitor does
       ObserveV2.getObserve().startRecordDependencies(this, item.id);
+      if (!(this.target_ instanceof PUV2ViewBase)) {
+        WeakRefPool.addMonitorId(this.target_, item.id);
+      }
       const [success, value] = this.analysisProp(true, item);
       ObserveV2.getObserve().stopRecordDependencies();
       if (!success) {
@@ -337,15 +337,37 @@ public notifyChangeForEachPath(pathId: number): number {
     return [true, obj as unknown as T];
   }
 
-  public static clearWatchesFromTarget(target: Object): void {
+  public debugInfo(): string {
+    return `@Monitor ${this.monitorFunction.name} owned by ${this.target_.constructor.name}`;
+  }
+
+  public static getMonitorIds(target: Object): number[] {
     let meta: Object;
-    if (!target || typeof target !== 'object' ||
-      !(meta = target[MonitorV2.WATCH_INSTANCE_PREFIX]) || typeof meta !== 'object') {
-      return;
+    let meta1: Object;
+    let monitorIds = [];
+    if (target && typeof target === 'object') {
+      // get @Monitor id
+      meta = target[ObserveV2.MONITOR_REFS];
+      if (meta && typeof meta === 'object') {
+        monitorIds = Array.from(Object.values(meta)).map((monitor: MonitorV2) => monitor.watchId_);
+      }
+      // get AddMonitor id
+      meta1 = target[ObserveV2.ADD_MONITOR_REFS];
+      if (meta1 && typeof meta1 === 'object') {
+        monitorIds = [...monitorIds, ...Array.from(Object.values(meta1)).map((monitor: MonitorV2) => monitor.watchId_)];
+      }
     }
 
-    stateMgmtConsole.debug(`MonitorV2: clearWatchesFromTarget: from target ${target.constructor?.name} watchIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
-    Array.from(Object.values(meta)).forEach((watchId) => ObserveV2.getObserve().clearWatch(watchId));
+    return monitorIds;
+  }
+
+  public static clearWatchesFromTarget(target: Object): void {
+    const monitorIds = MonitorV2.getMonitorIds(target);
+    stateMgmtConsole.debug(`MonitorV2: clearWatchesFromTarget: from target ${target.constructor?.name} watchIds to clear ${JSON.stringify(monitorIds)}`);
+    monitorIds.forEach((watchId) => {
+      ObserveV2.getObserve().clearWatch(watchId);
+      delete ObserveV2.getObserve().id2Others_[watchId];
+    });
   }
 }
 

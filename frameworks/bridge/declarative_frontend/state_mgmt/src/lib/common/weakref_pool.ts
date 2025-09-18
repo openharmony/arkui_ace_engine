@@ -14,58 +14,128 @@
  *
  */
 
+interface ObservedV2ClassInfo {
+  // obj -> weakRef
+  weakRef: WeakRef<object>;
+  cleanupInfo: CleanupInfo;
+}
+
+interface CleanupInfo {
+  // id -> gc-callback.
+  // to unregister from id2targets when observedV2 class gc
+  id2gcFunc?: Map<unknown, () => void>;
+  // computed id inside the observedV2 class
+  computedId?: Set<number>;
+  // monitor id including monitor value path id inside the observed class
+  monitorId?: Set<number>;
+}
 class WeakRefPool {
-  // map objects -> weakrefs
+  // map objects -> ObservedV2ClassInfo
   private static wmap_ = new WeakMap();
-  // map weakref -> Map<tag, gc-callback>
-  private static fmap_ = new Map();
-  //
-  private static freg_ = new FinalizationRegistry((weakRef: WeakRef<object>) => {
-    WeakRefPool.getTaggedCallbacks(weakRef).forEach(fn => fn());
-    WeakRefPool.fmap_.delete(weakRef);
+  // FinalizationRegistry to ObservedV2 class
+  private static freg_ = new FinalizationRegistry((cleanupInfo) => {
+    stateMgmtConsole.debug(`FinalizationRegistry begin 
+      computedId ${JSON.stringify(Array.from(cleanupInfo.computedId ? cleanupInfo.computedId : []))} 
+      monitorId: ${JSON.stringify(Array.from(cleanupInfo.monitorId ? cleanupInfo.monitorId : []))}`);
+    cleanupInfo.computedId?.forEach((id) => {
+      // remove from the ID_REFS, SYMBOL_REFS and id2targets
+      ObserveV2.getObserve().clearBinding(id);
+      // remove from id2Others
+      delete ObserveV2.getObserve().id2Others_[id];
+    });
+
+    cleanupInfo.monitorId?.forEach((id) => {
+      ObserveV2.getObserve().clearWatch(id);
+      delete ObserveV2.getObserve().id2Others_[id];
+    });
+    cleanupInfo.id2gcFunc?.forEach(fn => fn());
   });
 
   // Create a WeakRef for the given object and put it into the pool, or get
   // existing WeakRef from the pool if the object is already there. WeakRefs
   // for the same object are always identical.
-  public static get<T extends object>(obj: T): WeakRef<T>
-  {
-    let weakRef = WeakRefPool.wmap_.get(obj);
-    if (weakRef === undefined) {
-      WeakRefPool.wmap_.set(obj, weakRef = new WeakRef(obj));
+  public static getWeakRef<T extends object>(obj: T): WeakRef<T> {
+    let observedV2ClassInfo = WeakRefPool.wmap_.get(obj);
+    if (observedV2ClassInfo === undefined) {
+      WeakRefPool.wmap_.set(obj, observedV2ClassInfo = { weakRef: new WeakRef(obj), cleanupInfo: {} });
+      WeakRefPool.freg_.register(obj, observedV2ClassInfo.cleanupInfo);
+    } else if (!observedV2ClassInfo.weakRef) {
+      observedV2ClassInfo.weakRef = new WeakRef(obj);
     }
-    return weakRef;
+    return observedV2ClassInfo.weakRef;
   }
 
-  // Add handler to track when the given object is GC'ed.
-  // Tag is used by unregister() only. Pair <obj, tag> should be unique per callback
-  public static register<T extends object>(obj: T, tag: unknown, callback: () => void): void {
-    const weakRef = WeakRefPool.get(obj);
-    const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
-    tagMap.size || WeakRefPool.freg_.register(obj, weakRef);
-    tagMap.set(tag, callback);
+  public static asyncRegisterToFinalizationRegistry<T extends object>(obj: T): void {
+    Promise.resolve(true)
+      .then(() => {
+        stateMgmtConsole.debug(`asyncRegisterToFinalizationRegistry ${obj.constructor.name} `);
+        WeakRefPool.getOrCreateCleanupInfo(obj);
+        WeakRefPool.addMonitorComputedId(obj);
+      })
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in registerToFinalizationRegistry ${obj.constructor.name}`, error);
+        _arkUIUncaughtPromiseError(error);
+      });
   }
 
-  public static unregister<T extends object>(obj: T, tag: unknown): void {
-    const weakRef = WeakRefPool.get(obj);
-    const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
-    tagMap.delete(tag);
-    tagMap.size || WeakRefPool.freg_.unregister(weakRef);
-    tagMap.size || WeakRefPool.fmap_.delete(weakRef);
-  }
-
-  private static getTaggedCallbacks<T extends object>(weakRef: WeakRef<T>): Map<unknown, () => void> {
-    let tagMap = WeakRefPool.fmap_.get(weakRef);
-    if (tagMap === undefined) {
-      WeakRefPool.fmap_.set(weakRef, tagMap = new Map());
+  private static getOrCreateCleanupInfo<T extends object>(obj: T): CleanupInfo {
+    let observedV2ClassInfo = WeakRefPool.wmap_.get(obj);
+    if (observedV2ClassInfo === undefined) {
+      observedV2ClassInfo = { weakRef: new WeakRef(obj), cleanupInfo: {} };
+      WeakRefPool.wmap_.set(obj, observedV2ClassInfo);
+      WeakRefPool.freg_.register(obj, observedV2ClassInfo.cleanupInfo);
     }
-    return tagMap;
+    return observedV2ClassInfo.cleanupInfo;
   }
 
-  // debug only
-  private static getTaggedCallbacksSize(): number {
-    let size = 0;
-    WeakRefPool.fmap_.forEach(tagMap => size += tagMap.size);
-    return size;
+  public static addMonitorComputedId<T extends object>(obj: T): void {
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    const monitorIds = MonitorV2.getMonitorIds(obj);
+    const computedIds = ComputedV2.getComputedIds(obj);
+    
+    if (cleanupInfo.computedId) {
+      stateMgmtConsole.debug(`addMonitorComputedId: addComputedId ${obj.constructor.name} add ${JSON.stringify(computedIds)} to ${JSON.stringify(Array.from(cleanupInfo.computedId))}`);
+      computedIds.forEach(id => {
+        cleanupInfo.computedId.add(id);
+      });
+    } else {
+      cleanupInfo.computedId = new Set(computedIds);
+    }
+
+    if (cleanupInfo.monitorId) {
+      stateMgmtConsole.debug(`addMonitorComputedId: addMonitorId ${obj.constructor.name} add ${JSON.stringify(monitorIds)} to ${JSON.stringify(Array.from(cleanupInfo.monitorId))}`);
+      monitorIds.forEach(id => {
+        cleanupInfo.monitorId.add(id);
+      });
+    } else {
+      cleanupInfo.monitorId = new Set(monitorIds);
+    }
+    stateMgmtConsole.debug(`addMonitorComputedId monitorId: ${JSON.stringify(Array.from(cleanupInfo.monitorId))} computedId: ${JSON.stringify(Array.from(cleanupInfo.computedId))}`);
+  }
+
+  public static addTagCallback<T extends object>(obj: T, tag: unknown, callback: () => void): void {
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    cleanupInfo.id2gcFunc ??= new Map<unknown, () => void>();
+    cleanupInfo.id2gcFunc.set(tag, callback);
+  }
+
+  public static addMonitorId<T extends object>(obj: T, id: number): void {
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    cleanupInfo.monitorId ??= new Set<number>();
+    cleanupInfo.monitorId.add(id);
+  }
+
+  public static clearMonitorId<T extends object>(obj: T, id: number): void {
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    if (cleanupInfo.monitorId) {
+      cleanupInfo.monitorId.delete(id);
+    }
+  }
+
+  public static removeTagCallback<T extends object>(obj: T, tag: unknown): void {
+    const cleanupInfo = WeakRefPool.getOrCreateCleanupInfo(obj);
+    if (cleanupInfo.id2gcFunc) {
+      cleanupInfo.id2gcFunc.delete(tag);
+    }
   }
 }

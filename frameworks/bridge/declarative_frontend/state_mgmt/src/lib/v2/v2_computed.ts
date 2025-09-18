@@ -117,15 +117,23 @@ class ComputedV2 {
     return ret;
   }
 
-  public static clearComputedFromTarget(target: Object): void {
+  public static getComputedIds(target: Object): number[] {
     let meta: Object;
     if (!target || typeof target !== 'object' ||
         !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
-      return;
+      return [];
     }
 
-    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
-    Array.from(Object.values(meta)).forEach((computed: ComputedV2) => ObserveV2.getObserve().clearWatch(computed.computedId_));
+    return Array.from(Object.values(meta)).map((computed: ComputedV2) => computed.computedId_);
+  }
+
+  public static clearComputedFromTarget(target: Object): void {
+    const computedIds = ComputedV2.getComputedIds(target);
+    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(computedIds)}`);
+    computedIds.forEach((computedId: number) => {
+      ObserveV2.getObserve().clearWatch(computedId);
+      delete ObserveV2.getObserve().id2Others_[computedId];
+    });
   }
 
    /**

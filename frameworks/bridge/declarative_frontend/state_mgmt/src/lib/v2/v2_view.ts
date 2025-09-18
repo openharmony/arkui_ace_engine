@@ -65,7 +65,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
             ObserveV2.getObserve().isParentChildOptimizable_ = false;
         }
-        stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
+        stateMgmtConsole.debug(`ViewV2 constructor: Creating @ComponentV2 '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
     /**
@@ -314,8 +314,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             delete ObserveV2.getObserve().id2cmp_[elmtId];
         });
 
-        delete ObserveV2.getObserve().id2cmp_[this.id_];
-
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
 
@@ -336,6 +334,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         MonitorV2.clearWatchesFromTarget(this);
         ComputedV2.clearComputedFromTarget(this);
+
+        ObserveV2.getObserve().clearBinding(this.id_);
+        delete ObserveV2.getObserve().id2cmp_[this.id_];
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
