@@ -55,8 +55,7 @@ void SetDialogTransitionEffects(
 
 void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    CHECK_NULL_VOID(dialogProps.hasCustomMaskColor);
-    if (dialogProps.maskColor.has_value()) {
+    if (dialogProps.maskColor.has_value() && dialogProps.hasInvertColor.hasMaskColor) {
         Color maskColor = dialogProps.maskColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, maskColor, dialog->GetTag());
@@ -112,8 +111,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
 
 void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    CHECK_NULL_VOID(dialogProps.hasCustomShadowColor);
-    if (dialogProps.shadow.has_value()) {
+    if (dialogProps.shadow.has_value() && dialogProps.hasInvertColor.hasShadowColor) {
         Shadow shadow = dialogProps.shadow.value();
         Color shadowColor = shadow.GetColor();
         RefPtr<ResourceObject> resObj;
@@ -155,8 +153,7 @@ void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties
 
 void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    CHECK_NULL_VOID(dialogProps.hasCustomBackgroundColor);
-    if (dialogProps.backgroundColor.has_value()) {
+    if (dialogProps.backgroundColor.has_value() && dialogProps.hasInvertColor.hasBackgroundColor) {
         Color backgroundColor = dialogProps.backgroundColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, backgroundColor, dialog->GetTag());
@@ -195,10 +192,11 @@ void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogP
     }
 }
 
-void UpdateAndAddBorderTopColorCallback(RefPtr<FrameNode> dialog, BorderColorProperty borderColor)
+void UpdateAndAddBorderTopColorCallback(
+    RefPtr<FrameNode> dialog, std::optional<Color>& topColor, bool hasBorderTopColor)
 {
-    if (borderColor.topColor.has_value()) {
-        Color topBorderColor = borderColor.topColor.value();
+    if (topColor.has_value() && hasBorderTopColor) {
+        Color topBorderColor = topColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, topBorderColor, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
@@ -241,10 +239,11 @@ void UpdateAndAddBorderTopColorCallback(RefPtr<FrameNode> dialog, BorderColorPro
         contentRenderContext->UpdateBorderColor(currentBorderColor.value());
     }
 }
-void UpdateAndAddBorderBottomColorCallback(RefPtr<FrameNode> dialog, BorderColorProperty borderColor)
+void UpdateAndAddBorderBottomColorCallback(
+    RefPtr<FrameNode> dialog, std::optional<Color>& bottomColor, bool hasBorderBottomColor)
 {
-    if (borderColor.bottomColor.has_value()) {
-        Color bottomBorderColor = borderColor.bottomColor.value();
+    if (bottomColor.has_value() && hasBorderBottomColor) {
+        Color bottomBorderColor = bottomColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, bottomBorderColor, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
@@ -288,10 +287,11 @@ void UpdateAndAddBorderBottomColorCallback(RefPtr<FrameNode> dialog, BorderColor
         contentRenderContext->UpdateBorderColor(currentBorderColor.value());
     }
 }
-void UpdateAndAddBorderLeftColorCallback(RefPtr<FrameNode> dialog, BorderColorProperty borderColor)
+void UpdateAndAddBorderLeftColorCallback(
+    RefPtr<FrameNode> dialog, std::optional<Color>& leftColor, bool hasBorderLeftColor)
 {
-    if (borderColor.leftColor.has_value()) {
-        Color leftBorderColor = borderColor.leftColor.value();
+    if (leftColor.has_value() && hasBorderLeftColor) {
+        Color leftBorderColor = leftColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, leftBorderColor, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
@@ -335,10 +335,11 @@ void UpdateAndAddBorderLeftColorCallback(RefPtr<FrameNode> dialog, BorderColorPr
         contentRenderContext->UpdateBorderColor(currentBorderColor.value());
     }
 }
-void UpdateAndAddBorderRightColorCallback(RefPtr<FrameNode> dialog, BorderColorProperty borderColor)
+void UpdateAndAddBorderRightColorCallback(
+    RefPtr<FrameNode> dialog, std::optional<Color>& rightColor, bool hasBorderRightColor)
 {
-    if (borderColor.rightColor.has_value()) {
-        Color rightBorderColor = borderColor.rightColor.value();
+    if (rightColor.has_value() && hasBorderRightColor) {
+        Color rightBorderColor = rightColor.value();
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, rightBorderColor, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
@@ -384,19 +385,35 @@ void UpdateAndAddBorderRightColorCallback(RefPtr<FrameNode> dialog, BorderColorP
 
 void UpdateAndAddBorderColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    CHECK_NULL_VOID(dialogProps.hasCustomBorderColor);
-    if (dialogProps.borderColor.has_value()) {
-        BorderColorProperty borderColor = dialogProps.borderColor.value();
-        UpdateAndAddBorderTopColorCallback(dialog, borderColor);
-        UpdateAndAddBorderBottomColorCallback(dialog, borderColor);
-        UpdateAndAddBorderLeftColorCallback(dialog, borderColor);
-        UpdateAndAddBorderRightColorCallback(dialog, borderColor);
+    CHECK_EQUAL_VOID(dialogProps.borderColor.has_value(), false);
+    BorderColorProperty borderColor = dialogProps.borderColor.value();
+    UpdateAndAddBorderTopColorCallback(dialog, borderColor.topColor, dialogProps.hasInvertColor.hasBorderTopColor);
+    UpdateAndAddBorderBottomColorCallback(
+        dialog, borderColor.bottomColor, dialogProps.hasInvertColor.hasBorderBottomColor);
+    if (borderColor.startColor.has_value() || borderColor.endColor.has_value()) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRightToLeft) {
+            UpdateAndAddBorderLeftColorCallback(
+                dialog, borderColor.endColor, dialogProps.hasInvertColor.hasBorderEndColor);
+            UpdateAndAddBorderRightColorCallback(
+                dialog, borderColor.startColor, dialogProps.hasInvertColor.hasBorderStartColor);
+        } else {
+            UpdateAndAddBorderLeftColorCallback(
+                dialog, borderColor.startColor, dialogProps.hasInvertColor.hasBorderStartColor);
+            UpdateAndAddBorderRightColorCallback(
+                dialog, borderColor.endColor, dialogProps.hasInvertColor.hasBorderEndColor);
+        }
+    } else {
+        UpdateAndAddBorderLeftColorCallback(
+            dialog, borderColor.leftColor, dialogProps.hasInvertColor.hasBorderLeftColor);
+        UpdateAndAddBorderRightColorCallback(
+            dialog, borderColor.rightColor, dialogProps.hasInvertColor.hasBorderRightColor);
     }
 }
 
 void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    if (dialogProps.blurStyleOption.has_value()) {
+    if (dialogProps.blurStyleOption.has_value() && dialogProps.hasInvertColor.hasBlurStyleOptionInactiveColor) {
         BlurStyleOption blurStyleOption = dialogProps.blurStyleOption.value();
         Color inactiveColor = blurStyleOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
@@ -440,14 +457,13 @@ void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogP
 
 void UpdateAndAddEffectOptionColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    if (dialogProps.effectOption.has_value()) {
+    if (dialogProps.effectOption.has_value() && dialogProps.hasInvertColor.hasEffectOptionColor) {
         EffectOption effectOption = dialogProps.effectOption.value();
-
         Color color = effectOption.color;
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
-                                   const RefPtr<ResourceObject>& resObj) {
+                              const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
 
@@ -480,17 +496,15 @@ void UpdateAndAddEffectOptionColorCallback(RefPtr<FrameNode> dialog, const Dialo
     }
 }
 
-void UpdateAndAddEffectOptionCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
+void UpdateAndAddEffectOptionInactiveColorCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {
-    UpdateAndAddEffectOptionColorCallback(dialog, dialogProps);
-    if (dialogProps.effectOption.has_value()) {
+    if (dialogProps.effectOption.has_value() && dialogProps.hasInvertColor.hasEffectOptionInactiveColor) {
         EffectOption effectOption = dialogProps.effectOption.value();
-        
         Color inactiveColor = effectOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(resObj, inactiveColor, dialog->GetTag());
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
-                                           const RefPtr<ResourceObject>& resObj) {
+                              const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
 
@@ -511,7 +525,7 @@ void UpdateAndAddEffectOptionCallback(RefPtr<FrameNode> dialog, const DialogProp
         auto pattern = dialog->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->AddResObj("dialog.effectOption.inactiveColor", resObj, std::move(updateFunc));
-        
+
         auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
         CHECK_NULL_VOID(contentNode);
         auto contentRenderContext = contentNode->GetRenderContext();
@@ -521,6 +535,12 @@ void UpdateAndAddEffectOptionCallback(RefPtr<FrameNode> dialog, const DialogProp
         currentEffectOption->inactiveColor = inactiveColor;
         contentRenderContext->UpdateBackgroundEffect(currentEffectOption);
     }
+}
+
+void UpdateAndAddEffectOptionCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
+{
+    UpdateAndAddEffectOptionColorCallback(dialog, dialogProps);
+    UpdateAndAddEffectOptionInactiveColorCallback(dialog, dialogProps);
 }
 void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties& dialogProps)
 {

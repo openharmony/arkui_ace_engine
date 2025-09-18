@@ -610,12 +610,12 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle002, 
 
     Shadow shadow;
     shadow.SetColor(Color::BLUE);
+    HasInvertColor hasInvertColor {
+        .hasShadowColor = true,
+    };
     DialogProperties props {
         .shadow = shadow,
-        .hasCustomMaskColor = true,
-        .hasCustomShadowColor = true,
-        .hasCustomBackgroundColor = true,
-        .hasCustomBorderColor = true,
+        .hasInvertColor = hasInvertColor,
     };
     
     RefPtr<FrameNode> frameNode = DialogView::CreateDialogNode(props, contentNode);

@@ -23,8 +23,10 @@ namespace OHOS::Ace::Framework {
 
 class JSViewAbstractBridge {
 public:
-    static void GetBackgroundBlurStyleOption(napi_value value, BlurStyleOption& styleOption);
-    static void GetBackgroundEffect(napi_value value, EffectOption& styleOption);
+    static void GetBackgroundBlurStyleOption(
+        napi_value value, BlurStyleOption& styleOption, bool& hasBlurStyleOptionInactiveColor);
+    static void GetBackgroundEffect(
+        napi_value value, EffectOption& styleOption, bool& hasEffectOptionColor, bool& hasEffectOptionInactiveColor);
 };
 } // namespace OHOS::Ace::Framework
 #endif // RAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_ABSTRACT_BRIDGE_H

@@ -24,6 +24,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
@@ -65,6 +66,7 @@ const Dimension DIMENSION_NEGATIVE(-1.0, DimensionUnit::PX);
 const Dimension DIMENSION_SIZE(100.0, DimensionUnit::PX);
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 const Rect FOLD_CREASE_RECT = Rect(0.0, 300.0, 720.0, 80.0);
+const Color COLORYELLOW = Color(0xffffff00);
 } // namespace
 
 class DialogModelTestNg : public testing::Test {
@@ -637,6 +639,18 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
     EffectOption effectOption;
     effectOption.color = Color::BLUE;
     effectOption.inactiveColor = Color::BLUE;
+    HasInvertColor hasInvertColor {
+        .hasMaskColor = true,
+        .hasShadowColor = true,
+        .hasBackgroundColor = true,
+        .hasBorderTopColor = true,
+        .hasBorderBottomColor = true,
+        .hasBorderLeftColor = true,
+        .hasBorderRightColor = true,
+        .hasBlurStyleOptionInactiveColor = true,
+        .hasEffectOptionColor = true,
+        .hasEffectOptionInactiveColor = true,
+    };
     DialogProperties props {
         .maskColor = Color::BLUE,
         .shadow = shadow,
@@ -644,10 +658,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
         .backgroundColor = Color::BLUE,
         .blurStyleOption = blurStyleOption,
         .effectOption = effectOption,
-        .hasCustomMaskColor = true,
-        .hasCustomShadowColor = true,
-        .hasCustomBackgroundColor = true,
-        .hasCustomBorderColor = true,
+        .hasInvertColor = hasInvertColor,
     };
 
     /**
@@ -684,7 +695,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
 
     
     auto resBlurStyleOption = contentColumnRenderContext->GetBackBlurStyle();
-    EXPECT_EQ(resBlurStyleOption->inactiveColor.ColorToString(), props.blurStyleOption->inactiveColor.ColorToString());
+    EXPECT_EQ(resBlurStyleOption->inactiveColor.ColorToString(), "#00000000");
 
     auto resEffectOption = contentColumnRenderContext->GetBackgroundEffect();
     EXPECT_EQ(resEffectOption->color.ColorToString(), props.effectOption->color.ColorToString());
@@ -706,13 +717,22 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg043, TestSize.Level1)
 
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);
+    HasInvertColor hasInvertColor {
+        .hasMaskColor = true,
+        .hasShadowColor = true,
+        .hasBackgroundColor = true,
+        .hasBorderTopColor = true,
+        .hasBorderBottomColor = true,
+        .hasBorderLeftColor = true,
+        .hasBorderRightColor = true,
+        .hasBlurStyleOptionInactiveColor = true,
+        .hasEffectOptionColor = true,
+        .hasEffectOptionInactiveColor = true,
+    };
 
     DialogProperties props {
         .customStyle = true,
-        .hasCustomMaskColor = true,
-        .hasCustomShadowColor = true,
-        .hasCustomBackgroundColor = true,
-        .hasCustomBorderColor = true,
+        .hasInvertColor = hasInvertColor,
     };
     auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
     ASSERT_NE(dialogNode, nullptr);
@@ -747,12 +767,21 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg044, TestSize.Level1)
 
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);
+    HasInvertColor hasInvertColor {
+        .hasMaskColor = true,
+        .hasShadowColor = true,
+        .hasBackgroundColor = true,
+        .hasBorderTopColor = true,
+        .hasBorderBottomColor = true,
+        .hasBorderLeftColor = true,
+        .hasBorderRightColor = true,
+        .hasBlurStyleOptionInactiveColor = true,
+        .hasEffectOptionColor = true,
+        .hasEffectOptionInactiveColor = true,
+    };
 
     DialogProperties props {
-        .hasCustomMaskColor = true,
-        .hasCustomShadowColor = true,
-        .hasCustomBackgroundColor = true,
-        .hasCustomBorderColor = true,
+        .hasInvertColor = hasInvertColor,
     };
     auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
     ASSERT_NE(dialogNode, nullptr);
@@ -2266,5 +2295,242 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest035, TestSize.Level1)
     EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
     EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
     EXPECT_EQ(static_cast<int>(renderContext->GetBackBlurStyle().value().blurStyle), backgroundBlurStyle);
+}
+
+/**
+ * @tc.name: DialogModelTestNg045
+ * @tc.desc: Test DialogView's UpdateAndAddMaskColorCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg045, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    HasInvertColor hasInvertColor {
+        .hasMaskColor = true,
+    };
+    DialogProperties props {
+        .maskColor = Color::BLUE,
+        .isMask = true,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto renderContext = dialogNode->GetRenderContext();
+    auto resMaskColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(resMaskColor.has_value());
+    EXPECT_EQ(resMaskColor.value(), COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg046
+ * @tc.desc: Test DialogView's UpdateAndAddShadowCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg046, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    Shadow shadow;
+    shadow.SetColor(Color::BLUE);
+    HasInvertColor hasInvertColor {
+        .hasShadowColor = true,
+    };
+    DialogProperties props {
+        .shadow = shadow,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+    auto resShadow = contentColumnRenderContext->GetBackShadow();
+    EXPECT_TRUE(resShadow.has_value());
+    EXPECT_EQ(resShadow.value().GetColor(), COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg047
+ * @tc.desc: Test DialogView's UpdateAndAddBackgroundColorCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg047, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    HasInvertColor hasInvertColor {
+        .hasBackgroundColor = true,
+    };
+    DialogProperties props {
+        .backgroundColor = Color::BLUE,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+    auto resBgColor = contentColumnRenderContext->GetBackgroundColor();
+    EXPECT_TRUE(resBgColor.has_value());
+    EXPECT_EQ(resBgColor.value(), COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg048
+ * @tc.desc: Test DialogView's UpdateAndAddBorderColorCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg048, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLUE);
+    HasInvertColor hasInvertColor {
+        .hasBorderTopColor = true,
+        .hasBorderBottomColor = true,
+        .hasBorderLeftColor = true,
+        .hasBorderRightColor = true,
+    };
+    DialogProperties props {
+        .borderColor = borderColor,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+    auto resBorderColor = contentColumnRenderContext->GetBorderColor();
+    EXPECT_TRUE(resBorderColor.has_value());
+    EXPECT_TRUE(resBorderColor.value().topColor.has_value());
+    EXPECT_EQ(resBorderColor.value().topColor.value(), COLORYELLOW);
+    EXPECT_TRUE(resBorderColor.value().bottomColor.has_value());
+    EXPECT_EQ(resBorderColor.value().bottomColor.value(), COLORYELLOW);
+    EXPECT_TRUE(resBorderColor.value().leftColor.has_value());
+    EXPECT_EQ(resBorderColor.value().leftColor.value(), COLORYELLOW);
+    EXPECT_TRUE(resBorderColor.value().rightColor.has_value());
+    EXPECT_EQ(resBorderColor.value().rightColor.value(), COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg049
+ * @tc.desc: Test DialogView's UpdateAndAddBlurStyleOptionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg049, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.inactiveColor = Color::BLUE;
+    HasInvertColor hasInvertColor {
+        .hasBlurStyleOptionInactiveColor = true,
+    };
+    DialogProperties props {
+        .blurStyleOption = blurStyleOption,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+    auto resBlurStyleOption = contentColumnRenderContext->GetBackBlurStyle();
+    EXPECT_TRUE(resBlurStyleOption.has_value());
+    EXPECT_EQ(resBlurStyleOption.value().inactiveColor, COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogModelTestNg050
+ * @tc.desc: Test DialogView's UpdateAndAddEffectOptionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg050, TestSize.Level1)
+{
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::SetIsReloading(true);
+    EffectOption effectOption;
+    effectOption.color = Color::BLUE;
+    effectOption.inactiveColor = Color::BLUE;
+    HasInvertColor hasInvertColor {
+        .hasEffectOptionColor = true,
+        .hasEffectOptionInactiveColor = true,
+    };
+    DialogProperties props {
+        .effectOption = effectOption,
+        .hasInvertColor = hasInvertColor,
+    };
+    auto invertFunc = [](uint32_t color) { return ColorInverter::DefaultInverter(color); };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    auto dialogNode = DialogView::CreateDialogNode(props, contentNode);
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto contentColumn = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    auto contentColumnRenderContext = contentColumn->GetRenderContext();
+    auto resEffectOption = contentColumnRenderContext->GetBackgroundEffect();
+    EXPECT_TRUE(resEffectOption.has_value());
+    EXPECT_EQ(resEffectOption.value().color, COLORYELLOW);
+    EXPECT_EQ(resEffectOption.value().inactiveColor, COLORYELLOW);
+    g_isConfigChangePerform = isConfigChangePerform;
 }
 } // namespace OHOS::Ace::NG

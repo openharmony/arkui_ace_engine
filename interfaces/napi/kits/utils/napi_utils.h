@@ -111,6 +111,9 @@ bool HasProperty(napi_env env, napi_value value, const std::string& targetStr);
 bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit);
 bool ParseNapiDimensionNG(
     napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
+bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
+RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value);
+bool ParseNapiColor(napi_env env, napi_value value, Color& result, RefPtr<ResourceObject>& resObj);
 bool ParseNapiColor(napi_env env, napi_value value, Color& result);
 bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style);
 bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
