@@ -48,7 +48,11 @@ void QRCodeModelStatic::SetQRBackgroundColor(FrameNode* frameNode, const std::op
 void QRCodeModelStatic::SetContentOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
 {
     if (opacity) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, *opacity, frameNode);
+        double opca = *opacity;
+        if (LessNotEqual(opca, 0.0) || GreatNotEqual(opca, 1.0)) {
+            opca = 1.0;
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opca, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, frameNode);
     }

@@ -73,7 +73,6 @@ void SetContentOpacityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidateOpacity(convValue);
     if (!convValue) {
         return;
     }
