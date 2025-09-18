@@ -254,6 +254,9 @@ export class Application {
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             let instanceId = uiContext.getInstanceId();
             this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
+            if (this.startUrl == "__INTEROP__") {
+                return nullptr
+            }
             @memo
             let builder: () => void
             if (this.entryPoint) {
@@ -468,7 +471,7 @@ export class Application {
     }
 
     static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {
-        if (!userView && !entryPoint) {
+        if (!userView && !entryPoint && startUrl != "__INTEROP__") {
             throw new Error(`Invalid EntryPoint`)
         }
         registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
