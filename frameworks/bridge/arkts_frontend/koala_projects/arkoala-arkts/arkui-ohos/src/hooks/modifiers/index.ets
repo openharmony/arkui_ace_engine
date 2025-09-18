@@ -36,7 +36,7 @@ import { ArkCheckboxComponent, CheckboxAttribute } from "./../../component/check
 import { CheckboxModifier } from "./../../CheckboxModifier"
 import { ArkCheckboxGroupComponent, CheckboxGroupAttribute } from "./../../component/checkboxgroup"
 import { CheckboxGroupModifier } from "./../../CheckboxGroupModifier"
-import { ArkCircleComponent, CircleAttribute } from "./../../component/circle"
+import { ArkCircleComponent, CircleAttribute, CircleOptions, ArkCirclePeer } from './../../component/circle';
 import { CircleModifier } from "./../../CircleModifier"
 import { ArkColumnComponent, ColumnAttribute } from "./../../component/column"
 import { ColumnModifier } from "./../../ColumnModifier"
@@ -60,7 +60,7 @@ import { ArkDividerComponent, DividerAttribute } from "./../../component/divider
 import { DividerModifier } from "./../../DividerModifier"
 import { ArkEffectComponentComponent, EffectComponentAttribute } from "./../../component/effectComponent"
 import { EffectComponentModifier } from "./../../EffectComponentModifier"
-import { ArkEllipseComponent, EllipseAttribute } from "./../../component/ellipse"
+import { ArkEllipseComponent, EllipseAttribute, EllipseOptions, ArkEllipsePeer } from './../../component/ellipse';
 import { EllipseModifier } from "./../../EllipseModifier"
 import { ArkEmbeddedComponentComponent, EmbeddedComponentAttribute } from "./../../component/embeddedComponent"
 import { EmbeddedComponentModifier } from "./../../EmbeddedComponentModifier"
@@ -95,7 +95,7 @@ import { ArkBaseSpanStyle, BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
-import { ArkLineComponent, LineAttribute } from "./../../component/line"
+import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
 import { LineModifier } from "./../../LineModifier"
 import { ArkLinearIndicatorComponent, LinearIndicatorAttribute } from "./../../component/linearindicator"
 import { LinearIndicatorModifier } from "./../../LinearIndicatorModifier"
@@ -123,17 +123,17 @@ import { ArkNavDestinationComponent, NavDestinationAttribute } from "./../../com
 import { NavDestinationModifier } from "./../../NavDestinationModifier"
 import { ArkNavigationComponent, NavigationAttribute } from "./../../component/navigation"
 import { NavigationModifier } from "./../../NavigationModifier"
-import { ArkNodeContainerComponent, NodeContainerAttribute } from "./../../component/nodeContainer"
+import { ArkNodeContainerComponent, NodeContainerAttribute } from './../../component/nodeContainer';
 import { NodeContainerModifier } from "./../../NodeContainerModifier"
-import { ArkPathComponent, PathAttribute } from "./../../component/path"
+import { ArkPathComponent, PathAttribute, PathOptions, ArkPathPeer } from "./../../component/path"
 import { PathModifier } from "./../../PathModifier"
 import { ArkPatternLockComponent, PatternLockAttribute } from "./../../component/patternLock"
 import { PatternLockModifier } from "./../../PatternLockModifier"
 import { ArkPluginComponentComponent, PluginComponentAttribute } from "./../../component/pluginComponent"
 import { PluginComponentModifier } from "./../../PluginComponentModifier"
-import { ArkPolygonComponent, PolygonAttribute } from "./../../component/polygon"
+import { ArkPolygonComponent, PolygonAttribute, ArkPolygonPeer, PolygonOptions } from './../../component/polygon';
 import { PolygonModifier } from "./../../PolygonModifier"
-import { ArkPolylineComponent, PolylineAttribute } from "./../../component/polyline"
+import { ArkPolylineComponent, PolylineAttribute, ArkPolylinePeer, PolylineOptions } from './../../component/polyline';
 import { PolylineModifier } from "./../../PolylineModifier"
 import { ArkProgressComponent, ProgressAttribute, ProgressOptions } from "./../../component/progress"
 import { ProgressModifier } from "./../../ProgressModifier"
@@ -143,7 +143,7 @@ import { ArkRadioComponent, RadioAttribute } from "./../../component/radio"
 import { RadioModifier } from "./../../RadioModifier"
 import { ArkRatingComponent, RatingAttribute } from "./../../component/rating"
 import { RatingModifier } from "./../../RatingModifier"
-import { ArkRectComponent, RectAttribute } from "./../../component/rect"
+import { ArkRectComponent, RectAttribute, ArkRectPeer, RectOptions } from "./../../component/rect"
 import { RectModifier } from "./../../RectModifier"
 import { ArkRefreshComponent, RefreshAttribute } from "./../../component/refresh"
 import { RefreshModifier } from "./../../RefreshModifier"
@@ -171,7 +171,7 @@ import { ArkSearchComponent, SearchAttribute } from "./../../component/search"
 import { SearchModifier } from "./../../SearchModifier"
 import { ArkSelectComponent, SelectAttribute } from "./../../component/select"
 import { SelectModifier } from "./../../SelectModifier"
-import { ArkShapeComponent, ShapeAttribute } from "./../../component/shape"
+import { ArkShapeComponent, ShapeAttribute, ArkShapePeer } from "./../../component/shape"
 import { ShapeModifier } from "./../../ShapeModifier"
 import { ArkSideBarContainerComponent, SideBarContainerAttribute } from "./../../component/sidebar"
 import { SideBarContainerModifier } from "./../../SideBarContainerModifier"
@@ -216,7 +216,7 @@ import { ArkToolBarItemComponent, ToolBarItemAttribute } from "./../../component
 import { ToolBarItemModifier } from "./../../ToolBarItemModifier"
 import { ArkUIExtensionComponentComponent, UIExtensionComponentAttribute } from "./../../component/uiExtensionComponent"
 import { UIExtensionComponentModifier } from "./../../UIExtensionComponentModifier"
-import { ArkVideoComponent, VideoAttribute } from "./../../component/video"
+import { ArkVideoComponent, VideoAttribute, ArkVideoPeer, VideoOptions } from './../../component/video';
 import { VideoModifier } from "./../../VideoModifier"
 import { ArkWaterFlowComponent, WaterFlowAttribute } from "./../../component/waterFlow"
 import { WaterFlowModifier } from "./../../WaterFlowModifier"
@@ -258,52 +258,688 @@ import { ArkSecurityComponentMethodComponent, SecurityComponentMethod } from "./
 import { default as image } from "@ohos.multimedia.image"
 import { DrawableDescriptor } from "../../framework/ohos.arkui.drawableDescriptor"
 import { ImageAIOptions, DataPanelOptions, GaugeOptions, PatternLockController, TextTimerOptions, TextClockOptions } from "../../framework"
-export function hookAlphabetIndexerAttributeModifier(componenet: ArkAlphabetIndexerComponent, value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+import { ArkUIAniModule } from 'arkui.ani';
+import { KPointer } from '@koalaui/interop';
+
+export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+     if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): AlphabetIndexerModifier => {
+        let isAlphabetIndexerModifier: boolean = modifier instanceof AlphabetIndexerModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new AlphabetIndexerModifier();
+        if (isAlphabetIndexerModifier) {
+            let AlphabetIndexerModifier = modifier as object as AlphabetIndexerModifier;
+            initModifier.mergeModifier(AlphabetIndexerModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkAlphabetIndexerComponent => {
+        let componentNew: ArkAlphabetIndexerComponent = new ArkAlphabetIndexerComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<AlphabetIndexerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookBadgeAttributeModifier(componenet: ArkBadgeComponent, value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCanvasAttributeModifier(componenet: ArkCanvasComponent, value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookCircleAttributeModifier(componenet: ArkCircleComponent, value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookCircleAttributeModifier(component: ArkCircleComponent, modifier: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): CircleModifier => {
+        let isCircleModifier: boolean = modifier instanceof CircleModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CircleModifier();
+        if (isCircleModifier) {
+            let circleModifier = modifier as object as CircleModifier;
+            initModifier.mergeModifier(circleModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: CircleOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as CircleOptions
+        }
+        let peer: ArkCirclePeer = component.getPeer() as Object as ArkCirclePeer;
+        peer?.setCircleOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkCircleComponent => {
+        let componentNew: ArkCircleComponent = new ArkCircleComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<CircleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookCommonMethodAttributeModifier(componenet: ArkCommonMethodComponent, value: AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCommonShapeMethodAttributeModifier(componenet: ArkCommonShapeMethodComponent, value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScrollableCommonMethodAttributeModifier(componenet: ArkScrollableCommonMethodComponent, value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookComponent3DAttributeModifier(componenet: ArkComponent3DComponent, value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookEffectComponentAttributeModifier(componenet: ArkEffectComponentComponent, value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookEllipseAttributeModifier(componenet: ArkEllipseComponent, value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookEllipseAttributeModifier(component: ArkEllipseComponent, modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+      if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): EllipseModifier => {
+        let isEllipseModifier: boolean = modifier instanceof EllipseModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new EllipseModifier();
+        if (isEllipseModifier) {
+            let ellipseModifier = modifier as object as EllipseModifier;
+            initModifier.mergeModifier(ellipseModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: EllipseOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as EllipseOptions
+        }
+        let peer: ArkEllipsePeer = component.getPeer() as Object as ArkEllipsePeer;
+        peer?.setEllipseOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkEllipseComponent => {
+        let componentNew: ArkEllipseComponent = new ArkEllipseComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<EllipseAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookEmbeddedComponentAttributeModifier(componenet: ArkEmbeddedComponentComponent, value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookFlowItemAttributeModifier(componenet: ArkFlowItemComponent, value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookFormLinkAttributeModifier(componenet: ArkFormLinkComponent, value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookIndicatorComponentAttributeModifier(componenet: ArkIndicatorComponentComponent, value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookLineAttributeModifier(componenet: ArkLineComponent, value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookLineAttributeModifier(component: ArkLineComponent, modifier: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): LineModifier => {
+        let isLineModifier: boolean = modifier instanceof LineModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new LineModifier();
+        if (isLineModifier) {
+            let lineModifier = modifier as object as LineModifier;
+            initModifier.mergeModifier(lineModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: LineOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as LineOptions
+        }
+        let peer: ArkLinePeer = component.getPeer() as Object as ArkLinePeer;
+        peer?.setLineOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkLineComponent => {
+        let componentNew: ArkLineComponent = new ArkLineComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<LineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookLinearIndicatorAttributeModifier(componenet: ArkLinearIndicatorComponent, value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookMediaCachedImageAttributeModifier(componenet: ArkMediaCachedImageComponent, value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookNavDestinationAttributeModifier(componenet: ArkNavDestinationComponent, value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookNavigationAttributeModifier(componenet: ArkNavigationComponent, value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookNavDestinationAttributeModifier(component: ArkNavDestinationComponent, modifier: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): NavDestinationModifier => {
+        let isNavDestinationModifier: boolean = modifier instanceof NavDestinationModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new NavDestinationModifier();
+        if (isNavDestinationModifier) {
+            let navDestinationModifier = modifier as object as NavDestinationModifier;
+            initModifier.mergeModifier(navDestinationModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkNavDestinationComponent => {
+        let componentNew: ArkNavDestinationComponent = new ArkNavDestinationComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<NavDestinationAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookNavigationAttributeModifier(component: ArkNavigationComponent, modifier: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): NavigationModifier => {
+        let isNavigationModifier: boolean = modifier instanceof NavigationModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new NavigationModifier();
+        if (isNavigationModifier) {
+            let navigationModifier = modifier as object as NavigationModifier;
+            initModifier.mergeModifier(navigationModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkNavigationComponent => {
+        let componentNew: ArkNavigationComponent = new ArkNavigationComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<NavigationAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookNodeContainerAttributeModifier(componenet: ArkNodeContainerComponent, value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookPathAttributeModifier(componenet: ArkPathComponent, value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
+
+export function hookPathAttributeModifier(component: ArkPathComponent, modifier: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): PathModifier => {
+        let isPathModifier: boolean = modifier instanceof PathModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PathModifier();
+        if (isPathModifier) {
+            let pathModifier = modifier as object as PathModifier;
+            initModifier.mergeModifier(pathModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PathOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PathOptions
+        }
+        let peer: ArkPathPeer = component.getPeer() as Object as ArkPathPeer;
+        peer?.setPathOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkPathComponent => {
+        let componentNew: ArkPathComponent = new ArkPathComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<PathAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookPluginComponentAttributeModifier(componenet: ArkPluginComponentComponent, value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookPolygonAttributeModifier(componenet: ArkPolygonComponent, value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookPolylineAttributeModifier(componenet: ArkPolylineComponent, value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookRectAttributeModifier(componenet: ArkRectComponent, value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookPolygonAttributeModifier(component: ArkPolygonComponent, modifier: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+     if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): PolygonModifier => {
+        let isPolygonModifier: boolean = modifier instanceof PolygonModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PolygonModifier();
+        if (isPolygonModifier) {
+            let polygonModifier = modifier as object as PolygonModifier;
+            initModifier.mergeModifier(polygonModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PolygonOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PolygonOptions
+        }
+        let peer: ArkPolygonPeer = component.getPeer() as Object as ArkPolygonPeer;
+        peer?.setPolygonOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkPolygonComponent => {
+        let componentNew: ArkPolygonComponent = new ArkPolygonComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<PolygonAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookPolylineAttributeModifier(component: ArkPolylineComponent, modifier: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): PolylineModifier => {
+        let isPolylineModifier: boolean = modifier instanceof PolylineModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PolylineModifier();
+        if (isPolylineModifier) {
+            let polylineModifier = modifier as object as PolylineModifier;
+            initModifier.mergeModifier(polylineModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PolylineOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PolylineOptions
+        }
+        let peer: ArkPolylinePeer = component.getPeer() as Object as ArkPolylinePeer;
+        peer?.setPolylineOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkPolylineComponent => {
+        let componentNew: ArkPolylineComponent = new ArkPolylineComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<PolylineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookRectAttributeModifier(component: ArkRectComponent, modifier: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
+     if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): RectModifier => {
+        let isRectModifier: boolean = modifier instanceof RectModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RectModifier();
+        if (isRectModifier) {
+            let rectModifier = modifier as object as RectModifier;
+            initModifier.mergeModifier(rectModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: RectOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as RectOptions
+        }
+        let peer: ArkRectPeer = component.getPeer() as Object as ArkRectPeer;
+        peer?.setRectOptionsAttribute(options_casted)
+    };
+    let updaterReceiver = (): ArkRectComponent => {
+        let componentNew: ArkRectComponent = new ArkRectComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<RectAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookRemoteWindowAttributeModifier(componenet: ArkRemoteWindowComponent, value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookRichTextAttributeModifier(componenet: ArkRichTextComponent, value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookRootSceneAttributeModifier(componenet: ArkRootSceneComponent, value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScreenAttributeModifier(componenet: ArkScreenComponent, value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScrollBarAttributeModifier(componenet: ArkScrollBarComponent, value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookShapeAttributeModifier(componenet: ArkShapeComponent, value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookSideBarContainerAttributeModifier(componenet: ArkSideBarContainerComponent, value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+     if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ShapeModifier => {
+        let isShapeModifier: boolean = modifier instanceof ShapeModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ShapeModifier();
+        if (isShapeModifier) {
+            let shapeModifier = modifier as object as ShapeModifier;
+            initModifier.mergeModifier(shapeModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let peer: ArkShapePeer = component.getPeer() as Object as ArkShapePeer;
+        const param1_type = runtimeType(params[0])
+        if ((RuntimeType.UNDEFINED) !== param1_type) {
+            const pixelMap = params[0] as PixelMap;
+            ArkUIAniModule._Shape_Transfer_PixelMap(peer.getPeerPtr() as KPointer, pixelMap);
+        } else {
+          // peer?.setShapeOptions1Attribute();
+        }
+    };
+    let updaterReceiver = (): ArkShapeComponent => {
+        let componentNew: ArkShapeComponent = new ArkShapeComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ShapeAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookSideBarContainerAttributeModifier(component: ArkSideBarContainerComponent, modifier: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+      if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SideBarContainerModifier => {
+        let isSideBarContainerModifier: boolean = modifier instanceof SideBarContainerModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SideBarContainerModifier();
+        if (isSideBarContainerModifier) {
+            let sideBarContainerModifier = modifier as object as SideBarContainerModifier;
+            initModifier.mergeModifier(sideBarContainerModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkSideBarContainerComponent => {
+        let componentNew: ArkSideBarContainerComponent = new ArkSideBarContainerComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SideBarContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookBaseSpanAttributeModifier(componenet: ArkBaseSpanComponent, value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookStepperAttributeModifier(componenet: ArkStepperComponent, value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookStepperItemAttributeModifier(componenet: ArkStepperItemComponent, value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookSwiperAttributeModifier(componenet: ArkSwiperComponent, value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookTabContentAttributeModifier(componenet: ArkTabContentComponent, value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookTabsAttributeModifier(componenet: ArkTabsComponent, value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookStepperItemAttributeModifier(component: ArkStepperItemComponent, modifier: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): StepperItemModifier => {
+        let isStepperItemModifier: boolean = modifier instanceof StepperItemModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperItemModifier();
+        if (isStepperItemModifier) {
+            let stepperItemModifier = modifier as object as StepperItemModifier;
+            initModifier.mergeModifier(stepperItemModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkStepperItemComponent => {
+        let componentNew: ArkStepperItemComponent = new ArkStepperItemComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperItemAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookSwiperAttributeModifier(component: ArkSwiperComponent, modifier: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+        if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SwiperModifier => {
+        let isSwiperModifier: boolean = modifier instanceof SwiperModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SwiperModifier();
+        if (isSwiperModifier) {
+            let swiperModifier = modifier as object as SwiperModifier;
+            initModifier.mergeModifier(swiperModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkSwiperComponent => {
+        let componentNew: ArkSwiperComponent = new ArkSwiperComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SwiperAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookTabContentAttributeModifier(component: ArkTabContentComponent, modifier: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TabContentModifier => {
+        let isTabContentModifier: boolean = modifier instanceof TabContentModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TabContentModifier();
+        if (isTabContentModifier) {
+            let TabContentModifier = modifier as object as TabContentModifier;
+            initModifier.mergeModifier(TabContentModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkTabContentComponent => {
+        let componentNew: ArkTabContentComponent = new ArkTabContentComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TabContentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookTabsAttributeModifier(component: ArkTabsComponent, modifier: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TabsModifier => {
+        let isTabsModifier: boolean = modifier instanceof TabsModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TabsModifier();
+        if (isTabsModifier) {
+            let TabsModifier = modifier as object as TabsModifier;
+            initModifier.mergeModifier(TabsModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkTabsComponent => {
+        let componentNew: ArkTabsComponent = new ArkTabsComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TabsAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
 export function hookToolBarItemAttributeModifier(componenet: ArkToolBarItemComponent, value: AttributeModifier<ToolBarItemAttribute> | undefined):void {}
 export function hookUIExtensionComponentAttributeModifier(componenet: ArkUIExtensionComponentComponent, value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookVideoAttributeModifier(componenet: ArkVideoComponent, value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookVideoAttributeModifier(component: ArkVideoComponent, modifier: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+     if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): VideoModifier => {
+        let isVideoModifier: boolean = modifier instanceof VideoModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new VideoModifier();
+        if (isVideoModifier) {
+            let videoModifier = modifier as object as VideoModifier;
+            initModifier.mergeModifier(videoModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let peer: ArkVideoPeer = component.getPeer() as Object as ArkVideoPeer;
+        const param1_type = runtimeType(params[0])
+        if ((RuntimeType.UNDEFINED) !== param1_type) {
+            const options_casted = params[0] as VideoOptions;
+            // hookSetVideoOptionsWithPeer(peer, options_casted);
+        }
+    };
+    let updaterReceiver = (): ArkVideoComponent => {
+        let componentNew: ArkVideoComponent = new ArkVideoComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<VideoAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookWebAttributeModifier(componenet: ArkWebComponent, value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookWindowSceneAttributeModifier(componenet: ArkWindowSceneComponent, value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookWithThemeAttributeModifier(componenet: ArkWithThemeComponent, value: AttributeModifier<WithThemeAttribute> | undefined):void {}
-export function hookXComponentAttributeModifier(componenet: ArkXComponentComponent, value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookXComponentAttributeModifier(component: ArkXComponentComponent, modifier: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): XComponentModifier => {
+        let isXComponentModifier: boolean = modifier instanceof XComponentModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new XComponentModifier();
+        if (isXComponentModifier) {
+            let xcomponentModifier = modifier as object as XComponentModifier;
+            initModifier.mergeModifier(xcomponentModifier);
+        }
+        component.getPeer().attributeSet = initModifier;
+        return initModifier;
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkXComponentComponent => {
+        let componentNew: ArkXComponentComponent = new ArkXComponentComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<XComponentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookRootAttributeModifier(componenet: ArkRootComponent, value: AttributeModifier<Root> | undefined):void {}
 export function hookComponentRootAttributeModifier(componenet: ArkComponentRootComponent, value: AttributeModifier<ComponentRoot> | undefined):void {}
 export function hookCustomBuilderRootAttributeModifier(componenet: ArkCustomBuilderRootComponent, value: AttributeModifier<CustomBuilderRoot> | undefined):void {}
@@ -1006,41 +1642,41 @@ export function hookButtonAttributeModifier(component: ArkButtonComponent, modif
 }
 
 export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): void {
-    // if (modifier === undefined) {
-    //     return ;
-    // }
-    // let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    // if (isCommonModifier) {
-    //     applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-    //     return ;
-    // }
-    // let attributeSet = (): SpanModifier => {
-    //     let isSpanModifier: boolean = modifier instanceof SpanModifier;
-    //     let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SpanModifier();
-    //     if (isSpanModifier) {
-    //         let spanModifier = modifier as object as SpanModifier;
-    //         initModifier.mergeModifier(spanModifier);
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     } else {
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     }
-    // }
-    // let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    //     if (params.length !== 1) {
-    //         throw new Error('must only 1 parameter')
-    //     }
-    //     let content_casted: string | Resource = params[0] as (string | Resource)
-    //     let spanPeer: ArkSpanPeer = component.getPeer() as Object as ArkSpanPeer;
-    //     spanPeer.setSpanOptionsAttribute(content_casted)
-    // };
-    // let updaterReceiver = (): ArkSpanComponent => {
-    //     let initComponent: ArkSpanComponent = new ArkSpanComponent();
-    //     initComponent.setPeer(component.getPeer());
-    //     return initComponent;
-    // };
-    // applyAttributeModifierBase(modifier as Object as AttributeModifier<SpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): SpanModifier => {
+        let isSpanModifier: boolean = modifier instanceof SpanModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SpanModifier();
+        if (isSpanModifier) {
+            let spanModifier = modifier as object as SpanModifier;
+            initModifier.mergeModifier(spanModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length !== 1) {
+            throw new Error('must only 1 parameter')
+        }
+        let content_casted: string | Resource = params[0] as (string | Resource)
+        let spanPeer: ArkSpanPeer = component.getPeer() as Object as ArkSpanPeer;
+        spanPeer.setSpanOptionsAttribute(content_casted)
+    };
+    let updaterReceiver = (): ArkSpanComponent => {
+        let initComponent: ArkSpanComponent = new ArkSpanComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
 }
 
 export function hookImageSpanAttributeModifier(component: ArkImageSpanComponent, modifier: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): void {
@@ -1867,102 +2503,37 @@ export function hookToggleAttributeModifier(component: ArkToggleComponent,
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-// export function hookToggleButtonAttributeModifier(component: ArkToggleButtonComponent,
-//     modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-//     if (modifier === undefined) {
-//         return;
-//     }
-//     let isCommonModifier: boolean = modifier instanceof CommonModifier;
-//     if (isCommonModifier) {
-//         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-//         return;
-//     }
-//     let attributeSet = (): ToggleModifier => {
-//         let isToggleModifier: boolean = modifier instanceof ToggleModifier;
-//         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ToggleModifier();
-//         if (isToggleModifier) {
-//             let componentModifier = modifier as object as ToggleModifier;
-//          //   initModifier.mergeModifier(componentModifier);
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         } else {
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         }
-//     }
-//     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-//     };
-//     let updaterReceiver = (): ArkToggleButtonComponent => {
-//         let componentNew: ArkToggleButtonComponent = new ArkToggleButtonComponent();
-//         componentNew.setPeer(component.getPeer());
-//         return componentNew;
-//     };
-//   //  applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-// }
-
-// export function hookToggleCheckboxAttributeModifier(component: ArkToggleCheckboxComponent,
-//     modifier: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-//     if (modifier === undefined) {
-//         return;
-//     }
-//     let isCommonModifier: boolean = modifier instanceof CommonModifier;
-//     if (isCommonModifier) {
-//         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-//         return;
-//     }
-//     let attributeSet = (): ToggleModifier => {
-//         let isToggleModifier: boolean = modifier instanceof ToggleModifier;
-//         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ToggleModifier();
-//         if (isToggleModifier) {
-//             let componentModifier = modifier as object as ToggleModifier;
-//             initModifier.mergeModifier(componentModifier);
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         } else {
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         }
-//     }
-//     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-//     };
-//     let updaterReceiver = (): ArkToggleCheckboxComponent => {
-//         let componentNew: ArkToggleCheckboxComponent = new ArkToggleCheckboxComponent();
-//         componentNew.setPeer(component.getPeer());
-//         return componentNew;
-//     };
-//     applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-// }
 export function hookGridAttributeModifier(component: ArkGridComponent,
     modifier:AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    // if (modifier === undefined) {
-    //     return;
-    // }
-    // let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    // if (isCommonModifier) {
-    //     applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-    //     return;
-    // }
-    // let attributeSet = (): GridModifier => {
-    //     let isGridModifier: boolean = modifier instanceof GridModifier;
-    //     let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridModifier();
-    //     if (isGridModifier) {
-    //         let gridModifier = modifier as object as GridModifier;
-    //         initModifier.mergeModifier(gridModifier);
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     } else {
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     }
-    // }
-    // let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    // };
-    // let updaterReceiver = (): ArkGridComponent => {
-    //     let componentNew: ArkGridComponent = new ArkGridComponent();
-    //     componentNew.setPeer(component.getPeer());
-    //     return componentNew;
-    // };
-    // applyAttributeModifierBase(modifier as Object as AttributeModifier<GridAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): GridModifier => {
+        let isGridModifier: boolean = modifier instanceof GridModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridModifier();
+        if (isGridModifier) {
+            let gridModifier = modifier as object as GridModifier;
+            initModifier.mergeModifier(gridModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkGridComponent => {
+        let componentNew: ArkGridComponent = new ArkGridComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<GridAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookGridItemAttributeModifier(component: ArkGridItemComponent,
@@ -2001,36 +2572,35 @@ export function hookGridItemAttributeModifier(component: ArkGridItemComponent,
 
 export function hookListAttributeModifier(component: ArkListComponent,
     modifier:  AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    // if (modifier === undefined) {
-    //     return;
-    // }
-    // let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    // if (isCommonModifier) {
-    //     applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-    //     return;
-    // }
-    // let attributeSet = (): ListModifier => {
-    //     let isListModifier: boolean = modifier instanceof ListModifier;
-    //     let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ListModifier();
-    //     if (isListModifier) {
-    //         let listModifier = modifier as object as ListModifier;
-    //         initModifier.mergeModifier(listModifier);
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     } else {
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     }
-    // }
-    // let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    // };
-    // let updaterReceiver = (): ArkListComponent => {
-    //     let componentNew: ArkListComponent = new ArkListComponent();
-    //     componentNew.setPeer(component.getPeer());
-    //     return componentNew;
-    // };
-    // applyAttributeModifierBase(modifier as Object as AttributeModifier<ListAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ListModifier => {
+        let isListModifier: boolean = modifier instanceof ListModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ListModifier();
+        if (isListModifier) {
+            let listModifier = modifier as object as ListModifier;
+            initModifier.mergeModifier(listModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkListComponent => {
+        let componentNew: ArkListComponent = new ArkListComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ListAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookListItemAttributeModifier(component: ArkListItemComponent,
@@ -2137,69 +2707,69 @@ export function hookRefreshAttributeModifier(component: ArkRefreshComponent,
 export function hookScrollAttributeModifier(component: ArkScrollComponent,
      modifier: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined
 ): void {
-    // if (modifier === undefined) {
-    //     return;
-    // }
-    // let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    // if (isCommonModifier) {
-    //     applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-    //     return;
-    // }
-    // let attributeSet = (): ScrollModifier => {
-    //     let isScrollModifier: boolean = modifier instanceof ScrollModifier;
-    //     let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ScrollModifier();
-    //     if (isScrollModifier) {
-    //         let scrollModifier = modifier as object as ScrollModifier;
-    //         initModifier.mergeModifier(scrollModifier);
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     } else {
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     }
-    // }
-    // let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    // };
-    // let updaterReceiver = (): ArkScrollComponent => {
-    //     let componentNew: ArkScrollComponent = new ArkScrollComponent();
-    //     componentNew.setPeer(component.getPeer());
-    //     return componentNew;
-    // };
-    // applyAttributeModifierBase(modifier as Object as AttributeModifier<ScrollAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ScrollModifier => {
+        let isScrollModifier: boolean = modifier instanceof ScrollModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ScrollModifier();
+        if (isScrollModifier) {
+            let scrollModifier = modifier as object as ScrollModifier;
+            initModifier.mergeModifier(scrollModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkScrollComponent => {
+        let componentNew: ArkScrollComponent = new ArkScrollComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ScrollAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 
 }
 
 export function hookWaterFlowAttributeModifier(component: ArkWaterFlowComponent,
     modifier:AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    // if (modifier === undefined) {
-    //     return;
-    // }
-    // let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    // if (isCommonModifier) {
-    //     applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-    //     return;
-    // }
-    // let attributeSet = (): WaterFlowModifier => {
-    //     let isWaterFlowModifier: boolean = modifier instanceof WaterFlowModifier;
-    //     let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new WaterFlowModifier();
-    //     if (isWaterFlowModifier) {
-    //         let waterFlowModifier = modifier as object as WaterFlowModifier;
-    //         initModifier.mergeModifier(waterFlowModifier);
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     } else {
-    //         component.getPeer().attributeSet = initModifier;
-    //         return initModifier;
-    //     }
-    // }
-    // let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    // };
-    // let updaterReceiver = (): ArkWaterFlowComponent => {
-    //     let componentNew: ArkWaterFlowComponent = new ArkWaterFlowComponent();
-    //     componentNew.setPeer(component.getPeer());
-    //     return componentNew;
-    // };
-    // applyAttributeModifierBase(modifier as Object as AttributeModifier<WaterFlowAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): WaterFlowModifier => {
+        let isWaterFlowModifier: boolean = modifier instanceof WaterFlowModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new WaterFlowModifier();
+        if (isWaterFlowModifier) {
+            let waterFlowModifier = modifier as object as WaterFlowModifier;
+            initModifier.mergeModifier(waterFlowModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkWaterFlowComponent => {
+        let componentNew: ArkWaterFlowComponent = new ArkWaterFlowComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<WaterFlowAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 
 }
 
