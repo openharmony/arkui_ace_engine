@@ -1620,6 +1620,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
 
     json->PutExtAttr("syncLoad", syncLoad_ ? "true" : "false", filter);
+    json->PutExtAttr("supportSvg2", supportSvg2_ ? "true" : "false", filter);
     json->PutExtAttr("draggable", enableDrag_ ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
