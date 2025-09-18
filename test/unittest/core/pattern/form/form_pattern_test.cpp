@@ -2085,4 +2085,5 @@ HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level1)
 
     EXPECT_TRUE(pattern->updateFormComponentTimestamp_ >= nowTime);
 }
+
 } // namespace OHOS::Ace::NG
