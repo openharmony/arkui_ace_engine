@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,6 +61,19 @@ void InitTimePickerTextStyle(const char* fontInfo, uint32_t color, int32_t style
     textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
     textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
+}
+
+void GetColorResourceObject(FrameNode* frameNode, PickerTextStyle& textStyle)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> colorResObj;
+        Color result = textStyle.textColor.value();
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        if (colorResObj) {
+            textStyle.textColor = result;
+            textStyle.textColorResObj = colorResObj;
+        }
+    }
 }
 
 void SetTimePickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* fontFamilyRawPtr,
@@ -146,7 +160,8 @@ void ResetTimepickerBackgroundColor(ArkUINodeHandle node)
     TimePickerModelNG::SetBackgroundColor(frameNode, Color(DEFAULT_BG_COLOR));
 }
 
-void SetTimepickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+void SetTimepickerTextStyleBase(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -156,7 +171,22 @@ void SetTimepickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fo
     }
     NG::PickerTextStyle textStyle;
     InitTimePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     TimePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTimepickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+{
+    SetTimepickerTextStyleBase(node, color, fontInfo, style, false);
+}
+
+void SetTimepickerTextStylePtr(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isDefaultColor)
+{
+    SetTimepickerTextStyleBase(node, color, fontInfo, style, !isDefaultColor);
 }
 
 void SetTimepickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
@@ -191,7 +221,8 @@ void ResetTimepickerTextStyle(ArkUINodeHandle node)
     TimePickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTimepickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+void SetTimepickerSelectedTextStyleBase(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -201,7 +232,22 @@ void SetTimepickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const 
     }
     NG::PickerTextStyle textStyle;
     InitTimePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTimepickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+{
+    SetTimepickerSelectedTextStyleBase(node, color, fontInfo, style, false);
+}
+
+void SetTimepickerSelectedTextStylePtr(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isDefaultColor)
+{
+    SetTimepickerSelectedTextStyleBase(node, color, fontInfo, style, !isDefaultColor);
 }
 
 void SetTimepickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
@@ -236,7 +282,8 @@ void ResetTimepickerSelectedTextStyle(ArkUINodeHandle node)
     TimePickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTimepickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+void SetTimepickerDisappearTextStyleBase(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -246,7 +293,22 @@ void SetTimepickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const
     }
     NG::PickerTextStyle textStyle;
     InitTimePickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTimepickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style)
+{
+    SetTimepickerDisappearTextStyleBase(node, color, fontInfo, style, false);
+}
+
+void SetTimepickerDisappearTextStylePtr(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t style,
+    bool isDefaultColor)
+{
+    SetTimepickerDisappearTextStyleBase(node, color, fontInfo, style, !isDefaultColor);
 }
 
 void SetTimepickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
@@ -545,12 +607,15 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
         .setTimepickerDisappearTextStyle = SetTimepickerDisappearTextStyle,
+        .setTimepickerDisappearTextStylePtr = SetTimepickerDisappearTextStylePtr,
         .setTimepickerDisappearTextStyleWithResObj = SetTimepickerDisappearTextStyleWithResObj,
         .getTimepickerTextStyle = GetTimepickerTextStyle,
         .setTimepickerTextStyle = SetTimepickerTextStyle,
+        .setTimepickerTextStylePtr = SetTimepickerTextStylePtr,
         .setTimepickerTextStyleWithResObj = SetTimepickerTextStyleWithResObj,
         .getTimepickerSelectedTextStyle = GetTimepickerSelectedTextStyle,
         .setTimepickerSelectedTextStyle = SetTimepickerSelectedTextStyle,
+        .setTimepickerSelectedTextStylePtr = SetTimepickerSelectedTextStylePtr,
         .setTimepickerSelectedTextStyleWithResObj = SetTimepickerSelectedTextStyleWithResObj,
         .resetTimepickerDisappearTextStyle = ResetTimepickerDisappearTextStyle,
         .resetTimepickerTextStyle = ResetTimepickerTextStyle,

@@ -85,11 +85,11 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
-    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
-    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
-    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseResTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyleOpt,
+        const std::string& textStyleType, std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
 };
 
 class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {

@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -135,17 +136,40 @@ void ResetEndDate(ArkUINodeHandle node)
         frameNode, defaultDate.GetYear(), defaultDate.GetMonth(), defaultDate.GetDay());
 }
 
-void SetTextStyleWithWeightEnum(
-    ArkUINodeHandle node, uint32_t color, float fontSize, int32_t fontSizeUnit, int32_t fontWeight)
+void SetTextStyleWithWeightEnumBase(ArkUINodeHandle node, uint32_t color, float fontSize, int32_t fontSizeUnit,
+    int32_t fontWeight, bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::PickerTextStyle textStyle;
     textStyle.textColor = Color(color);
+    if (SystemProperties::ConfigChangePerform() && isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        RefPtr<ResourceObject> colorResObj;
+        Color result = Color(color);
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        if (colorResObj) {
+            textStyle.textColor = result;
+            textStyle.textColorResObj = colorResObj;
+        }
+    }
+
     Dimension fontSizeDimension(fontSize, DimensionUnit::FP);
     textStyle.fontSize = fontSizeDimension;
     textStyle.fontWeight = static_cast<Ace::FontWeight>(fontWeight);
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
+}
+
+void SetTextStyleWithWeightEnum(ArkUINodeHandle node, uint32_t color, float fontSize, int32_t fontSizeUnit,
+    int32_t fontWeight)
+{
+    SetTextStyleWithWeightEnumBase(node, color, fontSize, fontSizeUnit, fontWeight, false);
+}
+
+void SetTextStyleWithWeightEnumPtr(ArkUINodeHandle node, uint32_t color, float fontSize, int32_t fontSizeUnit,
+    int32_t fontWeight, bool isDefaultColor)
+{
+    SetTextStyleWithWeightEnumBase(node, color, fontSize, fontSizeUnit, fontWeight, !isDefaultColor);
 }
 
 void SetTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontSize, const char* fontweight)
@@ -565,6 +589,7 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
         .setSelectDate = SetSelectedDate,
         .resetSelectDate = ResetSelectedDate,
         .setTextStyleWithWeightEnum = SetTextStyleWithWeightEnum,
+        .setTextStyleWithWeightEnumPtr = SetTextStyleWithWeightEnumPtr,
         .setTextStyle = SetTextStyle,
         .setTextStyleWithResObj = SetTextStyleWithResObj,
         .resetTextStyle = ResetTextStyle,

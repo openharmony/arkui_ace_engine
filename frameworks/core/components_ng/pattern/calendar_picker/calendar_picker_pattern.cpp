@@ -1497,7 +1497,7 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
         Color defaultColor = pickerProperty->GetColor().value_or(calendarTheme->GetEntryFontColor());
         pickerProperty->UpdateColor(textStyle.textColor.value_or(defaultColor));
 
-        Dimension fontSize = calendarTheme->GetEntryFontSize();
+        Dimension fontSize = pickerProperty->GetFontSize().value_or(calendarTheme->GetEntryFontSize());
         if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
             fontSize = textStyle.fontSize.value();
         }

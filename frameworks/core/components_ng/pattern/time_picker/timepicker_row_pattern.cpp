@@ -2341,6 +2341,12 @@ void TimePickerRowPattern::UpdateDisappearTextStyle(const PickerTextStyle& textS
     if (pickerProperty->GetDisappearColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
     }
+    if (pickerProperty->GetDisappearFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetDisappearFontSize().value());
+    }
+    if (pickerProperty->GetDisappearFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetDisappearFontFamily().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,
@@ -2366,6 +2372,12 @@ void TimePickerRowPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyl
     if (pickerProperty->GetColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
     }
+    if (pickerProperty->GetFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetFontSize().value());
+    }
+    if (pickerProperty->GetFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetFontFamily().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,
@@ -2390,6 +2402,12 @@ void TimePickerRowPattern::UpdateSelectedTextStyle(const PickerTextStyle& textSt
 
     if (pickerProperty->GetSelectedColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+    if (pickerProperty->GetSelectedFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetSelectedFontSize().value());
+    }
+    if (pickerProperty->GetSelectedFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetSelectedFontFamily().value());
     }
 
     UpdateTextStyleCommon(

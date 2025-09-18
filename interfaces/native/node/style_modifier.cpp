@@ -349,7 +349,7 @@ void ResetAttributeItem()
     g_attributeItem.string = nullptr;
     g_attributeItem.object = nullptr;
 }
-uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
+uint32_t StringToColorInt(const char* string, bool& isDefaultColor, uint32_t defaultValue = 0)
 {
     std::smatch matches;
     std::string colorStr(string);
@@ -366,8 +366,10 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
             LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
         }
 
+        isDefaultColor = false;
         return value;
     }
+    isDefaultColor = true;
     return defaultValue;
 }
 
@@ -8620,8 +8622,9 @@ int32_t SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     double arrowSize = 0.0;
     double arrowColor = 0.0;
     if (!arrowStyle) {
-        backgroundColor = StringToColorInt("#00000000", 0);
-        arrowColor = StringToColorInt("#FF182431", 0);
+        bool isDefaultColor = false;
+        backgroundColor = StringToColorInt("#00000000", isDefaultColor, 0);
+        arrowColor = StringToColorInt("#FF182431", isDefaultColor, 0);
     } else {
         showBackground = arrowStyle->showBackground.value;
         showSidebarMiddle = arrowStyle->showSidebarMiddle.value;
@@ -9557,7 +9560,8 @@ int32_t SetDatePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9565,8 +9569,8 @@ int32_t SetDatePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getDatePickerModifier()->setDisappearTextStyle(
-        node->uiNodeHandle, fontInfo.c_str(), color, style);
+    fullImpl->getNodeModifiers()->getDatePickerModifier()->setDisappearTextStylePtr(
+        node->uiNodeHandle, fontInfo.c_str(), color, style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9598,7 +9602,8 @@ int32_t SetDatePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9606,8 +9611,8 @@ int32_t SetDatePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getDatePickerModifier()->setDatePickerTextStyle(
-        node->uiNodeHandle, fontInfo.c_str(), color, style);
+    fullImpl->getNodeModifiers()->getDatePickerModifier()->setDatePickerTextStylePtr(
+        node->uiNodeHandle, fontInfo.c_str(), color, style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9639,7 +9644,8 @@ int32_t SetDatePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_SELECTED_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_SELECTED_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9647,8 +9653,8 @@ int32_t SetDatePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getDatePickerModifier()->setSelectedTextStyle(
-        node->uiNodeHandle, fontInfo.c_str(), color, style);
+    fullImpl->getNodeModifiers()->getDatePickerModifier()->setSelectedTextStylePtr(
+        node->uiNodeHandle, fontInfo.c_str(), color, style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9842,7 +9848,8 @@ int32_t SetTimePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9850,8 +9857,8 @@ int32_t SetTimePickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerDisappearTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerDisappearTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9883,7 +9890,8 @@ int32_t SetTimePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -9891,8 +9899,8 @@ int32_t SetTimePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9925,15 +9933,16 @@ int32_t SetTimePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_SELECTED_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_SELECTED_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -10053,7 +10062,8 @@ int32_t SetTextPickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -10061,8 +10071,8 @@ int32_t SetTextPickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerDisappearTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerDisappearTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -10095,7 +10105,8 @@ int32_t SetTextPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_STYLE_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_STYLE_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -10103,8 +10114,8 @@ int32_t SetTextPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -10137,7 +10148,8 @@ int32_t SetTextPickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), DEFAULT_PICKER_SELECTED_COLOR);
+    bool isDefaultColor = false;
+    ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), isDefaultColor, DEFAULT_PICKER_SELECTED_COLOR);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (size == ERROR_CODE) {
         return ERROR_CODE_PARAM_INVALID;
@@ -10145,8 +10157,8 @@ int32_t SetTextPickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerSelectedTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerSelectedTextStylePtr(
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1, isDefaultColor);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -12761,8 +12773,10 @@ int32_t SetCalendarPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
         return ERROR_CODE_PARAM_INVALID;
     }
     uint32_t fontColor = Color::BLACK.GetValue();
+    bool isDefaultColor = true;
     if (CALENDAR_PICKER_FONT_COLOR_INDEX < actualSize) {
         fontColor = item->value[CALENDAR_PICKER_FONT_COLOR_INDEX].u32;
+        isDefaultColor = false;
     }
     float fontSize = 0.0f;
     std::vector<float> fontSizeArray;
@@ -12776,8 +12790,8 @@ int32_t SetCalendarPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     if (CALENDAR_PICKER_FONT_WEIGHT_INDEX < actualSize) {
         fontWeight = item->value[CALENDAR_PICKER_FONT_WEIGHT_INDEX].i32;
     }
-    fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setTextStyleWithWeightEnum(
-        node->uiNodeHandle, fontColor, fontSize, unit, fontWeight);
+    fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setTextStyleWithWeightEnumPtr(
+        node->uiNodeHandle, fontColor, fontSize, unit, fontWeight, isDefaultColor);
     return ERROR_CODE_NO_ERROR;
 }
 
