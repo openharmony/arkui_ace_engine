@@ -141,6 +141,32 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveMenuWrapperNode001, TestSize.Level1)
 }
 
 /**
+ *@tc.name:EraseMenuInfoFromWrapper001
+ *@tc.desc:Test EraseMenuInfoFromWrapper
+ *@tc.type:FUNC
+ */
+
+HWTEST_F(OverlayManagerTestThreeNg, EraseMenuInfoFromWrapper001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto targetId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    overlayManager->menuMap_[targetId] = menuWrapper;
+    overlayManager->EraseMenuInfoFromWrapper(menuWrapper);
+    EXPECT_EQ(overlayManager->menuMap_[targetId], nullptr);
+    overlayManager->menuMap_[targetId] = menuWrapper;
+    auto menuWrapper2 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    overlayManager->EraseMenuInfoFromWrapper(menuWrapper2);
+    EXPECT_NE(overlayManager->menuMap_[targetId], nullptr);
+    overlayManager->menuMap_[targetId] = nullptr;
+}
+
+/**
  *@tc.name:CheckPageNeedAvoidKeyboard001
  *@tc.desc:Test CheckPageNeedAvoidKeyboard
  *@tc.type:FUNC
