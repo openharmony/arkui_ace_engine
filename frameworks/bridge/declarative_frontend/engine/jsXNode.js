@@ -914,6 +914,9 @@ var UIState;
     UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
     UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
 })(UIState || (UIState = {}));
+function getFrameNodeRawPtr(frameNode) {
+    return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+}
 class FrameNode extends Disposable {
     constructor(uiContext, type, options) {
         super();
@@ -3351,5 +3354,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState
+    typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr
 };

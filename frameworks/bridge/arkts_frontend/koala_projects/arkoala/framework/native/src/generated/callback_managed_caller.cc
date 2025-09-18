@@ -64,6 +64,26 @@ void callManagedAccessibilityFocusCallbackSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeBoolean(isFocus);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedAccessibilityTransparentCallback(Ark_Int32 resourceId, Ark_TouchEvent event)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_AccessibilityTransparentCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeTouchEvent(event);
+    enqueueCallback(&callbackBuffer);
+}
+void callManagedAccessibilityTransparentCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEvent event)
+{
+    uint8_t dataBuffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(Kind_AccessibilityTransparentCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeTouchEvent(event);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedAsyncCallback_Array_TextMenuItem_Array_TextMenuItem(Ark_Int32 resourceId, Array_TextMenuItem menuItems, Callback_Array_TextMenuItem_Void continuation)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -8087,6 +8107,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
     switch (kind) {
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallback);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallback);
+        case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallback);
         case Kind_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_Array_TextMenuItem_Array_TextMenuItem);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_Void);
         case Kind_AsyncCallback_TextMenuItem_TextRange_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_TextMenuItem_TextRange_Boolean);
@@ -8412,6 +8433,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
     switch (kind) {
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallbackSync);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallbackSync);
+        case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallbackSync);
         case Kind_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_Array_TextMenuItem_Array_TextMenuItemSync);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_VoidSync);
         case Kind_AsyncCallback_TextMenuItem_TextRange_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_TextMenuItem_TextRange_BooleanSync);

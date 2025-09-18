@@ -286,6 +286,11 @@ public:
         return false;
     }
 
+    virtual bool IsStaticStack()
+    {
+        return false;
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,

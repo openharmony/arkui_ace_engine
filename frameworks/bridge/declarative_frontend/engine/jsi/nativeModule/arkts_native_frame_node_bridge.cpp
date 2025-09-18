@@ -713,6 +713,15 @@ ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* run
     auto nodeId = GetArkUINodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(nativeNode);
     return panda::NumberRef::New(vm, nodeId);
 }
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeRawPtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int64_t rawPtr = reinterpret_cast<int64_t>(nativeNode);
+    return panda::NumberRef::New(vm, rawPtr);
+}
 static int32_t GetOperatingHand(GestureEvent& info)
 {
     int32_t left = 0;

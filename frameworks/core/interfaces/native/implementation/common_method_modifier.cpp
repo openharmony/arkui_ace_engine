@@ -2345,6 +2345,8 @@ void BorderColorImpl(Ark_NativePointer node,
     if (color) {
         // TODO: Reset value
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    } else {
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     }
 }
 void BorderRadiusImpl(Ark_NativePointer node,
@@ -2744,6 +2746,25 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
+}
+void OnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                         const Opt_AccessibilityTransparentCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHoverTransparentFunc = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+        TouchEventInfo& info) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkTouchEventSync(info);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(frameNode, std::move(onHoverTransparentFunc));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      const Opt_HoverEffect* value)
@@ -5991,6 +6012,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnHoverMoveImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
+        CommonMethodModifier::OnAccessibilityHoverTransparentImpl,
         CommonMethodModifier::HoverEffectImpl,
         CommonMethodModifier::OnMouseImpl,
         CommonMethodModifier::OnTouchImpl,

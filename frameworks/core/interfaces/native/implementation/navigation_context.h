@@ -247,6 +247,11 @@ public:
     {
         nodes_.clear();
     }
+
+    bool IsStaticStack() override
+    {
+        return true;
+    }
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;

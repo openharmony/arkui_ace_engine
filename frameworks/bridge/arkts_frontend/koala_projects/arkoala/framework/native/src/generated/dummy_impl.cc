@@ -2591,6 +2591,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                             const AccessibilityTransparentCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnAccessibilityHoverTransparent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void HoverEffectImpl(Ark_NativePointer node,
                          const Opt_HoverEffect* value)
     {
@@ -20965,6 +20977,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::OnHoverImpl,
             CommonMethodModifier::OnHoverMoveImpl,
             CommonMethodModifier::OnAccessibilityHoverImpl,
+            CommonMethodModifier::OnAccessibilityHoverTransparentImpl,
             CommonMethodModifier::HoverEffectImpl,
             CommonMethodModifier::OnMouseImpl,
             CommonMethodModifier::OnTouchImpl,
@@ -31452,23 +31465,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
-    {
-        if (!needGroupedLog(1))
-            return {};
-        string out("getPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPropagationImpl(Ark_AxisEvent peer,
-                            const Callback_Void* propagation)
+    void PropagationImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
             return;
-        string out("setPropagation(");
-        WriteToString(&out, propagation);
+        string out("propagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -31950,23 +31951,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
-    {
-        if (!needGroupedLog(1))
-            return {};
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_KeyEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_FocusAxisEvent peer)
     {
         if (!needGroupedLog(1))
             return;
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -41369,7 +41358,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_ConsoleMessage CtorImpl(const Ark_String* message,
                                 const Ark_String* sourceId,
-                                const Ark_Number* lineNumber,
+                                const Ark_Int32* lineNumber,
                                 Ark_MessageLevel messageLevel)
     {
         if (!needGroupedLog(1))
@@ -41417,7 +41406,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
+    Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41567,7 +41556,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
+    Opt_Union_String_Int32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -41617,7 +41606,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
+    Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41628,7 +41617,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {42};
     }
     void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                             const Ark_Union_String_Number_Resource_Buffer* data)
+                             const Ark_Union_String_Int32_Resource_Buffer* data)
     {
         if (!needGroupedLog(1))
             return;
@@ -41678,7 +41667,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetResponseCodeImpl(Ark_WebResourceResponse peer,
-                             const Ark_Number* code)
+                             const Ark_Int32* code)
     {
         if (!needGroupedLog(1))
             return;
@@ -41747,7 +41736,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
+    Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -45589,8 +45578,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
-            AxisEventAccessor::GetPropagationImpl,
-            AxisEventAccessor::SetPropagationImpl,
+            AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
     }
@@ -45689,8 +45677,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FocusAxisEventAccessor::GetFinalizerImpl,
             FocusAxisEventAccessor::GetAxisMapImpl,
             FocusAxisEventAccessor::SetAxisMapImpl,
-            FocusAxisEventAccessor::GetStopPropagationImpl,
-            FocusAxisEventAccessor::SetStopPropagationImpl,
+            FocusAxisEventAccessor::StopPropagationImpl,
         };
         return &FocusAxisEventAccessorImpl;
     }

@@ -3140,6 +3140,160 @@ class NavPathStack {
 
 globalThis.NavPathStack = NavPathStack;
 
+function registerNavStackOperation(pushPathCallback) {
+  InteropNavPathStackModule.pushPathStaticCallback = pushPathCallback;
+}
+
+class NavPathStackExtent extends NavPathStack {
+  constructor() {
+    super();
+    this.staticStack = undefined;
+  }
+
+  getPathStack() {
+    
+  }
+  setPathStack(pathStack, animated) {
+    
+  }
+  getJsIndexFromNativeIndex(index) {
+    
+  }
+  initNavPathIndex(pathName) {
+    
+  }
+  getAllPathIndex() {
+    
+  }
+  findInPopArray(name) {
+    
+  }
+  setNativeStack(stack) {
+    this.staticStack = stack;
+  }
+  getNativeStack() {
+    return this.nativeStack;
+  }
+  setParent(parent) {
+    
+  }
+  getParent() {
+    
+  }
+  pushName(name, param) {
+    
+  }
+  push(info, animated) {
+    this.pushPath(info, animated);
+  }
+  pushPathByName(name, param, onPop, animated) {
+    
+  }
+  pushDestinationByName(name, param, onPop, animated) {
+    
+  }
+  pushWithLaunchModeAndAnimated(info, launchMode, animated, createPromise) {
+    
+  }
+  pushPath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
+    if (InteropNavPathStackModule.pushPathStaticCallback && this.staticStack) {
+      InteropNavPathStackModule.pushPathStaticCallback(this.staticStack, info, animated);
+    }
+  }
+  pushDestination(info, optionParam) {
+    
+  }
+  doReplaceInner(info, optionParam, isReplaceDestination) {
+    
+  }
+  replacePath(info, optionParam) {
+    
+  }
+  replaceDestination(info, navigationOptions) {
+    
+  }
+  replacePathByName(name, param, animated) {
+    
+  }
+  setIsReplace(value) {
+    
+  }
+  setAnimated(value) {
+    
+  }
+  pop(result, animated) {
+    this.nativeStack?.pop(result, animated);
+  }
+  popTo(name, animated) {
+    
+  }
+  popToName(name, result, animated) {
+    
+  }
+  innerPopToIndex(index, result, animated, needFireOnResult) {
+    
+  }
+  popToIndex(index, result, animated) {
+    
+  }
+  moveToTop(name, animated) {
+    
+  }
+  moveIndexToTop(index, animated) {
+    
+  }
+  clear(animated) {
+    
+  }
+  removeByIndexes(indexes) {
+    
+  }
+  removeByName(name) {
+    
+  }
+  removeByNavDestinationId(navDestinationId) {
+    
+  }
+  removeIndex(index) {
+    
+  }
+  removeInvalidPage(index) {
+    
+  }
+  getAllPathName() {
+    
+  }
+  getParamByIndex(index) {
+    
+  }
+  getParamByName(name) {
+    
+  }
+  getIndexByName(name) {
+    
+  }
+  getNameByIndex(index) {
+    
+  }
+  getOnPopByIndex(index) {
+    
+  }
+  size() {
+    
+  }
+  disableAnimation(disableAnimation) {
+    
+  }
+  setInterception(interception) {
+    
+  }
+}
+
+globalThis.NavPathStackExtent = NavPathStackExtent;
+
 class WaterFlowSections {
   constructor() {
     this.sectionArray = [];

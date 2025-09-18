@@ -558,9 +558,9 @@ export class Serializer extends SerializerBase {
     writeOnSearchResultReceiveEvent(value: OnSearchResultReceiveEvent): void {
         let valueSerializer : Serializer = this
         const value_activeMatchOrdinal  = value.activeMatchOrdinal
-        valueSerializer.writeNumber(value_activeMatchOrdinal)
+        valueSerializer.writeInt32(value_activeMatchOrdinal)
         const value_numberOfMatches  = value.numberOfMatches
-        valueSerializer.writeNumber(value_numberOfMatches)
+        valueSerializer.writeInt32(value_numberOfMatches)
         const value_isDoneCounting  = value.isDoneCounting
         valueSerializer.writeBoolean(value_isDoneCounting)
     }
@@ -4808,7 +4808,7 @@ export class Serializer extends SerializerBase {
         const value_host  = value.host
         valueSerializer.writeString(value_host)
         const value_port  = value.port
-        valueSerializer.writeNumber(value_port)
+        valueSerializer.writeInt32(value_port)
         const value_keyTypes  = value.keyTypes
         valueSerializer.writeInt32(value_keyTypes.length as int32)
         for (let i = 0; i < value_keyTypes.length; i++) {
@@ -4849,7 +4849,7 @@ export class Serializer extends SerializerBase {
         const value_mimetype  = value.mimetype
         valueSerializer.writeString(value_mimetype)
         const value_contentLength  = value.contentLength
-        valueSerializer.writeNumber(value_contentLength)
+        valueSerializer.writeInt64(value_contentLength)
     }
     writeOnErrorReceiveEvent(value: OnErrorReceiveEvent): void {
         let valueSerializer : Serializer = this

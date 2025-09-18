@@ -4459,6 +4459,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MoveTo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getIdByNodePtr"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetIdByNodePtr));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeRawPtr"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFrameNodeRawPtr));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToParent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToParent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToScreen"),

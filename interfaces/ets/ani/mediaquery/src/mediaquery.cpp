@@ -109,11 +109,10 @@ public:
             TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "clean:%{public}s", media_.c_str());
             CleanListenerSet();
         }
-        if (env_ == nullptr) {
-            return;
-        }
+        ani_env* env = nullptr;
+        vm_->GetEnv(ANI_VERSION_1, &env);
         for (auto& item : cbList_) {
-            env_->GlobalReference_Delete(item);
+            env->GlobalReference_Delete(item);
         }
     }
 
@@ -165,6 +164,8 @@ public:
     {
         OHOS::Ace::Framework::MediaQueryer queryer;
         for (auto& listener : copyListeners) {
+            ani_env* env = nullptr;
+            listener->vm_->GetEnv(ANI_VERSION_1, &env);
             auto json = OHOS::Ace::Framework::MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             std::set<ani_ref> delayDeleteCallbacks;
@@ -181,25 +182,25 @@ public:
                 TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "trigger:%{public}s matches:%{public}d",
                     listener->media_.c_str(), listener->matches_);
                 ani_wref cbWref;
-                if (ANI_OK != listener->env_->WeakReference_Create(cbRef, &cbWref)) {
+                if (ANI_OK != env->WeakReference_Create(cbRef, &cbWref)) {
                     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!WeakReference_Create");
                     return;
                 }
                 ani_ref ref;
                 ani_boolean wasReleased;
-                if (ANI_OK != listener->env_->WeakReference_GetReference(cbWref, &wasReleased, &ref)) {
+                if (ANI_OK != env->WeakReference_GetReference(cbWref, &wasReleased, &ref)) {
                     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!listener->env_->WeakReference_GetReference");
                     return;
                 }
                 ani_object result = {};
-                listener->MediaQueryResult::AniResultSerializer(listener->env_, result);
+                listener->MediaQueryResult::AniResultSerializer(env, result);
                 ani_ref resultRef = static_cast<ani_ref>(result);
                 if (resultRef == nullptr) {
                     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "resultRef == nullptr");
                     return;
                 }
                 ani_ref fnReturnVal;
-                if (ANI_OK != listener->env_->FunctionalObject_Call(static_cast<ani_fn_object>(ref), 1,
+                if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(ref), 1,
                     &resultRef, &fnReturnVal)) {
                     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "FunctionalObject_Call fail");
                 }
@@ -209,7 +210,9 @@ public:
 
     std::list<ani_ref>::iterator FindCbList(ani_object cb)
     {
-        return std::find_if(cbList_.begin(), cbList_.end(), [env = env_, cb](const ani_ref& item) -> bool {
+        return std::find_if(cbList_.begin(), cbList_.end(), [vm = vm_, cb](const ani_ref& item) -> bool {
+            ani_env* env = nullptr;
+            vm->GetEnv(ANI_VERSION_1, &env);
             ani_boolean result = false;
             ani_wref cbWref;
             env->WeakReference_Create(item, &cbWref);
@@ -268,6 +271,8 @@ public:
         if (!listener || argc == 0) {
             return;
         }
+        ani_env* env_ = nullptr;
+        listener->vm_->GetEnv(ANI_VERSION_1, &env_);
         if (argc == 1) {
             if (delayDeleteCallbacks_) {
                 delayDeleteEnv_ = env;
@@ -276,7 +281,7 @@ public:
                 }
             } else {
                 for (auto& item : listener->cbList_) {
-                    listener->env_->GlobalReference_Delete(item);
+                    env_->GlobalReference_Delete(item);
                 }
             }
             listener->cbList_.clear();
@@ -286,7 +291,7 @@ public:
                 if (delayDeleteCallbacks_) {
                     (*delayDeleteCallbacks_).emplace(*iter);
                 } else {
-                    listener->env_->GlobalReference_Delete(*iter);
+                    env_->GlobalReference_Delete(*iter);
                 }
                 listener->cbList_.erase(iter);
             }
@@ -337,9 +342,9 @@ private:
         if (ANI_OK != env->CreateLocalScope(nr_refs)) {
             return;
         }
-        if (env_ == nullptr) {
-            env_ = env;
-        }
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+        vm_ = vm;
         env->DestroyLocalScope();
         auto arkTsFrontend = MediaQueryListener::GetFronted();
         if (!arkTsFrontend) {
@@ -393,8 +398,7 @@ private:
         }
         return TWO_ARGS;
     }
-
-    ani_env *env_ = nullptr;
+    ani_vm* vm_ = nullptr;
     std::list<ani_ref> cbList_;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static std::set<ani_ref>* delayDeleteCallbacks_;

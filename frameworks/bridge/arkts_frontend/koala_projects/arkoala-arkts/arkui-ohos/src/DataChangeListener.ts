@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { ArkUIAniModule } from "arkui.ani";
 import { pointer } from "@koalaui/interop";
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "./component";
 import { int32 } from "@koalaui/common"
@@ -100,6 +101,7 @@ export class InternalListener implements DataChangeListener {
         }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
+            ArkUIAniModule._CustomNode_RequestFrame();
         }
         this.startIndex = Math.min(this.startIndex, index)
     }
