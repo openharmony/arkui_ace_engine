@@ -13841,10 +13841,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LazyBuildAccessor
     namespace LazyForEachOpsAccessor {
+    void NotifyChangeImpl(Ark_NativePointer node,
+                          Ark_Int32 startIndex,
+                          Ark_Int32 endIndex,
+                          Ark_Int32 count)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
     void SyncImpl(Ark_NativePointer node,
                   Ark_Int32 totalCount,
                   const Callback_CreateItem* creator,
                   const Callback_RangeUpdate* updater)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SyncOnMoveOpsImpl(Ark_NativePointer node,
+                           const Callback_OnMoveFromTo* onMoveFromToOps,
+                           const Opt_OnMoveHandler* onMoveOps,
+                           const Opt_ItemDragEventHandler* onMoveDragEventOps)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -19460,7 +19476,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     {
         static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
+            LazyForEachOpsAccessor::NotifyChangeImpl,
             LazyForEachOpsAccessor::SyncImpl,
+            LazyForEachOpsAccessor::SyncOnMoveOpsImpl,
         };
         return &LazyForEachOpsAccessorImpl;
     }

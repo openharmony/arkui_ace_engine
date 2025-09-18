@@ -17,7 +17,7 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { __context, __id, remember } from '@koalaui/runtime'
-import { ArkCommonMethodComponent, CommonMethod, DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
 import { LazyForEachImplForOptions } from '../base/LazyForEachImpl'
 import { InteropNativeModule } from '@koalaui/interop'
 
@@ -70,7 +70,8 @@ export interface DataExchangeOperation {
 export interface DataReloadOperation {
     type: DataOperationType;
 }
-export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation | DataExchangeOperation | DataReloadOperation;
+export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation
+    | DataExchangeOperation | DataReloadOperation;
 
 export interface DataChangeListener {
     onDataReloaded(): void;
@@ -108,7 +109,7 @@ export interface IDataSource<T> {
     unregisterDataChangeListener(listener: DataChangeListener): void;
 }
 
-export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
+export interface LazyForEachAttribute<T> extends DynamicNode {
     dataSource: IDataSource<T> | null;
     setLazyForEachOptions(dataSource: IDataSource<T>,
         /** @memo */
@@ -122,14 +123,26 @@ export interface LazyForEachAttribute<T> extends CommonMethod, DynamicNode {
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         return this;
     }
+    applyAttributesFinish(): void {}
 }
-export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent implements LazyForEachAttribute<T> {
+
+export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     dataSource: IDataSource<T> | null = null;
     /** @memo */
     itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
     keyGenerator?: (item: T, index: number) => string = undefined;
     onMoveEvent?: OnMoveHandler = undefined;
     itemDragEvent?: ItemDragEventHandler = undefined;
+
+    public setLazyForEachOptions(dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        this.dataSource = dataSource;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        return this;
+    }
 
     public onMove(handler?: OnMoveHandler): this {
         this.onMoveEvent = handler;
@@ -142,16 +155,9 @@ export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent impleme
         return this;
     }
 
-    public setLazyForEachOptions(dataSource: IDataSource<T>,
-        /** @memo */
-        itemGenerator: (item: T, index: number) => void,
-        keyGenerator?: (item: T, index: number) => string): this {
-        this.dataSource = dataSource;
-        this.itemGenerator = itemGenerator;
-        this.keyGenerator = keyGenerator;
-        return this;
-    }
+    applyAttributesFinish(): void {}
 }
+
 /** @memo */
 export function LazyForEachImpl<T>(
     /** @memo */
@@ -161,10 +167,9 @@ export function LazyForEachImpl<T>(
         return new ArkLazyForEachComponent<T>()
     })
     style?.(receiver)
-    if(!receiver.dataSource) {
+    if (!receiver.dataSource) {
         InteropNativeModule._NativeLog('LazyForEach receiver.dataSource null !')
-    }
-    else {
+    } else {
         LazyForEachImplForOptions(
             receiver.dataSource!,
             receiver.itemGenerator,

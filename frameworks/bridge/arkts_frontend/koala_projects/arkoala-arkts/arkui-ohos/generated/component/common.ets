@@ -12059,6 +12059,121 @@ export class InvertOptions_serializer {
         return value
     }
 }
+export class ItemDragEventHandler_serializer {
+    public static write(buffer: SerializerBase, value: ItemDragEventHandler): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOnLongPress  = value.onLongPress
+        if (valueHolderForOnLongPress !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnLongPressTmpValue  = valueHolderForOnLongPress!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnLongPressTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDragStart  = value.onDragStart
+        if (valueHolderForOnDragStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDragStartTmpValue  = valueHolderForOnDragStart!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDragStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnMoveThrough  = value.onMoveThrough
+        if (valueHolderForOnMoveThrough !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMoveThroughTmpValue  = valueHolderForOnMoveThrough!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMoveThroughTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDrop  = value.onDrop
+        if (valueHolderForOnDrop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDropTmpValue  = valueHolderForOnDrop!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDropTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ItemDragEventHandler {
+        let valueDeserializer : DeserializerBase = buffer
+        const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onLongPressTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onLongPressTmpBuf = (value0: number):void => {
+                const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
+                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onLongPressTmpResult : ((value0: number) => void) | undefined = onLongPressTmpBuf
+        const onDragStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDragStartTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDragStartTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDragStartTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDragStartTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDragStartTmpBuf = (value0: number):void => {
+                const onDragStartTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
+                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDragStartTmpResult : ((value0: number) => void) | undefined = onDragStartTmpBuf
+        const onMoveThroughTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onMoveThroughTmpBuf : OnMoveHandler | undefined = undefined
+        if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMoveThroughTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onMoveThroughTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onMoveThroughTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onMoveThroughTmpBuf = (from: number, to: number):void => {
+                const onMoveThroughTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                InteropNativeModule._CallCallbackSync(10, -1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
+                onMoveThroughTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMoveThroughTmpResult : OnMoveHandler | undefined = onMoveThroughTmpBuf
+        const onDropTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDropTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDropTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDropTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDropTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDropTmpBuf = (value0: number):void => {
+                const onDropTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
+                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDropTmpResult : ((value0: number) => void) | undefined = onDropTmpBuf
+        let value : ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
+        return value
+    }
+}
 export class ItemDragInfo_serializer {
     public static write(buffer: SerializerBase, value: ItemDragInfo): void {
         let valueSerializer : SerializerBase = buffer

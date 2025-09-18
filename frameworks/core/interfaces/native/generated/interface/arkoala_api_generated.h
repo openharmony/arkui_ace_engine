@@ -1213,6 +1213,8 @@ typedef struct Callback_OnLoadStartedEvent_Void Callback_OnLoadStartedEvent_Void
 typedef struct Opt_Callback_OnLoadStartedEvent_Void Opt_Callback_OnLoadStartedEvent_Void;
 typedef struct Callback_onMeasureSize_SizeResult Callback_onMeasureSize_SizeResult;
 typedef struct Opt_Callback_onMeasureSize_SizeResult Opt_Callback_onMeasureSize_SizeResult;
+typedef struct Callback_OnMoveFromTo Callback_OnMoveFromTo;
+typedef struct Opt_Callback_OnMoveFromTo Opt_Callback_OnMoveFromTo;
 typedef struct Callback_OnOverScrollEvent_Void Callback_OnOverScrollEvent_Void;
 typedef struct Opt_Callback_OnOverScrollEvent_Void Opt_Callback_OnOverScrollEvent_Void;
 typedef struct Callback_OnPageBeginEvent_Void Callback_OnPageBeginEvent_Void;
@@ -1908,6 +1910,8 @@ typedef struct Ark_intl_DateTimeOptions Ark_intl_DateTimeOptions;
 typedef struct Opt_intl_DateTimeOptions Opt_intl_DateTimeOptions;
 typedef struct Ark_InvertOptions Ark_InvertOptions;
 typedef struct Opt_InvertOptions Opt_InvertOptions;
+typedef struct Ark_ItemDragEventHandler Ark_ItemDragEventHandler;
+typedef struct Opt_ItemDragEventHandler Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo Opt_ItemDragInfo;
 typedef struct Ark_JavaScriptProxy Ark_JavaScriptProxy;
@@ -9969,6 +9973,16 @@ typedef struct Opt_Callback_onMeasureSize_SizeResult {
     Ark_Tag tag;
     Callback_onMeasureSize_SizeResult value;
 } Opt_Callback_onMeasureSize_SizeResult;
+typedef struct Callback_OnMoveFromTo {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to);
+} Callback_OnMoveFromTo;
+typedef struct Opt_Callback_OnMoveFromTo {
+    Ark_Tag tag;
+    Callback_OnMoveFromTo value;
+} Opt_Callback_OnMoveFromTo;
 typedef struct Callback_OnOverScrollEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13158,6 +13172,17 @@ typedef struct Opt_InvertOptions {
     Ark_Tag tag;
     Ark_InvertOptions value;
 } Opt_InvertOptions;
+typedef struct Ark_ItemDragEventHandler {
+    /* kind: Interface */
+    Opt_Callback_Number_Void onLongPress;
+    Opt_Callback_Number_Void onDragStart;
+    Opt_OnMoveHandler onMoveThrough;
+    Opt_Callback_Number_Void onDrop;
+} Ark_ItemDragEventHandler;
+typedef struct Opt_ItemDragEventHandler {
+    Ark_Tag tag;
+    Ark_ItemDragEventHandler value;
+} Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo {
     /* kind: Interface */
     Ark_Number x;
@@ -24689,10 +24714,18 @@ typedef struct GENERATED_ArkUILazyBuildAccessor {
 } GENERATED_ArkUILazyBuildAccessor;
 
 typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
+    void (*NotifyChange)(Ark_NativePointer node,
+                         Ark_Int32 startIndex,
+                         Ark_Int32 endIndex,
+                         Ark_Int32 count);
     void (*Sync)(Ark_NativePointer node,
                  Ark_Int32 totalCount,
                  const Callback_CreateItem* creator,
                  const Callback_RangeUpdate* updater);
+    void (*SyncOnMoveOps)(Ark_NativePointer node,
+                          const Callback_OnMoveFromTo* onMoveFromToOps,
+                          const Opt_OnMoveHandler* onMoveOps,
+                          const Opt_ItemDragEventHandler* onMoveDragEventOps);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {

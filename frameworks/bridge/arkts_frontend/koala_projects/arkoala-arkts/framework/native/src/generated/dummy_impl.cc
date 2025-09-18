@@ -32293,6 +32293,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LazyBuildAccessor
     namespace LazyForEachOpsAccessor {
+    void NotifyChangeImpl(Ark_NativePointer node,
+                          Ark_Int32 startIndex,
+                          Ark_Int32 endIndex,
+                          Ark_Int32 count)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("NotifyChange(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, startIndex);
+        out.append(", ");
+        WriteToString(&out, endIndex);
+        out.append(", ");
+        WriteToString(&out, count);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SyncImpl(Ark_NativePointer node,
                   Ark_Int32 totalCount,
                   const Callback_CreateItem* creator,
@@ -32310,6 +32330,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, creator);
         out.append(", ");
         WriteToString(&out, updater);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SyncOnMoveOpsImpl(Ark_NativePointer node,
+                           const Callback_OnMoveFromTo* onMoveFromToOps,
+                           const Opt_OnMoveHandler* onMoveOps,
+                           const Opt_ItemDragEventHandler* onMoveDragEventOps)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("SyncOnMoveOps(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, onMoveFromToOps);
+        out.append(", ");
+        WriteToString(&out, onMoveOps);
+        out.append(", ");
+        WriteToString(&out, onMoveDragEventOps);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -44730,7 +44770,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     {
         static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
+            LazyForEachOpsAccessor::NotifyChangeImpl,
             LazyForEachOpsAccessor::SyncImpl,
+            LazyForEachOpsAccessor::SyncOnMoveOpsImpl,
         };
         return &LazyForEachOpsAccessorImpl;
     }
