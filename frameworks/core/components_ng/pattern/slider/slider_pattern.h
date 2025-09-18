@@ -395,9 +395,12 @@ private:
     void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
-    void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
-    void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
-    void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetSelectPosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
+    void GetBackgroundPosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
+    void GetCirclePosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
     void UpdateBlock();
     void LayoutImageNode();
     void UpdateImagePosition(const PointF& imageCenter);
