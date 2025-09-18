@@ -115,9 +115,10 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     Dimension yOffset;
     auto xOffsetStr = obj->GetProperty("xOffset");
     auto yOffsetStr = obj->GetProperty("yOffset");
-    if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
-        !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
-        !ConvertFromJSValue(yOffsetStr, yOffset)) {
+    auto convertFail = (xOffsetStr->IsString() && !std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX)) ||
+                       (yOffsetStr->IsString() && !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX)) ||
+                       !ConvertFromJSValue(xOffsetStr, xOffset) || !ConvertFromJSValue(yOffsetStr, yOffset);
+    if (convertFail) {
         return;
     }
 

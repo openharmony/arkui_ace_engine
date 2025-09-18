@@ -83,8 +83,11 @@ void ParseChanges(
                 newSections.emplace_back(section);
             }
         }
-        waterFlowSections->ChangeData(changeObject->GetProperty("start")->ToNumber<int32_t>(),
-            changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
+        auto start = changeObject->GetProperty("start");
+        auto deleteCount = changeObject->GetProperty("deleteCount");
+        if (start->IsNumber() && deleteCount->IsNumber()) {
+            waterFlowSections->ChangeData(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections);
+        }
     }
 }
 
@@ -138,7 +141,8 @@ void UpdateSections(
     auto lengthFunc = sectionsObject->GetProperty("length");
     CHECK_NULL_VOID(lengthFunc->IsFunction());
     auto sectionLength = (JSRef<JSFunc>::Cast(lengthFunc))->Call(sectionsObject);
-    if (waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
+    if (sectionLength->IsNumber() &&
+        waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
         auto allSections = sectionsObject->GetProperty("sectionArray");
         CHECK_NULL_VOID(allSections->IsArray());
         ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
