@@ -29,7 +29,7 @@ import { window_SystemBarStyle_serializer } from "./../framework/ohos.window"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { hookPushPathMethod, hookPushPathByNameMethod, hookReplacePathMethod, hookReplacePathByNameMethod, hookPopMethod, hookPopToNameMethod, hookPopToIndexMethod, hookGetParamByIndexMethod, hookGetParamByNameMethod, extractors, hookSetNavigationOptions, hookSetNavDestination, AttributeModifier, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder, PageMapBuilder } from "./builder"
@@ -395,6 +395,11 @@ export class NavPathInfo implements MaterializedBase {
         this.setNavDestinationId_serialize(navDestinationId_casted)
         return
     }
+    updateNavPathInfo(): void {
+        this.setName_serialize(this.name)
+        this.setIsEntry_serialize(this.isEntry!)
+        this.setNavDestinationId_serialize(this.navDestinationId!)
+    }
     private getName_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getName(this.peer!.ptr)
         return retval
@@ -531,15 +536,11 @@ export class NavPathStack implements MaterializedBase {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
     public pushPath(info: NavPathInfo, animated?: boolean): void {
-        const info_casted = info as (NavPathInfo)
-        const animated_casted = animated as (boolean | undefined)
-        this.pushPath0_serialize(info_casted, animated_casted)
+        hookPushPathMethod(this, info, animated);
         return
     }
     public pushPath(info: NavPathInfo, options?: NavigationOptions): void {
-        const info_casted = info as (NavPathInfo)
-        const options_casted = options as (NavigationOptions | undefined)
-        this.pushPath1_serialize(info_casted, options_casted)
+        hookPushPathMethod(this, info, options);
         return
     }
     public pushDestination(info: NavPathInfo, animated?: boolean): Promise<void> {
@@ -553,18 +554,11 @@ export class NavPathStack implements MaterializedBase {
         return this.pushDestination1_serialize(info_casted, options_casted)
     }
     public pushPathByName(name: string, param: Object | null | undefined, animated?: boolean): void {
-        const name_casted = name as (string)
-        const param_casted = param as (Object | null | undefined)
-        const animated_casted = animated as (boolean | undefined)
-        this.pushPathByName0_serialize(name_casted, param_casted, animated_casted)
+        hookPushPathByNameMethod(this, name, param, animated);
         return
     }
     public pushPathByName(name: string, param: Object, onPop: ((value0: PopInfo) => void), animated?: boolean): void {
-        const name_casted = name as (string)
-        const param_casted = param as (Object)
-        const onPop_casted = onPop as (((value0: PopInfo) => void))
-        const animated_casted = animated as (boolean | undefined)
-        this.pushPathByName1_serialize(name_casted, param_casted, onPop_casted, animated_casted)
+        hookPushPathByNameMethod(this, name, param, onPop, animated);
         return
     }
     public pushDestinationByName(name: string, param: Object, animated?: boolean): Promise<void> {
@@ -581,15 +575,11 @@ export class NavPathStack implements MaterializedBase {
         return this.pushDestinationByName1_serialize(name_casted, param_casted, onPop_casted, animated_casted)
     }
     public replacePath(info: NavPathInfo, animated?: boolean): void {
-        const info_casted = info as (NavPathInfo)
-        const animated_casted = animated as (boolean | undefined)
-        this.replacePath0_serialize(info_casted, animated_casted)
+        hookReplacePathMethod(this, info, animated);
         return
     }
     public replacePath(info: NavPathInfo, options?: NavigationOptions): void {
-        const info_casted = info as (NavPathInfo)
-        const options_casted = options as (NavigationOptions | undefined)
-        this.replacePath1_serialize(info_casted, options_casted)
+        hookReplacePathMethod(this, info, options);
         return
     }
     public replaceDestination(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
@@ -598,10 +588,7 @@ export class NavPathStack implements MaterializedBase {
         return this.replaceDestination_serialize(info_casted, options_casted)
     }
     public replacePathByName(name: string, param: Object, animated?: boolean): void {
-        const name_casted = name as (string)
-        const param_casted = param as (Object)
-        const animated_casted = animated as (boolean | undefined)
-        this.replacePathByName_serialize(name_casted, param_casted, animated_casted)
+        hookReplacePathByNameMethod(this, name, param, animated);
         return
     }
     public removeByIndexes(indexes: Array<number>): number {
@@ -617,36 +604,23 @@ export class NavPathStack implements MaterializedBase {
         return this.removeByNavDestinationId_serialize(navDestinationId_casted)
     }
     public pop(animated?: boolean): NavPathInfo | undefined {
-        const animated_casted = animated as (boolean | undefined)
-        return this.pop0_serialize(animated_casted)
+        return hookPopMethod(this, animated);
     }
     public pop(result: Object, animated?: boolean): NavPathInfo | undefined {
-        const result_casted = result as (Object)
-        const animated_casted = animated as (boolean | undefined)
-        return this.pop1_serialize(result_casted, animated_casted)
+        return hookPopMethod(this, result, animated);
     }
     public popToName(name: string, animated?: boolean): number {
-        const name_casted = name as (string)
-        const animated_casted = animated as (boolean | undefined)
-        return this.popToName0_serialize(name_casted, animated_casted)
+        return hookPopToNameMethod(this, name, animated);
     }
     public popToName(name: string, result: Object, animated?: boolean): number {
-        const name_casted = name as (string)
-        const result_casted = result as (Object)
-        const animated_casted = animated as (boolean | undefined)
-        return this.popToName1_serialize(name_casted, result_casted, animated_casted)
+        return hookPopToNameMethod(this, name, result, animated);
     }
     public popToIndex(index: number, animated?: boolean): void {
-        const index_casted = index as (number)
-        const animated_casted = animated as (boolean | undefined)
-        this.popToIndex0_serialize(index_casted, animated_casted)
+        hookPopToIndexMethod(this, index, animated);
         return
     }
     public popToIndex(index: number, result: Object, animated?: boolean): void {
-        const index_casted = index as (number)
-        const result_casted = result as (Object)
-        const animated_casted = animated as (boolean | undefined)
-        this.popToIndex1_serialize(index_casted, result_casted, animated_casted)
+        hookPopToIndexMethod(this, index, result, animated);
         return
     }
     public moveToTop(name: string, animated?: boolean): number {
@@ -669,12 +643,10 @@ export class NavPathStack implements MaterializedBase {
         return this.getAllPathName_serialize()
     }
     public getParamByIndex(index: number): Object | null | undefined {
-        const index_casted = index as (number)
-        return this.getParamByIndex_serialize(index_casted)
+        return hookGetParamByIndexMethod(this, index);
     }
     public getParamByName(name: string): Array<Object | null | undefined> {
-        const name_casted = name as (string)
-        return this.getParamByName_serialize(name_casted)
+        return hookGetParamByNameMethod(this, name);
     }
     public getIndexByName(name: string): Array<number> {
         const name_casted = name as (string)
@@ -2053,6 +2025,15 @@ export interface NavContentInfo {
 }
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
+    // instructive change begin
+    /** @memo */
+    _navDestination: (name: string, param: Object | null | undefined) => void =
+        /** @memo */
+        (name: string, param: object | null | undefined) => {
+            InteropNativeModule._NativeLog("_navDestination attribute is undefined")
+        }
+    _needSync: boolean = false
+    // instructive change end
     getPeer(): ArkNavigationPeer {
         if (!this.peer) {
             throw new Error("Attribute function should be called in memo context")
@@ -2061,9 +2042,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public setNavigationOptions(pathInfos?: NavPathStack): this {
         if (this.checkPriority("setNavigationOptions")) {
-            const pathInfos_casted = pathInfos as (NavPathStack | undefined)
-            this.getPeer()?.setNavigationOptionsAttribute(pathInfos_casted)
-            return this
+            hookSetNavigationOptions(this, pathInfos);
         }
         return this
     }
@@ -2197,9 +2176,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public navDestination(value: PageMapBuilder | undefined): this {
         if (this.checkPriority("navDestination")) {
-            const value_casted = value as (PageMapBuilder | undefined)
-            this.getPeer()?.setNavDestinationAttribute(value_casted)
-            return this
+            hookSetNavDestination(this, value);
         }
         return this
     }
@@ -2314,6 +2291,20 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+
+    // instructive change begin
+    public updateNeedSync(needSync: boolean): void {
+        this._needSync = needSync;
+    }
+
+    public isNeedSync(): boolean {
+        return this._needSync;
+    }
+
+    public updateNavDestination(navdestination: PageMapBuilder): void {
+        this._navDestination = navdestination;
+    }
+    // instructive change end
 }
 
 @memo
