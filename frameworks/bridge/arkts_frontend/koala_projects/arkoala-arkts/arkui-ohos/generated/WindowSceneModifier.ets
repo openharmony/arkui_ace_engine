@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkWindowScenePeer, WindowSceneAttribute } from "./component/windowScene"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,16 +30,17 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: WindowSceneAttribute): void { }
-    applyPressedAttribute(instance: WindowSceneAttribute): void { }
-    applyFocusedAttribute(instance: WindowSceneAttribute): void { }
-    applyDisabledAttribute(instance: WindowSceneAttribute): void { }
-    applySelectedAttribute(instance: WindowSceneAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _attractionEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _attractionEffect_0_0value?: Position | undefined
     _attractionEffect_0_1value?: number | undefined
-    applyModifierPatch(peer: ArkWindowScenePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkWindowScenePeer;
         if (this._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._attractionEffect_0_flag) {

@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkEllipsePeer, EllipseAttribute } from "./component/ellipse"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -29,13 +30,14 @@ export class EllipseModifier extends CommonShapeMethodModifier implements Ellips
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: EllipseAttribute): void { }
-    applyPressedAttribute(instance: EllipseAttribute): void { }
-    applyFocusedAttribute(instance: EllipseAttribute): void { }
-    applyDisabledAttribute(instance: EllipseAttribute): void { }
-    applySelectedAttribute(instance: EllipseAttribute): void { }
-    applyModifierPatch(peer: ArkEllipsePeer): void {
-        super.applyModifierPatch(peer)
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkEllipsePeer;
     }
     mergeModifier(modifier: EllipseModifier): void {
         super.mergeModifier(modifier)

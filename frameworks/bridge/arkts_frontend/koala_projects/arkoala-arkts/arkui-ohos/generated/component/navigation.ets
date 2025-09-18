@@ -21,6 +21,7 @@ import { VoidCallback, Length, Dimension, ResourceStr, ResourceColor } from "./u
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { hookPushPathMethod, hookPushPathByNameMethod, hookReplacePathMethod, hookReplacePathByNameMethod, hookPopMethod, hookPopToNameMethod, hookPopToIndexMethod, hookGetParamByIndexMethod, hookGetParamByNameMethod, extractors, AttributeModifier, hookSetNavigationOptions, hookSetNavDestination, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
 import { Resource_serializer } from "./../framework/resource"
 import { Bindable_Arkui_Component_Units_Length_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -29,7 +30,6 @@ import { window_SystemBarStyle_serializer } from "./../framework/ohos.window"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
-import { hookPushPathMethod, hookPushPathByNameMethod, hookReplacePathMethod, hookReplacePathByNameMethod, hookPopMethod, hookPopToNameMethod, hookPopToIndexMethod, hookGetParamByIndexMethod, hookGetParamByNameMethod, extractors, hookSetNavigationOptions, hookSetNavDestination, AttributeModifier, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CustomBuilder, PageMapBuilder } from "./builder"
@@ -395,11 +395,13 @@ export class NavPathInfo implements MaterializedBase {
         this.setNavDestinationId_serialize(navDestinationId_casted)
         return
     }
+    // instructive change begin
     updateNavPathInfo(): void {
         this.setName_serialize(this.name)
         this.setIsEntry_serialize(this.isEntry!)
         this.setNavDestinationId_serialize(this.navDestinationId!)
     }
+    // instructive change end
     private getName_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getName(this.peer!.ptr)
         return retval
@@ -536,12 +538,10 @@ export class NavPathStack implements MaterializedBase {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
     public pushPath(info: NavPathInfo, animated?: boolean): void {
-        hookPushPathMethod(this, info, animated);
-        return
+        hookPushPathMethod(this, info, animated)
     }
     public pushPath(info: NavPathInfo, options?: NavigationOptions): void {
-        hookPushPathMethod(this, info, options);
-        return
+        hookPushPathMethod(this, info, options)
     }
     public pushDestination(info: NavPathInfo, animated?: boolean): Promise<void> {
         const info_casted = info as (NavPathInfo)
@@ -554,12 +554,10 @@ export class NavPathStack implements MaterializedBase {
         return this.pushDestination1_serialize(info_casted, options_casted)
     }
     public pushPathByName(name: string, param: Object | null | undefined, animated?: boolean): void {
-        hookPushPathByNameMethod(this, name, param, animated);
-        return
+        hookPushPathByNameMethod(this, name, param, animated)
     }
     public pushPathByName(name: string, param: Object, onPop: ((value0: PopInfo) => void), animated?: boolean): void {
-        hookPushPathByNameMethod(this, name, param, onPop, animated);
-        return
+        hookPushPathByNameMethod(this, name, param, onPop, animated)
     }
     public pushDestinationByName(name: string, param: Object, animated?: boolean): Promise<void> {
         const name_casted = name as (string)
@@ -575,12 +573,10 @@ export class NavPathStack implements MaterializedBase {
         return this.pushDestinationByName1_serialize(name_casted, param_casted, onPop_casted, animated_casted)
     }
     public replacePath(info: NavPathInfo, animated?: boolean): void {
-        hookReplacePathMethod(this, info, animated);
-        return
+        hookReplacePathMethod(this, info, animated)
     }
     public replacePath(info: NavPathInfo, options?: NavigationOptions): void {
-        hookReplacePathMethod(this, info, options);
-        return
+        hookReplacePathMethod(this, info, options)
     }
     public replaceDestination(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const info_casted = info as (NavPathInfo)
@@ -588,8 +584,7 @@ export class NavPathStack implements MaterializedBase {
         return this.replaceDestination_serialize(info_casted, options_casted)
     }
     public replacePathByName(name: string, param: Object, animated?: boolean): void {
-        hookReplacePathByNameMethod(this, name, param, animated);
-        return
+        hookReplacePathByNameMethod(this, name, param, animated)
     }
     public removeByIndexes(indexes: Array<number>): number {
         const indexes_casted = indexes as (Array<number>)
@@ -604,24 +599,22 @@ export class NavPathStack implements MaterializedBase {
         return this.removeByNavDestinationId_serialize(navDestinationId_casted)
     }
     public pop(animated?: boolean): NavPathInfo | undefined {
-        return hookPopMethod(this, animated);
+        return hookPopMethod(this, animated)
     }
     public pop(result: Object, animated?: boolean): NavPathInfo | undefined {
-        return hookPopMethod(this, result, animated);
+        return hookPopMethod(this, result, animated)
     }
     public popToName(name: string, animated?: boolean): number {
-        return hookPopToNameMethod(this, name, animated);
+        return hookPopToNameMethod(this, name, animated)
     }
     public popToName(name: string, result: Object, animated?: boolean): number {
-        return hookPopToNameMethod(this, name, result, animated);
+        return hookPopToNameMethod(this, name, result, animated)
     }
     public popToIndex(index: number, animated?: boolean): void {
-        hookPopToIndexMethod(this, index, animated);
-        return
+        hookPopToIndexMethod(this, index, animated)
     }
     public popToIndex(index: number, result: Object, animated?: boolean): void {
-        hookPopToIndexMethod(this, index, result, animated);
-        return
+        hookPopToIndexMethod(this, index, result, animated)
     }
     public moveToTop(name: string, animated?: boolean): number {
         const name_casted = name as (string)
@@ -643,10 +636,10 @@ export class NavPathStack implements MaterializedBase {
         return this.getAllPathName_serialize()
     }
     public getParamByIndex(index: number): Object | null | undefined {
-        return hookGetParamByIndexMethod(this, index);
+        return hookGetParamByIndexMethod(this, index)
     }
     public getParamByName(name: string): Array<Object | null | undefined> {
-        return hookGetParamByNameMethod(this, name);
+        return hookGetParamByNameMethod(this, name)
     }
     public getIndexByName(name: string): Array<number> {
         const name_casted = name as (string)
@@ -677,30 +670,6 @@ export class NavPathStack implements MaterializedBase {
         this.setPathStack_serialize(pathStack_casted, animated_casted)
         return
     }
-    pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    pushPath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
-            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     pushDestination0_serialize(info: NavPathInfo, animated?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (animated !== undefined) {
@@ -728,39 +697,6 @@ export class NavPathStack implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathStack_pushDestination1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-    pushPathByName0_serialize(name: string, param: Object | null | undefined, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (param !== undefined && param !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const paramTmpValue  = param!
-            thisSerializer.holdAndWriteObject(paramTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPathByName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    pushPathByName1_serialize(name: string, param: Object, onPop: ((value0: PopInfo) => void), animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(param)
-        thisSerializer.holdAndWriteCallback(onPop)
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPathByName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     pushDestinationByName0_serialize(name: string, param: Object, animated?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -793,30 +729,6 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    replacePath0_serialize(info: NavPathInfo, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    replacePath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
-            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     replaceDestination_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
@@ -830,19 +742,6 @@ export class NavPathStack implements MaterializedBase {
         ArkUIGeneratedNativeModule._NavPathStack_replaceDestination(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-    replacePathByName_serialize(name: string, param: Object, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(param)
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePathByName(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     removeByIndexes_serialize(indexes: Array<number>): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -862,99 +761,6 @@ export class NavPathStack implements MaterializedBase {
     removeByNavDestinationId_serialize(navDestinationId: string): boolean {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_removeByNavDestinationId(this.peer!.ptr, navDestinationId)
         return retval
-    }
-    pop0_serialize(animated?: boolean): NavPathInfo | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : NavPathInfo | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
-        }
-        const returnResult : NavPathInfo | undefined = buffer
-        return returnResult
-    }
-    pop1_serialize(result: Object, animated?: boolean): NavPathInfo | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(result)
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : NavPathInfo | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
-        }
-        const returnResult : NavPathInfo | undefined = buffer
-        return returnResult
-    }
-    popToName0_serialize(name: string, animated?: boolean): number {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_popToName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    popToName1_serialize(name: string, result: Object, animated?: boolean): number {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(result)
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_popToName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    popToIndex0_serialize(index: number, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_popToIndex0(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    popToIndex1_serialize(index: number, result: Object, animated?: boolean): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteObject(result)
-        if (animated !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const animatedTmpValue  = animated!
-            thisSerializer.writeBoolean(animatedTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavPathStack_popToIndex1(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     moveToTop_serialize(name: string, animated?: boolean): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1002,33 +808,6 @@ export class NavPathStack implements MaterializedBase {
             buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
-        return returnResult
-    }
-    getParamByIndex_serialize(index: number): Object | null | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByIndex(this.peer!.ptr, index)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : Object | null | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readObject() as object)
-        }
-        const returnResult : Object | null | undefined = buffer
-        return returnResult
-    }
-    getParamByName_serialize(name: string): Array<Object | null | undefined> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<Object | null | undefined> = new Array<Object | null | undefined>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
-            let bufferTempBuf : Object | null | undefined = undefined
-            if ((bufferTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                bufferTempBuf = (retvalDeserializer.readObject() as object)
-            }
-            buffer[bufferBufCounterI] = bufferTempBuf
-        }
-        const returnResult : Array<Object | null | undefined> = buffer
         return returnResult
     }
     getIndexByName_serialize(name: string): Array<number> {
@@ -1396,18 +1175,6 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setOnNavigationModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setNavDestinationAttribute(value: PageMapBuilder | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._NavigationAttribute_setNavDestination(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCustomNavContentTransitionAttribute(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): void {
@@ -2042,7 +1809,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public setNavigationOptions(pathInfos?: NavPathStack): this {
         if (this.checkPriority("setNavigationOptions")) {
-            hookSetNavigationOptions(this, pathInfos);
+            hookSetNavigationOptions(this, pathInfos)
         }
         return this
     }
@@ -2176,7 +1943,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public navDestination(value: PageMapBuilder | undefined): this {
         if (this.checkPriority("navDestination")) {
-            hookSetNavDestination(this, value);
+            hookSetNavDestination(this, value)
         }
         return this
     }

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkImageAnimatorPeer, ImageFrameInfo, ImageAnimatorAttribute } from "./component/imageAnimator"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,11 +30,11 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ImageAnimatorAttribute): void { }
-    applyPressedAttribute(instance: ImageAnimatorAttribute): void { }
-    applyFocusedAttribute(instance: ImageAnimatorAttribute): void { }
-    applyDisabledAttribute(instance: ImageAnimatorAttribute): void { }
-    applySelectedAttribute(instance: ImageAnimatorAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _images_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _images_0_0value?: Array<ImageFrameInfo> | undefined
     _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -60,8 +61,9 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _onCancel_0_0value?: (() => void) | undefined
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
-    applyModifierPatch(peer: ArkImageAnimatorPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkImageAnimatorPeer;
         if (this._images_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._images_0_flag) {

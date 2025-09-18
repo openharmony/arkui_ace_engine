@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCalendarPickerPeer, CalendarPickerAttribute, CalendarAlign } from "./component/calendarPicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
@@ -29,11 +30,11 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: CalendarPickerAttribute): void { }
-    applyPressedAttribute(instance: CalendarPickerAttribute): void { }
-    applyFocusedAttribute(instance: CalendarPickerAttribute): void { }
-    applyDisabledAttribute(instance: CalendarPickerAttribute): void { }
-    applySelectedAttribute(instance: CalendarPickerAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textStyle_0_0value?: PickerTextStyle | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -43,8 +44,9 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
     _edgeAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeAlign_0_0value?: CalendarAlign | undefined
     _edgeAlign_0_1value?: Offset | undefined
-    applyModifierPatch(peer: ArkCalendarPickerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCalendarPickerPeer;
         if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._textStyle_0_flag) {

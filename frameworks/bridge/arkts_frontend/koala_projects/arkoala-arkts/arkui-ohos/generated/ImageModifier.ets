@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkImagePeer, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PointLightStyle } from "./component/common"
@@ -36,11 +37,11 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ImageAttribute): void { }
-    applyPressedAttribute(instance: ImageAttribute): void { }
-    applyFocusedAttribute(instance: ImageAttribute): void { }
-    applyDisabledAttribute(instance: ImageAttribute): void { }
-    applySelectedAttribute(instance: ImageAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: string | Resource | image.PixelMap | undefined
     _matchTextDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -95,8 +96,9 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _enhancedImageQuality_0_0value?: image.ResolutionQuality | undefined
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
-    applyModifierPatch(peer: ArkImagePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkImagePeer;
         if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alt_0_flag) {

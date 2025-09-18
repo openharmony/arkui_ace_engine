@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkProgressPeer, LinearStyleOptions, RingStyleOptions, CapsuleStyleOptions, ProgressStyleOptions, ProgressConfiguration, ProgressAttribute } from "./component/progress"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -32,11 +33,11 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ProgressAttribute): void { }
-    applyPressedAttribute(instance: ProgressAttribute): void { }
-    applyFocusedAttribute(instance: ProgressAttribute): void { }
-    applyDisabledAttribute(instance: ProgressAttribute): void { }
-    applySelectedAttribute(instance: ProgressAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _value_0_0value?: number | undefined
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -45,8 +46,9 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
     _style_0_0value?: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined
     _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _privacySensitive_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkProgressPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkProgressPeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._value_0_flag) {

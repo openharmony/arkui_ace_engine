@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkStepperPeer, StepperAttribute } from "./component/stepper"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,11 +29,11 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: StepperAttribute): void { }
-    applyPressedAttribute(instance: StepperAttribute): void { }
-    applyFocusedAttribute(instance: StepperAttribute): void { }
-    applyDisabledAttribute(instance: StepperAttribute): void { }
-    applySelectedAttribute(instance: StepperAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
     _onSkip_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -43,8 +44,9 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
     _onNext_0_0value?: ((prevIndex: number,index: number) => void) | undefined
     _onPrevious_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPrevious_0_0value?: ((prevIndex: number,index: number) => void) | undefined
-    applyModifierPatch(peer: ArkStepperPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkStepperPeer;
         if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onFinish_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkIndicatorComponentPeer, IndicatorComponentAttribute } from "./component/indicatorcomponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,11 +30,11 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: IndicatorComponentAttribute): void { }
-    applyPressedAttribute(instance: IndicatorComponentAttribute): void { }
-    applyFocusedAttribute(instance: IndicatorComponentAttribute): void { }
-    applyDisabledAttribute(instance: IndicatorComponentAttribute): void { }
-    applySelectedAttribute(instance: IndicatorComponentAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _initialIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _initialIndex_0_0value?: number | undefined
     _count_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -46,8 +47,9 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
     _vertical_0_0value?: boolean | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: ((value0: number) => void) | undefined
-    applyModifierPatch(peer: ArkIndicatorComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkIndicatorComponentPeer;
         if (this._initialIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._initialIndex_0_flag) {

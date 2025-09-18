@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkLoadingProgressPeer, LoadingProgressConfiguration, LoadingProgressAttribute } from "./component/loadingProgress"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,17 +32,18 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: LoadingProgressAttribute): void { }
-    applyPressedAttribute(instance: LoadingProgressAttribute): void { }
-    applyFocusedAttribute(instance: LoadingProgressAttribute): void { }
-    applyDisabledAttribute(instance: LoadingProgressAttribute): void { }
-    applySelectedAttribute(instance: LoadingProgressAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     _enableLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableLoading_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkLoadingProgressPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkLoadingProgressPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {

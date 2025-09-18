@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGaugePeer, GaugeShadowOptions, GaugeIndicatorOptions, GaugeConfiguration, GaugeAttribute } from "./component/gauge"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -33,11 +34,11 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: GaugeAttribute): void { }
-    applyPressedAttribute(instance: GaugeAttribute): void { }
-    applyFocusedAttribute(instance: GaugeAttribute): void { }
-    applyDisabledAttribute(instance: GaugeAttribute): void { }
-    applySelectedAttribute(instance: GaugeAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _value_0_0value?: number | undefined
     _startAngle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -56,8 +57,9 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _indicator_0_0value?: GaugeIndicatorOptions | undefined
     _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _privacySensitive_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkGaugePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGaugePeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._value_0_flag) {

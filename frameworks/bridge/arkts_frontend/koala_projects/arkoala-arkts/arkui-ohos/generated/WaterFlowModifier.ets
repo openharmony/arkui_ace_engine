@@ -20,6 +20,7 @@ import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkWaterFlowPeer, WaterFlowAttribute } from "./component/waterFlow"
 import { int32 } from "@koalaui/common"
 import { ScrollableCommonMethod, OnWillScrollCallback, OnScrollCallback, CommonMethod } from "./component/common"
@@ -34,11 +35,11 @@ export class WaterFlowModifier extends ScrollableCommonMethodModifier implements
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: WaterFlowAttribute): void { }
-    applyPressedAttribute(instance: WaterFlowAttribute): void { }
-    applyFocusedAttribute(instance: WaterFlowAttribute): void { }
-    applyDisabledAttribute(instance: WaterFlowAttribute): void { }
-    applySelectedAttribute(instance: WaterFlowAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _columnsTemplate_0_0value?: string | undefined
     _itemConstraintSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -64,8 +65,9 @@ export class WaterFlowModifier extends ScrollableCommonMethodModifier implements
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedCount_1_0value?: number | undefined
     _cachedCount_1_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkWaterFlowPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkWaterFlowPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._columnsTemplate_0_flag) {

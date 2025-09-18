@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextPeer, TextOverflowOptions, TextMarqueeOptions, MarqueeState, TextAttribute, TextSpanType, TextResponseType } from "./component/text"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
@@ -40,11 +41,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextAttribute): void { }
-    applyPressedAttribute(instance: TextAttribute): void { }
-    applyFocusedAttribute(instance: TextAttribute): void { }
-    applyDisabledAttribute(instance: TextAttribute): void { }
-    applySelectedAttribute(instance: TextAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -137,8 +138,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _bindSelectionMenu_0_1value?: CustomBuilder | undefined
     _bindSelectionMenu_0_2value?: TextResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
-    applyModifierPatch(peer: ArkTextPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontColor_0_flag) {

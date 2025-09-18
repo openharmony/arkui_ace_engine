@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridColPeer, GridColColumnOption, GridColAttribute } from "./component/gridCol"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,19 +29,20 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: GridColAttribute): void { }
-    applyPressedAttribute(instance: GridColAttribute): void { }
-    applyFocusedAttribute(instance: GridColAttribute): void { }
-    applyDisabledAttribute(instance: GridColAttribute): void { }
-    applySelectedAttribute(instance: GridColAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _span_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _span_0_0value?: number | GridColColumnOption | undefined
     _gridColOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _gridColOffset_0_0value?: number | GridColColumnOption | undefined
     _order_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _order_0_0value?: number | GridColColumnOption | undefined
-    applyModifierPatch(peer: ArkGridColPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridColPeer;
         if (this._span_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._span_0_flag) {

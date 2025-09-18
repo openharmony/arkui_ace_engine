@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkColumnPeer, ColumnAttribute } from "./component/column"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,19 +30,20 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ColumnAttribute): void { }
-    applyPressedAttribute(instance: ColumnAttribute): void { }
-    applyFocusedAttribute(instance: ColumnAttribute): void { }
-    applyDisabledAttribute(instance: ColumnAttribute): void { }
-    applySelectedAttribute(instance: ColumnAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: HorizontalAlign | undefined
     _justifyContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _justifyContent_0_0value?: FlexAlign | undefined
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkColumnPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkColumnPeer;
         if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignItems_0_flag) {

@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPolygonPeer, PolygonAttribute } from "./component/polygon"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -32,15 +33,16 @@ export class PolygonModifier extends CommonShapeMethodModifier implements Polygo
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: PolygonAttribute): void { }
-    applyPressedAttribute(instance: PolygonAttribute): void { }
-    applyFocusedAttribute(instance: PolygonAttribute): void { }
-    applyDisabledAttribute(instance: PolygonAttribute): void { }
-    applySelectedAttribute(instance: PolygonAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
-    applyModifierPatch(peer: ArkPolygonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPolygonPeer;
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._points_0_flag) {

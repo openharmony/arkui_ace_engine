@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkBlankPeer, BlankAttribute } from "./component/blank"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,15 +32,16 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: BlankAttribute): void { }
-    applyPressedAttribute(instance: BlankAttribute): void { }
-    applyFocusedAttribute(instance: BlankAttribute): void { }
-    applyDisabledAttribute(instance: BlankAttribute): void { }
-    applySelectedAttribute(instance: BlankAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
-    applyModifierPatch(peer: ArkBlankPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkBlankPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {

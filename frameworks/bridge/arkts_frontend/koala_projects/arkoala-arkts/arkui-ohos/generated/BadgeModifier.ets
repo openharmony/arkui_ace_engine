@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkBadgePeer, BadgeAttribute } from "./component/badge"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,13 +29,14 @@ export class BadgeModifier extends CommonMethodModifier implements BadgeAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: BadgeAttribute): void { }
-    applyPressedAttribute(instance: BadgeAttribute): void { }
-    applyFocusedAttribute(instance: BadgeAttribute): void { }
-    applyDisabledAttribute(instance: BadgeAttribute): void { }
-    applySelectedAttribute(instance: BadgeAttribute): void { }
-    applyModifierPatch(peer: ArkBadgePeer): void {
-        super.applyModifierPatch(peer)
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkBadgePeer;
     }
     mergeModifier(modifier: BadgeModifier): void {
         super.mergeModifier(modifier)

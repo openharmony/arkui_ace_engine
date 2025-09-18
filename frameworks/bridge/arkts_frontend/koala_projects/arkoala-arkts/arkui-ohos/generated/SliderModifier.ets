@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSliderPeer, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderAttribute } from "./component/slider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -32,11 +33,11 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SliderAttribute): void { }
-    applyPressedAttribute(instance: SliderAttribute): void { }
-    applyFocusedAttribute(instance: SliderAttribute): void { }
-    applyDisabledAttribute(instance: SliderAttribute): void { }
-    applySelectedAttribute(instance: SliderAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _blockColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _blockColor_0_0value?: ResourceColor | undefined
     _trackColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -78,8 +79,9 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
-    applyModifierPatch(peer: ArkSliderPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSliderPeer;
         if (this._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._blockColor_0_flag) {

@@ -20,6 +20,7 @@ import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
 import { int32 } from "@koalaui/common"
 import { ScrollableCommonMethod, NestedScrollOptions, CommonMethod, EdgeEffectOptions } from "./component/common"
@@ -33,11 +34,11 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ScrollAttribute): void { }
-    applyPressedAttribute(instance: ScrollAttribute): void { }
-    applyFocusedAttribute(instance: ScrollAttribute): void { }
-    applyDisabledAttribute(instance: ScrollAttribute): void { }
-    applySelectedAttribute(instance: ScrollAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _scrollable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollable_0_0value?: ScrollDirection | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -73,8 +74,9 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _edgeEffect_0_1value?: EdgeEffectOptions | undefined
-    applyModifierPatch(peer: ArkScrollPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkScrollPeer;
         if (this._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._scrollable_0_flag) {

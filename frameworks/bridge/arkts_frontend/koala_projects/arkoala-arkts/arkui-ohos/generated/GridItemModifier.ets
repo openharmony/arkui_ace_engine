@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridItemPeer, GridItemAttribute } from "./component/gridItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -28,11 +29,11 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: GridItemAttribute): void { }
-    applyPressedAttribute(instance: GridItemAttribute): void { }
-    applyFocusedAttribute(instance: GridItemAttribute): void { }
-    applyDisabledAttribute(instance: GridItemAttribute): void { }
-    applySelectedAttribute(instance: GridItemAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _rowStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rowStart_0_0value?: number | undefined
     _rowEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -47,8 +48,9 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
     _selected_0_0value?: boolean | Bindable<boolean> | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
-    applyModifierPatch(peer: ArkGridItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridItemPeer;
         if (this._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._rowStart_0_flag) {

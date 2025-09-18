@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCheckboxGroupPeer, OnCheckboxGroupChangeCallback, CheckboxGroupResult, CheckboxGroupAttribute } from "./component/checkboxgroup"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -31,11 +32,11 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: CheckboxGroupAttribute): void { }
-    applyPressedAttribute(instance: CheckboxGroupAttribute): void { }
-    applyFocusedAttribute(instance: CheckboxGroupAttribute): void { }
-    applyDisabledAttribute(instance: CheckboxGroupAttribute): void { }
-    applySelectedAttribute(instance: CheckboxGroupAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _selectAll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectAll_0_0value?: boolean | Bindable<boolean> | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -48,8 +49,9 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
     _onChange_0_0value?: OnCheckboxGroupChangeCallback | undefined
     _checkboxShape_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _checkboxShape_0_0value?: CheckBoxShape | undefined
-    applyModifierPatch(peer: ArkCheckboxGroupPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCheckboxGroupPeer;
         if (this._selectAll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selectAll_0_flag) {

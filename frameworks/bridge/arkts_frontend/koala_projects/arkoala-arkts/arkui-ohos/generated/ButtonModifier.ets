@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkButtonPeer, ButtonType, ButtonStyleMode, ControlSize, ButtonRole, ButtonConfiguration, ButtonLabelStyle, ButtonAttribute } from "./component/button"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ButtonAttribute): void { }
-    applyPressedAttribute(instance: ButtonAttribute): void { }
-    applyFocusedAttribute(instance: ButtonAttribute): void { }
-    applyDisabledAttribute(instance: ButtonAttribute): void { }
-    applySelectedAttribute(instance: ButtonAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: ButtonType | undefined
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -62,8 +63,9 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     _minFontScale_0_0value?: number | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: number | Resource | undefined
-    applyModifierPatch(peer: ArkButtonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkButtonPeer;
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._type_0_flag) {

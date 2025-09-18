@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPathPeer, PathAttribute } from "./component/path"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -29,15 +30,16 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: PathAttribute): void { }
-    applyPressedAttribute(instance: PathAttribute): void { }
-    applyFocusedAttribute(instance: PathAttribute): void { }
-    applyDisabledAttribute(instance: PathAttribute): void { }
-    applySelectedAttribute(instance: PathAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _commands_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _commands_0_0value?: string | undefined
-    applyModifierPatch(peer: ArkPathPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPathPeer;
         if (this._commands_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._commands_0_flag) {

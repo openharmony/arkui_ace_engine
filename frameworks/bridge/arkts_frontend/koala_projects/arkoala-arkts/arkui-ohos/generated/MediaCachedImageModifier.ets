@@ -20,6 +20,7 @@ import { ImageModifier } from "./ImageModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkMediaCachedImagePeer, MediaCachedImageAttribute } from "./component/mediaCachedImage"
 import { int32 } from "@koalaui/common"
 import { ImageAttribute } from "./component/image"
@@ -30,13 +31,14 @@ export class MediaCachedImageModifier extends ImageModifier implements MediaCach
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: MediaCachedImageAttribute): void { }
-    applyPressedAttribute(instance: MediaCachedImageAttribute): void { }
-    applyFocusedAttribute(instance: MediaCachedImageAttribute): void { }
-    applyDisabledAttribute(instance: MediaCachedImageAttribute): void { }
-    applySelectedAttribute(instance: MediaCachedImageAttribute): void { }
-    applyModifierPatch(peer: ArkMediaCachedImagePeer): void {
-        super.applyModifierPatch(peer)
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkMediaCachedImagePeer;
     }
     mergeModifier(modifier: MediaCachedImageModifier): void {
         super.mergeModifier(modifier)

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkDividerPeer, DividerAttribute } from "./component/divider"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: DividerAttribute): void { }
-    applyPressedAttribute(instance: DividerAttribute): void { }
-    applyFocusedAttribute(instance: DividerAttribute): void { }
-    applyDisabledAttribute(instance: DividerAttribute): void { }
-    applySelectedAttribute(instance: DividerAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _vertical_0_0value?: boolean | undefined
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -44,8 +45,9 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
     _strokeWidth_0_0value?: number | string | undefined
     _lineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineCap_0_0value?: LineCapStyle | undefined
-    applyModifierPatch(peer: ArkDividerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkDividerPeer;
         if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._vertical_0_flag) {

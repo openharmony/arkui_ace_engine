@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute } from "./component/radio"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -28,19 +29,20 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RadioAttribute): void { }
-    applyPressedAttribute(instance: RadioAttribute): void { }
-    applyFocusedAttribute(instance: RadioAttribute): void { }
-    applyDisabledAttribute(instance: RadioAttribute): void { }
-    applySelectedAttribute(instance: RadioAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _checked_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _checked_0_0value?: boolean | Bindable<boolean> | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRadioChangeCallback | undefined
     _radioStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radioStyle_0_0value?: RadioStyle | undefined
-    applyModifierPatch(peer: ArkRadioPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRadioPeer;
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._checked_0_flag) {
