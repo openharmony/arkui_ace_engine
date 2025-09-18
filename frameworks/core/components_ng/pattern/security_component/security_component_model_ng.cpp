@@ -39,6 +39,11 @@ const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
 const static double DEFAULT_ICON_FONT_SIZE = 24;
+#ifdef SECURITY_COMPONENT_ENABLE
+static bool g_isVerified = false;
+static bool g_hasCustomPermission = false;
+static std::mutex g_verifyPermMutex;
+#endif
 static inline RefPtr<FrameNode> GetSecCompChildNode(const FrameNode* parent, const std::string& tag)
 {
     CHECK_NULL_RETURN(parent, nullptr);
@@ -81,7 +86,14 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::HORIZONTAL);
     bool hasCustomPermission = false;
 #ifdef SECURITY_COMPONENT_ENABLE
-    hasCustomPermission = SecurityComponentHandler::HasCustomPermissionForSecComp();
+    {
+        std::lock_guard<std::mutex> lock(g_verifyPermMutex);
+        if (!g_isVerified) {
+            g_hasCustomPermission = SecurityComponentHandler::HasCustomPermissionForSecComp();
+            g_isVerified = true;
+        }
+        hasCustomPermission = g_hasCustomPermission;
+    }
 #endif
     property->UpdateHasCustomPermissionForSecComp(hasCustomPermission);
 }
