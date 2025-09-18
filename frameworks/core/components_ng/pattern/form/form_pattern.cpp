@@ -715,6 +715,9 @@ void FormPattern::OnModifyDone()
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
         TAG_LOGD(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY %{public}d", isEnable);
     }
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
+        isBeenLayout_ = false;
+    }
     GetWantParam(info);
     HandleFormComponent(info);
 
@@ -726,6 +729,7 @@ void FormPattern::OnModifyDone()
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "skip measure and layout");
         return false;
     }
     isBeenLayout_ = true;
