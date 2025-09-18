@@ -454,4 +454,116 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NeedsContentTransition00
     bool needsTransition3 = imagePaintMethod_->NeedsContentTransition();
     EXPECT_EQ(needsTransition3, true);
 }
+
+/**
+ * @tc.name: HandleSrcResource001
+ * @tc.desc: Test HandleSrcResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, HandleSrcResource001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create resobj.
+     */
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    std::vector<ResourceObjectParams> resObjNullParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(100000, 20000, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjWithId0 =
+        AceType::MakeRefPtr<ResourceObject>(0, 20000, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObj1 =
+        AceType::MakeRefPtr<ResourceObject>(0, 20000, resObjNullParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObj2 =
+        AceType::MakeRefPtr<ResourceObject>(0, 30000, resObjParamsList, "com.example.test", "entry", 100000);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    image.CreateWithResourceObj(ImageResourceType::SRC, resObj);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::SRC, resObjWithId0);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::SRC, resObj1);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::SRC, resObj2);
+    pattern->OnColorModeChange(colorMode);
+    auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    EXPECT_FALSE(imageInfo.GetIsUriPureNumber());
+}
+
+/**
+ * @tc.name: HandleAltResource001
+ * @tc.desc: Test HandleAltResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, HandleAltResource001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create resobj.
+     */
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    std::vector<ResourceObjectParams> resObjNullParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(100000, 20000, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjWithId0 =
+        AceType::MakeRefPtr<ResourceObject>(0, 20000, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObj1 =
+        AceType::MakeRefPtr<ResourceObject>(0, 20000, resObjNullParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObj2 =
+        AceType::MakeRefPtr<ResourceObject>(0, 30000, resObjParamsList, "com.example.test", "entry", 100000);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    image.CreateWithResourceObj(ImageResourceType::ALT, resObj);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::ALT, resObjWithId0);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::ALT, resObj1);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::ALT, resObj2);
+    pattern->OnColorModeChange(colorMode);
+    auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+    EXPECT_FALSE(imageInfo.GetIsUriPureNumber());
+}
 } // namespace OHOS::Ace::NG

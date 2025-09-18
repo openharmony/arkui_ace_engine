@@ -77,6 +77,8 @@ const CalcLength MARGIN_LENGTH = CalcLength("8vp");
 const CalcSize TEXT_IDEAL_SIZE = CalcSize(CalcLength("50vp"), std::nullopt);
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float SELECT_WIDTH = 100.0f;
+constexpr float SELECT_HEIGHT = 200.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
@@ -2755,5 +2757,933 @@ HWTEST_F(SelectTestNg, SelectChangeEventTest001, TestSize.Level1)
     onSelect(1);
     EXPECT_EQ(currentIndex, 1);
     ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontFamily
+ * @tc.desc: Test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get select frame node, select pattern, pipeline base, select theme.
+     * @tc.expected: Objects are gotten successfully and should not be null.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    std::vector<std::string> value = { "select", "font", "family" };
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+
+    /**
+     * @tc.steps: step3. Get menu frame node, menu pattern, render context and verify if the color of render context
+     * is the same as the original input.
+     * @tc.expected: Property is setted successfully and obejects should not be null.
+     */
+    selectModelInstance.SetSelectedOptionFontFamily(Referenced::RawPtr(framenode), value);
+    ASSERT_NE(value.size(), 0);
+}
+
+/**
+ * @tc.name: SetOptionFontFamily
+ * @tc.desc: Test SelectPattern SetOptionFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionFontFamily, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    std::vector<std::string> value = { "select", "font", "family" };
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+
+    /**
+     * @tc.steps: step3. Call SetOptionFontFamily.
+     * @tc.expected: the function runs normally
+     */
+    selectModelInstance.SetOptionFontFamily(Referenced::RawPtr(framenode), value);
+    ASSERT_NE(value.size(), 0);
+}
+
+/**
+ * @tc.name: SetMenuAlign
+ * @tc.desc: Test SetMenuAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetMenuAlign, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    // create select
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    MenuAlign menuAlign;
+    menuAlign.alignType = MenuAlignType::END;
+    menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. verify the SetMenuAlign function.
+     */
+    selectModelInstance.SetMenuAlign(Referenced::RawPtr(framenode), menuAlign);
+    selectModelInstance.SetMenuAlign(menuAlign);
+    EXPECT_NE(framenode, nullptr);
+
+    selectModelInstance.SetMenuAlign(menuAlign);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetAvoidance
+ * @tc.desc: Test SelectPattern SetAvoidance
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetAvoidance, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetAvoidance.
+     * @tc.expected: the function runs normally
+     */
+    auto mode = AvoidanceMode::COVER_TARGET;
+    selectModelInstance.SetAvoidance(Referenced::RawPtr(framenode), mode);
+    EXPECT_NE(framenode, nullptr);
+
+    mode = AvoidanceMode::AVOID_AROUND_TARGET;
+    selectModelInstance.SetAvoidance(Referenced::RawPtr(framenode), mode);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetHasOptionWidth
+ * @tc.desc: Test SelectPattern SetHasOptionWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetHasOptionWidth, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetHasOptionWidth.
+     * @tc.expected: the function runs normally
+     */
+    bool hasOptionWidth = false;
+    selectModelInstance.SetHasOptionWidth(hasOptionWidth);
+    selectModelInstance.SetHasOptionWidth(Referenced::RawPtr(framenode), hasOptionWidth);
+    EXPECT_NE(framenode, nullptr);
+
+    hasOptionWidth = true;
+    selectModelInstance.SetHasOptionWidth(hasOptionWidth);
+    selectModelInstance.SetHasOptionWidth(Referenced::RawPtr(framenode), hasOptionWidth);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetDivider
+ * @tc.desc: Test SelectPattern SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetDivider, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetDivider.
+     * @tc.expected: the function runs normally
+     */
+    SelectDivider selectDivider;
+    const SelectDivider& divider = selectDivider;
+    selectModelInstance.SetDivider(divider);
+    EXPECT_EQ(selectDivider.color, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: SetDividerStyle
+ * @tc.desc: Test SelectPattern SetDividerStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetDividerStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetDividerStyle.
+     * @tc.expected: the function runs normally
+     */
+    SelectDivider selectDivider;
+    const DividerMode& mode = DividerMode::FLOATING_ABOVE_MENU;
+    const SelectDivider& divider = selectDivider;
+    selectModelInstance.SetDividerStyle(divider, mode);
+    selectModelInstance.SetDividerStyle(Referenced::RawPtr(framenode), divider, mode);
+    EXPECT_EQ(selectDivider.color, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: ResetDividerStyle
+ * @tc.desc: Test SelectPattern ResetDividerStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetDividerStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ResetDividerStyle.
+     * @tc.expected: the function runs normally
+     */
+    selectModelInstance.ResetDividerStyle(Referenced::RawPtr(framenode));
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: GetControlSize
+ * @tc.desc: Test SelectPattern GetControlSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetControlSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call GetControlSize.
+     * @tc.expected: the function runs normally
+     */
+    ControlSize res = selectModelInstance.GetControlSize();
+    EXPECT_EQ(res, ControlSize::NORMAL);
+
+    res = selectModelInstance.GetControlSize(Referenced::RawPtr(framenode));
+    EXPECT_EQ(res, ControlSize::NORMAL);
+}
+
+/**
+ * @tc.name: CreateFrameNode
+ * @tc.desc: Test SelectPattern CreateFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateFrameNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+
+    /**
+     * @tc.steps: step3. Call CreateFrameNode.
+     * @tc.expected: the function runs normally
+     */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto res = selectModelInstance.CreateFrameNode(nodeId);
+    auto tag = res->GetTag();
+    EXPECT_EQ(tag, V2::SELECT_ETS_TAG);
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Test SelectPattern CreateWithColorResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+
+    /**
+     * @tc.steps: step3. Call CreateWithColorResourceObj.
+     * @tc.expected: the function runs normally
+     */
+    const RefPtr<ResourceObject>& resObj = AceType::MakeRefPtr<ResourceObject>();
+    const SelectColorType& type = SelectColorType::FONT_COLOR;
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+    selectModelInstance.CreateWithColorResourceObj(resObj, type);
+    selectModelInstance.CreateWithColorResourceObj(nullptr, resObj, type);
+    selectModelInstance.CreateWithColorResourceObj(Referenced::RawPtr(framenode), resObj, type);
+    EXPECT_EQ(type, SelectColorType::FONT_COLOR);
+}
+
+/**
+ * @tc.name: SetArrowPosition
+ * @tc.desc: Test SelectPattern SetArrowPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetArrowPosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetArrowPosition.
+     * @tc.expected: the function runs normally
+     */
+    const ArrowPosition value = ArrowPosition::START;
+    selectModelInstance.SetArrowPosition(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetSpace
+ * @tc.desc: Test SelectPattern SetSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSpace, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetSpace.
+     * @tc.expected: the function runs normally
+     */
+    const Dimension& value = FONT_SIZE_VALUE;
+    selectModelInstance.SetSpace(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetValue
+ * @tc.desc: Test SelectPattern SetValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetValue.
+     * @tc.expected: the function runs normally
+     */
+    const std::string& value = "select";
+    selectModelInstance.SetValue(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetSelected
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelected, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    int32_t idx = 0;
+    selectModelInstance.SetSelected(Referenced::RawPtr(framenode), idx);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetFontSize
+ * @tc.desc: Test SelectPattern SetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetFontSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetFontSize.
+     * @tc.expected: the function runs normally
+     */
+    const Dimension& value = FONT_SIZE_VALUE;
+    selectModelInstance.SetFontSize(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetFontWeight
+ * @tc.desc: Test SelectPattern SetFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetFontWeight.
+     * @tc.expected: the function runs normally
+     */
+    const FontWeight& value = FontWeight::NORMAL;
+    selectModelInstance.SetFontWeight(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetFontFamily
+ * @tc.desc: Test SelectPattern SetFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetFontFamily, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetFontFamily.
+     * @tc.expected: the function runs normally
+     */
+    std::vector<std::string> value = { "select", "font", "family" };
+    selectModelInstance.SetFontFamily(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetItalicFontStyle
+ * @tc.desc: Test SelectPattern SetItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetItalicFontStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetItalicFontStyle.
+     * @tc.expected: the function runs normally
+     */
+    const Ace::FontStyle& value = Ace::FontStyle::NORMAL;
+    selectModelInstance.SetItalicFontStyle(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetFontColor
+ * @tc.desc: Test SelectPattern SetFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetFontColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetFontColor.
+     * @tc.expected: the function runs normally
+     */
+    const Color& color = TEXT_COLOR_VALUE;
+    selectModelInstance.SetFontColor(Referenced::RawPtr(framenode), color);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionBgColor
+ * @tc.desc: Test SelectPattern SetSelectedOptionBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionBgColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetSelectedOptionBgColor.
+     * @tc.expected: the function runs normally
+     */
+    const Color& color = BG_COLOR_VALUE;
+    selectModelInstance.SetSelectedOptionBgColor(Referenced::RawPtr(framenode), color);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetOptionFontSize
+ * @tc.desc: Test SelectPattern SetOptionFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionFontSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetOptionFontSize.
+     * @tc.expected: the function runs normally
+     */
+    const Dimension& value = FONT_SIZE_VALUE;
+    selectModelInstance.SetOptionFontSize(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetOptionFontWeight
+ * @tc.desc: Test SelectPattern SetOptionFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetOptionFontWeight.
+     * @tc.expected: the function runs normally
+     */
+    const FontWeight& value = FontWeight::NORMAL;
+    selectModelInstance.SetOptionFontWeight(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetOptionFontFamily001
+ * @tc.desc: Test SelectPattern SetOptionFontFamily001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionFontFamily001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetOptionFontFamily.
+     * @tc.expected: the function runs normally
+     */
+    std::vector<std::string> value = { "select", "font", "family" };
+    selectModelInstance.SetOptionFontFamily(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetOptionItalicFontStyle
+ * @tc.desc: Test SelectPattern SetOptionItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionItalicFontStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetOptionItalicFontStyle.
+     * @tc.expected: the function runs normally
+     */
+    const Ace::FontStyle& value = Ace::FontStyle::NORMAL;
+    selectModelInstance.SetOptionItalicFontStyle(Referenced::RawPtr(framenode), value);
+    EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: SetOptionBgColor
+ * @tc.desc: Test SelectPattern SetOptionBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionBgColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto framenode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(framenode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetOptionBgColor.
+     * @tc.expected: the function runs normally
+     */
+    const Color& color = BG_COLOR_VALUE;
+    selectModelInstance.SetOptionBgColor(Referenced::RawPtr(framenode), color);
+    EXPECT_NE(framenode, nullptr);
 }
 } // namespace OHOS::Ace::NG
