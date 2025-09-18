@@ -8396,13 +8396,13 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
-    auto lastCaretPos = GetLastCaretPos();
-    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !CheckIfNeedAvoidOnCaretChange(caretPos)
+    auto lastCaretPosY = GetLastCaretPos();
+    auto caretPosY = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+    if (lastCaretPosY.has_value() && caretPosY > lastCaretPosY.value() && !CheckIfNeedAvoidOnCaretChange(caretPosY)
         && !isTriggerAvoidOnCaretAvoidMode_) {
         return;
     }
-    SetLastCaretPos(caretPos);
+    SetLastCaretPos(caretPosY);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     textFieldManager->SetHeight(NearZero(caretHeight) ?
         richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);

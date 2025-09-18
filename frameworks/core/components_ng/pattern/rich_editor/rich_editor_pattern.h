@@ -1920,6 +1920,7 @@ private:
     RefPtr<RichEditorContentPattern> contentPattern_;
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
+    // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)
