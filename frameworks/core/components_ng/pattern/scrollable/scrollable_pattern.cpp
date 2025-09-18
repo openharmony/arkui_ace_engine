@@ -1885,8 +1885,11 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
         }
-        if ((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) ||
-            (pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta))) {
+        auto totalOffset = pattern->GetTotalOffset();
+        if (((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) &&
+                !GreatNotEqual(totalOffset, pattern->finalPosition_)) ||
+            ((pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta)) &&
+                !LessNotEqual(totalOffset, pattern->finalPosition_))) {
             delta = 0;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {
