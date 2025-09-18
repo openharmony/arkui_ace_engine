@@ -1354,7 +1354,8 @@ void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
         // keep offset and startIndex if startIndex is in the last line
         newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
         if (newIndex > info_.startIndex_) {
-            info_.currentOffset_ += lineHeight * ((newIndex - info_.startIndex_) / static_cast<int32_t>(crossCount_));
+            estimatedLines = (newIndex - info_.startIndex_) / static_cast<int32_t>(crossCount_);
+            info_.currentOffset_ += lineHeight * estimatedLines;
             info_.startIndex_ = newIndex;
         }
     }
