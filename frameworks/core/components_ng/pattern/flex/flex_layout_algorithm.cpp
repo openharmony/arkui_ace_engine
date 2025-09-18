@@ -1276,7 +1276,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float betweenSpace = 0.0f;
     CalculateSpace(remainSpace, frontSpace, betweenSpace);
     PlaceChildren(layoutWrapper, frontSpace, betweenSpace, paddingOffset);
-
+    HandleContentOverflow(layoutWrapper);
     for (auto&& child : children) {
         if (!child->IsOutOfLayout() && child->IsActive()) {
             child->Layout();

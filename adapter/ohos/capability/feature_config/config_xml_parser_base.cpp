@@ -22,24 +22,18 @@
 
 namespace OHOS::Ace {
 
-enum ParseXmlNodeIndex : uint32_t {
-    PARSE_XML_UNDEFINED = 0,
-    PARSE_XML_PERFORMANCE_OPT_CONFIG,
-    PARSE_XML_BUNDLE_NAME,
-    PARSE_XML_FEATURE,
-    PARSE_XML_MAX_SIZE,
-};
-
 namespace {
 static const std::array<std::string, PARSE_XML_MAX_SIZE> XML_NODE_NAME_ARRAY = {
     "undefine",             // PARSE_XML_UNDEFINED
     "PerformanceOptConfig", // PARSE_XML_PERFORMANCE_OPT_CONFIG
     "bundleName",           // PARSE_XML_BUNDLE_NAME
     "feature",              // PARSE_XML_FEATURE
+    "UICorrectionAppList"   // PARSE_XML_UI_CORRECTION
 };
 
 static const std::array<std::string, 1> SYS_PATH = { "/etc" };
 static constexpr char CONFIG_PATH[] = "/arkui/arkui_async_build_config.xml";
+static constexpr char UI_CORRECTION_CONFIG_PATH[] = "arkui/arkui_layout_config.xml";
 } // namespace
 
 ConfigXMLParserBase::~ConfigXMLParserBase()
@@ -72,6 +66,24 @@ ParseErrCode ConfigXMLParserBase::LoadPerformanceConfigXML()
     return PARSE_EXEC_SUCCESS;
 }
 
+ParseErrCode ConfigXMLParserBase::LoadUICorrectionConfigXML()
+{
+    for (const std::string& configRootPath : SYS_PATH) {
+        std::string uiCorrectionConfigPath = configRootPath + UI_CORRECTION_CONFIG_PATH;
+        xmlSysDocument_ = xmlReadFile(uiCorrectionConfigPath.c_str(), nullptr, 0);
+        if (xmlSysDocument_ != nullptr) {
+            LOGD("ConfigXMLParserBase success to get sys UI correction config: %{public}s",
+                uiCorrectionConfigPath.c_str());
+            break;
+        }
+    }
+    if (!xmlSysDocument_) {
+        LOGE("ConfigXMLParserBase read system UI correction config file failed");
+        return PARSE_SYS_FILE_LOAD_FAIL;
+    }
+    return PARSE_EXEC_SUCCESS;
+}
+
 ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName)
 {
     if (!xmlSysDocument_) {
@@ -91,7 +103,27 @@ ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const 
     return ret;
 }
 
-ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName)
+ParseErrCode ConfigXMLParserBase::ParseUICorrectionConfigXMLWithBundleName(const std::string& bundleName)
+{
+    if (!xmlSysDocument_) {
+        LOGE("ConfigXMLParserBase xmlSysDocument is empty, LoadUICorrectionConfiguration first");
+        return PARSE_SYS_FILE_LOAD_FAIL;
+    }
+    xmlNode* root = xmlDocGetRootElement(xmlSysDocument_);
+    if (root == nullptr) {
+        LOGE("ConfigXMLParserBase xmlDocGetRootElement failed");
+        return PARSE_GET_ROOT_FAIL;
+    }
+
+    auto ret = ParseInternalWithBundleName(*root, bundleName, PARSE_XML_UI_CORRECTION);
+    if (ret != PARSE_EXEC_SUCCESS) {
+        LOGE("ConfigXMLParserBase ParseInternalWithBundleName failed when parsing UI correction parameters");
+    }
+    return ret;
+}
+
+ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName,
+    ParseXmlNodeIndex xmlNodeIndex)
 {
     // skip root node
     xmlNode* currNode = node.children;
@@ -102,7 +134,7 @@ ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, con
     // find first PerformanceOptConfig node
     auto ret = PARSE_EXEC_SUCCESS;
     for (; currNode; currNode = currNode->next) {
-        ret = ParseXmlNodeNameWithIndex(*currNode, PARSE_XML_PERFORMANCE_OPT_CONFIG);
+        ret = ParseXmlNodeNameWithIndex(*currNode, xmlNodeIndex);
         if (ret == PARSE_EXEC_SUCCESS) {
             break;
         }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
 #include "core/components_ng/base/frame_node.h"
 
 #include "core/components_ng/base/node_render_status_monitor.h"
@@ -29,6 +30,7 @@
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 
+#include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -40,6 +42,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
@@ -59,6 +62,8 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -4838,6 +4843,17 @@ bool FrameNode::EnsureDelayedMeasureBeingOnlyOnce()
     return false;
 }
 
+bool FrameNode::IsVerticalScrollable() const
+{
+    CHECK_NULL_RETURN(pattern_, false);
+    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern_);
+    if (scrollablePattern && scrollablePattern->GetAxis() == Axis::VERTICAL) {
+        return true;
+    }
+    auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern_);
+    return (swiperPattern && swiperPattern->GetDirection() == Axis::VERTICAL);
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -4906,6 +4922,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         return;
     }
 
+    auto parent = GetAncestorNodeOfFrame(true);
+    isAncestorScrollable_ = (parent ? parent->IsAncestorScrollable() : false) || IsVerticalScrollable();
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
     geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());

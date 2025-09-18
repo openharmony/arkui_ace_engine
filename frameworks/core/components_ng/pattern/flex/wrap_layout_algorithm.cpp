@@ -252,6 +252,7 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         child->Layout();
     }
+    HandleContentOverflow(layoutWrapper);
     contentList_.clear();
 }
 

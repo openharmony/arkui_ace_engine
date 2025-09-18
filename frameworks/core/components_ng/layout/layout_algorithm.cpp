@@ -16,9 +16,11 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 
 #include "ui/view/layout/layout_algorithm.h"
-
+#include "base/utils/feature_param.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -109,4 +111,49 @@ void LayoutAlgorithm::SetWidthPercentSensitive(LayoutWrapper *layoutWrapper, boo
     layoutAlgorithmWrapper->SetPercentWidth(value);
 }
 
+void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
+{
+    if (!FeatureParam::IsPageOverflowEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    std::optional<RectF> totalChildFrameRect;
+    bool overflowDisabled = false;
+    int32_t childCount = hostNode->GetTotalChildCount();
+    for (int32_t i = 0; i < childCount; i++) {
+        auto child = AceType::DynamicCast<FrameNode>(hostNode->GetChildByIndex(i));
+        CHECK_NULL_CONTINUE(child);
+        if (child->IsOutOfLayout() || !child->IsActive()) {
+            continue;
+        }
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
+        bool hasSafeAreaProp = childLayoutProperty->IsIgnoreOptsValid() || child->SelfExpansive();
+        overflowDisabled |= hasSafeAreaProp;
+        if (overflowDisabled) {
+            break;
+        }
+        auto geometryNode = child->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geometryNode);
+        if (totalChildFrameRect.has_value()) {
+            totalChildFrameRect->CombineRectTInner(geometryNode->GetMarginFrameRect());
+        } else {
+            totalChildFrameRect = geometryNode->GetMarginFrameRect();
+        }
+    }
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    const auto &vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
+    CHECK_NULL_VOID(vOverflowHandler);
+    vOverflowHandler->SetOverflowDiabledFlag(overflowDisabled || hostNode->IsAncestorScrollable());
+    vOverflowHandler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
+    vOverflowHandler->CreateContentRect();
+    vOverflowHandler->HandleContentOverflow();
+}
 } // namespace OHOS::Ace::NG

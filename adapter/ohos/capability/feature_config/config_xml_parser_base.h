@@ -22,6 +22,15 @@
 #include <libxml/tree.h>
 
 namespace OHOS::Ace {
+enum ParseXmlNodeIndex : uint32_t {
+    PARSE_XML_UNDEFINED = 0,
+    PARSE_XML_PERFORMANCE_OPT_CONFIG,
+    PARSE_XML_BUNDLE_NAME,
+    PARSE_XML_FEATURE,
+    PARSE_XML_UI_CORRECTION,
+    PARSE_XML_MAX_SIZE,
+};
+
 enum ParseErrCode {
     PARSE_ERROR = -1,
     PARSE_EXEC_SUCCESS = 0,
@@ -51,9 +60,12 @@ protected:
 private:
     void Destroy();
     ParseErrCode LoadPerformanceConfigXML();
+    ParseErrCode LoadUICorrectionConfigXML();
     ParseErrCode ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName);
+    ParseErrCode ParseUICorrectionConfigXMLWithBundleName(const std::string& bundleName);
     ParseErrCode ParseXmlNodeNameWithIndex(xmlNode& node, uint32_t nodeNameIndex);
-    ParseErrCode ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName);
+    ParseErrCode ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName,
+        ParseXmlNodeIndex xmlNodeIndex = PARSE_XML_PERFORMANCE_OPT_CONFIG);
     void ParseFeatures(xmlNode& node);
 
     xmlDoc* xmlSysDocument_ = nullptr;

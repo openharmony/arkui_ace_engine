@@ -860,6 +860,10 @@ public:
 
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+    RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithmOnly()
+    {
+        return layoutAlgorithm_;
+    }
 
     bool EnsureDelayedMeasureBeingOnlyOnce();
 
@@ -1462,6 +1466,11 @@ public:
     }
 
     bool HasMultipleChild();
+    bool IsAncestorScrollable() const
+    {
+        return isAncestorScrollable_;
+    }
+    bool IsVerticalScrollable() const;
 
     void UpdateOcclusionCullingStatus(bool enable)
     {
@@ -1748,6 +1757,7 @@ private:
     bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
+    bool isAncestorScrollable_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

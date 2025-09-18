@@ -13,27 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_CORRECTION_PARSER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_CORRECTION_PARSER_H
 
-#include <string>
-
-#include "ui/base/macros.h"
+#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT FeatureParam {
+class UICorrectionParser : public ConfigXMLParserBase {
 public:
-    FeatureParam() = default;
-    ~FeatureParam() = default;
+    UICorrectionParser() = default;
+    ~UICorrectionParser() = default;
 
-    // SyncLoadParser
-    static bool IsSyncLoadEnabled();
-    static uint32_t GetSyncloadResponseDeadline();
-    // UINodeGcParamParser
-    static bool IsUINodeGcEnabled();
-    static bool IsPageOverflowEnabled();
-    static bool IsDialogCorrectionEnabled();
+    ParseErrCode ParseFeatureParam(xmlNode& node) override;
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_CORRECTION_PARSER_H

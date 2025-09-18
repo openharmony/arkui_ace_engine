@@ -13,34 +13,20 @@
  * limitations under the License.
  */
 
-#include "base/utils/feature_param.h"
+#include "adapter/ohos/capability/feature_config/features/ui_correction_parser.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "base/utils/string_utils.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
-
-bool FeatureParam::IsSyncLoadEnabled()
+ParseErrCode UICorrectionParser::ParseFeatureParam(xmlNode& node)
 {
-    return FeatureParamManager::GetInstance().IsSyncLoadEnabled();
+    auto& instance = FeatureParamManager::GetInstance();
+    auto pageOverflowEnabled = ExtractPropertyValue("pageOverflowEnabled", node) == "true";
+    auto dialogOverflowEnabled = ExtractPropertyValue("dialogOverflowEnabled", node) == "true";
+    instance.SetUiCorrectionEnableParam(pageOverflowEnabled, dialogOverflowEnabled);
+    return PARSE_EXEC_SUCCESS;
 }
 
-uint32_t FeatureParam::GetSyncloadResponseDeadline()
-{
-    return FeatureParamManager::GetInstance().GetSyncloadResponseDeadline();
-}
-
-bool FeatureParam::IsUINodeGcEnabled()
-{
-    return FeatureParamManager::GetInstance().IsUINodeGcEnabled();
-}
-
-bool FeatureParam::IsPageOverflowEnabled()
-{
-    return FeatureParamManager::GetInstance().IsPageOverflowEnabled();
-}
-
-bool FeatureParam::IsDialogCorrectionEnabled()
-{
-    return FeatureParamManager::GetInstance().IsDialogCorrectionEnabled();
-}
-} // OHOS::Ace
+} // namespace OHOS::Ace
