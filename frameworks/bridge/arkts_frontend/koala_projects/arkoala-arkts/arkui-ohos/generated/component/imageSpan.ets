@@ -215,15 +215,15 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
 export interface ImageLoadResult {
-    width: number;
-    height: number;
-    componentWidth: number;
-    componentHeight: number;
-    loadingStatus: number;
-    contentWidth: number;
-    contentHeight: number;
-    contentOffsetX: number;
-    contentOffsetY: number;
+    width: double;
+    height: double;
+    componentWidth: double;
+    componentHeight: double;
+    loadingStatus: double;
+    contentWidth: double;
+    contentHeight: double;
+    contentOffsetX: double;
+    contentOffsetY: double;
 }
 
 export class ArkImageSpanComponent extends ArkBaseSpanComponent implements ImageSpanAttribute {
@@ -321,35 +321,35 @@ export class ImageLoadResult_serializer {
     public static write(buffer: SerializerBase, value: ImageLoadResult): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
         const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        valueSerializer.writeFloat64(valueHolderForComponentWidth)
         const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        valueSerializer.writeFloat64(valueHolderForComponentHeight)
         const valueHolderForLoadingStatus  = value.loadingStatus
-        valueSerializer.writeNumber(valueHolderForLoadingStatus)
+        valueSerializer.writeFloat64(valueHolderForLoadingStatus)
         const valueHolderForContentWidth  = value.contentWidth
-        valueSerializer.writeNumber(valueHolderForContentWidth)
+        valueSerializer.writeFloat64(valueHolderForContentWidth)
         const valueHolderForContentHeight  = value.contentHeight
-        valueSerializer.writeNumber(valueHolderForContentHeight)
+        valueSerializer.writeFloat64(valueHolderForContentHeight)
         const valueHolderForContentOffsetX  = value.contentOffsetX
-        valueSerializer.writeNumber(valueHolderForContentOffsetX)
+        valueSerializer.writeFloat64(valueHolderForContentOffsetX)
         const valueHolderForContentOffsetY  = value.contentOffsetY
-        valueSerializer.writeNumber(valueHolderForContentOffsetY)
+        valueSerializer.writeFloat64(valueHolderForContentOffsetY)
     }
     public static read(buffer: DeserializerBase): ImageLoadResult {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const loadingStatusTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const contentOffsetYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
+        const componentWidthTmpResult : double = valueDeserializer.readFloat64()
+        const componentHeightTmpResult : double = valueDeserializer.readFloat64()
+        const loadingStatusTmpResult : double = valueDeserializer.readFloat64()
+        const contentWidthTmpResult : double = valueDeserializer.readFloat64()
+        const contentHeightTmpResult : double = valueDeserializer.readFloat64()
+        const contentOffsetXTmpResult : double = valueDeserializer.readFloat64()
+        const contentOffsetYTmpResult : double = valueDeserializer.readFloat64()
         let value : ImageLoadResult = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageLoadResult)
         return value
     }

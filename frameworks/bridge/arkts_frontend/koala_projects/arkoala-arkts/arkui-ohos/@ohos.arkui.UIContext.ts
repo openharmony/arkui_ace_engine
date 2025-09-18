@@ -80,7 +80,7 @@ export class MediaQuery {
 }
 
 export class MeasureUtils {
-    public measureText(options: MeasureOptions) : number {
+    public measureText(options: MeasureOptions) : double {
         throw Error("measureText not implemented in MeasureUtils!")
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {

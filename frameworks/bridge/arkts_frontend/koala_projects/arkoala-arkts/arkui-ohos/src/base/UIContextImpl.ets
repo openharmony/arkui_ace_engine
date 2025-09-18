@@ -113,18 +113,18 @@ export class MeasureUtilsImpl extends MeasureUtils {
         super()
         this.instanceId_ = instanceId;
     }
-    // public measureText(options: MeasureOptions) : number {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let width = GlobalScope_ohos_measure_utils.measureText(options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return width;
-    // }
-    // public measureTextSize(options: MeasureOptions) : SizeOptions {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
-    //     ArkUIAniModule._Common_Restore_InstanceId();
-    //     return sizeOptions;
-    // }
+    public measureText(options: MeasureOptions) : double {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let width = GlobalScope_ohos_measure_utils.measureText(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return width;
+    }
+    public measureTextSize(options: MeasureOptions) : SizeOptions {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return sizeOptions;
+    }
 }
 
 export class TextMenuControllerImpl extends TextMenuController {

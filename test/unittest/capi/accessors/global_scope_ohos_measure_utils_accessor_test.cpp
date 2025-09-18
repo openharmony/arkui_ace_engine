@@ -63,7 +63,7 @@ Ark_MeasureOptions GetOptions()
         .constraintWidth = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(TEST_DIM_14),
         .fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(TEST_DIM_15),
         .fontStyle = Converter::ArkUnion<Opt_Union_Number_FontStyle, Ark_FontStyle>(TEST_FONT_STYLE),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_String_FontWeight, Ark_FontWeight>(TEST_FONT_WEIGHT),
+        .fontWeight = Converter::ArkUnion<Opt_Union_I32_String_FontWeight, Ark_FontWeight>(TEST_FONT_WEIGHT),
         .fontFamily = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(TEST_FONT_FAMILY),
         .letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(TEST_DIM_16),
         .textAlign = Converter::ArkUnion<Opt_Union_Number_TextAlign, Ark_TextAlign>(ARK_TEST_ALIGN),

@@ -139,7 +139,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
 {
-    dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
+    dst.offset = ArkValue<Ark_Int32>(src.offset.value_or(0.0f));
     dst.value = ArkValue<Ark_String>(src.value.value_or(std::u16string()), ctx);
 }
 }

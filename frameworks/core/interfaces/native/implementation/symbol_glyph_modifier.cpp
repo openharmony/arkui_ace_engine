@@ -61,9 +61,9 @@ void AssignCast(std::optional<TextFontWeight>& dst, const Ark_FontWeight& src)
 }
 
 template<>
-void AssignCast(std::optional<TextFontWeight>& dst, const Ark_Number& src)
+void AssignCast(std::optional<TextFontWeight>& dst, const Ark_Int32& src)
 {
-    auto intVal = src.i32;
+    auto intVal = static_cast<int32_t>(src);
     if (intVal >= 0) {
         auto strVal = std::to_string(intVal);
         std::optional<Ace::FontWeight> fontWeight;
@@ -140,7 +140,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,7 +168,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     SymbolModelNG::SetFontColor(frameNode, fontColors);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,7 +196,7 @@ void SetRenderingStrategyImpl(Ark_NativePointer node,
     SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -206,7 +206,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     SymbolModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -231,7 +231,7 @@ bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect
 }
 void SetSymbolEffectImpl(Ark_NativePointer node,
                          const Opt_SymbolEffect* symbolEffect,
-                         const Opt_Union_Boolean_Number* triggerValue)
+                         const Opt_Union_Boolean_I32* triggerValue)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

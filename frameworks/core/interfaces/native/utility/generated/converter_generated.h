@@ -70,6 +70,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Boolean_I32& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Boolean_Number& src)
 {
     switch (src.selector) {
@@ -210,6 +225,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_FontWeight_I32_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_FontWeight_Number_String& src)
 {
     switch (src.selector) {
@@ -226,7 +257,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_I64_String& src)
+                   const Ark_Union_I32_FontStyle& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -241,7 +272,84 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_FontStyle& src)
+                   const Ark_Union_I32_FontWeight_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I32_String_FontWeight& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I32_TextAlign& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I32_TextCase& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I32_TextOverflow& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I64_String& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -273,67 +381,6 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Number_String& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_String_FontWeight& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_TextAlign& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_TextCase& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_TextOverflow& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -777,7 +824,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Color_Number_String_Resource& src)
+                   const Ark_Union_Color_I32_String_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2439,6 +2486,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_F64_LeadingMarginPlaceholder& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_IconOptions_SymbolGlyphModifier& src)
 {
     switch (src.selector) {
@@ -2628,21 +2690,6 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_LeadingMarginPlaceholder& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3363,6 +3410,7 @@ ASSIGN_OPT(Opt_ImageAnalyzerType)
 ASSIGN_OPT(Opt_ImageContent)
 ASSIGN_OPT(Opt_ImageFit)
 ASSIGN_OPT(Opt_ImageInterpolation)
+ASSIGN_OPT(Opt_ImageLoadResult)
 ASSIGN_OPT(Opt_ImageRenderMode)
 ASSIGN_OPT(Opt_ImageRepeat)
 ASSIGN_OPT(Opt_ImageRotateOrientation)
@@ -3393,6 +3441,7 @@ ASSIGN_OPT(Opt_LayoutSafeAreaType)
 ASSIGN_OPT(Opt_LayoutStyle)
 ASSIGN_OPT(Opt_LengthMetricsUnit)
 ASSIGN_OPT(Opt_LengthUnit)
+ASSIGN_OPT(Opt_LetterSpacingStyle)
 ASSIGN_OPT(Opt_LevelMode)
 ASSIGN_OPT(Opt_LevelOrder)
 ASSIGN_OPT(Opt_LifeCycle)
@@ -3400,6 +3449,7 @@ ASSIGN_OPT(Opt_LinearGradient)
 ASSIGN_OPT(Opt_LinearIndicatorController)
 ASSIGN_OPT(Opt_LineBreakStrategy)
 ASSIGN_OPT(Opt_LineCapStyle)
+ASSIGN_OPT(Opt_LineHeightStyle)
 ASSIGN_OPT(Opt_LineJoinStyle)
 ASSIGN_OPT(Opt_ListItemAlign)
 ASSIGN_OPT(Opt_ListItemGroupArea)
@@ -3426,6 +3476,7 @@ ASSIGN_OPT(Opt_ModifierKey)
 ASSIGN_OPT(Opt_MouseAction)
 ASSIGN_OPT(Opt_MouseButton)
 ASSIGN_OPT(Opt_MultiAppMode)
+ASSIGN_OPT(Opt_MutableStyledString)
 ASSIGN_OPT(Opt_NativeEmbedStatus)
 ASSIGN_OPT(Opt_NativeMediaPlayerConfig)
 ASSIGN_OPT(Opt_NativePointer)
@@ -3662,6 +3713,7 @@ ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_uiObserver_RouterPageState)
 ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
+ASSIGN_OPT(Opt_Union_Boolean_I32)
 ASSIGN_OPT(Opt_Union_Boolean_Number)
 ASSIGN_OPT(Opt_Union_CircleShape_EllipseShape_PathShape_RectShape)
 ASSIGN_OPT(Opt_Union_Color_Number_String)
@@ -3671,15 +3723,17 @@ ASSIGN_OPT(Opt_Union_Curve_ICurve)
 ASSIGN_OPT(Opt_Union_Curve_String_ICurve)
 ASSIGN_OPT(Opt_Union_F64_String)
 ASSIGN_OPT(Opt_Union_F64_String_PlaybackSpeed)
+ASSIGN_OPT(Opt_Union_FontWeight_I32_String)
 ASSIGN_OPT(Opt_Union_FontWeight_Number_String)
+ASSIGN_OPT(Opt_Union_I32_FontStyle)
+ASSIGN_OPT(Opt_Union_I32_FontWeight_String)
+ASSIGN_OPT(Opt_Union_I32_String_FontWeight)
+ASSIGN_OPT(Opt_Union_I32_TextAlign)
+ASSIGN_OPT(Opt_Union_I32_TextCase)
+ASSIGN_OPT(Opt_Union_I32_TextOverflow)
 ASSIGN_OPT(Opt_Union_I64_String)
-ASSIGN_OPT(Opt_Union_Number_FontStyle)
 ASSIGN_OPT(Opt_Union_Number_FontWeight_String)
 ASSIGN_OPT(Opt_Union_Number_String)
-ASSIGN_OPT(Opt_Union_Number_String_FontWeight)
-ASSIGN_OPT(Opt_Union_Number_TextAlign)
-ASSIGN_OPT(Opt_Union_Number_TextCase)
-ASSIGN_OPT(Opt_Union_Number_TextOverflow)
 ASSIGN_OPT(Opt_Union_PixelMap_String)
 ASSIGN_OPT(Opt_Union_ResponseType_RichEditorResponseType)
 ASSIGN_OPT(Opt_Union_RichEditorOptions_RichEditorStyledStringOptions)
@@ -3845,6 +3899,7 @@ ASSIGN_OPT(Opt_Callback_EnterKeyType_Void)
 ASSIGN_OPT(Opt_Callback_ErrorInformation_Void)
 ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
 ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
+ASSIGN_OPT(Opt_Callback_F64_F64_Void)
 ASSIGN_OPT(Opt_Callback_FocusAxisEvent_Void)
 ASSIGN_OPT(Opt_Callback_FormCallbackInfo_Void)
 ASSIGN_OPT(Opt_Callback_FullscreenInfo_Void)
@@ -3856,6 +3911,7 @@ ASSIGN_OPT(Opt_Callback_GestureJudgeResult_Void)
 ASSIGN_OPT(Opt_Callback_GestureRecognizer_Void)
 ASSIGN_OPT(Opt_Callback_HitTestMode_Void)
 ASSIGN_OPT(Opt_Callback_HoverEvent_Void)
+ASSIGN_OPT(Opt_Callback_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_InsertValue_Boolean)
 ASSIGN_OPT(Opt_Callback_InsertValue_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void)
@@ -4233,7 +4289,6 @@ ASSIGN_OPT(Opt_ImageAnalyzerConfig)
 ASSIGN_OPT(Opt_ImageBitmap)
 ASSIGN_OPT(Opt_ImageCompleteEvent)
 ASSIGN_OPT(Opt_ImageData)
-ASSIGN_OPT(Opt_ImageLoadResult)
 ASSIGN_OPT(Opt_ImageSourceSize)
 ASSIGN_OPT(Opt_InputCounterOptions)
 ASSIGN_OPT(Opt_InsertValue)
@@ -4249,11 +4304,9 @@ ASSIGN_OPT(Opt_LargestContentfulPaint)
 ASSIGN_OPT(Opt_LayoutConstraint)
 ASSIGN_OPT(Opt_LengthMetrics)
 ASSIGN_OPT(Opt_LengthMetricsCustom)
-ASSIGN_OPT(Opt_LetterSpacingStyle)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_LinearGradientOptions)
 ASSIGN_OPT(Opt_LinearIndicatorStartOptions)
-ASSIGN_OPT(Opt_LineHeightStyle)
 ASSIGN_OPT(Opt_LineOptions)
 ASSIGN_OPT(Opt_ListItemGroupOptions)
 ASSIGN_OPT(Opt_ListItemOptions)
@@ -4272,7 +4325,6 @@ ASSIGN_OPT(Opt_ModuleMetadata)
 ASSIGN_OPT(Opt_MotionBlurAnchor)
 ASSIGN_OPT(Opt_MotionBlurOptions)
 ASSIGN_OPT(Opt_MotionPathOptions)
-ASSIGN_OPT(Opt_MutableStyledString)
 ASSIGN_OPT(Opt_NativeEmbedVisibilityInfo)
 ASSIGN_OPT(Opt_NavContentInfo)
 ASSIGN_OPT(Opt_NavDestinationTransition)
@@ -4406,7 +4458,7 @@ ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_ButtonOptions_ResourceStr)
 ASSIGN_OPT(Opt_Union_Callback_EnterKeyType_Void_TextAreaSubmitCallback)
 ASSIGN_OPT(Opt_Union_Callback_String_Void_SearchSubmitCallback)
-ASSIGN_OPT(Opt_Union_Color_Number_String_Resource)
+ASSIGN_OPT(Opt_Union_Color_I32_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_ColoringStrategy)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_Number)
@@ -4708,6 +4760,7 @@ ASSIGN_OPT(Opt_Union_Dimension_SizeOptions)
 ASSIGN_OPT(Opt_Union_EdgeOutlineWidths_Dimension)
 ASSIGN_OPT(Opt_Union_EdgeWidths_Length_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths)
+ASSIGN_OPT(Opt_Union_F64_LeadingMarginPlaceholder)
 ASSIGN_OPT(Opt_Union_IconOptions_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_Length_Bindable)
 ASSIGN_OPT(Opt_Union_Length_BorderRadiuses)
@@ -4721,7 +4774,6 @@ ASSIGN_OPT(Opt_Union_LengthMetrics_Margin)
 ASSIGN_OPT(Opt_Union_LengthMetrics_Padding)
 ASSIGN_OPT(Opt_Union_Margin_Dimension)
 ASSIGN_OPT(Opt_Union_Margin_Length_LocalizedMargin)
-ASSIGN_OPT(Opt_Union_Number_LeadingMarginPlaceholder)
 ASSIGN_OPT(Opt_Union_OutlineRadiuses_Dimension)
 ASSIGN_OPT(Opt_Union_Padding_Dimension)
 ASSIGN_OPT(Opt_Union_Padding_Dimension_LocalizedPadding)

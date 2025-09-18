@@ -183,7 +183,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> indentValue = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        indentValue = Converter::OptConvertFromArkNumStrRes(value->value, DimensionUnit::FP);
+        indentValue = Converter::OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(value->value);
     }
     SearchModelStatic::SetTextIndent(frameNode, indentValue);
 }
@@ -355,8 +355,8 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
     auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](
         int32_t selectionStart, int32_t selectionEnd
     ) {
-        auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
-        auto arkSelectionEnd = Converter::ArkValue<Ark_Number>(selectionEnd);
+        auto arkSelectionStart = Converter::ArkValue<Ark_Int32>(selectionStart);
+        auto arkSelectionEnd = Converter::ArkValue<Ark_Int32>(selectionEnd);
         arkCallback.InvokeSync(arkSelectionStart, arkSelectionEnd);
     };
     SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
@@ -372,8 +372,8 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
         return;
     }
     auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
-        auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
-        auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
+        auto arkTotalOffsetX = Converter::ArkValue<Ark_Float64>(totalOffsetX);
+        auto arkTotalOffsetY = Converter::ArkValue<Ark_Float64>(totalOffsetY);
         arkCallback.InvokeSync(arkTotalOffsetX, arkTotalOffsetY);
     };
     SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
@@ -444,7 +444,7 @@ void SetCopyOptionImpl(Ark_NativePointer node,
     SearchModelStatic::SetCopyOption(frameNode, Converter::OptConvertPtr<CopyOptions>(value));
 }
 void SetMaxLengthImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -480,7 +480,7 @@ void SetSelectionMenuHiddenImpl(Ark_NativePointer node,
     SearchModelStatic::SetSelectionMenuHidden(frameNode, convValue);
 }
 void SetMinFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -493,7 +493,7 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     SearchModelStatic::SetAdaptMinFontSize(frameNode, optValue);
 }
 void SetMaxFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -506,7 +506,7 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     SearchModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -516,7 +516,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     SearchModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -537,7 +537,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_Resource* value)
+                          const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -550,7 +550,7 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
     SearchModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void SetLineHeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String_Resource* value)
+                       const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -589,7 +589,7 @@ void SetOnWillInsertImpl(Ark_NativePointer node,
     auto onWillInsert = [callback = CallbackHelper(*optValue)](const InsertValueInfo& value) -> bool {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
-            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertOffset = Converter::ArkValue<Ark_Int32>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
@@ -610,7 +610,7 @@ void SetOnDidInsertImpl(Ark_NativePointer node,
     auto onDidInsert = [arkCallback = CallbackHelper(*optValue)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
-            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertOffset = Converter::ArkValue<Ark_Int32>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         arkCallback.InvokeSync(insertValue);
@@ -630,7 +630,7 @@ void SetOnWillDeleteImpl(Ark_NativePointer node,
     auto onWillDelete = [callback = CallbackHelper(*optValue)](const DeleteValueInfo& value) -> bool {
         Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
-            .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
+            .deleteOffset = Converter::ArkValue<Ark_Int32>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
@@ -652,7 +652,7 @@ void SetOnDidDeleteImpl(Ark_NativePointer node,
     auto onDidDelete = [arkCallback = CallbackHelper(*optValue)](const DeleteValueInfo& value) {
         Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
-            .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
+            .deleteOffset = Converter::ArkValue<Ark_Int32>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };

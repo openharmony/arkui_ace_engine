@@ -217,8 +217,8 @@ namespace Converter {
             std::vector<ParamType> params_;
     };
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
-    template<typename T> std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src,
-        DimensionUnit defaultUnit = DimensionUnit::FP);
+    template<typename T, typename NumberType = Ark_Int32> std::optional<Dimension> OptConvertFromArkNumStrRes(
+        const T& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
     std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src,
@@ -312,6 +312,18 @@ namespace Converter {
     inline int Convert(const Ark_Number& src)
     {
         return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
+    }
+
+    template<>
+    inline unsigned int Convert(const Ark_Int32& src)
+    {
+        return static_cast<unsigned int>(src);
+    }
+
+    template<>
+    inline float Convert(const Ark_Int32& src)
+    {
+        return static_cast<float>(src);
     }
 
     template<>
@@ -522,10 +534,12 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
+    template<> Color Convert(const Ark_Int32& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> Dimension Convert(const Ark_Number& src);
+    template<> Dimension Convert(const Ark_Int32& src);
     template<> Dimension Convert(const Ark_String& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
@@ -540,7 +554,7 @@ namespace Converter {
     template<> FontFamilies Convert(const Ark_String& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> FontWeightInt Convert(const Ark_FontWeight& src);
-    template<> FontWeightInt Convert(const Ark_Number& src);
+    template<> FontWeightInt Convert(const Ark_Int32& src);
     template<> FontWeightInt Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
@@ -629,6 +643,7 @@ namespace Converter {
     template<> double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
     template<> float Convert(const Ark_Float64& src);
+    template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);

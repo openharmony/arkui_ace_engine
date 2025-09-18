@@ -67,7 +67,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _onContentScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onContentScroll_0_0value?: OnContentScrollCallback | undefined
     _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: number | undefined
+    _maxLength_0_0value?: int32 | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -75,7 +75,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -97,7 +97,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectedBackgroundColor_0_0value?: ResourceColor | undefined
     _caretPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _caretPosition_0_0value?: number | undefined
+    _caretPosition_0_0value?: int32 | undefined
     _enableKeyboardOnFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableKeyboardOnFocus_0_0value?: boolean | undefined
     _passwordIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -115,7 +115,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _barState_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barState_0_0value?: BarState | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: number | undefined
+    _maxLines_0_0value?: int32 | undefined
     _wordBreak_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _wordBreak_0_0value?: WordBreak | undefined
     _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -125,13 +125,13 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _selectAll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectAll_0_0value?: boolean | undefined
     _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontSize_0_0value?: number | string | Resource | undefined
+    _minFontSize_0_0value?: double | string | Resource | undefined
     _maxFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontSize_0_0value?: number | string | Resource | undefined
+    _maxFontSize_0_0value?: double | string | Resource | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
     _heightAdaptivePolicy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     _enableAutoFill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -139,9 +139,9 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _decoration_0_0value?: TextDecorationOptions | undefined
     _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: number | string | Resource | undefined
+    _letterSpacing_0_0value?: double | string | Resource | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeight_0_0value?: number | string | Resource | undefined
+    _lineHeight_0_0value?: double | string | Resource | undefined
     _passwordRules_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _passwordRules_0_0value?: string | undefined
     _fontFeature_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -425,7 +425,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._maxLength_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLengthAttribute((this._maxLength_0_0value as number | undefined));
+                    peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
                     this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -435,7 +435,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLengthAttribute((undefined as number | undefined));
+                    peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -497,7 +497,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -507,7 +507,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -695,7 +695,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._caretPosition_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCaretPositionAttribute((this._caretPosition_0_0value as number | undefined));
+                    peer.setCaretPositionAttribute((this._caretPosition_0_0value as int32 | undefined));
                     this._caretPosition_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -705,7 +705,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._caretPosition_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCaretPositionAttribute((undefined as number | undefined));
+                    peer.setCaretPositionAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -857,7 +857,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -867,7 +867,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -947,7 +947,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._minFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as double | string | Resource | undefined));
                     this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -957,7 +957,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMinFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -965,7 +965,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._maxFontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as double | string | Resource | undefined));
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -975,7 +975,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._maxFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setMaxFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -983,7 +983,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -993,7 +993,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1001,7 +1001,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1011,7 +1011,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1073,7 +1073,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._letterSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | Resource | undefined));
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1083,7 +1083,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLetterSpacingAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1091,7 +1091,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._lineHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineHeightAttribute((this._lineHeight_0_0value as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as double | string | Resource | undefined));
                     this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1101,7 +1101,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineHeightAttribute((undefined as number | string | Resource | undefined));
+                    peer.setLineHeightAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -1646,7 +1646,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.maxLength((undefined as number | undefined));
+                    this.maxLength((undefined as int32 | undefined));
                 }
             }
         }
@@ -1698,7 +1698,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -1841,7 +1841,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.caretPosition((undefined as number | undefined));
+                    this.caretPosition((undefined as int32 | undefined));
                 }
             }
         }
@@ -1958,7 +1958,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as number | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -2023,7 +2023,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.minFontSize((undefined as number | string | Resource | undefined));
+                    this.minFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -2036,7 +2036,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.maxFontSize((undefined as number | string | Resource | undefined));
+                    this.maxFontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -2049,7 +2049,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -2062,7 +2062,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -2114,7 +2114,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.letterSpacing((undefined as number | string | Resource | undefined));
+                    this.letterSpacing((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -2127,7 +2127,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.lineHeight((undefined as number | string | Resource | undefined));
+                    this.lineHeight((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -2535,7 +2535,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2579,7 +2579,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2700,7 +2700,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    caretPosition(value: number | undefined): this {
+    caretPosition(value: int32 | undefined): this {
         if (((this._caretPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._caretPosition_0_0value) !== (value)))
         {
             this._caretPosition_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2799,7 +2799,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2854,7 +2854,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2865,7 +2865,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         if (((this._maxFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2876,7 +2876,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2887,7 +2887,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2931,7 +2931,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
@@ -2942,7 +2942,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE

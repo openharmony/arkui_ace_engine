@@ -50,7 +50,7 @@ import { FocusBoxStyle, FocusPriority, KeyProcessingMode } from "./../../compone
 import { CustomBuilder, CustomBuilderT } from "./../../component/builder"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
-import { StyledString, GestureStyle, GestureStyleInterface, MutableStyledString, StyleOptions, SpanStyle, ImageAttachment, CustomSpan, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, LetterSpacingStyle, LineHeightStyle, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
+import { StyledString, GestureStyle, GestureStyleInterface, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
 import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
 import { default as ConfigurationConstant } from "@ohos.app.ability.ConfigurationConstant"
@@ -81,6 +81,7 @@ import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as colorSpaceManager } from "@ohos.graphics.colorSpaceManager"
 import { default as rpc } from "@ohos.rpc"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAIOptions, ImageAnalyzerConfig } from "./../../component/imageCommon"
+import { ImageLoadResult } from "./../../component/imageSpan"
 import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos.promptAction"
 import { IndexerAlign, AlphabetIndexerOptions } from "./../../component/alphabetIndexer"
 import { IndicatorComponentController } from "./../../component/indicatorcomponent"
@@ -158,7 +159,6 @@ import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOpt
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
-import { ImageLoadResult } from "./../../component/imageSpan"
 import { default as intl } from "@ohos.intl"
 import { LineOptions, ShapePoint } from "./../../component/line"
 import { MarqueeOptions } from "./../../component/marquee"
@@ -5281,6 +5281,9 @@ export class TypeChecker {
     static isArray_ColorStop(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_StyleOptions(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_NavPathInfo(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5297,9 +5300,6 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_RichEditorSpan(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_StyleOptions(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_SpanStyle(value: Object | string | number | undefined): boolean {

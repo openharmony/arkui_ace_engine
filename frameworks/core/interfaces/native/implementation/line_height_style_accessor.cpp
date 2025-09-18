@@ -39,12 +39,12 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
+Ark_Float64 GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
-    Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
+    Ark_Float64 ret = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->span, ret);
-    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToVp());
+    return Converter::ArkValue<Ark_Float64>(peer->span->GetLineHeight().ConvertToVp());
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()

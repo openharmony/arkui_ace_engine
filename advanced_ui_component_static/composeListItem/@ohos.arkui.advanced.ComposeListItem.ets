@@ -108,7 +108,7 @@ export class OperateCheck {
   public accessibilityLevel?: string;
 }
 
-const TEXT_MAX_LINE: number = 1;
+const TEXT_MAX_LINE: int = 1;
 const ITEM_BORDER_SHOWN: number = 2;
 const TEXT_COLUMN_SPACE: number = 4;
 const TEXT_SAFE_MARGIN: number = 8;
@@ -729,7 +729,7 @@ export struct OperateItemStruct {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
       .draggable(false)
       .flexShrink(1)
   }
@@ -986,7 +986,7 @@ export struct OperateItemStruct {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
             .focusable(true)
             .draggable(false)
             .constraintSize({

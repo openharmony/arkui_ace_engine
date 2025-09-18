@@ -160,7 +160,7 @@ export { LengthMetrics } from "arkui.Graphics"
 export { ColorMetrics } from "arkui.Graphics"
 export interface Font {
     size?: Length;
-    weight?: FontWeight | number | string;
+    weight?: FontWeight | int32 | string;
     family?: string | Resource;
     style?: FontStyle;
 }
@@ -2237,10 +2237,10 @@ export class Font_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForWeightTmpValueForIdx0  = valueHolderForWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx0.valueOf())
-            } else if (valueHolderForWeightTmpValue instanceof number) {
+            } else if (valueHolderForWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWeightTmpValueForIdx1)
+                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx1)
             } else if (valueHolderForWeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForWeightTmpValueForIdx2  = valueHolderForWeightTmpValue as string
@@ -2294,22 +2294,22 @@ export class Font_serializer {
         }
         const sizeTmpResult : Length | undefined = sizeTmpBuf
         const weightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let weightTmpBuf : FontWeight | number | string | undefined = undefined
+        let weightTmpBuf : FontWeight | int32 | string | undefined = undefined
         if ((weightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const weightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let weightTmpBuf_ : FontWeight | number | string | undefined
+            let weightTmpBuf_ : FontWeight | int32 | string | undefined
             if (weightTmpBuf_UnionSelector == (0).toChar()) {
                 weightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (weightTmpBuf_UnionSelector == (1).toChar()) {
-                weightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                weightTmpBuf_ = valueDeserializer.readInt32()
             } else if (weightTmpBuf_UnionSelector == (2).toChar()) {
                 weightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for weightTmpBuf_ has to be chosen through deserialisation.")
             }
-            weightTmpBuf = (weightTmpBuf_ as FontWeight | number | string)
+            weightTmpBuf = (weightTmpBuf_ as FontWeight | int32 | string)
         }
-        const weightTmpResult : FontWeight | number | string | undefined = weightTmpBuf
+        const weightTmpResult : FontWeight | int32 | string | undefined = weightTmpBuf
         const familyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let familyTmpBuf : string | Resource | undefined = undefined
         if ((familyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

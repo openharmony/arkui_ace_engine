@@ -73,7 +73,7 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._HyperlinkInterface_setHyperlinkOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorAttribute(value: Color | number | string | Resource | undefined): void {
+    setColorAttribute(value: Color | int32 | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -82,10 +82,10 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -106,7 +106,7 @@ export interface HyperlinkAttribute extends CommonMethod {
     setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
         throw new Error("Unimplemented method setHyperlinkOptions")
     }
-    color(value: Color | number | string | Resource | undefined): this {
+    color(value: Color | int32 | string | Resource | undefined): this {
         throw new Error("Unimplemented method color")
     }
     attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -114,12 +114,12 @@ export interface HyperlinkAttribute extends CommonMethod {
     }
 }
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
-    color_value?: Color | number | string | Resource | undefined
+    color_value?: Color | int32 | string | Resource | undefined
     attributeModifier_value?: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined
     setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
         return this
     }
-    color(value: Color | number | string | Resource | undefined): this {
+    color(value: Color | int32 | string | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -143,9 +143,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         }
         return this
     }
-    public color(value: Color | number | string | Resource | undefined): this {
+    public color(value: Color | int32 | string | Resource | undefined): this {
         if (this.checkPriority("color")) {
-            const value_casted = value as (Color | number | string | Resource | undefined)
+            const value_casted = value as (Color | int32 | string | Resource | undefined)
             this.getPeer()?.setColorAttribute(value_casted)
             return this
         }

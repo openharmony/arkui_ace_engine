@@ -3171,7 +3171,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkInterfaceModifier
     namespace HyperlinkAttributeModifier {
     void SetColorImpl(Ark_NativePointer node,
-                      const Opt_Union_Color_Number_String_Resource* value)
+                      const Opt_Union_Color_I32_String_Resource* value)
     {
     }
     } // HyperlinkAttributeModifier
@@ -3722,7 +3722,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -5098,7 +5098,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
     }
     void SetTextAlignImpl(Ark_NativePointer node,
@@ -5114,19 +5114,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetDecorationImpl(Ark_NativePointer node,
@@ -5134,11 +5134,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetTypeImpl(Ark_NativePointer node,
@@ -5740,7 +5740,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetFontStyleImpl(Ark_NativePointer node,
@@ -5748,7 +5748,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -5760,7 +5760,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Union_F64_String* value)
     {
     }
     void SetTextCaseImpl(Ark_NativePointer node,
@@ -6012,7 +6012,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SymbolGlyphInterfaceModifier
     namespace SymbolGlyphAttributeModifier {
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetFontColorImpl(Ark_NativePointer node,
@@ -6020,7 +6020,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetEffectStrategyImpl(Ark_NativePointer node,
@@ -6032,16 +6032,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetSymbolEffectImpl(Ark_NativePointer node,
                              const Opt_SymbolEffect* symbolEffect,
-                             const Opt_Union_Boolean_Number* triggerValue)
+                             const Opt_Union_Boolean_I32* triggerValue)
     {
     }
     } // SymbolGlyphAttributeModifier
@@ -6060,7 +6060,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SymbolSpanInterfaceModifier
     namespace SymbolSpanAttributeModifier {
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetFontColorImpl(Ark_NativePointer node,
@@ -6068,7 +6068,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetEffectStrategyImpl(Ark_NativePointer node,
@@ -6256,23 +6256,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String_Resource* value)
+                         const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetFontStyleImpl(Ark_NativePointer node,
@@ -6288,7 +6288,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetTextOverflowImpl(Ark_NativePointer node,
@@ -6300,7 +6300,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetDecorationImpl(Ark_NativePointer node,
@@ -6308,7 +6308,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Union_F64_String* value)
     {
     }
     void SetTextCaseImpl(Ark_NativePointer node,
@@ -6316,7 +6316,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBaselineOffsetImpl(Ark_NativePointer node,
-                               const Opt_Union_Number_String* value)
+                               const Opt_Union_F64_String* value)
     {
     }
     void SetCopyOptionImpl(Ark_NativePointer node,
@@ -6372,7 +6372,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
-                                      const Opt_Callback_Number_Number_Void* value)
+                                      const Opt_Callback_I32_I32_Void* value)
     {
     }
     void SetFontFeatureImpl(Ark_NativePointer node,
@@ -6413,13 +6413,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_String* weight,
                            const Opt_FontSettingOptions* options)
     {
     }
     void SetSelectionImpl(Ark_NativePointer node,
-                          const Opt_Number* selectionStart,
-                          const Opt_Number* selectionEnd)
+                          const Opt_Int32* selectionStart,
+                          const Opt_Int32* selectionEnd)
     {
     }
     void SetBindSelectionMenuImpl(Ark_NativePointer node,
@@ -6477,7 +6477,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6509,11 +6509,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
-                                      const Opt_Callback_Number_Number_Void* value)
+                                      const Opt_Callback_I32_I32_Void* value)
     {
     }
     void SetOnContentScrollImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_Number_Void* value)
+                                const Opt_Callback_F64_F64_Void* value)
     {
     }
     void SetOnEditChangeImpl(Ark_NativePointer node,
@@ -6541,7 +6541,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
     }
     void SetStyleImpl(Ark_NativePointer node,
@@ -6557,19 +6557,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
@@ -6577,7 +6577,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetWordBreakImpl(Ark_NativePointer node,
@@ -6593,7 +6593,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetLineSpacingImpl(Ark_NativePointer node,
@@ -6601,7 +6601,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetTypeImpl(Ark_NativePointer node,
@@ -6723,7 +6723,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_String* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6810,7 +6810,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLengthImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Int32* value)
     {
     }
     void SetFontColorImpl(Ark_NativePointer node,
@@ -6870,7 +6870,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCaretPositionImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Int32* value)
     {
     }
     void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -6906,7 +6906,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetWordBreakImpl(Ark_NativePointer node,
@@ -6926,19 +6926,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMinFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMaxFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Union_Number_String_Resource* value)
+                            const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetMinFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetMaxFontScaleImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_Resource* value)
+                             const Opt_Union_F64_Resource* value)
     {
     }
     void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
@@ -6954,11 +6954,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLetterSpacingImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String_Resource* value)
+                              const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetLineHeightImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String_Resource* value)
+                           const Opt_Union_F64_String_Resource* value)
     {
     }
     void SetPasswordRulesImpl(Ark_NativePointer node,
@@ -10886,7 +10886,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
+    Ark_Float64 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
     {
         return {};
     }
@@ -13253,7 +13253,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_fontAccessor
     namespace GlobalScope_ohos_measure_utilsAccessor {
-    Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
+    Ark_Float64 MeasureTextImpl(const Ark_MeasureOptions* options)
     {
         return {};
     }
@@ -13791,13 +13791,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
+    Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
     {
         return {};
     }
     Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
-                                                              const Ark_Number* x,
-                                                              const Ark_Number* y)
+                                                              Ark_Float64 x,
+                                                              Ark_Float64 y)
     {
         return {};
     }
@@ -13866,7 +13866,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
+    Ark_Float64 GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
     {
         return {};
     }
@@ -13965,7 +13965,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
+    Ark_Float64 GetLineHeightImpl(Ark_LineHeightStyle peer)
     {
         return {};
     }
@@ -14329,19 +14329,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void ReplaceStringImpl(Ark_MutableStyledString peer,
-                           const Ark_Number* start,
-                           const Ark_Number* length,
+                           Ark_Int32 start,
+                           Ark_Int32 length,
                            const Ark_String* other)
     {
     }
     void InsertStringImpl(Ark_MutableStyledString peer,
-                          const Ark_Number* start,
+                          Ark_Int32 start,
                           const Ark_String* other)
     {
     }
     void RemoveStringImpl(Ark_MutableStyledString peer,
-                          const Ark_Number* start,
-                          const Ark_Number* length)
+                          Ark_Int32 start,
+                          Ark_Int32 length)
     {
     }
     void ReplaceStyleImpl(Ark_MutableStyledString peer,
@@ -14353,27 +14353,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void RemoveStyleImpl(Ark_MutableStyledString peer,
-                         const Ark_Number* start,
-                         const Ark_Number* length,
+                         Ark_Int32 start,
+                         Ark_Int32 length,
                          Ark_StyledStringKey styledKey)
     {
     }
     void RemoveStylesImpl(Ark_MutableStyledString peer,
-                          const Ark_Number* start,
-                          const Ark_Number* length)
+                          Ark_Int32 start,
+                          Ark_Int32 length)
     {
     }
     void ClearStylesImpl(Ark_MutableStyledString peer)
     {
     }
     void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
-                                 const Ark_Number* start,
-                                 const Ark_Number* length,
+                                 Ark_Int32 start,
+                                 Ark_Int32 length,
                                  Ark_StyledString other)
     {
     }
     void InsertStyledStringImpl(Ark_MutableStyledString peer,
-                                const Ark_Number* start,
+                                Ark_Int32 start,
                                 Ark_StyledString other)
     {
     }
@@ -15086,11 +15086,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
+    Opt_Float64 GetTextIndentImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
-    Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
+    Opt_Int32 GetMaxLinesImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -15102,11 +15102,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+    Opt_Union_F64_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
-    Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
+    Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -16115,15 +16115,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void CaretPositionImpl(Ark_SearchController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
     }
     void StopEditingImpl(Ark_SearchController peer)
     {
     }
     void SetTextSelectionImpl(Ark_SearchController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
     }
@@ -16230,8 +16230,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
-                                  const Ark_Number* start,
-                                  const Ark_Number* length,
+                                  Ark_Int32 start,
+                                  Ark_Int32 length,
                                   const Opt_StyledStringKey* styledKey)
     {
         return {};
@@ -16242,8 +16242,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
-                                         const Ark_Number* start,
-                                         const Opt_Number* length)
+                                         Ark_Int32 start,
+                                         const Opt_Int32* length)
     {
         return {};
     }
@@ -16279,7 +16279,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
-    Ark_Number GetLengthImpl(Ark_StyledString peer)
+    Ark_Int32 GetLengthImpl(Ark_StyledString peer)
     {
         return {};
     }
@@ -16728,12 +16728,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void CaretPositionImpl(Ark_TextAreaController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
     }
     void SetTextSelectionImpl(Ark_TextAreaController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
     }
@@ -16818,13 +16818,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+    Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     {
         return {};
     }
-    Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
-                           const Ark_String* text,
-                           const Opt_TextContentControllerOptions* textOperationOptions)
+    Ark_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
+                          const Ark_String* text,
+                          const Opt_TextContentControllerOptions* textOperationOptions)
     {
         return {};
     }
@@ -17007,12 +17007,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void CaretPositionImpl(Ark_TextInputController peer,
-                           const Ark_Number* value)
+                           Ark_Int32 value)
     {
     }
     void SetTextSelectionImpl(Ark_TextInputController peer,
-                              const Ark_Number* selectionStart,
-                              const Ark_Number* selectionEnd,
+                              Ark_Int32 selectionStart,
+                              Ark_Int32 selectionEnd,
                               const Opt_SelectionOptions* options)
     {
     }
@@ -17148,11 +17148,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Opt_Number GetFontSizeImpl(Ark_TextStyle peer)
+    Opt_Float64 GetFontSizeImpl(Ark_TextStyle peer)
     {
         return {};
     }
-    Opt_Number GetFontWeightImpl(Ark_TextStyle peer)
+    Opt_Int32 GetFontWeightImpl(Ark_TextStyle peer)
     {
         return {};
     }

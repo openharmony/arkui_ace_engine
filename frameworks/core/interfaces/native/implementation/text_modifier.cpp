@@ -220,7 +220,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     TextModelStatic::SetTextColor(frameNode, color);
 }
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -233,7 +233,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
     TextModelStatic::SetFontSize(frameNode, fontSize);
 }
 void SetMinFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -246,7 +246,7 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     TextModelStatic::SetAdaptMinFontSize(frameNode, fontSize);
 }
 void SetMaxFontSizeImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -259,7 +259,7 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     TextModelStatic::SetAdaptMaxFontSize(frameNode, fontSize);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -270,7 +270,7 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     TextModelStatic::SetMinFontScale(frameNode, minFontScale);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Resource* value)
+                         const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -305,7 +305,7 @@ void SetTextAlignImpl(Ark_NativePointer node,
     TextModelStatic::SetTextAlign(frameNode, textAlign);
 }
 void SetLineHeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_String_Resource* value)
+                       const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -341,7 +341,7 @@ void SetFontFamilyImpl(Ark_NativePointer node,
     TextModelStatic::SetFontFamily(frameNode, families);
 }
 void SetMaxLinesImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -367,7 +367,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     TextModelStatic::SetTextDecorationStyle(frameNode, style);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+                          const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -384,7 +384,7 @@ void SetTextCaseImpl(Ark_NativePointer node,
     TextModelStatic::SetTextCase(frameNode, textCase);
 }
 void SetBaselineOffsetImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
+                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -430,7 +430,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Dimension> indent = std::nullopt;
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        indent = Converter::OptConvertFromArkNumStrRes(value->value, DimensionUnit::FP);
+        indent = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(value->value, DimensionUnit::FP);
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
@@ -511,7 +511,7 @@ void SetDataDetectorConfigImpl(Ark_NativePointer node,
     TextModelNG::SetTextDetectConfig(frameNode, *convValue);
 }
 void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Number_Number_Void* value)
+                                  const Opt_Callback_I32_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -521,7 +521,7 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t start, int32_t end) {
-        arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(start), Converter::ArkValue<Ark_Int32>(end));
     };
 
     TextModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
@@ -643,7 +643,7 @@ void SetFontImpl(Ark_NativePointer node,
     TextModelStatic::SetFont(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* weight,
+                       const Opt_Union_I32_FontWeight_String* weight,
                        const Opt_FontSettingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -661,8 +661,8 @@ void SetFontWeightImpl(Ark_NativePointer node,
     TextModelStatic::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
 }
 void SetSelectionImpl(Ark_NativePointer node,
-                      const Opt_Number* selectionStart,
-                      const Opt_Number* selectionEnd)
+                      const Opt_Int32* selectionStart,
+                      const Opt_Int32* selectionEnd)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

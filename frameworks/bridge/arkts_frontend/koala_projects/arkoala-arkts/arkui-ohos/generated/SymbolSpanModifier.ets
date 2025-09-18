@@ -38,11 +38,11 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
     applyDisabledAttribute(instance: SymbolSpanAttribute): void { }
     applySelectedAttribute(instance: SymbolSpanAttribute): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: number | string | Resource | undefined
+    _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: Array<ResourceColor> | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _effectStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -53,7 +53,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         {
             switch (this._fontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
                     this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -63,7 +63,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                 }
                 default: {
                     this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -89,7 +89,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -99,7 +99,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -151,7 +151,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as number | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -177,7 +177,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -208,7 +208,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
             }
         }
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -230,7 +230,7 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

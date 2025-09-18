@@ -41,11 +41,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
+Ark_Float64 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->span, {});
-    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetBaselineOffset().ConvertToVp());
+    auto value = Converter::ArkValue<Ark_Float64>(peer->span->GetBaselineOffset().ConvertToVp());
     return value;
 }
 } // BaselineOffsetStyleAccessor

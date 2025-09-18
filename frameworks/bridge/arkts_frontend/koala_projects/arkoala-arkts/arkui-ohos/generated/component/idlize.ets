@@ -1390,7 +1390,7 @@ export class GlobalScope_ohos_font {
     }
 }
 export class GlobalScope_ohos_measure_utils {
-    static measureText_serialize(options: MeasureOptions): number {
+    static measureText_serialize(options: MeasureOptions): double {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         MeasureOptions_serializer.write(thisSerializer, options)
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureText(thisSerializer.asBuffer(), thisSerializer.length())
@@ -1406,7 +1406,7 @@ export class GlobalScope_ohos_measure_utils {
         const returnResult : SizeOptions = SizeOptions_serializer.read(retvalDeserializer)
         return returnResult
     }
-    public static measureText(options: MeasureOptions): number {
+    public static measureText(options: MeasureOptions): double {
         const options_casted = options as (MeasureOptions)
         return GlobalScope_ohos_measure_utils.measureText_serialize(options_casted)
     }

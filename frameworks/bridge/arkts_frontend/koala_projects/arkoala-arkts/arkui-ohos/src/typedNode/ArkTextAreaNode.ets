@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
@@ -78,7 +79,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         this.getPeer().setFontWeightAttribute(value);
         this.markDirty();
         return this;
@@ -119,12 +120,12 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    onTextSelectionChange(value: ((first: number, last: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((first: int32, last: int32) => void) | undefined): this {
         this.getPeer().setOnTextSelectionChangeAttribute(value);
         this.markDirty();
         return this;
     }
-    onContentScroll(value: ((first: number, last: number) => void) | undefined): this {
+    onContentScroll(value: ((first: double, last: double) => void) | undefined): this {
         this.getPeer().setOnContentScrollAttribute(value);
         this.markDirty();
         return this;
@@ -159,7 +160,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         this.getPeer().setMaxLengthAttribute(value);
         this.markDirty();
         return this;
@@ -179,22 +180,22 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         this.getPeer().setMinFontSizeAttribute(value);
         this.markDirty();
         return this;
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         this.getPeer().setMaxFontSizeAttribute(value);
         this.markDirty();
         return this;
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         this.getPeer().setMinFontScaleAttribute(value);
         this.markDirty();
         return this;
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         this.getPeer().setMaxFontScaleAttribute(value);
         this.markDirty();
         return this;
@@ -204,7 +205,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         this.getPeer().setMaxLinesAttribute(value);
         this.markDirty();
         return this;
@@ -224,7 +225,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         this.getPeer().setLetterSpacingAttribute(value);
         this.markDirty();
         return this;
@@ -234,7 +235,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         this.getPeer().setLineHeightAttribute(value);
         this.markDirty();
         return this;
