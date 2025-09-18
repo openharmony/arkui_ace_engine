@@ -390,13 +390,6 @@ public:
         }
     }
 
-    void SetCurrentHeightToOverlay(float height)
-    {
-        auto overlayManager = GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->SetSheetHeight(height);
-    }
-
     void ChangeScrollHeight(float height);
 
     FocusPattern GetFocusPattern() const override
@@ -1107,6 +1100,15 @@ public:
     void UpdateBorderColor(const RefPtr<FrameNode>& sheetNodeWK);
     void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode);
     void HandleMultiDetentKeyboardAvoid();
+    void SetSheetHeightForTranslate(float height)
+    {
+        sheetHeightForTranslate_ = height;
+    }
+
+    float GetSheetHeightForTranslate() const
+    {
+        return sheetHeightForTranslate_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -1282,6 +1284,7 @@ private:
     WeakPtr<FrameNode> titleBuilderNode_;
     RefPtr<SheetObject> sheetObject_;
     WeakPtr<FrameNode> dragBarNode_;
+    float sheetHeightForTranslate_ { 0.0 };
 };
 } // namespace OHOS::Ace::NG
 
