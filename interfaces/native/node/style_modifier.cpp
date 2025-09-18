@@ -344,8 +344,6 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
 };
 
-constexpr float GRID_DEFAULT_SCROLL_BAR_WIDTH = 4.0f;
-constexpr uint32_t GRID_DEFAULT_SCROLL_BAR_COLOR = 0x66182431;
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -5913,6 +5911,7 @@ void SetDefaultScrollFriction(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_GRID) {
         auto fullImpl = GetFullImpl();
         fullImpl->getNodeModifiers()->getGridModifier()->resetFriction(node->uiNodeHandle);
+        fullImpl->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     }
 }
 
@@ -6063,8 +6062,8 @@ void SetDefaultScrollBar(ArkUI_NodeHandle node)
 {
     if (node->type == ARKUI_NODE_GRID) {
         auto fullImpl = GetFullImpl();
-        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBar(node->uiNodeHandle,
-            ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO);
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBar(node->uiNodeHandle);
+        fullImpl->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     }
 }
 
@@ -6127,8 +6126,8 @@ void SetDefaultScrollBarWidth(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_GRID) {
-        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarWidth(node->uiNodeHandle,
-            GRID_DEFAULT_SCROLL_BAR_WIDTH, GetDefaultUnit(node, UNIT_VP));
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBarWidth(node->uiNodeHandle);
+        fullImpl->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     }
 }
 
@@ -6153,7 +6152,7 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
             node->uiNodeHandle, width.c_str());
     } else if (node->type == ARKUI_NODE_GRID) {
         fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarWidth(node->uiNodeHandle, attrVal, unit);
-    } 
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6194,8 +6193,8 @@ void SetDefaultScrollBarColor(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_GRID) {
-        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColor(node->uiNodeHandle,
-            GRID_DEFAULT_SCROLL_BAR_COLOR);
+        fullImpl->getNodeModifiers()->getGridModifier()->resetGridScrollBarColor(node->uiNodeHandle);
+        fullImpl->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     }
 }
 
@@ -6218,7 +6217,7 @@ int32_t SetScrollScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
             node->uiNodeHandle, value.c_str());
     } else if (node->type == ARKUI_NODE_GRID) {
-        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColor(node->uiNodeHandle, color);
+        fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColorPtr(node->uiNodeHandle, color, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6286,6 +6285,13 @@ const ArkUI_AttributeItem* GetScrollEdgeEffect(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         auto valueSize =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getEdgeEffect(node->uiNodeHandle, &values);
+        for (int i = 0; i < valueSize; i++) {
+            g_numberValues[i].i32 = values[i];
+        }
+        g_attributeItem.size = valueSize;
+    } else if (node->type == ARKUI_NODE_GRID) {
+        auto valueSize =
+            GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollEdgeEffect(node->uiNodeHandle, &values);
         for (int i = 0; i < valueSize; i++) {
             g_numberValues[i].i32 = values[i];
         }
@@ -6420,6 +6426,7 @@ void SetDefaultScrollNestedScroll(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_GRID) {
         auto* fullImpl = GetFullImpl();
         fullImpl->getNodeModifiers()->getGridModifier()->resetNestedScroll(node->uiNodeHandle);
+        fullImpl->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     }
 }
 
