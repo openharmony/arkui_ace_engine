@@ -3340,4 +3340,35 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src)
 {
     dst = static_cast<int32_t>(reinterpret_cast<intptr_t>(src));
 }
+
+template<>
+void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src)
+{
+    Matrix4_Obj* matrixObj = reinterpret_cast<Matrix4_Obj*>(src);
+    if (!matrixObj) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = matrixObj->matrix4x4;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<OHOS::Rosen::VisualEffect*>(src);
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<OHOS::Rosen::Filter*>(src);
+}
 } // namespace OHOS::Ace::NG::Converter

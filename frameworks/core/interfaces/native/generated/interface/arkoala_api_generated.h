@@ -20251,7 +20251,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setRotate)(Ark_NativePointer node,
                       const Opt_RotateOptions* value);
     void (*setTransform)(Ark_NativePointer node,
-                         const Opt_Object* value);
+                         const Opt_matrix4_Matrix4Transit* value);
     void (*setOnAppear)(Ark_NativePointer node,
                         const Opt_Callback_Void* value);
     void (*setOnDisAppear)(Ark_NativePointer node,

@@ -27,6 +27,10 @@ ani_long ExtractorsToEllipseShapePtr(ani_env* env, ani_object aniClass, ani_obje
 ani_object ExtractorsFromEllipseShapePtr(ani_env* env, ani_object aniClass, ani_long ptr);
 ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_long ptr);
+ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_VISUAL_EFFECT_VISUAL_EFFECT_MODULE_H

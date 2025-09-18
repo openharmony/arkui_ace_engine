@@ -869,6 +869,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
+    template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
+    template<> void AssignCast(std::optional<OHOS::Rosen::VisualEffect*>& dst, const Ark_uiEffect_VisualEffect& src);
+    template<> void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Filter& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!
     template<>

@@ -35,6 +35,9 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from "@ohos.graphics.scene"
 import { RectShape, CircleShape, EllipseShape, PathShape } from "@ohos.arkui.shape"
+import curves from "@ohos.curves"
+import matrix4 from "@ohos.matrix4"
+import uiEffect from "@ohos.graphics.uiEffect";
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -49,6 +52,10 @@ export class ArkUIAniModule {
     native static _Extractors_FromEllipseShapePtr(ptr: KPointer): EllipseShape;
     native static _Extractors_ToPathShapePtr(value: PathShape): KPointer;
     native static _Extractors_FromPathShapePtr(ptr: KPointer): PathShape;
+    native static _Extractors_ToICurvePtr(value: curves.ICurve): KPointer;
+    native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
+    native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
+    native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void

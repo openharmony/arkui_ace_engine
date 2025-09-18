@@ -1271,6 +1271,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromPathShapePtr)
         },
+        ani_native_function {
+            "_Extractors_ToICurvePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToICurvePtr)
+        },
+        ani_native_function {
+            "_Extractors_ToMatrix4TransitPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToMatrix4TransitPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToUiEffectFilterPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectFilterPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToUiEffectVisualEffectPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
+        },
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

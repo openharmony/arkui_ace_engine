@@ -2151,24 +2151,44 @@ void SetVisualEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::VisualEffect*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetVisualEffect(frameNode, ptrOpt.value());
 }
 void SetBackgroundFilterImpl(Ark_NativePointer node,
                              const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetBackgroundFilter(frameNode, ptrOpt.value());
 }
 void SetForegroundFilterImpl(Ark_NativePointer node,
                              const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetForegroundFilter(frameNode, ptrOpt.value());
 }
 void SetCompositingFilterImpl(Ark_NativePointer node,
                               const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
 void SetOpacityImpl(Ark_NativePointer node,
                     const Opt_Union_Number_Resource* value)
@@ -3177,14 +3197,16 @@ void SetRotateImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
     ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
-void SetTransformImpl(Ark_NativePointer node,
-                      const Opt_Object* value)
+void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Matrix4> convValue = std::nullopt;
-    LOGE("ARKOALA:Transform1Impl: Opt_Object is not supported");
-    ViewAbstractModelStatic::SetTransformMatrix(frameNode, convValue);
+    auto matrixOpt = OptConvertPtr<Matrix4>(value);
+    if (!matrixOpt.has_value()) {
+        ViewAbstract::SetTransformMatrix(frameNode, Matrix4::CreateIdentity());
+        return;
+    }
+    ViewAbstract::SetTransformMatrix(frameNode, matrixOpt.value());
 }
 void SetOnAppearImpl(Ark_NativePointer node,
                      const Opt_Callback_Void* value)

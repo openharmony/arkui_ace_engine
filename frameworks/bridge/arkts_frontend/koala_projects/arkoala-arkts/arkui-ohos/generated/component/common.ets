@@ -33,6 +33,7 @@ import { LengthMetrics_serializer } from "./../Graphics"
 import { ResizableOptions_serializer, ResizableOptions } from "./image"
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_BrightnessBlender_serializer } from "./../framework/ohos.graphics.uiEffect"
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
+import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Gesture_serializer, GestureGroup_serializer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask, GestureMode, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
@@ -40,6 +41,7 @@ import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, Sty
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
+import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
@@ -3691,12 +3693,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setRotate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTransformAttribute(value: Object | undefined): void {
+    setTransformAttribute(value: matrix4.Matrix4Transit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteObject(valueTmpValue)
+            matrix4_Matrix4Transit_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6448,6 +6450,7 @@ export interface AnimateParam {
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
 export type ICurve = curves.ICurve;
+export type Matrix4Transit = matrix4.Matrix4Transit;
 export interface MotionPathOptions {
     path: string;
     from?: number;
@@ -7444,7 +7447,7 @@ export interface CommonMethod {
     rotate(value: RotateOptions | undefined): this {
         throw new Error("Unimplemented method rotate")
     }
-    transform(value: Object | undefined): this {
+    transform(value: matrix4.Matrix4Transit | undefined): this {
         throw new Error("Unimplemented method transform")
     }
     onAppear(value: (() => void) | undefined): this {
@@ -7901,7 +7904,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     translate_value?: TranslateOptions | undefined
     scale_value?: ScaleOptions | undefined
     rotate_value?: RotateOptions | undefined
-    transform_value?: Object | undefined
+    transform_value?: matrix4.Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: VoidCallback | undefined
@@ -8221,7 +8224,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     rotate(value: RotateOptions | undefined): this {
         return this
     }
-    transform(value: Object | undefined): this {
+    transform(value: matrix4.Matrix4Transit | undefined): this {
         return this
     }
     onAppear(value: (() => void) | undefined): this {
@@ -9594,9 +9597,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transform(value: Object | undefined): this {
+    public transform(value: matrix4.Matrix4Transit | undefined): this {
         if (this.checkPriority("transform")) {
-            const value_casted = value as (Object | undefined)
+            const value_casted = value as (matrix4.Matrix4Transit | undefined)
             this.getPeer()?.setTransformAttribute(value_casted)
             return this
         }
