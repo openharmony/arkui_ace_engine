@@ -35,6 +35,7 @@ namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr uint32_t REQUEST_AFTER_LAYOUT = 1 << 2;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -47,9 +48,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(layoutProperty, false);
     bool isHideRightClickMenu = layoutProperty->GetSelectionMenuHiddenValue(false) && IsUsingMouse();
     bool isFontSizeZero = layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value());
-    if (isHideRightClickMenu || (isFontSizeZero && !SelectOverlayIsOn())) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "The selection menu is not displayed cause Font size is zero or selectionMenuHidden is true");
+    if (isHideRightClickMenu || (isFontSizeZero && !SelectOverlayIsOn()) || CheckIfInterruptProcessing(request)) {
         return false;
     }
     UpdatePattern(request);
@@ -582,6 +581,13 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
     ProcessOverlay(newRequest);
 }
 
+void TextFieldSelectOverlay::ProcessOverlayAfterLayout(const OverlayRequest& request)
+{
+    OverlayRequest newRequest = request;
+    newRequest.requestCode = static_cast<uint32_t>(newRequest.requestCode) | REQUEST_AFTER_LAYOUT;
+    BaseTextSelectOverlay::ProcessOverlay(newRequest);
+}
+
 void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
@@ -765,5 +771,17 @@ void TextFieldSelectOverlay::UpdateMagnifier(const OffsetF& offset, bool updateO
         GetLocalPointWithTransform(magnifierLocalOffset);
     }
     pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
+}
+
+bool TextFieldSelectOverlay::CheckIfInterruptProcessing(const OverlayRequest& request)
+{
+    auto isRequestAfterLayout =
+        (static_cast<uint32_t>(request.requestCode) & REQUEST_AFTER_LAYOUT) == REQUEST_AFTER_LAYOUT;
+    // When the selected text remains unchanged, there is no need to recreate the right-click menu.
+    if (isRequestAfterLayout && IsUsingMouse() && IsShowMouseMenu() && SelectOverlayIsOn()) {
+        auto overlayInfo = GetSelectOverlayInfos();
+        return overlayInfo && overlayInfo->selectText == GetSelectedText();
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
