@@ -219,7 +219,9 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
-    this.fakeSourceBackup_ = this.source_;
+    if (this.source_.__isFake_ObservedPropertyAbstract_Internal()) {
+      this.fakeSourceBackup_ = this.source_;
+    }
     this.source_ = newSource;
     // register two-way sync to the new source
     this.source_.addSubscriber(this);
@@ -233,7 +235,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   public resetFakeSource(): void {
     if (!this.fakeSourceBackup_) {
-      stateMgmtConsole.warn(`${this.debugInfo()} does not have the fake source backup, need to check the build node does not amount to parent ever`)
+      stateMgmtConsole.warn(`${this.debugInfo()} does not have the fake source backup, need to check the build node does not amount to parent ever`);
       return;
     }
 
