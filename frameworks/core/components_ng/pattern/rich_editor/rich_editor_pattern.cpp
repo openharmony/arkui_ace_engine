@@ -4000,7 +4000,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
             isLongPressSelectArea, isLongPressByMouse, isMouseClickWithShift);
         return;
     }
-    HandleDoubleClickOrLongPress(info, host);
+    CHECK_NULL_VOID(!HandleDoubleClickOrLongPress(info, host));
     if (IsSelected()) {
         TriggerAvoidOnCaretChangeNextFrame();
     } else {
@@ -4044,10 +4044,10 @@ bool RichEditorPattern::HandleLongPressOnAiSelection()
     return true;
 }
 
-void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
+bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
 {
     auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_RETURN(focusHub, false);
     isLongPress_ = true;
     auto localOffset = info.GetLocalLocation();
     if (selectOverlay_->HasRenderTransform()) {
@@ -4065,7 +4065,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
-    CHECK_NULL_VOID(!HandleLongPressOnAiSelection());
+    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     focusHub->RequestFocusImmediately();
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
@@ -4089,6 +4089,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     } else {
         StopTwinkling();
     }
+    return false;
 }
 
 void RichEditorPattern::StartVibratorByLongPress()

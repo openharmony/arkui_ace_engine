@@ -1467,7 +1467,7 @@ private:
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
-    void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    bool HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
     bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
