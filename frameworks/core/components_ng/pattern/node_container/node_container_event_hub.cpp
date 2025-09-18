@@ -59,7 +59,6 @@ void NodeContainerEventHub::FireOnWillBind(int32_t containerId)
         auto onWillBind = onWillBindCallback_;
         onWillBind(containerId);
     }
-    EventHub::FireOnWillBind(containerId);
 }
 
 void NodeContainerEventHub::FireOnWillUnbind(int32_t containerId)
@@ -68,7 +67,6 @@ void NodeContainerEventHub::FireOnWillUnbind(int32_t containerId)
         auto onWillUnbind = onWillUnbindCallback_;
         onWillUnbind(containerId);
     }
-    EventHub::FireOnWillUnbind(containerId);
 }
 
 void NodeContainerEventHub::FireOnBind(int32_t containerId)
@@ -77,7 +75,6 @@ void NodeContainerEventHub::FireOnBind(int32_t containerId)
         auto onBind = onBindCallback_;
         onBind(containerId);
     }
-    EventHub::FireOnBind(containerId);
 }
 
 void NodeContainerEventHub::FireOnUnbind(int32_t containerId)
@@ -86,7 +83,6 @@ void NodeContainerEventHub::FireOnUnbind(int32_t containerId)
         auto onUnbind = onUnbindCallback_;
         onUnbind(containerId);
     }
-    EventHub::FireOnUnbind(containerId);
 }
 
 void NodeContainerEventHub::FireOnAttach()

@@ -2122,7 +2122,7 @@ HWTEST_F(WebModelTestNg, SetOnDragStart009, TestSize.Level1)
     webModelNG.SetOnDragStart(onDragStart);
     auto dragEvent = RefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
-    auto info = eventHub->onDragStart_(dragEvent, "");
+    auto info = eventHub->GetOnDragStart()(dragEvent, "");
     EXPECT_EQ(info.pixelMap, nullptr);
 #endif
 }
