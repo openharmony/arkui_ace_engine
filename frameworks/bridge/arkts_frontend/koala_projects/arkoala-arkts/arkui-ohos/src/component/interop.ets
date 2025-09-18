@@ -34,10 +34,11 @@ import {
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
-import { CustomComponent } from './customComponent';
+import { CustomComponent, CustomDelegate } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { ArkContentSlotPeer } from './contentSlot';
+import { ArkCustomComponentRootPeer } from "#generated";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -97,11 +98,11 @@ export function compatibleComponent(
 
 export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
     factory: () => T,
-    options?: T_Options,
+    options?: () => T_Options,
     content?: () => void
-): number {
+): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        T._instantiateImpl(undefined, factory, options, undefined, content);
+        T._instantiateImpl(undefined, factory, options ? options() : undefined, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -128,10 +129,11 @@ export function compatibleStaticComponent<T extends CustomComponent<T, T_Options
     const peerNode = findPeerNode(inc);
     if (peerNode === undefined) {
         node.dispose();
-        return 0;
+        return [() => {}, 0];
     }
+    const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
     uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
-    return peerNode.getPeerPtr() as number;
+    return [() => {(staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);}, peerNode.getPeerPtr() as number];
 }
 
 function openInterop(): void {

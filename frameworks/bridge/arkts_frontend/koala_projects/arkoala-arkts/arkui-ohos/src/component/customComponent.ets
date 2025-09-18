@@ -276,7 +276,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
-    protected __updateStruct(
+    public __updateStruct(
         initializers?: T_Options
     ): void {
         if (this.instance instanceof OptionsCallback<T_Options>) {
