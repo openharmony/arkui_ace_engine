@@ -180,7 +180,7 @@ void CheckBoxPattern::OnModifyDone()
     InitDefaultMargin();
     auto callback = [weak = WeakClaim(this)]() {
         auto checkbox = weak.Upgrade();
-        if(checkbox) {
+        if (checkbox) {
             checkbox->InitEvent();
         }
     };
