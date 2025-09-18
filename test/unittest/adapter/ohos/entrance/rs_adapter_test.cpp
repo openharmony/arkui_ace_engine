@@ -29,7 +29,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "wm/window.h"
-
+#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -297,4 +297,23 @@ HWTEST_F(RsAdapterTest, FlushImplicitTransaction001, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: RosenWindowRecoverExecutor001
+ * @tc.desc: Test RosenWindowRocoverExecutor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RsAdapterTest, RosenWindowRecoverExecutor001, TestSize.Level1)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    bool flag = false;
+    constexpr uint64_t timeout = 5000000; // timeout: 5000000 ns
+    RefPtr<TaskExecutor> taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto task = [&flag] {
+        flag = true;
+    };
+    auto executor = std::make_shared<RosenWindow::RecoverExecutor>(std::move(task), taskExecutor, timeout);
+    executor->Start("", 0); // Execute immediately in 0 ms.
+    EXPECT_TRUE(flag);
+#endif
+}
 } // namespace OHOS::Ace::NG
