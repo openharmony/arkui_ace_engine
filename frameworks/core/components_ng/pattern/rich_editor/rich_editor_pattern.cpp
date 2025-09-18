@@ -3265,7 +3265,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         IF_TRUE(focusHub->IsCurrentFocus(), HandleOnEditChanged(true));
         RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
         if (focusHub->RequestFocusImmediately()) {
-            IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
+            IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true, info.GetSourceDevice());
         }
     }

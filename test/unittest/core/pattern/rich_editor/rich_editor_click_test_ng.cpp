@@ -397,6 +397,41 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSingleClickEvent004
+ * @tc.desc: test RichEditorPattern HandleSingleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CreateNodePaintMethod();
+
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
+
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+
+    richEditorPattern->shiftFlag_ = true;
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
+
+    richEditorPattern->shiftFlag_ = false;
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_TRUE(richEditorPattern->caretVisible_);
+}
+
+
+/**
  * @tc.name: TestRichEditorHandleTripleClickEvent001
  * @tc.desc: test HandleTripleClickEvent
  * @tc.type: FUNC
