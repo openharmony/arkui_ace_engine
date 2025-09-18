@@ -1187,6 +1187,13 @@ void TextFieldModelNG::SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value, frameNode);
 }
 
+OHOS::Ace::DisplayMode TextFieldModelNG::GetBarState(FrameNode* frameNode)
+{
+    OHOS::Ace::DisplayMode value = OHOS::Ace::DisplayMode::AUTO;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, DisplayMode, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon)
 {
     CHECK_NULL_VOID(frameNode);

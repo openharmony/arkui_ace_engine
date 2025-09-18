@@ -4026,6 +4026,22 @@ typedef enum {
     NODE_TEXT_AREA_LINE_HEIGHT = 8031,
 
     /**
+     * @brief Define bar state of the text area.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. The default value is <b>ARKUI_BAR_STATE_AUTO</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. \n
+     *
+     * @since 22
+     */
+     NODE_TEXT_AREA_BAR_STATE = 8032,
+
+    /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

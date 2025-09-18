@@ -2332,6 +2332,13 @@ ArkUI_Uint32 GetTextAreaStrokeColor(ArkUINodeHandle node)
     return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
 }
 
+ArkUI_Int32 GetTextAreaBarState(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetBarState(frameNode));
+}
+
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2532,6 +2539,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaStrokeColor = GetTextAreaStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .getTextAreaBarState = GetTextAreaBarState,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
