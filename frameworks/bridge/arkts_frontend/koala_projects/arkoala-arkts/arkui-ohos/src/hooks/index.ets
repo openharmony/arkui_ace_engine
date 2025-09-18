@@ -99,6 +99,7 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
+export * from "./theme";
 
 export function hookPushPathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
   PathStackUtils.pushPath(pathStack, info, animated);

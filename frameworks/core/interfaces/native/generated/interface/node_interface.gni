@@ -284,6 +284,7 @@ generated_sources = [
   "implementation/text_style_accessor.cpp",
   "implementation/text_timer_controller_accessor.cpp",
   "implementation/text_timer_modifier.cpp",
+  "implementation/theme_ops_accessor.cpp",
   "implementation/time_picker_dialog_accessor.cpp",
   "implementation/time_picker_modifier.cpp",
   "implementation/toggle_modifier.cpp",

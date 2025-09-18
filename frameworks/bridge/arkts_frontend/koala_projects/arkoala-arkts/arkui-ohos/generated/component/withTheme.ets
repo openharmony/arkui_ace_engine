@@ -27,10 +27,11 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomTheme } from "@ohos.arkui.theme"
 import { ThemeColorMode } from "./common"
-import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { hookWithThemeAttributeModifier, AttributeModifier, AttributeUpdater, hookWithThemeOptions } from "#handwritten"
 import { WithThemeModifier } from "./../WithThemeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
+import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
 export class ArkWithThemePeer extends PeerNode {
     attributeSet?: WithThemeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -80,8 +81,7 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     }
     public setWithThemeOptions(options: WithThemeOptions): this {
         if (this.checkPriority("setWithThemeOptions")) {
-            const options_casted = options as (WithThemeOptions)
-            this.getPeer()?.setWithThemeOptionsAttribute(options_casted)
+            hookWithThemeOptions(this, options);
             return this
         }
         return this
@@ -107,10 +107,14 @@ export function WithThemeImpl(
         return new ArkWithThemeComponent()
     })
     NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (peer: ArkWithThemePeer): void => {
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstRender)
         receiver.setPeer(peer)
         style?.(receiver)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         receiver.setPeer(undefined)
         content_?.()
+        ArkThemeScopeManager.getInstance().onScopeExit();
+        receiver.isFirstRender = false;
     })
 }
 
