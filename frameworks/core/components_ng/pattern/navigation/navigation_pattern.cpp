@@ -2831,7 +2831,10 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             newTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage, proxy);
         }
     }
-
+    if (proxy->GetIsFinished()) {
+        // animation is finish can't set preNode enable false.
+        return true;
+    }
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
