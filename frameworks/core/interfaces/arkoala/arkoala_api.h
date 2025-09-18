@@ -3663,6 +3663,7 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getMaintainVisibleContentPosition)(ArkUINodeHandle node);
     void (*setSwiperOnScrollStateChanged)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnScrollStateChanged)(ArkUINodeHandle node);
+    void (*setSwiperFinishAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

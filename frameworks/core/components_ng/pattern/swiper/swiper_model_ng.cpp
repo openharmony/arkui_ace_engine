@@ -1285,6 +1285,16 @@ bool SwiperModelNG::GetMaintainVisibleContentPosition(FrameNode* frameNode)
     return value;
 }
 
+void SwiperModelNG::SetSwiperFinishAnimation(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_VOID(controller);
+    controller->FinishAnimation();
+}
+
 void SwiperModelNG::ProcessDotPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
     const RefPtr<ResourceObject>& resObj)
 {

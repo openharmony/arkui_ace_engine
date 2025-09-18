@@ -3083,6 +3083,7 @@ interfaces/native/node/resource.h @arkui_framework_resource
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkui_framework_xnode
 interfaces/native/node/style_modifier.h @arkui_framework_xnode
+interfaces/native/node/swiper_option.cpp @arkui_navigation
 interfaces/native/node/textpicker_option.cpp @arkui001
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
