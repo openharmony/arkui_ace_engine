@@ -941,8 +941,9 @@ bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     bool hasDarkRes = false;
     auto params = resObj->GetParams();
     if (resId == -1 && !params.empty() && params.back().value.has_value()) {
-        hasDarkRes =
-            resourceAdapter->ExistDarkResByName(params.back().value.value(), std::to_string(resObj->GetType()));
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
+        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(), std::to_string(resObj->GetType()));
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
     }
