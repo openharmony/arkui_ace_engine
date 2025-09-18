@@ -893,6 +893,30 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset004, TestSize.Level1)
     EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
 }
 
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffsetWithEmptyCacheAndWithoutLastSize, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.lineHeightMap_ = {};
+    info.crossCount_ = 2;
+    info.childrenCount_ = 30;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -200.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 100.f;
+    info.startIndex_ = 10;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 29);
+    EXPECT_EQ(info.currentOffset_, -20.f);
+}
+
 HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
 {
     GridLayoutInfo info;
