@@ -3815,4 +3815,393 @@ HWTEST_F(SelectPatternTestNg, AddOptionNode, TestSize.Level1)
     selectPattern->AddOptionNode(option);
     EXPECT_EQ(selectPattern->options_.size(), 2);
 }
+
+/**
+ * @tc.name: InitSpinner002
+ * @tc.desc: Test SelectPattern InitSpinner with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, InitSpinner002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create a FrameNode with TextPattern to represent the Spinner control.
+     */
+    auto spinner = AceType::MakeRefPtr<FrameNode>("spinner", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(spinner, nullptr);
+
+    /**
+     * @tc.steps: step2.Create a SelectTheme instance and set its font size to 16px.
+     */
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->SetFontSize(Dimension(16.0, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3.Create a IconTheme instance.
+     */
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(iconTheme, nullptr);
+
+    /**
+     * @tc.steps: step4.Invoke the InitSpinner method of SelectPattern with the created FrameNode and SelectTheme
+     */
+    SelectPattern selectPattern;
+    selectPattern.InitSpinner(spinner, iconTheme, selectTheme);
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(spinnerLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: SetAvoidance
+ * @tc.desc: Test SelectPattern SetAvoidance
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetAvoidance, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetAvoidance.
+     * @tc.expected: the function runs normally
+     */
+    auto mode = AvoidanceMode::COVER_TARGET;
+    selectPattern->SetAvoidance(mode);
+    EXPECT_EQ(selectPattern->options_.size(), 1);
+
+    mode = AvoidanceMode::AVOID_AROUND_TARGET;
+    selectPattern->SetAvoidance(mode);
+    EXPECT_EQ(selectPattern->options_.size(), 1);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate
+ * @tc.desc: Test SelectPattern OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, OnThemeScopeUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    selectPattern->text_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    
+    /**
+     * @tc.steps: step2. Test OnThemeScopeUpdate with different user-defined flags.
+     * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
+     */
+    int32_t themeScopeId = 0;
+    bool res = selectPattern->OnThemeScopeUpdate(themeScopeId);
+    ASSERT_NE(res, false);
+}
+
+/**
+ * @tc.name: SetHasOptionWidth
+ * @tc.desc: Test SelectPattern SetHasOptionWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetHasOptionWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+
+    /**
+     * @tc.steps: step3. Call SetHasOptionWidth.
+     * @tc.expected: the function runs normally
+     */
+    auto hasOptionWidth = false;
+    selectPattern->SetHasOptionWidth(hasOptionWidth);
+    EXPECT_EQ(selectPattern->options_.size(), 1);
+
+    hasOptionWidth = true;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->options_.push_back(option);
+    selectPattern->SetHasOptionWidth(hasOptionWidth);
+    EXPECT_EQ(selectPattern->options_.size(), 2);
+}
+
+/**
+ * @tc.name: SetMenuBackgroundBlurStyle
+ * @tc.desc: Test SelectPattern SetMenuBackgroundBlurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetMenuBackgroundBlurStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step2. Test SetMenuBackgroundBlurStyle with different user-defined flags.
+     * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
+     */
+    BlurStyleOption opt;
+    const BlurStyleOption& blurStyle = opt;
+    selectPattern->SetMenuBackgroundBlurStyle(blurStyle);
+    ASSERT_EQ(blurStyle.isWindowFocused, true);
+}
+
+/**
+ * @tc.name: SetDivider
+ * @tc.desc: Test SelectPattern SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetDivider, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+
+    /**
+     * @tc.steps: step3. Call SetDivider.
+     * @tc.expected: the function runs normally
+     */
+    SelectDivider selectDivider;
+    const SelectDivider& divider = selectDivider;
+    selectPattern->SetDivider(divider);
+    EXPECT_EQ(selectPattern->options_.size(), 1);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->options_.push_back(option);
+    selectPattern->SetDivider(divider);
+    EXPECT_EQ(selectPattern->options_.size(), 2);
+}
+
+/**
+ * @tc.name: SetDividerMode
+ * @tc.desc: Test SelectPattern SetDividerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetDividerMode, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetDividerMode.
+     * @tc.expected: the function runs normally
+     */
+    const std::optional<DividerMode>& mode1 = std::nullopt;
+    selectPattern->SetDividerMode(mode1);
+    EXPECT_EQ(mode1.has_value(), false);
+
+    const std::optional<DividerMode>& mode2 = DividerMode::FLOATING_ABOVE_MENU;
+    selectPattern->SetDividerMode(mode2);
+    EXPECT_EQ(mode2.has_value(), true);
+}
+
+/**
+ * @tc.name: DumpInfo
+ * @tc.desc: Test SelectPattern DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, DumpInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+
+    /**
+     * @tc.steps: step3. Call DumpInfo.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->DumpInfo();
+    EXPECT_EQ(selectPattern->selected_, -1);
+}
+
+/**
+ * @tc.name: SetArrowColor
+ * @tc.desc: Test SelectPattern SetArrowColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetArrowColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto spinner1 = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto spinner2 = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+
+    /**
+     * @tc.steps: step2. Test SetArrowColor with different user-defined flags.
+     * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
+     */
+    const Color& color = Color::FromRGB(100, 100, 100);
+    selectPattern->spinner_ = nullptr;
+    ASSERT_EQ(selectPattern->spinner_, nullptr);
+
+    selectPattern->spinner_ = spinner1;
+    selectPattern->SetArrowColor(color);
+
+    selectPattern->spinner_ = spinner2;
+    selectPattern->SetArrowColor(color);
+    ASSERT_NE(selectPattern->spinner_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectedOptionFontFromPattern
+ * @tc.desc: Test SelectPattern UpdateSelectedOptionFontFromPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, UpdateSelectedOptionFontFromPattern, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateSelectedOptionFontFromPattern with different user-defined flags.
+     * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
+     */
+    const RefPtr<MenuItemPattern>& optionPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    selectPattern->selectedFont_.FontColor = std::nullopt;
+    selectPattern->selectedFont_.FontFamily = std::nullopt;
+    selectPattern->selectedFont_.FontSize = std::nullopt;
+    selectPattern->selectedFont_.FontStyle = std::nullopt;
+    selectPattern->selectedFont_.FontWeight = std::nullopt;
+    selectPattern->UpdateSelectedOptionFontFromPattern(optionPattern);
+    ASSERT_EQ(selectPattern->selectedFont_.FontFamily, std::nullopt);
+
+    selectPattern->selectedFont_.FontColor = Color::FromRGB(100, 100, 100);
+    selectPattern->selectedFont_.FontFamily.emplace();
+    selectPattern->selectedFont_.FontSize = OPTION_MARGIN;
+    selectPattern->selectedFont_.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    selectPattern->selectedFont_.FontWeight = FontWeight::BOLD;
+    selectPattern->UpdateSelectedOptionFontFromPattern(optionPattern);
+    ASSERT_NE(selectPattern->selectedFont_.FontFamily, std::nullopt);
+}
 } // namespace OHOS::Ace::NG
