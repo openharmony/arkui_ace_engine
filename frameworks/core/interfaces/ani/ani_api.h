@@ -527,6 +527,8 @@ struct ArkUIAniCommonModifier {
         const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, void* func);
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
     float (*getPx2VpWithCurrentDensity)(float px);
+    void (*setImageCacheCount)(ani_int value, ani_int instanceId);
+    void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

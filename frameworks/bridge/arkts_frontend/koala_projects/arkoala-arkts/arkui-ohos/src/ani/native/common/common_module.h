@@ -106,6 +106,10 @@ void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
     ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId);
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId);
 ani_status GetAniEnv(ani_vm* vm, ani_env** env);
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr);
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);

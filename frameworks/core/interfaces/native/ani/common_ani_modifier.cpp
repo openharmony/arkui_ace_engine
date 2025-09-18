@@ -63,6 +63,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -874,6 +875,34 @@ float GetPx2VpWithCurrentDensity(float px)
     return PipelineBase::Px2VpWithCurrentDensity(px);
 }
 
+void SetImageCacheCount(ani_int value, ani_int instanceId)
+{
+    int32_t count = static_cast<int32_t>(value);
+    if (count < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetCapacity(count);
+}
+
+void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
+{
+    int32_t cacheSize = static_cast<int32_t>(value);
+    if (cacheSize < 0) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto imageCache = pipelineContext->GetImageCache();
+    imageCache->SetDataCacheLimit(cacheSize);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -940,7 +969,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
-        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity
+        .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
+        .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
+        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize
     };
     return &impl;
 }

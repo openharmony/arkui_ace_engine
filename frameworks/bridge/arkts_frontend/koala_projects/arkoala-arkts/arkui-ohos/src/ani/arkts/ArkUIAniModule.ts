@@ -74,6 +74,8 @@ export class ArkUIAniModule {
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
+    native static _Common_SetImageCacheCount(value: KInt, instanceId: KInt): void
+    native static _Common_SetImageRawDataCacheSize(value: KInt, instanceId: KInt): void
     native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
     native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
     native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt

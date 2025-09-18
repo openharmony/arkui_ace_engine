@@ -1213,6 +1213,26 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
 }
 
+void SetImageCacheCount(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageCacheCount(value, instanceId);
+}
+
+void SetImageRawDataCacheSize(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_int value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setImageRawDataCacheSize(value, instanceId);
+}
+
 ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr)
 {
     return {};

@@ -608,6 +608,13 @@ export class UIContext {
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    public setImageCacheCount(value: int): void {
+        throw Error("setImageCacheCount not implemented in UIContext!")
+    }
+
+    public setImageRawDataCacheSize(value: int): void {
+        throw Error("setImageRawDataCacheSize not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
