@@ -1855,7 +1855,7 @@ template<>
 RefPtr<BasicShape> Convert(const Ark_EllipseShape& src)
 {
     CHECK_NULL_RETURN(src, nullptr);
-    return src->shape;
+    return src->ellipseShape;
 }
 
 template<>
