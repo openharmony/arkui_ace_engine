@@ -2033,6 +2033,12 @@ void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     if (pickerProperty->GetDisappearColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
     }
+    if (pickerProperty->GetDisappearFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetDisappearFontSize().value());
+    }
+    if (pickerProperty->GetDisappearFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetDisappearFontFamily().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,
@@ -2059,6 +2065,12 @@ void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
 
     if (pickerProperty->GetColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+    if (pickerProperty->GetFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetFontSize().value());
+    }
+    if (pickerProperty->GetFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetFontFamily().value());
     }
 
     UpdateTextStyleCommon(
@@ -2087,6 +2099,12 @@ void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     if (pickerProperty->GetSelectedColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
     }
+    if (pickerProperty->GetSelectedFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetSelectedFontSize().value());
+    }
+    if (pickerProperty->GetSelectedFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetSelectedFontFamily().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,
@@ -2113,6 +2131,12 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
 
     if (pickerProperty->GetDefaultColor().has_value()) {
         defaultTextStyle.SetTextColor(pickerProperty->GetDefaultColor().value());
+    }
+    if (pickerProperty->GetDefaultFontSize().has_value()) {
+        defaultTextStyle.SetFontSize(pickerProperty->GetDefaultFontSize().value());
+    }
+    if (pickerProperty->GetDefaultFontFamily().has_value()) {
+        defaultTextStyle.SetFontFamilies(pickerProperty->GetDefaultFontFamily().value());
     }
 
     UpdateTextStyleCommon(

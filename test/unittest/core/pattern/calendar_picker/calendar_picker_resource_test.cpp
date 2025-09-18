@@ -54,6 +54,7 @@ CalendarPickerModel* CalendarPickerModel::GetInstance()
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double TEST_FONT_SIZE = 10.0;
+const Dimension FONT_SIZE_VALUE_DIMENSION = Dimension(20.1, DimensionUnit::PX);
 }
 
 class CalendarPickerResourceTest : public testing::Test {
@@ -256,6 +257,98 @@ HWTEST_F(CalendarPickerResourceTest, UpdateTextStyle001, TestSize.Level1)
 
     EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateTextStyle002
+ * @tc.desc: Test CalendarPickerPattern UpdateTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerResourceTest, UpdateTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CalendarPicker.
+     */
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the CalendarTheme.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->entryFontColor_ = Color::GREEN;
+    theme->entryFontSize_ = FONT_SIZE_VALUE_DIMENSION;
+
+    /**
+     * @tc.steps: step3. Call UpdateTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    pickerPattern->UpdateTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+}
+
+/**
+ * @tc.name: UpdateTextStyle003
+ * @tc.desc: Test CalendarPickerPattern UpdateTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has value, the LayoutProperty value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerResourceTest, UpdateTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CalendarPicker.
+     */
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the CalendarTheme.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->entryFontColor_ = Color::GREEN;
+    theme->entryFontSize_ = FONT_SIZE_VALUE_DIMENSION;
+
+    /**
+     * @tc.steps: step3. SetTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    CalendarPickerModelNG::GetInstance()->SetTextStyle(textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of LayoutProperty will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    pickerPattern->UpdateTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
 }
 
 } // namespace OHOS::Ace::NG
