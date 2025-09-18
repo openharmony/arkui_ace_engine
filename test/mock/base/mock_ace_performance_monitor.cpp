@@ -63,8 +63,10 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     layoutNodeNum_ = 0;
     renderNodeNum_ = 0;
     monitorStatus_ = 0;
+    auto tempStatus = std::move(bkMonitorStatus_);
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor() {}
 
+void ArkUIPerfMonitor::FlushPerfMonitorOutOfVsync() {}
 } // namespace OHOS::Ace

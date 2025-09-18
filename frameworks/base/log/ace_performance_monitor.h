@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <stack>
 
 namespace OHOS::Ace {
 
@@ -75,6 +76,7 @@ private:
     void InitPerfMonitor();
     void ClearPerfMonitor();
     void FlushPerfMonitor();
+    void FlushPerfMonitorOutOfVsync();
     std::map<MonitorTag, int64_t> timeSlice_;
     int64_t propertyNum_;
     int64_t stateMgmtNodeNum_;
@@ -84,6 +86,8 @@ private:
     TimePoint end_;
     int64_t monitorStatus_;
     int32_t displaySyncRate_ = 0;
+
+    std::stack<int64_t> bkMonitorStatus_;
 };
 } // namespace OHOS::Ace
 

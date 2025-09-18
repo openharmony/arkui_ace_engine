@@ -73,6 +73,7 @@ ArkUIPerfMonitor::ArkUIPerfMonitor()
 
 void ArkUIPerfMonitor::StartPerf()
 {
+    FlushPerfMonitorOutOfVsync();
     GetTimePoint(begin_);
     ClearPerfMonitor();
 }
@@ -123,6 +124,20 @@ void ArkUIPerfMonitor::RecordDisplaySyncRate(int32_t displaySyncRate)
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status)
 {
     if (tag == MonitorTag::STATIC_API) {
+        switch (status) {
+            case MonitorStatus::RUNNING:
+                ++monitorStatus_;
+                bkMonitorStatus_.push(monitorStatus_);
+                monitorStatus_ = 0;
+                break;
+            case MonitorStatus::IDLE:
+                if (bkMonitorStatus_.size() > 0) {
+                    monitorStatus_ = bkMonitorStatus_.top();
+                    bkMonitorStatus_.pop();
+                }
+                --monitorStatus_;
+                break;
+        }
         return;
     }
     switch (status) {
@@ -154,6 +169,8 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     layoutNodeNum_ = 0;
     renderNodeNum_ = 0;
     displaySyncRate_ = 0;
+
+    auto tempStatus = std::move(bkMonitorStatus_);
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor()
@@ -183,6 +200,26 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     oss << ",\'display_sync_rate\':" << displaySyncRate_;
     oss << "}";
     ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", oss.str().c_str());
+#endif
+}
+
+void ArkUIPerfMonitor::FlushPerfMonitorOutOfVsync()
+{
+#if ORIGIN_PERF_MONITOR
+    auto json = JsonUtil::Create(true);
+    json->Put("state_mgmt", stateMgmtNodeNum_);
+    json->Put("layout", layoutNodeNum_);
+    json->Put("render", renderNodeNum_);
+    json->Put("property", propertyNum_);
+    ACE_SCOPED_TRACE("ArkUIOutOfVsyncPerfMonitor %s", json->ToString().c_str());
+#else
+    std::ostringstream oss;
+    oss << "{\'state_mgmt\':" << stateMgmtNodeNum_;
+    oss << ",\'layout\':" << layoutNodeNum_;
+    oss << ",\'render\':" << renderNodeNum_;
+    oss << ",\'property\':" << propertyNum_;
+    oss << "}";
+    ACE_SCOPED_TRACE("ArkUIOutOfVsyncPerfMonitor %s", oss.str().c_str());
 #endif
 }
 } // namespace OHOS::Ace
