@@ -3,8 +3,8 @@
 **Sig**: SIG_ApplicationFramework
 **Binary Source**: No(涉及则Yes)
 
-## 请勿修改以下选项内容，仅需保存后点击复选框，或在编辑时将对应项前面的[ ]改为[x]
-## Do not modify the following option content. Simply save and click the checkbox, or when editing, change [ ] to [x] for the relevant item.
+## 请勿修改以下选项内容，仅需保存后点击复选框，或在编辑时将对应项前面的`[ ]`改为`[x]`
+## Do not modify the following option content. Simply save and click the checkbox, or when editing, change `[ ]` to `[x]` for the relevant item.
 ### Feature or Bugfix
 - [ ] 需求/Feature
 - [ ] 缺陷/Bugfix
