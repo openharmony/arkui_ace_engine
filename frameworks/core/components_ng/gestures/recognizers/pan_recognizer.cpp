@@ -296,7 +296,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is not READY");
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is %{public}d not READY", refereeState_);
         }
     }
     HandlePanExtAccept();

@@ -2093,6 +2093,7 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
             items[i].emplace_back(finger, touchTestResult[finger].begin());
         }
     }
+    eventManager->lastTouchEvent_.sourceType = SourceType::TOUCH;
     EXPECT_EQ(touchTestResult.size(), fingerCnt);
     EXPECT_EQ(touchTestResult[0].size(), targetCnt);
     EXPECT_EQ(touchTestResult[1].size(), targetCnt);
