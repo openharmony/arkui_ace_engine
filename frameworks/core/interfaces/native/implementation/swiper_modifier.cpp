@@ -293,6 +293,18 @@ void SetIndexImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convValue);
     SwiperModelStatic::SetIndex(frameNode, convValue.value_or(OHOS::Ace::DEFAULT_SWIPER_CURRENT_INDEX));
 }
+void SetAutoPlay0Impl(Ark_NativePointer node,
+                     const Opt_Boolean* autoPlay)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto autoPlayConv = Converter::OptConvertPtr<bool>(autoPlay);
+    if (!autoPlayConv) {
+        SwiperModelStatic::SetAutoPlay(frameNode, false);
+        return;
+    }
+    SwiperModelStatic::SetAutoPlay(frameNode, *autoPlayConv);
+}
 void SetIntervalImpl(Ark_NativePointer node,
                      const Opt_Number* value)
 {
@@ -458,16 +470,6 @@ void SetCurveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    RefPtr<Curve> curve = nullptr;
-    if (value) {
-        if (auto curveOpt = Converter::OptConvert<RefPtr<Curve>>(*value); curveOpt) {
-            curve = *curveOpt;
-        }
-    }
-    if (!curve) {
-        curve = Framework::CreateCurve(std::string(), true); // the default Framework Curve
-    }
-    SwiperModelStatic::SetCurve(frameNode, curve);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_Callback_Number_Void* value)
@@ -680,7 +682,7 @@ void SetOnContentWillScrollImpl(Ark_NativePointer node,
     };
     SwiperModelStatic::SetOnContentWillScroll(frameNode, std::move(onEvent));
 }
-void SetAutoPlayImpl(Ark_NativePointer node,
+void SetAutoPlay1Impl(Ark_NativePointer node,
                      const Opt_Boolean* autoPlay,
                      const Opt_AutoPlayOptions* options)
 {
@@ -688,13 +690,14 @@ void SetAutoPlayImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto autoPlayConv = Converter::OptConvertPtr<bool>(autoPlay);
     if (!autoPlayConv) {
-        // Implement Reset value
+        SwiperModelStatic::SetAutoPlay(frameNode, false);
         return;
     }
     SwiperModelStatic::SetAutoPlay(frameNode, *autoPlayConv);
     auto optionsConv = Converter::OptConvertPtr<SwiperAutoPlayOptions>(options);
     if (!optionsConv) {
-        // Implement Reset value
+        SwiperAutoPlayOptions swiperAutoPlayOptions;
+        SwiperModelStatic::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
         return;
     }
     SwiperModelStatic::SetAutoPlayOptions(frameNode, *optionsConv);
@@ -810,6 +813,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperModifier::ConstructImpl,
         SwiperInterfaceModifier::SetSwiperOptionsImpl,
         SwiperAttributeModifier::SetIndexImpl,
+        SwiperAttributeModifier::SetAutoPlay0Impl,
         SwiperAttributeModifier::SetIntervalImpl,
         SwiperAttributeModifier::SetIndicatorImpl,
         SwiperAttributeModifier::SetLoopImpl,
@@ -833,7 +837,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::SetIndicatorInteractiveImpl,
         SwiperAttributeModifier::SetPageFlipModeImpl,
         SwiperAttributeModifier::SetOnContentWillScrollImpl,
-        SwiperAttributeModifier::SetAutoPlayImpl,
+        SwiperAttributeModifier::SetAutoPlay1Impl,
         SwiperAttributeModifier::SetDisplayArrowImpl,
         SwiperAttributeModifier::SetCachedCount1Impl,
         SwiperAttributeModifier::SetDisplayCountImpl,

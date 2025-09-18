@@ -20,6 +20,7 @@ import { IndicatorComponentController } from "../component/indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "../component/enums"
 import { runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkBaseNode } from "./ArkBaseNode";
+import { default as curves } from "@ohos.curves"
 import { ArkSwiperPeer, SwiperController, SwiperAttribute, AutoPlayOptions, DotIndicator, DigitIndicator,
     SwiperDisplayMode, OnSwiperAnimationStartCallback, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback,
     SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback,
@@ -60,10 +61,15 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
         }
         return this
     }
-    autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
+    autoPlay(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setAutoPlay0Attribute(value_casted)
+        return this
+    }
+    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
         const autoPlay_casted = autoPlay as (boolean | undefined)
         const options_casted = options as (AutoPlayOptions | undefined)
-        this.getPeer()?.setAutoPlayAttribute(autoPlay_casted, options_casted)
+        this.getPeer()?.setAutoPlay1Attribute(autoPlay_casted, options_casted)
         return this
     }
     interval(value: number | undefined): this {
@@ -74,6 +80,7 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
     indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
         const value_casted = value as (IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined)
         this.getPeer()?.setIndicatorAttribute(value_casted)
+        this.markDirty();
         return this
     }
     loop(value: boolean | undefined): this {
@@ -101,6 +108,11 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
         this.getPeer()?.setDisplayModeAttribute(value_casted)
         return this
     }
+    cachedCount(value: number | undefined): this {
+        const value_casted = value as (number | undefined)
+        this.getPeer()?.setCachedCount0Attribute(value_casted)
+        return this
+    }
     cachedCount(count: number | undefined, isShown?: boolean): this {
         const count_casted = count as (number | undefined)
         const isShown_casted = isShown as (boolean | undefined)
@@ -117,8 +129,8 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
         this.getPeer()?.setDisableSwipeAttribute(value_casted)
         return this
     }
-    curve(value: Curve | string | ICurve | undefined): this {
-        const value_casted = value as (Curve | string | ICurve | undefined)
+    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
+        const value_casted = value as (curves.Curve | string | curves.ICurve | undefined)
         this.getPeer()?.setCurveAttribute(value_casted)
         return this
     }
@@ -184,25 +196,26 @@ export class ArkSwiperNode extends ArkBaseNode implements SwiperAttribute  {
     }
     displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
         const value_casted = value as (ArrowStyle | boolean | undefined)
-        const isHoverShow_casted = isHoverShow as (boolean)
+        const isHoverShow_casted = isHoverShow as (boolean | undefined)
         this.getPeer()?.setDisplayArrowAttribute(value_casted, isHoverShow_casted)
+        this.markDirty();
         return this
     }
     displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         const value_casted = value as (number | string | SwiperAutoFill | undefined)
-        const swipeByGroup_casted = swipeByGroup as (boolean)
+        const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
         this.getPeer()?.setDisplayCountAttribute(value_casted, swipeByGroup_casted)
         return this
     }
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         const value_casted = value as (Length | undefined)
-        const ignoreBlank_casted = ignoreBlank as (boolean)
+        const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
         this.getPeer()?.setPrevMarginAttribute(value_casted, ignoreBlank_casted)
         return this
     }
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         const value_casted = value as (Length | undefined)
-        const ignoreBlank_casted = ignoreBlank as (boolean)
+        const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
         this.getPeer()?.setNextMarginAttribute(value_casted, ignoreBlank_casted)
         return this
     }
