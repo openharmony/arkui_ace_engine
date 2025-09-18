@@ -610,7 +610,7 @@ export type Matrix4 = [
     number,
     number
 ]
-export interface Edges<T> {
+export interface NodeEdges<T> {
     top?: T;
     left?: T;
     bottom?: T;
@@ -642,15 +642,15 @@ export type Scale = Vector2;
 export type Translation = Vector2;
 export type Rotation = Vector3;
 
-export function edgeColors(all: number): Edges<number> {
+export function edgeColors(all: number): NodeEdges<number> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function edgeWidths(all: number): Edges<number> {
+export function edgeWidths(all: number): NodeEdges<number> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
-export function borderStyles(all: BorderStyle): Edges<BorderStyle> {
+export function borderStyles(all: BorderStyle): NodeEdges<BorderStyle> {
     return { left: all, top: all, right: all, bottom: all };
 }
 
