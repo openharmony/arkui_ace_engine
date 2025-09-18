@@ -49,7 +49,9 @@ struct WaterFlowMainPage {
     new TextList(15, 'GridDemo002', 'pages/grid/st/GridDemo002'),
     new TextList(16, 'GridDemo006', 'pages/grid/st/GridDemo006'),
     new TextList(17, 'LazyVGridSample', 'pages/grid/st/LazyVGridSample'),
-    new TextList(18, 'NestedScroll001', 'pages/grid/st/NestedScroll001')
+    new TextList(18, 'NestedScroll001', 'pages/grid/st/NestedScroll001'),
+    new TextList(19, 'GridIndex', 'pages/grid/GridIndex'),
+    new TextList(20, 'GridModifierIndex', 'pages/grid/GridModifierIndex')
   ]
   @State fontSize: Resource | undefined = undefined
 
