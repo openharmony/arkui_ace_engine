@@ -13,18 +13,26 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+#include "tab_bar_symbol_peer_impl.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabBarSymbolAccessor {
 void DestroyPeerImpl(Ark_TabBarSymbol peer)
 {
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 Ark_TabBarSymbol ConstructImpl()
 {
-    return {};
+    auto peerImpl = Referenced::MakeRefPtr<TabBarSymbolPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<TabBarSymbolPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,19 +40,44 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_SymbolGlyphModifier GetNormalImpl(Ark_TabBarSymbol peer)
 {
-    return {};
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    auto glyphModifier = peerImpl->GetNormal().Upgrade();
+    CHECK_NULL_RETURN(glyphModifier, nullptr);
+    return reinterpret_cast<SymbolGlyphModifierPeer *>(Referenced::RawPtr(glyphModifier));
 }
 void SetNormalImpl(Ark_TabBarSymbol peer,
                    Ark_SymbolGlyphModifier normal)
 {
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto glyphModifier = reinterpret_cast<SymbolGlyphModifierPeer *>(normal);
+    CHECK_NULL_VOID(glyphModifier);
+    peerImpl->SetNormal(AceType::WeakClaim(glyphModifier));
 }
 Opt_SymbolGlyphModifier GetSelectedImpl(Ark_TabBarSymbol peer)
 {
-    return {};
+    auto optModifier = Converter::ArkValue<Opt_SymbolGlyphModifier>();
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, optModifier);
+    auto glyphModifier = peerImpl->GetSelected().Upgrade();
+    CHECK_NULL_RETURN(glyphModifier, optModifier);
+    auto glyphModifierValue = reinterpret_cast<SymbolGlyphModifierPeer*>(Referenced::RawPtr(glyphModifier));
+    return Converter::ArkValue<Opt_SymbolGlyphModifier>(glyphModifierValue);
 }
 void SetSelectedImpl(Ark_TabBarSymbol peer,
                      const Opt_SymbolGlyphModifier* selected)
 {
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto glyphModifierOpt = Converter::OptConvertPtr<Ark_SymbolGlyphModifier>(selected);
+    if (glyphModifierOpt) {
+        auto glyphModifier = reinterpret_cast<SymbolGlyphModifierPeer*>(glyphModifierOpt.value());
+        CHECK_NULL_VOID(glyphModifier);
+        peerImpl->SetSelected(AceType::WeakClaim(glyphModifier));
+    } else {
+        peerImpl->SetSelected(nullptr);
+    }
 }
 } // TabBarSymbolAccessor
 const GENERATED_ArkUITabBarSymbolAccessor* GetTabBarSymbolAccessor()
