@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute, SymbolEffect } from "./component/symbolglyph"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -35,11 +36,11 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SymbolGlyphAttribute): void { }
-    applyPressedAttribute(instance: SymbolGlyphAttribute): void { }
-    applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
-    applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
-    applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -57,8 +58,9 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _symbolEffect_0_0value?: SymbolEffect | undefined
     _symbolEffect_0_1value?: boolean | int32 | undefined
-    applyModifierPatch(peer: ArkSymbolGlyphPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSymbolGlyphPeer;
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {

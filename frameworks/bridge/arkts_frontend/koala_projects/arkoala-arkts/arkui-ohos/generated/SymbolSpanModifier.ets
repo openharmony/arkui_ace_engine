@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSymbolSpanPeer, SymbolSpanAttribute } from "./component/symbolSpan"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -32,11 +33,11 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SymbolSpanAttribute): void { }
-    applyPressedAttribute(instance: SymbolSpanAttribute): void { }
-    applyFocusedAttribute(instance: SymbolSpanAttribute): void { }
-    applyDisabledAttribute(instance: SymbolSpanAttribute): void { }
-    applySelectedAttribute(instance: SymbolSpanAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -47,8 +48,9 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
     _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
-    applyModifierPatch(peer: ArkSymbolSpanPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSymbolSpanPeer;
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {

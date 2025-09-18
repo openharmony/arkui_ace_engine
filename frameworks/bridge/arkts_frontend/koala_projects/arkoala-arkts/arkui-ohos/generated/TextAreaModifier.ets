@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextAreaPeer, TextAreaSubmitCallback, TextAreaType, TextAreaAttribute } from "./component/textArea"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./component/common"
@@ -36,11 +37,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextAreaAttribute): void { }
-    applyPressedAttribute(instance: TextAreaAttribute): void { }
-    applyFocusedAttribute(instance: TextAreaAttribute): void { }
-    applyDisabledAttribute(instance: TextAreaAttribute): void { }
-    applySelectedAttribute(instance: TextAreaAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _placeholderColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _placeholderColor_0_0value?: ResourceColor | undefined
     _placeholderFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -164,8 +165,9 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
-    applyModifierPatch(peer: ArkTextAreaPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextAreaPeer;
         if (this._placeholderColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._placeholderColor_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkEmbeddedComponentPeer, EmbeddedComponentAttribute } from "./component/embeddedComponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TerminationInfo } from "./component/common"
@@ -29,17 +30,18 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: EmbeddedComponentAttribute): void { }
-    applyPressedAttribute(instance: EmbeddedComponentAttribute): void { }
-    applyFocusedAttribute(instance: EmbeddedComponentAttribute): void { }
-    applyDisabledAttribute(instance: EmbeddedComponentAttribute): void { }
-    applySelectedAttribute(instance: EmbeddedComponentAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: ErrorCallback<BusinessError> | undefined
-    applyModifierPatch(peer: ArkEmbeddedComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkEmbeddedComponentPeer;
         if (this._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onTerminated_0_flag) {

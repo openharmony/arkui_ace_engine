@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from "./component/toggle"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ToggleAttribute): void { }
-    applyPressedAttribute(instance: ToggleAttribute): void { }
-    applyFocusedAttribute(instance: ToggleAttribute): void { }
-    applyDisabledAttribute(instance: ToggleAttribute): void { }
-    applySelectedAttribute(instance: ToggleAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: ((value0: boolean) => void) | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -44,8 +45,9 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
     _switchPointColor_0_0value?: ResourceColor | undefined
     _switchStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _switchStyle_0_0value?: SwitchStyle | undefined
-    applyModifierPatch(peer: ArkTogglePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTogglePeer;
         if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onChange_0_flag) {

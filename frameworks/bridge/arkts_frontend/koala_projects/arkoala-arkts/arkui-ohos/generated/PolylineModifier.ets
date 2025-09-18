@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkPolylinePeer, PolylineAttribute } from "./component/polyline"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -32,15 +33,16 @@ export class PolylineModifier extends CommonShapeMethodModifier implements Polyl
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: PolylineAttribute): void { }
-    applyPressedAttribute(instance: PolylineAttribute): void { }
-    applyFocusedAttribute(instance: PolylineAttribute): void { }
-    applyDisabledAttribute(instance: PolylineAttribute): void { }
-    applySelectedAttribute(instance: PolylineAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
-    applyModifierPatch(peer: ArkPolylinePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkPolylinePeer;
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._points_0_flag) {

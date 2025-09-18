@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -34,11 +35,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RichEditorAttribute): void { }
-    applyPressedAttribute(instance: RichEditorAttribute): void { }
-    applyFocusedAttribute(instance: RichEditorAttribute): void { }
-    applyDisabledAttribute(instance: RichEditorAttribute): void { }
-    applySelectedAttribute(instance: RichEditorAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReady_0_0value?: VoidCallback | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -110,8 +111,9 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _placeholder_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _placeholder_0_0value?: ResourceStr | undefined
     _placeholder_0_1value?: PlaceholderStyle | undefined
-    applyModifierPatch(peer: ArkRichEditorPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRichEditorPeer;
         if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onReady_0_flag) {

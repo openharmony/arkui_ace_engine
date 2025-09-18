@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSearchPeer, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchSubmitCallback, SearchType, SearchAttribute, SearchButtonOptions } from "./component/search"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions } from "./component/common"
@@ -36,11 +37,11 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SearchAttribute): void { }
-    applyPressedAttribute(instance: SearchAttribute): void { }
-    applyFocusedAttribute(instance: SearchAttribute): void { }
-    applyDisabledAttribute(instance: SearchAttribute): void { }
-    applySelectedAttribute(instance: SearchAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _searchIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -138,8 +139,9 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
-    applyModifierPatch(peer: ArkSearchPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSearchPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontColor_0_flag) {

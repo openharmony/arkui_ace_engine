@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextClockPeer, TextClockConfiguration, TextClockAttribute } from "./component/textClock"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
@@ -32,11 +33,11 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextClockAttribute): void { }
-    applyPressedAttribute(instance: TextClockAttribute): void { }
-    applyFocusedAttribute(instance: TextClockAttribute): void { }
-    applyDisabledAttribute(instance: TextClockAttribute): void { }
-    applySelectedAttribute(instance: TextClockAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _format_0_0value?: ResourceStr | undefined
     _onDateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -57,8 +58,9 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
     _fontFeature_0_0value?: string | undefined
     _dateTimeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dateTimeOptions_0_0value?: intl.DateTimeOptions | undefined
-    applyModifierPatch(peer: ArkTextClockPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextClockPeer;
         if (this._format_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._format_0_flag) {

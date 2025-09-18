@@ -20,6 +20,7 @@ import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute } from "./component/grid"
 import { int32 } from "@koalaui/common"
 import { ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions } from "./component/common"
@@ -34,11 +35,11 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: GridAttribute): void { }
-    applyPressedAttribute(instance: GridAttribute): void { }
-    applyFocusedAttribute(instance: GridAttribute): void { }
-    applyDisabledAttribute(instance: GridAttribute): void { }
-    applySelectedAttribute(instance: GridAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _columnsTemplate_0_0value?: string | undefined
     _rowsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -103,8 +104,9 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _edgeEffect_0_1value?: EdgeEffectOptions | undefined
-    applyModifierPatch(peer: ArkGridPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._columnsTemplate_0_flag) {

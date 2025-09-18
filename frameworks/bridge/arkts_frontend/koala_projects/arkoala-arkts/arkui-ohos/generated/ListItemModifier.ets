@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkListItemPeer, SwipeActionOptions, ListItemAttribute } from "./component/listItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -28,11 +29,11 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ListItemAttribute): void { }
-    applyPressedAttribute(instance: ListItemAttribute): void { }
-    applyFocusedAttribute(instance: ListItemAttribute): void { }
-    applyDisabledAttribute(instance: ListItemAttribute): void { }
-    applySelectedAttribute(instance: ListItemAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _selectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectable_0_0value?: boolean | undefined
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -41,8 +42,9 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
     _swipeAction_0_0value?: SwipeActionOptions | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
-    applyModifierPatch(peer: ArkListItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkListItemPeer;
         if (this._selectable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selectable_0_flag) {

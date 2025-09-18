@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCirclePeer, CircleAttribute } from "./component/circle"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -29,13 +30,14 @@ export class CircleModifier extends CommonShapeMethodModifier implements CircleA
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: CircleAttribute): void { }
-    applyPressedAttribute(instance: CircleAttribute): void { }
-    applyFocusedAttribute(instance: CircleAttribute): void { }
-    applyDisabledAttribute(instance: CircleAttribute): void { }
-    applySelectedAttribute(instance: CircleAttribute): void { }
-    applyModifierPatch(peer: ArkCirclePeer): void {
-        super.applyModifierPatch(peer)
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkCirclePeer;
     }
     mergeModifier(modifier: CircleModifier): void {
         super.mergeModifier(modifier)

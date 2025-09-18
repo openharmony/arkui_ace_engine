@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, BlurStyle } from "./component/common"
@@ -35,11 +36,11 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SelectAttribute): void { }
-    applyPressedAttribute(instance: SelectAttribute): void { }
-    applyFocusedAttribute(instance: SelectAttribute): void { }
-    applyDisabledAttribute(instance: SelectAttribute): void { }
-    applySelectedAttribute(instance: SelectAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selected_0_0value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -97,8 +98,9 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
-    applyModifierPatch(peer: ArkSelectPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSelectPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._selected_0_flag) {

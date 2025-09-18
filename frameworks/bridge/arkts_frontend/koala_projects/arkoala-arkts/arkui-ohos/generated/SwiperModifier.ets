@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwiperAnimationStartCallback, SwiperAnimationEvent, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperAttribute } from "./component/swiper"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
@@ -33,11 +34,11 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SwiperAttribute): void { }
-    applyPressedAttribute(instance: SwiperAttribute): void { }
-    applyFocusedAttribute(instance: SwiperAttribute): void { }
-    applyDisabledAttribute(instance: SwiperAttribute): void { }
-    applySelectedAttribute(instance: SwiperAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _index_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _index_0_0value?: number | Bindable<number> | undefined
     _interval_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -104,8 +105,9 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _nextMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nextMargin_0_0value?: Length | undefined
     _nextMargin_0_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkSwiperPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSwiperPeer;
         if (this._index_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._index_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFlowItemPeer, FlowItemAttribute } from "./component/flowItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,13 +29,14 @@ export class FlowItemModifier extends CommonMethodModifier implements FlowItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: FlowItemAttribute): void { }
-    applyPressedAttribute(instance: FlowItemAttribute): void { }
-    applyFocusedAttribute(instance: FlowItemAttribute): void { }
-    applyDisabledAttribute(instance: FlowItemAttribute): void { }
-    applySelectedAttribute(instance: FlowItemAttribute): void { }
-    applyModifierPatch(peer: ArkFlowItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFlowItemPeer;
     }
     mergeModifier(modifier: FlowItemModifier): void {
         super.mergeModifier(modifier)

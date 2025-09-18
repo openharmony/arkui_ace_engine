@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
@@ -31,11 +32,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TabsAttribute): void { }
-    applyPressedAttribute(instance: TabsAttribute): void { }
-    applyFocusedAttribute(instance: TabsAttribute): void { }
-    applyDisabledAttribute(instance: TabsAttribute): void { }
-    applySelectedAttribute(instance: TabsAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _vertical_0_0value?: boolean | undefined
     _barPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -95,8 +96,9 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _cachedMaxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedMaxCount_0_0value?: number | undefined
     _cachedMaxCount_0_1value?: TabsCacheMode | undefined
-    applyModifierPatch(peer: ArkTabsPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTabsPeer;
         if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._vertical_0_flag) {

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextInputPeer, InputType, ContentType, EnterKeyType, OnSubmitCallback, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputAttribute } from "./component/textInput"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./component/common"
@@ -35,11 +36,11 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextInputAttribute): void { }
-    applyPressedAttribute(instance: TextInputAttribute): void { }
-    applyFocusedAttribute(instance: TextInputAttribute): void { }
-    applyDisabledAttribute(instance: TextInputAttribute): void { }
-    applySelectedAttribute(instance: TextInputAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: InputType | undefined
     _contentType_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -185,8 +186,9 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _showCounter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showCounter_0_0value?: boolean | undefined
     _showCounter_0_1value?: InputCounterOptions | undefined
-    applyModifierPatch(peer: ArkTextInputPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextInputPeer;
         if (this._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._type_0_flag) {

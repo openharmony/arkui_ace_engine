@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkFolderStackPeer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam, FolderStackAttribute } from "./component/folderStack"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,11 +30,11 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: FolderStackAttribute): void { }
-    applyPressedAttribute(instance: FolderStackAttribute): void { }
-    applyFocusedAttribute(instance: FolderStackAttribute): void { }
-    applyDisabledAttribute(instance: FolderStackAttribute): void { }
-    applySelectedAttribute(instance: FolderStackAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
     _onFolderStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -44,8 +45,9 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
     _enableAnimation_0_0value?: boolean | undefined
     _autoHalfFold_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoHalfFold_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkFolderStackPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkFolderStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignContent_0_flag) {

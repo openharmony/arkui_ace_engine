@@ -20,6 +20,7 @@ import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from "./component/list"
 import { int32 } from "@koalaui/common"
 import { ScrollableCommonMethod, ChildrenMainSize, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod } from "./component/common"
@@ -33,11 +34,11 @@ export class ListModifier extends ScrollableCommonMethodModifier implements List
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ListAttribute): void { }
-    applyPressedAttribute(instance: ListAttribute): void { }
-    applyFocusedAttribute(instance: ListAttribute): void { }
-    applyDisabledAttribute(instance: ListAttribute): void { }
-    applySelectedAttribute(instance: ListAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _alignListItem_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignListItem_0_0value?: ListItemAlign | undefined
     _listDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -94,8 +95,9 @@ export class ListModifier extends ScrollableCommonMethodModifier implements List
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedCount_1_0value?: number | undefined
     _cachedCount_1_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkListPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkListPeer;
         if (this._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignListItem_0_flag) {

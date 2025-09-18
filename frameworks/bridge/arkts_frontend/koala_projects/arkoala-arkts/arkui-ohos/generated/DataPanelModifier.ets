@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from "./component/dataPanel"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: DataPanelAttribute): void { }
-    applyPressedAttribute(instance: DataPanelAttribute): void { }
-    applyFocusedAttribute(instance: DataPanelAttribute): void { }
-    applyDisabledAttribute(instance: DataPanelAttribute): void { }
-    applySelectedAttribute(instance: DataPanelAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _closeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _closeEffect_0_0value?: boolean | undefined
     _valueColors_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -46,8 +47,9 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     _strokeWidth_0_0value?: Length | undefined
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackShadow_0_0value?: DataPanelShadowOptions | undefined
-    applyModifierPatch(peer: ArkDataPanelPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkDataPanelPeer;
         if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._closeEffect_0_flag) {

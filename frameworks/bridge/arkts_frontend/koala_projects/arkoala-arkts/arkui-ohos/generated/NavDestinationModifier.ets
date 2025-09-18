@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
@@ -36,11 +37,11 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: NavDestinationAttribute): void { }
-    applyPressedAttribute(instance: NavDestinationAttribute): void { }
-    applyFocusedAttribute(instance: NavDestinationAttribute): void { }
-    applyDisabledAttribute(instance: NavDestinationAttribute): void { }
-    applySelectedAttribute(instance: NavDestinationAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _hideTitleBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideTitleBar_0_0value?: boolean | undefined
     _hideBackButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -115,8 +116,9 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _enableStatusBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableStatusBar_0_0value?: boolean | undefined
     _enableStatusBar_0_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkNavDestinationPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkNavDestinationPeer;
         if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hideTitleBar_0_flag) {

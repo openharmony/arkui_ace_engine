@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkScrollableCommonMethodPeer, CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect } from "./component/enums"
@@ -30,11 +31,11 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ScrollableCommonMethod): void { }
-    applyPressedAttribute(instance: ScrollableCommonMethod): void { }
-    applyFocusedAttribute(instance: ScrollableCommonMethod): void { }
-    applyDisabledAttribute(instance: ScrollableCommonMethod): void { }
-    applySelectedAttribute(instance: ScrollableCommonMethod): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -69,8 +70,9 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
     _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
-    applyModifierPatch(peer: ArkScrollableCommonMethodPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkScrollableCommonMethodPeer;
         if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._scrollBar_0_flag) {

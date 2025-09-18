@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkXComponentPeer, XComponentAttribute } from "./component/xcomponent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,11 +30,11 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: XComponentAttribute): void { }
-    applyPressedAttribute(instance: XComponentAttribute): void { }
-    applyFocusedAttribute(instance: XComponentAttribute): void { }
-    applyDisabledAttribute(instance: XComponentAttribute): void { }
-    applySelectedAttribute(instance: XComponentAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onLoad_0_0value?: VoidCallback | undefined
     _onDestroy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -44,8 +45,9 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     _enableSecure_0_0value?: boolean | undefined
     _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hdrBrightness_0_0value?: double | undefined
-    applyModifierPatch(peer: ArkXComponentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkXComponentPeer;
         if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onLoad_0_flag) {

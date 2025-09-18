@@ -19,6 +19,7 @@
 import { SecurityComponentMethodModifier } from "./SecurityComponentMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSaveButtonPeer, SaveButtonCallback, SaveButtonOnClickResult, SaveButtonAttribute } from "./component/saveButton"
 import { int32 } from "@koalaui/common"
 import { SecurityComponentMethod } from "./component/securityComponent"
@@ -32,11 +33,11 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SaveButtonAttribute): void { }
-    applyPressedAttribute(instance: SaveButtonAttribute): void { }
-    applyFocusedAttribute(instance: SaveButtonAttribute): void { }
-    applyDisabledAttribute(instance: SaveButtonAttribute): void { }
-    applySelectedAttribute(instance: SaveButtonAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: SaveButtonCallback | undefined
     _setIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -49,8 +50,9 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     _iconBorderRadius_0_0value?: Dimension | BorderRadiuses | undefined
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stateEffect_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkSaveButtonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSaveButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onClick_0_flag) {
