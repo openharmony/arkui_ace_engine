@@ -3262,10 +3262,10 @@ NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src)
         }
     }
     if (src.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-       options.paddingStart = Converter::Convert<CalcDimension>(src.paddingStart.value);
+        options.paddingStart = Converter::Convert<CalcDimension>(src.paddingStart.value);
     }
     if (src.paddingEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-       options.paddingEnd = Converter::Convert<CalcDimension>(src.paddingEnd.value);
+        options.paddingEnd = Converter::Convert<CalcDimension>(src.paddingEnd.value);
     }
     return options;
 }
