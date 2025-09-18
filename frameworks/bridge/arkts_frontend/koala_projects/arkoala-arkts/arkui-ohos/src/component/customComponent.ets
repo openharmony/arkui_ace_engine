@@ -27,6 +27,61 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
+import { RecordData } from "@ohos.base"
+
+export class ReuseObject {
+    readonly _raw: RecordData;
+    private _recordValue: Record<string, RecordData> = {}
+    private _isRecord: boolean = false;
+    constructor(value: RecordData) {
+        this._raw = value;
+        if (this._raw instanceof Record<string, RecordData>) {
+            this._recordValue = value as Record<string, RecordData>;
+            this._isRecord = true;
+        }
+    }
+
+    get raw(): RecordData {
+        return this._raw;
+    }
+
+    $_get(key: string): RecordData {
+        if (this._raw === undefined || this._raw === null) {
+            return undefined;
+        }
+        if (this._isRecord) {
+            return this._recordValue[key];
+        } else {
+            return ((reflect.Value.of(this._raw) as ClassValue).getFieldByName(key).getData() as RecordData);
+        }
+    }
+
+    has(key: string): boolean {
+        if (this._raw === undefined || this._raw === null) {
+            return false;
+        }
+        if (this._isRecord) {
+            return this._recordValue.has(key);
+        } else {
+            return (Type.of(this._raw) as ClassType).hasField(key);
+        }
+    }
+
+    keys(): string[] {
+        if (this._raw === undefined || this._raw === null) {
+            return [];
+        }
+        if (this._isRecord) {
+            let key: string[] = [];
+            for (let value of this._recordValue.keys()) {
+                key.push(value);
+            }
+            return key;
+        } else {
+            return Object.getOwnPropertyNames(this._raw!);
+        }
+    }
+}
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -150,16 +205,20 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
-    aboutToReuse(initializers?: T_Options): void {
+    aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
             const reusable = this.instance as ReusableLifeCycle;
+            if (param) {
+                reusable.aboutToReuse(new ReuseObject(param))
+                return;
+            }
             if (initializers === undefined) {
-                reusable.aboutToReuse({});
+                reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
                 const data: T_Options = initializers as T_Options;
                 const params: Record<string, object> = component.__toRecord(data! as object);
-                reusable.aboutToReuse(params);
+                reusable.aboutToReuse(new ReuseObject(params));
             }
         } else if (this.instance instanceof ReusableV2LifeCycle) {
             const reusable = this.instance as ReusableV2LifeCycle;
@@ -301,7 +360,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
 }
 
 interface ReusableLifeCycle {
-    aboutToReuse(params: Record<string, object>): void;
+    aboutToReuse(params: ReuseObject): void;
 }
 
 export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle {
@@ -325,7 +384,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
             () => createInstance(uiContext, factory, initializers), content, initializers, reuseKey);
     }
 
-    aboutToReuse(params: Record<string, object>): void {}
+     aboutToReuse(params: ReuseObject): void {}
 }
 
 interface ReusableV2LifeCycle {

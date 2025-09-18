@@ -31,7 +31,7 @@ export function setNeedCreate(isNeedCreate: boolean): boolean
 export function ArkComponentRoot(
     component: ArkCustomComponent,
     @memo
-    content: () => void
+    content: (node: PeerNode) => void
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
     NodeAttach<PeerNode>(
@@ -40,7 +40,7 @@ export function ArkComponentRoot(
             if (_isNeedCreate) {
                 rememberDisposable(() => {
                     let state = mutableState(false)
-                    scheduleCallback(() => {})
+                    scheduleCallback(() => { })
                     return state;
                 }, (_: MutableState<boolean> | undefined) => {
                     scheduleCallback(() => {
@@ -49,7 +49,7 @@ export function ArkComponentRoot(
                 })
                 component.aboutToAppear()
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before content`)
-                content()
+                content(node)
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after content`)
                 return
             }
@@ -69,7 +69,7 @@ export function ArkComponentRoot(
             if (shown.value) {
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
                 InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
-                content();
+                content(node);
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
             }
         }
