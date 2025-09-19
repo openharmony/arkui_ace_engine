@@ -119,6 +119,9 @@ export class SerializerBase {
     private static poolTop = 0
 
     static hold(): SerializerBase {
+        if (SerializerBase.isMultithread) {
+            return new SerializerBase()
+        }
         if (this.poolTop === this.pool.length) {
             throw new Error("Pool empty! Release one of taken serializers")
         }
@@ -135,12 +138,25 @@ export class SerializerBase {
             current.next = serializer
         }
     }
+
+    private static isMultithread: boolean = false
+    static setMultithreadMode(): void {
+        if (SerializerBase.isMultithread) {
+            return
+        }
+        SerializerBase.isMultithread = true
+        SerializerBase.pool = []
+    }
+
     constructor() {
         this.buffer = new ArrayBuffer(96)
         this.view = new DataView(this.buffer)
     }
     public release() {
         this.releaseResources()
+        if (SerializerBase.isMultithread) {
+            return
+        }
         this.position = 0
         if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
             throw new Error("Serializers should be release in LIFO order")
