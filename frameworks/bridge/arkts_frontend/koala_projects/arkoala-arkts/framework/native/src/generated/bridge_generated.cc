@@ -17903,6 +17903,19 @@ void impl_SwiperAttribute_setIndex(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetNodeModifiers()->getSwiperModifier()->setIndex(self, static_cast<Opt_Union_Number_Bindable*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setIndex, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SwiperAttribute_setAutoPlay0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSwiperModifier()->setAutoPlay0(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setAutoPlay0, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setInterval(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -18247,7 +18260,7 @@ void impl_SwiperAttribute_setOnContentWillScroll(Ark_NativePointer thisPtr, KSer
         GetNodeModifiers()->getSwiperModifier()->setOnContentWillScroll(self, static_cast<Opt_ContentWillScrollCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setOnContentWillScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_SwiperAttribute_setAutoPlay(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_SwiperAttribute_setAutoPlay1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto autoPlayValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -18264,9 +18277,9 @@ void impl_SwiperAttribute_setAutoPlay(Ark_NativePointer thisPtr, KSerializerBuff
             optionsValueTempTmpBuf.value = AutoPlayOptions_serializer::read(thisDeserializer);
         }
         Opt_AutoPlayOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getSwiperModifier()->setAutoPlay(self, static_cast<Opt_Boolean*>(&autoPlayValueTemp), static_cast<Opt_AutoPlayOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getSwiperModifier()->setAutoPlay1(self, static_cast<Opt_Boolean*>(&autoPlayValueTemp), static_cast<Opt_AutoPlayOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setAutoPlay, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setAutoPlay1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setDisplayArrow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -34316,9 +34329,16 @@ void impl_SwiperController_showPrevious(Ark_NativePointer thisPtr) {
         GetAccessors()->getSwiperControllerAccessor()->showPrevious(self);
 }
 KOALA_INTEROP_DIRECT_V1(SwiperController_showPrevious, Ark_NativePointer)
-void impl_SwiperController_changeIndex(Ark_NativePointer thisPtr, KInteropNumber index, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_SwiperController_changeIndex(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto indexValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Number indexValueTempTmpBuf = {};
+        indexValueTempTmpBuf.tag = indexValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((indexValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            indexValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        Opt_Number indexValueTemp = indexValueTempTmpBuf;;
         const auto animationModeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Union_SwiperAnimationMode_Boolean animationModeValueTempTmpBuf = {};
         animationModeValueTempTmpBuf.tag = animationModeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -34338,9 +34358,9 @@ void impl_SwiperController_changeIndex(Ark_NativePointer thisPtr, KInteropNumber
             animationModeValueTempTmpBuf.value = static_cast<Ark_Union_SwiperAnimationMode_Boolean>(animationModeValueTempTmpBuf_);
         }
         Opt_Union_SwiperAnimationMode_Boolean animationModeValueTemp = animationModeValueTempTmpBuf;;
-        GetAccessors()->getSwiperControllerAccessor()->changeIndex(self, (const Ark_Number*) (&index), static_cast<Opt_Union_SwiperAnimationMode_Boolean*>(&animationModeValueTemp));
+        GetAccessors()->getSwiperControllerAccessor()->changeIndex(self, static_cast<Opt_Number*>(&indexValueTemp), static_cast<Opt_Union_SwiperAnimationMode_Boolean*>(&animationModeValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(SwiperController_changeIndex, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(SwiperController_changeIndex, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperController_finishAnimation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

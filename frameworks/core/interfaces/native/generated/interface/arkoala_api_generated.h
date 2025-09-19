@@ -22298,6 +22298,8 @@ typedef struct GENERATED_ArkUISwiperModifier {
                              const Opt_SwiperController* controller);
     void (*setIndex)(Ark_NativePointer node,
                      const Opt_Union_Number_Bindable* value);
+    void (*setAutoPlay0)(Ark_NativePointer node,
+                         const Opt_Boolean* value);
     void (*setInterval)(Ark_NativePointer node,
                         const Opt_Number* value);
     void (*setIndicator)(Ark_NativePointer node,
@@ -22344,9 +22346,9 @@ typedef struct GENERATED_ArkUISwiperModifier {
                             const Opt_PageFlipMode* value);
     void (*setOnContentWillScroll)(Ark_NativePointer node,
                                    const Opt_ContentWillScrollCallback* value);
-    void (*setAutoPlay)(Ark_NativePointer node,
-                        const Opt_Boolean* autoPlay,
-                        const Opt_AutoPlayOptions* options);
+    void (*setAutoPlay1)(Ark_NativePointer node,
+                         const Opt_Boolean* autoPlay,
+                         const Opt_AutoPlayOptions* options);
     void (*setDisplayArrow)(Ark_NativePointer node,
                             const Opt_Union_ArrowStyle_Boolean* value,
                             const Opt_Boolean* isHoverShow);
@@ -25827,7 +25829,7 @@ typedef struct GENERATED_ArkUISwiperControllerAccessor {
     void (*showNext)(Ark_SwiperController peer);
     void (*showPrevious)(Ark_SwiperController peer);
     void (*changeIndex)(Ark_SwiperController peer,
-                        const Ark_Number* index,
+                        const Opt_Number* index,
                         const Opt_Union_SwiperAnimationMode_Boolean* animationMode);
     void (*finishAnimation)(Ark_SwiperController peer,
                             const Opt_VoidCallback* callback_);

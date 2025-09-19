@@ -41,6 +41,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     applySelectedAttribute(instance: Object): void { }
     _index_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _index_0_0value?: number | Bindable<number> | undefined
+    _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoPlay_0_0value?: boolean | undefined
     _interval_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _interval_0_0value?: number | undefined
     _indicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -87,9 +89,9 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _pageFlipMode_0_0value?: PageFlipMode | undefined
     _onContentWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onContentWillScroll_0_0value?: ContentWillScrollCallback | undefined
-    _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _autoPlay_0_0value?: boolean | undefined
-    _autoPlay_0_1value?: AutoPlayOptions | undefined
+    _autoPlay_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoPlay_1_0value?: boolean | undefined
+    _autoPlay_1_1value?: AutoPlayOptions | undefined
     _displayArrow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayArrow_0_0value?: ArrowStyle | boolean | undefined
     _displayArrow_0_1value?: boolean | undefined
@@ -123,6 +125,24 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 default: {
                     this._index_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setIndexAttribute((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (this._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoPlay0Attribute((this._autoPlay_0_0value as boolean | undefined));
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoPlay0Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -540,21 +560,21 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
-        if (this._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._autoPlay_1_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._autoPlay_0_flag) {
+            switch (this._autoPlay_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAutoPlayAttribute((this._autoPlay_0_0value as boolean | undefined), (this._autoPlay_0_1value as AutoPlayOptions | undefined));
-                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    peer.setAutoPlay1Attribute((this._autoPlay_1_0value as boolean | undefined), (this._autoPlay_1_1value as AutoPlayOptions | undefined));
+                    this._autoPlay_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    this._autoPlay_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._autoPlay_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAutoPlayAttribute((undefined as boolean | undefined), (undefined as AutoPlayOptions | undefined));
+                    this._autoPlay_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoPlay1Attribute((undefined as boolean | undefined), (undefined as AutoPlayOptions | undefined));
                 }
             }
         }
@@ -661,6 +681,19 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this.index((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (modifier._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoPlay(modifier._autoPlay_0_0value);
+                    break;
+                }
+                default: {
+                    this.autoPlay((undefined as boolean | undefined));
                 }
             }
         }
@@ -963,12 +996,12 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
-        if (modifier._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._autoPlay_1_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._autoPlay_0_flag) {
+            switch (modifier._autoPlay_1_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.autoPlay(modifier._autoPlay_0_0value, modifier._autoPlay_0_1value);
+                    this.autoPlay(modifier._autoPlay_1_0value, modifier._autoPlay_1_1value);
                     break;
                 }
                 default: {
@@ -1050,6 +1083,17 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         } else
         {
             this._index_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    autoPlay(value: boolean | undefined): this {
+        if (((this._autoPlay_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoPlay_0_0value) !== (value)))
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoPlay_0_0value = value
+        } else
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1307,14 +1351,14 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         return this
     }
     autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
-        if (((this._autoPlay_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoPlay_0_0value) !== (autoPlay)) || (true))
+        if (((this._autoPlay_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoPlay_1_0value) !== (autoPlay)) || (true))
         {
-            this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
-            this._autoPlay_0_0value = autoPlay
-            this._autoPlay_0_1value = options
+            this._autoPlay_1_flag = AttributeUpdaterFlag.UPDATE
+            this._autoPlay_1_0value = autoPlay
+            this._autoPlay_1_1value = options
         } else
         {
-            this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
+            this._autoPlay_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
