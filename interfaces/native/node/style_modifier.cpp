@@ -2156,7 +2156,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
-            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
@@ -14009,7 +14009,7 @@ int32_t SetTextLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     };
 
     fullImpl->getNodeModifiers()->getTextModifier()->setLinearGradient(
-        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14106,7 +14106,7 @@ int32_t SetTextRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
     values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
     fullImpl->getNodeModifiers()->getTextModifier()->setRadialGradient(
-        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
