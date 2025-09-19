@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <functional>
 
 #include "base/log/ace_trace.h"
 #include "base/utils/noncopyable.h"
@@ -307,6 +308,8 @@ public:
     {
         enablePreBuild_ = enable;
     }
+
+    std::string DumpHashKey();
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
