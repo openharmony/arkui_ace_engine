@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
+import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
 import { KPointer } from '@koalaui/interop'
 import { BorderStyle } from '../../component/enums'
 import { ArkUIAniModule } from 'arkui.ani'

@@ -15,7 +15,7 @@
 
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
-import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
+import { NodePosition, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
     Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer,
     NativeThunk, SerializerBase
@@ -439,36 +439,36 @@ export class FrameNode implements MaterializedBase {
     public getOpacity(): number {
         return FrameNodeExtender.getOpacity(this);
     }
-    public getPositionToWindowWithTransform(): Position {
+    public getPositionToWindowWithTransform(): NodePosition {
         // return FrameNodeExtender.getPositionToWindowWithTransform(this);
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
-    public getPositionToParent(): Position {
+    public getPositionToParent(): NodePosition {
         // return FrameNodeExtender.getPositionToParent(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
-    public getPositionToScreen(): Position {
+    public getPositionToScreen(): NodePosition {
         // return FrameNodeExtender.getPositionToScreen(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
-    public getPositionToWindow(): Position {
+    public getPositionToWindow(): NodePosition {
         // return FrameNodeExtender.getPositionToWindow(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
-    public getPositionToParentWithTransform(): Position {
+    public getPositionToParentWithTransform(): NodePosition {
         // return FrameNodeExtender.getPositionToParentWithTransform(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
-    public getPositionToScreenWithTransform(): Position {
+    public getPositionToScreenWithTransform(): NodePosition {
         // return FrameNodeExtender.getPositionToScreenWithTransform(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
     public getMeasuredSize(): Size {
         return FrameNodeExtender.getMeasuredSize(this)
     }
-    public getLayoutPosition(): Position {
+    public getLayoutPosition(): NodePosition {
         // return FrameNodeExtender.getLayoutPosition(this)
-        return { x: 0, y: 0 } as Position;
+        return { x: 0, y: 0 } as NodePosition;
     }
    public getUserConfigBorderWidth(): Edges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigBorderWidth()
@@ -525,10 +525,10 @@ export class FrameNode implements MaterializedBase {
         ArkUIAniModule._OnMeasure_InnerMeasure(this!.peer!.ptr);
     }
     public onLayoutInner(x: number, y: number): void {
-        const position: Position = { x: x, y: y };
+        const position: NodePosition = { x: x, y: y };
         this.onLayout(position);
     }
-    public onLayout(position: Position): void {
+    public onLayout(position: NodePosition): void {
         ArkUIAniModule._OnLayout_InnerLayout(this!.peer!.ptr);
     }
     public setMeasuredSize(size: Size): void {
@@ -538,8 +538,8 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.setMeasuredSize(this, size_casted);
         return;
     }
-    public setLayoutPosition(position: Position): void {
-        // const position_casted = position as (Position);
+    public setLayoutPosition(position: NodePosition): void {
+        // const position_casted = position as (NodePosition);
         // FrameNodeExtender.setLayoutPosition_serialize(this, position_casted);
         return;
     }
@@ -551,8 +551,8 @@ export class FrameNode implements MaterializedBase {
         ArkUIAniModule._Common_Restore_InstanceId();
         return;
     }
-    public layout(position: Position): void {
-        const position_casted = position as (Position);
+    public layout(position: NodePosition): void {
+        const position_casted = position as (NodePosition);
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
         // FrameNodeExtender.layout_serialize(this, position_casted);
