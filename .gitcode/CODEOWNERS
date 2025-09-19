@@ -3156,17 +3156,17 @@ interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkui_framework_xnode
 
 [Arkoala]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
-frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkui_statemgmt
+frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkweb-committer-group
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniModule.ts @arkui_framework_xnode
@@ -3194,19 +3194,19 @@ frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/arkts_frontend.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/entry/ @arkui_framework_xnode
 
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @arkuievent
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @arkuievent
-frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @arkuievent
-frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @arkuievent
-frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @arkuievent
-frameworks/core/interfaces/native/implementation/drag_event_peer.h @arkuievent
-frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @arkuievent
-frameworks/core/interfaces/native/ani/drag_ani_modifier.h @arkuievent
-frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @arkuievent
-frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @arkuievent
-frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @arkuievent
-frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @arkuievent
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @ArkUI_Event
+frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
+frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
+frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @ArkUI_Event
+frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.h @ArkUI_Event
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @ArkUI_Event
+frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @ArkUI_Event
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkweb-committer-group
