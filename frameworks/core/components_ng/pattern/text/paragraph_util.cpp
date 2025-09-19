@@ -105,6 +105,9 @@ void ParagraphUtil::GetSpanParagraphStyle(
     if (lineStyle->HasLeadingMargin()) {
         pStyle.leadingMargin = lineStyle->GetLeadingMarginValue();
     }
+    if (lineStyle->HasDrawableLeadingMargin()) {
+        SetDrawableLeadingMargin(pStyle, lineStyle);
+    }
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
@@ -115,6 +118,17 @@ void ParagraphUtil::GetSpanParagraphStyle(
         pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
     }
     pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
+}
+
+void ParagraphUtil::SetDrawableLeadingMargin(ParagraphStyle& pStyle, const std::unique_ptr<TextLineStyle>& lineStyle)
+{
+    pStyle.drawableLeadingMargin = lineStyle->GetDrawableLeadingMarginValue();
+    if (pStyle.drawableLeadingMargin.has_value() && pStyle.drawableLeadingMargin->getLeadingMarginFunc_) {
+        auto getLeadingMarginFunc = pStyle.drawableLeadingMargin->getLeadingMarginFunc_;
+        auto leadingMarginWidth = getLeadingMarginFunc();
+        pStyle.drawableLeadingMargin->size = NG::LeadingMarginSize(leadingMarginWidth,
+            Dimension(0.0, leadingMarginWidth.Unit()));
+    }
 }
 
 void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans,
@@ -145,7 +159,7 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
             }
             if (pStyle != nextSpanParagraphStyle ||
                 (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) || Positive(pStyle.indent.Value()) ||
-                pStyle.maxLines != UINT32_MAX) {
+                pStyle.maxLines != UINT32_MAX || pStyle.drawableLeadingMargin.has_value()) {
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
@@ -200,7 +214,10 @@ void ParagraphUtil::ApplyIndent(
     auto indent = static_cast<float>(value);
     auto leadingMarginValue = 0.0f;
     std::vector<float> indents;
-    if (paragraphStyle.leadingMargin.has_value()) {
+    if (paragraphStyle.drawableLeadingMargin.has_value()) {
+        leadingMarginValue = paragraphStyle.drawableLeadingMargin->size.Width().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    } else if (paragraphStyle.leadingMargin.has_value()) {
         leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }

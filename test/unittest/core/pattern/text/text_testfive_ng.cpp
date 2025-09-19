@@ -3071,6 +3071,51 @@ HWTEST_F(TextTestFiveNg, PaintCustomSpan001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PaintLeadingMarginSpan001
+ * @tc.desc: test text_content_modifier.cpp PaintLeadingMarginSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, PaintLeadingMarginSpan001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(2));
+    TextLineMetrics textLineMetrics;
+    EXPECT_CALL(*paragraph, GetLineMetrics(_)).WillRepeatedly(Return(textLineMetrics));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    /**
+     * @tc.steps: step2. test PaintLeadingMarginSpan without drawableLeadingMargin
+     */
+    auto pManager = pattern->GetParagraphManager();
+    ASSERT_NE(pManager, nullptr);
+    RSCanvas canvas;
+    DrawingContext drawingContext = { canvas, 10, 10 };
+    textContentModifier->PaintLeadingMarginSpan(pattern, drawingContext, pManager);
+
+    /**
+     * @tc.steps: step3. test PaintLeadingMarginSpan
+     */
+    ParagraphStyle paraStyle;
+    DrawableLeadingMargin leadingMargin;
+    leadingMargin.onDraw_ = [](NG::DrawingContext& context, NG::LeadingMarginSpanOptions options) {};
+    paraStyle.drawableLeadingMargin = std::make_optional<NG::DrawableLeadingMargin>(leadingMargin);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paraStyle, .start = 0, .end = 1 });
+    textContentModifier->PaintLeadingMarginSpan(pattern, drawingContext, pManager);
+}
+
+/**
  * @tc.name: onDraw001
  * @tc.desc: test text_content_modifier.cpp onDraw function
  * @tc.type: FUNC

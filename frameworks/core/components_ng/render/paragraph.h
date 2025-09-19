@@ -94,6 +94,28 @@ struct LineMetrics {
     int32_t endIndex = 0;
 };
 
+struct LeadingMarginSpanOptions {
+    double x = 0.0f;
+    TextDirection direction = TextDirection::LTR;
+    double top = 0.0f;
+    double baseline = 0.0f;
+    double bottom = 0.0f;
+    size_t start = 0;
+    size_t end = 0;
+    bool first = false;
+};
+
+struct DrawableLeadingMargin {
+    std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> onDraw_;
+    std::function<CalcDimension()> getLeadingMarginFunc_;
+    LeadingMarginSize size;
+
+    bool operator==(const DrawableLeadingMargin& other) const
+    {
+        return size == other.size;
+    }
+};
+
 struct LeadingMargin {
     LeadingMarginSize size;
     RefPtr<PixelMap> pixmap;
@@ -150,6 +172,7 @@ struct ParagraphStyle {
     LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
+    std::optional<DrawableLeadingMargin> drawableLeadingMargin;
     double fontSize = 14.0;
     Dimension lineHeight;
     Dimension indent;
@@ -168,7 +191,8 @@ struct ParagraphStyle {
         return direction == others.direction && align == others.align && verticalAlign == others.verticalAlign &&
                maxLines == others.maxLines && fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
-               leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
+               leadingMargin == others.leadingMargin &&
+               drawableLeadingMargin == others.drawableLeadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
                enableAutoSpacing == others.enableAutoSpacing;

@@ -427,6 +427,9 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     } else {
         DrawObscuration(drawingContext);
     }
+    if (!marqueeSet_) {
+        PaintLeadingMarginSpan(textPattern, drawingContext, pManager);
+    }
     PaintCustomSpan(drawingContext);
 }
 
@@ -520,6 +523,43 @@ void TextContentModifier::DrawText(
             host->GetId(), pManager->GetLongestLineWithIndent(), pManager->GetMaxIntrinsicWidth(),
             pManager->GetMaxWidth(), pManager->GetHeight(), static_cast<int32_t>(pManager->GetLineCount()),
             static_cast<int32_t>(paragraphs.size()));
+    }
+}
+
+void TextContentModifier::PaintLeadingMarginSpan(const RefPtr<TextPattern>& textPattern,
+    DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager)
+{
+    CHECK_NULL_VOID(textPattern);
+    CHECK_NULL_VOID(pManager);
+    auto paragraphs = pManager->GetParagraphs();
+    auto offset = textPattern->GetTextRect().GetOffset();
+    size_t lineCount = 0;
+    for (auto&& paragraphInfo : paragraphs) {
+        auto drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
+        auto currentParagraphLineCount = paragraphInfo.paragraph->GetLineCount();
+        if (!drawableLeadingMargin.has_value() || currentParagraphLineCount <= 0) {
+            lineCount += currentParagraphLineCount;
+            continue;
+        }
+        auto leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
+        CHECK_NULL_VOID(leadingMarginOnDraw);
+        for (size_t i = 0; i < currentParagraphLineCount; i++) {
+            auto lineMetrics = pManager->GetLineMetrics(lineCount + i);
+            LeadingMarginSpanOptions options;
+            options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
+                lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;
+            options.direction = paragraphInfo.paragraphStyle.direction;
+            options.top = lineMetrics.y + offset.GetY();
+            options.baseline = lineMetrics.baseline + offset.GetY();
+            options.bottom = options.top + lineMetrics.height;
+            options.start = lineMetrics.startIndex;
+            options.end = lineMetrics.endIndex;
+            if (i == 0) {
+                options.first = true;
+            }
+            leadingMarginOnDraw(drawingContext, options);
+        }
+        lineCount += currentParagraphLineCount;
     }
 }
 

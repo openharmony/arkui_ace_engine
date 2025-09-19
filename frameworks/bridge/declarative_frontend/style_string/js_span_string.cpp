@@ -327,7 +327,12 @@ JSRef<JSObject> JSSpanString::CreateJsParagraphStyleSpan(const RefPtr<SpanBase>&
     CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
     JSRef<JSObject> obj = JSClass<JSParagraphStyleSpan>::NewInstance();
     auto paragraphSpan = Referenced::Claim(obj->Unwrap<JSParagraphStyleSpan>());
-    paragraphSpan->SetParagraphStyleSpan(span);
+    paragraphSpan->SetParagraphStyle(span->GetParagraphStyle());
+
+    auto jsSpan = AceType::DynamicCast<JSParagraphStyleSpan>(spanObject);
+    if (jsSpan) {
+        paragraphSpan->SetJsLeadingMarginSpanObject(jsSpan->GetJsLeadingMarginSpanObject());
+    }
     return obj;
 }
 
@@ -487,9 +492,9 @@ RefPtr<SpanBase> JSSpanString::ParseJsParagraphStyleSpan(int32_t start, int32_t 
 {
     auto* base = obj->Unwrap<AceType>();
     auto* paragraphStyleSpan = AceType::DynamicCast<JSParagraphStyleSpan>(base);
-    if (paragraphStyleSpan && paragraphStyleSpan->GetParagraphStyleSpan()) {
-        return AceType::MakeRefPtr<ParagraphStyleSpan>(
-            paragraphStyleSpan->GetParagraphStyleSpan()->GetParagraphStyle(), start, start + length);
+    if (paragraphStyleSpan) {
+        return AceType::MakeRefPtr<JSParagraphStyleSpan>(paragraphStyleSpan->GetJsLeadingMarginSpanObject(),
+            paragraphStyleSpan->GetParagraphStyle(), start, start + length);
     }
     return nullptr;
 }

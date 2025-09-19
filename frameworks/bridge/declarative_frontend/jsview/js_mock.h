@@ -88,6 +88,14 @@ public:
     void Invalidate(const JSCallbackInfo& info) {}
 };
 
+class JSMockNativeLeadingMarginSpan {
+public:
+    JSMockNativeLeadingMarginSpan() = default;
+    ~JSMockNativeLeadingMarginSpan() = default;
+
+    static void JSBind(BindingTarget globalObj);
+};
+
 class JSMockViewBuildNodeBase {
 public:
     JSMockViewBuildNodeBase() = default;

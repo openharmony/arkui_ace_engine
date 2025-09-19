@@ -73,16 +73,19 @@ private:
     RefPtr<FontSpan> fontSpan_;
 };
 
-class JSParagraphStyleSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSParagraphStyleSpan, AceType);
+class JSParagraphStyleSpan : public ParagraphStyleSpan {
+    DECLARE_ACE_TYPE(JSParagraphStyleSpan, ParagraphStyleSpan);
 
 public:
     JSParagraphStyleSpan() = default;
+    JSParagraphStyleSpan(JSRef<JSObject> leadingMarginSpanObj, SpanParagraphStyle paragraphStyle,
+        int32_t start, int32_t end);
     ~JSParagraphStyleSpan() override = default;
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSParagraphStyleSpan* paragraphStyleSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<ParagraphStyleSpan> ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj);
+    static SpanParagraphStyle ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj,
+        const JSCallbackInfo& args, RefPtr<JSParagraphStyleSpan>& paragraphSpan);
     static void ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextVerticalAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
@@ -90,9 +93,18 @@ public:
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsLeadingMarginSpan(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle,
+        const JSCallbackInfo& args, RefPtr<JSParagraphStyleSpan>& paragraphSpan);
+    static std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> ParseMarginOnDrawFunc(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+    static std::function<CalcDimension()> ParseGetLeadingMarginFunc(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+    static JSRef<JSVal> SetLeadingMarginSpanObj(const JSRef<JSObjTemplate>& objectTemplate,
+        const NG::LeadingMarginSpanOptions& leadingMarginOptions);
     static void ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
+    static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& leadingMarginObject);
     void GetTextAlign(const JSCallbackInfo& info);
     void SetTextAlign(const JSCallbackInfo& info);
     void GetTextVerticalAlign(const JSCallbackInfo& info);
@@ -107,17 +119,20 @@ public:
     void GetWordBreak(const JSCallbackInfo& info);
     void SetLeadingMargin(const JSCallbackInfo& info);
     void GetLeadingMargin(const JSCallbackInfo& info);
+    void SetLeadingMarginSpan(const JSCallbackInfo& info);
+    void GetLeadingMarginSpan(const JSCallbackInfo& info);
     void GetParagraphSpacing(const JSCallbackInfo& info);
     void SetParagraphSpacing(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 
-    RefPtr<ParagraphStyleSpan>& GetParagraphStyleSpan();
-    void SetParagraphStyleSpan(const RefPtr<ParagraphStyleSpan>& paragraphStyleSpan);
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    JSRef<JSObject>& GetJsLeadingMarginSpanObject();
+    void SetJsLeadingMarginSpanObject(const JSRef<JSObject>& leadingMarginSpanObj);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSParagraphStyleSpan);
-    RefPtr<ParagraphStyleSpan> paragraphStyleSpan_;
+    JSRef<JSObject> leadingMarginSpanObj_;
 };
 
 class JSDecorationSpan : public virtual AceType {
@@ -358,6 +373,17 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
     RefPtr<JSNativeCustomSpan> customSpan_;
     JSRef<JSObject> customSpanObj_;
+};
+
+class JSNativeLeadingMarginSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSNativeLeadingMarginSpan, AceType);
+
+public:
+    JSNativeLeadingMarginSpan() = default;
+    ~JSNativeLeadingMarginSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSNativeLeadingMarginSpan* imageSpan);
+    static void JSBind(BindingTarget globalObj);
 };
 
 class JSExtSpan : public ExtSpan {
