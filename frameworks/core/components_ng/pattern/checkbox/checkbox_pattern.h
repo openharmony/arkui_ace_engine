@@ -191,6 +191,7 @@ private:
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void InitEvent();
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();

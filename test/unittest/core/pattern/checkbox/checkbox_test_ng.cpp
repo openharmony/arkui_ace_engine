@@ -927,6 +927,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     layoutProperty->UpdateMargin(margin); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
@@ -940,6 +943,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     layoutProperty->UpdateMargin(margin1); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
+    pipeline->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
@@ -2791,6 +2795,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0128, TestSize.Level1)
      * @tc.expected: test GetFirstChild is not null
      */
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->UpdateIndicator();
     auto host = pattern->GetHost();
     ASSERT_NE(host->GetFirstChild(), nullptr);
@@ -2819,6 +2826,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0129, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->StartCustomNodeAnimation(true);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
@@ -2850,6 +2860,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->StartCustomNodeAnimation(false);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
