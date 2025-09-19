@@ -1453,8 +1453,8 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
 }
 export type SystemBarStyle = window.SystemBarStyle;
 export interface NavigationCommonTitle {
-    main: string | Resource;
-    sub: string | Resource;
+    main: string | Resource | undefined;
+    sub: string | Resource | undefined;
 }
 export interface NavigationCustomTitle {
     builder: CustomBuilder;
@@ -1522,7 +1522,7 @@ export enum NavigationOperation {
     REPLACE = 3
 }
 export interface ToolbarItem {
-    value: ResourceStr;
+    value: ResourceStr | undefined;
     icon?: ResourceStr;
     symbolIcon?: SymbolGlyphModifier;
     action?: (() => void);
@@ -2446,48 +2446,70 @@ export class NavigationCommonTitle_serializer {
     public static write(buffer: SerializerBase, value: NavigationCommonTitle): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMain  = value.main
-        if (valueHolderForMain instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForMainForIdx0  = valueHolderForMain as string
-            valueSerializer.writeString(valueHolderForMainForIdx0)
-        } else if (valueHolderForMain instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
-            const valueHolderForMainForIdx1  = valueHolderForMain as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForMainForIdx1)
+        if (valueHolderForMain !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMainTmpValue  = valueHolderForMain!
+            if (valueHolderForMainTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForMainTmpValueForIdx0  = valueHolderForMainTmpValue as string
+                valueSerializer.writeString(valueHolderForMainTmpValueForIdx0)
+            } else if (valueHolderForMainTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForMainTmpValueForIdx1  = valueHolderForMainTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMainTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForSub  = value.sub
-        if (valueHolderForSub instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForSubForIdx0  = valueHolderForSub as string
-            valueSerializer.writeString(valueHolderForSubForIdx0)
-        } else if (valueHolderForSub instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
-            const valueHolderForSubForIdx1  = valueHolderForSub as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForSubForIdx1)
+        if (valueHolderForSub !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSubTmpValue  = valueHolderForSub!
+            if (valueHolderForSubTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForSubTmpValueForIdx0  = valueHolderForSubTmpValue as string
+                valueSerializer.writeString(valueHolderForSubTmpValueForIdx0)
+            } else if (valueHolderForSubTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForSubTmpValueForIdx1  = valueHolderForSubTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSubTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationCommonTitle {
         let valueDeserializer : DeserializerBase = buffer
-        const mainTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let mainTmpBuf : string | Resource | undefined
-        if (mainTmpBufUnionSelector == (0).toChar()) {
-            mainTmpBuf = (valueDeserializer.readString() as string)
-        } else if (mainTmpBufUnionSelector == (1).toChar()) {
-            mainTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for mainTmpBuf has to be chosen through deserialisation.")
+        const mainTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mainTmpBuf : string | Resource | undefined = undefined
+        if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const mainTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let mainTmpBuf_ : string | Resource | undefined
+            if (mainTmpBuf_UnionSelector == (0).toChar()) {
+                mainTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (mainTmpBuf_UnionSelector == (1).toChar()) {
+                mainTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for mainTmpBuf_ has to be chosen through deserialisation.")
+            }
+            mainTmpBuf = (mainTmpBuf_ as string | Resource)
         }
-        const mainTmpResult : string | Resource = (mainTmpBuf as string | Resource)
-        const subTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let subTmpBuf : string | Resource | undefined
-        if (subTmpBufUnionSelector == (0).toChar()) {
-            subTmpBuf = (valueDeserializer.readString() as string)
-        } else if (subTmpBufUnionSelector == (1).toChar()) {
-            subTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for subTmpBuf has to be chosen through deserialisation.")
+        const mainTmpResult : string | Resource | undefined = mainTmpBuf
+        const subTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let subTmpBuf : string | Resource | undefined = undefined
+        if ((subTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const subTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let subTmpBuf_ : string | Resource | undefined
+            if (subTmpBuf_UnionSelector == (0).toChar()) {
+                subTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (subTmpBuf_UnionSelector == (1).toChar()) {
+                subTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for subTmpBuf_ has to be chosen through deserialisation.")
+            }
+            subTmpBuf = (subTmpBuf_ as string | Resource)
         }
-        const subTmpResult : string | Resource = (subTmpBuf as string | Resource)
+        const subTmpResult : string | Resource | undefined = subTmpBuf
         let value : NavigationCommonTitle = ({main: mainTmpResult, sub: subTmpResult} as NavigationCommonTitle)
         return value
     }
@@ -2621,14 +2643,20 @@ export class ToolbarItem_serializer {
     public static write(buffer: SerializerBase, value: ToolbarItem): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForValue  = value.value
-        if (valueHolderForValue instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
-            const valueHolderForValueForIdx0  = valueHolderForValue as string
-            valueSerializer.writeString(valueHolderForValueForIdx0)
-        } else if (valueHolderForValue instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
-            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
+        if (valueHolderForValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForValueTmpValue  = valueHolderForValue!
+            if (valueHolderForValueTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as string
+                valueSerializer.writeString(valueHolderForValueTmpValueForIdx0)
+            } else if (valueHolderForValueTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForIcon  = value.icon
         if (valueHolderForIcon !== undefined) {
@@ -2697,16 +2725,21 @@ export class ToolbarItem_serializer {
     }
     public static read(buffer: DeserializerBase): ToolbarItem {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let valueTmpBuf : string | Resource | undefined
-        if (valueTmpBufUnionSelector == (0).toChar()) {
-            valueTmpBuf = (valueDeserializer.readString() as string)
-        } else if (valueTmpBufUnionSelector == (1).toChar()) {
-            valueTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let valueTmpBuf : ResourceStr | undefined = undefined
+        if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const valueTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let valueTmpBuf_ : string | Resource | undefined
+            if (valueTmpBuf_UnionSelector == (0).toChar()) {
+                valueTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (valueTmpBuf_UnionSelector == (1).toChar()) {
+                valueTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for valueTmpBuf_ has to be chosen through deserialisation.")
+            }
+            valueTmpBuf = (valueTmpBuf_ as string | Resource)
         }
-        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
+        const valueTmpResult : ResourceStr | undefined = valueTmpBuf
         const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let iconTmpBuf : ResourceStr | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

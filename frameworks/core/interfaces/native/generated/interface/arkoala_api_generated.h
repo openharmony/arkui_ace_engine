@@ -16304,8 +16304,8 @@ typedef struct Opt_NavDestinationContext {
 } Opt_NavDestinationContext;
 typedef struct Ark_NavigationCommonTitle {
     /* kind: Interface */
-    Ark_Union_String_Resource main;
-    Ark_Union_String_Resource sub;
+    Opt_Union_String_Resource main;
+    Opt_Union_String_Resource sub;
 } Ark_NavigationCommonTitle;
 typedef struct Opt_NavigationCommonTitle {
     Ark_Tag tag;
@@ -16808,7 +16808,7 @@ typedef struct Opt_ToggleOptions {
 } Opt_ToggleOptions;
 typedef struct Ark_ToolbarItem {
     /* kind: Interface */
-    Ark_ResourceStr value;
+    Opt_ResourceStr value;
     Opt_ResourceStr icon;
     Opt_SymbolGlyphModifier symbolIcon;
     Opt_Callback_Void action;
@@ -17360,7 +17360,7 @@ typedef struct Opt_DividerOptions {
 } Opt_DividerOptions;
 typedef struct Ark_DividerStyle {
     /* kind: Interface */
-    Ark_Length strokeWidth;
+    Opt_Length strokeWidth;
     Opt_ResourceColor color;
     Opt_Length startMargin;
     Opt_Length endMargin;
