@@ -104,10 +104,10 @@ void DialogPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
     if (!onClick_) {
+        auto maskNode = extraMaskNode_ ? extraMaskNode_ : host;
+        auto gestureHub = maskNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
         InitClickEvent(gestureHub);
     }
     auto focusHub = host->GetOrCreateFocusHub();
@@ -615,6 +615,8 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
         extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
         extraMaskNodeContext->UpdateZIndex(-1);
         extraMaskNode->MountToParent(dialog);
+        extraMaskNode_ = extraMaskNode;
+        dialog->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     }
 }
 
