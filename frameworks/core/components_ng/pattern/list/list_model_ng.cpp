@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "list_layout_property.h"
 
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
@@ -241,6 +242,12 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
         count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count);
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
+}
+
+void ListModelNG::SetCacheRange(NG::CacheRange cacheRange, bool show)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, cacheRange);
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
@@ -614,6 +621,13 @@ void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
 void ListModelNG::ResetCacheRange(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
+}
+
+CacheRange ListModelNG::GetCacheRange(FrameNode* frameNode)
+{
+    CacheRange value { -1, -1 };
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CacheRange, value, frameNode, value);
+    return value;
 }
 
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)

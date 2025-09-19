@@ -1290,6 +1290,11 @@ public:
 
     uint32_t ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params);
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
+    bool GetIsRequestFrame() const
+    {
+        CHECK_NULL_RETURN(window_, false);
+        return window_->GetIsRequestFrame();
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

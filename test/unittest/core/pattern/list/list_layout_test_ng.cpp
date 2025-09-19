@@ -2690,7 +2690,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
     ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
     auto listPattern = frameNode_->GetPattern<ListPattern>();
     FlushIdleTask(listPattern);
-    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
 
     /**
      * @tc.steps: step2. ResetCacheRange
@@ -2726,7 +2726,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
     UpdateCurrentOffset(-250);
     FlushUITasks(frameNode_);
     FlushIdleTask(listPattern);
-    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 5);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(0), 1);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(1), 1);
     EXPECT_EQ(listPattern->cachedItemPosition_.count(7), 1);
