@@ -663,6 +663,11 @@ public:
         return isUserFling_;
     }
 
+    void SetIsDragOuterScrollBarStopAnimation(bool isDragOuterScrollBarStopAnimation)
+    {
+        isDragOuterScrollBarStopAnimation_ = isDragOuterScrollBarStopAnimation;
+    }
+
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
      */
@@ -748,6 +753,7 @@ private:
     bool isWillFling_ = false;
     bool isNeedFireDidStopFling_ = false;
     bool isTouchStopAnimation_ = false;
+    bool isDragOuterScrollBarStopAnimation_ = false;
     bool isUserFling_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;

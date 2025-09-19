@@ -255,6 +255,13 @@ bool ScrollBarProxy::NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnima
     return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
 
+void ScrollBarProxy::NotifyPreDragStart() const
+{
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.preDragStartCallback);
+    node.preDragStartCallback();
+}
+
 void ScrollBarProxy::NotifyScrollBarOnDidStopDragging(bool isWilFling) const
 {
     auto node = scorllableNode_;
