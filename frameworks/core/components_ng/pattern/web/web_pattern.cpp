@@ -8311,7 +8311,8 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         return;
     }
 
-    if (delegate_) {
+    if (delegate_ &&
+        renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         delegate_->MaximizeResize();
     }
 
