@@ -191,37 +191,4 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 }
-
-/**
- * @tc.name: DynamicPatternManagerTestNg004
- * @tc.desc: Test DynamicPattern UVTaskWrapperImpl Call
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. test method UVTaskWrapperImpl::UVTaskWrapperImpl
-     */
-    void* runtime_;
-    auto env = reinterpret_cast<napi_env>(runtime_);
-    UVTaskWrapperImpl taskWrapper_(env);
-
-    /**
-     * @tc.steps: step2. test method UVTaskWrapperImpl::Call
-     */
-    auto delayTime = 0;
-    auto priorityType = PriorityType::High;
-
-    int32_t currentId = Container::CurrentId();
-    auto traceIdFunc = [weak = WeakClaim(const_cast<TaskExecutorImpl*>(this)), type]() {
-        auto sp = weak.Upgrade();
-        if (sp) {
-            sp->taskIdTable_[static_cast<uint32_t>(type)]++;
-        }
-    };
-    
-    TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
-            std::move(task), currentId, delayTime, std::move(traceIdFunc));
-    taskWrapper_->Call(std::move(wrappedTask), delayTime, priorityType);
-}
 } // namespace OHOS::Ace::NG
