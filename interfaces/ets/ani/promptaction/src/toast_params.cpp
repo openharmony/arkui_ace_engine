@@ -152,9 +152,10 @@ std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncCo
         auto task = [asyncContext, toastId]() {
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
             if (asyncContext == nullptr || !asyncContext->deferred || env == nullptr) {
                 return;

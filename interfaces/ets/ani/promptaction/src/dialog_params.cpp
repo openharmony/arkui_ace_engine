@@ -541,9 +541,10 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
             }
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
 
             ani_size nrRefs = 16;
@@ -599,9 +600,10 @@ std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<Promp
 
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
 
             ani_size nrRefs = 16;
@@ -765,9 +767,10 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
             }
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
 
             ani_size nrRefs = 16;
@@ -822,9 +825,10 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(std::shared_ptr<P
             }
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
             ani_size nrRefs = 16;
             status = env->CreateLocalScope(nrRefs);
@@ -1043,9 +1047,10 @@ bool GetDestroyCallback(ani_vm *vm, ani_object object,
 {
     ani_env* env = nullptr;
     ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "[ANI] GetEnv fail. status: %{public}d", status);
+        return false;
     }
     ani_ref destroyFuncRef;
     status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
@@ -1069,9 +1074,10 @@ bool GetDestroyCallback(ani_vm *vm, ani_object object,
         }
         ani_env* env = nullptr;
         ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-        if (status != ANI_OK) {
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                 "[ANI] GetEnv fail. status: %{public}d", status);
+            return;
         }
 
         auto nodePtr = node.Upgrade();
@@ -1098,9 +1104,10 @@ bool GetCustomBuilderWithId(ani_vm *vm, ani_object object,
 {
     ani_env* env = nullptr;
     ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "[ANI] GetEnv fail. status: %{public}d", status);
+        return false;
     }
     ani_ref builderFuncRef;
     status = env->Object_GetPropertyByName_Ref(object, "builderWithId", &builderFuncRef);
@@ -1124,9 +1131,10 @@ bool GetCustomBuilderWithId(ani_vm *vm, ani_object object,
         }
         ani_env* env = nullptr;
         ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-        if (status != ANI_OK) {
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                 "[ANI] GetEnv fail. status: %{public}d", status);
+            return;
         }
 
         ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
@@ -1427,9 +1435,10 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
 
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
 
             ani_size nrRefs = 16;
@@ -1491,9 +1500,10 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
             }
             ani_env* env = nullptr;
             ani_status status = asyncContext->vm->GetEnv(ANI_VERSION_1, &env);
-            if (status != ANI_OK) {
-                TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                     "[ANI] GetEnv fail. status: %{public}d", status);
+                return;
             }
 
             ani_size nrRefs = 16;
