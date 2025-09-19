@@ -31,9 +31,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   public staticWatchFunc?: Object;
 
-  public _setInteropValueForStaticState?: setValue<T>;
-  public _notifyInteropFireChange?: () => void;
-
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
    
@@ -54,10 +51,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   public syncPeerHasChanged(eventSource?: ObservedPropertyAbstractPU<T>) : void {
     stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
     this.notifyPropertyHasChangedPU();
-    // for interop
-    if (InteropConfigureStateMgmt.instance.needsInterop() && eventSource !== undefined && this._notifyInteropFireChange) {
-      this._notifyInteropFireChange();
-    }
   }
 
   public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<T>, changedTrackedObjectPropertyName: string): void {

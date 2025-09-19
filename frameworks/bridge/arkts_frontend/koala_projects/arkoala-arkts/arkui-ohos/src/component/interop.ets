@@ -29,7 +29,8 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton
+    ObserveSingleton,
+    IProvideDecoratedVariable
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
@@ -147,6 +148,8 @@ function openInterop(): void {
     registerCreateStaticObservedCallback();
     registerCompatibleStaticComponentCallback();
     registerMakeBuilderParameterStaticProxy();
+    registerUpdateInteropExtendableComponent();
+    registerResetInteropExtendableComponent();
 }
 
 function closeInterop(): void {
@@ -564,4 +567,75 @@ class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultP
         this.state.value;
         return propertyGetter.invoke().unwrap();
     }
+}
+
+export class InteropExtendableComponent extends ExtendableComponent {
+    dynamicComponent: ESValue;
+    originComponent?: WeakRef<ExtendableComponent>;
+    constructor(dynamicComponent: ESValue) {
+        super();
+        this.dynamicComponent = dynamicComponent;
+        const prev = ExtendableComponent.current;
+        if (prev) {
+            this.originComponent = new WeakRef<ExtendableComponent>(prev! as ExtendableComponent);
+        }
+    }
+
+    /** @memo */ build(): void {}
+
+    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+        const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
+        if (value.unwrap() == undefined) {
+            return null;
+        }
+        const getProxy = value.invokeMethod('getProxy').unwrap();
+        if (getProxy === undefined && ExtendableComponent.current) {
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            value.invokeMethod('setProxy', ESValue.wrap(provideVar));
+            const setProxyValue = ((newVal: T): void => {
+                value.invokeMethod('set', ESValue.wrap(newVal));
+            });
+            provideVar.setProxyValue = setProxyValue;
+            const global = ESValue.getGlobal();
+            const setSource = ((newVal: T): void => {
+                provideVar.set(newVal);
+            });
+            const fireChange = (): void => {
+                provideVar.fireChange();
+            }
+            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
+            const notifyProxy = (): void => {
+                value.invokeMethod('syncPeerHasChanged');
+            };
+            provideVar.addWatch(notifyProxy);
+            global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
+            return provideVar;
+        }
+        else {
+            return getProxy as IProvideDecoratedVariable<T>;
+        }
+    }
+
+    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+}
+
+export function updateInteropExtendableComponent(dynamicComponent: Object): void {
+    ExtendableComponent.current = new InteropExtendableComponent(ESValue.wrap(dynamicComponent));
+}
+
+export function resetInteropExtendableComponent(): void {
+    const dynamicComponent = ExtendableComponent.current;
+    ExtendableComponent.current = (dynamicComponent as InteropExtendableComponent).originComponent?.deref();
+}
+
+export function registerUpdateInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerUpdateInteropExtendableComponent');
+    registerCallback.invoke(updateInteropExtendableComponent);
+}
+
+export function registerResetInteropExtendableComponent(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerResetInteropExtendableComponent');
+    registerCallback.invoke(resetInteropExtendableComponent);
 }

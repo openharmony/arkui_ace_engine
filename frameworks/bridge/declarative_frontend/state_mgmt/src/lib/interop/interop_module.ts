@@ -45,6 +45,8 @@ class InteropExtractorModule {
         content?: () => void
     ) => [() => void, number];
     static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
+    static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
+    static resetInteropExtendableComponent?: ()=> void;
 }
 
 class StaticInteropHook {
@@ -71,4 +73,12 @@ function registerCompatibleStaticComponentCallback(
 
 function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
     InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
+}
+
+function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: Object) => void) {
+    InteropExtractorModule.updateInteropExtendableComponent = callback;
+}
+
+function registerResetInteropExtendableComponent(callback: () => void) {
+    InteropExtractorModule.resetInteropExtendableComponent = callback;
 }
