@@ -670,7 +670,7 @@ void SetStopBackPressImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(false));
+    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
 }
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
