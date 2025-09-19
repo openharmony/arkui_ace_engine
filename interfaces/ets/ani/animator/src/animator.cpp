@@ -1027,7 +1027,8 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"setOnRepeat", nullptr, reinterpret_cast<void *>(SetOnrepeat)},
         ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
         ani_native_function{"update", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIUpdate)},
-        ani_native_function{"reset", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIReset)},
+        ani_native_function{"reset", "X{C{@ohos.animator.AnimatorOptions}C{@ohos.animator.SimpleAnimatorOptions}}:",
+            reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
