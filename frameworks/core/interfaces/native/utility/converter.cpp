@@ -1619,14 +1619,29 @@ template<>
 NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 {
     NG::NavigationBackgroundOptions options;
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    EffectOption effectOption;
+  
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
+    }
 
-#ifdef WRONG_GEN
-    options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
-#endif
-    options.blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
-    options.blurStyleOption->blurStyle = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle)
-        .value_or(options.blurStyleOption->blurStyle);
-    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
+    }
     return options;
 }
 
@@ -1634,14 +1649,34 @@ template<>
 NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
 {
     NG::NavigationBackgroundOptions options;
-    std::optional<BlurStyleOption> styleOptions;
-    std::optional<EffectOption> effectOption;
+    options.color.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    EffectOption effectOption;
 
-    options.color = Converter::OptConvert<Color>(src.backgroundColor);
-    options.blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
-    options.blurStyleOption->blurStyle = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle)
-        .value_or(options.blurStyleOption->blurStyle);
-    options.effectOption = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (src.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.color = Converter::OptConvert<Color>(src.backgroundColor.value);
+    }
+
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
+    }
+
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
+    }
     return options;
 }
 
@@ -3210,6 +3245,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
 
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -3217,14 +3253,14 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
         }
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
     }
-    options.blurStyleOption = styleOptions;
-    options.effectOption = effectOption;
     return options;
 }
 
@@ -3244,8 +3280,12 @@ NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src)
             options.barStyle = NG::BarStyle::STANDARD;
         }
     }
-    options.paddingStart = Converter::OptConvert<CalcDimension>(src.paddingStart.value);
-    options.paddingEnd = Converter::OptConvert<CalcDimension>(src.paddingEnd.value);
+    if (src.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.paddingStart = Converter::Convert<CalcDimension>(src.paddingStart.value);
+    }
+    if (src.paddingEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.paddingEnd = Converter::Convert<CalcDimension>(src.paddingEnd.value);
+    }
     return options;
 }
 
