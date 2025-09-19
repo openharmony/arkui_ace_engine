@@ -168,10 +168,15 @@ bool ParallelPageRouterManager::JudgePrimaryPage(const RouterPageInfo& target)
 
     std::string homePageConfig = stageManager->GetHomePageConfig();
     std::string pageInfo = target.url;
-    if (strcmp(homePageConfig.c_str(), pageInfo.c_str()) == 0) {
-        TAG_LOGD(AceLogTag::ACE_ROUTER,
-            "current page: %{public}s is consistent with home page config", pageInfo.c_str());
-        return true;
+    if (!homePageConfig.empty()) {
+        if (strcmp(homePageConfig.c_str(), pageInfo.c_str()) == 0) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER,
+                "current page: %{public}s is consistent with home page config", pageInfo.c_str());
+            return true;
+        }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "current page is NOT consistent with home page config `%{public}s`",
+            homePageConfig.c_str());
+        return false;
     }
 
     int32_t elementNum = ElementRegister::GetInstance()->GetLastestElementId();
