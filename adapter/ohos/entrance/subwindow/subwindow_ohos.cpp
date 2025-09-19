@@ -325,6 +325,9 @@ void SubwindowOhos::InitContainer()
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
             auto isSelectOverlay = GetIsSelectOverlaySubWindow();
             auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
+            TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "parentWindowId = %{public}d mainWindowId = %{public}d",
+                parentWindowId, mainWindowId);
+            mainWindowId = mainWindowId == 0 ? parentWindowId : mainWindowId;
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
             windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
             windowName = "ARK_APP_SUBWINDOW_" + windowTag + parentWindowName + std::to_string(windowId_);
