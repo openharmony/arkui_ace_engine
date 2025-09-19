@@ -610,4 +610,62 @@ HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
     ASSERT_NE(textLayoutProperty->GetPositionProperty(), nullptr);
     EXPECT_EQ(textLayoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::CENTER_RIGHT);
 }
+
+/**
+ * @tc.name: StackIgnoreLayoutSafeArea003
+ * @tc.desc: Test GetAccumulatedSafeAreaExpand Cache whether hit
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
+{
+    RefPtr<FrameNode> parent1, child1;
+    auto stackNode = CreateStack([this, &parent1, &child1](StackModelNG model) {
+        parent1 = CreateStack([this, &child1](StackModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            child1 = CreateStack([this](StackModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+                ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+            });
+        });
+        ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(30.0f, DimensionUnit::PX));
+    });
+    /* corresponding ets code:
+        Stack() {
+          Stack(){
+            Stack()
+                .width("300px")
+                .height("300px")
+                .ignoreLayoutSafeArea()
+          }
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .ignoreLayoutSafeArea()
+        }
+        .width("500px")
+        .height("500px")
+        .safeAreaPadding(LengthMetrics.px(30))
+    */
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    auto childLayoutProperty1 = child1->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty1, nullptr);
+    childLayoutProperty1->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto parentLayoutProperty = parent1->GetLayoutProperty();
+    ASSERT_NE(parentLayoutProperty, nullptr);
+    parentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(stackNode);
+    EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
+        << child1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(parent1->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 500.0f))
+        << parent1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(child1->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 100.0f))
+        << child1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(parent1->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f))
+        << parent1->GetGeometryNode()->GetFrameRect().ToString();
+}
 } // namespace OHOS::Ace::NG
