@@ -6198,19 +6198,19 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), isAnimate]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
-            webPattern->RemoveSnapshotFrameNode();
+            webPattern->RemoveSnapshotFrameNode(isAnimate);
         },
         TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }

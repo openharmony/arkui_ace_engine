@@ -1420,7 +1420,7 @@ public:
     int GetLastHitTestResult();
     int GetHitTestResult();
 
-    void RemoveSnapshotFrameNode(int removeDelayTime);
+    void RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate = false);
     void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);

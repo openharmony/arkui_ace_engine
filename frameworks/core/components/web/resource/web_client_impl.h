@@ -347,6 +347,7 @@ public:
     bool IsShowHandle() override;
     void OnSafeBrowsingCheckFinish(int threat_type) override;
     void OnRefreshAccessedHistoryV2(const std::string& url, bool isReload, bool isMainFrame) override;
+    void OnRemoveBlanklessFrameWithAnimation(int delayTime) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
