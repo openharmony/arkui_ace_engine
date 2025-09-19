@@ -190,4 +190,48 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 }
+
+/**
+ * @tc.name: DynamicPatternManagerTestNg004
+ * @tc.desc: Test DynamicPattern UVTaskWrapperImpl Call
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test method UVTaskWrapperImpl::UVTaskWrapperImpl
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_NE(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    EXPECT_NE(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    EXPECT_NE(stageNode, nullptr);
+    auto geometryNode = stageNode->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
+    auto frameNodeRef =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeRef, nullptr);
+
+
+
+    UVTaskWrapperImpl aaa(env);
+
+    /**
+     * @tc.steps: step2. test method UVTaskWrapperImpl::Call
+     */
+
+    void* runtime_;
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    
+    auto taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
+    auto delayTime = 0;
+    auto priorityType = PriorityType::High;
+
+    
+    TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
+            std::move(task), currentId, delayTime, std::move(traceIdFunc));
+    taskWrapper_->Call(std::move(wrappedTask), delayTime, priorityType);
+}
 } // namespace OHOS::Ace::NG
