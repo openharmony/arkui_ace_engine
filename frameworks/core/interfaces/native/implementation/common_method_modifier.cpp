@@ -3878,15 +3878,11 @@ void SetClipShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (!convValue) {
         return;
     }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    ViewAbstract::SetClipShape(frameNode, convValue.value());
 }
 void SetMaskImpl(Ark_NativePointer node,
                  const Opt_ProgressMask* value)
@@ -3903,15 +3899,11 @@ void SetMaskShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (!convValue) {
         return;
     }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    ViewAbstract::SetMask(frameNode, convValue.value());
 }
 void SetKeyImpl(Ark_NativePointer node,
                 const Opt_String* value)

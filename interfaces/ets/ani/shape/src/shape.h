@@ -34,21 +34,9 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
 #include "shapeUtil.h"
-
+#include "shape_peer.h"
 
 namespace OHOS::Ace {
-struct CirclePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Circle> circleShape;
-};
-struct EllipsePeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Ellipse> ellipseShape;
-};
-struct PathPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Path> pathShape;
-};
-struct RectPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> rectShape;
-};
 class ACE_FORCE_EXPORT CircleShape final {
 public:
     static ani_status BindCircleShape(ani_env *env);

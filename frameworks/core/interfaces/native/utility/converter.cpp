@@ -1813,7 +1813,7 @@ template<>
 RefPtr<BasicShape> Convert(const Ark_CircleShape& src)
 {
     CHECK_NULL_RETURN(src, nullptr);
-    return src->shape;
+    return src->circleShape;
 }
 
 template<>
