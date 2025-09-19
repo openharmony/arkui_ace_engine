@@ -2460,6 +2460,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     container->SetApiTargetVersion(apiTargetVersion);
+    if (info) {
+        container->SetSrcEntrance(info->srcEntrance);
+    }
 
     PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 

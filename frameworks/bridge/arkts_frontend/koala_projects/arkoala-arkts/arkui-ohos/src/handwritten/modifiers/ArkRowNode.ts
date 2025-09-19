@@ -34,12 +34,12 @@ export class ArkRowNode extends ArkBaseNode implements RowAttribute {
     
     initialize(options?: RowOptions | RowOptionsV2): this {
         const options_type = runtimeType(options);
-        if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+        if ((RuntimeType.OBJECT === options_type) || (RuntimeType.UNDEFINED === options_type)) {
             const options_casted = options as (RowOptions | RowOptionsV2 | undefined);
             this.getPeer()?.setRowOptions1Attribute(options_casted);
             return this;
         }
-        throw new Error("Can not select appropriate overload");
+        throw new Error('Can not select appropriate overload');
     }
 
     getPeer(): ArkRowPeer {

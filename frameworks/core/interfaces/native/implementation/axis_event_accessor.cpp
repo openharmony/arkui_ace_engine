@@ -260,23 +260,12 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(info);
     LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
 }
-Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        AxisInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(false);
-    });
-    return callback;
-}
-void SetPropagationImpl(Ark_AxisEvent peer,
-                        const Callback_Void* propagation)
+void PropagationImpl(Ark_AxisEvent peer)
 {
     CHECK_NULL_VOID(peer);
-    auto info = peer->GetEventInfo();
+    AxisInfo* info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    LOGE("Arkoala method AxisEventAccessor.SetPropagation doesn't have sense. Not implemented...");
+    info->SetStopPropagation(false);
 }
 } // AxisEventAccessor
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
@@ -304,8 +293,7 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::GetPropagationImpl,
-        AxisEventAccessor::SetPropagationImpl,
+        AxisEventAccessor::PropagationImpl,
     };
     return &AxisEventAccessorImpl;
 }

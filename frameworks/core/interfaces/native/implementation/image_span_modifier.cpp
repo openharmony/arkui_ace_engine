@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/image/image_source_info.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -26,6 +27,9 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components ImageSpan used in ParallelizeUI");
+    }
     auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
     CHECK_NULL_RETURN(imageSpanNode, nullptr);
     imageSpanNode->IncRefCount();

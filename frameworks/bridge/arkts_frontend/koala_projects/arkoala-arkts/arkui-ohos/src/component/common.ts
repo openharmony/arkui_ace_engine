@@ -3148,6 +3148,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     hoverEffectAttribute(value: HoverEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -8064,10 +8076,12 @@ export interface CommonMethod {
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {return this;}
     onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {return this;}
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {return this;}
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {return this;}
     hoverEffect(value: HoverEffect | undefined): this {return this;}
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
-    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
+    onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {return this;}
+    onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
     onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {return this;}
     onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
     onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
@@ -8291,6 +8305,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((parameter: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
@@ -8536,6 +8551,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         return this
     }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        return this
+    }
     public hoverEffect(value: HoverEffect | undefined): this {
         return this
     }
@@ -8545,7 +8563,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
@@ -9273,6 +9294,7 @@ export interface KeyframeState {
 export type Callback<T,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<number>;
     expectedUpdateInterval?: number;
@@ -9781,6 +9803,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {       
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.onAccessibilityHoverTransparentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onMouse(value: ((event: MouseEvent) => void) | undefined): this {
         if (this.checkPriority("onMouse")) {
             const value_casted = value as (((event: MouseEvent) => void) | undefined)
@@ -9797,7 +9827,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {
+        if (this.checkPriority("onKeyEvent")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (((parameter: KeyEvent) => void) | undefined)
+                this.getPeer()?.onKeyEvent0Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
@@ -13031,7 +13073,7 @@ export interface AxisEvent extends BaseEvent {
     x: number
     y: number
     scrollStep?: number | undefined
-    propagation: (() => void)
+    propagation(): void
     getHorizontalAxisValue(): number
     getVerticalAxisValue(): number
     getPinchAxisScaleValue(): number
@@ -13086,11 +13128,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const scrollStep_NonNull  = (scrollStep as number)
         this.setScrollStep(scrollStep_NonNull)
     }
-    get propagation(): (() => void) {
-        return this.getPropagation()
-    }
-    set propagation(propagation: (() => void)) {
-        this.setPropagation(propagation)
+    public propagation(): void {
+        this.propagation_serialize()
     }
     static ctor_axisevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_ctor()
@@ -13177,14 +13216,6 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    private getPropagation(): (() => void) {
-        return this.getPropagation_serialize()
-    }
-    private setPropagation(propagation: (() => void)): void {
-        const propagation_casted = propagation as ((() => void))
-        this.setPropagation_serialize(propagation_casted)
-        return
-    }
     private getHorizontalAxisValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -13267,25 +13298,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     private setScrollStep_serialize(scrollStep: number): void {
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, scrollStep)
     }
-    private getPropagation_serialize(): (() => void) {
-        // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr) as FixedArray<byte>
-        // @ts-ignore
-        let exactRetValue: byte[] = new Array<byte>
-        for (let i = 0; i < retval.length; i++) {
-            // @ts-ignore
-            exactRetValue.push(new Byte(retval[i]))
-        }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
-        let returnResult = retvalDeserializer.readCallback_Void(true);
-        return returnResult;
-    }
-    private setPropagation_serialize(propagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(propagation)
-        ArkUIGeneratedNativeModule._AxisEvent_setPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    private propagation_serialize(): void {
+        ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
     public static fromPtr(ptr: KPointer): AxisEventInternal {
         const obj : AxisEventInternal = new AxisEventInternal()
@@ -13295,7 +13309,7 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
 }
 export interface FocusAxisEvent {
     axisMap: Map<AxisModel, number>
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
     get axisMap(): Map<AxisModel, number> {
@@ -13304,11 +13318,8 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     set axisMap(axisMap: Map<AxisModel, number>) {
         this.setAxisMap(axisMap)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
     }
     static ctor_focusaxisevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_ctor()
@@ -13328,14 +13339,6 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     private setAxisMap(axisMap: Map<AxisModel, number>): void {
         const axisMap_casted = axisMap as (Map<AxisModel, number>)
         this.setAxisMap_serialize(axisMap_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
     private getAxisMap_serialize(): Map<AxisModel, number> {
@@ -13370,24 +13373,8 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
-        // @ts-ignore
-        let exactRetValue: byte[] = new Array<byte>
-        for (let i = 0; i < retval.length; i++) {
-            // @ts-ignore
-            exactRetValue.push(new Byte(retval[i]))
-        }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        let returnResult = retvalDeserializer.readCallback_Void(true);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._FocusAxisEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    private stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
     public static fromPtr(ptr: KPointer): FocusAxisEventInternal {
         const obj : FocusAxisEventInternal = new FocusAxisEventInternal()

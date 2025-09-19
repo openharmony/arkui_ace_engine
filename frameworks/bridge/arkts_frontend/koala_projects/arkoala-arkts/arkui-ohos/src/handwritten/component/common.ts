@@ -761,7 +761,7 @@ export class MouseEventTransfer {
             let pressedButtonsArray = mouseEvent!.pressedButtons as Array<MouseButton>;
             let pressedButtonsValue = ESValue.instantiateEmptyArray();
             for (let index = 0; index < pressedButtonsArray.length; index++) {
-                pressedButtonsValue.setProperty(index, TypeChecker.MouseButton_ToNumeric(mouseEvent.button));
+                pressedButtonsValue.setProperty(index, TypeChecker.MouseButton_ToNumeric(pressedButtonsArray[index]));
             }
             retValue.setProperty('pressedButtons', pressedButtonsValue);
         }

@@ -17,7 +17,7 @@
 import { AttributeUpdater } from '../../AttributeUpdater';
 import { CommonModifier } from '../../CommonModifier';
 import { ArkCommonMethodComponent, AttributeModifier, AnimatableArithmetic, BackgroundOptions, BlendMode } from '../../component/common';
-import { AccessibilityCallback, AlignRuleOption, AnimateParam, Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, CommonMethod } from "../../component/common";
+import { AccessibilityCallback, AccessibilityTransparentCallback, AlignRuleOption, AnimateParam, Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, CommonMethod } from "../../component/common";
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global.resource"
@@ -307,6 +307,24 @@ class OnHoverMoveModifier extends ModifierWithKey<((parameter: HoverEvent) => vo
 
     static factory(value: ((parameter: HoverEvent) => void) | undefined): OnHoverMoveModifier {
         return new OnHoverMoveModifier(value)
+    }
+}
+
+class OnAccessibilityHoverTransparentModifier extends ModifierWithKey<AccessibilityTransparentCallback | undefined> {
+    constructor(value: AccessibilityTransparentCallback | undefined) {
+        super(value);
+    }
+    static identity: string = 'onAccessibilityHoverTransparent';
+    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
+        if (reset) {
+            // commomPeerNode.resetAccessibilityHoverTransparent();
+        } else {
+            node.onAccessibilityHoverTransparentAttribute(this.value);
+        }
+    }
+
+    static factory(value: AccessibilityTransparentCallback | undefined): OnAccessibilityHoverTransparentModifier {
+        return new OnAccessibilityHoverTransparentModifier(value)
     }
 }
 
@@ -1752,6 +1770,14 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       return this
   }
   public onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+      return this
+  }
+  public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+      if (value) {
+        modifierWithKey(this._modifiersWithKeys, OnAccessibilityHoverTransparentModifier.identity, OnAccessibilityHoverTransparentModifier.factory, value);
+      } else {
+          modifierNullWithKey(this._modifiersWithKeys, OnAccessibilityHoverTransparentModifier.identity)
+      }
       return this
   }
   public accessibilityTextHint(value: string | undefined): this {

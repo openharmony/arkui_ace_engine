@@ -284,7 +284,7 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
     /** @memo */
-    const action = (ele: T, i: int32) => {
+    const action = (ele: T, i: int32): void => {
         const ri = new RepeatItemImpl<T>(ele, (i as number));
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);

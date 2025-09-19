@@ -34,6 +34,7 @@ public:
     static bool CheckNodeOnValidThread(NG::UINode* node);
     static void SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope);
     static bool IsThreadSafeNodeScope();
+    static bool IsParallelScope();
     bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
         std::function<void()>&& onFinishTask);
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);

@@ -36,6 +36,7 @@ import { UIContextUtil } from "arkui/handwritten/UIContextUtil";
 import { DetachedRootEntryImpl, UIContextImpl } from "arkui/handwritten/UIContextImpl";
 import { CustomComponent } from "./customComponent";
 import { setNeedCreate } from "../ArkComponentRoot";
+import { NavPathInfo, NavPathStackInternal } from "arkui/component";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -340,6 +341,18 @@ export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
     registerCallback.invoke(compatibleStaticComponent);
+    return;
+}
+
+export function registerNavPathStackCallback(): void {
+    console.log("testTag, enter registerNavPathStackCallback")
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty("registerNavStackOperation");
+    const pushPathCallback = (stack: KPointer, info: NavPathInfo, animated?: boolean): void => {
+        let navStack = NavPathStackInternal.fromPtr(stack);
+        navStack.pushPath(info, animated);
+    }
+    registerCallback.invoke(pushPathCallback);
     return;
 }
 

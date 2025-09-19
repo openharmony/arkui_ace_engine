@@ -181,6 +181,7 @@ public:
     void NotifyNavigationStateChangeForAni(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
+    void NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     void NotifyDensityChange(double density);
     void NotifyWillClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
@@ -203,6 +204,7 @@ public:
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
+    using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
@@ -222,6 +224,7 @@ public:
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
+    void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
@@ -255,6 +258,7 @@ private:
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    RouterPageHandleFuncForAni routerPageHandleFuncForAni_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;

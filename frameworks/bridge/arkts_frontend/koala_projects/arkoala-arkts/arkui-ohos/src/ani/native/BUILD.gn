@@ -21,7 +21,25 @@ group("ace_ani_native_package") {
     "ui_extension:arkuiuiextension_group",
   ]
 }
+config("ani_utils_common_config") {
+  include_dirs = [
+    "./"
+  ]
+}
+ohos_source_set("ani_utils_common") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 
+  configs = [ "$ace_root:ace_config" ]
+  public_configs = [ ":ani_utils_common_config" ]
+  sources = [
+    "utils/ani_utils.cpp",
+  ]
+
+  external_deps = [
+    "runtime_core:ani",
+  ]
+}
 ohos_shared_library("arkoala_native_ani") {
   shlib_type = "ani"
   subsystem_name = ace_engine_subsystem
@@ -32,7 +50,7 @@ ohos_shared_library("arkoala_native_ani") {
     "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
   ]
 
-  deps = []
+  deps = [ ":ani_utils_common" ]
   if (!build_ohos_sdk) {
     deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
@@ -59,14 +77,18 @@ ohos_shared_library("arkoala_native_ani") {
     "shape/shape_module_methods.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "styled_string/styled_string_module.cpp",
-    "utils/ani_utils.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
     "water_flow/waterFlowSection_module.cpp",
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
   ]
-
+  if (ace_engine_feature_wearable) {
+    sources -= [
+      "canvas/canvas_module.cpp",
+      "module.cpp",
+    ]
+  }
   external_deps = [
     "graphic_2d:drawing_ani",
     "hilog:libhilog",

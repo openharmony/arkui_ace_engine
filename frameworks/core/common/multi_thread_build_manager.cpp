@@ -101,6 +101,11 @@ bool MultiThreadBuildManager::IsThreadSafeNodeScope()
     return isThreadSafeNodeScope_ || SystemProperties::GetDebugThreadSafeNodeEnabled();
 }
 
+bool MultiThreadBuildManager::IsParallelScope()
+{
+    return isThreadSafeNodeScope_ && isParallelizeUI_;
+}
+
 bool MultiThreadBuildManager::PostAsyncUITask(
     int32_t contextId, std::function<void()>&& asyncUITask, std::function<void()>&& onFinishTask)
 {
