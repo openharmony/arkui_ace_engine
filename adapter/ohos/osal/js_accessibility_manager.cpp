@@ -1646,7 +1646,7 @@ void UpdateChildrenOfAccessibilityElementInfo(
         }
         if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
             std::sort(childrenIdInfo.begin(), childrenIdInfo.end(),
-                [](const auto&zIndexA, const auto&zIndexB) { return zIndexA.second < zIndexB.second; });
+                [](const auto& zIndexA, const auto& zIndexB) { return zIndexA.second < zIndexB.second; });
         }
         for (const auto& childrenIdPair : childrenIdInfo) {
             nodeInfo.AddChild(childrenIdPair.first);
