@@ -1543,4 +1543,12 @@ void WebClientImpl::OnPdfLoadEvent(int32_t result, const std::string& url)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnPdfLoadEvent(result, url);
 }
+
+void WebClientImpl::OnInsertBlanklessFrameWithSize(const std::string& pathToFrame, uint32_t width, uint32_t height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
+    delegate->CreateSnapshotFrameNode(pathToFrame, width, height);
+}
 } // namespace OHOS::Ace

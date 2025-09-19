@@ -1375,11 +1375,14 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 }
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
-void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height) {}
 void WebDelegate::SetVisibility(bool isVisible)
 {
     isVisible_ = isVisible;
 }
+void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height) {}
+double WebDelegate::ResizeWidth() const { return 1.0; }
+double WebDelegate::ResizeHeight() const { return 1.0; }
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}

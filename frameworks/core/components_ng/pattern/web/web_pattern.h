@@ -865,7 +865,7 @@ public:
         isAILinkMenuShow_ = isAILinkMenuShow;
     }
 
-    void CreateSnapshotImageFrameNode(const std::string& snapshotPath);
+    void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode();
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
