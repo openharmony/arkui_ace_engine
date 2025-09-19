@@ -201,34 +201,23 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg004, TestSize.L
     /**
      * @tc.steps: step1. test method UVTaskWrapperImpl::UVTaskWrapperImpl
      */
-    auto context = PipelineContext::GetCurrentContext();
-    EXPECT_NE(context, nullptr);
-    auto stageManager = context->GetStageManager();
-    EXPECT_NE(stageManager, nullptr);
-    auto stageNode = stageManager->GetStageNode();
-    EXPECT_NE(stageNode, nullptr);
-    auto geometryNode = stageNode->GetGeometryNode();
-    EXPECT_NE(geometryNode, nullptr);
-    EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto frameNodeRef =
-        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNodeRef, nullptr);
-
-
-
-    UVTaskWrapperImpl aaa(env);
+    void* runtime_;
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    UVTaskWrapperImpl taskWrapper_(env);
 
     /**
      * @tc.steps: step2. test method UVTaskWrapperImpl::Call
      */
-
-    void* runtime_;
-    auto env = reinterpret_cast<napi_env>(runtime_);
-    
-    auto taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
     auto delayTime = 0;
     auto priorityType = PriorityType::High;
 
+    int32_t currentId = Container::CurrentId();
+    auto traceIdFunc = [weak = WeakClaim(const_cast<TaskExecutorImpl*>(this)), type]() {
+        auto sp = weak.Upgrade();
+        if (sp) {
+            sp->taskIdTable_[static_cast<uint32_t>(type)]++;
+        }
+    };
     
     TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
             std::move(task), currentId, delayTime, std::move(traceIdFunc));
