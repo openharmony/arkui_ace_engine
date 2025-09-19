@@ -2352,7 +2352,6 @@ void FormPattern::SetExternalRenderOpacity(double opacity)
     auto rsNode = externalRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     rsNode->SetAlpha(opacity);
-
 }
 
 bool FormPattern::ShouldDoSkeletonAnimation()
