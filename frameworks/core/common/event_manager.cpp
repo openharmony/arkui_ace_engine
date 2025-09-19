@@ -217,6 +217,8 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         refereeNG_->ForceCleanGestureReferee();
         responseCtrl_->Reset();
         refereeNG_->CleanAll();
+        downFingerIds_.clear();
+        downFingerIds_[touchPoint.id] = touchPoint.originalId;
 
         TouchTestResult reHitTestResult;
         ResponseLinkResult reResponseLinkResult;
