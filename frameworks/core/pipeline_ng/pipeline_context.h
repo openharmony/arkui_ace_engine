@@ -356,7 +356,8 @@ public:
 
     void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {}) override;
 
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
@@ -388,6 +389,9 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
     void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+
+    bool FlushSafeArea(
+        int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas);
 
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 
@@ -1291,15 +1295,20 @@ public:
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void StartWindowMaximizeAnimation(
-        int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
+    void StartWindowMaximizeAnimation(int32_t width, int32_t height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
 
     void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;

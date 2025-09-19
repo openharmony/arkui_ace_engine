@@ -494,6 +494,22 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
     return false;
 }
 
+std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> ParseAvoidAreasToMap(
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas;
+    for (auto& avoidArea : avoidAreas) {
+        if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_SYSTEM] = ConvertAvoidArea(avoidArea.second);
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR] = ConvertAvoidArea(avoidArea.second);
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_CUTOUT] = ConvertAvoidArea(avoidArea.second);
+        }
+    }
+    return safeAvoidAreas;
+}
+
 void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
@@ -507,21 +523,15 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     }
 }
 
-void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
-    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
-    const ViewportConfig& config,
-    const RefPtr<Platform::AceContainer>& container)
+std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    CHECK_NULL_VOID(container);
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_RETURN(pipelineContext, {});
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-    ParseAvoidAreasUpdate(context, avoidAreas, config);
+    CHECK_NULL_RETURN(context, {});
+    auto safeAreaMap = ParseAvoidAreasToMap(avoidAreas);
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+    return safeAreaMap;
 }
 
 void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
@@ -3960,8 +3970,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                     taskId, viewportConfigMgr = viewportConfigMgr_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
+        auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
         if (pipelineContext) {
-            UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             if (reason != OHOS::Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
@@ -3989,15 +3999,21 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
         if (isDynamicRender && animationOpt.IsValid()) {
-            AnimationUtils::Animate(animationOpt, [pipelineContext, aceView, config, reason, rsTransaction] {
+            AnimationUtils::Animate(
+                animationOpt,
+                [pipelineContext, aceView, config, reason, rsTransaction, avoidAreaMap] {
                 ContainerScope scope(aceView->GetInstanceId());
                 Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                     static_cast<WindowSizeChangeReason>(reason), rsTransaction);
-                pipelineContext->OnSurfaceChanged(
-                    config.Width(), config.Height(), static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+                pipelineContext->OnSurfaceChanged(config.Width(), config.Height(),
+                    static_cast<WindowSizeChangeReason>(reason), rsTransaction, avoidAreaMap);
                 pipelineContext->FlushUITasks(true);
             }, nullptr, nullptr, pipelineContext);
         } else {
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            if (context) {
+                context->FlushSafeArea(config.Width(), config.Height(), avoidAreaMap);
+            }
             Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         }

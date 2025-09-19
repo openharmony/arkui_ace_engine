@@ -1754,8 +1754,32 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
+bool PipelineContext::FlushSafeArea(
+    int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas)
+{
+    bool safeAreaUpdated = false;
+    for (auto& avoidArea : safeAvoidAreas) {
+        if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_SYSTEM) {
+            safeAreaUpdated |= safeAreaManager_->UpdateSystemSafeArea(avoidArea.second);
+        } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR) {
+            safeAreaUpdated |= safeAreaManager_->UpdateNavSafeArea(avoidArea.second);
+        } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_CUTOUT) {
+            safeAreaUpdated |= safeAreaManager_->UpdateCutoutSafeArea(
+                avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
+        }
+    }
+    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight, height);
+    if (safeAreaUpdated) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+        return true;
+    }
+    return false;
+}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     ACE_SCOPED_TRACE("PipelineContext::OnSurfaceChanged");
     CHECK_RUN_ON(UI);
@@ -1789,8 +1813,9 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
+    StartWindowSizeChangeAnimate(width, height, type, rsTransaction, safeAvoidArea);
 #else
+    FlushSafeArea(width, height, safeAvoidArea);
     SetRootRect(width, height, 0.0);
 #endif
 }
@@ -1883,36 +1908,39 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform)
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
+        FlushSafeArea(width, height, safeAvoidArea);
         SetRootRect(width, height, 0.0);
         return;
     }
     switch (type) {
         case WindowSizeChangeReason::FULL_TO_SPLIT:
         case WindowSizeChangeReason::FULL_TO_FLOATING: {
-            StartFullToMultWindowAnimation(width, height, type, rsTransaction);
+            StartFullToMultWindowAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            StartWindowMaximizeAnimation(width, height, rsTransaction);
+            StartWindowMaximizeAnimation(width, height, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
         case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE: {
-            StartSplitWindowAnimation(width, height, type, rsTransaction);
+            StartSplitWindowAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT:
         case WindowSizeChangeReason::RECOVER_IN_IMPLICIT: {
-            MaximizeInImplictAnimation(width, height, type, rsTransaction);
+            MaximizeInImplictAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
             if (textFieldManager_) {
@@ -1926,6 +1954,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
             break;
@@ -1936,6 +1965,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0f);
         }
     }
@@ -1987,7 +2017,8 @@ void PipelineContext::PostKeyboardAvoidTask()
 }
 
 void PipelineContext::StartWindowMaximizeAnimation(
-    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
@@ -2009,9 +2040,10 @@ void PipelineContext::StartWindowMaximizeAnimation(
     auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
     auto weak = WeakClaim(this);
-    Animate(option, curve, [width, height, weak]() {
+    Animate(option, curve, [width, height, weak, safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2022,8 +2054,9 @@ void PipelineContext::StartWindowMaximizeAnimation(
 #endif
 }
 
-void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2044,9 +2077,10 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
     auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingFraction, 0);
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
-    Animate(option, springMotion, [width, height, weak]() {
+    Animate(option, springMotion, [width, height, weak, safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2058,7 +2092,8 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
 }
 
 void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
         "Root node start split window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2072,9 +2107,10 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
+    Animate(option, curve, [width, height, weak = WeakClaim(this), safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2086,7 +2122,8 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
 }
 
 void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
         "Maximize window in implict animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2100,9 +2137,10 @@ void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, 
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
+    Animate(option, curve, [width, height, weak = WeakClaim(this), safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });

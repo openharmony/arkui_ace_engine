@@ -319,5 +319,17 @@ struct IgnoreLayoutSafeAreaOpts {
         return index > EDGE_MASK_LIMIT ? 0 : LayoutEdgeEnum[index];
     }
 };
+/**
+ * @brief Enumerates avoid area type.
+ */
+enum class SafeAreaAvoidType : uint32_t {
+    TYPE_START = 0,
+    TYPE_SYSTEM = TYPE_START,           // area of SystemUI
+    TYPE_CUTOUT,                        // cutout of screen
+    TYPE_SYSTEM_GESTURE,                // area for system gesture
+    TYPE_KEYBOARD,                      // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_END,
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_PROPERTIES_SAFE_AREA_INSETS_H
