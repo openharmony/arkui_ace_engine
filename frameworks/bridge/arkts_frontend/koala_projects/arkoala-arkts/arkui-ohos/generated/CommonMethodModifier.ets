@@ -18,6 +18,7 @@
 
 import { AttributeModifier, extractors, GestureModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, DrawModifier, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
@@ -27,6 +28,7 @@ import { LengthMetrics } from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority } from "./component/focus"
+import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
@@ -199,7 +201,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
     _rotate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rotate_0_0value?: RotateOptions | undefined
     _transform_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _transform_0_0value?: Object | undefined
+    _transform_0_0value?: matrix4.Matrix4Transit | undefined
     _onAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAppear_0_0value?: (() => void) | undefined
     _onDisAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -488,7 +490,8 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
     _onGestureRecognizerJudgeBegin_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
-    applyModifierPatch(peer: ArkCommonMethodPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkCommonMethodPeer;
         if (this._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._width_0_flag) {
@@ -1915,7 +1918,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._transform_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTransformAttribute((this._transform_0_0value as Object | undefined));
+                    peer.setTransformAttribute((this._transform_0_0value as matrix4.Matrix4Transit | undefined));
                     this._transform_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1925,7 +1928,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._transform_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTransformAttribute((undefined as Object | undefined));
+                    peer.setTransformAttribute((undefined as matrix4.Matrix4Transit | undefined));
                 }
             }
         }
@@ -5073,7 +5076,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                     break;
                 }
                 default: {
-                    this.transform((undefined as Object | undefined));
+                    this.transform((undefined as matrix4.Matrix4Transit | undefined));
                 }
             }
         }
@@ -7468,8 +7471,8 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         }
         return this
     }
-    transform(value: Object | undefined): this {
-        if (((this._transform_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._transform_0_0value) !== (value)))
+    transform(value: matrix4.Matrix4Transit | undefined): this {
+        if (((this._transform_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._transform_0_flag = AttributeUpdaterFlag.UPDATE
             this._transform_0_0value = value

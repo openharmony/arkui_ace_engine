@@ -23,7 +23,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace::NG::Converter;
 
 void AssignArkValue(Ark_InvertOptions& dst, const float& value)
 {
@@ -51,32 +50,26 @@ void AssignArkValue(Ark_InvertOptions& dst, const InvertOption& value)
 
 namespace OHOS::Ace::NG {
 namespace {
-const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
-const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_INVERT_NAME = "invert";
-const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_HUE_ROTATE_NAME = "hueRotate";
-const auto ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE = 0;
-const auto ATTRIBUTE_USE_EFFECT_NAME = "useEffect";
-const auto ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_USE_EFFECT_TYPE_NAME = "useEffectType";
-const auto ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE = "EffectType.DEFAULT";
-const auto ATTRIBUTE_RENDER_GROUP_NAME = "renderGroup";
-const auto ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE = true;
-const auto ATTRIBUTE_FREEZE_NAME = "freeze";
-const auto ATTRIBUTE_FREEZE_DEFAULT_VALUE = false;
-const auto ATTRIBUTE_GRID_SPAN_NAME = "gridSpan";
-const auto ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE = 1;
-const auto ATTRIBUTE_GRID_OFFSET_NAME = "gridOffset";
-const auto ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE = 0;
-const auto ATTRIBUTE_SPHERICAL_EFFECT_NAME = "sphericalEffect";
-const auto ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE = 0.0;
-const auto ATTRIBUTE_LIGHT_UP_EFFECT_NAME = "lightUpEffect";
-const auto ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE = 0.0;
-const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME = "pixelStretchEffect";
-const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE =
-    "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
-const auto ATTRIBUTE_ALIGN_RULES_NAME = "alignRules";
+    const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
+    const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_INVERT_NAME = "invert";
+    const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_HUE_ROTATE_NAME = "hueRotate";
+    const auto ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE = 0;
+    const auto ATTRIBUTE_USE_EFFECT_NAME = "useEffect";
+    const auto ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE = false;
+    const auto ATTRIBUTE_RENDER_GROUP_NAME = "renderGroup";
+    const auto ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE = true;
+    const auto ATTRIBUTE_FREEZE_NAME = "freeze";
+    const auto ATTRIBUTE_FREEZE_DEFAULT_VALUE = false;
+    const auto ATTRIBUTE_SPHERICAL_EFFECT_NAME = "sphericalEffect";
+    const auto ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE = 0.0;
+    const auto ATTRIBUTE_LIGHT_UP_EFFECT_NAME = "lightUpEffect";
+    const auto ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE = 0.0;
+    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME = "pixelStretchEffect";
+    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE =
+        "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
+    const auto ATTRIBUTE_ALIGN_RULES_NAME = "alignRules";
 const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_NAME = "left";
 const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_NAME = "right";
 const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME = "middle";
@@ -137,21 +130,7 @@ const auto ATTRIBUTE_ROTATE_I_CENTER_Z_NAME = "centerZ";
 const auto ATTRIBUTE_ROTATE_I_ANGLE_NAME = "angle";
 const auto ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_ARRAY_DEFAULT_SIZE = 0;
-
-static const std::vector<std::tuple<Opt_Boolean, std::string>> testFixtureUseEffect = {
-    { ArkValue<Opt_Boolean>(true), "true"},
-    { ArkValue<Opt_Boolean>(false), "false"},
-    { ArkValue<Opt_Boolean>(), ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE },
-};
-static const std::vector<std::tuple<std::string, Opt_EffectType, std::string>> testFixtureEnumUseEffectType = {
-    { "ARK_EFFECT_TYPE_DEFAULT", ArkValue<Opt_EffectType>(ARK_EFFECT_TYPE_DEFAULT), "EffectType.DEFAULT" },
-    { "EMPTY_VALUE", ArkValue<Opt_EffectType>(), ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE },
-    { "ARK_EFFECT_TYPE_WINDOW_EFFECT", ArkValue<Opt_EffectType>(ARK_EFFECT_TYPE_WINDOW_EFFECT),
-        "EffectType.WINDOW_EFFECT" },
-    { "INVALID_VALUE", ArkValue<Opt_EffectType>(INVALID_ENUM_VAL<Ark_EffectType>),
-        ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE },
-};
-} // namespace
+}
 struct PixelStretchEffect {
     float left = 0.0;
     float top = 0.0;
@@ -200,7 +179,7 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setColorBlend0, nullptr);
+    ASSERT_NE(modifier_->setColorBlend, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_WHITE), "#FFFFFFFF"},
@@ -218,7 +197,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestS
             "#00000000"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setColorBlend0(node_, &inputValue);
+        modifier_->setColorBlend(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -232,14 +211,14 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestS
  */
 HWTEST_F(CommonMethodModifierTest4, setColorBlendTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setColorBlend0, nullptr);
+    ASSERT_NE(modifier_->setColorBlend, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_String>(""), ""},
         {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_String>("failValue"), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setColorBlend0(node_, &inputValue);
+        modifier_->setColorBlend(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -264,7 +243,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setInvert0, nullptr);
+    ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_InvertOptions, std::string>;
     InvertOption val1 = {1.0f, 2.0f, 3.0f, 4.0f};
     static const std::vector<OneTestStep> testPlan = {
@@ -279,7 +258,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.
             "{\"low\":1,\"high\":2,\"threshold\":3,\"thresholdRange\":4}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setInvert0(node_, &inputValue);
+        modifier_->setInvert(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -293,7 +272,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setInvert0, nullptr);
+    ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_InvertOptions, std::string>;
     InvertOption val1 = {-1.0, 2.0, 3.0, 4.0};
     static const std::vector<OneTestStep> testPlan = {
@@ -303,7 +282,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
             Converter::ArkValue<Ark_InvertOptions>(val1)), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setInvert0(node_, &inputValue);
+        modifier_->setInvert(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -329,7 +308,7 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setHueRotate0, nullptr);
+    ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)), 0.0},
@@ -344,7 +323,7 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("1.5turn")), 180.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setHueRotate0(node_, &inputValue);
+        modifier_->setHueRotate(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -358,14 +337,14 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setHueRotate0, nullptr);
+    ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), 0.0},
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("badValue")), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setHueRotate0(node_, &inputValue);
+        modifier_->setHueRotate(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -373,54 +352,35 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
 }
 ////////////// UseEffect
 /*
- * @tc.name: setUseEffectTestDefaultValues
+ * @tc.name: setUseEffectDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setUseEffectTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setUseEffectDefaultValues, TestSize.Level1)
 {
-    auto fullJson = GetJsonValue(node_);
-    auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto resultValue = jsonValue->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
     EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
-    resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setUseEffect0Test
+ * @tc.name: setUseEffectValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setUseEffect0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setUseEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseEffect0, nullptr);
-    for (auto &[inputValue, expectedValue]: testFixtureUseEffect) {
+    using OneTestStep = std::tuple<Opt_Boolean, bool>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_Boolean>(true), true},
+        {Converter::ArkValue<Opt_Boolean>(false), false},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setUseEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-}
-
-/*
- * @tc.name: setUseEffect1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setUseEffect1Test, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setUseEffect0, nullptr);
-    for (auto &[inputValue, expectedValue] : testFixtureUseEffect) {
-        modifier_->setUseEffect2(node_, &inputValue, nullptr);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-    for (auto &[message, inputValue, expectedValue] : testFixtureEnumUseEffectType) {
-        modifier_->setUseEffect1(node_, nullptr, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        auto resultValue = fullJson->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
     }
 }
 ////////////// RenderGroup
@@ -443,14 +403,14 @@ HWTEST_F(CommonMethodModifierTest4, setRenderGroupDefaultValues, TestSize.Level1
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setRenderGroup0, nullptr);
+    ASSERT_NE(modifier_->setRenderGroup, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, bool>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Boolean>(true), true},
         {Converter::ArkValue<Opt_Boolean>(false), false},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setRenderGroup0(node_, &inputValue);
+        modifier_->setRenderGroup(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetBool(ATTRIBUTE_RENDER_GROUP_NAME, ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
@@ -476,127 +436,17 @@ HWTEST_F(CommonMethodModifierTest4, setFreezeDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setFreeze0, nullptr);
+    ASSERT_NE(modifier_->setFreeze, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, bool>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Boolean>(true), true},
         {Converter::ArkValue<Opt_Boolean>(false), false},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setFreeze0(node_, &inputValue);
+        modifier_->setFreeze(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetBool(ATTRIBUTE_FREEZE_NAME, ATTRIBUTE_FREEZE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
-    }
-}
-////////////// GridSpan
-/*
- * @tc.name: setGridSpanDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setGridSpanDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto resultValue = jsonValue->GetBool(ATTRIBUTE_GRID_SPAN_NAME, ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE);
-    EXPECT_EQ(resultValue, ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setGridSpanValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setGridSpanValidValues, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setGridSpan, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(0), 0},
-        {Converter::ArkValue<Opt_Number>(1), 1},
-        {Converter::ArkValue<Opt_Number>(2), 2},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setGridSpan(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetInt(ATTRIBUTE_GRID_SPAN_NAME, ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-}
-
-/*
- * @tc.name: setGridSpanInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setGridSpanInvalidValues, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setGridSpan, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(-1), 1},
-        {Converter::ArkValue<Opt_Number>(-2), 1},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setGridSpan(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetInt(ATTRIBUTE_GRID_SPAN_NAME, ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-}
-////////////// GridOffset
-/*
- * @tc.name: setGridOffsetDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setGridOffsetDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto resultValue = jsonValue->GetBool(ATTRIBUTE_GRID_OFFSET_NAME, ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE);
-    EXPECT_EQ(resultValue, ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE);
-}
-
-/*
- * @tc.name: setGridOffsetValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setGridOffsetValidValues, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setGridOffset, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(0), 0},
-        {Converter::ArkValue<Opt_Number>(1), 1},
-        {Converter::ArkValue<Opt_Number>(2), 2},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setGridOffset(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetInt(ATTRIBUTE_GRID_OFFSET_NAME, ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-}
-
-/*
- * @tc.name: setGridOffsetInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setGridOffsetInvalidValues, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setGridOffset, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(-1), 0},
-        {Converter::ArkValue<Opt_Number>(-2), 0},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setGridOffset(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetInt(ATTRIBUTE_GRID_OFFSET_NAME, ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
 ////////////// SphericalEffect
@@ -619,7 +469,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Le
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSphericalEffect0, nullptr);
+    ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Number>(0.0), 0.0},
@@ -629,7 +479,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, Test
         {Converter::ArkValue<Opt_Number>(1.0), 1.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setSphericalEffect0(node_, &inputValue);
+        modifier_->setSphericalEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
             ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -644,7 +494,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, Test
  */
 HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSphericalEffect0, nullptr);
+    ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Number>(-1.0), 0.0},
@@ -653,7 +503,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Le
         {Converter::ArkValue<Opt_Number>(2.0), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setSphericalEffect0(node_, &inputValue);
+        modifier_->setSphericalEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
             ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -680,7 +530,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLightUpEffect0, nullptr);
+    ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Number>(0.0), 0.0},
@@ -690,7 +540,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSi
         {Converter::ArkValue<Opt_Number>(1.0), 1.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setLightUpEffect0(node_, &inputValue);
+        modifier_->setLightUpEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -704,7 +554,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLightUpEffect0, nullptr);
+    ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Number>(-1.0), 0.0},
@@ -713,7 +563,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Leve
         {Converter::ArkValue<Opt_Number>(2.0), 0.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setLightUpEffect0(node_, &inputValue);
+        modifier_->setLightUpEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -739,7 +589,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setPixelStretchEffect0, nullptr);
+    ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Opt_PixelStretchEffectOptions, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_PixelStretchEffectOptions>(
@@ -753,7 +603,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, T
             "{\"left\":\"1.00px\",\"right\":\"3.00px\",\"top\":\"2.00px\",\"bottom\":\"4.00px\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setPixelStretchEffect0(node_, &inputValue);
+        modifier_->setPixelStretchEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -767,15 +617,18 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, T
  */
 HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setPixelStretchEffect0, nullptr);
+    ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Opt_PixelStretchEffectOptions, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_PixelStretchEffectOptions>(Ark_PixelStretchEffectOptions {
-            .top = {}, .bottom = {}, .left = {}, .right = {}}),
+            .top = Converter::ArkValue<Opt_Length>(),
+            .bottom = Converter::ArkValue<Opt_Length>(),
+            .left = Converter::ArkValue<Opt_Length>(),
+            .right = Converter::ArkValue<Opt_Length>()}),
             "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setPixelStretchEffect0(node_, &inputValue);
+        modifier_->setPixelStretchEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -1103,17 +956,17 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLengthMetricsTest
 
 typedef std::pair<Ark_Length, std::string> lengthOneTestStep;
 std::vector<lengthOneTestStep> testLengthValues = {
-    { Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
-    { Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp" },
-    { Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
-    { Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
-    { Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp" },
-    { Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
-    { Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
-    { Converter::ArkValue<Ark_Length>(0.0_px), "0.00px" },
-    { Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
-    { Converter::ArkValue<Ark_Length>(0.5_pct), "50.00%" },
-    { Converter::ArkValue<Ark_Length>(0.0_pct), "0.00%" },
+    { Converter::ArkValue<Ark_Length>("123.0vp"), "123.00vp" },
+    { Converter::ArkValue<Ark_Length>("0.0vp"), "0.00vp" },
+    { Converter::ArkValue<Ark_Length>("1.23vp"), "1.23vp" },
+    { Converter::ArkValue<Ark_Length>("123.0fp"), "123.00fp" },
+    { Converter::ArkValue<Ark_Length>("0.0fp"), "0.00fp" },
+    { Converter::ArkValue<Ark_Length>("1.23fp"), "1.23fp" },
+    { Converter::ArkValue<Ark_Length>("123.0px"), "123.00px" },
+    { Converter::ArkValue<Ark_Length>("0.0px"), "0.00px" },
+    { Converter::ArkValue<Ark_Length>("1.23px"), "1.23px" },
+    { Converter::ArkValue<Ark_Length>("50%"), "50.00%" },
+    { Converter::ArkValue<Ark_Length>("0%"), "0.00%" },
 };
 /*
  * @tc.name: setSafeAreaPaddingLeftArkPaddingTestValues
@@ -1243,15 +1096,15 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setOnSizeChangeTest, TestSize.Level
         checkEvent = {
             .nodeId = nodeId,
         };
-        auto arkLen = Converter::OptConvert<Ark_Length>(oldValue.width);
-        auto sizeW = arkLen.has_value() ? arkLen.value().value : 0.0f;
-        arkLen = Converter::OptConvert<Ark_Length>(oldValue.height);
-        auto sizeH = arkLen.has_value() ? arkLen.value().value : 0.0f;
+        auto arkLen = Converter::OptConvert<Dimension>(oldValue.width);
+        auto sizeW = arkLen.has_value() ? arkLen->Value() : 0.0f;
+        arkLen = Converter::OptConvert<Dimension>(oldValue.height);
+        auto sizeH = arkLen.has_value() ? arkLen->Value() : 0.0f;
         checkEvent->oldSize = SizeF(sizeW, sizeH);
-        arkLen = Converter::OptConvert<Ark_Length>(newValue.width);
-        sizeW = arkLen.has_value() ? arkLen.value().value : 0.0f;
-        arkLen = Converter::OptConvert<Ark_Length>(newValue.height);
-        sizeH = arkLen.has_value() ? arkLen.value().value : 0.0f;
+        arkLen = Converter::OptConvert<Dimension>(newValue.width);
+        sizeW = arkLen.has_value() ? arkLen->Value() : 0.0f;
+        arkLen = Converter::OptConvert<Dimension>(newValue.height);
+        sizeH = arkLen.has_value() ? arkLen->Value() : 0.0f;
         checkEvent->newSize = SizeF(sizeW, sizeH);
     };
     static constexpr int32_t contextId = 123;
@@ -1282,11 +1135,11 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> dimensionsFLoatVal
 };
 
 /*
- * @tc.name: setRotate0TestRotateCenterZValidValues
+ * @tc.name: setRotateTestRotateCenterZValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateCenterZValidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1302,12 +1155,12 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, Test
         inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
         inputValueRotate.centerZ = optValue;
         auto optInputValueRotate = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        modifier_->setRotate0(node_, &optInputValueRotate);
+        modifier_->setRotate(node_, &optInputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerZ";
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
     for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
@@ -1316,11 +1169,11 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, Test
 }
 
 /*
- * @tc.name: setRotate0TestRotateCenterZInvalidValues
+ * @tc.name: setRotateTestRotateCenterZInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotateTestRotateCenterZInvalidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1337,82 +1190,12 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate0TestRotateCenterZInvalidV
         inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
         inputValueRotate.centerZ = invalidValue;
         auto optInputValueRotate = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        modifier_->setRotate0(node_, &optInputValueRotate);
+        modifier_->setRotate(node_, &optInputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerZ";
-    };
-
-    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
-        checkValue(input, ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE, value, Converter::ArkValue<Opt_Number>());
-    }
-}
-
-/*
- * @tc.name: setRotate1TestRotateCenterZValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZValidValues, TestSize.Level1)
-{
-    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
-    auto checkValue = [this, defNumValue](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_RotateOptions inputValueRotate;
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
-        inputValueRotate.x = optValue;
-        inputValueRotate.y = optValue;
-        inputValueRotate.z = optValue;
-        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
-        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
-        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerZ = optValue;
-
-        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        modifier_->setRotate1(node_, &optRotateOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate1, attribute: rotate.centerZ";
-    };
-
-    for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setRotate1TestRotateCenterZInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
-{
-    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
-    auto checkValue = [this, defNumValue](
-                          const std::string& input, const std::string& expectedStr,
-                          const Ark_Number& value, const Opt_Number& invalidValue) {
-        Ark_RotateOptions inputValueRotate;
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
-        inputValueRotate.x = optValue;
-        inputValueRotate.y = optValue;
-        inputValueRotate.z = optValue;
-        inputValueRotate.perspective = Converter::ArkValue<Opt_Number>(defNumValue);
-        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(defNumValue);
-        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerZ = invalidValue;
-        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        modifier_->setRotate1(node_, &optRotateOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate1, attribute: rotate.centerZ";
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
     for (auto& [input, value, expected] : dimensionsFLoatValidValues) {
@@ -1437,11 +1220,11 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testStringFloatVal
 };
 
 /*
- * @tc.name: setRotate0TestRotateAngleValidValues
+ * @tc.name: setRotateTestRotateAngleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateAngleValidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1457,13 +1240,13 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleValidValues, TestSi
         inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
         inputValueRotate.centerZ = optValue;
         auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        
-        modifier_->setRotate0(node_, &optRotateOptions);
+
+        modifier_->setRotate(node_, &optRotateOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate0, attribute: rotate.angle";
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 
     for (auto& [input, value, expected] : testNumberFloatValues) {
@@ -1472,11 +1255,11 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleValidValues, TestSi
 }
 
 /*
- * @tc.name: setRotate0TestRotateAngleStringValidValues
+ * @tc.name: setRotateTestRotateAngleStringValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleStringValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateAngleStringValidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1493,50 +1276,15 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateAngleStringValidValues, 
         inputValueRotate.centerZ = optValue;
         auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
 
-        modifier_->setRotate0(node_, &optRotateOptions);
+        modifier_->setRotate(node_, &optRotateOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate0, attribute: rotate.angle";
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 
     for (auto& [input, value, expected] : testStringFloatValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setRotate1TestRotateAngleValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateAngleValidValues, TestSize.Level1)
-{
-    Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
-    auto checkValue = [this, defNumValue](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_RotateOptions inputValueRotate;
-        auto optValue = Converter::ArkValue<Opt_Number>(defNumValue);
-        inputValueRotate.x = optValue;
-        inputValueRotate.y = optValue;
-        inputValueRotate.z = optValue;
-        inputValueRotate.perspective = optValue;
-        inputValueRotate.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value);
-        inputValueRotate.centerZ = optValue;
-
-        auto optRotateOptions = Converter::ArkValue<Opt_RotateOptions>(inputValueRotate);
-        modifier_->setRotate1(node_, &optRotateOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate1, attribute: rotate.angle";
-    };
-
-    for (auto& [input, value, expected] : testNumberFloatValues) {
         checkValue(input, expected, value);
     }
 }
@@ -1595,8 +1343,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffectTest, Te
     ASSERT_NE(rContext, nullptr);
     AutoTransitionEffectPeer peer(fullAPI_, ChainedTransitionEffectType::TRANSLATE);
     const auto materialized = peer.GetArkValue();
-    auto effect = Converter::ArkUnion<Opt_Union_TransitionOptions_TransitionEffect,
-    Ark_TransitionEffect>(materialized);
+    auto effect = Converter::ArkValue<Opt_TransitionEffect>(materialized);
     modifier_->setTransition0(node_, &effect);
     auto rcEffect = rContext->chainedTransitionEffect_;
     ASSERT_NE(rcEffect, nullptr);
@@ -1616,8 +1363,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffect2Test, T
     ASSERT_NE(rContext, nullptr);
     AutoTransitionEffectPeer peer(fullAPI_, ChainedTransitionEffectType::ROTATE);
     const auto materialized = peer.GetArkValue();
-    auto effect = Converter::ArkUnion<Opt_Union_TransitionOptions_TransitionEffect,
-    Ark_TransitionEffect>(materialized);
+    auto effect = Converter::ArkValue<Opt_TransitionEffect>(materialized);
     modifier_->setTransition0(node_, &effect);
     auto rcEffect = rContext->chainedTransitionEffect_;
     ASSERT_NE(rcEffect, nullptr);

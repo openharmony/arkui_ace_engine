@@ -44,7 +44,7 @@ static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
         ani_long nativePtr = 0;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Long(
-            reinterpret_cast<ani_object>(object), "innerGetThisVar", ":J", &nativePtr) != ANI_OK) {
+            reinterpret_cast<ani_object>(object), "innerGetThisVar", ":l", &nativePtr) != ANI_OK) {
             return 0;
         }
         return static_cast<long>(nativePtr);
@@ -76,7 +76,7 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
     auto setWebIdFunc = [vm, object = savePtr](int32_t nwebId) {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setNWebId", "I:V", static_cast<ani_int>(nwebId)) != ANI_OK) {
+            reinterpret_cast<ani_object>(object), "_setNWebId", "i:", static_cast<ani_int>(nwebId)) != ANI_OK) {
             return;
         }
     };
@@ -88,7 +88,7 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
         }
         if (envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
             envTemp->Object_CallMethodByName_Void(
-                reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
+                reinterpret_cast<ani_object>(object), "_setHapPath", "C{std.core.String}:", aniHapPath) != ANI_OK) {
             envTemp->GlobalReference_Delete(object);
             return;
         }
@@ -124,7 +124,7 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
         ani_int nwebId;
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Int(
-            reinterpret_cast<ani_object>(object), "getWebId", ":I", &nwebId) != ANI_OK) {
+            reinterpret_cast<ani_object>(object), "getWebId", ":i", &nwebId) != ANI_OK) {
             return -1;
         }
         return static_cast<int32_t>(nwebId);
@@ -135,7 +135,7 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
             return;
         }
         envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "innerCompleteWindowNew", "I:V", static_cast<ani_int>(parentId));
+            reinterpret_cast<ani_object>(object), "innerCompleteWindowNew", "i:", static_cast<ani_int>(parentId));
     };
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;

@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkVideoPeer, FullscreenInfo, PreparedInfo, PlaybackInfo, VideoAttribute } from "./component/video"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: VideoAttribute): void { }
-    applyPressedAttribute(instance: VideoAttribute): void { }
-    applyFocusedAttribute(instance: VideoAttribute): void { }
-    applyDisabledAttribute(instance: VideoAttribute): void { }
-    applySelectedAttribute(instance: VideoAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _muted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _muted_0_0value?: boolean | undefined
     _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -72,8 +73,9 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
     _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableShortcutKey_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkVideoPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkVideoPeer;
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._muted_0_flag) {

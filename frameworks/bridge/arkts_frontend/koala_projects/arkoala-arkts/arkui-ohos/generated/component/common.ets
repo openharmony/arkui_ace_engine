@@ -33,6 +33,7 @@ import { LengthMetrics_serializer } from "./../Graphics"
 import { ResizableOptions_serializer, ResizableOptions } from "./image"
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_BrightnessBlender_serializer } from "./../framework/ohos.graphics.uiEffect"
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
+import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Gesture_serializer, GestureGroup_serializer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask, GestureMode, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
@@ -40,6 +41,7 @@ import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, Sty
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
+import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
@@ -74,6 +76,7 @@ import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
+import { AnimationExtender } from '#generated';
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
@@ -1783,10 +1786,10 @@ export class TextContentControllerBase implements MaterializedBase {
     public getTextContentRect(): RectResult {
         return this.getTextContentRect_serialize()
     }
-    public getTextContentLineCount(): number {
+    public getTextContentLineCount(): int32 {
         return this.getTextContentLineCount_serialize()
     }
-    public addText(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
         const text_casted = text as (string)
         const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
         return this.addText_serialize(text_casted, textOperationOptions_casted)
@@ -1819,11 +1822,11 @@ export class TextContentControllerBase implements MaterializedBase {
         const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getTextContentLineCount_serialize(): number {
+    getTextContentLineCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
         return retval
     }
-    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): number {
+    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (textOperationOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3690,12 +3693,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setRotate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTransformAttribute(value: Object | undefined): void {
+    setTransformAttribute(value: matrix4.Matrix4Transit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteObject(valueTmpValue)
+            matrix4_Matrix4Transit_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6260,7 +6263,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export interface InputCounterOptions {
-    thresholdPercentage?: number;
+    thresholdPercentage?: double;
     highlightBorder?: boolean;
 }
 export interface TextDecorationOptions {
@@ -6447,6 +6450,7 @@ export interface AnimateParam {
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
 export type ICurve = curves.ICurve;
+export type Matrix4Transit = matrix4.Matrix4Transit;
 export interface MotionPathOptions {
     path: string;
     from?: number;
@@ -7443,7 +7447,7 @@ export interface CommonMethod {
     rotate(value: RotateOptions | undefined): this {
         throw new Error("Unimplemented method rotate")
     }
-    transform(value: Object | undefined): this {
+    transform(value: matrix4.Matrix4Transit | undefined): this {
         throw new Error("Unimplemented method transform")
     }
     onAppear(value: (() => void) | undefined): this {
@@ -7814,11 +7818,8 @@ export interface CommonMethod {
     overload accessibilityText { accessibilityTextOfStringType, accessibilityTextOfResourceType }
     overload accessibilityDescription { accessibilityDescriptionOfStringType, accessibilityDescriptionOfResourceType }
     // instructive change begin
-    // attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-    //     throw new Error("Unimplemented method attributeModifier")
-    // }
-    // instructive change end
     applyAttributesFinish(): void {}
+    // instructive change end
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | LayoutPolicy | undefined
@@ -7900,7 +7901,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     translate_value?: TranslateOptions | undefined
     scale_value?: ScaleOptions | undefined
     rotate_value?: RotateOptions | undefined
-    transform_value?: Object | undefined
+    transform_value?: matrix4.Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: VoidCallback | undefined
@@ -8220,7 +8221,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     rotate(value: RotateOptions | undefined): this {
         return this
     }
-    transform(value: Object | undefined): this {
+    transform(value: matrix4.Matrix4Transit | undefined): this {
         return this
     }
     onAppear(value: (() => void) | undefined): this {
@@ -8729,10 +8730,10 @@ export type Filter = uiEffect.Filter;
 export type Blender = uiEffect.Blender;
 export type PromptActionDialogController = promptAction.DialogController;
 export interface RectResult {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: double;
+    y: double;
+    width: double;
+    height: double;
 }
 export interface CaretOffset {
     index: number;
@@ -9593,9 +9594,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transform(value: Object | undefined): this {
+    public transform(value: matrix4.Matrix4Transit | undefined): this {
         if (this.checkPriority("transform")) {
-            const value_casted = value as (Object | undefined)
+            const value_casted = value as (matrix4.Matrix4Transit | undefined)
             this.getPeer()?.setTransformAttribute(value_casted)
             return this
         }
@@ -10890,7 +10891,9 @@ export function animateTo(value: AnimateParam, event: (() => void)): void {
     // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
+    // instructive change start
+    AnimationExtender.AnimateToImmediatelyImpl(value, event)
+    // instructive change end
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)
@@ -10964,20 +10967,20 @@ export class RectResult_serializer {
     public static write(buffer: SerializerBase, value: RectResult): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): RectResult {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : RectResult = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as RectResult)
         return value
     }
@@ -12003,7 +12006,7 @@ export class InputCounterOptions_serializer {
         if (valueHolderForThresholdPercentage !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForThresholdPercentageTmpValue  = valueHolderForThresholdPercentage!
-            valueSerializer.writeNumber(valueHolderForThresholdPercentageTmpValue)
+            valueSerializer.writeFloat64(valueHolderForThresholdPercentageTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12019,11 +12022,11 @@ export class InputCounterOptions_serializer {
     public static read(buffer: DeserializerBase): InputCounterOptions {
         let valueDeserializer : DeserializerBase = buffer
         const thresholdPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let thresholdPercentageTmpBuf : number | undefined = undefined
+        let thresholdPercentageTmpBuf : double | undefined = undefined
         if ((thresholdPercentageTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            thresholdPercentageTmpBuf = (valueDeserializer.readNumber() as number)
+            thresholdPercentageTmpBuf = valueDeserializer.readFloat64()
         }
-        const thresholdPercentageTmpResult : number | undefined = thresholdPercentageTmpBuf
+        const thresholdPercentageTmpResult : double | undefined = thresholdPercentageTmpBuf
         const highlightBorderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let highlightBorderTmpBuf : boolean | undefined = undefined
         if ((highlightBorderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12056,6 +12059,121 @@ export class InvertOptions_serializer {
         return value
     }
 }
+export class ItemDragEventHandler_serializer {
+    public static write(buffer: SerializerBase, value: ItemDragEventHandler): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOnLongPress  = value.onLongPress
+        if (valueHolderForOnLongPress !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnLongPressTmpValue  = valueHolderForOnLongPress!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnLongPressTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDragStart  = value.onDragStart
+        if (valueHolderForOnDragStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDragStartTmpValue  = valueHolderForOnDragStart!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDragStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnMoveThrough  = value.onMoveThrough
+        if (valueHolderForOnMoveThrough !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMoveThroughTmpValue  = valueHolderForOnMoveThrough!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMoveThroughTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDrop  = value.onDrop
+        if (valueHolderForOnDrop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDropTmpValue  = valueHolderForOnDrop!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDropTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ItemDragEventHandler {
+        let valueDeserializer : DeserializerBase = buffer
+        const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onLongPressTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onLongPressTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onLongPressTmpBuf = (value0: number):void => {
+                const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
+                onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
+                onLongPressTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                onLongPressTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onLongPressTmpResult : ((value0: number) => void) | undefined = onLongPressTmpBuf
+        const onDragStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDragStartTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onDragStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDragStartTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDragStartTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDragStartTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDragStartTmpBuf = (value0: number):void => {
+                const onDragStartTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
+                onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCallSync);
+                onDragStartTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onDragStartTmpBuf_BufArgsSerializer.asBuffer(), onDragStartTmpBuf_BufArgsSerializer.length());
+                onDragStartTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDragStartTmpResult : ((value0: number) => void) | undefined = onDragStartTmpBuf
+        const onMoveThroughTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onMoveThroughTmpBuf : OnMoveHandler | undefined = undefined
+        if ((onMoveThroughTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMoveThroughTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onMoveThroughTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onMoveThroughTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onMoveThroughTmpBuf = (from: number, to: number):void => {
+                const onMoveThroughTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
+                onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCallSync);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(from);
+                onMoveThroughTmpBuf_BufArgsSerializer.writeNumber(to);
+                InteropNativeModule._CallCallbackSync(10, -1200281222, onMoveThroughTmpBuf_BufArgsSerializer.asBuffer(), onMoveThroughTmpBuf_BufArgsSerializer.length());
+                onMoveThroughTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onMoveThroughTmpResult : OnMoveHandler | undefined = onMoveThroughTmpBuf
+        const onDropTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDropTmpBuf : ((value0: number) => void) | undefined = undefined
+        if ((onDropTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDropTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDropTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onDropTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onDropTmpBuf = (value0: number):void => {
+                const onDropTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
+                onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCallSync);
+                onDropTmpBuf_BufArgsSerializer.writeNumber(value0);
+                InteropNativeModule._CallCallbackSync(10, 36519084, onDropTmpBuf_BufArgsSerializer.asBuffer(), onDropTmpBuf_BufArgsSerializer.length());
+                onDropTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onDropTmpResult : ((value0: number) => void) | undefined = onDropTmpBuf
+        let value : ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
+        return value
+    }
+}
 export class ItemDragInfo_serializer {
     public static write(buffer: SerializerBase, value: ItemDragInfo): void {
         let valueSerializer : SerializerBase = buffer
@@ -12081,6 +12199,70 @@ export class KeyEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return KeyEventInternal.fromPtr(ptr)
+    }
+}
+export class KeyframeState_serializer {
+    public static write(buffer: SerializerBase, value: KeyframeState): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDuration  = value.duration
+        valueSerializer.writeNumber(valueHolderForDuration)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCurveTmpValue  = valueHolderForCurve!
+            if (valueHolderForCurveTmpValue instanceof curves.Curve) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
+                valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
+            } else if (valueHolderForCurveTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as string
+                valueSerializer.writeString(valueHolderForCurveTmpValueForIdx1)
+            } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForCurveTmpValueForIdx2  = valueHolderForCurveTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEvent  = value.event
+        valueSerializer.holdAndWriteCallback(valueHolderForEvent)
+    }
+    public static read(buffer: DeserializerBase): KeyframeState {
+        let valueDeserializer : DeserializerBase = buffer
+        const durationTmpResult : number = (valueDeserializer.readNumber() as number)
+        const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
+        if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const curveTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let curveTmpBuf_ : curves.Curve | string | curves.ICurve | undefined
+            if (curveTmpBuf_UnionSelector == (0).toChar()) {
+                curveTmpBuf_ = curves.Curve.fromValue(valueDeserializer.readInt32())
+            } else if (curveTmpBuf_UnionSelector == (1).toChar()) {
+                curveTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (curveTmpBuf_UnionSelector == (2).toChar()) {
+                curveTmpBuf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+            } else {
+                throw new Error("One of the branches for curveTmpBuf_ has to be chosen through deserialisation.")
+            }
+            curveTmpBuf = (curveTmpBuf_ as curves.Curve | string | curves.ICurve)
+        }
+        const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
+        const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const eventTmpResult : (() => void) = ():void => {
+            const eventTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            eventTmpBufBufArgsSerializer.writeInt32(eventTmpBufBufResource.resourceId);
+            eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCall);
+            eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCallSync);
+            InteropNativeModule._CallCallbackSync(10, -1867723152, eventTmpBufBufArgsSerializer.asBuffer(), eventTmpBufBufArgsSerializer.length());
+            eventTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : KeyframeState = ({duration: durationTmpResult, curve: curveTmpResult, event: eventTmpResult} as KeyframeState)
+        return value
     }
 }
 export class LinearGradientBlurOptions_serializer {
@@ -14225,6 +14407,83 @@ export class HistoricalPoint_serializer {
         const forceTmpResult : number = (valueDeserializer.readNumber() as number)
         const timestampTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
+        return value
+    }
+}
+export class KeyframeAnimateParam_serializer {
+    public static write(buffer: SerializerBase, value: KeyframeAnimateParam): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDelay  = value.delay
+        if (valueHolderForDelay !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDelayTmpValue  = valueHolderForDelay!
+            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForIterations  = value.iterations
+        if (valueHolderForIterations !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIterationsTmpValue  = valueHolderForIterations!
+            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnFinish  = value.onFinish
+        if (valueHolderForOnFinish !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnFinishTmpValue  = valueHolderForOnFinish!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnFinishTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForExpectedFrameRateRange  = value.expectedFrameRateRange
+        if (valueHolderForExpectedFrameRateRange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForExpectedFrameRateRangeTmpValue  = valueHolderForExpectedFrameRateRange!
+            ExpectedFrameRateRange_serializer.write(valueSerializer, valueHolderForExpectedFrameRateRangeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): KeyframeAnimateParam {
+        let valueDeserializer : DeserializerBase = buffer
+        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let delayTmpBuf : number | undefined = undefined
+        if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            delayTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const delayTmpResult : number | undefined = delayTmpBuf
+        const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iterationsTmpBuf : number | undefined = undefined
+        if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onFinishTmpBuf : (() => void) | undefined = undefined
+        if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onFinishTmpBuf = ():void => {
+                const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
+                onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                onFinishTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onFinishTmpResult : (() => void) | undefined = onFinishTmpBuf
+        const expectedFrameRateRangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let expectedFrameRateRangeTmpBuf : ExpectedFrameRateRange | undefined = undefined
+        if ((expectedFrameRateRangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            expectedFrameRateRangeTmpBuf = ExpectedFrameRateRange_serializer.read(valueDeserializer)
+        }
+        const expectedFrameRateRangeTmpResult : ExpectedFrameRateRange | undefined = expectedFrameRateRangeTmpBuf
+        let value : KeyframeAnimateParam = ({delay: delayTmpResult, iterations: iterationsTmpResult, onFinish: onFinishTmpResult, expectedFrameRateRange: expectedFrameRateRangeTmpResult} as KeyframeAnimateParam)
         return value
     }
 }

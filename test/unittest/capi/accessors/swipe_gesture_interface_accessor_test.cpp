@@ -43,7 +43,7 @@ public:
     void *CreatePeerInstance() override
     {
         auto value = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>();
-        return accessor_->ctor(&value);
+        return accessor_->construct(&value);
     }
     void SetUp(void) override
     {
@@ -82,7 +82,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>(arkSomeDirection);
         params.speed = Converter::ArkValue<Opt_Number>(someSpeed);
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -102,7 +102,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>();
         params.speed = Converter::ArkValue<Opt_Number>();
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -140,7 +140,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestDirection, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>(value.first);
         params.speed = Converter::ArkValue<Opt_Number>(someSpeed);
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -160,7 +160,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestDirection, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>(value.first);
         params.speed = Converter::ArkValue<Opt_Number>();
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -199,7 +199,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestSpeed, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>(arkSomeDirection);
         params.speed = Converter::ArkValue<Opt_Number>(value.first);
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -219,7 +219,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestSpeed, TestSize.Level1)
         params.direction = Converter::ArkValue<Opt_SwipeDirection>();
         params.speed = Converter::ArkValue<Opt_Number>(value.first);
         auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto peer = accessor_->construct(&optParam);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -241,7 +241,7 @@ HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestSpeed, TestSize.Level1)
  */
 HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 {
-    auto peer = accessor_->ctor(nullptr);
+    auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->gesture, nullptr);
     auto fingers = peer->gesture->GetFingers();

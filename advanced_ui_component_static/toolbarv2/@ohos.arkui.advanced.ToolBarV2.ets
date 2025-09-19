@@ -47,8 +47,8 @@ const MAX_DIALOG: VP = '256vp';
 const MIN_DIALOG: VP = '216vp';
 const TEXT_TOOLBAR_DIALOG: FP = '18.3fp';
 const SCREEN_WIDTH_BREAK_POINT: number = 640;
-const VERTICAL_SCREEN_TEXT_MAX_LINES: number = 6;
-const HORIZONTAL_SCREEN_TEXT_MAX_LINES: number = 1;
+const VERTICAL_SCREEN_TEXT_MAX_LINES: int = 6;
+const HORIZONTAL_SCREEN_TEXT_MAX_LINES: int = 1;
 const FOCUS_BOX_MARGIN: number = -2;
 const FOCUS_BOX_BORDER_WIDTH: number = 2;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
@@ -313,7 +313,7 @@ export struct ToolBarV2 {
     return menuContent;
   }
 
-  private itemCardTextMaxLine: number = 1;
+  private itemCardTextMaxLine: int = 1;
   private itemDialogId?: number = undefined;
   private isFollowSystem?: boolean = false;
   private maxFontSizeScale?: number = 3.2;

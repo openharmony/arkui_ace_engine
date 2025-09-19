@@ -29,20 +29,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace OverlayOpsAccessor {
-#if !defined(PREVIEW)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
-#endif
-
 void SetOverlayAttributeImpl(Ark_NativePointer node, const Opt_Union_String_CustomBuilder* value,
     const Opt_OverlayOptions* options)
 {
@@ -56,12 +42,7 @@ void SetOverlayAttributeImpl(Ark_NativePointer node, const Opt_Union_String_Cust
         },
         [node, frameNode, &overlay](const CustomNodeBuilder& builder) {
             CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
-#if !defined(PREVIEW)
-                ViewAbstract::SetOverlayBuilder(
-                    frameNode, CreateProxyNode(uiNode), overlay.align, overlay.x, overlay.y);
-#else
                 ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
-#endif
                 }, node);
         },
         [frameNode, &overlay]() {

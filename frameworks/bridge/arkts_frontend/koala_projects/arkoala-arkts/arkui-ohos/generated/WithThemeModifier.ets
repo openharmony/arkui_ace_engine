@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkWithThemePeer, WithThemeAttribute } from "./component/withTheme"
 import { int32 } from "@koalaui/common"
 export class WithThemeModifier implements WithThemeAttribute,AttributeModifier<WithThemeAttribute> {
@@ -26,12 +27,13 @@ export class WithThemeModifier implements WithThemeAttribute,AttributeModifier<W
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: WithThemeAttribute): void { }
-    applyPressedAttribute(instance: WithThemeAttribute): void { }
-    applyFocusedAttribute(instance: WithThemeAttribute): void { }
-    applyDisabledAttribute(instance: WithThemeAttribute): void { }
-    applySelectedAttribute(instance: WithThemeAttribute): void { }
-    applyModifierPatch(peer: ArkWithThemePeer): void {
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkWithThemePeer;
     }
     mergeModifier(modifier: WithThemeModifier): void {
     }

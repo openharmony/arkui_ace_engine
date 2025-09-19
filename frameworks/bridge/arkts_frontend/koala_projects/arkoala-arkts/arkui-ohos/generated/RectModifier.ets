@@ -20,6 +20,7 @@ import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRectPeer, RadiusItem, RectAttribute } from "./component/rect"
 import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
@@ -31,19 +32,20 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RectAttribute): void { }
-    applyPressedAttribute(instance: RectAttribute): void { }
-    applyFocusedAttribute(instance: RectAttribute): void { }
-    applyDisabledAttribute(instance: RectAttribute): void { }
-    applySelectedAttribute(instance: RectAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _radiusWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusWidth_0_0value?: double | string | undefined
     _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusHeight_0_0value?: double | string | undefined
     _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radius_0_0value?: Length | Array<RadiusItem> | undefined
-    applyModifierPatch(peer: ArkRectPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRectPeer;
         if (this._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._radiusWidth_0_flag) {

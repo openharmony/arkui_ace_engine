@@ -18,7 +18,7 @@
 
 import { __context, __id, remember } from '@koalaui/runtime'
 import { RepeatImplForOptions } from '../base/RepeatImpl'
-import { ArkCommonMethodComponent, CommonMethod, DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
 
 export interface RepeatItem<T> {
     readonly item: T;
@@ -43,7 +43,7 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface RepeatAttribute<T> extends CommonMethod, DynamicNode {
+export interface RepeatAttribute<T> extends DynamicNode {
     arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
     key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
@@ -55,16 +55,10 @@ export interface RepeatAttribute<T> extends CommonMethod, DynamicNode {
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
+    applyAttributesFinish(): void{}
 }
 
-// export class ArkRepeatStyle<T> extends ArkCommonMethodStyle implements RepeatAttribute<T> {
-//     public arr: RepeatArray<T> = [];
-//     public setRepeatOptions(arr: RepeatArray<T>): this {
-//         this.arr = arr;
-//         return this;
-//     }
-// }
-export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements RepeatAttribute<T> {
+export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
     public arr: RepeatArray<T> = [];
     public setRepeatOptions(arr: RepeatArray<T>): this {
         this.arr = arr;
@@ -91,7 +85,11 @@ export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements R
     public onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         return this;
     }
+    applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+    }
 }
+
 /** @memo */
 export function RepeatImpl<T>(
     /** @memo */

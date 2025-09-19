@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkHyperlinkPeer, HyperlinkAttribute } from "./component/hyperlink"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -30,20 +31,21 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: HyperlinkAttribute): void { }
-    applyPressedAttribute(instance: HyperlinkAttribute): void { }
-    applyFocusedAttribute(instance: HyperlinkAttribute): void { }
-    applyDisabledAttribute(instance: HyperlinkAttribute): void { }
-    applySelectedAttribute(instance: HyperlinkAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _color_0_0value?: Color | number | string | Resource | undefined
-    applyModifierPatch(peer: ArkHyperlinkPeer): void {
-        super.applyModifierPatch(peer)
+    _color_0_0value?: Color | int32 | string | Resource | undefined
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkHyperlinkPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColorAttribute((this._color_0_0value as Color | number | string | Resource | undefined));
+                    peer.setColorAttribute((this._color_0_0value as Color | int32 | string | Resource | undefined));
                     this._color_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -53,7 +55,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
                 }
                 default: {
                     this._color_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColorAttribute((undefined as Color | number | string | Resource | undefined));
+                    peer.setColorAttribute((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -69,12 +71,12 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
                     break;
                 }
                 default: {
-                    this.color((undefined as Color | number | string | Resource | undefined));
+                    this.color((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
     }
-    color(value: Color | number | string | Resource | undefined): this {
+    color(value: Color | int32 | string | Resource | undefined): this {
         if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE

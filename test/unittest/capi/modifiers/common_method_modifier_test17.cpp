@@ -1124,7 +1124,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowWi
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .arrowWidth = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .arrowWidth = Converter::ArkValue<Opt_Dimension>(Ark_Empty()),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1145,7 +1145,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowWi
 
     // valid value
     arkOptions = { .builder = *arkBuilder,
-        .arrowWidth = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
+        .arrowWidth = Converter::ArkValue<Opt_Dimension>("1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1160,7 +1160,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowWi
 
     // negative value
     arkOptions = { .builder = *arkBuilder,
-        .arrowWidth = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-1._px)),
+        .arrowWidth = Converter::ArkValue<Opt_Dimension>("-1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1189,7 +1189,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowHe
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .arrowHeight = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .arrowHeight = Converter::ArkValue<Opt_Dimension>(Ark_Empty()),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1210,7 +1210,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowHe
 
     // valid value
     arkOptions = { .builder = *arkBuilder,
-        .arrowHeight = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
+        .arrowHeight = Converter::ArkValue<Opt_Dimension>("1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1225,7 +1225,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsArrowHe
 
     // negative value
     arkOptions = { .builder = *arkBuilder,
-        .arrowHeight = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-1._px)),
+        .arrowHeight = Converter::ArkValue<Opt_Dimension>("-1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1254,7 +1254,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsRadiusT
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = { .builder = *arkBuilder,
-        .radius = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .radius = Converter::ArkValue<Opt_Dimension>(Ark_Empty()),
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1275,7 +1275,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsRadiusT
 
     // valid value
     arkOptions = { .builder = *arkBuilder,
-        .radius = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
+        .radius = Converter::ArkValue<Opt_Dimension>("1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1290,7 +1290,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsRadiusT
 
     // negative value
     arkOptions = { .builder = *arkBuilder,
-        .radius = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-1._px)),
+        .radius = Converter::ArkValue<Opt_Dimension>("-1px"),
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1457,7 +1457,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsWidthDe
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .width = Converter::ArkValue<Opt_Length>(Ark_Empty())
+        .width = Converter::ArkValue<Opt_Dimension>(Ark_Empty())
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1494,7 +1494,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsWidthVa
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .width = Converter::ArkValue<Opt_Length>(999.0)
+        .width = Converter::ArkValue<Opt_Dimension>(999.0f)
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1531,7 +1531,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsWidthIn
     static auto* arkBuilder = &builder;
     Ark_CustomPopupOptions arkOptions = {
         .builder = *arkBuilder,
-        .width = Converter::ArkValue<Opt_Length>(-1)
+        .width = Converter::ArkValue<Opt_Dimension>(-1.f)
     };
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_CustomPopupOptions>(arkOptions);
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -1822,13 +1822,15 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnWillD
 {
     MockPipelineContext::GetCurrent()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(false));
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    struct CheckEvent { int32_t resourceId; std::optional<Ark_DismissPopupAction> action; };
+    struct CheckEvent { int32_t resourceId; std::optional<DismissReason> reason; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     void (*checkCallback)(const Ark_Int32, const Ark_DismissPopupAction) =
         [](const Ark_Int32 resourceId, const Ark_DismissPopupAction action) {
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getDismissPopupActionAccessor();
             checkEvent = {
                 .resourceId = resourceId,
-                .action = action
+                .reason = static_cast<DismissReason>(accessor->getReason(action)),
             };
         };
 
@@ -1865,9 +1867,9 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnWillD
     pattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
 
     ASSERT_TRUE(checkEvent.has_value());
-    ASSERT_TRUE(checkEvent.value().action.has_value());
+    ASSERT_TRUE(checkEvent.value().reason.has_value());
     EXPECT_EQ(checkEvent.value().resourceId, TEST_RESOURCE_ID_1);
-    EXPECT_NE(checkEvent.value().action.value(), nullptr);
+    EXPECT_NE(checkEvent.value().reason.value(), DismissReason::TOUCH_OUTSIDE);
 }
 
 }

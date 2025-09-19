@@ -40,7 +40,7 @@ const INDEX_TWO: int = 2;
 const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
-const DOUBLE_LINE_NUM: number = 2;
+const DOUBLE_LINE_NUM: int = 2;
 // 资源数值
 const RESOURCE_TYPE_SYMBOL: int = 40000;
 // 左边尺寸常量
@@ -90,7 +90,7 @@ export class SelectOptions {
 export class SymbolOptions {
   public fontSize?: Length;
   public fontColor?: Array<ResourceColor>;
-  public fontWeight?: number | FontWeight | string;
+  public fontWeight?: int | FontWeight | string;
   public effectStrategy?: SymbolEffectStrategy;
   public renderingStrategy?: SymbolRenderingStrategy;
 }
@@ -112,8 +112,8 @@ interface ContentIconOption {
 }
 
 class FontStyle {
-  public maxLines: number = 0;
-  public fontWeight: number = 0;
+  public maxLines: int = 0;
+  public fontWeight: int = 0;
   public fontColor?: ResourceColor;
   public alignment?: Alignment;
 }
@@ -280,7 +280,7 @@ export struct SubHeader {
   rightAreaClickEvent(instance: CommonMethod) {
     instance.onKeyEvent((event: KeyEvent) => {
       if (!event) {
-        return;
+        return false;
       }
       if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
         event.type === KeyType.Down) {
@@ -727,7 +727,7 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
@@ -788,7 +788,7 @@ export struct SubHeader {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontPrimaryColor,

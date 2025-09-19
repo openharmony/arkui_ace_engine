@@ -31,7 +31,7 @@ const auto ATTRIBUTE_STROKE_OPACITY_NAME = "strokeOpacity";
 const auto ATTRIBUTE_FILL_OPACITY_NAME = "fillOpacity";
 
 // global variables
-const Ark_Int32 FAKE_RES_ID(1234);
+const int64_t FAKE_RES_ID(1234);
 
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";

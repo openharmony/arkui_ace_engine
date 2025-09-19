@@ -217,7 +217,7 @@ class RouterImpl implements Router {
 
     private getClassName(url: string): string {
         let className: string = this.moduleName + "/src/main/ets/" + url + "/__EntryWrapper";
-        return className;
+        return className.replaceAll('/', '.');
     }
 
     private getPathInfo(url: string): string {

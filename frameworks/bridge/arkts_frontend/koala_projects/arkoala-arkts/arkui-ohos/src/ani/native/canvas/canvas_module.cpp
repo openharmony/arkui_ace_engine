@@ -173,13 +173,13 @@ ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object 
         return nullptr;
     }
     canvasModifier->getImageData(peer, imageData, sx * density, sy * density, sw * density, sh * density);
-    static const char* className = "Lescompat/Uint8ClampedArray;";
+    static const char* className = "escompat.Uint8ClampedArray";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &ctor)) {
         return nullptr;
     }
     ani_object aniValue;

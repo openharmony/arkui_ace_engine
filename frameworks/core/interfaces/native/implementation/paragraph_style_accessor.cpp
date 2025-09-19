@@ -84,24 +84,24 @@ Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     return Converter::ArkValue<Opt_TextAlign>(peer->span->GetParagraphStyle().align);
 }
-Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
+Opt_Float64 GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     if (style.textIndent) {
-        return Converter::ArkValue<Opt_Number>(style.textIndent.value().ConvertToVp());
+        return Converter::ArkValue<Opt_Float64>(style.textIndent.value().ConvertToVp());
     }
     return invalid;
 }
-Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
+Opt_Int32 GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Int32>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    return Converter::ArkValue<Opt_Number>(style.maxLines);
+    return Converter::ArkValue<Opt_Int32>(style.maxLines);
 }
 Opt_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
 {
@@ -119,27 +119,27 @@ Opt_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_WordBreak>(style.wordBreak);
 }
-Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+Opt_Union_F64_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Union_Number_LeadingMarginPlaceholder>();
+    auto invalid = Converter::ArkValue<Opt_Union_F64_LeadingMarginPlaceholder>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     if (style.leadingMargin.has_value() && style.leadingMargin->pixmap) {
-        return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
+        return Converter::ArkUnion<Opt_Union_F64_LeadingMarginPlaceholder,
             Ark_LeadingMarginPlaceholder>(style.leadingMargin);
     } else {
-        return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
-            Ark_Number>(style.leadingMargin);
+        return Converter::ArkUnion<Opt_Union_F64_LeadingMarginPlaceholder,
+            Ark_Float64>(style.leadingMargin);
     }
 }
-Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
+Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Number>();
+    auto invalid = Converter::ArkValue<Opt_Float64>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    return Converter::ArkValue<Opt_Number>(style.paragraphSpacing);
+    return Converter::ArkValue<Opt_Float64>(style.paragraphSpacing);
 }
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()

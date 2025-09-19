@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRatingPeer, StarStyleOptions, OnRatingChangeCallback, RatingConfiguration, RatingAttribute } from "./component/rating"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,11 +29,11 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RatingAttribute): void { }
-    applyPressedAttribute(instance: RatingAttribute): void { }
-    applyFocusedAttribute(instance: RatingAttribute): void { }
-    applyDisabledAttribute(instance: RatingAttribute): void { }
-    applySelectedAttribute(instance: RatingAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _stars_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stars_0_0value?: number | undefined
     _stepSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -41,8 +42,9 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     _starStyle_0_0value?: StarStyleOptions | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRatingChangeCallback | undefined
-    applyModifierPatch(peer: ArkRatingPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRatingPeer;
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._stars_0_flag) {

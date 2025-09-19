@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkGridRowPeer, GridRowAttribute } from "./component/gridRow"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,17 +30,18 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: GridRowAttribute): void { }
-    applyPressedAttribute(instance: GridRowAttribute): void { }
-    applyFocusedAttribute(instance: GridRowAttribute): void { }
-    applyDisabledAttribute(instance: GridRowAttribute): void { }
-    applySelectedAttribute(instance: GridRowAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onBreakpointChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onBreakpointChange_0_0value?: ((breakpoints: string) => void) | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: ItemAlign | undefined
-    applyModifierPatch(peer: ArkGridRowPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkGridRowPeer;
         if (this._onBreakpointChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onBreakpointChange_0_flag) {

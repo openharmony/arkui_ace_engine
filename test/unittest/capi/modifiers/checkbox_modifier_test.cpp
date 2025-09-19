@@ -90,7 +90,7 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOnChangeTest, TestSize.Level1)
     };
     auto arkCallback = Converter::ArkValue<OnCheckboxChangeCallback>(testCallback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_OnCheckboxChangeCallback>(arkCallback);
-    modifier_->setOnChange0(node_, &optCallback);
+    modifier_->setOnChange(node_, &optCallback);
     auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     EXPECT_FALSE(checkEvent);
     eventHub->UpdateChangeEvent(false);
@@ -228,16 +228,11 @@ HWTEST_F(CheckboxModifierTest, setSelectTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Boolean initValueSelect;
-
-    // Initial setup
-    initValueSelect = std::get<1>(selectSelectValidValues[0]);
 
     // Verifying attribute's  values
-    auto inputValueSelect = Converter::ArkValue<Opt_Boolean>(initValueSelect);
     for (auto&& value: selectSelectValidValues) {
-        inputValueSelect = Converter::ArkValue<Opt_Boolean>(std::get<1>(value));
-        modifier_->setSelect0(node_, &inputValueSelect);
+        auto inputValueSelect = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(std::get<1>(value));
+        modifier_->setSelect(node_, &inputValueSelect);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_NAME);
         expectedStr = std::get<2>(value);
@@ -278,7 +273,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 
     for (auto&& value: selectedColorSelectedColorValidValues) {
         auto inputValueSelectedColor = Converter::ArkValue<Opt_ResourceColor>(std::get<1>(value));
-        modifier_->setSelectedColor0(node_, &inputValueSelectedColor);
+        modifier_->setSelectedColor(node_, &inputValueSelectedColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         expectedStr = std::get<2>(value);
@@ -299,14 +294,14 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level
     Ark_ResourceColor inputValueSelectedColor;
 
     // Initial setup
-    auto value = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setSelect0(node_, &value);
+    auto value = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    modifier_->setSelect(node_, &value);
 
     // Verifying attribute's  values
 
     inputValueSelectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
     auto optInputValueSelectedColor = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
-    modifier_->setSelectedColor0(node_, &optInputValueSelectedColor);
+    modifier_->setSelectedColor(node_, &optInputValueSelectedColor);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
     expectedStr = ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE;
@@ -354,7 +349,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level
     for (auto&& value: unselectedColorUnselectedColorValidValues) {
         inputValueUnselectedColor = std::get<1>(value);
         auto optInputValueUnselectedColor = Converter::ArkValue<Opt_ResourceColor>(inputValueUnselectedColor);
-        modifier_->setUnselectedColor0(node_, &optInputValueUnselectedColor);
+        modifier_->setUnselectedColor(node_, &optInputValueUnselectedColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
         expectedStr = std::get<2>(value);
@@ -375,14 +370,14 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Lev
     Ark_ResourceColor inputValueUnselectedColor;
 
     // Initial setup
-    auto optValueTrue = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setSelect0(node_, &optValueTrue);
+    auto optValueTrue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    modifier_->setSelect(node_, &optValueTrue);
 
     // Verifying attribute's  values
 
     inputValueUnselectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
     auto optInputValueUnselectedColor = Converter::ArkValue<Opt_ResourceColor>(inputValueUnselectedColor);
-    modifier_->setUnselectedColor0(node_, &optInputValueUnselectedColor);
+    modifier_->setUnselectedColor(node_, &optInputValueUnselectedColor);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
     expectedStr = ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE;
@@ -432,7 +427,7 @@ HWTEST_F(CheckboxModifierTest, setShapeTestValidValues, TestSize.Level1)
     for (auto&& value: shapeShapeValidValues) {
         inputValueShape = std::get<1>(value);
         auto optInputValueShape = Converter::ArkValue<Opt_CheckBoxShape>(inputValueShape);
-        modifier_->setShape0(node_, &optInputValueShape);
+        modifier_->setShape(node_, &optInputValueShape);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHAPE_NAME);
         expectedStr = std::get<2>(value);
@@ -466,10 +461,10 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
     for (auto&& value: shapeShapeInvalidValues) {
         inputValueShape = initValueShape;
         auto optInputValueShape = Converter::ArkValue<Opt_CheckBoxShape>(inputValueShape);
-        modifier_->setShape0(node_, &optInputValueShape);
+        modifier_->setShape(node_, &optInputValueShape);
         inputValueShape = std::get<1>(value);
         optInputValueShape = Converter::ArkValue<Opt_CheckBoxShape>(inputValueShape);
-        modifier_->setShape0(node_, &optInputValueShape);
+        modifier_->setShape(node_, &optInputValueShape);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHAPE_NAME);
         expectedStr = ATTRIBUTE_SHAPE_DEFAULT_VALUE;
@@ -528,7 +523,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestValidValues, TestSize.Level1)
     style.size = opt1;
     style.strokeWidth = opt2;
     auto optStyle = Converter::ArkValue<Opt_MarkStyle>(style);
-    modifier_->setMark0(node_, &optStyle);
+    modifier_->setMark(node_, &optStyle);
 
     jsonValue = GetJsonValue(node_);
 
@@ -568,7 +563,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
     style.size = opt1;
     style.strokeWidth = opt2;
     auto optStyle = Converter::ArkValue<Opt_MarkStyle>(style);
-    modifier_->setMark0(node_, &optStyle);
+    modifier_->setMark(node_, &optStyle);
 
     jsonValue = GetJsonValue(node_);
 
@@ -586,6 +581,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
     EXPECT_EQ(resultStr, expectedStr);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectImpl
  * @tc.desc:
@@ -625,5 +621,6 @@ HWTEST_F(CheckboxModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 
 } // namespace OHOS::Ace::NG

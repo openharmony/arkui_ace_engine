@@ -70,15 +70,12 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const Ark_RichEditorGesture& 
         .gesture = Converter::ArkValue<Opt_RichEditorGesture>(gesture),
         .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
         .offset = Converter::ArkValue<Opt_Number>(),
-#ifdef WRONG_GEN
         .onHover = Converter::ArkValue<Opt_OnHoverCallback>(),
-#endif
     };
 
     return Converter::ArkValue<Opt_RichEditorImageSpanOptions>(options);
 }
 
-#ifdef WRONG_GEN
 Opt_RichEditorImageSpanOptions GetImageSpanOptions(const ::OnHoverCallback& hover)
 {
     Ark_RichEditorImageSpanOptions options = {
@@ -90,7 +87,6 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const ::OnHoverCallback& hove
 
     return Converter::ArkValue<Opt_RichEditorImageSpanOptions>(options);
 }
-#endif
 
 Opt_RichEditorTextSpanOptions GetTextSpanOptions(const Ark_RichEditorGesture& gesture)
 {
@@ -281,9 +277,8 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorCallbackTest, DISABLED_addImageSpanTestOnHover, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     static const std::string expectedType = "onHover";
     struct CheckEvent {
         int32_t nodeId;
@@ -328,7 +323,6 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, DISABLED_addImageSpanTestOnHo
     };
     test(true, SourceType::MOUSE);
     test(false, SourceType::JOYSTICK);
-#endif
 }
 
 /**
@@ -357,7 +351,9 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
+
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, &ctx);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onClick, nullptr);
@@ -398,7 +394,9 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubl
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
+
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, &ctx);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onDoubleClick, nullptr);
@@ -440,7 +438,9 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongP
     };
 
     auto optOptions = GetTextSpanOptions(gesture);
-    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, Converter::FC);
+
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_SPAN_VALUE, &ctx);
 
     g_gestureOptions = UserGestureOptions();
     ASSERT_EQ(g_gestureOptions.onLongPress, nullptr);

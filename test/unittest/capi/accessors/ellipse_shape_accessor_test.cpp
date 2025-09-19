@@ -35,7 +35,7 @@ public:
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(200),
         };
         Opt_ShapeSize shapeSizeOpt = Converter::ArkValue<Opt_ShapeSize>(shapeSize);
-        return accessor_->ctor(&shapeSizeOpt);
+        return accessor_->construct(&shapeSizeOpt);
     }
 };
 
@@ -62,8 +62,8 @@ HWTEST_F(EllipseShapeAccessorTest, offsetTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_Position offset {
-        .x = Converter::ArkValue<Opt_Length>(5._px),
-        .y = Converter::ArkValue<Opt_Length>(8._px)
+        .x = Converter::ArkValue<Opt_Length>("5px"),
+        .y = Converter::ArkValue<Opt_Length>("8px")
     };
     EXPECT_EQ(accessor_->offset(peer_, &offset), peer_);
 
@@ -71,7 +71,7 @@ HWTEST_F(EllipseShapeAccessorTest, offsetTest, TestSize.Level1)
     EXPECT_EQ(peer_->shape->GetOffset(), expected);
 
     Ark_Position offset2 {
-        .x = Converter::ArkValue<Opt_Length>(10._px),
+        .x = Converter::ArkValue<Opt_Length>("10px"),
         .y = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };
     EXPECT_EQ(accessor_->offset(peer_, &offset2), peer_);
@@ -79,7 +79,7 @@ HWTEST_F(EllipseShapeAccessorTest, offsetTest, TestSize.Level1)
 
     Ark_Position offset3 {
         .x = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .y = Converter::ArkValue<Opt_Length>(10._px)
+        .y = Converter::ArkValue<Opt_Length>("10px")
     };
     EXPECT_EQ(accessor_->offset(peer_, &offset3), peer_);
     EXPECT_EQ(peer_->shape->GetOffset(), expected);
@@ -121,8 +121,8 @@ HWTEST_F(EllipseShapeAccessorTest, positionTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_Position position {
-        .x = Converter::ArkValue<Opt_Length>(5._px),
-        .y = Converter::ArkValue<Opt_Length>(8._px)
+        .x = Converter::ArkValue<Opt_Length>("5px"),
+        .y = Converter::ArkValue<Opt_Length>("8px")
     };
     EXPECT_EQ(accessor_->position(peer_, &position), peer_);
 
@@ -130,7 +130,7 @@ HWTEST_F(EllipseShapeAccessorTest, positionTest, TestSize.Level1)
     EXPECT_EQ(peer_->shape->GetPosition(), expected);
 
     Ark_Position position2 {
-        .x = Converter::ArkValue<Opt_Length>(10._px),
+        .x = Converter::ArkValue<Opt_Length>("10px"),
         .y = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };
     expected = DimensionOffset();
@@ -141,7 +141,7 @@ HWTEST_F(EllipseShapeAccessorTest, positionTest, TestSize.Level1)
 
     Ark_Position position3 {
         .x = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .y = Converter::ArkValue<Opt_Length>(10._px)
+        .y = Converter::ArkValue<Opt_Length>("10px")
     };
     expected = DimensionOffset();
     auto y = Dimension(10.f, DimensionUnit::PX);
@@ -164,16 +164,16 @@ HWTEST_F(EllipseShapeAccessorTest, widthTest, TestSize.Level1)
     ASSERT_NE(accessor_->width, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
-    Ark_Length width = Converter::ArkValue<Ark_Length>(96._px);
+    Ark_Length width = Converter::ArkValue<Ark_Length>("96px");
     auto expected = Dimension(96.f, DimensionUnit::PX);
     EXPECT_EQ(accessor_->width(peer_, &width), peer_);
     EXPECT_EQ(peer_->shape->GetWidth(), expected);
 
-    width = Converter::ArkValue<Ark_Length>(-64._px);
+    width = Converter::ArkValue<Ark_Length>("-64px");
     EXPECT_EQ(accessor_->width(peer_, &width), peer_);
     EXPECT_EQ(peer_->shape->GetWidth(), expected);
 
-    width = Converter::ArkValue<Ark_Length>(3._px);
+    width = Converter::ArkValue<Ark_Length>("3px");
     EXPECT_EQ(accessor_->width(nullptr, &width), nullptr);
     EXPECT_EQ(accessor_->width(nullptr, nullptr), nullptr);
     EXPECT_EQ(accessor_->width(peer_, nullptr), peer_);
@@ -190,16 +190,16 @@ HWTEST_F(EllipseShapeAccessorTest, heightTest, TestSize.Level1)
     ASSERT_NE(accessor_->height, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
-    Ark_Length height = Converter::ArkValue<Ark_Length>(96._px);
+    Ark_Length height = Converter::ArkValue<Ark_Length>("96px");
     auto expected = Dimension(96.f, DimensionUnit::PX);
     EXPECT_EQ(accessor_->height(peer_, &height), peer_);
     EXPECT_EQ(peer_->shape->GetHeight(), expected);
 
-    height = Converter::ArkValue<Ark_Length>(-64._px);
+    height = Converter::ArkValue<Ark_Length>("-64px");
     EXPECT_EQ(accessor_->height(peer_, &height), peer_);
     EXPECT_EQ(peer_->shape->GetHeight(), expected);
 
-    height = Converter::ArkValue<Ark_Length>(3._px);
+    height = Converter::ArkValue<Ark_Length>("3px");
     EXPECT_EQ(accessor_->height(nullptr, &height), nullptr);
     EXPECT_EQ(accessor_->height(nullptr, nullptr), nullptr);
     EXPECT_EQ(accessor_->height(peer_, nullptr), peer_);
@@ -217,8 +217,8 @@ HWTEST_F(EllipseShapeAccessorTest, sizeTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_SizeOptions size {
-        .width = Converter::ArkValue<Opt_Length>(5._px),
-        .height = Converter::ArkValue<Opt_Length>(8._px)
+        .width = Converter::ArkValue<Opt_Length>("5px"),
+        .height = Converter::ArkValue<Opt_Length>("8px")
     };
     EXPECT_EQ(accessor_->size(peer_, &size), peer_);
 
@@ -228,7 +228,7 @@ HWTEST_F(EllipseShapeAccessorTest, sizeTest, TestSize.Level1)
     EXPECT_EQ(peer_->shape->GetHeight(), expectedHeight);
 
     Ark_SizeOptions size2 {
-        .width = Converter::ArkValue<Opt_Length>(10._px),
+        .width = Converter::ArkValue<Opt_Length>("10px"),
         .height = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };
     expectedWidth = Dimension(10.f, DimensionUnit::PX);
@@ -238,7 +238,7 @@ HWTEST_F(EllipseShapeAccessorTest, sizeTest, TestSize.Level1)
 
     Ark_SizeOptions size3 {
         .width = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .height = Converter::ArkValue<Opt_Length>(15._px)
+        .height = Converter::ArkValue<Opt_Length>("15px")
     };
     expectedHeight = Dimension(15.f, DimensionUnit::PX);
     EXPECT_EQ(accessor_->size(peer_, &size3), peer_);

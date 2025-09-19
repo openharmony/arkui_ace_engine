@@ -29,8 +29,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
-    getLineCount(): number
-    getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity
+    getLineCount(): int32
+    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -53,19 +53,19 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         return new LayoutManagerInternal(ptr)
     }
-    public getLineCount(): number {
+    public getLineCount(): int32 {
         return this.getLineCount_serialize()
     }
-    public getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity {
-        const x_casted = x as (number)
-        const y_casted = y as (number)
+    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
-    getLineCount_serialize(): number {
+    getLineCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
         return retval
     }
-    getGlyphPositionAtCoordinate_serialize(x: number, y: number): PositionWithAffinity {
+    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
@@ -331,11 +331,11 @@ export interface TextDataDetectorConfig {
     decoration?: DecorationStyleInterface;
 }
 export interface TextRange {
-    start?: number;
-    end?: number;
+    start?: int32;
+    end?: int32;
 }
 export interface InsertValue {
-    insertOffset: number;
+    insertOffset: int32;
     insertValue: string;
 }
 export enum TextDeleteDirection {
@@ -353,14 +353,14 @@ export enum AutoCapitalizationMode {
     ALL_CHARACTERS = 3
 }
 export interface DeleteValue {
-    deleteOffset: number;
+    deleteOffset: int32;
     direction: TextDeleteDirection;
     deleteValue: string;
 }
 export type OnDidChangeCallback = (rangeBefore: TextRange, rangeAfter: TextRange) => void;
 export type EditableTextOnChangeCallback = (value: string, previewText?: PreviewText, options?: TextChangeOptions) => void;
 export interface PreviewText {
-    offset: number;
+    offset: int32;
     value: string;
 }
 export interface StyledStringChangedListener {
@@ -373,7 +373,7 @@ export interface StyledStringChangeValue {
     previewText?: StyledString;
 }
 export interface PositionWithAffinity {
-    position: number;
+    position: int32;
 }
 export interface CaretStyle {
     width?: Length;
@@ -438,11 +438,11 @@ export class PositionWithAffinity_serializer {
     public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForPosition  = value.position
-        valueSerializer.writeNumber(valueHolderForPosition)
+        valueSerializer.writeInt32(valueHolderForPosition)
     }
     public static read(buffer: DeserializerBase): PositionWithAffinity {
         let valueDeserializer : DeserializerBase = buffer
-        const positionTmpResult : number = (valueDeserializer.readNumber() as number)
+        const positionTmpResult : int32 = valueDeserializer.readInt32()
         let value : PositionWithAffinity = ({position: positionTmpResult} as PositionWithAffinity)
         return value
     }
@@ -495,7 +495,7 @@ export class DeleteValue_serializer {
     public static write(buffer: SerializerBase, value: DeleteValue): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForDeleteOffset  = value.deleteOffset
-        valueSerializer.writeNumber(valueHolderForDeleteOffset)
+        valueSerializer.writeInt32(valueHolderForDeleteOffset)
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
         const valueHolderForDeleteValue  = value.deleteValue
@@ -503,7 +503,7 @@ export class DeleteValue_serializer {
     }
     public static read(buffer: DeserializerBase): DeleteValue {
         let valueDeserializer : DeserializerBase = buffer
-        const deleteOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const deleteOffsetTmpResult : int32 = valueDeserializer.readInt32()
         const directionTmpResult : TextDeleteDirection = TextDeleteDirection.fromValue(valueDeserializer.readInt32())
         const deleteValueTmpResult : string = (valueDeserializer.readString() as string)
         let value : DeleteValue = ({deleteOffset: deleteOffsetTmpResult, direction: directionTmpResult, deleteValue: deleteValueTmpResult} as DeleteValue)
@@ -593,13 +593,13 @@ export class InsertValue_serializer {
     public static write(buffer: SerializerBase, value: InsertValue): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForInsertOffset  = value.insertOffset
-        valueSerializer.writeNumber(valueHolderForInsertOffset)
+        valueSerializer.writeInt32(valueHolderForInsertOffset)
         const valueHolderForInsertValue  = value.insertValue
         valueSerializer.writeString(valueHolderForInsertValue)
     }
     public static read(buffer: DeserializerBase): InsertValue {
         let valueDeserializer : DeserializerBase = buffer
-        const insertOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const insertOffsetTmpResult : int32 = valueDeserializer.readInt32()
         const insertValueTmpResult : string = (valueDeserializer.readString() as string)
         let value : InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
         return value
@@ -609,13 +609,13 @@ export class PreviewText_serializer {
     public static write(buffer: SerializerBase, value: PreviewText): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForOffset  = value.offset
-        valueSerializer.writeNumber(valueHolderForOffset)
+        valueSerializer.writeInt32(valueHolderForOffset)
         const valueHolderForValue  = value.value
         valueSerializer.writeString(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): PreviewText {
         let valueDeserializer : DeserializerBase = buffer
-        const offsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const offsetTmpResult : int32 = valueDeserializer.readInt32()
         const valueTmpResult : string = (valueDeserializer.readString() as string)
         let value : PreviewText = ({offset: offsetTmpResult, value: valueTmpResult} as PreviewText)
         return value
@@ -696,7 +696,7 @@ export class TextRange_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            valueSerializer.writeNumber(valueHolderForStartTmpValue)
+            valueSerializer.writeInt32(valueHolderForStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -704,7 +704,7 @@ export class TextRange_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
-            valueSerializer.writeNumber(valueHolderForEndTmpValue)
+            valueSerializer.writeInt32(valueHolderForEndTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -712,17 +712,17 @@ export class TextRange_serializer {
     public static read(buffer: DeserializerBase): TextRange {
         let valueDeserializer : DeserializerBase = buffer
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : number | undefined = undefined
+        let startTmpBuf : int32 | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (valueDeserializer.readNumber() as number)
+            startTmpBuf = valueDeserializer.readInt32()
         }
-        const startTmpResult : number | undefined = startTmpBuf
+        const startTmpResult : int32 | undefined = startTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let endTmpBuf : number | undefined = undefined
+        let endTmpBuf : int32 | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endTmpBuf = (valueDeserializer.readNumber() as number)
+            endTmpBuf = valueDeserializer.readInt32()
         }
-        const endTmpResult : number | undefined = endTmpBuf
+        const endTmpResult : int32 | undefined = endTmpBuf
         let value : TextRange = ({start: startTmpResult, end: endTmpResult} as TextRange)
         return value
     }

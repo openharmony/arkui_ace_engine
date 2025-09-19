@@ -62,6 +62,7 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
 }
 void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_String_Void& callback)
 {
+    arkOnSurfaceCreated = callback;
     onSurfaceCreatedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
@@ -70,6 +71,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_Strin
 }
 void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback)
 {
+    arkOnSurfaceChanged = callback;
     onSurfaceChangedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const RectF& rect) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
@@ -83,6 +85,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
 }
 void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback)
 {
+    arkOnSurfaceDestroyed = callback;
     onSurfaceDestroyedEvent_ = [arkCallback = CallbackHelper(callback)]
         (const std::string& surfaceId, const std::string& xcomponentId) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);

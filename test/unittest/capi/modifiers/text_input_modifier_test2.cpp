@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "test/unittest/capi/stubs/friend_class_accessor.h"
+
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
-#ifdef NEED_PRIVATE
-#include "test/unittest/capi/stubs/friend_class_accessor.h"
-#endif
-#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,28 +31,15 @@ namespace GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
 } // namespace GeneratedModifier
 
-namespace {
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME = "autocapitalizationMode";
-const auto ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE = "AutoCapitalizationMode.NONE";
-
-std::vector<std::tuple<std::string, Opt_AutoCapitalizationMode, std::string>>
-    testFixtureEnumAutoCapitalizationModeTestPlan = {
-        { "AutoCapitalizationMode.NONE", Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::NONE),
-            "AutoCapitalizationMode.NONE" },
-        { "AutoCapitalizationMode.WORDS",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::WORDS),
-            "AutoCapitalizationMode.WORDS" },
-        { "AutoCapitalizationMode.SENTENCES",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::SENTENCES),
-            "AutoCapitalizationMode.SENTENCES" },
-        { "AutoCapitalizationMode.ALL_CHARACTERS",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(AutoCapitalizationMode::ALL_CHARACTERS),
-            "AutoCapitalizationMode.ALL_CHARACTERS" },
-        { "AutoCapitalizationMode.INVALID",
-            Converter::ArkValue<Opt_AutoCapitalizationMode>(INVALID_ENUM_VAL<Ark_AutoCapitalizationMode>),
-            ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE },
-    };
-}
+namespace Converter {
+    template<>
+    PreviewText Convert(const Ark_PreviewText& src)
+    {
+        PreviewText previewText = {.value = Convert<std::u16string>(src.value),
+                                   .offset = Convert<int32_t>(src.offset)};
+        return previewText;
+    }
+} // namespace Converter
 
 namespace {
     Ark_EnterKeyType g_EventTestKey{};
@@ -90,31 +75,6 @@ public:
     }
 };
 
-/*
- * @tc.name: setAutoCapitalizationModeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
-{
-    ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
-    auto jsonValue = GetJsonValue(node_);
-    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_AutoCapitalizationMode& value) {
-        modifier_->setAutoCapitalizationMode(node_, &value);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
-    };
-    for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
-        checkValue(input, expected, value);
-    }
-}
-
 /**
  * @tc.name: setOnChangeTest
  * @tc.desc: Check the functionality of setOnChange.
@@ -144,9 +104,8 @@ HWTEST_F(TextInputModifierTest2, setOnChangeTest, TestSize.Level1)
     };
 
     auto onChange = Converter::ArkValue<EditableTextOnChangeCallback>(arkCallback, frameNode->GetId());
-    auto optOnChange = Converter::ArkValue<Opt_EditableTextOnChangeCallback>(onChange);
 
-    modifier_->setOnChange(node_, &optOnChange);
+    modifier_->setOnChange(node_, &onChange);
     textFieldEventHub->FireOnChange({expectedText, expectedPreviewText});
     EXPECT_EQ(resultText, expectedText);
     EXPECT_EQ(resultPreviewText, expectedPreviewText.value);
@@ -174,8 +133,7 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
     };
 
     auto onPaste = Converter::ArkValue<OnPasteCallback>(arkCallback, frameNode->GetId());
-    auto optOnPaste = Converter::ArkValue<Opt_OnPasteCallback>(onPaste);
-    modifier_->setOnPaste(node_, &optOnPaste);
+    modifier_->setOnPaste(node_, &onPaste);
     textFieldEventHub->FireOnPaste(expectedText);
     EXPECT_EQ(resultText, expectedText);
 }
@@ -193,7 +151,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    const auto builder = ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setCustomKeyboard(node_, &builder, nullptr);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
@@ -218,7 +176,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    const auto builder = ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
@@ -235,7 +193,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
-    static const std::u16string testValue(u"string text");
+    static const std::u16string TEST_VALUE(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -247,17 +205,16 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);
-        EXPECT_EQ(submitEventInfo->GetText(), testValue);
+        EXPECT_EQ(submitEventInfo->GetText(), TEST_VALUE);
         GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
         EXPECT_EQ(resourceId, expectedResId);
         g_EventTestKey = enterKeyType;
     };
 
     auto func = Converter::ArkValue<OnSubmitCallback>(onSubmitFunc, expectedResId);
-    auto optFunc = Converter::ArkValue<Opt_OnSubmitCallback>(func);
-    modifier_->setOnSubmit(node_, &optFunc);
+    modifier_->setOnSubmit(node_, &func);
     TextFieldCommonEvent event;
-    event.SetText(testValue);
+    event.SetText(TEST_VALUE);
     eventHub->FireOnSubmit(111, event);
     EXPECT_EQ(g_EventTestKey, -1);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
@@ -278,7 +235,6 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
     EXPECT_EQ(g_EventTestKey, 8);
 }
 
-#ifdef NEED_PRIVATE
 /**
  * @tc.name: setEditMenuOptionsTest
  * @tc.desc: setEditMenuOptions test
@@ -325,8 +281,7 @@ HWTEST_F(TextInputModifierTest2, setEditMenuOptionsTest, TestSize.Level1)
     auto params = GetMenuItemParams();
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
-    auto optOptions = Converter::ArkValue<Opt_EditMenuOptions>(options);
-    modifier_->setEditMenuOptions(node_, &optOptions);
+    modifier_->setEditMenuOptions(node_, &options);
     FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
     selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
@@ -337,5 +292,4 @@ HWTEST_F(TextInputModifierTest2, setEditMenuOptionsTest, TestSize.Level1)
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
 }
-#endif
 } // namespace OHOS::Ace::NG

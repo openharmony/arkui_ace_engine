@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRowSplitPeer, RowSplitAttribute } from "./component/rowSplit"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,15 +29,16 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RowSplitAttribute): void { }
-    applyPressedAttribute(instance: RowSplitAttribute): void { }
-    applyFocusedAttribute(instance: RowSplitAttribute): void { }
-    applyDisabledAttribute(instance: RowSplitAttribute): void { }
-    applySelectedAttribute(instance: RowSplitAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _resizeable_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkRowSplitPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRowSplitPeer;
         if (this._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._resizeable_0_flag) {

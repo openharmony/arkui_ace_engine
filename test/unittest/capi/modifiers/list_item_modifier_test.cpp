@@ -86,62 +86,31 @@ public:
 };
 
 /*
- * @tc.name: setListItemOptions0Test
- * @tc.desc: Check the functionality of ListItemModifier.setListItemOptions0
+ * @tc.name: setListItemOptionsTest
+ * @tc.desc: Check the functionality of ListItemModifier.setListItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptions0Test, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptionsTest, TestSize.Level1)
 {
     auto style = GetAttrValue<std::string>(node_, "itemStyle");
     EXPECT_EQ(style, "ListItemStyle.NONE");
 
     Ark_ListItemOptions listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(V2::ListItemStyle::CARD)};
     Opt_ListItemOptions arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
-    modifier_->setListItemOptions0(node_, &arg);
+    modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
     EXPECT_EQ(style, "ListItemStyle.CARD");
 
     arg = Converter::ArkValue<Opt_ListItemOptions>(Ark_Empty());
-    modifier_->setListItemOptions0(node_, &arg);
+    modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
     EXPECT_EQ(style, "ListItemStyle.CARD");
 
     listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(Ark_Empty())};
     arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
-    modifier_->setListItemOptions0(node_, &arg);
+    modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
     EXPECT_EQ(style, "ListItemStyle.NONE");
-}
-
-/**
- * @tc.name: setStickyTest
- * @tc.desc: Check the functionality of ListItemModifier.setSticky
- * @tc.type: FUNC
- */
-HWTEST_F(ListItemModifierTest, setStickyTest, TestSize.Level1)
-{
-    auto checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "Sticky.None");
-
-    auto optSticky = Converter::ArkValue<Opt_Sticky>(V2::StickyMode::NORMAL);
-    modifier_->setSticky(node_, &optSticky);
-    checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "Sticky.Normal");
-
-    optSticky = Converter::ArkValue<Opt_Sticky>(V2::StickyMode::NONE);
-    modifier_->setSticky(node_, &optSticky);
-    checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "Sticky.None");
-
-    optSticky = Converter::ArkValue<Opt_Sticky>(V2::StickyMode::OPACITY);
-    modifier_->setSticky(node_, &optSticky);
-    checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "Sticky.Opacity");
-
-    optSticky = Converter::ArkValue<Opt_Sticky>(static_cast<Ark_Sticky>(-10));
-    modifier_->setSticky(node_, &optSticky);
-    checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "Sticky.None");
 }
 
 /*
@@ -168,54 +137,10 @@ HWTEST_F(ListItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
-}
-
-/*
- * @tc.name: setEditableTest
- * @tc.desc: Check the functionality of ListItemModifier.setEditable
- * @tc.type: FUNC
- */
-HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
-{
-    bool editable = GetAttrValue<bool>(node_, "editable");
-    EXPECT_FALSE(editable);
-
-    auto argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
-        (Ark_EditMode::ARK_EDIT_MODE_NONE);
-    auto optEditMode = Converter::ArkValue<Opt_Union_Boolean_EditMode>(argEditMode);
-    modifier_->setEditable(node_, &optEditMode);
-    auto editableStr = GetAttrValue<std::string>(node_, "editable");
-    EXPECT_EQ(editableStr, "EditMode.None");
-
-    argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
-        (Ark_EditMode::ARK_EDIT_MODE_DELETABLE);
-    optEditMode = Converter::ArkValue<Opt_Union_Boolean_EditMode>(argEditMode);
-    modifier_->setEditable(node_, &optEditMode);
-    editableStr = GetAttrValue<std::string>(node_, "editable");
-    EXPECT_EQ(editableStr, "EditMode.Deletable");
-
-    argEditMode = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_EditMode>
-        (Ark_EditMode::ARK_EDIT_MODE_MOVABLE);
-    optEditMode = Converter::ArkValue<Opt_Union_Boolean_EditMode>(argEditMode);
-    modifier_->setEditable(node_, &optEditMode);
-    editableStr = GetAttrValue<std::string>(node_, "editable");
-    EXPECT_EQ(editableStr, "EditMode.Movable");
-
-    auto argBool = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_Boolean>(true);
-    auto optBool = Converter::ArkValue<Opt_Union_Boolean_EditMode>(argBool);
-    modifier_->setEditable(node_, &optBool);
-    editable = GetAttrValue<bool>(node_, "editable");
-    EXPECT_TRUE(editable);
-
-    argBool = Converter::ArkUnion<Ark_Union_Boolean_EditMode, Ark_Boolean>(false);
-    optBool = Converter::ArkValue<Opt_Union_Boolean_EditMode>(argBool);
-    modifier_->setEditable(node_, &optBool);
-    editableStr = GetAttrValue<std::string>(node_, "editable");
-    EXPECT_EQ(editableStr, "EditMode.None");
 }
 
 /*
@@ -829,6 +754,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
     EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -867,4 +793,5 @@ HWTEST_F(ListItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

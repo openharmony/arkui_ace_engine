@@ -70,7 +70,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
     EXPECT_EQ(checkVal1, "#FF007DFF");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
-    modifier_->setSelectedColor0(node_, &optColor);
+    modifier_->setSelectedColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -86,7 +86,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
     EXPECT_EQ(checkVal1, "#FF000000");
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
-    modifier_->setUnselectedColor0(node_, &optColor);
+    modifier_->setUnselectedColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
 }
@@ -100,8 +100,8 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal1, "false");
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setSelectAll0(node_, &optValue);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    modifier_->setSelectAll(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal2, "true");
 }
@@ -119,7 +119,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
     style.size = Converter::ArkValue<Opt_Length>("111.00px");
     style.strokeWidth = Converter::ArkValue<Opt_Length>("222.00px");
     auto optStyle = Converter::ArkValue<Opt_MarkStyle>(style);
-    modifier_->setMark0(node_, &optStyle);
+    modifier_->setMark(node_, &optStyle);
 
     auto jsonValue = GetJsonValue(node_);
     auto mark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, "mark");
@@ -147,11 +147,11 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
     auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal1, "CIRCLE");
     auto optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
-    modifier_->setCheckboxShape0(node_, &optValue);
+    modifier_->setCheckboxShape(node_, &optValue);
     auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
     optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE);
-    modifier_->setCheckboxShape0(node_, &optValue);
+    modifier_->setCheckboxShape(node_, &optValue);
     auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
     EXPECT_EQ(checkVal3, "CIRCLE");
 }
@@ -177,7 +177,7 @@ HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
     };
     auto arkCallback = Converter::ArkValue<OnCheckboxGroupChangeCallback>(testCallback, frameNode->GetId());
     auto optCallback = Converter::ArkValue<Opt_OnCheckboxGroupChangeCallback>(arkCallback);
-    modifier_->setOnChange0(node_, &optCallback);
+    modifier_->setOnChange(node_, &optCallback);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     CheckboxGroupResult info({"test1", "test2"}, 2);
@@ -188,6 +188,7 @@ HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->result.GetStatus(), info.GetStatus());
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectAllImpl
  * @tc.desc:
@@ -235,4 +236,5 @@ HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Leve
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

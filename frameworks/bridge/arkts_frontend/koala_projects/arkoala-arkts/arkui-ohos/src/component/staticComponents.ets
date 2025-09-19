@@ -61,6 +61,9 @@ export class ArkCustomComponentRootPeer extends PeerNode {
         this.component = component;
         this.component!.__addMeToParent__IExtendableComponent_Internal();
     }
+    getComponent(): IExtendableComponent | undefined {
+        return this.component;
+    }
     public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
         const peerId  = PeerNode.nextId();
         if (component.isCustomLayout) {

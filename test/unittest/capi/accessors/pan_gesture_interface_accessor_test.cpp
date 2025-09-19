@@ -18,11 +18,13 @@
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
+#include "test/unittest/capi/modifiers/generated/type_helpers.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace TypeHelper;
 
 namespace {
     int32_t ID = 123;
@@ -32,7 +34,7 @@ namespace {
     struct CheckEvent {
         int32_t resourceId;
     };
-    
+
     const std::vector<std::pair<Ark_PanDirection, PanDirection>> TEST_PLAN_DIRECTION = {
         { Ark_PanDirection::ARK_PAN_DIRECTION_NONE, {.type = PanDirection::NONE} },
         { Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL, {.type = PanDirection::HORIZONTAL} },
@@ -97,8 +99,9 @@ class PanGestureInterfaceAccessorTest
 public:
     void *CreatePeerInstance() override
     {
-        auto value = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>();
-        return accessor_->ctor(&value);
+        auto value = Converter::ArkUnion<Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions,
+            Ark_Empty>(nullptr);
+        return accessor_->construct(&value);
     }
     void SetUp(void) override
     {
@@ -126,13 +129,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
     const double someDistance = 10.0;
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>(value.first);
-        params.value0.distance = Converter::ArkValue<Opt_Number>(someDistance);
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>(Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL);
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        dst.distance = Converter::ArkValue<Opt_Number>(someDistance);
+        dst.direction = Converter::ArkValue<Opt_PanDirection>(Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -145,13 +147,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
     }
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>(value.first);
-        params.value0.distance = Converter::ArkValue<Opt_Number>();
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>();
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        dst.distance = Converter::ArkValue<Opt_Number>();
+        dst.direction = Converter::ArkValue<Opt_PanDirection>();
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -180,14 +181,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsFingers, TestSiz
     };
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
         auto options = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
         options->handler = Referenced::MakeRefPtr<PanGestureOption>();
         fullAPI_->getAccessors()->getPanGestureOptionsAccessor()->setFingers(options, &value.first);
-        params.selector = 1;
-        params.value1 = options;
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto params = Converter::ArkUnion<Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions,
+            Ark_PanGestureOptions>(options);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto fingers = peer->gesture->GetFingers();
@@ -218,13 +217,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
     const double expectedFingers = 4;
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>(expectedFingers);
-        params.value0.distance = Converter::ArkValue<Opt_Number>(value.first);
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>(Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL);
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>(expectedFingers);
+        dst.distance = Converter::ArkValue<Opt_Number>(value.first);
+        dst.direction = Converter::ArkValue<Opt_PanDirection>(Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto result = peer->gesture->GetFingers();
@@ -237,13 +235,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
     }
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>();
-        params.value0.distance = Converter::ArkValue<Opt_Number>(value.first);
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>();
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>();
+        dst.distance = Converter::ArkValue<Opt_Number>(value.first);
+        dst.direction = Converter::ArkValue<Opt_PanDirection>();
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto result = peer->gesture->GetFingers();
@@ -273,14 +270,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDistance, TestSi
     };
 
     for (auto& value : TEST_PLAN) {
-        Ark_Type_PanGestureInterface_callable0_value params;
         auto options = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
         options->handler = Referenced::MakeRefPtr<PanGestureOption>();
         fullAPI_->getAccessors()->getPanGestureOptionsAccessor()->setDistance(options, &value.first);
-        params.selector = 1;
-        params.value1 = options;
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto params = Converter::ArkUnion<Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions,
+            Ark_PanGestureOptions>(options);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto distance = peer->gesture->GetDistance();
@@ -305,13 +300,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDirection, TestSize.Level1)
     const double expectedDistance = 4.0;
 
     for (auto& value : TEST_PLAN_DIRECTION) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>(expectedFingers);
-        params.value0.distance = Converter::ArkValue<Opt_Number>(expectedDistance);
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>(value.first);
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>(expectedFingers);
+        dst.distance = Converter::ArkValue<Opt_Number>(expectedDistance);
+        dst.direction = Converter::ArkValue<Opt_PanDirection>(value.first);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto result = peer->gesture->GetFingers();
@@ -324,13 +318,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDirection, TestSize.Level1)
     }
 
     for (auto& value : TEST_PLAN_DIRECTION) {
-        Ark_Type_PanGestureInterface_callable0_value params;
-        params.selector = 0;
-        params.value0.fingers = Converter::ArkValue<Opt_Number>();
-        params.value0.distance = Converter::ArkValue<Opt_Number>();
-        params.value0.direction = Converter::ArkValue<Opt_PanDirection>(value.first);
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions params;
+        auto& dst = WriteToUnion<Ark_PanGestureInterface_Invoke_Literal>(params);
+        dst.fingers = Converter::ArkValue<Opt_Number>();
+        dst.distance = Converter::ArkValue<Opt_Number>();
+        dst.direction = Converter::ArkValue<Opt_PanDirection>(value.first);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto result = peer->gesture->GetFingers();
@@ -351,14 +344,12 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDirection, TestSize.Level1)
 HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDirection, TestSize.Level1)
 {
     for (auto& value : TEST_PLAN_DIRECTION) {
-        Ark_Type_PanGestureInterface_callable0_value params;
         auto options = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
         options->handler = Referenced::MakeRefPtr<PanGestureOption>();
         fullAPI_->getAccessors()->getPanGestureOptionsAccessor()->setDirection(options, value.first);
-        params.selector = 1;
-        params.value1 = options;
-        auto optParam = Converter::ArkValue<Opt_Type_PanGestureInterface_callable0_value>(params);
-        auto peer = accessor_->ctor(&optParam);
+        auto params = Converter::ArkUnion<Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions,
+            Ark_PanGestureOptions>(options);
+        auto peer = accessor_->construct(&params);
         ASSERT_NE(peer, nullptr);
         ASSERT_NE(peer->gesture, nullptr);
         auto direction = peer->gesture->GetDirection();
@@ -379,18 +370,15 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDirection, TestS
  */
 HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 {
-    auto peer = accessor_->ctor(nullptr);
-    ASSERT_NE(peer, nullptr);
-    ASSERT_NE(peer->gesture, nullptr);
-    auto fingers = peer->gesture->GetFingers();
+    ASSERT_NE(peer_->gesture, nullptr);
+    auto fingers = peer_->gesture->GetFingers();
     EXPECT_EQ(fingers, DEFAULT_FINGERS);
-    auto distance = peer->gesture->GetDistance();
+    auto distance = peer_->gesture->GetDistance();
     EXPECT_NEAR(distance, DEFAULT_DISTANCE.ConvertToPx(), FLT_PRECISION);
-    auto direction = peer->gesture->GetDirection();
+    auto direction = peer_->gesture->GetDirection();
     EXPECT_EQ(direction.type, DEFAULT_DIRECTION.type);
-    auto options = peer->gesture->GetGestureOptions();
+    auto options = peer_->gesture->GetGestureOptions();
     EXPECT_EQ(options, nullptr);
-    finalyzer_(peer);
 }
 
 /**

@@ -45,7 +45,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     env->Object_GetType(obj, &type);
 
     ani_method onPageShowMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onPageShow", ":V", &onPageShowMethod);
+    env->Class_FindMethod(static_cast<ani_class>(type), "onPageShow", ":", &onPageShowMethod);
     auto&& onPageShow = [vm, weakRef, onPageShowMethod]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
@@ -59,7 +59,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     };
 
     ani_method onPageHideMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onPageHide", ":V", &onPageHideMethod);
+    env->Class_FindMethod(static_cast<ani_class>(type), "onPageHide", ":", &onPageHideMethod);
     auto&& onPageHide = [vm, weakRef, onPageHideMethod]() {
         ani_env* env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
@@ -107,7 +107,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     };
 
     ani_method onDumpInspectorMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":Lstd/core/String;",
+    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":C{std.core.String}",
         &onDumpInspectorMethod);
     auto onDumpInspector = [vm, weakRef, onDumpInspectorMethod]() {
         ani_env *env = nullptr;

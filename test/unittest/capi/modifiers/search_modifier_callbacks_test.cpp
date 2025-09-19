@@ -137,7 +137,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     options.icon = ArkValue<Opt_String>(Ark_Empty());
 
     auto controllerPtr =
-        fullAPI_->getAccessors()->getSearchControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getSearchControllerAccessor()->construct();
     auto peerImplPtr = reinterpret_cast<SearchControllerPeer*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -486,7 +486,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
         testString.clear();
         testString.append(value);
     };
-    
+
     auto func = Converter::ArkValue<SearchSubmitCallback>(onSubmitFunc, expectedResId);
     testString.clear();
     modifier_->setOnSubmit1(node_, &func);

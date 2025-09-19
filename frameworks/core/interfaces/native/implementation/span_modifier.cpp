@@ -81,7 +81,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     SpanModelStatic::SetTextColor(frameNode, convValue);
 }
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -102,7 +102,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     SpanModelStatic::SetItalicFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -134,7 +134,7 @@ void SetDecorationImpl(Ark_NativePointer node,
     SpanModelStatic::SetTextDecorationStyle(frameNode, style);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+                          const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

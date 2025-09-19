@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkStackPeer, StackAttribute } from "./component/stack"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -29,15 +30,16 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: StackAttribute): void { }
-    applyPressedAttribute(instance: StackAttribute): void { }
-    applyFocusedAttribute(instance: StackAttribute): void { }
-    applyDisabledAttribute(instance: StackAttribute): void { }
-    applySelectedAttribute(instance: StackAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
-    applyModifierPatch(peer: ArkStackPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignContent_0_flag) {

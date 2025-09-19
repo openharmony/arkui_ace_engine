@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -32,19 +33,20 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TabContentAttribute): void { }
-    applyPressedAttribute(instance: TabContentAttribute): void { }
-    applyFocusedAttribute(instance: TabContentAttribute): void { }
-    applyDisabledAttribute(instance: TabContentAttribute): void { }
-    applySelectedAttribute(instance: TabContentAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _tabBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _tabBar_0_0value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
     _onWillShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillShow_0_0value?: VoidCallback | undefined
     _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillHide_0_0value?: VoidCallback | undefined
-    applyModifierPatch(peer: ArkTabContentPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTabContentPeer;
         if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._tabBar_0_flag) {

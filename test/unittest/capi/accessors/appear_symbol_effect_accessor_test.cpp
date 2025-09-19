@@ -30,7 +30,7 @@ class AppearSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_Ark
     &GENERATED_ArkUIAccessors::getAppearSymbolEffectAccessor, AppearSymbolEffectPeer> {
     void* CreatePeerInstance() override
     {
-        return accessor_->ctor(nullptr);
+        return accessor_->construct(nullptr);
     }
 };
 
@@ -64,7 +64,7 @@ HWTEST_F(AppearSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
         {nullptr, PeerUtils::CreatePeer<AppearSymbolEffectPeer>(std::nullopt)},
     };
     for (auto [value, expected] : testPlan) {
-        Ark_AppearSymbolEffect peer = accessor_->ctor(value);
+        Ark_AppearSymbolEffect peer = accessor_->construct(value);
         ASSERT_NE(peer, nullptr);
         EXPECT_EQ(*peer, *expected);
     }
@@ -100,15 +100,15 @@ HWTEST_F(AppearSymbolEffectAccessorTest, setScopeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setScope, nullptr);
     const std::vector<std::tuple<
-        Ark_AppearSymbolEffect, Ark_EffectScope, std::optional<OHOS::Ace::ScopeType>
+        Ark_AppearSymbolEffect, Opt_EffectScope, std::optional<OHOS::Ace::ScopeType>
     >> testPlan {
-        {peer_, ARK_EFFECT_SCOPE_LAYER, OHOS::Ace::ScopeType::LAYER},
-        {peer_, ARK_EFFECT_SCOPE_WHOLE, OHOS::Ace::ScopeType::WHOLE},
-        {nullptr, ARK_EFFECT_SCOPE_LAYER, std::nullopt},
+        {peer_, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_LAYER), OHOS::Ace::ScopeType::LAYER},
+        {peer_, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_WHOLE), OHOS::Ace::ScopeType::WHOLE},
+        {nullptr, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_LAYER), std::nullopt},
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->scope.reset();
-        accessor_->setScope(peer, value);
+        accessor_->setScope(peer, &value);
         EXPECT_EQ(peer_->scope, expected);
     }
 }

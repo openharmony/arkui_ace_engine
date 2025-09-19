@@ -21,7 +21,7 @@ import { PeerNode } from '../PeerNode'
 import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
-import { OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
 import { LazyItemNode } from './LazyItemNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 import { CustomComponent } from '../component/customComponent'
@@ -82,6 +82,12 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             return nullptr
         }
     }
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
 export class NodeHolder {
@@ -99,7 +105,7 @@ function createLazyNode(isRepeat: boolean): PeerNode {
     NodeAttach(
         () => {
             const peerId = PeerNode.nextId()
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId, isRepeat)
             if (!_peerPtr) {
                 throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
             }

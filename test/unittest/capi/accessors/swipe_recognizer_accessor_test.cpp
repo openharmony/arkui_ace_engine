@@ -66,7 +66,7 @@ public:
  */
 HWTEST_F(SwipeRecognizerAccessorTest, ctorTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->ctor, nullptr);
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 

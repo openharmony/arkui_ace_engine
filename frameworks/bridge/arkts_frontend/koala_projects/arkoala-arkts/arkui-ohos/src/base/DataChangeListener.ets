@@ -16,6 +16,7 @@
 import { pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { MutableState } from '@koalaui/runtime'
+import { LazyForEachOps } from '#generated'
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation,
     DataMoveOperation, DataExchangeOperation, DataChangeListener } from '../component/lazyForEach'
 
@@ -39,6 +40,12 @@ export class InternalListener implements DataChangeListener {
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             return Number.POSITIVE_INFINITY // none affected
         }
+        LazyForEachOps.NotifyChange(
+            nodePtr,
+            this.startIndex as int32,
+            this.endIndex as int32,
+            this.changeCount as int32
+        );
         const firstAffected = this.startIndex
         // Reset the cache after flushing
         this.startIndex = Number.POSITIVE_INFINITY;

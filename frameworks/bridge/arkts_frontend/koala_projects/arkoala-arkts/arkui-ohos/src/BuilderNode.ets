@@ -28,6 +28,7 @@ import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ArkUIAniModule } from 'arkui.ani'
 import { UIContextImpl } from "./base/UIContextImpl"
+import { RecordData } from "@ohos.base"
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -42,7 +43,7 @@ export interface BuildOptions {
     nestingBuilderSupported?: boolean;
 }
 
-const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "ConditionScope"]
+const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "ForEach", "LazyForEach", "Repeat", "ConditionScope", "Span", "ContainerSpan", "SymbolSpan"]
 
 class BuilderRootNode extends IncrementalNode {
     public __parent?: ArkBuilderProxyNodePeer;
@@ -186,7 +187,7 @@ export class BuilderNode<T = undefined> {
         this._JSBuilderNode.disposeNode();
         this.nodePtr_ = undefined;
     }
-    public reuse(param?: Record<string, Object>): void {
+    public reuse(param?: RecordData): void {
         this._JSBuilderNode.reuse(param);
     }
     public recycle(): void {
@@ -342,6 +343,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         const old = GlobalStateManager.GetLocalManager();
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__params!.value = arg!;
+        this.__rootStage?.forceCompleteRerender();
         this.__manager!.syncChanges();
         this.__manager!.updateSnapshot();
         this.__rootStage?.value;
@@ -357,10 +359,18 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         return null;
     }
 
-    public reuse(param?: Record<string, Object>): void {
+    public reuse(param?: RecordData): void {
+        if (this.__root) {
+            let node = findPeerNode(this.__root!);
+            node?.onReuse(true, param);
+        }
     }
 
     public recycle(): void {
+        if (this.__root) {
+            let node = findPeerNode(this.__root!);
+            node?.onRecycle(true);
+        }
     }
 
     public getFrameNodeWithoutCheck(): FrameNode | null | undefined {

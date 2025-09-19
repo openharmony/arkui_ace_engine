@@ -191,12 +191,12 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
 
 // Invalid values for attribute 'min' of method 'setGaugeOptions'
 static std::vector<std::tuple<std::string, Opt_Number>> setGaugeOptionsMinInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Number>(Ark_Empty())},
+    {"undefined", Converter::ArkValue<Opt_Number>(Ark_Empty())},
 };
 
 // Invalid values for attribute 'max' of method 'setGaugeOptions'
 static std::vector<std::tuple<std::string, Opt_Number>> setGaugeOptionsMaxInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Number>(Ark_Empty())},
+    {"undefined", Converter::ArkValue<Opt_Number>(Ark_Empty())},
 };
 
 /*
@@ -499,8 +499,8 @@ const std::string GRADIENT_ARRAY_RESULT =
                 "[\"#FFFFFFFF\",\"20.000000\"]],0.25],"
                 "[[[\"#FF000000\",\"5.500000\"],"
                 "[\"#FF00FF00\",\"100.000000\"]],0.75]]";
-using GaugeColorsValues = std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors, std::string>>;
-using ArkColorColor = Ark_Type_GaugeAttribute_colors_colors;
+using ArkColorColor = Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number;
+using GaugeColorsValues = std::vector<std::tuple<std::string, ArkColorColor, std::string>>;
 
 // Valid values for attribute of method 'colors'
 GaugeColorsValues CreateColorsValidValues()
@@ -563,8 +563,8 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Type_GaugeAttribute_colors_colors inputColors;
-    Ark_Type_GaugeAttribute_colors_colors initColors;
+    ArkColorColor inputColors;
+    ArkColorColor initColors;
 
     // Initial setup
     initColors = std::get<1>(colorsValidValues[0]);
@@ -573,8 +573,7 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
     inputColors = initColors;
     for (auto&& value: colorsValidValues) {
         inputColors = std::get<1>(value);
-        auto optInputColors = Converter::ArkValue<Opt_Type_GaugeAttribute_colors_colors>(inputColors);
-        modifier_->setColors(node_, &optInputColors);
+        modifier_->setColors(node_, &inputColors);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
         expectedStr = std::get<2>(value);
@@ -601,15 +600,15 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
     {"0.0f", Converter::ArkValue<Ark_Length>(0.0f), "0.00vp"},
     {"5.0f", Converter::ArkValue<Ark_Length>(5.0f), "5.00vp"},
     {"5.5f", Converter::ArkValue<Ark_Length>(5.5f), "5.50vp"},
-    {"0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), "0.00vp"},
-    {"15.0_vp", Converter::ArkValue<Ark_Length>(15.0_vp), "15.00vp"},
-    {"15.5_vp", Converter::ArkValue<Ark_Length>(15.5_vp), "15.50vp"},
-    {"0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), "0.00px"},
-    {"25.0_px", Converter::ArkValue<Ark_Length>(25.0_px), "25.00px"},
-    {"25.5_px", Converter::ArkValue<Ark_Length>(25.5_px), "25.50px"},
-    {"0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), "0.00fp"},
-    {"35.0_fp", Converter::ArkValue<Ark_Length>(35.0_fp), "35.00fp"},
-    {"35.5_fp", Converter::ArkValue<Ark_Length>(35.5_fp), "35.50fp"},
+    {"0.0vp", Converter::ArkValue<Ark_Length>("0.0vp"), "0.00vp"},
+    {"15.0vp", Converter::ArkValue<Ark_Length>("15.0vp"), "15.00vp"},
+    {"15.5vp", Converter::ArkValue<Ark_Length>("15.5vp"), "15.50vp"},
+    {"0.0px", Converter::ArkValue<Ark_Length>("0.0px"), "0.00px"},
+    {"25.0px", Converter::ArkValue<Ark_Length>("25.0px"), "25.00px"},
+    {"25.5px", Converter::ArkValue<Ark_Length>("25.5px"), "25.50px"},
+    {"0.0fp", Converter::ArkValue<Ark_Length>("0.0fp"), "0.00fp"},
+    {"35.0fp", Converter::ArkValue<Ark_Length>("35.0fp"), "35.00fp"},
+    {"35.5fp", Converter::ArkValue<Ark_Length>("35.5fp"), "35.50fp"},
 };
 
 /*
@@ -643,12 +642,12 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
 
 // Valid values for attribute 'strokeWidthLength' of method 'strokeWidth'
 static std::vector<std::tuple<std::string, Ark_Length>> strokeWidthStrokeWidthLengthInvalidValues = {
-    {"10.0_pct", Converter::ArkValue<Ark_Length>(10.0_pct)},
-    {"0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct)},
+    {"10%", Converter::ArkValue<Ark_Length>("10%")},
+    {"0%", Converter::ArkValue<Ark_Length>("0%")},
     {"-5.0f", Converter::ArkValue<Ark_Length>(-5.0f)},
-    {"-15.5_vp", Converter::ArkValue<Ark_Length>(-15.5_vp)},
-    {"-25.0_px", Converter::ArkValue<Ark_Length>(-25.0_px)},
-    {"-0.5_fp", Converter::ArkValue<Ark_Length>(-0.5_fp)},
+    {"-15.5vp", Converter::ArkValue<Ark_Length>("-15.5vp")},
+    {"-25.0px", Converter::ArkValue<Ark_Length>("-25.0px")},
+    {"-0.5fp", Converter::ArkValue<Ark_Length>("-0.5fp")},
 };
 
 /*
@@ -839,7 +838,7 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
 
 // Invalid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowRadiusInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
     {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f))},
     {"-20.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-20.5f))},
@@ -847,13 +846,13 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShad
 
 // Invalid values for attribute 'offsetX' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetXInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
 };
 
 // Invalid values for attribute 'offsetY' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetYInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"undefined", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
 };
 
@@ -952,15 +951,15 @@ static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> indica
 };
 
 // Valid values for attribute 'space' of method 'indicator'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> indicatorSpaceValidValues = {
-    {"5.0f", Converter::ArkValue<Opt_Length>(5.0f), "5.00vp"},
-    {"5.5f", Converter::ArkValue<Opt_Length>(5.5f), "5.50vp"},
-    {"15.0_vp", Converter::ArkValue<Opt_Length>(15.0_vp), "15.00vp"},
-    {"15.5_vp", Converter::ArkValue<Opt_Length>(15.5_vp), "15.50vp"},
-    {"25.0_px", Converter::ArkValue<Opt_Length>(25.0_px), "25.00px"},
-    {"25.5_px", Converter::ArkValue<Opt_Length>(25.5_px), "25.50px"},
-    {"35.0_fp", Converter::ArkValue<Opt_Length>(35.0_fp), "35.00fp"},
-    {"35.5_fp", Converter::ArkValue<Opt_Length>(35.5_fp), "35.50fp"},
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> indicatorSpaceValidValues = {
+    {"5.0f", Converter::ArkValue<Opt_Dimension>(5.0f), "5.00vp"},
+    {"5.5f", Converter::ArkValue<Opt_Dimension>(5.5f), "5.50vp"},
+    {"15.0vp", Converter::ArkValue<Opt_Dimension>("15.0vp"), "15.00vp"},
+    {"15.5vp", Converter::ArkValue<Opt_Dimension>("15.5vp"), "15.50vp"},
+    {"25.0px", Converter::ArkValue<Opt_Dimension>("25.0px"), "25.00px"},
+    {"25.5px", Converter::ArkValue<Opt_Dimension>("25.5px"), "25.50px"},
+    {"35.0fp", Converter::ArkValue<Opt_Dimension>("35.0fp"), "35.00fp"},
+    {"35.5fp", Converter::ArkValue<Opt_Dimension>("35.5fp"), "35.50fp"},
 };
 
 /*
@@ -1010,15 +1009,15 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
 
 // Invalid values for attribute 'icon' of method 'indicator'
 static std::vector<std::tuple<std::string, Opt_ResourceStr>> indicatorIconInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty())},
+    {"undefined", Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr)},
 };
 
 // Invalid values for attribute 'space' of method 'indicator'
-static std::vector<std::tuple<std::string, Opt_Length>> indicatorSpaceInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-    {"-0.5_vp", Converter::ArkValue<Opt_Length>(-0.5_vp)},
-    {"50.0_pct", Converter::ArkValue<Opt_Length>(50.0_pct)},
+static std::vector<std::tuple<std::string, Opt_Dimension>> indicatorSpaceInvalidValues = {
+    {"undefined", Converter::ArkValue<Opt_Dimension>(Ark_Empty())},
+    {"-0.5vp", Converter::ArkValue<Opt_Dimension>("-0.5vp")},
+    {"50%", Converter::ArkValue<Opt_Dimension>("50%")},
 };
 
 /*
@@ -1116,7 +1115,7 @@ HWTEST_F(GaugeModifierTest, DISABLED_setPrivacySensitiveTestValidValues, TestSiz
 // Invalid values for attribute 'privacySensitiveIsPrivacySensitiveMode' of method 'privacySensitive'
 static std::vector<std::tuple<std::string, Opt_Boolean>>
 privacySensitivePrivacySensitiveIsPrivacySensitiveModeInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Boolean>(Ark_Empty())},
+    {"undefined", Converter::ArkValue<Opt_Boolean>(Ark_Empty())},
 };
 
 /*

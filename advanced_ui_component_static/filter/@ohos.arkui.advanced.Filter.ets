@@ -387,7 +387,7 @@ struct MultiFilterRow {
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover');
   @State isArrowBgHoverRow: boolean = false;
   @PropRef fontSizeScale: number | undefined;
-  @State replaceEffect: number = 0;
+  @State replaceEffect: int = 0;
   @State isSendArrowAccessibility: boolean = false;
   private filterColumnWidth: number = 0;
   private lastFilterColumnWidth: number = 0;
@@ -951,7 +951,7 @@ export struct Filter {
       if(uiContent.getHostContext() !== undefined) {
         let hostContext : common.UIAbilityContext = uiContent.getHostContext() as common.UIAbilityContext
          this.applicationContext = hostContext.getApplicationContext();
-         this.callbackId = this.applicationContext.on('environment', this.callbacks);
+         this.callbackId = this.applicationContext.onEnvironment(this.callbacks);
       }
 
     } catch (err) {
@@ -966,7 +966,7 @@ export struct Filter {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if(context.getHostContext() !== undefined) {
-        this.applicationContext.off('environment', this.callbackId!.toInt(),
+        this.applicationContext.offEnvironment(this.callbackId!.toInt(),
           (err: BusinessError<void> | null): void => {
           hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
         })

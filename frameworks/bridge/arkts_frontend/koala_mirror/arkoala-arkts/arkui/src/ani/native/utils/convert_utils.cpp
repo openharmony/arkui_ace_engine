@@ -35,13 +35,13 @@ ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClas
 
 ani_object ConvertToPixelMapAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long pixelMapPtr)
 {
-    static const char* className = "L@ohos/multimedia/image/image/PixelMapInner;";
+    static const char* className = "@ohos.multimedia.image.image.PixelMapInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
         return nullptr;
     }
     ani_object aniValue;

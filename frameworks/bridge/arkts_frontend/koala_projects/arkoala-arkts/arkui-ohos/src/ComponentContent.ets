@@ -19,6 +19,7 @@ import { Content } from "./Content"
 import { KPointer, pointer } from "@koalaui/interop"
 import { BuilderNode, BuildOptions, voidBuilderFunc, TBuilderFunc } from "./BuilderNode"
 import { WrappedBuilder } from "#generated"
+import { RecordData } from "@ohos.base"
 
 export interface ComponentContentBase extends Content {
 }
@@ -51,7 +52,7 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
         // point to struct FrameNodePeer or undefined
         return this.builderNode_.getNodePtr();
     }
-    reuse(param?: Record<string, Object>): void {
+    reuse(param?: RecordData): void {
         this.builderNode_.reuse(param);
     }
     recycle(): void {

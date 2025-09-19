@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextTimerPeer, TextTimerConfiguration, TextTimerAttribute } from "./component/textTimer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
@@ -31,11 +32,11 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextTimerAttribute): void { }
-    applyPressedAttribute(instance: TextTimerAttribute): void { }
-    applyFocusedAttribute(instance: TextTimerAttribute): void { }
-    applyDisabledAttribute(instance: TextTimerAttribute): void { }
-    applySelectedAttribute(instance: TextTimerAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _format_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _format_0_0value?: string | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -52,8 +53,9 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
     _onTimer_0_0value?: ((utc: number,elapsedTime: number) => void) | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
-    applyModifierPatch(peer: ArkTextTimerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextTimerPeer;
         if (this._format_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._format_0_flag) {

@@ -70,19 +70,25 @@ public:
 HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
 {
     Ark_SectionOptions section1;
-    section1.columnsGap = Converter::ArkValue<Opt_Length>(1);
+    section1.columnsGap = Converter::ArkValue<Opt_Dimension>(1.f);
     section1.crossCount = Converter::ArkValue<Opt_Number>(2);
     section1.itemsCount = Converter::ArkValue<Ark_Number>(3);
-    section1.rowsGap = Converter::ArkValue<Opt_Length>(4);
+    section1.rowsGap = Converter::ArkValue<Opt_Dimension>(4.f);
     Ark_SectionOptions section2;
-    section2.columnsGap = Converter::ArkValue<Opt_Length>(5);
+    section2.columnsGap = Converter::ArkValue<Opt_Dimension>(5.f);
     section2.crossCount = Converter::ArkValue<Opt_Number>(6);
     section2.itemsCount = Converter::ArkValue<Ark_Number>(7);
-    section2.rowsGap = Converter::ArkValue<Opt_Length>(8);
+    section2.rowsGap = Converter::ArkValue<Opt_Dimension>(8.f);
     accessor_->push(peer_, &section1);
     accessor_->push(peer_, &section2);
     auto length = accessor_->length(peer_);
     EXPECT_EQ(Converter::Convert<int>(length), 2);
+}
+
+template<typename T>
+std::optional<decltype(T().ToString())> ToStr(const std::optional<T>& src)
+{
+    return src ? std::make_optional(src->ToString()) : std::nullopt;
 }
 
 /**
@@ -93,33 +99,31 @@ HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
 HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
 {
     Ark_SectionOptions section;
-    section.columnsGap = Converter::ArkValue<Opt_Length>(1);
+    section.columnsGap = Converter::ArkValue<Opt_Dimension>(1.f);
     section.crossCount = Converter::ArkValue<Opt_Number>(2);
     section.itemsCount = Converter::ArkValue<Ark_Number>(3);
-    section.rowsGap = Converter::ArkValue<Opt_Length>(4);
-    const CalcLength length(123.0_vp);
+    section.rowsGap = Converter::ArkValue<Opt_Dimension>(4.f);
+    const auto length = "123.0vp";
     Ark_Padding arkPadding = {
-        .left = Converter::ArkValue<Opt_Length>(length.GetDimension()),
-        .top = Converter::ArkValue<Opt_Length>(length.GetDimension()),
-        .right = Converter::ArkValue<Opt_Length>(length.GetDimension()),
-        .bottom = Converter::ArkValue<Opt_Length>(length.GetDimension()),
+        .left = Converter::ArkValue<Opt_Length>(length),
+        .top = Converter::ArkValue<Opt_Length>(length),
+        .right = Converter::ArkValue<Opt_Length>(length),
+        .bottom = Converter::ArkValue<Opt_Length>(length),
     };
-    Opt_Union_Margin_Dimension margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>
-                        (Converter::ArkValue<Ark_Padding>(arkPadding));
+    auto margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(arkPadding);
     section.margin = margin;
     accessor_->push(peer_, &section);
     Array_SectionOptions sections = accessor_->values(peer_);
     EXPECT_EQ(sections.length, 1);
     EXPECT_EQ(Converter::Convert<int32_t>(sections.array[0].itemsCount), 3);
-    auto crossCountOpt  = Converter::OptConvert<Ark_Number>(sections.array[0].crossCount);
-    auto crossCount = Converter::Convert<int32_t>(crossCountOpt.value());
-    EXPECT_EQ(crossCount, 2);
-    EXPECT_EQ(Converter::OptConvert<Dimension>(section.columnsGap),
-              Converter::OptConvert<Dimension>(sections.array[0].columnsGap));
-    EXPECT_EQ(Converter::OptConvert<Dimension>(section.rowsGap),
-              Converter::OptConvert<Dimension>(sections.array[0].rowsGap));
-    EXPECT_EQ(Converter::OptConvert<MarginProperty>(section.margin),
-              Converter::OptConvert<MarginProperty>(sections.array[0].margin));
+    auto crossCountOpt  = Converter::OptConvert<int32_t>(sections.array[0].crossCount);
+    EXPECT_EQ(crossCountOpt, 2);
+    EXPECT_EQ(ToStr(Converter::OptConvert<Dimension>(section.columnsGap)),
+              ToStr(Converter::OptConvert<Dimension>(sections.array[0].columnsGap)));
+    EXPECT_EQ(ToStr(Converter::OptConvert<Dimension>(section.rowsGap)),
+              ToStr(Converter::OptConvert<Dimension>(sections.array[0].rowsGap)));
+    EXPECT_EQ(ToStr(Converter::OptConvert<MarginProperty>(section.margin)),
+              ToStr(Converter::OptConvert<MarginProperty>(sections.array[0].margin)));
 }
 
 /**

@@ -23,13 +23,13 @@ namespace OHOS::Ace::Ani {
 ani_object AniUtils::CreateDouble(ani_env *env, double value)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char *className = "Lstd/core/Double;";
+    static const char *className = "std.core.Double";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
         return nullptr;
     }
     ani_method infoCtor;
-    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &infoCtor)) {
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &infoCtor)) {
         return nullptr;
     }
     ani_object personInfoObj;
@@ -42,13 +42,13 @@ ani_object AniUtils::CreateDouble(ani_env *env, double value)
 ani_object AniUtils::CreateLong(ani_env *env, ani_long value)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char *className = "Lstd/core/Long;";
+    static const char *className = "std.core.Long";
     ani_class long_cls;
     if (ANI_OK != env->FindClass(className, &long_cls)) {
         return nullptr;
     }
     ani_method longCtor;
-    if (ANI_OK != env->Class_FindMethod(long_cls, "<ctor>", "J:V", &longCtor)) {
+    if (ANI_OK != env->Class_FindMethod(long_cls, "<ctor>", "l:", &longCtor)) {
         return nullptr;
     }
     ani_object longObj;
@@ -150,7 +150,7 @@ bool AniUtils::IsString(ani_env* env, ani_object obj)
 {
     CHECK_NULL_RETURN(env, false);
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
 
     ani_boolean isString;
     env->Object_InstanceOf(obj, stringClass, &isString);
@@ -161,7 +161,7 @@ bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 {
     CHECK_NULL_RETURN(env, false);
     ani_class numberClass;
-    env->FindClass("Lstd/core/Double;", &numberClass);
+    env->FindClass("std.core.Double", &numberClass);
 
     ani_boolean isNumber;
     env->Object_InstanceOf(obj, numberClass, &isNumber);
@@ -171,7 +171,7 @@ bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 bool AniUtils::IsFunction(ani_env* env, ani_object obj)
 {
     ani_class funcClass;
-    if ((ANI_OK != env->FindClass("Lstd/core/Function0;", &funcClass))) {
+    if ((ANI_OK != env->FindClass("std.core.Function0", &funcClass))) {
         return false;
     }
     ani_boolean result;
@@ -229,11 +229,11 @@ ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -249,11 +249,11 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = WrapBusinessError(env, msg, code);
@@ -308,7 +308,7 @@ bool AniUtils::GetBigIntValue(ani_env* env, ani_object object, int64_t& longValu
     CHECK_NULL_RETURN(env, false);
     auto status = ANI_OK;
     ani_long value;
-    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":J", &value)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &value)) != ANI_OK) {
         return false;
     }
     longValue = value;
@@ -349,14 +349,14 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
 ani_object AniUtils::CreateDoubleObject(ani_env* env, double value)
 {
     ani_status state;
-    static const char* className = "Lstd/core/Double;";
+    static const char* className = "std.core.Double";
     ani_class persion_cls;
     if ((state = env->FindClass(className, &persion_cls)) != ANI_OK) {
         HILOGE("FindClass std/core/Double failed, %{public}d", state);
         return nullptr;
     }
     ani_method personInfoCtor;
-    if ((state = env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod Double ctor failed, %{public}d", state);
         return nullptr;
     }
@@ -388,12 +388,12 @@ int32_t AniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& result)
 {
     ani_status state;
     ani_class booleanClass;
-    if ((state = env->FindClass("Lstd/core/Boolean;", &booleanClass)) != ANI_OK) {
+    if ((state = env->FindClass("std.core.Boolean", &booleanClass)) != ANI_OK) {
         HILOGE("FindClass std/core/Boolean failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
     ani_method booleanClassCtor;
-    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanClassCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanClassCtor)) != ANI_OK) {
         HILOGE("Class_FindMethod Boolean ctor failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
@@ -408,13 +408,14 @@ int32_t AniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& result)
 int32_t AniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& result)
 {
     ani_module stdCoreModule;
-    auto state = env->FindModule("Lstd/core;", &stdCoreModule);
+    auto state = env->FindModule("std.core", &stdCoreModule);
     if (state != ANI_OK) {
         HILOGE("Find module core failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
     ani_function fn;
-    state = env->Module_FindFunction(stdCoreModule, "getNearestNonBootRuntimeLinker", ":Lstd/core/RuntimeLinker;", &fn);
+    state =
+        env->Module_FindFunction(stdCoreModule, "getNearestNonBootRuntimeLinker", ":C{std.core.RuntimeLinker}", &fn);
     if (state != ANI_OK) {
         HILOGE("Find function getNearestNonBootRuntimeLinker failed, %{public}d", state);
         return static_cast<int32_t>(state);

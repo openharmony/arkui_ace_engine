@@ -20,6 +20,7 @@ import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
 import { int32 } from "@koalaui/common"
 import { BaseSpan } from "./component/span"
@@ -35,11 +36,11 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ImageSpanAttribute): void { }
-    applyPressedAttribute(instance: ImageSpanAttribute): void { }
-    applyFocusedAttribute(instance: ImageSpanAttribute): void { }
-    applyDisabledAttribute(instance: ImageSpanAttribute): void { }
-    applySelectedAttribute(instance: ImageSpanAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _verticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _verticalAlign_0_0value?: ImageSpanAlignment | undefined
     _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -52,8 +53,9 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
     _onError_0_0value?: ImageErrorCallback | undefined
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: image.PixelMap | undefined
-    applyModifierPatch(peer: ArkImageSpanPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkImageSpanPeer;
         if (this._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._verticalAlign_0_flag) {

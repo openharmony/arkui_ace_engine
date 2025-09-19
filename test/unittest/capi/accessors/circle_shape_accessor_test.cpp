@@ -47,7 +47,7 @@ public:
         Opt_ShapeSize options;
         options.value.width = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(width);
         options.value.height = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(height);
-        Ark_CircleShape ret = accessor_->ctor(&options);
+        Ark_CircleShape ret = accessor_->construct(&options);
         return ret;
     }
 };

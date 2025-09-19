@@ -609,14 +609,14 @@ struct ToolBarDialog {
   mainWindowStage: window.Window | undefined = undefined;
   controller?: CustomDialogController;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   cancel: () => void = () => {
   };
   confirm: () => void = () => {
   };
   @PropRef fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   @Observed
   @State symbolEffect: SymbolEffect = new SymbolEffect();

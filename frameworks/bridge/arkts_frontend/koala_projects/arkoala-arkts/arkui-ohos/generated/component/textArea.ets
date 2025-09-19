@@ -219,15 +219,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -371,7 +371,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTextSelectionChangeAttribute(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): void {
+    setOnTextSelectionChangeAttribute(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -383,7 +383,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setOnTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnContentScrollAttribute(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): void {
+    setOnContentScrollAttribute(value: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -467,12 +467,12 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setEnableKeyboardOnFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLengthAttribute(value: number | undefined): void {
+    setMaxLengthAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -515,15 +515,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setSelectionMenuHidden(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMinFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -539,15 +539,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontSizeAttribute(value: number | string | Resource | undefined): void {
+    setMaxFontSizeAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -563,15 +563,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -583,15 +583,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -615,12 +615,12 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setHeightAdaptivePolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLinesAttribute(value: number | undefined): void {
+    setMaxLinesAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -663,15 +663,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: number | string | Resource | undefined): void {
+    setLetterSpacingAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -699,15 +699,15 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineHeightAttribute(value: number | string | Resource | undefined): void {
+    setLineHeightAttribute(value: double | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -1035,7 +1035,7 @@ export interface TextAreaAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1059,10 +1059,10 @@ export interface TextAreaAttribute extends CommonMethod {
     onChange(value: EditableTextOnChangeCallback | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onTextSelectionChange")
     }
-    onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onContentScroll(value: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined): this {
         throw new Error("Unimplemented method onContentScroll")
     }
     onEditChange(value: ((isEditing: boolean) => void) | undefined): this {
@@ -1083,7 +1083,7 @@ export interface TextAreaAttribute extends CommonMethod {
     enableKeyboardOnFocus(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableKeyboardOnFocus")
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLength")
     }
     style(value: TextContentStyle | undefined): this {
@@ -1095,22 +1095,22 @@ export interface TextAreaAttribute extends CommonMethod {
     selectionMenuHidden(value: boolean | undefined): this {
         throw new Error("Unimplemented method selectionMenuHidden")
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method minFontSize")
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontSize")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         throw new Error("Unimplemented method heightAdaptivePolicy")
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLines")
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1122,13 +1122,13 @@ export interface TextAreaAttribute extends CommonMethod {
     decoration(value: TextDecorationOptions | undefined): this {
         throw new Error("Unimplemented method decoration")
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
     lineSpacing(value: LengthMetrics | undefined): this {
         throw new Error("Unimplemented method lineSpacing")
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method lineHeight")
     }
     type(value: TextAreaType | undefined): this {
@@ -1204,7 +1204,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: ResourceStr | undefined
     textOverflow_value?: TextOverflow | undefined
     textIndent_value?: Dimension | undefined
@@ -1212,30 +1212,30 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     selectedBackgroundColor_value?: ResourceColor | undefined
     onSubmit_value?: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined
     onChange_value?: EditableTextOnChangeCallback | undefined
-    onTextSelectionChange_value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
-    onContentScroll_value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    onTextSelectionChange_value?: ((selectionStart: int32,selectionEnd: int32) => void) | undefined
+    onContentScroll_value?: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined
     onEditChange_value?: ((isEditing: boolean) => void) | undefined
     onCopy_value?: ((value: string) => void) | undefined
     onCut_value?: ((value: string) => void) | undefined
     onPaste_value?: ((value: string,event: PasteEvent) => void) | undefined
     copyOption_value?: CopyOptions | undefined
     enableKeyboardOnFocus_value?: boolean | undefined
-    maxLength_value?: number | undefined
+    maxLength_value?: int32 | undefined
     style_value?: TextContentStyle | undefined
     barState_value?: BarState | undefined
     selectionMenuHidden_value?: boolean | undefined
-    minFontSize_value?: number | string | Resource | undefined
-    maxFontSize_value?: number | string | Resource | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    minFontSize_value?: double | string | Resource | undefined
+    maxFontSize_value?: double | string | Resource | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     heightAdaptivePolicy_value?: TextHeightAdaptivePolicy | undefined
-    maxLines_value?: number | undefined
+    maxLines_value?: int32 | undefined
     wordBreak_value?: WordBreak | undefined
     lineBreakStrategy_value?: LineBreakStrategy | undefined
     decoration_value?: TextDecorationOptions | undefined
-    letterSpacing_value?: number | string | Resource | undefined
+    letterSpacing_value?: double | string | Resource | undefined
     lineSpacing_value?: LengthMetrics | undefined
-    lineHeight_value?: number | string | Resource | undefined
+    lineHeight_value?: double | string | Resource | undefined
     type_value?: TextAreaType | undefined
     enableAutoFill_value?: boolean | undefined
     contentType_value?: ContentType | undefined
@@ -1281,7 +1281,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1305,10 +1305,10 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     onChange(value: EditableTextOnChangeCallback | undefined): this {
         return this
     }
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         return this
     }
-    onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onContentScroll(value: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined): this {
         return this
     }
     onEditChange(value: ((isEditing: boolean) => void) | undefined): this {
@@ -1329,7 +1329,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     enableKeyboardOnFocus(value: boolean | undefined): this {
         return this
     }
-    maxLength(value: number | undefined): this {
+    maxLength(value: int32 | undefined): this {
         return this
     }
     style(value: TextContentStyle | undefined): this {
@@ -1341,22 +1341,22 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     selectionMenuHidden(value: boolean | undefined): this {
         return this
     }
-    minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: double | string | Resource | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         return this
     }
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         return this
     }
-    maxLines(value: number | undefined): this {
+    maxLines(value: int32 | undefined): this {
         return this
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1368,13 +1368,13 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     decoration(value: TextDecorationOptions | undefined): this {
         return this
     }
-    letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: double | string | Resource | undefined): this {
         return this
     }
     lineSpacing(value: LengthMetrics | undefined): this {
         return this
     }
-    lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: double | string | Resource | undefined): this {
         return this
     }
     type(value: TextAreaType | undefined): this {
@@ -1521,9 +1521,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -1585,17 +1585,17 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    public onTextSelectionChange(value: ((selectionStart: int32,selectionEnd: int32) => void) | undefined): this {
         if (this.checkPriority("onTextSelectionChange")) {
-            const value_casted = value as (((selectionStart: number,selectionEnd: number) => void) | undefined)
+            const value_casted = value as (((selectionStart: int32,selectionEnd: int32) => void) | undefined)
             this.getPeer()?.setOnTextSelectionChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    public onContentScroll(value: ((totalOffsetX: double,totalOffsetY: double) => void) | undefined): this {
         if (this.checkPriority("onContentScroll")) {
-            const value_casted = value as (((selectionStart: number,selectionEnd: number) => void) | undefined)
+            const value_casted = value as (((totalOffsetX: double,totalOffsetY: double) => void) | undefined)
             this.getPeer()?.setOnContentScrollAttribute(value_casted)
             return this
         }
@@ -1649,9 +1649,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public maxLength(value: number | undefined): this {
+    public maxLength(value: int32 | undefined): this {
         if (this.checkPriority("maxLength")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLengthAttribute(value_casted)
             return this
         }
@@ -1681,33 +1681,33 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    public minFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    public maxFontSize(value: double | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setMaxFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
@@ -1721,9 +1721,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         if (this.checkPriority("maxLines")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLinesAttribute(value_casted)
             return this
         }
@@ -1753,9 +1753,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public letterSpacing(value: number | string | Resource | undefined): this {
+    public letterSpacing(value: double | string | Resource | undefined): this {
         if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
@@ -1769,9 +1769,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    public lineHeight(value: double | string | Resource | undefined): this {
         if (this.checkPriority("lineHeight")) {
-            const value_casted = value as (number | string | Resource | undefined)
+            const value_casted = value as (double | string | Resource | undefined)
             this.getPeer()?.setLineHeightAttribute(value_casted)
             return this
         }
@@ -2113,14 +2113,14 @@ export class TextAreaController extends TextContentControllerBase implements Mat
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextAreaController_getFinalizer()
     }
-    public caretPosition(value: number): void {
-        const value_casted = value as (number)
+    public caretPosition(value: int32): void {
+        const value_casted = value as (int32)
         this.caretPosition_serialize(value_casted)
         return
     }
-    public setTextSelection(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
-        const selectionStart_casted = selectionStart as (number)
-        const selectionEnd_casted = selectionEnd as (number)
+    public setTextSelection(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32)
+        const selectionEnd_casted = selectionEnd as (int32)
         const options_casted = options as (SelectionOptions | undefined)
         this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
@@ -2129,10 +2129,10 @@ export class TextAreaController extends TextContentControllerBase implements Mat
         this.stopEditing_serialize()
         return
     }
-    caretPosition_serialize(value: number): void {
+    caretPosition_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._TextAreaController_caretPosition(this.peer!.ptr, value)
     }
-    setTextSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
+    setTextSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

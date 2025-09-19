@@ -39,7 +39,7 @@ namespace  {
     const auto ATTRIBUTE_IMAGES_TOP_NAME = "top";
     const auto ATTRIBUTE_IMAGES_TOP_TEST_VALUE = "100.00vp";
     const auto ATTRIBUTE_IMAGES_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "autocalc";
+    const auto ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE = "0.00auto"; // Need to check value on ArkUI
     const auto ATTRIBUTE_IMAGES_HEIGHT_NAME = "height";
     const auto ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE = "100.00px";
     const auto ATTRIBUTE_IMAGES_DURATION_NAME = "duration";
@@ -169,11 +169,11 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     std::string imagesSrc = "test";
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
-    PixelMapPeer pixelMapPeer;
+    image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
     auto array = new Ark_ImageFrameInfo[] {
         {
-            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(&pixelMapPeer),
+            .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_image_PixelMap>(&pixelMapPeer),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
             .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),

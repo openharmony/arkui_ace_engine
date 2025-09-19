@@ -308,7 +308,7 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Leve
     auto controllerAccessor = GeneratedModifier::GetTextInputControllerAccessor();
     ASSERT_NE(controllerAccessor, nullptr);
 
-    auto peer = controllerAccessor->ctor();
+    auto peer = controllerAccessor->construct();
     ASSERT_NE(peer, nullptr);
     EXPECT_EQ(peer->GetController(), nullptr);
 

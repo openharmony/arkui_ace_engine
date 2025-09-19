@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkTextPickerPeer, TextPickerTextStyle, OnTextPickerChangeCallback, TextPickerScrollStopCallback, TextPickerEnterSelectedAreaCallback, DividerOptions, TextPickerAttribute } from "./component/textPicker"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
@@ -31,11 +32,11 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: TextPickerAttribute): void { }
-    applyPressedAttribute(instance: TextPickerAttribute): void { }
-    applyFocusedAttribute(instance: TextPickerAttribute): void { }
-    applyDisabledAttribute(instance: TextPickerAttribute): void { }
-    applySelectedAttribute(instance: TextPickerAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _defaultPickerItemHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _defaultPickerItemHeight_0_0value?: number | string | undefined
     _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -66,8 +67,9 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
     _enableHapticFeedback_0_0value?: boolean | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
-    applyModifierPatch(peer: ArkTextPickerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkTextPickerPeer;
         if (this._defaultPickerItemHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._defaultPickerItemHeight_0_flag) {

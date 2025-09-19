@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkRefreshPeer, RefreshStatus, RefreshAttribute } from "./component/refresh"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,11 +29,11 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: RefreshAttribute): void { }
-    applyPressedAttribute(instance: RefreshAttribute): void { }
-    applyFocusedAttribute(instance: RefreshAttribute): void { }
-    applyDisabledAttribute(instance: RefreshAttribute): void { }
-    applySelectedAttribute(instance: RefreshAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _onStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onStateChange_0_0value?: ((state: RefreshStatus) => void) | undefined
     _onRefreshing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -45,8 +46,9 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     _onOffsetChange_0_0value?: ((value0: number) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullDownRatio_0_0value?: number | undefined
-    applyModifierPatch(peer: ArkRefreshPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkRefreshPeer;
         if (this._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onStateChange_0_flag) {

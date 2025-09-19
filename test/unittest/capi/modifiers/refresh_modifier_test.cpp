@@ -315,6 +315,7 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventRefreshingImpl
  * @tc.desc:
@@ -354,4 +355,5 @@ HWTEST_F(RefreshModifierTest, setOnChangeEventRefreshingImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

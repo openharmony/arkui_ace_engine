@@ -135,13 +135,12 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
     }
     StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
 }
-#ifdef WRONG_GEN
-void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_Void* event_)
+
+void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event)
 {
-    auto event = Converter::OptConvert<Callback_Void>(*event_);
     std::function<void()> onEventFinish;
     if (event) {
-        onEventFinish = [arkCallback = CallbackHelper(event.value())]() {
+        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
             arkCallback.InvokeSync();
         };
     }
@@ -164,7 +163,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_
     auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
     std::optional<int32_t> count;
     if (onFinish) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
             ContainerScope scope(currentId);
             arkCallback.InvokeSync();
@@ -174,7 +173,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_
 
     ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, true);
 }
-#endif
+
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -344,8 +343,8 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     // close KeyframeAnimation.
     AnimationUtils::CloseImplicitAnimation();
 }
-#ifdef WRONG_GEN
-void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ark_KeyframeState* keyframes)
+
+void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Array_KeyframeState* keyframes)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {
@@ -367,7 +366,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     option.SetDelay(delay);
     option.SetIteration(iterations);
     if (param && param->onFinish.tag != INTEROP_TAG_UNDEFINED) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         auto onFinishEvent = [arkCallback = CallbackHelper(param->onFinish.value),
                                  currentId = Container::CurrentIdSafely()]() mutable {
             ContainerScope scope(currentId);
@@ -380,9 +379,6 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     if (keyframes && keyframes->array) {
         for (int i = 0; i < keyframes->length; ++i) {
             const auto& arkFrame = keyframes->array[i];
-            if (arkFrame.event.tag == INTEROP_TAG_UNDEFINED) {
-                continue;
-            }
             Keyframe keyframe;
             keyframe.duration = Converter::OptConvert<int32_t>(arkFrame.duration).value_or(DEFAULT_DURATION);
             if (keyframe.duration < 0) {
@@ -390,7 +386,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
             }
             totalDuration += keyframe.duration;
             keyframe.curve = Converter::OptConvert<RefPtr<Curve>>(arkFrame.curve).value_or(Curves::EASE_IN_OUT);
-            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event.value),
+            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event),
                                             currentId = Container::CurrentIdSafely()]() {
                 ContainerScope scope(currentId);
                 arkCallback.InvokeSync();
@@ -404,7 +400,7 @@ void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ar
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
-#endif
+
 void AnimationTranslateImpl(Ark_NativePointer node,
                             const Ark_TranslateOptions* value)
 {
@@ -435,6 +431,8 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
         AnimationExtenderAccessor::AnimationTranslateImpl,
+        AnimationExtenderAccessor::AnimateToImmediatelyImplImpl,
+        AnimationExtenderAccessor::KeyframeAnimationImplImpl,
     };
     return &AnimationExtenderAccessorImpl;
 }

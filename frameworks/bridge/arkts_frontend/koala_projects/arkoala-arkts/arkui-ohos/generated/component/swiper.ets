@@ -189,8 +189,8 @@ export class SwiperController implements MaterializedBase {
         this.showPrevious_serialize()
         return
     }
-    public changeIndex(index: number, animationMode?: SwiperAnimationMode | boolean): void {
-        const index_casted = index as (number)
+    public changeIndex(index: number | undefined, animationMode?: SwiperAnimationMode | boolean): void {
+        const index_casted = index as (number | undefined)
         const animationMode_casted = animationMode as (SwiperAnimationMode | boolean | undefined)
         this.changeIndex_serialize(index_casted, animationMode_casted)
         return
@@ -210,8 +210,15 @@ export class SwiperController implements MaterializedBase {
     showPrevious_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperController_showPrevious(this.peer!.ptr)
     }
-    changeIndex_serialize(index: number, animationMode?: SwiperAnimationMode | boolean): void {
+    changeIndex_serialize(index: number | undefined, animationMode?: SwiperAnimationMode | boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (index !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const indexTmpValue  = index!
+            thisSerializer.writeNumber(indexTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         if (animationMode !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const animationModeTmpValue  = animationMode!
@@ -227,7 +234,7 @@ export class SwiperController implements MaterializedBase {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     finishAnimation_serialize(callback_?: VoidCallback): void {
@@ -303,6 +310,18 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAutoPlay0Attribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SwiperAttribute_setAutoPlay0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIntervalAttribute(value: number | undefined): void {
@@ -617,7 +636,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnContentWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAutoPlayAttribute(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): void {
+    setAutoPlay1Attribute(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (autoPlay !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -633,7 +652,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_setAutoPlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_setAutoPlay1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisplayArrowAttribute(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): void {
@@ -817,6 +836,9 @@ export interface SwiperAttribute extends CommonMethod {
     index(value: number | Bindable<number> | undefined): this {
         throw new Error("Unimplemented method index")
     }
+    autoPlay(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoPlay")
+    }
     interval(value: number | undefined): this {
         throw new Error("Unimplemented method interval")
     }
@@ -910,6 +932,7 @@ export interface SwiperAttribute extends CommonMethod {
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
     index_value?: number | Bindable<number> | undefined
+    autoPlay_value?: boolean | undefined
     interval_value?: number | undefined
     indicator_value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
     loop_value?: boolean | undefined
@@ -937,6 +960,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
         return this
     }
     index(value: number | Bindable<number> | undefined): this {
+        return this
+    }
+    autoPlay(value: boolean | undefined): this {
         return this
     }
     interval(value: number | undefined): this {
@@ -1061,6 +1087,14 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         if (this.checkPriority("index")) {
             const value_casted = value as (number | Bindable<number> | undefined)
             this.getPeer()?.setIndexAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public autoPlay(value: boolean | undefined): this {
+        if (this.checkPriority("autoPlay")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setAutoPlay0Attribute(value_casted)
             return this
         }
         return this
@@ -1253,7 +1287,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         if (this.checkPriority("autoPlay")) {
             const autoPlay_casted = autoPlay as (boolean | undefined)
             const options_casted = options as (AutoPlayOptions | undefined)
-            this.getPeer()?.setAutoPlayAttribute(autoPlay_casted, options_casted)
+            this.getPeer()?.setAutoPlay1Attribute(autoPlay_casted, options_casted)
             return this
         }
         return this

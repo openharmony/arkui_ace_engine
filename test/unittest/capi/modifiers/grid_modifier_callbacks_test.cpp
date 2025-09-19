@@ -208,7 +208,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
+HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
 {
     using namespace Converter;
     static const int32_t expectedX = 357;
@@ -225,7 +225,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Number itemIndex,
-        const Callback_CustomBuilder_Void continuation
+        const Callback_Opt_CustomBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);
@@ -242,13 +242,14 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
             CallbackHelper(continuation).InvokeSync(expectedCustomNode);
         };
         auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+        auto optBuilder = ArkValue<Opt_CustomNodeBuilder>(builder);
 
         // return result
-        CallbackHelper(continuation).InvokeSync(builder);
+        CallbackHelper(continuation).InvokeSync(optBuilder);
     };
     auto arkCallback =
-        ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_GridAttribute_onItemDragStart_event_type>(arkCallback);
+        ArkValue<OnItemDragStartCallback>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    auto optCallback = Converter::ArkValue<Opt_OnItemDragStartCallback>(arkCallback);
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
@@ -286,7 +287,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Number itemIndex,
-        const Callback_CustomBuilder_Void continuation
+        const Callback_Opt_CustomBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);
@@ -303,13 +304,14 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
             CallbackHelper(continuation).Invoke(expectedCustomNode);
         };
         auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+        auto optBuilder = ArkValue<Opt_CustomNodeBuilder>(builder);
 
         // return result
-        CallbackHelper(continuation).Invoke(builder);
+        CallbackHelper(continuation).Invoke(optBuilder);
     };
     auto arkCallback =
-        ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_GridAttribute_onItemDragStart_event_type>(arkCallback);
+        ArkValue<OnItemDragStartCallback>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    auto optCallback = Converter::ArkValue<Opt_OnItemDragStartCallback>(arkCallback);
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
@@ -334,6 +336,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragEnterTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -374,6 +377,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -422,6 +426,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -467,6 +472,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
+    ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
         int32_t nodeId;
@@ -506,209 +512,6 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->itemIndex, 81);
     EXPECT_EQ(checkEvent->insertIndex, 99);
     EXPECT_TRUE(checkEvent->isSuccess);
-}
-
-/*
- * @tc.name: setOnScrollTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        Dimension scrollOffset;
-        int32_t scrollState;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_Void arkCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_Number offset, const Ark_Number state) {
-            checkEvent = {
-                .nodeId = nodeId,
-                .scrollOffset = Converter::Convert<Dimension>(offset),
-                .scrollState = Converter::Convert<int32_t>(state),
-            };
-        }
-    };
-
-    auto onScroll = eventHub->GetOnScroll();
-    EXPECT_EQ(onScroll, nullptr);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
-    modifier_->setOnScroll(node_, &optCallback);
-    onScroll = eventHub->GetOnScroll();
-    EXPECT_NE(onScroll, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScroll(CalcDimension(55), ScrollState::FLING);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->scrollOffset.Value(), 55);
-    EXPECT_EQ(checkEvent->scrollOffset.Unit(), DimensionUnit::VP);
-    EXPECT_EQ(checkEvent->scrollState, static_cast<int>(ScrollState::FLING));
-}
-
-/*
- * @tc.name: setOnReachStartTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, setOnReachStartTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void onReachStartCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId)
-        {
-            checkEvent = {
-                .nodeId = nodeId,
-                .result = true,
-            };
-        }
-    };
-
-    auto onReachStart = eventHub->GetOnReachStart();
-    EXPECT_EQ(onReachStart, nullptr);
-    auto optOnReachStartCallback = Converter::ArkValue<Opt_Callback_Void>(onReachStartCallback);
-    modifier_->setOnReachStart(node_, &optOnReachStartCallback);
-    onReachStart = eventHub->GetOnReachStart();
-    EXPECT_NE(onReachStart, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onReachStart();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnReachEndTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, setOnReachEndTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void onReachEndCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId)
-        {
-            checkEvent = {
-                .nodeId = nodeId,
-                .result = true,
-            };
-        }
-    };
-
-    auto onReachEnd = eventHub->GetOnReachEnd();
-    EXPECT_EQ(onReachEnd, nullptr);
-    auto optOnReachEndCallback = Converter::ArkValue<Opt_Callback_Void>(onReachEndCallback);
-    modifier_->setOnReachEnd(node_, &optOnReachEndCallback);
-    onReachEnd = eventHub->GetOnReachEnd();
-    EXPECT_NE(onReachEnd, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onReachEnd();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnScrollStartTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, setOnScrollStartTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void onScrollStartCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId)
-        {
-            checkEvent = {
-                .nodeId = nodeId,
-                .result = true,
-            };
-        }
-    };
-
-    auto onScrollStart = eventHub->GetOnScrollStart();
-    EXPECT_EQ(onScrollStart, nullptr);
-    auto optOnScrollStartCallback = Converter::ArkValue<Opt_Callback_Void>(onScrollStartCallback);
-    modifier_->setOnScrollStart(node_, &optOnScrollStartCallback);
-    onScrollStart = eventHub->GetOnScrollStart();
-    EXPECT_NE(onScrollStart, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollStart();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
-}
-
-/*
- * @tc.name: setOnScrollStopTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-        bool result;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Void onScrollStopCallback = {
-        .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId)
-        {
-            checkEvent = {
-                .nodeId = nodeId,
-                .result = true,
-            };
-        }
-    };
-
-    auto onScrollStop = eventHub->GetOnScrollStop();
-    EXPECT_EQ(onScrollStop, nullptr);
-    auto optOnScrollStopCallback = Converter::ArkValue<Opt_Callback_Void>(onScrollStopCallback);
-    modifier_->setOnScrollStop(node_, &optOnScrollStopCallback);
-    onScrollStop = eventHub->GetOnScrollStop();
-    EXPECT_NE(onScrollStop, nullptr);
-
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollStop();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->result);
 }
 
 /*

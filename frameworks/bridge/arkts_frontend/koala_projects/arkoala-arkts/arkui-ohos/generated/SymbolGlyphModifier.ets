@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute, SymbolEffect } from "./component/symbolglyph"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -35,35 +36,36 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SymbolGlyphAttribute): void { }
-    applyPressedAttribute(instance: SymbolGlyphAttribute): void { }
-    applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
-    applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
-    applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: number | string | Resource | undefined
+    _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: Array<ResourceColor> | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _effectStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _effectStrategy_0_0value?: SymbolEffectStrategy | undefined
     _renderingStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _renderingStrategy_0_0value?: SymbolRenderingStrategy | undefined
     _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontScale_0_0value?: number | Resource | undefined
+    _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_0value?: double | Resource | undefined
     _symbolEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _symbolEffect_0_0value?: SymbolEffect | undefined
-    _symbolEffect_0_1value?: boolean | number | undefined
-    applyModifierPatch(peer: ArkSymbolGlyphPeer): void {
-        super.applyModifierPatch(peer)
+    _symbolEffect_0_1value?: boolean | int32 | undefined
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSymbolGlyphPeer;
         if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
                     this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -73,7 +75,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -99,7 +101,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -109,7 +111,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -153,7 +155,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         {
             switch (this._minFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as double | Resource | undefined));
                     this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -163,7 +165,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMinFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -171,7 +173,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         {
             switch (this._maxFontScale_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as double | Resource | undefined));
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -181,7 +183,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                    peer.setMaxFontScaleAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -189,7 +191,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         {
             switch (this._symbolEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | number | undefined));
+                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | int32 | undefined));
                     this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -199,7 +201,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
                 default: {
                     this._symbolEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSymbolEffectAttribute((undefined as SymbolEffect | undefined), (undefined as boolean | number | undefined | undefined));
+                    peer.setSymbolEffectAttribute((undefined as SymbolEffect | undefined), (undefined as boolean | int32 | undefined | undefined));
                 }
             }
         }
@@ -215,7 +217,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as number | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -241,7 +243,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -280,7 +282,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                     break;
                 }
                 default: {
-                    this.minFontScale((undefined as number | Resource | undefined));
+                    this.minFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -293,7 +295,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                     break;
                 }
                 default: {
-                    this.maxFontScale((undefined as number | Resource | undefined));
+                    this.maxFontScale((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -306,12 +308,12 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                     break;
                 }
                 default: {
-                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as boolean | number | undefined | undefined));
+                    this.symbolEffect((undefined as SymbolEffect | undefined), (undefined as boolean | int32 | undefined | undefined));
                 }
             }
         }
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -333,7 +335,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -366,7 +368,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -377,7 +379,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
@@ -388,7 +390,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
         return this
     }
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | int32): this {
         if (((this._symbolEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._symbolEffect_0_1value) !== (triggerValue)))
         {
             this._symbolEffect_0_flag = AttributeUpdaterFlag.UPDATE

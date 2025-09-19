@@ -68,19 +68,19 @@ void FillEmptyOptions(T& options)
     options.position = Converter::ArkValue<Opt_Union_BadgePosition_Position>(Ark_Empty());
     options.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .fontSize = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
-        .badgeSize = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
+        .fontSize = Converter::ArkValue<Opt_Union_Number_ResourceStr>(Ark_Empty()),
+        .badgeSize = Converter::ArkValue<Opt_Union_Number_ResourceStr>(Ark_Empty()),
         .badgeColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
         .borderColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
         .borderWidth = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .fontWeight = Converter::ArkValue<Opt_Union_Number_FontWeight_String>(Ark_Empty()),
+        .fontWeight = Converter::ArkValue<Opt_Union_Number_FontWeight_ResourceStr>(Ark_Empty()),
     };
 }
 
 void InitStringOptions(Ark_BadgeParamWithString& options)
 {
     FillEmptyOptions(options);
-    options.value = Converter::ArkValue<Ark_String>("");
+    options.value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
 }
 
 void InitNumberOptions(Ark_BadgeParamWithNumber& options)
@@ -88,6 +88,12 @@ void InitNumberOptions(Ark_BadgeParamWithNumber& options)
     FillEmptyOptions(options);
     options.maxCount = Converter::ArkValue<Opt_Number>(Ark_Empty());
     options.count = Converter::ArkValue<Ark_Number>(0);
+}
+
+Opt_Union_Number_ResourceStr GetOptNumStr(std::string str)
+{
+    return Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(
+        Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str, Converter::FC));
 }
 
 } // namespace
@@ -254,14 +260,14 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY)),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("8.00vp"),
-        .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(32.00f),
+        .fontSize = GetOptNumStr("8.00vp"),
+        .badgeSize = Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(32.00f),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FF00FF00")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF0000FF)),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(2.45f, DimensionUnit::VP)),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
+        .borderWidth = Converter::ArkValue<Opt_Length>("2.45vp"),
+        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
             Converter::ArkValue<Ark_FontWeight>(FontWeight::MEDIUM)),
     };
     inputValueOptions.count = Converter::ArkValue<Ark_Number>(4);
@@ -314,21 +320,21 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
     InitNumberOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(-14.00));
+    position.x = Converter::ArkValue<Opt_Length>(-12.00);
+    position.y = Converter::ArkValue<Opt_Length>(-14.00);
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-8.00vp"),
-        .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-32.00vp"),
+        .fontSize = GetOptNumStr("-8.00vp"),
+        .badgeSize = GetOptNumStr("-32.00vp"),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("-100 color")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(-2.45f, DimensionUnit::VP)),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
+        .borderWidth = Converter::ArkValue<Opt_Length>("-2.45vp"),
+        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
             Converter::ArkValue<Ark_FontWeight>(static_cast<FontWeight>(-100))),
     };
     inputValueOptions.count = Converter::ArkValue<Ark_Number>(-1);
@@ -433,16 +439,17 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
         );
     inputValueOptions.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF00FFFF)),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(28.00f),
-        .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("32.00px"),
+        .fontSize = Converter::ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(28.00f),
+        .badgeSize = GetOptNumStr("32.00px"),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
         .borderColor =Converter::ArkValue<Opt_ResourceColor>(
             Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME))),
-        .borderWidth = Converter::ArkValue<Opt_Length>(10),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>("100"),
+        .borderWidth = Converter::ArkValue<Opt_Length>(10.f),
+        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+            Converter::ArkUnion<Ark_ResourceStr, Ark_String>("100")),
     };
-    inputValueOptions.value = Converter::ArkValue<Ark_String>("badge_value");
+    inputValueOptions.value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("badge_value");
 
     modifier_->setBadgeOptions1(node_, &inputValueOptions);
 
@@ -490,23 +497,23 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
     InitStringOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00, DimensionUnit::PX));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(-10.00, DimensionUnit::PX));
+    position.x = Converter::ArkValue<Opt_Length>("-12.00px");
+    position.y = Converter::ArkValue<Opt_Length>("-10.00px");
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("50%"),
-        .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("10%"),
+        .fontSize = GetOptNumStr("50%"),
+        .badgeSize = GetOptNumStr("10%"),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
         .borderColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("blue color")),
-        .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(0.55f, DimensionUnit::PERCENT)),
-        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(-100),
+        .borderWidth = Converter::ArkValue<Opt_Length>("55%"),
+        .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_Number>(-100),
     };
-    inputValueOptions.value = Converter::ArkValue<Ark_String>("");
+    inputValueOptions.value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
 
     modifier_->setBadgeOptions1(node_, &inputValueOptions);
 

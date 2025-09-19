@@ -35,6 +35,9 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from "@ohos.graphics.scene"
 import { RectShape, CircleShape, EllipseShape, PathShape } from "@ohos.arkui.shape"
+import curves from "@ohos.curves"
+import matrix4 from "@ohos.matrix4"
+import uiEffect from "@ohos.graphics.uiEffect";
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -49,6 +52,10 @@ export class ArkUIAniModule {
     native static _Extractors_FromEllipseShapePtr(ptr: KPointer): EllipseShape;
     native static _Extractors_ToPathShapePtr(value: PathShape): KPointer;
     native static _Extractors_FromPathShapePtr(ptr: KPointer): PathShape;
+    native static _Extractors_ToICurvePtr(value: curves.ICurve): KPointer;
+    native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
+    native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
+    native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
@@ -93,7 +100,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
-    native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -345,9 +352,10 @@ export class ArkUIAniModule {
     native static _NodeAdapter_NotifyItemInserted(ptr : KPointer, start : number, count : number) : void
     native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
     native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
-
+    // for ForEach
     native static _SyntaxItem_Construct(id: KInt): KPointer
-    native static _ForEachNode_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
+    native static _ForEach_FinishRender(peerPtr: KPointer): void
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void

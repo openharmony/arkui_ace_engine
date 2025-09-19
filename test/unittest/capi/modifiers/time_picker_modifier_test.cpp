@@ -225,16 +225,16 @@ public:
  */
 HWTEST_F(TimePickerModifierTest, setUseMilitaryTime, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setUseMilitaryTime0, nullptr);
+    ASSERT_NE(modifier_->setUseMilitaryTime, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
     EXPECT_EQ(checkInitial, ATTRIBUTE_USE_MILITARY_TIME_DEFAULT_VALUE);
 
-    modifier_->setUseMilitaryTime0(node_, &OPT_TRUE);
+    modifier_->setUseMilitaryTime(node_, &OPT_TRUE);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
     EXPECT_EQ(checkVal2, EXPECTED_TRUE);
 
-    modifier_->setUseMilitaryTime0(node_, &OPT_FALSE);
+    modifier_->setUseMilitaryTime(node_, &OPT_FALSE);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
@@ -246,16 +246,16 @@ HWTEST_F(TimePickerModifierTest, setUseMilitaryTime, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setLoop, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setLoop0, nullptr);
+    ASSERT_NE(modifier_->setLoop, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
     EXPECT_EQ(checkInitial, ATTRIBUTE_LOOP_DEFAULT_VALUE);
 
-    modifier_->setLoop0(node_, &OPT_TRUE);
+    modifier_->setLoop(node_, &OPT_TRUE);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
     EXPECT_EQ(checkVal2, EXPECTED_TRUE);
 
-    modifier_->setLoop0(node_, &OPT_FALSE);
+    modifier_->setLoop(node_, &OPT_FALSE);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
@@ -267,7 +267,7 @@ HWTEST_F(TimePickerModifierTest, setLoop, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setDisappearTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -286,7 +286,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextStyle, TestSize.Level1)
         font.style = style.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -308,7 +308,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextStyle, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setDisappearTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -327,7 +327,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -345,7 +345,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -367,7 +367,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextWeight, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -386,7 +386,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
         font.family = family.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -408,7 +408,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
  */
 HWTEST_F(TimePickerModifierTest, setDisappearTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -427,7 +427,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextSize, TestSize.Level1)
         font.size = size.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -449,7 +449,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextSize, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setDisappearTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -459,7 +459,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextColor, TestSize.Level1)
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = { .value = value };
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setDisappearTextStyle0(node_, &optStyle);
+        modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -474,7 +474,7 @@ HWTEST_F(TimePickerModifierTest, setDisappearTextColor, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -493,7 +493,7 @@ HWTEST_F(TimePickerModifierTest, setTextStyle, TestSize.Level1)
         font.style = style.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -515,7 +515,7 @@ HWTEST_F(TimePickerModifierTest, setTextStyle, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -534,7 +534,7 @@ HWTEST_F(TimePickerModifierTest, setTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -552,7 +552,7 @@ HWTEST_F(TimePickerModifierTest, setTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -574,7 +574,7 @@ HWTEST_F(TimePickerModifierTest, setTextWeight, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -593,7 +593,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
         font.family = family.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -615,7 +615,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -634,7 +634,7 @@ HWTEST_F(TimePickerModifierTest, setTextSize, TestSize.Level1)
         font.size = size.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -656,7 +656,7 @@ HWTEST_F(TimePickerModifierTest, setTextSize, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -666,7 +666,7 @@ HWTEST_F(TimePickerModifierTest, setTextColor, TestSize.Level1)
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = { .value = value };
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setTextStyle0(node_, &optStyle);
+        modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -681,7 +681,7 @@ HWTEST_F(TimePickerModifierTest, setTextColor, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setSelectedTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -700,7 +700,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextStyle, TestSize.Level1)
         font.style = style.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -722,7 +722,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextStyle, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setSelectedTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -741,7 +741,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -759,7 +759,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextWeight, TestSize.Level1)
         font.weight = weight.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -781,7 +781,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextWeight, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -800,7 +800,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
         font.family = family.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -822,7 +822,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
  */
 HWTEST_F(TimePickerModifierTest, setSelectedTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -841,7 +841,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextSize, TestSize.Level1)
         font.size = size.first;
         pickerStyle.font.value = font;
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
@@ -863,7 +863,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextSize, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -873,7 +873,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         pickerStyle.color = { .value = value };
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
-        modifier_->setSelectedTextStyle0(node_, &optStyle);
+        modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
@@ -888,7 +888,7 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDateTimeOptions0, nullptr);
+    ASSERT_NE(modifier_->setDateTimeOptions, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
     auto hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
@@ -897,9 +897,9 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
     EXPECT_EQ(minuteStr, ATTRIBUTE_DATETIMEOPTIONS_MINUTE_DEFAULT_VALUE);
 
     for (const auto& [val, expectVal] : DATETIMEOPTIONS_HOUR_TEST_PLAN) {
-        Ark_DateTimeOptions dateTimeOptions {.hour = val };
-        auto optOptions = Converter::ArkValue<Opt_DateTimeOptions>(dateTimeOptions);
-        modifier_->setDateTimeOptions0(node_, &optOptions);
+        Ark_intl_DateTimeOptions dateTimeOptions {.hour = val };
+        auto optOptions = Converter::ArkValue<Opt_intl_DateTimeOptions>(dateTimeOptions);
+        modifier_->setDateTimeOptions(node_, &optOptions);
         auto fullJson = GetJsonValue(node_);
         optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
         hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
@@ -907,9 +907,9 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
     }
 
     for (const auto& [val, expectVal] : DATETIMEOPTIONS_MINUTE_TEST_PLAN) {
-        Ark_DateTimeOptions dateTimeOptions {.minute = val };
-        auto optOptions = Converter::ArkValue<Opt_DateTimeOptions>(dateTimeOptions);
-        modifier_->setDateTimeOptions0(node_, &optOptions);
+        Ark_intl_DateTimeOptions dateTimeOptions {.minute = val };
+        auto optOptions = Converter::ArkValue<Opt_intl_DateTimeOptions>(dateTimeOptions);
+        modifier_->setDateTimeOptions(node_, &optOptions);
         auto fullJson = GetJsonValue(node_);
         optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
         minuteStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_MINUTE);
@@ -924,7 +924,7 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
  */
 HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnChange0, nullptr);
+    ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -944,9 +944,9 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
             .selectedTime = selectedTime
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_TimePickerResult_Void>(onChange, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_TimePickerResult_Void>(arkCallback);
-    modifier_->setOnChange0(node_, &optCallback);
+    auto arkCallback = Converter::ArkValue<OnTimePickerChangeCallback>(onChange, frameNode->GetId());
+    auto optCallback = Converter::ArkValue<Opt_OnTimePickerChangeCallback>(arkCallback);
+    modifier_->setOnChange(node_, &optCallback);
 
     for (const auto time : CHANGE_EVENT_TEST_PLAN) {
         checkEvent = std::nullopt;
@@ -979,22 +979,23 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 {
     // static const std::string& DEFAULT_VALUE(ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
-    ASSERT_NE(modifier_->setEnableHapticFeedback0, nullptr);
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     auto checkVal = static_cast<bool>(TimePickerModelNG::getEnableHapticFeedback(frameNode));
     EXPECT_EQ(checkVal, ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
 
-    modifier_->setEnableHapticFeedback0(node_, &OPT_FALSE);
+    modifier_->setEnableHapticFeedback(node_, &OPT_FALSE);
     checkVal = static_cast<bool>(TimePickerModelNG::getEnableHapticFeedback(frameNode));
     EXPECT_EQ(checkVal, false);
 
-    modifier_->setEnableHapticFeedback0(node_, &OPT_TRUE);
+    modifier_->setEnableHapticFeedback(node_, &OPT_TRUE);
     checkVal = static_cast<bool>(TimePickerModelNG::getEnableHapticFeedback(frameNode));
     EXPECT_EQ(checkVal, true);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedTest
  * @tc.desc:
@@ -1040,6 +1041,7 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         EXPECT_EQ(selectedTime->GetSecond(), 0);
     };
 }
+#endif
 
 /**
  * @tc.name: enableCascadeTest

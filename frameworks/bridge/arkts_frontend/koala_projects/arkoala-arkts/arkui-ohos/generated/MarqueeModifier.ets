@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkMarqueePeer, MarqueeAttribute } from "./component/marquee"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: MarqueeAttribute): void { }
-    applyPressedAttribute(instance: MarqueeAttribute): void { }
-    applyFocusedAttribute(instance: MarqueeAttribute): void { }
-    applyDisabledAttribute(instance: MarqueeAttribute): void { }
-    applySelectedAttribute(instance: MarqueeAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -43,7 +44,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     _allowScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _allowScale_0_0value?: boolean | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: string | Resource | undefined
     _marqueeUpdateStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -54,8 +55,9 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     _onBounce_0_0value?: (() => void) | undefined
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
-    applyModifierPatch(peer: ArkMarqueePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkMarqueePeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._fontColor_0_flag) {
@@ -114,7 +116,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -124,7 +126,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -269,7 +271,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -372,7 +374,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

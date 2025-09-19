@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkContainerSpanPeer, ContainerSpanAttribute } from "./component/containerSpan"
 import { int32 } from "@koalaui/common"
 import { TextBackgroundStyle } from "./component/span"
@@ -27,14 +28,15 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ContainerSpanAttribute): void { }
-    applyPressedAttribute(instance: ContainerSpanAttribute): void { }
-    applyFocusedAttribute(instance: ContainerSpanAttribute): void { }
-    applyDisabledAttribute(instance: ContainerSpanAttribute): void { }
-    applySelectedAttribute(instance: ContainerSpanAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    applyModifierPatch(peer: ArkContainerSpanPeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkContainerSpanPeer;
         if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._textBackgroundStyle_0_flag) {

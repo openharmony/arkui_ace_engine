@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavigationMenuItem, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
@@ -34,11 +35,11 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: NavigationAttribute): void { }
-    applyPressedAttribute(instance: NavigationAttribute): void { }
-    applyFocusedAttribute(instance: NavigationAttribute): void { }
-    applyDisabledAttribute(instance: NavigationAttribute): void { }
-    applySelectedAttribute(instance: NavigationAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _navBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _navBarWidth_0_0value?: Length | Bindable<Length> | undefined
     _navBarPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -71,8 +72,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _onNavBarStateChange_0_0value?: ((isVisible: boolean) => void) | undefined
     _onNavigationModeChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onNavigationModeChange_0_0value?: ((mode: NavigationMode) => void) | undefined
-    _navDestination_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _navDestination_0_0value?: PageMapBuilder | undefined
     _customNavContentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _customNavContentTransition_0_0value?: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined
     _systemBarStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -104,8 +103,9 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _ignoreLayoutSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
     _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
-    applyModifierPatch(peer: ArkNavigationPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkNavigationPeer;
         if (this._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._navBarWidth_0_flag) {
@@ -391,24 +391,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 default: {
                     this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnNavigationModeChangeAttribute((undefined as ((mode: NavigationMode) => void) | undefined));
-                }
-            }
-        }
-        if (this._navDestination_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._navDestination_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setNavDestinationAttribute((this._navDestination_0_0value as PageMapBuilder | undefined));
-                    this._navDestination_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._navDestination_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._navDestination_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setNavDestinationAttribute((undefined as PageMapBuilder | undefined));
                 }
             }
         }
@@ -839,19 +821,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
-        if (modifier._navDestination_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._navDestination_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.navDestination(modifier._navDestination_0_0value);
-                    break;
-                }
-                default: {
-                    this.navDestination((undefined as PageMapBuilder | undefined));
-                }
-            }
-        }
         if (modifier._customNavContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._customNavContentTransition_0_flag) {
@@ -1182,17 +1151,6 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         } else
         {
             this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    navDestination(value: PageMapBuilder | undefined): this {
-        if (((this._navDestination_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._navDestination_0_flag = AttributeUpdaterFlag.UPDATE
-            this._navDestination_0_0value = value
-        } else
-        {
-            this._navDestination_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

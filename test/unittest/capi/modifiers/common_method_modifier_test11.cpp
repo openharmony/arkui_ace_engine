@@ -33,8 +33,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const auto ACCESSABLE_PROP_TEXT = "propText";
-    const auto ACCESSABLE_PROP_TEXT_VALUE = "Hello, World!";
+    const auto ACCESSIBLE_PROP_TEXT = "propText";
+    const auto ACCESSIBLE_PROP_TEXT_VALUE = "Hello, World!";
     const auto BUBBLE_LAYOUT_PROP = "bubbleLayoutProperty";
     const auto BUBBLE_LAYOUT_PROP_PLACEMENT = "placement";
     const auto BUBBLE_LAYOUT_PROP_PLACEMENT_BOTTOM = "Placement::BOTTOM";
@@ -109,7 +109,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMessageTest, 
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
@@ -124,12 +124,12 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMessageTest, 
 
     auto checkValue = GetAttrValue<std::string>(
         reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)),
-        ACCESSABLE_PROP_TEXT);
-    EXPECT_EQ(checkValue, ACCESSABLE_PROP_TEXT_VALUE);
+        ACCESSIBLE_PROP_TEXT);
+    EXPECT_EQ(checkValue, ACCESSIBLE_PROP_TEXT_VALUE);
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPlacementDeafultValueTest
+ * @tc.name: bindPopupPopupOptionsPlacementDefaultValueTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -137,7 +137,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementDefa
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -166,7 +166,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementVali
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(
             Converter::ArkValue<Ark_Placement>(Ark_Placement::ARK_PLACEMENT_TOP))
     });
@@ -196,7 +196,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementInva
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .placement = Converter::ArkValue<Opt_Placement>(
             Converter::ArkValue<Ark_Placement>(static_cast<Ark_Placement>(-1)))
     });
@@ -226,7 +226,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetTe
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
     });
@@ -248,7 +248,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetTe
 
     // valid value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
     });
@@ -275,7 +275,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetPo
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(Ark_Empty())
     });
@@ -297,7 +297,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetPo
 
     // valid value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .arrowOffset = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .arrowPointPosition = Converter::ArkValue<Opt_ArrowPointPosition>(
             Converter::ArkValue<Ark_ArrowPointPosition>(Ark_ArrowPointPosition::ARK_ARROW_POINT_POSITION_CENTER))
@@ -325,7 +325,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsTargetSpaceTe
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Ark_Empty()),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -346,7 +346,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsTargetSpaceTe
 
     // valid value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(1._px)),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -361,7 +361,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsTargetSpaceTe
 
     // negative value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .targetSpace = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-1._px)),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -385,7 +385,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableArrowTe
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .enableArrow = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -406,7 +406,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableArrowTe
 
     // valid value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .enableArrow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -429,7 +429,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverMo
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .enableHoverMode = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -458,7 +458,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverMo
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .enableHoverMode = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -488,7 +488,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsFollowTransfo
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .followTransformOfTarget = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -509,7 +509,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsFollowTransfo
 
     // valid value
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .followTransformOfTarget = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -532,7 +532,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelDef
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .autoCancel = Converter::ArkValue<Opt_Boolean>(Ark_Empty()),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -561,7 +561,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelTes
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .autoCancel = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -590,7 +590,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskBlockEven
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -612,7 +612,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskBlockEven
 
     auto arkUnionMask = Converter::ArkUnion<Ark_Union_Boolean_PopupMaskType, Ark_Boolean>(false);
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -635,7 +635,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorDefa
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -669,7 +669,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColo
     auto arkUnionMask = Converter::ArkUnion<
         Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -693,7 +693,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColo
     literalColor = { .color = colorArkNumber };
     TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -721,7 +721,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorStri
     auto arkUnionMask = Converter::ArkUnion<
         Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -746,7 +746,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorStri
     arkUnionMask = Converter::ArkUnion<
         Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .mask = Converter::ArkValue<Opt_Union_Boolean_PopupMaskType>(arkUnionMask)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -769,7 +769,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsOffsetTest, T
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .offset = Converter::ArkValue<Opt_Position>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -795,7 +795,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsOffsetTest, T
         .y = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(yLength))
     };
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .offset = Converter::ArkValue<Opt_Position>(arkPosition)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -818,7 +818,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorDef
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -850,7 +850,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorCol
     auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_Color>(ARK_COLOR_BLUE);
 
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -872,7 +872,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorCol
     // color as string
     arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_String>(TEST_COLOR_BLUE_STR);
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -898,7 +898,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNum
     auto arkUnionPopupColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_Number, Ark_Number>(
         TEST_COLOR_BLUE_NUM);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -920,7 +920,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNum
     // color as resource
     TypeHelper::WriteToUnion<Ark_Resource>(arkUnionPopupColor) = TEST_COLOR_RESOURCE;
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .popupColor = Converter::ArkValue<Opt_Union_Color_String_Resource_Number>(arkUnionPopupColor)
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -943,7 +943,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubWind
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Ark_Empty())
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
@@ -963,7 +963,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubWind
     EXPECT_FALSE(checkValue);
 
     arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
-        .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
+        .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
         .showInSubWindow = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true))
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);

@@ -104,20 +104,20 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setEdgeEffectTestDefaultValues, Tes
  */
 HWTEST_F(ScrollableCommonMethodModifierTest, setEdgeEffectTestEdgeEffectEdgeEffectValidValues, TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    WriteTo(initValueEdgeEffect) = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const Ark_EdgeEffect& value, const std::string& expectedStr) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
-        inputValueEdgeEffect = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        inputValueEdgeEffect = Converter::ArkValue<Opt_EdgeEffect>(value);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         EXPECT_EQ(resultStr, expectedStr)
@@ -137,21 +137,21 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setEdgeEffectTestEdgeEffectEdgeEffe
 HWTEST_F(
     ScrollableCommonMethodModifierTest, setEdgeEffectTestEdgeEffectEdgeEffectInvalidValues, TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    WriteTo(initValueEdgeEffect) = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const Ark_EdgeEffect& value) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
-        inputValueEdgeEffect = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
+        inputValueEdgeEffect = Converter::ArkValue<Opt_EdgeEffect>(value);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_DEFAULT_VALUE)
@@ -171,20 +171,20 @@ HWTEST_F(
 HWTEST_F(ScrollableCommonMethodModifierTest, setEdgeEffectTestEdgeEffectOptionsAlwaysEnabledValidValues,
     TestSize.Level1)
 {
-    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffect initValueEdgeEffect;
     Opt_EdgeEffectOptions initValueOptions;
 
     // Initial setup
-    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    WriteTo(initValueEdgeEffect) = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
         Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
 
         WriteTo(inputValueOptions).alwaysEnabled = value;
-        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultOptions =
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
@@ -215,48 +215,6 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setFrictionTestDefaultValues, TestS
 }
 
 /*
- * @tc.name: setOnWillScrollTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnWillScrollTest, TestSize.Level1)
-{
-#ifdef WRONG_GEN
-    using namespace Converter;
-    static const int32_t expectedResId = 123;
-    static const Dimension expectedOffset = 555.0_vp;
-    static const ScrollState expectedState = ScrollState::SCROLL;
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
-                            const Ark_Number xOffset, const Ark_Number yOffset,
-                            Ark_ScrollState scrollState, Ark_ScrollSource scrollSource,
-                            const Callback_OffsetResult_Void continuation) {
-        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResId);
-        EXPECT_EQ(OptConvert<ScrollState>(scrollState).value_or(ScrollState()), expectedState);
-
-        Ark_OffsetResult arkResult {
-            .xOffset = xOffset,
-            .yOffset = yOffset
-        };
-        CallbackHelper(continuation).InvokeSync(arkResult);
-    };
-    auto func = ArkValue<ScrollOnWillScrollCallback>(nullptr, callSyncFunc, expectedResId);
-    auto funcOpt = ArkValue<Opt_ScrollOnWillScrollCallback>(func);
-    modifier_->setOnWillScroll(node_, &funcOpt);
-
-    auto fireOnWillScroll = eventHub->GetOnWillScroll();
-    ASSERT_NE(fireOnWillScroll, nullptr);
-    auto result = fireOnWillScroll(expectedOffset, expectedState, ScrollSource::SCROLL_BAR);
-    EXPECT_EQ(result.offset, expectedOffset);
-#endif
-}
-
-/*
  * @tc.name: setOnReachStartTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -271,7 +229,8 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnReachStartTest, TestSize.Level
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnReachStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnReachStart(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -301,7 +260,8 @@ HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnReachEndTest, TestSiz
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnReachEnd(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnReachEnd(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -330,7 +290,8 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStartTest, TestSize.Leve
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnScrollStart(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnScrollStart(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -360,7 +321,8 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level
 
     // setup the callback object via C-API
     auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    modifier_->setOnScrollStop(node_, &arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
+    modifier_->setOnScrollStop(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -441,12 +403,12 @@ HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTest, TestSize
 
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE);
-    auto value = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setBackToTop(node_, value);
+    auto value = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setBackToTop(node_, &value);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
     EXPECT_EQ(checkVal, EXPECTED_FALSE);
-    value = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setBackToTop(node_, value);
+    value = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setBackToTop(node_, &value);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
     EXPECT_EQ(checkVal, EXPECTED_TRUE);
 }

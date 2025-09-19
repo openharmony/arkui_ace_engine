@@ -49,7 +49,7 @@ void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
 } // SymbolSpanInterfaceModifier
 namespace SymbolSpanAttributeModifier {
 void SetFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+                     const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -77,7 +77,7 @@ void SetFontColorImpl(Ark_NativePointer node,
     SymbolSpanModelNG::SetFontColor(frameNode, colorVec);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

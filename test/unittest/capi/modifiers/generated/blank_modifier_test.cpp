@@ -157,14 +157,14 @@ HWTEST_F(BlankModifierTest, setColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueColor;
+    Opt_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueColor = initValueColor;
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueColor = initValueColor;
 
         inputValueColor = value;
         modifier_->setColor(node_, &inputValueColor);
@@ -174,16 +174,16 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -194,13 +194,13 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
  */
 HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Level1)
 {
-    Ark_ResourceColor initValueColor;
+    Opt_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueColor = initValueColor;
+    auto checkValue = [this, &initValueColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_ResourceColor inputValueColor = initValueColor;
 
         modifier_->setColor(node_, &inputValueColor);
         inputValueColor = value;
@@ -212,12 +212,14 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 } // namespace OHOS::Ace::NG

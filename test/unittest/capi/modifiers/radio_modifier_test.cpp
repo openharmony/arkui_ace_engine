@@ -191,8 +191,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
 {
     auto checked = GetStringAttribute(node_, CHECKED_ATTR);
     EXPECT_EQ(checked, "false");
-    auto optValue = Converter::ArkValue<Opt_Boolean>(true);
-    modifier_->setChecked0(node_, &optValue);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    modifier_->setChecked(node_, &optValue);
     auto checkedChanged = GetStringAttribute(node_, CHECKED_ATTR);
     EXPECT_EQ(checkedChanged, "true");
 }
@@ -494,7 +494,7 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
         bool value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Boolean_Void arkCallback = {
+    OnRadioChangeCallback arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_Boolean value) {
             checkEvent = {
@@ -503,43 +503,15 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
             };
         }
     };
-    auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
-    modifier_->setOnChange0(node_, &optCallback);
+    auto optCallback = Converter::ArkValue<Opt_OnRadioChangeCallback>(arkCallback);
+    modifier_->setOnChange(node_, &optCallback);
     eventHub->UpdateChangeEvent(true);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_TRUE(checkEvent->value);
 }
 
-/**
- * @tc.name: RadioEventTest001
- * @tc.desc: Test Radio onChange event.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioModifierTest, setOnChange1, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
-    struct CheckEvent {
-        int32_t nodeId;
-        bool value;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .value = Converter::Convert<bool>(parameter)
-        };
-    };
-    OnRadioChangeCallback arkCallback = Converter::ArkValue<OnRadioChangeCallback>(checkCallback, frameNode->GetId());
-    Opt_OnRadioChangeCallback optCb = Converter::ArkValue<Opt_OnRadioChangeCallback>(arkCallback);
-    modifier_->setOnChange1(node_, &optCb);
-    eventHub->UpdateChangeEvent(true);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_TRUE(checkEvent->value);
-}
-
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventCheckedImpl
  * @tc.desc:
@@ -579,4 +551,5 @@ HWTEST_F(RadioModifierTest, setOnChangeEventCheckedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

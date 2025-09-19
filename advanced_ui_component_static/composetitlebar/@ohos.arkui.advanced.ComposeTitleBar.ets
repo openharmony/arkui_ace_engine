@@ -374,7 +374,7 @@ struct CollapsibleMenuSection {
             .onKeyEvent((event: KeyEvent) => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
                 event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return;
+                return false;
               }
               if (event.type === KeyType.Down) {
                 this.isMoreIconOnClick = true;
@@ -681,10 +681,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return;
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return;
+          return false;
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true;
@@ -785,10 +785,10 @@ struct ImageMenuItem {
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return;
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return;
+          return false;
         }
         if (event.type === KeyType.Down) {
           this.isOnClick = true;
@@ -831,11 +831,11 @@ struct ComposeTitleBarDialog {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   screenWidth: number = 640;
-  verticalScreenLines: number = 6;
-  horizontalsScreenLines: number = 1;
+  verticalScreenLines: int = 6;
+  horizontalsScreenLines: int = 1;
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
-  @State maxLines: number = 1;
+  @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   }

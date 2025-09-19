@@ -263,8 +263,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_ref appLocal;
     ani_ref optionalEntry;
     env->GetUndefined(&optionalEntry);
-    auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env);
+    auto entryPointObj = url == "__INTEROP__" ? nullptr : entryLoader.GetPageEntryObj();
+    auto legacyEntryPointObj = url == "__INTEROP__" ? nullptr : LegacyLoadPage(env);
     std::string moduleName = Container::Current()->GetModuleName();
     ani_string module;
     env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);

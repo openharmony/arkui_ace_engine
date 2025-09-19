@@ -20,6 +20,9 @@
 #include "test_fixtures.h"
 #include "type_helpers.h"
 
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -31,7 +34,7 @@ namespace {
 const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
-const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
+const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "14.00px";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
@@ -49,10 +52,20 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
 
+        SetupTheme<TextTheme>();
+
         for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
             AddResource(id, res);
             AddResource(strid, res);
         }
+    }
+    void SetUp() override
+    {
+        ModifierTestBase::SetUp();
+        static auto node = TextModelNG::CreateFrameNode(0, u"");
+        static auto pattern = AceType::MakeRefPtr<TextPattern>();
+        pattern->AttachToFrameNode(node);
+        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(pattern);
     }
 };
 
@@ -101,15 +114,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
@@ -120,13 +133,13 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Le
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -137,15 +150,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Le
  */
 HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_String_Resource initValueFontSize;
+    Opt_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
-    initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
+    initValueFontSize = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
-                          const std::string& input, const Ark_Union_Number_String_Resource& value) {
-        Ark_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
+                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
+        Opt_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
 
         modifier_->setFontSize(node_, &inputValueFontSize);
         inputValueFontSize = value;
@@ -157,16 +170,18 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
 }
 
 /*
@@ -214,15 +229,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
@@ -233,13 +248,13 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightValidValues, TestSiz
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
 
@@ -250,15 +265,15 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightValidValues, TestSiz
  */
 HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_String initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
-                          const std::string& input, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const std::string& input, const Opt_Union_Number_FontWeight_String& value) {
+        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         inputValueFontWeight = value;
@@ -270,16 +285,18 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightInvalidValues, TestS
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_Number_FontWeight_String>());
 }
 
 /*
@@ -303,17 +320,18 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestDefaultValues, TestSize.Le
  */
 HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyValidValues, TestSize.Level1)
 {
-    Ark_SymbolEffectStrategy initValueEffectStrategy;
+    Opt_SymbolEffectStrategy initValueEffectStrategy;
 
     // Initial setup
-    initValueEffectStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolEffectStrategyValidValues[0]);
+    initValueEffectStrategy =
+        ArkValue<Opt_SymbolEffectStrategy>(std::get<1>(Fixtures::testFixtureEnumSymbolEffectStrategyValidValues[0]));
 
     auto checkValue = [this, &initValueEffectStrategy](const std::string& input, const std::string& expectedStr,
-                          const Ark_SymbolEffectStrategy& value) {
-        Ark_SymbolEffectStrategy inputValueEffectStrategy = initValueEffectStrategy;
+                          const Opt_SymbolEffectStrategy& value) {
+        Opt_SymbolEffectStrategy inputValueEffectStrategy = initValueEffectStrategy;
 
         inputValueEffectStrategy = value;
-        modifier_->setEffectStrategy(node_, inputValueEffectStrategy);
+        modifier_->setEffectStrategy(node_, &inputValueEffectStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -321,7 +339,7 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumSymbolEffectStrategyValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_SymbolEffectStrategy>(value));
     }
 }
 
@@ -332,18 +350,19 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyValidValues,
  */
 HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyInvalidValues, TestSize.Level1)
 {
-    Ark_SymbolEffectStrategy initValueEffectStrategy;
+    Opt_SymbolEffectStrategy initValueEffectStrategy;
 
     // Initial setup
-    initValueEffectStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolEffectStrategyValidValues[0]);
+    initValueEffectStrategy =
+        ArkValue<Opt_SymbolEffectStrategy>(std::get<1>(Fixtures::testFixtureEnumSymbolEffectStrategyValidValues[0]));
 
     auto checkValue = [this, &initValueEffectStrategy](
-                          const std::string& input, const Ark_SymbolEffectStrategy& value) {
-        Ark_SymbolEffectStrategy inputValueEffectStrategy = initValueEffectStrategy;
+                          const std::string& input, const Opt_SymbolEffectStrategy& value) {
+        Opt_SymbolEffectStrategy inputValueEffectStrategy = initValueEffectStrategy;
 
-        modifier_->setEffectStrategy(node_, inputValueEffectStrategy);
+        modifier_->setEffectStrategy(node_, &inputValueEffectStrategy);
         inputValueEffectStrategy = value;
-        modifier_->setEffectStrategy(node_, inputValueEffectStrategy);
+        modifier_->setEffectStrategy(node_, &inputValueEffectStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE) <<
@@ -351,7 +370,7 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyInvalidValue
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumSymbolEffectStrategyInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_SymbolEffectStrategy>(value));
     }
 }
 
@@ -377,17 +396,18 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestDefaultValues, TestSize
  */
 HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyValidValues, TestSize.Level1)
 {
-    Ark_SymbolRenderingStrategy initValueRenderingStrategy;
+    Opt_SymbolRenderingStrategy initValueRenderingStrategy;
 
     // Initial setup
-    initValueRenderingStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues[0]);
+    initValueRenderingStrategy = ArkValue<Opt_SymbolRenderingStrategy>(
+        std::get<1>(Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues[0]));
 
     auto checkValue = [this, &initValueRenderingStrategy](const std::string& input, const std::string& expectedStr,
-                          const Ark_SymbolRenderingStrategy& value) {
-        Ark_SymbolRenderingStrategy inputValueRenderingStrategy = initValueRenderingStrategy;
+                          const Opt_SymbolRenderingStrategy& value) {
+        Opt_SymbolRenderingStrategy inputValueRenderingStrategy = initValueRenderingStrategy;
 
         inputValueRenderingStrategy = value;
-        modifier_->setRenderingStrategy(node_, inputValueRenderingStrategy);
+        modifier_->setRenderingStrategy(node_, &inputValueRenderingStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -395,7 +415,7 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyValidV
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkValue<Opt_SymbolRenderingStrategy>(value));
     }
 }
 
@@ -406,18 +426,19 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyValidV
  */
 HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyInvalidValues, TestSize.Level1)
 {
-    Ark_SymbolRenderingStrategy initValueRenderingStrategy;
+    Opt_SymbolRenderingStrategy initValueRenderingStrategy;
 
     // Initial setup
-    initValueRenderingStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues[0]);
+    initValueRenderingStrategy = ArkValue<Opt_SymbolRenderingStrategy>(
+        std::get<1>(Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues[0]));
 
     auto checkValue = [this, &initValueRenderingStrategy](
-                          const std::string& input, const Ark_SymbolRenderingStrategy& value) {
-        Ark_SymbolRenderingStrategy inputValueRenderingStrategy = initValueRenderingStrategy;
+                          const std::string& input, const Opt_SymbolRenderingStrategy& value) {
+        Opt_SymbolRenderingStrategy inputValueRenderingStrategy = initValueRenderingStrategy;
 
-        modifier_->setRenderingStrategy(node_, inputValueRenderingStrategy);
+        modifier_->setRenderingStrategy(node_, &inputValueRenderingStrategy);
         inputValueRenderingStrategy = value;
-        modifier_->setRenderingStrategy(node_, inputValueRenderingStrategy);
+        modifier_->setRenderingStrategy(node_, &inputValueRenderingStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE) <<
@@ -425,7 +446,7 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyInvali
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumSymbolRenderingStrategyInvalidValues) {
-        checkValue(input, value);
+        checkValue(input, ArkValue<Opt_SymbolRenderingStrategy>(value));
     }
 }
 } // namespace OHOS::Ace::NG

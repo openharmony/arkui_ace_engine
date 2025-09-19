@@ -115,15 +115,15 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MarqueeAttribute_setAllowScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -210,7 +210,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
 }
 export interface MarqueeOptions {
     start: boolean;
-    step?: number;
+    step?: double;
     loop?: number;
     fromStart?: boolean;
     src: string;
@@ -228,7 +228,7 @@ export interface MarqueeAttribute extends CommonMethod {
     allowScale(value: boolean | undefined): this {
         throw new Error("Unimplemented method allowScale")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -254,7 +254,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     allowScale_value?: boolean | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontFamily_value?: string | Resource | undefined
     marqueeUpdateStrategy_value?: MarqueeUpdateStrategy | undefined
     onStart_value?: (() => void) | undefined
@@ -273,7 +273,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     allowScale(value: boolean | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -335,9 +335,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -420,7 +420,7 @@ export class MarqueeOptions_serializer {
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStepTmpValue  = valueHolderForStep!
-            valueSerializer.writeNumber(valueHolderForStepTmpValue)
+            valueSerializer.writeFloat64(valueHolderForStepTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -447,11 +447,11 @@ export class MarqueeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const startTmpResult : boolean = valueDeserializer.readBoolean()
         const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepTmpBuf : number | undefined = undefined
+        let stepTmpBuf : double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            stepTmpBuf = (valueDeserializer.readNumber() as number)
+            stepTmpBuf = valueDeserializer.readFloat64()
         }
-        const stepTmpResult : number | undefined = stepTmpBuf
+        const stepTmpResult : double | undefined = stepTmpBuf
         const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let loopTmpBuf : number | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

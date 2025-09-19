@@ -26,11 +26,6 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-const std::string g_message = "message";
-
-} // namespace
-
 namespace GeneratedModifier {
     const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 }
@@ -40,9 +35,8 @@ class TransitionEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUI
 public:
     void *CreatePeerInstance() override
     {
-        Ark_String arkType = Converter::ArkValue<Ark_String>(g_message);
-        Ark_TransitionEffects* arkEffects = new(Ark_TransitionEffects);
-        return accessor_->ctor(&arkType, arkEffects);
+        Ark_String arkType = Converter::ArkValue<Ark_String>("identity");
+        return accessor_->construct0(&arkType);
     }
 };
 

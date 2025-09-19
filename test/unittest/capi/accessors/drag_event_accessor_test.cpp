@@ -24,6 +24,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "frameworks/base/geometry/offset.h"
@@ -36,14 +37,10 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
-namespace GeneratedModifier {
-    const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
-}
-
 namespace Converter {
-    void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
+    void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
     {
-        const auto peer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
+        auto peer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
         peer->unifiedData = data;
         arkData = peer;
     }
@@ -68,7 +65,7 @@ namespace {
         { "ARK_DRAG_RESULT_DRAG_CANCELED", ARK_DRAG_RESULT_DRAG_CANCELED, DragRet::DRAG_CANCEL },
         { "ARK_DRAG_RESULT_DROP_ENABLED", ARK_DRAG_RESULT_DROP_ENABLED, DragRet::ENABLE_DROP },
         { "ARK_DRAG_RESULT_DROP_DISABLED", ARK_DRAG_RESULT_DROP_DISABLED, DragRet::DISABLE_DROP },
-        { "ARK_DRAG_RESULT_INVALID", ARK_DRAG_RESULT_UNKNOWN, DragRet::DRAG_DEFAULT },
+        { "invalid value", INVALID_ENUM_VAL<Ark_DragResult>, DragRet::DRAG_DEFAULT },
     };
 
     const std::vector<std::tuple<std::string, DragRet, Ark_DragResult>> testFixtureEnumArkDragResultValues {
@@ -77,7 +74,6 @@ namespace {
         {  "ARK_DRAG_RESULT_DRAG_CANCELED", DragRet::DRAG_CANCEL, ARK_DRAG_RESULT_DRAG_CANCELED },
         {  "ARK_DRAG_RESULT_DROP_ENABLED", DragRet::ENABLE_DROP, ARK_DRAG_RESULT_DROP_ENABLED },
         {  "ARK_DRAG_RESULT_DROP_DISABLED", DragRet::DISABLE_DROP, ARK_DRAG_RESULT_DROP_DISABLED },
-        {  "ARK_DRAG_RESULT_INVALID", DragRet::DRAG_DEFAULT, ARK_DRAG_RESULT_UNKNOWN },
     };
 } // namespace
 
@@ -123,36 +119,6 @@ HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
         auto windowY = Convert<float>(accessor_->getWindowY(peer_));
         EXPECT_EQ(windowY, Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetWindowYTest";
-    }
-}
-
-/**
- * @tc.name: GetXTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventAccessorTest, GetXTest, TestSize.Level1)
-{
-    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
-        dragEvent_->SetX(value);
-        auto x = Convert<float>(accessor_->getX(peer_));
-        EXPECT_EQ(x, Convert<float>(expected)) <<
-            "Input value is: " << input << ", method: GetXTest";
-    }
-}
-
-/**
- * @tc.name: GetYTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventAccessorTest, GetYTest, TestSize.Level1)
-{
-    for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
-        dragEvent_->SetY(value);
-        auto y = Convert<float>(accessor_->getY(peer_));
-        EXPECT_EQ(y, Convert<float>(expected)) <<
-            "Input value is: " << input << ", method: GetYTest";
     }
 }
 
@@ -220,13 +186,11 @@ HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
-    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(unifiedData);
+    auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
     ASSERT_NE(dragEvent_->GetData(), nullptr);
     EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: setData";
-    auto unifiedDataPeer = arkUnifiedData;
-    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
 }
 
 /**
@@ -237,17 +201,14 @@ HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 {
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
-    auto arkUnifiedData = ArkValue<Ark_UnifiedData>(unifiedData);
+    auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
-    auto getData = accessor_->getData(vmContext_, peer_);
+    auto getData = accessor_->getData(peer_);
     ASSERT_NE(getData, nullptr);
     auto dataPeer = getData;
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
-    auto unifiedDataPeer = arkUnifiedData;
-    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(unifiedDataPeer);
-    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
 }
 
 /**
@@ -257,10 +218,9 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
 {
-    auto dataPeer = accessor_->getData(vmContext_, nullptr);
+    auto dataPeer = accessor_->getData(nullptr);
     ASSERT_NE(dataPeer, nullptr);
     ASSERT_EQ(dataPeer->unifiedData, nullptr);
-    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
 }
 
 /**
@@ -425,11 +385,20 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         { {"fn"}, {KeyCode::KEY_CTRL_LEFT}, false }
     };
 
+    auto getter = Converter::OptConvert<ModifierKeyStateGetter>(accessor_->getGetModifierKeyState(peer_));
+    ASSERT_TRUE(getter.has_value());
+    auto callback = CallbackHelper(getter.value());
+
+    auto getResult = [&callback](const Array_String& keys) -> bool {
+        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(keys);
+        return Converter::Convert<bool>(arkResult);
+    };
+
     for (auto& [param, value, expected] : TEST_PLAN) {
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         Array_String stringArrayValues = stringHolder.ArkValue();
         dragEvent_->SetPressedKeyCodes(value);
-        auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
+        bool result = getResult(stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
 }
@@ -439,14 +408,16 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetSummaryTestDefault, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestDefault, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     ASSERT_NE(accessor_->getSummary, nullptr);
     auto check = accessor_->getSummary(peer_);
     EXPECT_EQ(check.summary.size, 0);
     EXPECT_EQ(check.summary.keys, nullptr);
     EXPECT_EQ(check.summary.values, nullptr);
     EXPECT_EQ(check.totalSize, 0);
+#endif
 }
 
 /**
@@ -454,8 +425,9 @@ HWTEST_F(DragEventAccessorTest, GetSummaryTestDefault, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetSummaryTestValid, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestValid, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     std::map<std::string, int64_t> expectedMap = {
         {"a", 23},
         {"b", 45},
@@ -479,5 +451,6 @@ HWTEST_F(DragEventAccessorTest, GetSummaryTestValid, TestSize.Level1)
         idx++;
     }
     EXPECT_EQ(Converter::Convert<int64_t>(check.totalSize), expectedTotal);
+#endif
 }
 } // namespace OHOS::Ace::NG

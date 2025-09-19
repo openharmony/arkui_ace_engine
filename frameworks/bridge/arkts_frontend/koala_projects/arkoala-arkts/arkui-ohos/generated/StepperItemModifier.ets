@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkStepperItemPeer, ItemState, StepperItemAttribute } from "./component/stepperItem"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -28,19 +29,20 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: StepperItemAttribute): void { }
-    applyPressedAttribute(instance: StepperItemAttribute): void { }
-    applyFocusedAttribute(instance: StepperItemAttribute): void { }
-    applyDisabledAttribute(instance: StepperItemAttribute): void { }
-    applySelectedAttribute(instance: StepperItemAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _prevLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _prevLabel_0_0value?: string | undefined
     _nextLabel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nextLabel_0_0value?: string | undefined
     _status_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _status_0_0value?: ItemState | undefined
-    applyModifierPatch(peer: ArkStepperItemPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkStepperItemPeer;
         if (this._prevLabel_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._prevLabel_0_flag) {

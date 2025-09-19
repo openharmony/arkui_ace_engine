@@ -29,7 +29,6 @@ import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
 import { OutlineStyle } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
-import { ArkUIAniModule } from "arkui.ani"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         return new ColorFilter(false, ptr)
@@ -59,53 +58,6 @@ export class ColorFilter implements MaterializedBase {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ColorFilter_getFinalizer()
-    }
-    static transferStatic(input: Any): Any {
-        if (typeof (input) !== 'object' || input === null) {
-            return undefined;
-        }
-        let esValue: ESValue = input as ESValue;
-        const global = ESValue.getGlobal();
-        const getColorFilterPointerFunc = global.getProperty('GetColorFilterPointer');
-        if (getColorFilterPointerFunc.isNull() || getColorFilterPointerFunc.isUndefined()) {
-            return undefined;
-        }
-        const pointer = getColorFilterPointerFunc.invoke(esValue);
-        if (!pointer.isNumber()) {
-            return undefined;
-        }
-        let pointerVal = pointer.toNumber() as long;
-        let ctorPtr = ArkUIAniModule._Image_ColorFilter_TransferStatic(pointerVal);
-        if (ctorPtr === 0) {
-            return undefined;
-        }
-        let colorFilter = new ColorFilter(false, ctorPtr);
-        return colorFilter;
-    }
-    static transferDynamic(input: Object): Any {
-        if (input === null) {
-            return undefined;
-        }
-        if (!(input instanceof ColorFilter)) {
-            return undefined;
-        }
-        let colorFilter = input as ColorFilter;
-        let colorFilterObj = ESValue.instantiateEmptyObject();
-        const global = ESValue.getGlobal();
-        const wrapFunc = global.getProperty('WrapColorFilterPointer');
-        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
-            return undefined;
-        }
-        let peerPtr = colorFilter?.peer?.ptr;
-        if (peerPtr === undefined) {
-            return undefined;
-        }
-        let pointer = ArkUIAniModule._Image_ColorFilter_TransferDynamic(peerPtr);
-        if (pointer === 0) {
-            return undefined;
-        }
-        wrapFunc.invoke(colorFilterObj, ESObject.wrap(pointer));
-        return colorFilterObj;
     }
 }
 export { Resource } from "global.resource"
@@ -208,7 +160,7 @@ export { LengthMetrics } from "arkui.Graphics"
 export { ColorMetrics } from "arkui.Graphics"
 export interface Font {
     size?: Length;
-    weight?: FontWeight | number | string;
+    weight?: FontWeight | int32 | string;
     family?: string | Resource;
     style?: FontStyle;
 }
@@ -2285,10 +2237,10 @@ export class Font_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForWeightTmpValueForIdx0  = valueHolderForWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx0.valueOf())
-            } else if (valueHolderForWeightTmpValue instanceof number) {
+            } else if (valueHolderForWeightTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWeightTmpValueForIdx1)
+                const valueHolderForWeightTmpValueForIdx1  = valueHolderForWeightTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForWeightTmpValueForIdx1)
             } else if (valueHolderForWeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForWeightTmpValueForIdx2  = valueHolderForWeightTmpValue as string
@@ -2342,22 +2294,22 @@ export class Font_serializer {
         }
         const sizeTmpResult : Length | undefined = sizeTmpBuf
         const weightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let weightTmpBuf : FontWeight | number | string | undefined = undefined
+        let weightTmpBuf : FontWeight | int32 | string | undefined = undefined
         if ((weightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const weightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let weightTmpBuf_ : FontWeight | number | string | undefined
+            let weightTmpBuf_ : FontWeight | int32 | string | undefined
             if (weightTmpBuf_UnionSelector == (0).toChar()) {
                 weightTmpBuf_ = FontWeight.fromValue(valueDeserializer.readInt32())
             } else if (weightTmpBuf_UnionSelector == (1).toChar()) {
-                weightTmpBuf_ = (valueDeserializer.readNumber() as number)
+                weightTmpBuf_ = valueDeserializer.readInt32()
             } else if (weightTmpBuf_UnionSelector == (2).toChar()) {
                 weightTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for weightTmpBuf_ has to be chosen through deserialisation.")
             }
-            weightTmpBuf = (weightTmpBuf_ as FontWeight | number | string)
+            weightTmpBuf = (weightTmpBuf_ as FontWeight | int32 | string)
         }
-        const weightTmpResult : FontWeight | number | string | undefined = weightTmpBuf
+        const weightTmpResult : FontWeight | int32 | string | undefined = weightTmpBuf
         const familyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let familyTmpBuf : string | Resource | undefined = undefined
         if ((familyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

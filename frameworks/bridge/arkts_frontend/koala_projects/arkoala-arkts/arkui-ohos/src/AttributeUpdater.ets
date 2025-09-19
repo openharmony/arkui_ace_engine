@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { AttributeModifier, PeerNode } from "arkui/component/common";
+import { AttributeModifier } from "arkui/component/common";
+import { PeerNode } from "./PeerNode";
 
 export type Initializer<T = void> = (...params: FixedArray<Object>) => T;
 

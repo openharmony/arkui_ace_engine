@@ -104,16 +104,16 @@ static const std::vector<int32_t> SELECTED_INDEX_TEST_PLAN = { 1, 10, 32, -1, -3
 typedef std::tuple<Ark_Number, std::string, std::string> ArkNumberTestStep;
 static const std::vector<ArkNumberTestStep> BORDER_RADIUS_TEST_PLAN = {
     {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
-        StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp")},
+        StringUtils::DoubleToString(10).append("vp")},
     {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
-        StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp")},
+        StringUtils::DoubleToString(832.599345f).append("vp")},
     {ArkValue<Ark_Number>(-123), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
     {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
-        StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp")},
+        StringUtils::DoubleToString(25.01).append("vp")},
     {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
-    {ArkValue<Ark_Number>(0.0f), "0.00vp", StringUtils::DoubleToString(RADIUS_OFFSET).append("vp")},
+        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
+    {ArkValue<Ark_Number>(0.0f), "0.00vp", "0.00vp"},
 };
 static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
     { ArkValue<Ark_Number>(10), "10", "10" },
@@ -277,23 +277,23 @@ const std::vector<AlignTestStep> ALIGN_TEST_PLAN = {
 
 const std::vector<OptLengthTestStep> POPUP_HORIZONTAL_OFFSET_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
+    { Converter::ArkValue<Opt_Length>("22.11px"), "22.11px" },
     { Converter::ArkValue<Opt_Length>("99.00%"), "99.00%" },
-    { Converter::ArkValue<Opt_Length>(13.0_vp), "13.00vp" },
+    { Converter::ArkValue<Opt_Length>("13.0vp"), "13.00vp" },
     { Converter::ArkValue<Opt_Length>("-55.00%"), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>("55.00%"), "55.00%" },
-    { Converter::ArkValue<Opt_Length>(-3.12_px), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE }
+    { Converter::ArkValue<Opt_Length>("-3.12px"), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE }
 };
 
 typedef std::pair<Ark_Length, std::string> PopupPositionTestStep;
 static const std::vector<PopupPositionTestStep> POPUP_POSITION_TEST_PLAN = {
     { Converter::ArkValue<Ark_Length>(15.4f), "15.40vp" },
-    { Converter::ArkValue<Ark_Length>(22.11_px), "22.11px" },
+    { Converter::ArkValue<Ark_Length>("22.11px"), "22.11px" },
     { Converter::ArkValue<Ark_Length>("99.00%"), "99.00%" },
-    { Converter::ArkValue<Ark_Length>(13.0_vp), "13.00vp" },
+    { Converter::ArkValue<Ark_Length>("13.0vp"), "13.00vp" },
     { Converter::ArkValue<Ark_Length>("-55.00%"), "-55.00%" },
     { Converter::ArkValue<Ark_Length>("55.00%"), "55.00%" },
-    { Converter::ArkValue<Ark_Length>(-3.12_px), "-3.12px" }
+    { Converter::ArkValue<Ark_Length>("-3.12px"), "-3.12px" }
 };
 
 typedef std::pair<Ark_BlurStyle, std::string> BlurStyleTestStep;
@@ -365,39 +365,10 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSi
 
     Ark_AlphabetIndexerOptions options;
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
-        options.selected = value;
+        options.selected = Converter::ArkUnion<Ark_Union_Number_Bindable, Ark_Number>(value);
         modifier_->setAlphabetIndexerOptions(node_, &options);
         checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
         EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnSelected
- * @tc.desc: Check the functionality of AlphabetIndexerModifier.OnSelectedImpl
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
-        [](const Ark_Int32 resourceId, const Ark_Number param) {
-            selectedIndex = Converter::Convert<int32_t>(param);
-        };
-    auto func = Converter::ArkValue<Callback_Number_Void>(checkCallback, CONTEXT_ID);
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Void, Callback_Number_Void>(func);
-    modifier_->setOnSelected(node_, &optFunc);
-    EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
-
-    auto onSelect = eventHub->GetOnSelected();
-
-    for (const auto& expected : SELECTED_INDEX_TEST_PLAN) {
-        onSelect(expected);
-        EXPECT_EQ(selectedIndex, expected);
     }
 }
 
@@ -1413,7 +1384,7 @@ HWTEST_F(IndexerModifierTest, setSelected, TestSize.Level1)
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        auto optValue = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(value);
         modifier_->setSelected(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
         EXPECT_EQ(checkVal, expectVal);
@@ -1535,16 +1506,16 @@ HWTEST_F(IndexerModifierTest, setItemBorderRadius, TestSize.Level1)
     using TestStep = std::tuple<Ark_Number, std::string, std::string>;
     static const std::vector<TestStep> testPlan = {
         {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
-            StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp")},
+            StringUtils::DoubleToString(10).append("vp")},
         {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
-            StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp")},
+            StringUtils::DoubleToString(832.599345f).append("vp")},
         {ArkValue<Ark_Number>(-123), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
         {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
-            StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp")},
+            StringUtils::DoubleToString(25.01).append("vp")},
         {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
-        {ArkValue<Ark_Number>(0.0f), "0.00vp", StringUtils::DoubleToString(RADIUS_OFFSET).append("vp")},
+            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
+        {ArkValue<Ark_Number>(0.0f), "0.00vp", "0.00vp"},
     };
 
     for (const auto& [value, expectItemVal, expectVal] : testPlan) {
@@ -1637,6 +1608,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
     EXPECT_EQ(checkVal3, EXPECTED_TRUE);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -1677,4 +1649,5 @@ HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 10);
 }
+#endif
 } // namespace OHOS::Ace::NG

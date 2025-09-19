@@ -38,9 +38,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
-#endif
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -109,20 +106,6 @@ const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
 
 namespace OHOS::Ace::NG {
 namespace {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
-#endif
-
 Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     Ark_GestureRecognizer peer = nullptr;
@@ -2168,24 +2151,44 @@ void SetVisualEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::VisualEffect*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetVisualEffect(frameNode, ptrOpt.value());
 }
 void SetBackgroundFilterImpl(Ark_NativePointer node,
                              const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetBackgroundFilter(frameNode, ptrOpt.value());
 }
 void SetForegroundFilterImpl(Ark_NativePointer node,
                              const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetForegroundFilter(frameNode, ptrOpt.value());
 }
 void SetCompositingFilterImpl(Ark_NativePointer node,
                               const Opt_uiEffect_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        return;
+    }
+    ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
 void SetOpacityImpl(Ark_NativePointer node,
                     const Opt_Union_Number_Resource* value)
@@ -3194,14 +3197,16 @@ void SetRotateImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
     ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
-void SetTransformImpl(Ark_NativePointer node,
-                      const Opt_Object* value)
+void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Matrix4> convValue = std::nullopt;
-    LOGE("ARKOALA:Transform1Impl: Opt_Object is not supported");
-    ViewAbstractModelStatic::SetTransformMatrix(frameNode, convValue);
+    auto matrixOpt = OptConvertPtr<Matrix4>(value);
+    if (!matrixOpt.has_value()) {
+        ViewAbstract::SetTransformMatrix(frameNode, Matrix4::CreateIdentity());
+        return;
+    }
+    ViewAbstract::SetTransformMatrix(frameNode, matrixOpt.value());
 }
 void SetOnAppearImpl(Ark_NativePointer node,
                      const Opt_Callback_Void* value)
@@ -3873,15 +3878,11 @@ void SetClipShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (!convValue) {
         return;
     }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetClipShape(frameNode, convValue->shape);
+    ViewAbstract::SetClipShape(frameNode, convValue.value());
 }
 void SetMaskImpl(Ark_NativePointer node,
                  const Opt_ProgressMask* value)
@@ -3898,15 +3899,11 @@ void SetMaskShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (!convValue) {
         return;
     }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    ViewAbstract::SetMask(frameNode, convValue.value());
 }
 void SetKeyImpl(Ark_NativePointer node,
                 const Opt_String* value)
@@ -4435,11 +4432,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
     CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
             CHECK_NULL_VOID(uiNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-                return CreateProxyNode(uiNode);
-#else
                 return uiNode;
-#endif
             };
             ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
         }, node);
@@ -5235,10 +5228,12 @@ void SetBindSheetImpl(Ark_NativePointer node,
         BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.isTitleBuilder = false;
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
                 sheetStyle.sheetSubtitle = OptConvert<std::string>(value.subtitle.value);
             },
-            [frameNode, node, &cbs](const CustomNodeBuilder& value) {
+            [&sheetStyle, frameNode, node, &cbs](const CustomNodeBuilder& value) {
+                sheetStyle.isTitleBuilder = true;
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
                     auto uiNode = callback.BuildSync(node);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
@@ -5251,23 +5246,17 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle,
-        titleBuilder = std::move(cbs.titleBuilder), onAppear = std::move(cbs.onAppear),
-        onDisappear = std::move(cbs.onDisappear), shouldDismiss = std::move(cbs.shouldDismiss),
-        onWillDismiss = std::move(cbs.onWillDismiss), onWillAppear = std::move(cbs.onWillAppear),
-        onWillDisappear = std::move(cbs.onWillDisappear), onHeightDidChange = std::move(cbs.onHeightDidChange),
-        onDetentsDidChange = std::move(cbs.onDetentsDidChange), onWidthDidChange = std::move(cbs.onWidthDidChange),
-        onTypeDidChange = std::move(cbs.onTypeDidChange), sheetSpringBack = std::move(cbs.sheetSpringBack)](
+    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, cb = std::move(cbs)](
         const RefPtr<UINode>& uiNode) mutable {
         auto buildFunc = [frameNode, uiNode]() {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             ViewStackProcessor::GetInstance()->Push(uiNode);
         };
         ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
-            std::move(titleBuilder), sheetStyle, std::move(onAppear), std::move(onDisappear),
-            std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
-            std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
-            std::move(onTypeDidChange), std::move(sheetSpringBack));
+            std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
+            std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
+            std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),
+            std::move(cb.onWidthDidChange), std::move(cb.onTypeDidChange), std::move(cb.sheetSpringBack));
         }, node);
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,

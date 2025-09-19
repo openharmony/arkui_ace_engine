@@ -67,7 +67,7 @@ constexpr auto ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME = "dailySixRowSpace";
 constexpr auto ATTRIBUTE_LUNAR_HEIGHT_NAME = "lunarHeight";
 constexpr auto ATTRIBUTE_UNDERSCORE_WIDTH_NAME = "underscoreWidth";
 constexpr auto ATTRIBUTE_UNDERSCORE_LENGTH_NAME = "underscoreLength";
-constexpr auto ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME = "scheduleMarkerRadius";
+constexpr auto ATTRIBUTE_SCHEDULE_MARKER_RADIUS_NAME = "scheduleMarkerRadius";
 constexpr auto ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME = "boundaryRowOffset";
 constexpr auto ATTRIBUTE_BOUNDARY_COL_OFFSET_NAME = "boundaryColOffset";
 
@@ -162,7 +162,7 @@ const std::vector<Ark_CalendarDay> nextDayArray {
 };
 Converter::ArkArrayHolder<Array_CalendarDay> nextDays(nextDayArray);
 
-const Ark_Type_CalendarInterface_callable0_value calendarOptions {
+const Ark_CalendarRequestedMonths calendarOptions {
     .date {
         .year = Converter::ArkValue<Ark_Number>(2024),
         .month = Converter::ArkValue<Ark_Number>(2),
@@ -738,7 +738,7 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
         EXPECT_EQ(resultStr, "15.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_LENGTH_NAME);
         EXPECT_EQ(resultStr, "16.00vp");
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_RADIUS_NAME);
         EXPECT_EQ(resultStr, "17.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME);
         EXPECT_EQ(resultStr, "18.00vp");
@@ -920,58 +920,58 @@ HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
     }
 }
 
-// /*
-//  * @tc.name: setOnSelectChangeTest
-//  * @tc.desc:
-//  * @tc.type: FUNC
-//  */
-// HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
-// {
-//     static constexpr auto contextId = 654321;
-//     static std::vector<Ark_CalendarSelectedDate> checkInvoke;
+/*
+ * @tc.name: setOnSelectChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
+{
+    static constexpr auto contextId = 654321;
+    static std::vector<Ark_CalendarSelectedDate> checkInvoke;
 
-//     modifier_->setCalendarOptions(node_, &calendarOptions);
-//     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-//     ASSERT_NE(frameNode, nullptr);
-//     ASSERT_FALSE(frameNode->GetChildren().empty());
-//     auto swiperNode = frameNode->GetChildren().front();
-//     ASSERT_NE(swiperNode, nullptr);
-//     std::vector<RefPtr<CalendarEventHub>> eventHubList;
-//     ASSERT_FALSE(swiperNode->GetChildren().empty());
-//     for (const auto& calendarNode : swiperNode->GetChildren()) {
-//         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-//         CHECK_NULL_CONTINUE(calendarFrameNode);
-//         auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
-//         CHECK_NULL_CONTINUE(pattern);
-//         auto calendarEventHub = pattern->GetOrCreateEventHub<CalendarEventHub>();
-//         CHECK_NULL_CONTINUE(calendarEventHub);
-//         eventHubList.emplace_back(std::move(calendarEventHub));
-//     }
+    modifier_->setCalendarOptions(node_, &calendarOptions);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    std::vector<RefPtr<CalendarEventHub>> eventHubList;
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        CHECK_NULL_CONTINUE(calendarFrameNode);
+        auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        auto calendarEventHub = pattern->GetEventHub<CalendarEventHub>();
+        CHECK_NULL_CONTINUE(calendarEventHub);
+        eventHubList.emplace_back(std::move(calendarEventHub));
+    }
 
-//     auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarSelectedDate event) {
-//         EXPECT_EQ(resourceId, contextId);
-//         checkInvoke.emplace_back(std::move(event));
-//     };
-//     auto arkCallback = Converter::ArkValue<Callback_CalendarSelectedDate_Void>(callback, contextId);
-//     auto optCallback = Converter::ArkValue<Opt_Callback_CalendarSelectedDate_Void>(arkCallback);
-//     modifier_->setOnSelectChange(node_, &optCallback);
-//     auto json = JsonUtil::Create(true);
-//     json->Put("day", 31);
-//     json->Put("month", 12);
-//     json->Put("year", 2024);
-//     for (auto&& eventHub : eventHubList) {
-//         eventHub->UpdateSelectedChangeEvent(json->ToString());
-//     }
+    auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarSelectedDate event) {
+        EXPECT_EQ(resourceId, contextId);
+        checkInvoke.emplace_back(std::move(event));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_CalendarSelectedDate_Void>(callback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_CalendarSelectedDate_Void>(arkCallback);
+    modifier_->setOnSelectChange(node_, &optCallback);
+    auto json = JsonUtil::Create(true);
+    json->Put("day", 31);
+    json->Put("month", 12);
+    json->Put("year", 2024);
+    for (auto&& eventHub : eventHubList) {
+        eventHub->UpdateSelectedChangeEvent(json->ToString());
+    }
 
-//     EXPECT_EQ(checkInvoke.size(), eventHubList.size());
-//     EXPECT_GT(checkInvoke.size(), 0);
-//     for (auto&& event : checkInvoke) {
-//         EXPECT_EQ(Converter::Convert<int32_t>(event.day), 31);
-//         EXPECT_EQ(Converter::Convert<int32_t>(event.month), 12);
-//         EXPECT_EQ(Converter::Convert<int32_t>(event.year), 2024);
-//     }
-//     checkInvoke.clear();
-// }
+    EXPECT_EQ(checkInvoke.size(), eventHubList.size());
+    EXPECT_GT(checkInvoke.size(), 0);
+    for (auto&& event : checkInvoke) {
+        EXPECT_EQ(Converter::Convert<int32_t>(event.day), 31);
+        EXPECT_EQ(Converter::Convert<int32_t>(event.month), 12);
+        EXPECT_EQ(Converter::Convert<int32_t>(event.year), 2024);
+    }
+    checkInvoke.clear();
+}
 
 /*
  * @tc.name: setOnRequestDataTest

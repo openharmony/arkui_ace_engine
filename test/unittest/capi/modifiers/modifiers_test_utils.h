@@ -97,11 +97,11 @@ inline T GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKe
 
 // Resource functions
 
-using NamedResourceId = std::tuple<const char *, OHOS::Ace::ResourceType>;
-using IntResourceId = std::tuple<uint32_t, OHOS::Ace::ResourceType>;
+using NamedResourceId = std::tuple<const char *, ResourceType>;
+using IntResourceId = std::tuple<uint32_t, ResourceType>;
 
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::ResourceType type);
-Ark_Resource CreateResource(const char *name, OHOS::Ace::ResourceType type);
+Ark_Resource CreateResource(int64_t id, ResourceType type);
+Ark_Resource CreateResource(const std::string& name, ResourceType type);
 
 inline Ark_Resource CreateResource(NamedResourceId id)
 {

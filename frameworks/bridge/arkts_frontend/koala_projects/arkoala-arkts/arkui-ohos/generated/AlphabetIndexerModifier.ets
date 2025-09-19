@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkAlphabetIndexerPeer, OnAlphabetIndexerSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerPopupSelectCallback, AlphabetIndexerAttribute, IndexerAlign } from "./component/alphabetIndexer"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, BlurStyle } from "./component/common"
@@ -31,11 +32,11 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: AlphabetIndexerAttribute): void { }
-    applyPressedAttribute(instance: AlphabetIndexerAttribute): void { }
-    applyFocusedAttribute(instance: AlphabetIndexerAttribute): void { }
-    applyDisabledAttribute(instance: AlphabetIndexerAttribute): void { }
-    applySelectedAttribute(instance: AlphabetIndexerAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -89,8 +90,9 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
     _alignStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignStyle_0_0value?: IndexerAlign | undefined
     _alignStyle_0_1value?: Length | undefined
-    applyModifierPatch(peer: ArkAlphabetIndexerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkAlphabetIndexerPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._color_0_flag) {

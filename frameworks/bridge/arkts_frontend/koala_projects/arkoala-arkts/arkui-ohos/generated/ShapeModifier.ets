@@ -19,6 +19,7 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkShapePeer, ViewportRect, ShapeAttribute } from "./component/shape"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
@@ -31,11 +32,11 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: ShapeAttribute): void { }
-    applyPressedAttribute(instance: ShapeAttribute): void { }
-    applyFocusedAttribute(instance: ShapeAttribute): void { }
-    applyDisabledAttribute(instance: ShapeAttribute): void { }
-    applySelectedAttribute(instance: ShapeAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _viewPort_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _viewPort_0_0value?: ViewportRect | undefined
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -64,8 +65,9 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     _mesh_0_0value?: Array<double> | undefined
     _mesh_0_1value?: int32 | undefined
     _mesh_0_2value?: int32 | undefined
-    applyModifierPatch(peer: ArkShapePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkShapePeer;
         if (this._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._viewPort_0_flag) {

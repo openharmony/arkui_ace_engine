@@ -20,6 +20,7 @@ import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSpanPeer, BaseSpan, SpanAttribute } from "./component/span"
 import { int32 } from "@koalaui/common"
 import { Font, ResourceColor, Length } from "./component/units"
@@ -33,35 +34,36 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: SpanAttribute): void { }
-    applyPressedAttribute(instance: SpanAttribute): void { }
-    applyFocusedAttribute(instance: SpanAttribute): void { }
-    applyDisabledAttribute(instance: SpanAttribute): void { }
-    applySelectedAttribute(instance: SpanAttribute): void { }
+    applyNormalAttribute(instance: Object): void { }
+    applyPressedAttribute(instance: Object): void { }
+    applyFocusedAttribute(instance: Object): void { }
+    applyDisabledAttribute(instance: Object): void { }
+    applySelectedAttribute(instance: Object): void { }
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontSize_0_0value?: number | string | Resource | undefined
+    _fontSize_0_0value?: double | string | Resource | undefined
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: string | Resource | undefined
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _decoration_0_0value?: DecorationStyleInterface | undefined
     _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _letterSpacing_0_0value?: number | string | undefined
+    _letterSpacing_0_0value?: double | string | undefined
     _textCase_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textCase_0_0value?: TextCase | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineHeight_0_0value?: Length | undefined
     _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
-    applyModifierPatch(peer: ArkSpanPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSpanPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {
@@ -102,7 +104,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         {
             switch (this._fontSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as double | string | Resource | undefined));
                     this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -112,7 +114,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                 }
                 default: {
                     this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                    peer.setFontSizeAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -138,7 +140,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -148,7 +150,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -192,7 +194,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         {
             switch (this._letterSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | undefined));
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as double | string | undefined));
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -202,7 +204,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                 }
                 default: {
                     this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLetterSpacingAttribute((undefined as number | string | undefined));
+                    peer.setLetterSpacingAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -298,7 +300,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                     break;
                 }
                 default: {
-                    this.fontSize((undefined as number | string | Resource | undefined));
+                    this.fontSize((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -324,7 +326,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
                 }
             }
         }
@@ -363,7 +365,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
                     break;
                 }
                 default: {
-                    this.letterSpacing((undefined as number | string | undefined));
+                    this.letterSpacing((undefined as double | string | undefined));
                 }
             }
         }
@@ -429,7 +431,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         }
         return this
     }
-    fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: double | string | Resource | undefined): this {
         if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -451,7 +453,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         }
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
@@ -484,7 +486,7 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         }
         return this
     }
-    letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: double | string | undefined): this {
         if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._letterSpacing_0_0value) !== (value)))
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE

@@ -21,7 +21,7 @@ import { KPointer } from '@koalaui/interop'
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime'
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat'
 import { IDataSource, DataChangeListener } from '../component/lazyForEach'
-import { OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
 import { LazyForEachImplForOptions, NodeHolder } from './LazyForEachImpl'
 import { InternalListener } from './DataChangeListener'
 import { PeerNode } from '../PeerNode'
@@ -172,6 +172,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     reusable_: boolean = true;
     disableVirtualScroll_: boolean = false;
+
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
@@ -228,6 +229,10 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
         this.itemDragEvent_ = eventHandler;
         return this;
     }
+
+    applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+    }
 }
 
 export class SyntaxItemPeer extends PeerNode {
@@ -248,7 +253,7 @@ export class SyntaxItemPeer extends PeerNode {
 export class ForEachNodePeer extends PeerNode {
     public static create(isRepeat: boolean = false): ForEachNodePeer {
         const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId);
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId, isRepeat);
         if (!_peerPtr) {
             throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
         }
@@ -299,6 +304,7 @@ function virtualRender<T>(
         attributes.onMove_, attributes.itemDragEvent_);
 }
 
+// onMoveFromTo has no operation in non-virtual mode
 function onMoveFromTo(moveFrom: int32, moveTo: int32): void {}
 
 /** @memo */
@@ -324,6 +330,13 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     };
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
         RepeatByArray<T>(arr, keyGen, action);
-            nodeHolder.node = node;
+        nodeHolder.node = node;
     });
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(nodeHolder.node!.getPeerPtr(), onMoveFromTo, onMove, itemDragEvent);
+
+    ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }

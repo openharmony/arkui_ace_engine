@@ -30,7 +30,7 @@ class BackgroundColorStyleAccessorTest
 public:
     void SetUp() override
     {
-        ASSERT_NE(accessor_->ctor, nullptr);
+        ASSERT_NE(accessor_->construct, nullptr);
         AccessorTestBaseParent::SetUp();
     }
     void TearDown() override
@@ -55,9 +55,9 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
     for (auto& value : TEST_PLAN) {
         Ark_TextBackgroundStyle arkValue;
         arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
-        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
+        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value.second, &ctx);
         arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
-        peer_ = accessor_->ctor(&arkValue);
+        peer_ = accessor_->construct(&arkValue);
         ASSERT_NE(peer_, nullptr);
         ASSERT_NE(peer_->span, nullptr);
         auto result = peer_->span->GetBackgroundColor();
@@ -72,7 +72,7 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
     Ark_TextBackgroundStyle arkValue;
     arkValue.color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty());
     arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
-    peer_ = accessor_->ctor(&arkValue);
+    peer_ = accessor_->construct(&arkValue);
     ASSERT_NE(peer_, nullptr);
     auto result = peer_->span->GetBackgroundColor();
     EXPECT_FALSE(result.backgroundColor.has_value());
@@ -97,9 +97,9 @@ HWTEST_F(BackgroundColorStyleAccessorTest, GetTextBackgroundStyleTest, TestSize.
     for (auto& value : TEST_PLAN) {
         Ark_TextBackgroundStyle arkValue;
         arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
-        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
+        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Dimension>(value.second, &ctx);
         arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
-        peer_ = accessor_->ctor(&arkValue);
+        peer_ = accessor_->construct(&arkValue);
         ASSERT_NE(peer_, nullptr);
         Ark_TextBackgroundStyle style = accessor_->getTextBackgroundStyle(peer_);
         auto aceStyle = Converter::Convert<TextBackgroundStyle>(style);
