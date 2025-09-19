@@ -2487,7 +2487,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
             auto frameNode = wrapper->GetHostNode();
             CHECK_NULL_VOID(frameNode);
             frameNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
-            FrameNode::ProcessOffscreenNode(frameNode);
+            FrameNode::ProcessOffscreenNode(frameNode, show);
         } else {
             listMainSizeValues.forward = (*it).forwardCacheCount > -1;
             listMainSizeValues.backward = (*it).backwardCacheCount > -1;
