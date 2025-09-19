@@ -1195,10 +1195,7 @@ public:
         uiTranslateManager_->RemoveTranslateListener(nodeId);
     }
 
-    void SetEnableSwipeBack(bool isEnable) override
-    {
-        enableSwipeBack_ = isEnable;
-    }
+    void SetEnableSwipeBack(bool isEnable) override;
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1598,7 +1595,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
-    bool enableSwipeBack_ = true;
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();

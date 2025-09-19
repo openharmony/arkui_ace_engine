@@ -2821,12 +2821,6 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
-    auto deviceType = SystemProperties::GetDeviceType();
-    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
-        LOGW("disableSwipeBack set in wearable device, will NOT consume this back-press event");
-        return true;
-    }
-
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("fullscreen component: video or web consumed backpressed event");
@@ -6535,6 +6529,14 @@ std::string PipelineContext::GetModuleName()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+void PipelineContext::SetEnableSwipeBack(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto rootPattern = rootNode_->GetPattern<RootPattern>();
+    CHECK_NULL_VOID(rootPattern);
+    rootPattern->SetEnableSwipeBack(isEnable);
 }
 
 void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
