@@ -2004,6 +2004,26 @@ void deserializeAndCallSyncCallback_onMeasureSize_SizeResult(Ark_VMContext vmCon
     Callback_SizeResult_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SizeResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SizeResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SizeResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SizeResult_Void))))};
     callSyncMethod(vmContext, resourceId, selfLayoutInfo, children, constraint, continuationResult);
 }
+void deserializeAndCallCallback_OnMoveFromTo(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnMoveFromTo))));
+    thisDeserializer.readPointer();
+    Ark_Int32 from = thisDeserializer.readInt32();
+    Ark_Int32 to = thisDeserializer.readInt32();
+    _call(_resourceId, from, to);
+}
+void deserializeAndCallSyncCallback_OnMoveFromTo(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnMoveFromTo))));
+    Ark_Int32 from = thisDeserializer.readInt32();
+    Ark_Int32 to = thisDeserializer.readInt32();
+    callSyncMethod(vmContext, resourceId, from, to);
+}
 void deserializeAndCallCallback_OnOverScrollEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -6818,6 +6838,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisArray, thisLength);
         case Kind_Callback_OnLoadStartedEvent_Void: return deserializeAndCallCallback_OnLoadStartedEvent_Void(thisArray, thisLength);
         case Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisArray, thisLength);
+        case Kind_Callback_OnMoveFromTo: return deserializeAndCallCallback_OnMoveFromTo(thisArray, thisLength);
         case Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallCallback_OnOverScrollEvent_Void(thisArray, thisLength);
         case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallCallback_OnPageBeginEvent_Void(thisArray, thisLength);
         case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallCallback_OnPageEndEvent_Void(thisArray, thisLength);
@@ -7126,6 +7147,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallSyncCallback_OnLoadInterceptEvent_Boolean(vmContext, thisArray, thisLength);
         case Kind_Callback_OnLoadStartedEvent_Void: return deserializeAndCallSyncCallback_OnLoadStartedEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallSyncCallback_onMeasureSize_SizeResult(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnMoveFromTo: return deserializeAndCallSyncCallback_OnMoveFromTo(vmContext, thisArray, thisLength);
         case Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallSyncCallback_OnOverScrollEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallSyncCallback_OnPageBeginEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallSyncCallback_OnPageEndEvent_Void(vmContext, thisArray, thisLength);

@@ -30352,6 +30352,10 @@ void impl_LazyBuild_SetTabContentLazyBuilder(Ark_NativePointer node, KSerializer
         GetAccessors()->getLazyBuildAccessor()->SetTabContentLazyBuilder(node, static_cast<CustomNodeBuilder*>(&builderValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(LazyBuild_SetTabContentLazyBuilder, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_LazyForEachOps_NotifyChange(Ark_NativePointer node, Ark_Int32 startIndex, Ark_Int32 endIndex, Ark_Int32 count) {
+        GetAccessors()->getLazyForEachOpsAccessor()->NotifyChange(node, startIndex, endIndex, count);
+}
+KOALA_INTEROP_DIRECT_V4(LazyForEachOps_NotifyChange, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
 void impl_LazyForEachOps_Sync(Ark_NativePointer node, Ark_Int32 totalCount, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Callback_CreateItem creatorValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CreateItem)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CreateItem))))};;
@@ -30359,6 +30363,26 @@ void impl_LazyForEachOps_Sync(Ark_NativePointer node, Ark_Int32 totalCount, KSer
         GetAccessors()->getLazyForEachOpsAccessor()->Sync(node, totalCount, static_cast<Callback_CreateItem*>(&creatorValueTemp), static_cast<Callback_RangeUpdate*>(&updaterValueTemp));
 }
 KOALA_INTEROP_DIRECT_V4(LazyForEachOps_Sync, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_LazyForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_OnMoveFromTo onMoveFromToOpsValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnMoveFromTo)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 from, const Ark_Int32 to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnMoveFromTo))))};;
+        const auto onMoveOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnMoveHandler onMoveOpsValueTempTmpBuf = {};
+        onMoveOpsValueTempTmpBuf.tag = onMoveOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveOpsValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnMoveHandler)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number from, const Ark_Number to)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnMoveHandler))))};
+        }
+        Opt_OnMoveHandler onMoveOpsValueTemp = onMoveOpsValueTempTmpBuf;;
+        const auto onMoveDragEventOpsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTempTmpBuf = {};
+        onMoveDragEventOpsValueTempTmpBuf.tag = onMoveDragEventOpsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((onMoveDragEventOpsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            onMoveDragEventOpsValueTempTmpBuf.value = ItemDragEventHandler_serializer::read(thisDeserializer);
+        }
+        Opt_ItemDragEventHandler onMoveDragEventOpsValueTemp = onMoveDragEventOpsValueTempTmpBuf;;
+        GetAccessors()->getLazyForEachOpsAccessor()->SyncOnMoveOps(node, static_cast<Callback_OnMoveFromTo*>(&onMoveFromToOpsValueTemp), static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(LazyForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_LetterSpacingStyle_construct(Ark_NativePointer value) {
         return GetAccessors()->getLetterSpacingStyleAccessor()->construct(static_cast<Ark_LengthMetrics>(value));
 }

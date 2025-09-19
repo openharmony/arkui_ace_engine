@@ -56,7 +56,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration } from "./../../component/textTimer"
@@ -1089,6 +1089,13 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
     }
     const _callResult  = _call(selfLayoutInfo, children, constraint)
     continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_OnMoveFromTo(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_OnMoveFromTo)
+    let from : int32 = thisDeserializer.readInt32()
+    let to : int32 = thisDeserializer.readInt32()
+    _call(from, to)
 }
 export function deserializeAndCallCallback_OnOverScrollEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3493,6 +3500,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadStartedEvent_Void: return deserializeAndCallCallback_OnLoadStartedEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnMoveFromTo: return deserializeAndCallCallback_OnMoveFromTo(thisDeserializer);
         case CallbackKind.Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallCallback_OnOverScrollEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallCallback_OnPageBeginEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallCallback_OnPageEndEvent_Void(thisDeserializer);
