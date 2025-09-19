@@ -423,8 +423,9 @@ bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
 
     ani_vm *vm = nullptr;
     status = env->GetVM(&vm);
-    if (status != ANI_OK) {
-        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail.");
+    if (status != ANI_OK || vm == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetVM fail, status: %{public}d.", status);
+        return false;
     }
     result = [vm, globalRef]() {
         if (!globalRef) {
@@ -432,9 +433,10 @@ bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
         }
         ani_env* env = nullptr;
         ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-        if (status != ANI_OK) {
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG,
+        if (status != ANI_OK || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG,
                 "[ANI] GetEnv fail. status: %{public}d", status);
+            return;
         }
         ani_fn_object func = static_cast<ani_fn_object>(globalRef);
         std::vector<ani_ref> args;
