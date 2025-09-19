@@ -742,11 +742,12 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
     }
 }
 
-void PipelineContext::AddNeedReloadNodes(const WeakPtr<UINode>& node)
+void PipelineContext::AddNeedReloadNodes(UINode* node)
 {
-    CHECK_NULL_VOID(node.Upgrade());
-    if (std::find(needReloadNodes_.begin(), needReloadNodes_.end(), node) == needReloadNodes_.end()) {
-        needReloadNodes_.push_back(node);
+    CHECK_NULL_VOID(node);
+    auto weakNode = WeakClaim(node);
+    if (std::find(needReloadNodes_.begin(), needReloadNodes_.end(), weakNode) == needReloadNodes_.end()) {
+        needReloadNodes_.push_back(weakNode);
     }
 }
 

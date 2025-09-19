@@ -30,6 +30,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
+constexpr uint32_t RESOURCE_COLOR_TYPE = 10001; // ohos_theme
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
 
 void CheckThemeId(int32_t& themeId)
@@ -1149,7 +1150,9 @@ bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, 
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, false);
     auto resType = StringUtils::StringToUintCheck(resourceType, UINT32_MAX);
-    if (resType < OHOS::Global::Resource::ResType::VALUES ||
+    if (resType == RESOURCE_COLOR_TYPE) {
+        resType = OHOS::Global::Resource::ResType::COLOR;
+    } else if (resType < OHOS::Global::Resource::ResType::VALUES ||
         resType > OHOS::Global::Resource::ResType::MAX_RES_TYPE) {
         return false;
     }
