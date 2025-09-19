@@ -252,16 +252,16 @@ void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (!optValue) {
-        // Implement Reset value
+        eventHub->SetOnNavBarStateChange(nullptr);
         return;
     }
     auto stateCallback = [changeCallback = CallbackHelper(*optValue)](bool isVisible) {
         auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
         changeCallback.Invoke(visible);
     };
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavBarStateChange(stateCallback);
 }
 void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
@@ -552,6 +552,10 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
                         const RefPtr<UINode>& uiNode) { NavigationModelStatic::SetCustomToolBar(frameNode, uiNode); },
                     node);
         }
+    } else {
+        NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());
+        NavigationModelStatic::SetToolbarConfiguration(frameNode, std::vector<NG::BarItem>());
+        NavigationModelStatic::SetCustomToolBar(frameNode, nullptr);
     }
 
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
