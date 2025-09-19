@@ -106,7 +106,7 @@ export class PathStackUtils {
                     return;
                 }
                 id = PathStackUtils.infoArray[PathStackUtils.infoArray.length - 1].navDestinationId;
-                let removeArray = PathStackUtils.infoArray.splice(inputIndex + 1);
+                let removeArray = PathStackUtils.infoArray.splice(inputIndex.toInt() + 1);
                 removeArray.forEach((element) => {
                     if (element.navDestinationId != undefined && element.navDestinationId == id) {
                         PathStackUtils.infoMaps.delete(element.navDestinationId!)

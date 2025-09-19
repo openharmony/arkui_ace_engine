@@ -52,7 +52,7 @@ export class ReusablePool implements Disposable {
     setMaxSize(value: number) {
         this._maxSize = value
         if (this._cache.length > this._maxSize) {
-            const removed = this._cache.splice(this._maxSize);
+            const removed = this._cache.splice(this._maxSize.toInt());
             scheduleCallback(() => {
                 for (const value of removed)
                     value.dispose();

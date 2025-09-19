@@ -101,12 +101,12 @@ export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
     copyWithin(target: number, start: number, end?: number): Array<Item>
     fill(value: Item, start?: number, end?: number): Array<Item>
     pop(): Item | undefined
-    push(...items: Item[]): number
+    push(...items: Item[]): int
     reverse(): Array<Item>
     shift(): Item | undefined
     sort(comparator?: (a: Item, b: Item) => number): Array<Item>
     splice(start: int, deleteCount: int | undefined, ...items: Item[]): Array<Item>
-    unshift(...items: Item[]): number
+    unshift(...items: Item[]): int
 }
 
 /**
@@ -456,7 +456,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return this.mutable.pop()
     }
 
-    push(...items: Item[]): number {
+    push(...items: Item[]): int {
         return this.mutable.push(...items)
     }
 
@@ -477,7 +477,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return array.splice(start, deleteCount ?? array.length, ...items)
     }
 
-    unshift(...items: Item[]): number {
+    unshift(...items: Item[]): int {
         return this.mutable.unshift(...items)
     }
 
