@@ -470,6 +470,7 @@
       OHOS::Ace::NG::RenderSurface::*;
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::ViewStackProcessor::*;
+      OHOS::Ace::ColorInverter::*;
       OHOS::Ace::DataAbilityHelperStandard::*;
       OHOS::Ace::DataProviderManagerStandard::*;
       OHOS::Ace::ShadowTheme::*;
