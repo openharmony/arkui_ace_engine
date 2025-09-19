@@ -111,11 +111,11 @@ function staticStateBindObservedObject(value: Object, staticCallback: () => void
     return value;
 }
 
-function compatibleStaticComponent(
+function __Interop_CreateStaticComponent_Internal(
     factory: () => Object,
-    options?: Object,
+    options?: () => Object,
     content?: () => void
-): number {
+): [() => void, number] {
     if (InteropExtractorModule.compatibleStaticComponent === undefined) {
         throw new Error('Non Method For Create StaticComponent');
     }

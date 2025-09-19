@@ -2870,6 +2870,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if ((type_ == FrontendType::STATIC_HYBRID_DYNAMIC || type_ == FrontendType::DYNAMIC_HYBRID_STATIC) &&
             subFrontend_) {
             subFrontend_->AttachPipelineContext(pipelineContext_);
+            if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+                // init uiContext and Application, use __INTEROP__ to indicate only the initialization path executed
+                subFrontend_->RunPage("__INTEROP__", "");
+            }
         }
     } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {

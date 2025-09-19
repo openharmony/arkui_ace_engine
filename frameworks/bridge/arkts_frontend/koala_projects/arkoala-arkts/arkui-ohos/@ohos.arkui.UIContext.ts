@@ -137,7 +137,7 @@ export class Router {
         throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): ComputableState<IncrementalNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> | undefined {
         throw Error("getStateRoot not implemented in Router!");
     }
 

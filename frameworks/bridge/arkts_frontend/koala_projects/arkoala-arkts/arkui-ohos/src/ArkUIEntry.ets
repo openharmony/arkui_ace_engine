@@ -32,6 +32,8 @@ import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
+import { ObserveSingleton } from './stateManagement/base/observeSingleton'
+import { StateUpdateLoop } from './stateManagement'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -318,7 +320,15 @@ export class Application {
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
         let preState = uiContextRouter.getPreState();
+        ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState, preState);
+        ObserveSingleton.instance.makeDelayedMutableStateChanges();
+        while (StateUpdateLoop.len) {
+            StateUpdateLoop.consume();
+            ObserveSingleton.instance.updateDirty();
+            this.updateStates(this.manager!, rootState, preState);
+            ObserveSingleton.instance.makeDelayedMutableStateChanges();
+        }
         // Here we request to draw a frame and call custom components callbacks.
         // ArkUINativeModule._MeasureLayoutAndDraw(this.rootPointer)
 
@@ -331,7 +341,7 @@ export class Application {
         callScheduledCallbacks()
     }
 
-    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>, pre: ComputableState<IncrementalNode> | undefined) {
+    updateStates(manager: StateManager, root: ComputableState<IncrementalNode> | undefined, pre: ComputableState<IncrementalNode> | undefined) {
         if (this.instanceId < 0) {
             InteropNativeModule._NativeLog(
                 `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
@@ -360,7 +370,9 @@ export class Application {
                 update.callback(true)
                 // Compute new tree state
                 try {
-                    root.value
+                    if (root) {
+                        root.value
+                    }
                     if (pre) {
                         pre!.value;
                     }
@@ -385,6 +397,7 @@ export class Application {
     }
 
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
+        StateUpdateLoop.canRequestFrame = true;
         enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
 

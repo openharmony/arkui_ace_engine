@@ -39,6 +39,9 @@ enum PrebuildPhase {
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
+  // for interop
+  public __interopInStaticRendering_internal_ = false;
+
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
   protected get isReusable_(): boolean {

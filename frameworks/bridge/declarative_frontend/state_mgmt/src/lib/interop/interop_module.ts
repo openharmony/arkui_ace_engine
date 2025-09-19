@@ -41,14 +41,13 @@ class InteropExtractorModule {
     static makeObserved?: (value: Object) => Object;
     static compatibleStaticComponent?: (
         factory: () => Object,
-        options?: Object,
+        options?: () => Object,
         content?: () => void
-    ) => number;
+    ) => [() => void, number];
     static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
 }
 
 class StaticInteropHook {
-    state?: Object;
     addRef?: () => void;
 }
 
@@ -63,9 +62,9 @@ function registerCallbackForMakeObserved(callback: (value: Object) => Object): v
 function registerCompatibleStaticComponentCallback(
     callback: (
         factory: () => Object,
-        options?: Object,
+        options?: () => Object,
         content?: () => void
-    ) => number
+    ) => [() => void, number]
 ): void {
     InteropExtractorModule.compatibleStaticComponent = callback;
 }

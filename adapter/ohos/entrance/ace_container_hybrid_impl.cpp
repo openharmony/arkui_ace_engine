@@ -122,8 +122,6 @@ void AceContainer::InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFw
     subFrontend_ = arktsFrontend;
     // open statemanagement interop
     subFrontend_->OpenStateMgmtInterop();
-    // init uiContext and Application, use __INTEROP__ to indicate only the initialization path executed
-    subFrontend_->RunPage("__INTEROP__", "");
     // 1.1 initialization
     if (isFormRender_) {
 #ifdef FORM_SUPPORTED
