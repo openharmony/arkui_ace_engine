@@ -3992,13 +3992,19 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
                 pipelineContext->StartWindowAnimation();
-                container->NotifyDirectionUpdate();
+                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
+                    container->NotifyDirectionUpdate();
+                }
             }
         }
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
-        if (isDynamicRender && animationOpt.IsValid()) {
+        bool needAnimate = isDynamicRender && animationOpt.IsValid() &&
+            (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT
+            && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION);
+        if (needAnimate) {
+            ACE_SCOPED_TRACE("DynamicRender SurfaceChanged need animate");
             AnimationUtils::Animate(
                 animationOpt,
                 [pipelineContext, aceView, config, reason, rsTransaction, avoidAreaMap] {
