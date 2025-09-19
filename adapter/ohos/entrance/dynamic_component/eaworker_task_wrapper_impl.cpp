@@ -132,7 +132,7 @@ bool EaWorkerTaskWrapperImpl::HasAttachCurrentThread(pthread_t tid)
     return attachCurrentThreads_.find(tid) != attachCurrentThreads_.end();
 }
 
-void Call(const TaskExecutor::Task& task, PriorityType priorityType = PriorityType::LOW)
+void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task, PriorityType priorityType = PriorityType::LOW)
 {
     Call(task, 0);
 }
@@ -164,7 +164,7 @@ void EaWorkerTaskWrapperImpl::DumpWorker()
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "DumpWorker end, worker_id: %{public}d", worker_id);
 }
 
-void Call(const TaskExecutor::Task& task, uint32_t delayTime, PriorityType priorityType = PriorityType::LOW)
+void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime, PriorityType priorityType = PriorityType::LOW)
 {
     if (!CheckWorkerId(workerId_)) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl Call due "
