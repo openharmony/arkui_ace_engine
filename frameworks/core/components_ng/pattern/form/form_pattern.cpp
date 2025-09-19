@@ -1673,7 +1673,7 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
             isRecover,
             isSkeletonAnimEnable_,
             isTransparencyEnable_);
-        externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+        node->SetAlpha(TRANSPARENT_VAL);
     } else {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1,%{public}d,"
                                   "%{public}d,%{public}d",
@@ -1681,7 +1681,7 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
             isRecover,
             isSkeletonAnimEnable_,
             isTransparencyEnable_);
-        externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+        node->SetAlpha(NON_TRANSPARENT_VAL);
     }
 
     auto renderContext = host->GetRenderContext();
@@ -2256,14 +2256,18 @@ void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, do
     if (formChildNodeType == FormChildNodeType::FORM_SURFACE_NODE) {
         auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
         CHECK_NULL_VOID(externalRenderContext);
-        externalRenderContext->OnOpacityUpdate(opacity);
+        auto rsNode = externalRenderContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetAlpha(opacity);
     } else if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE ||
         formChildNodeType == FormChildNodeType::FORM_SKELETON_NODE) {
         auto childNode = GetFormChildNode(formChildNodeType);
         CHECK_NULL_VOID(childNode);
         auto renderContext = DynamicCast<NG::RosenRenderContext>(childNode->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        renderContext->OnOpacityUpdate(opacity);
+        auto rsNode = renderContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetAlpha(opacity);
     }
 }
 
@@ -2345,7 +2349,10 @@ void FormPattern::SetExternalRenderOpacity(double opacity)
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetOpacity(opacity);
+    auto rsNode = externalRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetAlpha(opacity);
+
 }
 
 bool FormPattern::ShouldDoSkeletonAnimation()
