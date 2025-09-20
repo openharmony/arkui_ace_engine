@@ -91,8 +91,7 @@ export namespace extractors {
     return 123;
   }
   export function fromDrawContextPtr(ptr: KPointer): DrawContext {
-    const x: Object = {};
-    return x as DrawContext;
+    return ArkUIAniModule._Extractors_FromDrawContextPtr(ptr);
   }
 
   export function toLengthMetricsPtr(ptr: LengthMetrics): KPointer {

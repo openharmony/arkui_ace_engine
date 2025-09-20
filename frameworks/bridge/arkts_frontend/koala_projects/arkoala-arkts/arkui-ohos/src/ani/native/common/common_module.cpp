@@ -159,8 +159,8 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
         return nullptr;
     }
     ani_object sizeObject;
-    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
-    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float width = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.width);
+    ani_float height = modifier->getCommonAniModifier()->getPx2VpWithCurrentDensity(context.height);
     if ((status = env->Object_New(sizeClass, sizeCtor, &sizeObject, width, height)) != ANI_OK) {
         HILOGE("New Size object failed, %{public}d", status);
         return nullptr;
@@ -1214,5 +1214,16 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
         return;
     }
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
+}
+
+ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr)
+{
+    return {};
+}
+ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr)
+{
+    auto contextPtr = reinterpret_cast<NG::DrawingContext *>(ptr);
+    CHECK_NULL_RETURN(contextPtr, {});
+    return CreateDrawingContext(env, *contextPtr);
 }
 } // namespace OHOS::Ace::Ani
