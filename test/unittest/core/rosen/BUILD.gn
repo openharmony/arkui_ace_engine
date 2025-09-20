@@ -161,8 +161,10 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_task_runner_adapter_factory.cpp",
     "rosen_render_context_test.cpp",
     "rosen_render_context_test_new.cpp",
+    "detached_rs_node_manager_test.cpp",
   ]
 
   configs = [ ":rosen_render_context_config" ]
@@ -290,6 +292,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_task_runner_adapter_factory.cpp",
     "gradient_style_modifier_test.cpp",
   ]
 

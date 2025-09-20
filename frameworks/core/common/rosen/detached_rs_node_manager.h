@@ -22,6 +22,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
 
+#include "base/utils/utils.h"
 #include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace {
