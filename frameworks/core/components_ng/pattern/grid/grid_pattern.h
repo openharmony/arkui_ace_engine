@@ -272,6 +272,11 @@ public:
 
     void OnColorModeChange(uint32_t colorMode) override;
 
+    float GetContentStartOffset() const override
+    {
+        return info_.contentStartOffset_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

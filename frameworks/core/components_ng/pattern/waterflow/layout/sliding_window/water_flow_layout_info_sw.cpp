@@ -259,7 +259,8 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    const bool backFromOverScroll = Positive(prevPos) && LessOrEqual(totalOffset_, contentStartOffset_);
+    const bool backFromOverScroll =
+        Positive(prevPos - contentStartOffset_) && NonPositive(totalOffset_ - contentStartOffset_);
     return firstLayout || prevItemStart_ != itemStart_ || backFromOverScroll;
 }
 
@@ -318,15 +319,16 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     }
     switch (align_) {
         case ScrollAlign::START:
+            pos -= contentStartOffset_;
             break;
         case ScrollAlign::END:
-            pos = pos - lastMainSize_ + itemSize;
+            pos = pos - lastMainSize_ + itemSize + contentEndOffset_;
             break;
         case ScrollAlign::AUTO:
-            if (Negative(pos)) {
-                /* */
+            if (LessNotEqual(pos, -contentStartOffset_)) {
+                pos -= contentStartOffset_;
             } else if (GreatNotEqual(pos + itemSize, lastMainSize_)) {
-                pos = pos - lastMainSize_ + itemSize;
+                pos = pos - lastMainSize_ + itemSize + contentEndOffset_;
             } else {
                 pos = 0.0f; // already in viewport, no movement needed
             }

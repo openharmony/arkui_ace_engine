@@ -1601,4 +1601,37 @@ HWTEST_F(WaterFlowTestNg, ContentOffsetIsAtTopAndBottomTest, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
 }
+
+/**
+ * @tc.name: GetContentStartOffsetTest
+ * @tc.desc: test WaterFlowPattern::GetContentStartOffsetTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, GetContentStartOffsetTest, TestSize.Level1)
+{
+    CreateWaterFlow();
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetContentStartOffset(), contentOffset);
+}
+
+/**
+ * @tc.name: GetContentStartOffsetWithInvalidValueTest
+ * @tc.desc: test WaterFlowPattern::GetContentStartOffsetTest with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, GetContentStartOffsetWithInvalidValueTest, TestSize.Level1)
+{
+    CreateWaterFlow();
+    float contentOffset = WATER_FLOW_HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    EXPECT_FLOAT_EQ(pattern_->GetContentStartOffset(), 0.0f);
+}
 } // namespace OHOS::Ace::NG

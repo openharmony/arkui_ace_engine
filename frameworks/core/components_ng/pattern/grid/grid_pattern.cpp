@@ -539,12 +539,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     info_.reachStart_ = info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_);
 
     auto curDelta = info_.currentOffset_ - info_.prevOffset_;
-    info_.currentHeight_ = EstimateHeight() + info_.contentStartOffset_;
+    info_.currentHeight_ = EstimateHeight();
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
     if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
-        endHeight_ = GetTotalHeight() - GetMainContentSize();
+        endHeight_ = GetTotalHeight() - info_.contentStartOffset_ - GetMainContentSize();
     }
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);
@@ -1063,9 +1063,10 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 
 bool GridPattern::IsOutOfBoundary(bool /*useCurrentDelta*/)
 {
-    const bool scrollable = GetAlwaysEnabled() || (info_.startIndex_ > 0) ||
-                            (info_.endIndex_ < info_.childrenCount_ - 1) ||
-                            GreatNotEqual(info_.totalHeightOfItemsInView_, info_.lastMainSize_);
+    const bool scrollable =
+        GetAlwaysEnabled() || (info_.startIndex_ > 0) || (info_.endIndex_ < info_.childrenCount_ - 1) ||
+        GreatNotEqual(
+            info_.totalHeightOfItemsInView_ + info_.contentStartOffset_ + info_.contentEndOffset_, info_.lastMainSize_);
     return scrollable && (info_.IsOutOfStart() || info_.IsOutOfEnd(GetMainGap(), UseIrregularLayout()));
 }
 
@@ -1196,7 +1197,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         return offset;
     }
     if (info_.endIndex_ == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
-        float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_;
+        float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_ + info_.contentEndOffset_;
         float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
         if (GreatNotEqual(GetMainContentSize(), info_.currentOffset_ + info_.totalHeightOfItemsInView_ +
                                                     info_.contentEndOffset_ + info_.contentStartOffset_)) {
@@ -1503,7 +1504,7 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
         CHECK_NULL_RETURN(host, false);
         auto size = GridLayoutUtils::GetItemSize(&info_, RawPtr(host), *targetIndex_);
         targetPos = info_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
-        if (Negative(targetPos)) {
+        if (LessNotEqual(targetPos, -info_.contentStartOffset_)) {
             success = false;
         }
     } else {

@@ -486,7 +486,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto gridPattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(gridPattern);
     if (!gridPattern->IsInitialized()) {
-        info_.currentOffset_ = info_.contentStartOffset_;
+        info_.currentOffset_ += info_.contentStartOffset_;
     }
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
@@ -523,7 +523,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
         auto offset = info_.currentOffset_ - info_.contentStartOffset_;
-        if ((NonNegative(offset) && !canOverScrollStart_) || (NonPositive(offset) && !canOverScrollEnd_)) {
+        if (Positive(offset) && !canOverScrollStart_) {
             info_.currentOffset_ = info_.contentStartOffset_;
             info_.prevOffset_ = info_.contentStartOffset_;
         }
@@ -1079,8 +1079,8 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
         // startLine <= info_.startMainLineIndex_
         info_.startMainLineIndex_ = startLine;
         info_.UpdateStartIndexByStartLine();
-        info_.prevOffset_ = 0;
-        info_.currentOffset_ = 0;
+        info_.prevOffset_ = info_.contentStartOffset_;
+        info_.currentOffset_ = info_.contentStartOffset_;
         info_.ResetPositionFlags();
         return;
     }
@@ -1090,8 +1090,10 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
     if (!info_.gridMatrix_.empty()) {
         if (targetIndex < info_.gridMatrix_.begin()->second.begin()->second) {
             isTargetBackward = false;
+            info_.scrollAlign_ = ScrollAlign::START;
         } else if (targetIndex > info_.gridMatrix_.rbegin()->second.rbegin()->second) {
             isTargetBackward = true;
+            info_.scrollAlign_ = ScrollAlign::END;
         } else {
             return;
         }
@@ -1119,7 +1121,7 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
         info_.startMainLineIndex_ = startLine;
         info_.UpdateStartIndexByStartLine();
         info_.prevOffset_ = 0;
-        info_.currentOffset_ = info_.startIndex_ == 0 ? info_.contentStartOffset_:0;
+        info_.currentOffset_ = 0;
         info_.ResetPositionFlags();
         return;
     }
@@ -1159,10 +1161,10 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
             TAG_LOGW(AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", info_.jumpIndex_);
         }
     }
-    if (info_.jumpIndex_ == info_.childrenCount_ - 1) {
+    if (info_.scrollAlign_ == ScrollAlign::END) {
         info_.currentOffset_ -= info_.contentEndOffset_;
     }
-    if (info_.jumpIndex_ == 0) {
+    if (info_.scrollAlign_ == ScrollAlign::START) {
         info_.currentOffset_ += info_.contentStartOffset_;
     }
     if (info_.extraOffset_.has_value() && !info_.targetIndex_.has_value()) {
@@ -1563,7 +1565,9 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
         // scrollToIndex(AUTO) on first layout
         moveToEndLineIndex_ = -1;
-        return cellAveLength_;
+        if (NearZero(info_.contentEndOffset_)) {
+            return cellAveLength_;
+        }
     }
     auto currentIndex = info_.endIndex_ + 1;
     currentMainLineIndex_++; // if it fails to fill a new line backward, do [currentMainLineIndex_--]

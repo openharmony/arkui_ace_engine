@@ -105,12 +105,12 @@ public:
 
     double GetCurrentPosition() const
     {
-        return currentOffset_ - contentStartOffset_;
+        return currentOffset_;
     }
 
     double GetTotalOffset() const override
     {
-        return -currentOffset_ - contentStartOffset_;
+        return -currentOffset_;
     }
 
     void ResetPosition();
@@ -398,6 +398,11 @@ public:
     bool IsEnablePagingValid() override
     {
         return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
+    }
+
+    float GetContentStartOffset() const override
+    {
+        return contentStartOffset_;
     }
 
 protected:
