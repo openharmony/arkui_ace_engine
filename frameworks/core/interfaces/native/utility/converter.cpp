@@ -1862,7 +1862,7 @@ template<>
 RefPtr<BasicShape> Convert(const Ark_PathShape& src)
 {
     CHECK_NULL_RETURN(src, nullptr);
-    return src->shape;
+    return src->pathShape;
 }
 
 template<>
