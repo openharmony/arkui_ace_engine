@@ -109,6 +109,8 @@ class MonitorV2 {
   public static nextWatchId_ = MonitorV2.MIN_WATCH_ID;
   public static nextWatchApiId_ = MonitorV2.MIN_WATCH_FROM_API_ID;
   public static nextSyncWatchApiId_ = MonitorV2.MIN_SYNC_WATCH_FROM_API_ID;
+  // count of currently running @Monitor functions
+  public static runningCount: number = 0;
 
   private values_: Map<string, MonitorValueV2<unknown>> = new Map<string, MonitorValueV2<unknown>>();
   private target_: object; // @Monitor function 'this': data object or ViewV2
@@ -252,12 +254,14 @@ class MonitorV2 {
     }
     try {
       // exec @Monitor/AddMonitor function
+      MonitorV2.runningCount++;
       this.monitorFunction.call(this.target_, this);
     } catch (e) {
       stateMgmtConsole.applicationError(`AddMonitor exception caught for ${this.monitorFunction.name}`, e.toString());
       throw e;
     } finally {
       this.resetMonitor();
+      MonitorV2.runningCount--;
     }
   }
 
