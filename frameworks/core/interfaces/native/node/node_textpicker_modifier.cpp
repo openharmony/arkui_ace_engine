@@ -84,6 +84,19 @@ void InitTextPickerTextStyle(const char* fontInfo, uint32_t color, int32_t fontS
     textStyle.textColor = Color(color);
 }
 
+void GetColorResourceObject(FrameNode* frameNode, PickerTextStyle& textStyle)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> colorResObj;
+        Color result = textStyle.textColor.value();
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        if (colorResObj) {
+            textStyle.textColor = result;
+            textStyle.textColorResObj = colorResObj;
+        }
+    }
+}
+
 void SetTextPickerTextStyleResObj(NG::PickerTextStyle& textStyle,
     const struct ArkUIPickerTextStyleStruct* textStyleStruct)
 {
@@ -214,8 +227,8 @@ void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
     }
 }
 
-void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
-    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+void SetTextPickerTextStyleBase(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -225,6 +238,10 @@ void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Char
     }
     NG::PickerTextStyle textStyle;
     InitTextPickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     if (minFontSize) {
         textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
     }
@@ -237,6 +254,18 @@ void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Char
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
     TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    SetTextPickerTextStyleBase(node, color, fontInfo, style, minFontSize, maxFontSize, overflow, false);
+}
+
+void SetTextPickerTextStylePtr(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isDefaultColor)
+{
+    SetTextPickerTextStyleBase(node, color, fontInfo, style, minFontSize, maxFontSize, overflow, !isDefaultColor);
 }
 
 void SetTextPickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
@@ -282,8 +311,8 @@ void ResetTextPickerTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
-    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+void SetTextPickerSelectedTextStyleBase(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -293,6 +322,10 @@ void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ar
     }
     NG::PickerTextStyle textStyle;
     InitTextPickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     if (minFontSize) {
         textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
     }
@@ -305,6 +338,19 @@ void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ar
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    SetTextPickerSelectedTextStyleBase(node, color, fontInfo, style, minFontSize, maxFontSize, overflow, false);
+}
+
+void SetTextPickerSelectedTextStylePtr(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isDefaultColor)
+{
+    SetTextPickerSelectedTextStyleBase(
+        node, color, fontInfo, style, minFontSize, maxFontSize, overflow, !isDefaultColor);
 }
 
 void SetTextPickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
@@ -351,8 +397,8 @@ void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextPickerDisappearTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
-    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+void SetTextPickerDisappearTextStyleBase(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -362,6 +408,10 @@ void SetTextPickerDisappearTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, A
     }
     NG::PickerTextStyle textStyle;
     InitTextPickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     if (minFontSize) {
         textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
     }
@@ -374,6 +424,19 @@ void SetTextPickerDisappearTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, A
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
     TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTextPickerDisappearTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    SetTextPickerDisappearTextStyleBase(node, color, fontInfo, style, minFontSize, maxFontSize, overflow, false);
+}
+
+void SetTextPickerDisappearTextStylePtr(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isDefaultColor)
+{
+    SetTextPickerDisappearTextStyleBase(
+        node, color, fontInfo, style, minFontSize, maxFontSize, overflow, !isDefaultColor);
 }
 
 void SetTextPickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
@@ -840,8 +903,8 @@ void ResetTextPickerDisableTextStyleAnimation(ArkUINodeHandle node)
     TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, false);
 }
 
-void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style,
-    ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+void SetTextPickerDefaultTextStyleBase(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isNeedGetResObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -854,6 +917,10 @@ void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ark
 
     NG::PickerTextStyle textStyle;
     InitTextPickerTextStyle(fontInfo, color, style, textStyle);
+    if (isNeedGetResObj) {
+        textStyle.textColorSetByUser = true;
+        GetColorResourceObject(frameNode, textStyle);
+    }
     textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
     textStyle.maxFontSize = StringUtils::StringToCalcDimension(maxFontSize, false, DimensionUnit::FP);
     if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
@@ -863,6 +930,19 @@ void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ark
     }
 
     TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, textStyle);
+}
+
+void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style,
+    ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    SetTextPickerDefaultTextStyleBase(node, color, fontInfo, style, minFontSize, maxFontSize, overflow, false);
+}
+
+void SetTextPickerDefaultTextStylePtr(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow, bool isDefaultColor)
+{
+    SetTextPickerDefaultTextStyleBase(
+        node, color, fontInfo, style, minFontSize, maxFontSize, overflow, !isDefaultColor);
 }
 
 void SetTextPickerDefaultTextStyleWithResObj(ArkUINodeHandle node,
@@ -959,6 +1039,14 @@ void SetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUI_Bool* getV
     pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
     if (getValue[GETCOLOR]) {
         pickerBgStyle.color = Color(color);
+        pickerBgStyle.textColorSetByUser = true;
+        RefPtr<ResourceObject> colorResObj;
+        Color result = Color(color);
+        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        if (colorResObj) {
+            pickerBgStyle.color = result;
+            pickerBgStyle.colorResObj = colorResObj;
+        }
     }
     if (getValue[GETTOPLEFT]) {
         pickerBgStyle.borderRadius->radiusTopLeft = Dimension(
@@ -1090,12 +1178,15 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerSelectedIndex = SetTextPickerSelectedIndex,
         .getTextPickerTextStyle = GetTextPickerTextStyle,
         .setTextPickerTextStyle = SetTextPickerTextStyle,
+        .setTextPickerTextStylePtr = SetTextPickerTextStylePtr,
         .setTextPickerTextStyleWithResObj = SetTextPickerTextStyleWithResObj,
         .getTextPickerSelectedTextStyle = GetTextPickerSelectedTextStyle,
         .setTextPickerSelectedTextStyle = SetTextPickerSelectedTextStyle,
+        .setTextPickerSelectedTextStylePtr = SetTextPickerSelectedTextStylePtr,
         .setTextPickerSelectedTextStyleWithResObj = SetTextPickerSelectedTextStyleWithResObj,
         .getTextPickerDisappearTextStyle = GetTextPickerDisappearTextStyle,
         .setTextPickerDisappearTextStyle = SetTextPickerDisappearTextStyle,
+        .setTextPickerDisappearTextStylePtr = SetTextPickerDisappearTextStylePtr,
         .setTextPickerDisappearTextStyleWithResObj = SetTextPickerDisappearTextStyleWithResObj,
         .setTextPickerDefaultPickerItemHeight = SetTextPickerDefaultPickerItemHeight,
         .resetTextPickerCanLoop = ResetTextPickerCanLoop,
@@ -1127,6 +1218,7 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerDisableTextStyleAnimation = SetTextPickerDisableTextStyleAnimation,
         .resetTextPickerDisableTextStyleAnimation = ResetTextPickerDisableTextStyleAnimation,
         .setTextPickerDefaultTextStyle = SetTextPickerDefaultTextStyle,
+        .setTextPickerDefaultTextStylePtr = SetTextPickerDefaultTextStylePtr,
         .setTextPickerDefaultTextStyleWithResObj = SetTextPickerDefaultTextStyleWithResObj,
         .resetTextPickerDefaultTextStyle = ResetTextPickerDefaultTextStyle,
         .getTextPickerEnableHapticFeedback = GetTextPickerEnableHapticFeedback,
