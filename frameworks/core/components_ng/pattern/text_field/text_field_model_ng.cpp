@@ -2234,6 +2234,16 @@ void TextFieldModelNG::SetEllipsisMode(EllipsisMode value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value);
 }
 
+void TextFieldModelNG::SetTextAreaScrollBarColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, value);
+}
+
+void TextFieldModelNG::ResetTextAreaScrollBarColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ScrollBarColor, PROPERTY_UPDATE_MEASURE);
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -2594,4 +2604,22 @@ void TextFieldModelNG::SetKeyboardAppearanceConfig(FrameNode* frameNode, Keyboar
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearanceConfig(config);
 }
+
+void TextFieldModelNG::SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, value, frameNode);
+}
+
+Color TextFieldModelNG::GetTextAreaScrollBarColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ScrollBarColor, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::ResetTextAreaScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ScrollBarColor, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

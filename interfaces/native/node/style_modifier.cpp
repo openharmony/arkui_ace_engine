@@ -7711,6 +7711,31 @@ void ResetTextAreaSelectionMenuHidden(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuHidden(node->uiNodeHandle);
 }
 
+int32_t SetTextAreaScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaScrollBarColor(
+        node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextAreaScrollBarColor(ArkUI_NodeHandle node)
+{
+    g_numberValues[0].u32 =
+        GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaScrollBarColor(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+void ResetTextAreaScrollBarColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaScrollBarColor(node->uiNodeHandle);
+}
+
 int32_t SetEmbeddedComponentWant(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (node == nullptr || item == nullptr || item->object == nullptr) {
@@ -17349,7 +17374,8 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetTextInputTextSelection, SetTextInputEnableAutoFill, SetTextInputContentType,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextAreaMaxLines, SetTextAreaLineSpacing,
-        SetTextAreaMinLines, SetTextAreaMaxLinesWithScroll, SetTextAreaLineHeight, SetTextAreaBarState };
+        SetTextAreaMinLines, SetTextAreaMaxLinesWithScroll, SetTextAreaLineHeight, SetTextAreaBarState,
+        SetTextAreaScrollBarColor };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17366,7 +17392,8 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextInputContentLineCount, GetTextInputTextSelection, GetTextInputEnableAutoFill, GetTextInputContentType,
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
         GetTextInputHalfLeading, GetTextInputKeyboardAppearance, GetTextAreaMaxLines, GetTextAreaLineSpacing,
-        GetTextAreaMinLines, GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState };
+        GetTextAreaMinLines, GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState,
+        GetTextAreaScrollBarColor };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17386,7 +17413,8 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputTextSelection, ResetTextInputEnableAutoFill, ResetTextInputContentType,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextAreaMaxLines, ResetTextAreaLineSpacing,
-        ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState };
+        ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState,
+        ResetTextAreaScrollBarColor };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

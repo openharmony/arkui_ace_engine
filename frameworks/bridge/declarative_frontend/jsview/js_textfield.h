@@ -155,6 +155,7 @@ public:
     static void ParseOffIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
     static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
     static void UnregisterResource(const std::string& key);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

@@ -2371,6 +2371,37 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableAutoSpacing(frameNode, false);
 }
+
+void SetTextAreaScrollBarColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextAreaScrollBarColor(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("scrollBarColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("scrollBarColor");
+        }
+    }
+}
+
+ArkUI_Uint32 GetTextAreaScrollBarColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetTextAreaScrollBarColor(frameNode).GetValue();
+}
+
+void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2559,6 +2590,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
         .getTextAreaBarState = GetTextAreaBarState,
+        .setTextAreaScrollBarColor = SetTextAreaScrollBarColor,
+        .getTextAreaScrollBarColor = GetTextAreaScrollBarColor,
+        .resetTextAreaScrollBarColor = ResetTextAreaScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

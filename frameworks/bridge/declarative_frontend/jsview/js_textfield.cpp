@@ -2486,4 +2486,22 @@ void JSTextField::UnregisterResource(const std::string& key)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
 }
+
+void JSTextField::SetScrollBarColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color scrollBarColor;
+    RefPtr<ResourceObject> resObj;
+    UnregisterResource("scrollBarColor");
+    if (!JSViewAbstract::ParseJsColor(info[0], scrollBarColor, resObj)) {
+        TextFieldModel::GetInstance()->ResetTextAreaScrollBarColor();
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("scrollBarColor", resObj, scrollBarColor);
+    }
+    TextFieldModel::GetInstance()->SetTextAreaScrollBarColor(scrollBarColor);
+}
 } // namespace OHOS::Ace::Framework
