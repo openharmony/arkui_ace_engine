@@ -61,7 +61,7 @@ void PagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     MeasureType measureType = MeasureType::MATCH_PARENT;
     auto container = Container::Current();
-    if (container && container->IsDynamicRender()) {
+    if (container && container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         measureType = MeasureType::MATCH_CONTENT;
     }
     host->GetLayoutProperty()->UpdateMeasureType(measureType);

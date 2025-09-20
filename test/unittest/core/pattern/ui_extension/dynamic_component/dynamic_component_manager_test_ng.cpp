@@ -124,7 +124,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     OffsetF offsetF(2.0, 3.0);
     OffsetF offsetF2(2.0, 3.0);
     frameNode->lastFrameRect_ = std::make_unique<RectF>();
-    frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f));
+    frameNode->lastParentOffsetToWindow_ =
+        std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f));
     frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
     DynamicComponentManager::HandleDynamicRenderOnAreaChange(frameNode, rectF, offsetF, offsetF2);
 

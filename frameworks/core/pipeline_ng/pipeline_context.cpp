@@ -1802,8 +1802,12 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         return;
     }
     if (container->IsUseStageModel()) {
-        callback();
-        FlushBuild();
+        bool isDCRotation = (type == WindowSizeChangeReason::ROTATION) &&
+            (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT);
+        if (!isDCRotation) {
+            callback();
+            FlushBuild();
+        }
     } else {
         taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
     }
@@ -1945,6 +1949,16 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             FlushUITasks();
             if (textFieldManager_) {
                 DynamicCast<TextFieldManagerNG>(textFieldManager_)->ScrollTextFieldToSafeArea();
+            }
+            auto container = Container::GetContainer(instanceId_);
+            CHECK_NULL_VOID(container);
+            auto uIContentType = container->GetUIContentType();
+            if (uIContentType == UIContentType::DYNAMIC_COMPONENT) {
+                auto frontend = weakFrontend_.Upgrade();
+                if (frontend) {
+                    frontend->OnSurfaceChanged(width, height);
+                }
+                FlushBuild();
             }
             FlushUITasks();
             if (!textFieldManager_) {
