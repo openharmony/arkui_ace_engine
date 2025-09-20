@@ -116,6 +116,8 @@ constexpr float MAX_SIZE_HEIGHT = -100.0f;
 constexpr float OFFSET_X = -10.0f;
 constexpr float OFFSET_X_NEW = -20.0f;
 constexpr float ONE_HUNDRED = 100.0f;
+const std::string EMPTY_TEXT = "";
+const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
 } // namespace
 
@@ -492,6 +494,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
 
     auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
     menuNode->instanceId_ = container->GetInstanceId();
     AceEngine::Get().AddContainer(container->GetInstanceId(), container);
 
@@ -516,6 +519,70 @@ HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper001, TestSize.Level1)
     menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
     EXPECT_FALSE(NearZero(result.GetX()));
     EXPECT_TRUE(NearZero(result.GetY()));
+
+    menuNode->instanceId_ = MIN_SUBCONTAINER_ID;
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenu(false);
+    menuAlgorithm->ModifyPositionToWrapper(AceType::RawPtr(menuNode), result);
+    EXPECT_FALSE(NearZero(result.GetX()));
+    EXPECT_TRUE(NearZero(result.GetY()));
+}
+
+/**
+ * @tc.name: ModifyPositionToWrapper002
+ * @tc.desc: Test InitTargetSizeAndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, ModifyPositionToWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menuLayoutAlgorithm
+     */
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(nodeId, TEXT_TAG, MenuType::CONTEXT_MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(nodeId, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+    
+    menuLayoutAlgorithm->targetNodeId_ = nodeId;
+    menuLayoutAlgorithm->targetTag_ = "text";
+    menuLayoutAlgorithm->canExpandCurrentWindow_ = true;
+    menuPattern->SetIsSelectMenu(false);
+    auto target = FrameNode::GetOrCreateFrameNode("text", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(target, nullptr);
+
+    /**
+     * @tc.steps: step2. layoutWrapper, target node and the geometry node of target is not null
+     */
+    std::vector<SelectParam> params;
+    params.push_back({ "MenuItem", "Icon" });
+    auto frameNode = MenuView::Create(params, 1, EMPTY_TEXT);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    layoutProp->UpdateLayoutConstraint(parentLayoutConstraint);
+    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode* layoutWrapper =
+        new LayoutWrapperNode(frameNode, menuGeometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+    geometryNode->frame_ = geometryProperty;
+    target->geometryNode_ = geometryNode;
+
+    /**
+     * @tc.steps: step3. execute InitTargetSizeAndPosition that isSelectMenu is false
+     * @tc.expected: result as expected
+     */
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
 
 /**
