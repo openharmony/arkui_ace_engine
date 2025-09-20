@@ -46,7 +46,7 @@ void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
     CHECK_NULL_VOID(context);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
     CHECK_NULL_VOID(stageManager);
-    if (!stageManager->GetForceSplitEnable()) {
+    if (!stageManager->IsForceSplitSupported()) {
         return;
     }
     auto forceSplitMgr = context->GetForceSplitManager();
@@ -147,7 +147,7 @@ bool ParallelPageRouterManager::DetectPrimaryPage(const RouterPageInfo& target, 
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, false);
 
-    if (!stageManager->GetDetectPrimaryPageEnable()) {
+    if (!stageManager->IsForceSplitSupported()) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "No need for home page recognition");
         return false;
     }
