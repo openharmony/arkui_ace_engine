@@ -287,6 +287,7 @@ public:
     bool IsAILink() const override;
     int GetSourceTypeV2() const override;
     int GetMediaTypeV2() const override;
+    int GetContextMenuMediaType() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
