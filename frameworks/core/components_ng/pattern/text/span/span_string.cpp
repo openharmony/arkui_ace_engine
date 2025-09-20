@@ -132,6 +132,7 @@ void UpdateImageLayoutPropertyByImageSpanAttribute(std::optional<ImageSpanAttrib
     auto imageLayoutProperty = imageNode->GetLayoutProperty<NG::ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imagePattern->SetSyncLoad(imgAttr.syncLoad);
+    imagePattern->SetSupportSvg2(imgAttr.supportSvg2);
     if (imgAttr.size.has_value()) {
         imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
     }

@@ -123,6 +123,15 @@ void JSImageSpan::OnError(const JSCallbackInfo& args)
     }
 }
 
+void JSImageSpan::SupportSvg2(const JSCallbackInfo& info)
+{
+    bool enable = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], enable);
+    }
+    ImageModel::GetInstance()->SetSupportSvg2(enable);
+}
+
 void JSImageSpan::SetBaselineOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -208,6 +217,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImageSpan>::StaticMethod("colorFilter", &JSImageSpan::SetColorFilter, opt);
     JSClass<JSImageSpan>::StaticMethod("baselineOffset", &JSImageSpan::SetBaselineOffset);
+    JSClass<JSImageSpan>::StaticMethod("supportSvg2", &JSImageSpan::SupportSvg2);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

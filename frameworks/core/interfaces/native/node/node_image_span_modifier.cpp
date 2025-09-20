@@ -15,6 +15,8 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 
 #include "core/components/image/image_component.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 
@@ -35,6 +37,7 @@ constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
 constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
 constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
 constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
+constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 constexpr VerticalAlign DEFAULT_VERTICAL_ALIGN = VerticalAlign::BOTTOM;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
@@ -256,6 +259,75 @@ void SetImageSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bund
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::SetSrc(frameNode, src, bundleName, moduleName, isUriPureNumber);
 }
+
+struct NativeHandle {
+    std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter> value = nullptr;
+};
+
+void SetImageSpanDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
+{
+    ViewAbstract::CheckMainThread();
+    CHECK_NULL_VOID(colorFilter);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto handle = reinterpret_cast<NativeHandle*>(colorFilter);
+    auto filterPtr = handle->value;
+    CHECK_NULL_VOID(filterPtr);
+    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
+    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
+}
+
+void* GetImageSpanDrawingColorFilter(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    CHECK_NULL_RETURN(drawingColorFilter, nullptr);
+    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
+        drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    CHECK_NULL_RETURN(filterSptr, nullptr);
+    return reinterpret_cast<void*>(filterSptr);
+}
+
+void SetSupportSvg2(ArkUINodeHandle node, ArkUI_Bool supportSvg2)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSupportSvg2(frameNode, supportSvg2);
+}
+
+void ResetSupportSvg2(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetSupportSvg2(frameNode);
+}
+
+int32_t GetSupportSvg2(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ImageModelNG::GetSupportSvg2(frameNode);
+}
+
+void GetImageSpanColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
+{
+    ViewAbstract::CheckMainThread();
+    CHECK_NULL_VOID(colorFilter);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
+    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE
+                                  ? static_cast<int32_t>(filterFloatArray.size())
+                                  : static_cast<int32_t>(MAX_COLOR_FILTER_SIZE);
+    for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
+        *(colorFilter->filterArray+i) = filterFloatArray[i];
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -282,8 +354,14 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
         .setImageSpanColorFilter = SetImageSpanColorFilter,
         .resetImageSpanColorFilter = ResetImageSpanColorFilter,
+        .getImageSpanColorFilter = GetImageSpanColorFilter,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
         .setImageSpanSrc = SetImageSpanSrc,
+        .setImageSpanDrawingColorFilter = SetImageSpanDrawingColorFilter,
+        .getImageSpanDrawingColorFilter = GetImageSpanDrawingColorFilter,
+        .setSupportSvg2 = SetSupportSvg2,
+        .resetSupportSvg2 = ResetSupportSvg2,
+        .getSupportSvg2 = GetSupportSvg2,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
