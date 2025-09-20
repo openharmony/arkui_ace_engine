@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/rosen/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
@@ -971,6 +972,8 @@ WebDelegate::~WebDelegate()
     UnregisterAvoidAreaChangeListener(instanceId_);
     UnRegisterConfigObserver();
     UnregisterFreeMultiWindowListener();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(surfaceRsNode_);
 }
 
 void WebDelegate::ReleasePlatformResource()
