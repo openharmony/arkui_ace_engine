@@ -289,6 +289,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     rendererDumpInfo_.ReSet();
     // create UI Content
     TAG_LOGI(aceLogTag_, "create UI Content");
+    ACE_SCOPED_TRACE("create UI Content");
     uiContent_ = UIContent::Create(abilityContext, runtime_, true);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->SetUIContentType(uIContentType_);
