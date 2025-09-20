@@ -1288,6 +1288,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 void ImagePattern::OnRecycle()
 {
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnRecycle. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
+    ACE_SCOPED_TRACE("OnRecycle %s", imageDfxConfig_.ToStringWithSrc().c_str());
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1305,6 +1306,7 @@ void ImagePattern::OnRecycle()
 
 void ImagePattern::OnReuse()
 {
+    ACE_SCOPED_TRACE("OnReuse %s", imageDfxConfig_.ToStringWithSrc().c_str());
     RegisterWindowStateChangedCallback();
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
@@ -1864,6 +1866,7 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("visibility: ").append(previousVisibility_ ? "true" : "false"));
     DumpMenmoryNameId();
 }
 
