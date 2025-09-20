@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "accessibility_frame_node_utils.h"
 #include "base/log/log_wrapper.h"
-#include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/accessibility/accessibility_manager.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,6 +85,62 @@ bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINod
     }
     return false;
 }
+
+bool IsInPageNodes(int32_t pageId, const std::vector<WeakPtr<FrameNode>>& pageNodes)
+{
+    for (const auto& weak : pageNodes) {
+        auto page = weak.Upgrade();
+        CHECK_NULL_CONTINUE(page);
+        if (pageId == page->GetPageId()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void GetFrameNodeChildren(
+    const RefPtr<UINode>& uiNode,
+    std::vector<RefPtr<FrameNode>>& children,
+    const FrameNodeHandleParam& handleParam,
+    const RefPtr<AccessibilityManager>& accessibilityManager)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (AccessibilityFrameNodeUtils::IsValidEmbedTarget(frameNode, accessibilityManager)) {
+        return;
+    }
+
+    if (frameNode) {
+        CHECK_NULL_VOID(frameNode->IsActive());
+        if (uiNode->GetTag() == "page") {
+            if (!handleParam.pageNodes.empty() && !IsInPageNodes(uiNode->GetPageId(), handleParam.pageNodes)) {
+                return;
+            }
+        } else if (!frameNode->IsInternal() && uiNode->GetTag() != "stage") {
+            children.emplace_back(frameNode);
+            return;
+        }
+
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            GetFrameNodeChildren(overlayNode, children, handleParam, accessibilityManager);
+        }
+
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+        auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
+        if (uiVirtualNode != nullptr) {
+            auto virtualNode = AceType::DynamicCast<FrameNode>(uiVirtualNode);
+            if (virtualNode != nullptr) {
+                GetFrameNodeChildren(virtualNode, children, handleParam, accessibilityManager);
+                return;
+            }
+        }
+    }
+
+    for (const auto& frameChild : uiNode->GetChildren(true)) {
+        GetFrameNodeChildren(frameChild, children, handleParam, accessibilityManager);
+    }
+}
 } // namespace
 
 void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
@@ -108,7 +164,7 @@ void AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(const RefPtr<
     if (NearEqual(rect.Width(), 0.0) && NearEqual(rect.Height(), 0.0)) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Component %{public}s is not visible: width and height are both zero.",
                  std::to_string(frameNode->GetAccessibilityId()).c_str());
-        clipVisible = false;
+                 clipVisible = false;
     }
     std::string parentPath;
     while (parent) {
@@ -179,5 +235,62 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId
         }
     }
     return nullptr;
+}
+
+bool AccessibilityFrameNodeUtils::IsValidEmbedTarget(
+    const RefPtr<FrameNode>& node, const RefPtr<AccessibilityManager>& accessibilityManager)
+{
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(accessibilityManager, false);
+#ifdef SUPPORT_ACCESSIBILITY_FOCUS_MOVE
+    return accessibilityManager->CheckAndGetEmbedFrameNode(frameNode) != INVALID_ACCESSIBILITY_NODE_ID;
+#else
+    return false;
+#endif
+}
+
+void AccessibilityFrameNodeUtils::GetChildrenFromFrameNode(
+    const RefPtr<FrameNode>& node,
+    std::vector<RefPtr<FrameNode>>& children,
+    const FrameNodeHandleParam& handleParam,
+    const RefPtr<AccessibilityManager>& accessibilityManager)
+{
+    auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+    auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
+    if (uiVirtualNode != nullptr) {
+        auto virtualNode = AceType::DynamicCast<FrameNode>(uiVirtualNode);
+        if (virtualNode != nullptr) {
+            GetFrameNodeChildren(virtualNode, children, handleParam, accessibilityManager);
+        }
+    } else {
+        for (const auto& item : node->GetChildren(true)) {
+            GetFrameNodeChildren(item, children, handleParam, accessibilityManager);
+        }
+
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, handleParam, accessibilityManager);
+        }
+    }
+}
+
+void AccessibilityFrameNodeUtils::GetLastestPageNodes(
+    const RefPtr<FrameNode>& node,
+    std::vector<WeakPtr<FrameNode>>& pageNodes)
+{
+    auto context = node->GetContextRefPtr();
+    auto ngPipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    auto stageManager = ngPipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    if (stageManager->IsSplitMode()) {
+        for (auto& pageNode : stageManager->GetTopPagesWithTransition()) {
+            pageNodes.push_back(pageNode);
+        }
+        return;
+    }
+    auto page = stageManager->GetLastPageWithTransition();
+    CHECK_NULL_VOID(page);
+    pageNodes.push_back(page);
 }
 } // namespace OHOS::Ace::NG
