@@ -659,4 +659,4 @@ export function borderRadiuses(all: number): Corners<number> {
 }
 
 export type NodeBorderRadiuses = Corners<number>;
-export type Offset = Vector2;
+export type NodeOffset = Vector2;
