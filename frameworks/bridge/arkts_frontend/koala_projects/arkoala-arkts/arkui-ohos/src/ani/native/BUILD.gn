@@ -81,6 +81,7 @@ ohos_shared_library("arkoala_native_ani") {
     "water_flow/water_flow_module.cpp",
     "list/list_children_main_size_module.cpp",
     "web/web_module_methods.cpp",
+    "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
     "condition_scope/condition_scope.cpp",
     "UINode/uinode_module_methods.cpp",

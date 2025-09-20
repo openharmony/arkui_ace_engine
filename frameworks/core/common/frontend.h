@@ -431,7 +431,7 @@ public:
 
     // For arkts 1.2
     virtual void NotifyArkoalaConfigurationChange() {}
-
+    virtual void InitXBarProxy() {}
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;
