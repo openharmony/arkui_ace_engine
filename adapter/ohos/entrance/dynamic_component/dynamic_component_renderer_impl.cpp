@@ -804,7 +804,7 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             " hasSyncTransaction:[%d]", uiContent->GetInstanceId(), config.ToString().c_str(),
             std::to_string(syncId).c_str(), optionIsValid, static_cast<int32_t>(reason),
             hostRSTransaction == nullptr);
-        if (option) {
+        if (option == nullptr) {
             TAG_LOGI(aceLogTag, "option points to nullptr");
             return;
         }
