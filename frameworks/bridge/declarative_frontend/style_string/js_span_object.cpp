@@ -897,6 +897,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
         "layoutStyle", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
     JSClass<JSImageAttachment>::CustomProperty(
         "colorFilter", &JSImageAttachment::GetImageColorFilter, &JSImageAttachment::SetImageColorFilter);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "supportSvg2", &JSImageAttachment::GetSupportSvg2, &JSImageAttachment::SetSupportSvg2);
     JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
 }
 
@@ -990,6 +992,11 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     auto syncLoadObj = obj->GetProperty("syncLoad");
     if (!syncLoadObj->IsNull() && syncLoadObj->IsBoolean()) {
         imageStyle.syncLoad = syncLoadObj->ToBoolean();
+    }
+
+    auto supportSvg2 = obj->GetProperty("supportSvg2");
+    if (!supportSvg2->IsNull() && supportSvg2->IsBoolean()) {
+        imageStyle.supportSvg2 = supportSvg2->ToBoolean();
     }
 
     ParseJsImageSpanColorFilterAttribute(obj, imageStyle);
@@ -1234,6 +1241,16 @@ void JSImageAttachment::GetImageColorFilter(const JSCallbackInfo& info)
         CHECK_NULL_VOID(colorFilterJsVal->IsObject());
         info.SetReturnValue(JSRef<JSObject>::Cast(colorFilterJsVal));
     }
+}
+
+void JSImageAttachment::GetSupportSvg2(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(imageAttr->supportSvg2)));
 }
 
 const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()

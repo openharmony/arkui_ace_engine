@@ -2728,6 +2728,36 @@ typedef enum {
      */
     NODE_IMAGE_SPAN_BASELINE_OFFSET = 3003,
     /**
+     * @brief Defines the color filter of the image span.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem } parameter for setting the attribute:\n 
+     * .value [0].f32 to . value [19].f32: filter matrix array. \n 
+     * .size :5 x 4 filter array size. \n 
+     * .object : the pointer to OH _ Drawing _ ColorFilter . Either . value or . object is set. \n 
+     * \n 
+     * Format of the return value {@ link ArkUI _ AttributeItem ):\n 
+     * .value [0].f32 to . value [19].f32: filter matrix array. \n 
+     * .size: 5 x 4 filter array size. \n 
+     * .object: the pointer to OH_Drawing_ColorFilter. \n 
+     * 
+     * @since 21
+     */
+    NODE_IMAGE_SPAN_COLOR_FILTER = 3004,
+    /**
+     * @brief Set the range of SVG parsing capabilities supported through enable switch.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether color fliter support svg. The default value is <b>false</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: enable switch.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SPAN_SUPPORT_SVG2 = 3005,
+    /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

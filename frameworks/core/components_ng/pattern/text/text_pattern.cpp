@@ -6012,9 +6012,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
-        auto imagePattern = imageNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
-        imagePattern->SetSyncLoad(imgAttr.syncLoad);
+        SetImageNodePattern(imageNode, imgAttr);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -6056,6 +6054,15 @@ void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     gesture->SetHitTestMode(HitTestMode::HTMNONE);
+}
+
+void TextPattern::SetImageNodePattern(RefPtr<ImageSpanNode> imageNode, const ImageSpanAttribute& imageSpanAttr)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(imageSpanAttr.syncLoad);
+    imagePattern->SetSupportSvg2(imageSpanAttr.supportSvg2);
 }
 
 void TextPattern::ProcessSpanString()

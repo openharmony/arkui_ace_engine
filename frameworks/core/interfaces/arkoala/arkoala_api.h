@@ -5383,12 +5383,18 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanOnError)(ArkUINodeHandle node);
     void (*setImageSpanColorFilter)(ArkUINodeHandle node, const ArkUI_Float32* array, ArkUI_Int32 length);
     void (*resetImageSpanColorFilter)(ArkUINodeHandle node);
+    void (*getImageSpanColorFilter)(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter);
     void (*setImageSpanBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageSpanBorderRadius)(ArkUINodeHandle node);
     ArkUI_Float32 (*getImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Int32 unit);
     void (*setImageSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
         ArkUI_Bool isUriPureNumber);
+    void (*setImageSpanDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
+    void* (*getImageSpanDrawingColorFilter)(ArkUINodeHandle node);
+    void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetSupportSvg2)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSupportSvg2)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {

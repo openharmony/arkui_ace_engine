@@ -12422,6 +12422,83 @@ const ArkUI_AttributeItem* GetImageSpanBaselineOffset(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetImageSpanColorFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWENTY_PARAM);
+    bool isObject = CheckAttributeObject(item);
+    if ((actualSize < 0 && !isObject) || (actualSize > 0 && isObject)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (isObject) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanDrawingColorFilter(
+            node->uiNodeHandle, item->object);
+        return ERROR_CODE_NO_ERROR;
+    }
+    std::vector<float> colorFloatArray;
+    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_TWENTY_PARAM; i++) {
+        colorFloatArray.emplace_back(item->value[i].f32);
+    }
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+        node->uiNodeHandle, &colorFloatArray[0], colorFloatArray.size());
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetImageSpanColorFilter(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto colorFilter =
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->getImageSpanDrawingColorFilter(node->uiNodeHandle);
+    if (colorFilter) {
+        g_attributeItem.object = colorFilter;
+        g_attributeItem.size = 0;
+        return &g_attributeItem;
+    }
+    g_attributeItem.size = REQUIRED_TWENTY_PARAM;
+    for (size_t i = 0; i < REQUIRED_TWENTY_PARAM; i++) {
+        g_numberValues[i].f32 = 0;
+    }
+    ArkUIFilterColorType colorFilterType = { .filterArray = &g_numberValues[0].f32,
+        .filterSize = REQUIRED_TWENTY_PARAM };
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->getImageSpanColorFilter(
+        node->uiNodeHandle, &colorFilterType);
+    return &g_attributeItem;
+}
+
+void ResetImageSpanColorFilter(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanColorFilter(node->uiNodeHandle);
+}
+
+int32_t SetImageSpanSupportSvg2(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->setSupportSvg2(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetImageSpanSupportSvg2(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 =
+        static_cast<int32_t>(fullImpl->getNodeModifiers()->getImageSpanModifier()->getSupportSvg2(node->uiNodeHandle));
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetImageSpanSupportSvg2(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->resetSupportSvg2(node->uiNodeHandle);
+}
+
 int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -17096,7 +17173,8 @@ void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt, SetImageSpanBaselineOffset };
+    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt, SetImageSpanBaselineOffset,
+        SetImageSpanColorFilter, SetImageSpanSupportSvg2 };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17106,7 +17184,8 @@ int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 
 const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt, GetImageSpanBaselineOffset };
+    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt, GetImageSpanBaselineOffset,
+        GetImageSpanColorFilter, GetImageSpanSupportSvg2 };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17116,7 +17195,8 @@ const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t 
 
 void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt, ResetImageSpanBaselineOffset };
+    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt, ResetImageSpanBaselineOffset,
+        ResetImageSpanColorFilter, ResetImageSpanSupportSvg2 };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

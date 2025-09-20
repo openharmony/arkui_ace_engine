@@ -286,6 +286,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         pattern->SetSyncLoad(true);
     } else if (options.imageAttribute.has_value()) {
         pattern->SetSyncLoad(options.imageAttribute.value().syncLoad);
+        pattern->SetSupportSvg2(options.imageAttribute.value().supportSvg2);
     }
     auto index = host->GetChildren().size();
     imageNodes.push_back(imageNode);

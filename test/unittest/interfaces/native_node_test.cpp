@@ -2387,6 +2387,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SRC, &item);
     value[0].f32 = 10.0f;
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET, &item);
+    ArkUI_NumberValue value20[] = { { .f32 = 0.239f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f } };
+
+    ArkUI_AttributeItem item20 = { value20, sizeof(value20) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER, &item20), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_NumberValue svg[] = { { .i32 = 1 } };
+    ArkUI_AttributeItem svg2 = { svg, sizeof(svg) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2, &svg2), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
