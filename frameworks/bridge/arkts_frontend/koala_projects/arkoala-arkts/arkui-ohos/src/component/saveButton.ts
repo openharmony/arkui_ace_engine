@@ -94,10 +94,16 @@ export enum SaveButtonOnClickResult {
 }
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
+    setSaveButtonOptions(options?: SaveButtonOptions): this {
+        return this
+    }
     onClick(value: SaveButtonCallback | undefined): this
 }
 export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
     onClick_value?: SaveButtonCallback | undefined
+    public setSaveButtonOptions(options?: SaveButtonOptions): this {
+        return this
+    }
     public onClick(value: SaveButtonCallback | undefined): this {
         return this
     }

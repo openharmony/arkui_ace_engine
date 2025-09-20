@@ -80,10 +80,16 @@ export enum PasteButtonOnClickResult {
 }
 export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
+    setPasteButtonOptions(options?: PasteButtonOptions): this {
+        return this
+    }
     onClick(value: PasteButtonCallback | undefined): this
 }
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined
+    public setPasteButtonOptions(options?: PasteButtonOptions): this {
+        return this
+    }
     public onClick(value: PasteButtonCallback | undefined): this {
         return this
     }
