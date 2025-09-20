@@ -278,6 +278,10 @@ void RosenWindow::Destroy()
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->SendMessages();
+    auto rsUIContext = rsUIDirector_->GetRSUIContext();
+    if (rsUIContext) {
+        rsUIContext->DetachFromUI();
+    }
     if (!directorFromWindow_) {
         rsUIDirector_->Destroy();
     }
