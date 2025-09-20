@@ -121,4 +121,7 @@ void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
 void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
     const std::string &formName)
 {}
+
+void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInfo& generalEventErrorInfo)
+{}
 } // namespace OHOS::Ace
