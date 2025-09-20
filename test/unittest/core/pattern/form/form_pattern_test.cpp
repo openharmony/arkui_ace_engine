@@ -2070,7 +2070,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
  * @tc.desc: GetCurrentTimestamp
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level0)
+HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level1)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
