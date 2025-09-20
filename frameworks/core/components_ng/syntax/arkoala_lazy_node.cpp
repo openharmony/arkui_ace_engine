@@ -99,10 +99,14 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child && !needBuild) {
         return nullptr;
     }
-    if (createItem_) {
+    if (!child && createItem_) {
         child = createItem_(indexMapped);
     }
-    CHECK_NULL_RETURN(child, nullptr);
+    if (!child) {
+        TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH,
+            "(%{public}d) createItem_ failed to create new node for index %{public}d", GetId(), indexMapped);
+        return nullptr;
+    }
     node4Index_.Put(indexMapped, child);
 
     if (isCache) {
