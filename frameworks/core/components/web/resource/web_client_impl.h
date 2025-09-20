@@ -335,6 +335,9 @@ public:
 
     void OnPdfScrollAtBottom(const std::string& url) override;
     void OnPdfLoadEvent(int32_t result, const std::string& url) override;
+    void OnInsertBlanklessFrameWithSize(const std::string& pathToFrame,
+                                        uint32_t width,
+                                        uint32_t height) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

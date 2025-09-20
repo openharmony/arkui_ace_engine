@@ -1297,8 +1297,11 @@ public:
     int GetHitTestResult();
 
     void RemoveSnapshotFrameNode(int removeDelayTime);
-    void CreateSnapshotFrameNode(const std::string& snapshotPath);
+    void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
+    void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
+    double ResizeWidth() const;
+    double ResizeHeight() const;
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
