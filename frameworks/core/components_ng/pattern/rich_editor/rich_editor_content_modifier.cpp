@@ -70,11 +70,24 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
     }
 
     for (auto iter = lb; iter <= ub && iter != paragraphs.end(); ++iter) {
-        auto& info = *iter;
-        info.paragraph->Paint(drawingContext.canvas, offset.GetX(), info.topPos + offset.GetY());
+        const auto& info = *iter;
+        float x = AdjustParagraphX(info, contentRect);
+        float y = info.topPos + offset.GetY();
+        info.paragraph->Paint(drawingContext.canvas, x, y);
     }
 
     PaintCustomSpan(drawingContext);
+}
+
+float RichEditorContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect)
+{
+    auto x = contentRect.GetOffset().GetX();
+    CHECK_NULL_RETURN(info.paragraph && info.paragraph->empty(), x);
+    const auto& paraStyle = info.paragraphStyle;
+    CHECK_NULL_RETURN(paraStyle.leadingMargin && paraStyle.leadingMargin->pixmap, x);
+    CHECK_NULL_RETURN(paraStyle.direction == TextDirection::RTL, x);
+    float leadingMarginWidth = static_cast<float>(paraStyle.leadingMargin->size.Width().ConvertToPx());
+    return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
 }
 
 void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)

@@ -409,4 +409,47 @@ HWTEST_F(RichEditorContentModifierTestNg, PaintCustomSpan006, TestSize.Level1)
     testContentModifier->PaintCustomSpan(context);
     EXPECT_TRUE(info.customSpanIndex >= static_cast<int32_t>(rectsForPlaceholderSize));
 }
+
+/**
+ * @tc.name: AdjustParagraphX001
+ * @tc.desc: Test AdjustParagraphX.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorContentModifierTestNg, AdjustParagraphX001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentPattern = richEditorPattern->contentPattern_;
+    ASSERT_NE(contentPattern, nullptr);
+    auto testContentModifier = AceType::MakeRefPtr<RichEditorContentModifier>(
+        richEditorPattern->textStyle_, &richEditorPattern->paragraphs_, contentPattern);
+
+    ParagraphManager::ParagraphInfo info;
+    RectF contentRect{0, 0, 100, 100};
+    EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 0); // info.paragraph is nullptr
+
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, empty()).WillRepeatedly(Return(false));
+    info.paragraph = paragraph;
+    EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 0); // info.paragraph is empty
+
+    paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, empty()).WillRepeatedly(Return(true));
+    info.paragraph = paragraph;
+    EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 0); // leadingMargin is nullopt
+
+    ParagraphStyle paragraphStyle;
+    LeadingMargin leadingMargin;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    leadingMargin.pixmap = PixelMap::CreatePixelMap(voidPtr);
+    paragraphStyle.leadingMargin = leadingMargin;
+    paragraphStyle.direction = TextDirection::LTR;
+    info.paragraphStyle = paragraphStyle;
+    EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 0);
+
+    paragraphStyle.direction = TextDirection::RTL;
+    info.paragraphStyle = paragraphStyle;
+    EXPECT_EQ(testContentModifier->AdjustParagraphX(info, contentRect), 100);
+}
+
 } // namespace OHOS::Ace::NG
