@@ -23,7 +23,11 @@
 #define private public
 #define protected public
 
+#include "render_service_client/core/ui/rs_canvas_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+
 #include "core/common/rosen/detached_rs_node_manager.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #undef private
 #undef protected
@@ -47,7 +51,14 @@ HWTEST_F(DetachedRsNodeManagerTest, DetachedRsNodeManagerTest001, TestSize.Level
      */
     EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
     EXPECT_NE(DetachedRsNodeManager::GetInstance().taskExecutor_, nullptr);
-    EXPECT_EQ(DetachedRsNodeManager::GetInstance().taskExecutor_, DetachedRsNodeManager::GetInstance().taskExecutor_);
+
+    auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create();
+    rsUIDirector->Init(true, true);
+    auto rsContext = rsUIDirector->GetRSUIContext();
+    auto rsNode = Rosen::RSCanvasNode::Create(false, false, rsContext);
+
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
 }
 } // namespace OHOS::Ace::NG
 

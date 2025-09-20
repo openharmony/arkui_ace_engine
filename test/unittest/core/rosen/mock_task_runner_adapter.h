@@ -26,6 +26,11 @@ public:
     MockTaskRunnerAdapter() = default;
     ~MockTaskRunnerAdapter() = default;
 
+    void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW)
+    {
+        task();
+    }
+
     bool RunsTasksOnCurrentThread() override
     {
         return true;

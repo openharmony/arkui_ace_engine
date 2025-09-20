@@ -49,21 +49,32 @@ public:
         LOGD("DetachedRsNodeManager start %{public}" PRIu64 ".", rsUIContext->GetToken());
         taskExecutor_->PostTask(
             [rsUIContext]() {
-                if (!rsUIContext) {
-                    LOGE("DetachedRsNodeManager fail, rsUIContext is nullptr");
-                    return;
-                }
-                auto transition = rsUIContext->GetRSTransaction();
-                if (!transition) {
-                    LOGE("DetachedRsNodeManager fail, transition is nullptr");
-                    return;
-                }
-                transition->FlushImplicitTransaction();
+                DetachedRsNodeManager::GetInstance().FlushImplicitTransaction(rsUIContext);
                 LOGD("DetachedRsNodeManager end %{public}" PRIu64 ".", rsUIContext->GetToken());
-                std::lock_guard<std::mutex> lock(DetachedRsNodeManager::GetInstance().mutex_);
-                DetachedRsNodeManager::GetInstance().rsUIContexts_.erase(rsUIContext.get());
+                DetachedRsNodeManager::GetInstance().RemoveRSUIContext(rsUIContext);
             },
             "DetachedRsNodeManager", PriorityType::LOW);
+    }
+
+    void FlushImplicitTransaction(std::shared_ptr<Rosen::RSUIContext> rsUIContext)
+    {
+        if (!rsUIContext) {
+            LOGE("DetachedRsNodeManager fail, rsUIContext is nullptr");
+            return;
+        }
+        auto transition = rsUIContext->GetRSTransaction();
+        if (!transition) {
+            LOGE("DetachedRsNodeManager fail, transition is nullptr");
+            return;
+        }
+        transition->FlushImplicitTransaction();
+    }
+
+    void RemoveRSUIContext(std::shared_ptr<Rosen::RSUIContext> rsUIContext)
+    {
+        CHECK_NULL_VOID(rsUIContext);
+        std::lock_guard<std::mutex> lock(mutex_);
+        rsUIContexts_.erase(rsUIContext.get());
     }
 
 private:
