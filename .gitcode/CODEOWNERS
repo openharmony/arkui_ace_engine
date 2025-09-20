@@ -3165,6 +3165,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/pasteButton.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/saveButton.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/securityComponent.ts @harylee
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
@@ -3293,6 +3296,9 @@ frameworks/core/interfaces/native/implementation/water_flow_sections_accessor_pe
 frameworks/core/interfaces/native/implementation/water_flow_sections_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/water_flow_scroller_peer_impl.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/paste_button_modifier.cpp @harylee
+frameworks/core/interfaces/native/implementation/save_button_modifier.cpp @harylee
+frameworks/core/interfaces/native/implementation/security_component_method_modifier.cpp @harylee
 
 [Test source]
 test/mock/base @arkui_framework_xnode
