@@ -830,6 +830,7 @@ HWTEST_F(WebContextSelectOverlayTest, OnUpdateSelectOverlayInfo_003, TestSize.Le
     SelectOverlayInfo selectInfo;
     int32_t requestCode = 0;
     overlay.SetIsSingleHandle(false);
+    overlay.SetEnableSubWindowMenu(true);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
     EXPECT_TRUE(selectInfo.handlerColor.has_value());
     EXPECT_FALSE(selectInfo.handleReverse);
@@ -839,6 +840,7 @@ HWTEST_F(WebContextSelectOverlayTest, OnUpdateSelectOverlayInfo_003, TestSize.Le
     EXPECT_TRUE(selectInfo.isHandleLineShow);
     EXPECT_FALSE(selectInfo.isSingleHandle);
     EXPECT_FALSE(selectInfo.recreateOverlay);
+    EXPECT_TRUE(selectInfo.enableSubWindowMenu);
 }
 
 /**
