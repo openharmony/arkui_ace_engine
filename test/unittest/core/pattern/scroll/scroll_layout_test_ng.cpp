@@ -1025,6 +1025,31 @@ HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateScrollAlignment007
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(4.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER
+     */
+    Alignment scrollAlignment = Alignment::CENTER;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER);
+}
+
+/**
  * @tc.name: OnSurfaceChanged001
  * @tc.desc: Test ScrollLayoutAlgorithm OnSurfaceChanged
  * @tc.type: FUNC

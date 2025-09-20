@@ -258,7 +258,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
-    if (layoutDirection == TextDirection::RTL && axis == Axis::VERTICAL) {
+    if (layoutDirection == TextDirection::RTL) {
         UpdateScrollAlignment(scrollAlignment);
     }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
