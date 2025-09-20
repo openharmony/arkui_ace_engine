@@ -43,7 +43,7 @@
 #include "syntax_item_ani_modifier.h"
 #include "for_each_node_ani_modifier.h"
 #include "uinode_ani_modifier.h"
-
+#include "xbar_ani_modifier.h"
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
 {
@@ -80,6 +80,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getSyntaxItemAniModifier = OHOS::Ace::NG::GetSyntaxItemAniModifier,
         .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
         .getComponent3DModifier = OHOS::Ace::NG::GetComponent3DModifier,
+        .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
     };
     return &impl;
 }

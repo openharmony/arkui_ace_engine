@@ -170,6 +170,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/WebModifier.ets",
   "arkui-preprocessed/arkui/WindowSceneModifier.ets",
   "arkui-preprocessed/arkui/WithThemeModifier.ets",
+  "arkui-preprocessed/arkui/XBarProxy.ets",
   "arkui-preprocessed/arkui/XComponentModifier.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniCustomNodeModule.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniModule.ets",

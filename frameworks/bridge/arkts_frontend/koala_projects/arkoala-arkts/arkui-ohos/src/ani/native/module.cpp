@@ -43,6 +43,7 @@
 #include "search/search_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
+#include "xbar/xbar_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
@@ -1230,6 +1231,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Component3D_SetWidget",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Component3DSetWidget)
+        },
+        ani_native_function {
+            "_XBar_Set_ComponentCreateFunc",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::XBarSetComponentCreateFunc)
+        },
+        ani_native_function {
+            "_XBar_Set_JsFunc",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::XBarSetJsFunc)
+        },
+        ani_native_function {
+            "_XBar_Call_Native",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::XBarCallNative)
         },
         ani_native_function {
             "_Extractors_ToRectShapePtr",

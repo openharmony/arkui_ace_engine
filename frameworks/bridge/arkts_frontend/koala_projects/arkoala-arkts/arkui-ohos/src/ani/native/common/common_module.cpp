@@ -54,34 +54,31 @@ ani_status GetAniEnv(ani_vm* vm, ani_env** env)
     return status;
 }
 
-class CommonModuleCallbackAni {
-public:
-    CommonModuleCallbackAni(ani_env* env, ani_ref func)
-    {
-        CHECK_NULL_VOID(env);
-        env->GetVM(&vm_);
-        env->GlobalReference_Create(func, &func_);
+CommonModuleCallbackAni::CommonModuleCallbackAni(ani_env* env, ani_ref func)
+{
+    CHECK_NULL_VOID(env);
+    env->GetVM(&vm_);
+    env->GlobalReference_Create(func, &func_);
+}
+
+CommonModuleCallbackAni::~CommonModuleCallbackAni()
+{
+    CHECK_NULL_VOID(vm_);
+    CHECK_NULL_VOID(func_);
+    ani_env* env = nullptr;
+    auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
+    if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
+        env->GlobalReference_Delete(func_);
+        vm_->DetachCurrentThread();
     }
-    ~CommonModuleCallbackAni()
-    {
-        CHECK_NULL_VOID(vm_);
-        CHECK_NULL_VOID(func_);
-        ani_env* env = nullptr;
-        auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-        if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
-            env->GlobalReference_Delete(func_);
-            vm_->DetachCurrentThread();
-        }
-    }
-    void Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
-    {
-        CHECK_NULL_VOID(env);
-        env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
-    }
-private:
-    ani_vm* vm_ = nullptr;
-    ani_ref func_ = nullptr;
-};
+}
+
+void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
+{
+    CHECK_NULL_VOID(env);
+    env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
+}
+
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();

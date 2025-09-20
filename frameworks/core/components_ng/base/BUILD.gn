@@ -38,6 +38,7 @@ build_component_ng("base_ng") {
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
     "interop/view_stack_processor_interop.cpp",
+    "xbar_proxy_wrapper.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode)) {

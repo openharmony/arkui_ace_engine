@@ -449,6 +449,15 @@ struct ArkUIAniDragModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
 };
+struct ArkUIAniXBarModifier {
+    void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
+    void (*setOnWindowFocusedFunc)(int64_t ptr, std::function<void()>&& fn);
+    void (*setOnWindowUnFocusedFunc)(int64_t ptr, std::function<void()>&& fn);
+    void (*setSetAppTitleFunc)(int64_t ptr, std::function<void(const std::string&)>&& fn);
+    void (*setSetAppIconFunc)(int64_t ptr, std::function<void(void*)>&& fn);
+    void (*setSetCustomCallbackFunc)(int64_t ptr, std::function<void(const std::string&, const std::string&)>&& fn);
+    void (*callNative)(const int32_t& xBarType, const std::string callType, const std::string message);
+};
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)(ArkUI_Int32 key);
     void (*setFrameRateRange)(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type);
@@ -747,6 +756,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
     const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
+    const ArkUIAniXBarModifier* (*getXBarAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
