@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0;
+} // namespace
 
 void SymbolModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
@@ -69,22 +72,22 @@ void SymbolModelStatic::SetSymbolEffect(FrameNode* frameNode, const std::optiona
 
 void SymbolModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (optValue) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, optValue.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, frameNode);
+    float minFontScale = 0.0f;
+    if (optValue.has_value()) {
+        minFontScale = std::clamp(optValue.value(), 0.0f, 1.0f);
     }
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, minFontScale, frameNode);
 }
 
 void SymbolModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (optValue) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, optValue.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, frameNode);
+    float maxFontScale = MAX_FONT_SCALE;
+    if (optValue.has_value()) {
+        maxFontScale = std::max(optValue.value(), 1.0f);
     }
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, maxFontScale, frameNode);
 }
 
 void SymbolModelStatic::SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue)

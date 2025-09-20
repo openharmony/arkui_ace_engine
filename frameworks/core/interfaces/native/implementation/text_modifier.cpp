@@ -264,9 +264,6 @@ void SetMinFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto minFontScale = Converter::OptConvertPtr<float>(value);
-    Validator::ValidatePositive(minFontScale);
-    const auto maxValue = 1.f;
-    Validator::ValidateLessOrEqual(minFontScale, maxValue);
     TextModelStatic::SetMinFontScale(frameNode, minFontScale);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
@@ -275,8 +272,6 @@ void SetMaxFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto maxFontScale = Converter::OptConvertPtr<float>(value);
-    const auto minValue = 1.f;
-    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
     TextModelStatic::SetMaxFontScale(frameNode, maxFontScale);
 }
 void SetFontStyleImpl(Ark_NativePointer node,
