@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -850,7 +850,13 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         "%{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
-
+#else
+#ifdef CROSS_PLATFORM
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    InputMethodManager::GetInstance()->SetEditingState(value, GetInstanceId());
 #else
     if (HasConnection()) {
         TextEditingValue value;
@@ -859,6 +865,7 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         connection_->SetEditingState(value, GetInstanceId());
     }
+#endif
 #endif
 }
 
@@ -1565,6 +1572,9 @@ void TextFieldPattern::ModifyInnerStateInBlurEvent()
 
 void TextFieldPattern::HandleCrossPlatformInBlurEvent()
 {
+#ifdef CROSS_PLATFORM
+    return;
+#endif
 #ifndef OHOS_PLATFORM
     if (HasConnection()) {
         CloseKeyboard(true);
@@ -4756,6 +4766,25 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
+#ifdef CROSS_PLATFORM
+    TextInputConfiguration config;
+    config.type = keyboard_;
+    config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+    config.inputFilter = GetInputFilter();
+    config.maxLength = GetMaxLength();
+    if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
+        config.obscureText = textObscured_;
+    }
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    auto inputMethodManager = InputMethodManager::GetInstance();
+    CHECK_NULL_RETURN(inputMethodManager, false);
+    inputMethodManager->Attach(WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
+    inputMethodManager->SetEditingState(value, GetInstanceId());
+    inputMethodManager->ShowKeyboard(isFocusViewChanged, GetInstanceId());
+#else
     if (!HasConnection()) {
         TextInputConfiguration config;
         config.type = keyboard_;
@@ -4778,6 +4807,7 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
     value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
     connection_->SetEditingState(value, GetInstanceId());
     connection_->Show(isFocusViewChanged, GetInstanceId());
+#endif
 #endif
     return true;
 }
@@ -4920,10 +4950,14 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
         }
         inputMethod->Close();
 #else
+#ifdef CROSS_PLATFORM
+        InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
         if (HasConnection()) {
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
         }
+#endif
 #endif
         return true;
     }
@@ -4945,10 +4979,14 @@ bool TextFieldPattern::RequestCustomKeyboard()
         inputMethod->Close();
     }
 #else
+#ifdef CROSS_PLATFORM
+    InputMethodManager::GetInstance()->CloseKeyboard(GetInstanceId());
+#else
     if (HasConnection()) {
         connection_->Close(GetInstanceId());
         connection_ = nullptr;
     }
+#endif
 #endif
 
     if (isCustomKeyboardAttached_) {
