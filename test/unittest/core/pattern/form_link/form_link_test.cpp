@@ -61,6 +61,7 @@ HWTEST_F(FormLinkTest, FormLinkPatternTest001, TestSize.Level1)
     pattern->OnAttachToFrameNode();
     ASSERT_EQ(*ret, 1);
     pattern->OnAreaChangedInner();
+    pattern->SetAction("router");
     ASSERT_EQ(*ret, 1);
 }
 } // namespace OHOS::Ace::NG
