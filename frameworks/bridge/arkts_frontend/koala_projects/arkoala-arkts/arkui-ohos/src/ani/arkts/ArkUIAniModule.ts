@@ -56,6 +56,8 @@ export class ArkUIAniModule {
     native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
     native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
+    native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
+    native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void

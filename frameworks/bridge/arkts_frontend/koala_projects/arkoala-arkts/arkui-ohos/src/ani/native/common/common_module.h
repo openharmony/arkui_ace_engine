@@ -96,6 +96,8 @@ void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
 void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
     ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
+ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_object ptr);
+ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
