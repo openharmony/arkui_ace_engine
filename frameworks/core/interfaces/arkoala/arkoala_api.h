@@ -4665,6 +4665,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaMaxLength)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaMinLines)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaPlaceholderColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaBarState)(ArkUINodeHandle node);
     void (*getTextAreaPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
     ArkUI_Bool (*getTextAreaEditing)(ArkUINodeHandle node);
     void (*setTextAreaBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);

@@ -303,6 +303,7 @@ public:
     static bool GetSelectAllValue(FrameNode* frameNode);
     static std::string GetInputFilter(FrameNode* frameNode);
     static InputStyle GetInputStyle(FrameNode* frameNode);
+    static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
     static RefPtr<TextFieldControllerBase> GetOrCreateController(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
