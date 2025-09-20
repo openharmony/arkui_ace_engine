@@ -81,8 +81,8 @@ ColorMode AniThemeModule::MapAniColorModeToColorMode(int32_t aniColorMode)
     return ColorMode::COLOR_MODE_UNDEFINED;
 }
 
-void AniThemeModule::ConvertToColorArray(
-    const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors)
+void AniThemeModule::ConvertToColorArray(const std::vector<Ark_ResourceColor>& colorArray,
+    std::vector<uint32_t>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
     for (size_t i = 0; i < colorArray.size(); i++) {
@@ -101,6 +101,7 @@ void AniThemeModule::ConvertToColorArray(
             isColorAvailable = true;
         }
         colors.push_back(color.GetValue());
+        resObjs.push_back(ConvertToResObj(value));
     }
 }
 
@@ -109,5 +110,28 @@ ArkUINodeHandle AniThemeModule::CreateWithThemeNode(int32_t themeScopeId)
     auto themeModifier = NodeModifier::GetThemeModifier();
     auto node = themeModifier->createWithThemeNode(themeScopeId);
     return node;
+}
+
+RefPtr<ResourceObject> AniThemeModule::ConvertToResObj(const Ark_ResourceColor& color)
+{
+    if (color.selector != 3) {
+        return nullptr;
+    }
+    auto resource = color.value3;
+    auto id = Converter::Convert<int32_t>(resource.id);
+    auto type = Converter::OptConvert<int32_t>(resource.type).value_or(0);
+    auto bundleName = Converter::Convert<std::string>(resource.bundleName);
+    auto moduleName = Converter::Convert<std::string>(resource.moduleName);
+
+    std::vector<ResourceObjectParams> params;
+    if (resource.params.tag != INTEROP_TAG_UNDEFINED) {
+        for (int i = 0; i < resource.params.value.length; i++) {
+            ResourceObjectParams param { .value = std::make_optional(resource.params.value.array[i].chars),
+                .type = ResourceObjectParams::STRING };
+            params.emplace_back(param);
+        }
+    }
+
+    return AceType::MakeRefPtr<ResourceObject>(id, type, params, bundleName, moduleName, Container::CurrentIdSafely());
 }
 } // namespace OHOS::Ace::NG

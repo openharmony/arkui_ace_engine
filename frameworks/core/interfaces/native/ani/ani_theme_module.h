@@ -34,8 +34,10 @@ class AniThemeModule final {
 public:
     static void UpdateColorMode(int32_t colorMode);
     static void RestoreColorMode();
-    static void ConvertToColorArray(const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors);
+    static void ConvertToColorArray(const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors,
+        std::vector<RefPtr<ResourceObject>>& resObjs);
     static ArkUINodeHandle CreateWithThemeNode(int32_t nodeId);
+    static RefPtr<ResourceObject> ConvertToResObj(const Ark_ResourceColor& color);
 
 private:
     static ColorMode MapAniColorModeToColorMode(int32_t aniColorMode);
