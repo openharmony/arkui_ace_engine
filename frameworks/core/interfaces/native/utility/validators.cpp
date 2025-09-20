@@ -108,6 +108,12 @@ void ValidateNonNegative(std::optional<CalcDimension>& opt)
         opt.reset();
     }
 }
+void ValidatePositive(std::optional<CalcDimension>& opt)
+{
+    if (opt.has_value() && opt.value().Unit() != DimensionUnit::CALC && opt.value().IsNonPositive()) {
+        opt.reset();
+    }
+}
 void ValidateNonPercent(std::optional<CalcDimension>& opt)
 {
     if (opt.has_value() && (opt.value().Unit() == DimensionUnit::PERCENT)) {

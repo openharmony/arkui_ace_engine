@@ -11062,7 +11062,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
         if (this.checkPriority("bindTips")) {
             const message_casted = message as (TipsMessageType | undefined)
-            const options_casted = options as (TipsOptions)
+            const options_casted = options as (TipsOptions | undefined)
             this.getPeer()?.bindTipsAttribute(message_casted, options_casted)
             return this
         }

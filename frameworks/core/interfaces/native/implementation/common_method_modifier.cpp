@@ -255,6 +255,10 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (autoCancel.has_value()) {
         popupParam->SetHasAction(!autoCancel.value());
     }
+    auto keyboardAvoidMode = Converter::OptConvert<PopupKeyboardAvoidMode>(src.keyboardAvoidMode);
+    if (keyboardAvoidMode.has_value()) {
+        popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
+    }
 };
 
 auto g_getPopupDefaultShadow = []() -> ShadowStyle {
@@ -304,13 +308,13 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetChildWidth(widthOpt.value());
     }
     auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
-    Validator::ValidateNonNegative(arrowWidthOpt);
+    Validator::ValidatePositive(arrowWidthOpt);
     Validator::ValidateNonPercent(arrowWidthOpt);
     if (arrowWidthOpt.has_value()) {
         popupParam->SetArrowWidth(arrowWidthOpt.value());
     }
     auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
-    Validator::ValidateNonNegative(arrowHeightOpt);
+    Validator::ValidatePositive(arrowHeightOpt);
     Validator::ValidateNonPercent(arrowHeightOpt);
     if (arrowHeightOpt.has_value()) {
         popupParam->SetArrowHeight(arrowHeightOpt.value());
@@ -1509,52 +1513,61 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
 }
 
 template<>
+void AssignCast(std::optional<PopupKeyboardAvoidMode> &dst, const Ark_KeyboardAvoidMode& src)
+{
+    switch (src) {
+        case ARK_KEYBOARD_AVOID_MODE_DEFAULT: dst = PopupKeyboardAvoidMode::DEFAULT; break;
+        case ARK_KEYBOARD_AVOID_MODE_NONE: dst = PopupKeyboardAvoidMode::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+    }
+}
+
+template<>
 RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     auto appearingTimeOpt = Converter::OptConvert<int>(src.appearingTime);
-    if (appearingTimeOpt.has_value()) {
+    if (appearingTimeOpt.has_value() && appearingTimeOpt.value() >= 0) {
         popupParam->SetAppearingTime(appearingTimeOpt.value());
     }
     auto disappearingTimeOpt = Converter::OptConvert<int>(src.disappearingTime);
-    if (disappearingTimeOpt.has_value()) {
+    if (disappearingTimeOpt.has_value() && disappearingTimeOpt.value() >= 0) {
         popupParam->SetDisappearingTime(disappearingTimeOpt.value());
     }
     auto appearingTimeWithContinuousOperationOpt =
         Converter::OptConvert<int>(src.appearingTimeWithContinuousOperation);
-    if (appearingTimeWithContinuousOperationOpt.has_value()) {
+    if (appearingTimeWithContinuousOperationOpt.has_value() &&
+        appearingTimeWithContinuousOperationOpt.value() >= 0) {
         popupParam->SetAppearingTimeWithContinuousOperation(appearingTimeWithContinuousOperationOpt.value());
     }
     auto disappearingTimeWithContinuousOperationOpt =
         Converter::OptConvert<int>(src.disappearingTimeWithContinuousOperation);
-    if (disappearingTimeWithContinuousOperationOpt.has_value()) {
-        popupParam->SetAppearingTime(disappearingTimeWithContinuousOperationOpt.value());
+    if (disappearingTimeWithContinuousOperationOpt.has_value() &&
+        disappearingTimeWithContinuousOperationOpt.value() >= 0) {
+        popupParam->SetDisappearingTimeWithContinuousOperation(disappearingTimeWithContinuousOperationOpt.value());
     }
     auto enableArrowOpt = Converter::OptConvert<bool>(src.enableArrow);
     if (enableArrowOpt.has_value()) {
         popupParam->SetEnableArrow(enableArrowOpt.value());
+        if (enableArrowOpt.value()) {
+            auto arrowPointPositionOpt = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+            if (arrowPointPositionOpt.has_value()) {
+                popupParam->SetArrowOffset(arrowPointPositionOpt.value());
+            }
+            auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
+            Validator::ValidatePositive(arrowWidthOpt);
+            Validator::ValidateNonPercent(arrowWidthOpt);
+            if (arrowWidthOpt.has_value()) {
+                popupParam->SetArrowWidth(arrowWidthOpt.value());
+            }
+            auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
+            Validator::ValidatePositive(arrowHeightOpt);
+            Validator::ValidateNonPercent(arrowHeightOpt);
+            if (arrowHeightOpt.has_value()) {
+                popupParam->SetArrowHeight(arrowHeightOpt.value());
+            }
+        }
     }
-    if (enableArrowOpt.value()) {
-        auto arrowPointPositionOpt = Converter::OptConvert<Dimension>(src.arrowPointPosition);
-        if (arrowPointPositionOpt.has_value()) {
-            popupParam->SetArrowOffset(arrowPointPositionOpt.value());
-        }
-        auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
-        Validator::ValidateNonNegative(arrowWidthOpt);
-        Validator::ValidateNonPercent(arrowWidthOpt);
-        if (arrowWidthOpt.has_value()) {
-            popupParam->SetArrowWidth(arrowWidthOpt.value());
-        }
-        auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
-        Validator::ValidateNonNegative(arrowHeightOpt);
-        Validator::ValidateNonPercent(arrowHeightOpt);
-        if (arrowHeightOpt.has_value()) {
-            popupParam->SetArrowHeight(arrowHeightOpt.value());
-        }
-    }
-    popupParam->SetBlockEvent(false);
-    popupParam->SetTipsFlag(true);
-    popupParam->SetShowInSubWindow(true);
     return popupParam;
 }
 
@@ -5425,6 +5438,10 @@ void BindTipsImpl(Ark_NativePointer node,
     if (tipsOption.has_value()) {
         popupParam = Converter::Convert<RefPtr<PopupParam>>(tipsOption.value());
     }
+    popupParam->SetBlockEvent(false);
+    popupParam->SetTipsFlag(true);
+    popupParam->SetShowInSubWindow(true);
+    popupParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
     Converter::VisitUnion(*message,
         [frameNode, popupParam, styledString] (const Ark_ResourceStr& value) {
             auto message = Converter::OptConvert<std::string>(value);
