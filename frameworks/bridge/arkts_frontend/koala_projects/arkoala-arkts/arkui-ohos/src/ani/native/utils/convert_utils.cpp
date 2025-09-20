@@ -20,6 +20,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 
 namespace OHOS::Ace::Ani {
 ani_long ConvertFromPixelMapAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object pixelMapObj)
@@ -39,7 +40,7 @@ ani_object ConvertToPixelMapAni(ani_env* env, [[maybe_unused]] ani_object aniCla
     return Media::PixelMapTaiheAni::CreateEtsPixelMap(env, *mediaPixelMap);
 }
 
-ani_long ConvertFromDrawingCanvasAni(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object drawingCanvasObj)
+ani_long ExtractorsToDrawingCanvasPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_object drawingCanvasObj)
 {
     ani_long nativeObj {};
     if (env->Object_GetFieldByName_Long(drawingCanvasObj, "nativeObj", &nativeObj) != ANI_OK) {
@@ -47,13 +48,19 @@ ani_long ConvertFromDrawingCanvasAni(ani_env* env, [[maybe_unused]]ani_object an
     }
     auto* canvasAni = reinterpret_cast<Rosen::Drawing::AniCanvas*>(nativeObj);
     CHECK_NULL_RETURN(canvasAni, {});
-    return reinterpret_cast<ani_long>(canvasAni->GetCanvas());
+    auto rsCanvas = canvasAni->GetCanvas();
+    CHECK_NULL_RETURN(rsCanvas, {});
+    drawing_CanvasPeer* drawingCanvasPeer = new drawing_CanvasPeer(std::shared_ptr<Rosen::Drawing::Canvas>(rsCanvas));
+    return reinterpret_cast<ani_long>(drawingCanvasPeer);
 }
 
-ani_object ConvertToDrawingCanvasAni(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long drawingCanvasPtr)
+ani_object ExtractorsFromDrawingCanvasPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long drawingCanvasPtr)
 {
-    auto* canvas = reinterpret_cast<Rosen::Drawing::Canvas*>(drawingCanvasPtr);
-    CHECK_NULL_RETURN(canvas, nullptr);
-    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, canvas);
+    auto* drawingCanvasPeer = reinterpret_cast<drawing_CanvasPeer*>(drawingCanvasPtr);
+    CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
+    auto rsCanvas = drawingCanvasPeer->GetCanvas();
+    CHECK_NULL_RETURN(rsCanvas, nullptr);
+    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, rsCanvas.get());
 }
+
 } // namespace OHOS::Ace::Ani
