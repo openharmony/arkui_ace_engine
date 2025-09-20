@@ -25,6 +25,7 @@ import {
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
 import promptAction from '@ohos/promptAction'
+import { Theme } from '@ohos/arkui/theme';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -218,6 +219,8 @@ export abstract class ExtendableComponent implements LifeCycle {
     public onDumpInspector(): string {
         return ""
     }
+
+    onWillApplyTheme(theme: Theme) {}
 }
 
 export class ExtendableComponent_serializer {

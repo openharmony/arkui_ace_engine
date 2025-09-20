@@ -255,6 +255,7 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
+export * from "./theme";
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);

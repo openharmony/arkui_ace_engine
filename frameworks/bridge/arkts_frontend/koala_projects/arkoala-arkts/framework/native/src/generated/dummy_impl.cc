@@ -41549,6 +41549,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TextTimerControllerAccessor
+    namespace ThemeOpsAccessor {
+    void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
+                               Ark_Int32 elmtId)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("sendThemeToNative(");
+        WriteToString(&out, colorArray);
+        out.append(", ");
+        WriteToString(&out, elmtId);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetDefaultThemeImpl(const Array_ResourceColor* colorArray,
+                             Ark_Boolean isDark)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDefaultTheme(");
+        WriteToString(&out, colorArray);
+        out.append(", ");
+        WriteToString(&out, isDark);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
+                                Ark_Int32 themeId,
+                                const Array_ResourceColor* colorArray,
+                                Ark_ThemeColorMode colorMode,
+                                const Callback_Void* onThemeScopeDestroy)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("createAndBindTheme(");
+        WriteToString(&out, themeScopeId);
+        out.append(", ");
+        WriteToString(&out, themeId);
+        out.append(", ");
+        WriteToString(&out, colorArray);
+        out.append(", ");
+        WriteToString(&out, colorMode);
+        out.append(", ");
+        WriteToString(&out, onThemeScopeDestroy);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ApplyThemeScopeIdToNodeImpl(Ark_NativePointer ptr,
+                                     Ark_Int32 themeScopeId)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("applyThemeScopeIdToNode(");
+        WriteToString(&out, ptr);
+        out.append(", ");
+        WriteToString(&out, themeScopeId);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ThemeOpsAccessor
     namespace TimePickerDialogAccessor {
     void DestroyPeerImpl(Ark_TimePickerDialog peer)
     {
@@ -46746,6 +46813,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TextTimerControllerPeer {
         virtual ~TextTimerControllerPeer() = default;
     };
+    const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor()
+    {
+        static const GENERATED_ArkUIThemeOpsAccessor ThemeOpsAccessorImpl {
+            ThemeOpsAccessor::SendThemeToNativeImpl,
+            ThemeOpsAccessor::SetDefaultThemeImpl,
+        };
+        return &ThemeOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
     {
         static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
@@ -47266,6 +47342,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTextShadowStyleAccessor,
             GetTextStyleAccessor,
             GetTextTimerControllerAccessor,
+            GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
             GetTouchEventAccessor,
             GetTransitionEffectAccessor,
