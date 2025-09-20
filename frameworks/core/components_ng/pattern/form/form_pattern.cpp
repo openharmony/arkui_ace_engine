@@ -446,8 +446,24 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "call.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "HandleOnSnapshot.");
     CHECK_NULL_VOID(pixelMap);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("DelayRemoveFormChildNode").append(nodeIdStr));
+
+    executor->RemoveTask(
+        TaskExecutor::TaskType::UI, std::string("ArkUIFormSetNonTransparentAfterRecover_").append(nodeIdStr));
+    executor->RemoveTask(
+        TaskExecutor::TaskType::UI, std::string("ArkUIFormDeleteImageNodeAfterRecover_").append(nodeIdStr));
+
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
     isSnapshot_ = true;
@@ -456,7 +472,8 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "call, treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    TAG_LOGD(AceLogTag::ACE_FORM, "OnAccessibilityChildTreeRegister, treeId: %{public}d, id: %{public}" PRId64, treeId,
+        accessibilityId);
     if (formManagerBridge_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
         return;
