@@ -837,19 +837,19 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * If `fromIndex` is ommited then `fromIndex = length()-1`.
      * @returns The last index of the element in the array; -1 if not found.
      */
-    // public override lastIndexOf(searchElement: T, fromIndex?: int): int {
-    //     if (this.shouldAddRef()) {
-    //         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-    //     }
-    //     return this.store_.lastIndexOf(searchElement, fromIndex);
-    // }
+    public override lastIndexOf(searchElement: T, fromIndex?: int): int {
+        if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.lastIndexOf(searchElement, fromIndex);
+    }
 
-    // public override lastIndexOf(searchElement: T): int {
-    //      if (this.shouldAddRef()) {
-    //         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-    //     }
-    //     return this.store_.lastIndexOf(searchElement);
-    // }
+    public override lastIndexOf(searchElement: T): int {
+         if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.lastIndexOf(searchElement);
+    }
 
     /**
      * Creates and returns a new string by concatenating all of the elements in an `Array`,
