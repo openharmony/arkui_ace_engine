@@ -60,7 +60,9 @@ HWTEST_F(FormLinkTest, FormLinkPatternTest001, TestSize.Level1)
     auto ret = std::make_shared<int64_t>(1);
     pattern->OnAttachToFrameNode();
     ASSERT_EQ(*ret, 1);
+
     pattern->OnAreaChangedInner();
+    pattern->SetAction("router");
     ASSERT_EQ(*ret, 1);
 }
 } // namespace OHOS::Ace::NG
