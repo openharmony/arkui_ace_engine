@@ -480,6 +480,7 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     RefPtr<RenderContext> context;
+    bool isScale = false;
     if (GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextDragBase>();
         CHECK_NULL_VOID(pattern);
@@ -491,9 +492,10 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         context = dragNode->GetRenderContext();
     } else {
         context = frameNode->GetRenderContext();
+        isScale = true;
     }
     CHECK_NULL_VOID(context);
-    auto thumbnailPixelMap = context->GetThumbnailPixelMap(false, GetTextDraggable());
+    auto thumbnailPixelMap = context->GetThumbnailPixelMap(isScale, GetTextDraggable());
     CHECK_NULL_VOID(thumbnailPixelMap);
     SetPixelMap(thumbnailPixelMap);
 }
