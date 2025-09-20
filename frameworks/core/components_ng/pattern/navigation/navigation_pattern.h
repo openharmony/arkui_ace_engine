@@ -586,11 +586,22 @@ public:
         return enableShowHideWithContentCover_;
     }
 
+    bool CanForceSplitLayout() const
+    {
+        return canForceSplitLayout_;
+    }
+
     bool IsTopFullScreenPage() const
     {
         return isTopFullScreenPage_;
     }
+
+    bool IsTopFullScreenChanged() const
+    {
+        return isTopFullScreenPage_;
+    }
 private:
+    void UpdateCanForceSplitLayout(const SizeF& frameSize);
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
         NavDestVisibilityChangeReason reason = NavDestVisibilityChangeReason::TRANSITION);
     void ClearNavigationCustomTransition();
@@ -850,7 +861,9 @@ private:
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
+    bool canForceSplitLayout_ = false;
     bool isTopFullScreenPage_ = false;
+    bool isTopFullScreenChanged_ = false;
     bool forceSplitUseNavBar_ = false;
     std::optional<bool> homeNodeTouched_;
     bool navBarIsHome_ = false;
