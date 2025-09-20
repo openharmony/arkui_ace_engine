@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1764,7 +1764,7 @@ private:
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
     std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
-    bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
+    bool UnableStandardInputCrossPlatform(bool isFocusViewChanged);
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void ReportComponentChangeEvent();
