@@ -1290,7 +1290,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 }
 export class ProgressMaskInternal {
     public static fromPtr(ptr: KPointer): ProgressMask {
-        const obj : ProgressMask = new ProgressMask(undefined, undefined, undefined)
+        const obj : ProgressMask = new ProgressMask()
         obj.peer = new Finalizable(ptr, ProgressMask.getFinalizer())
         return obj
     }
@@ -1328,12 +1328,11 @@ export class ProgressMask implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(value?: number, total?: number, color?: ResourceColor) {
-        if (((value) !== (undefined)) || ((total) !== (undefined)) || ((color) !== (undefined)))
-        {
-            const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
-            this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
-        }
+    constructor(value: number, total: number, color: ResourceColor) {
+        const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
+        this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
+    }
+    constructor() {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
@@ -3037,50 +3036,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_foregroundColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundColor1Attribute(value: ResourceColor | ColoringStrategy | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (TypeChecker.isColor(value_value_0)) {
-                    thisSerializer.writeInt8(0 as int32)
-                    const value_value_0_0  = value_value_0 as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
-                    thisSerializer.writeInt8(1 as int32)
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_value_0_type) {
-                    thisSerializer.writeInt8(2 as int32)
-                    const value_value_0_2  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
-                    thisSerializer.writeInt8(3 as int32)
-                    const value_value_0_3  = value_value_0 as Resource
-                    thisSerializer.writeResource(value_value_0_3)
-                }
-            }
-            else if (TypeChecker.isColoringStrategy(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as ColoringStrategy
-                thisSerializer.writeInt32(TypeChecker.ColoringStrategy_ToNumeric(value_value_1))
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     onClick0Attribute(value: ((event: ClickEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3646,18 +3601,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_sepia0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    sepia1Attribute(value: number | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_sepia1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     invert0Attribute(value: number | InvertOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3679,29 +3622,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_invert0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    invert1Attribute(value: number | InvertOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as InvertOptions
-                thisSerializer.writeInvertOptions(value_value_1)
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_invert1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hueRotate0Attribute(value: number | string | undefined): void {
@@ -3805,25 +3725,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_useEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    useEffect2Attribute(useEffect: boolean | undefined, effectType?: EffectType): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let useEffect_type : int32 = RuntimeType.UNDEFINED
-        useEffect_type = runtimeType(useEffect)
-        thisSerializer.writeInt8(useEffect_type as int32)
-        if ((RuntimeType.UNDEFINED) != (useEffect_type)) {
-            const useEffect_value  = useEffect!
-            thisSerializer.writeBoolean(useEffect_value)
-        }
-        let effectType_type : int32 = RuntimeType.UNDEFINED
-        effectType_type = runtimeType(effectType)
-        thisSerializer.writeInt8(effectType_type as int32)
-        if ((RuntimeType.UNDEFINED) != (effectType_type)) {
-            const effectType_value  = (effectType as EffectType)
-            thisSerializer.writeInt32(TypeChecker.EffectType_ToNumeric(effectType_value))
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_useEffect2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     renderGroup0Attribute(value: boolean | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3836,18 +3737,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_renderGroup0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    renderGroup1Attribute(value: boolean | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_renderGroup1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     freeze0Attribute(value: boolean | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3858,18 +3747,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeBoolean(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_freeze0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    freeze1Attribute(value: boolean | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_freeze1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     translate0Attribute(value: TranslateOptions | undefined): void {
@@ -3954,18 +3831,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeRotateOptions(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_rotate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    rotate1Attribute(value: RotateOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeRotateOptions(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_rotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     transform0Attribute(value: object | undefined): void {
@@ -4398,28 +4263,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_aspectRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    clickEffect0Attribute(value: ClickEffect | undefined): void {
+    clickEffect0Attribute(value: ClickEffect | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
+        if (value !== null) {
+            value_type = runtimeType(value)
+        }
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeClickEffect(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_clickEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    clickEffect1Attribute(value: ClickEffect | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeClickEffect(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_clickEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
@@ -4914,39 +4769,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_maskShape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    maskShape1Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isCircleShape(value_value)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as CircleShape
-                thisSerializer.writeCircleShape(value_value_0)
-            }
-            else if (TypeChecker.isEllipseShape(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as EllipseShape
-                thisSerializer.writeEllipseShape(value_value_1)
-            }
-            else if (TypeChecker.isPathShape(value_value)) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as PathShape
-                thisSerializer.writePathShape(value_value_2)
-            }
-            else if (TypeChecker.isRectShape(value_value)) {
-                thisSerializer.writeInt8(3 as int32)
-                const value_value_3  = value_value as RectShape
-                thisSerializer.writeRectShape(value_value_3)
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_maskShape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     keyAttribute(value: string | undefined): void {
@@ -5647,25 +5469,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeBackgroundImageOptions(options_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_backgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = (value as BlurStyle)
-            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeBackgroundBlurStyleOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -7762,35 +7565,36 @@ export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
 export enum BlendMode {
-    CLEAR = 0,
-    SRC = 1,
-    DST = 2,
-    SRC_OVER = 3,
-    DST_OVER = 4,
-    SRC_IN = 5,
-    DST_IN = 6,
-    SRC_OUT = 7,
-    DST_OUT = 8,
-    SRC_ATOP = 9,
-    DST_ATOP = 10,
-    XOR = 11,
-    PLUS = 12,
-    MODULATE = 13,
-    SCREEN = 14,
-    OVERLAY = 15,
-    DARKEN = 16,
-    LIGHTEN = 17,
-    COLOR_DODGE = 18,
-    COLOR_BURN = 19,
-    HARD_LIGHT = 20,
-    SOFT_LIGHT = 21,
-    DIFFERENCE = 22,
-    EXCLUSION = 23,
-    MULTIPLY = 24,
-    HUE = 25,
-    SATURATION = 26,
-    COLOR = 27,
-    LUMINOSITY = 28
+    NONE,
+    CLEAR = 1,
+    SRC = 2,
+    DST = 3,
+    SRC_OVER = 4,
+    DST_OVER = 5,
+    SRC_IN = 6,
+    DST_IN = 7,
+    SRC_OUT = 8,
+    DST_OUT = 9,
+    SRC_ATOP = 10,
+    DST_ATOP = 11,
+    XOR = 12,
+    PLUS = 13,
+    MODULATE = 14,
+    SCREEN = 15,
+    OVERLAY = 16,
+    DARKEN = 17,
+    LIGHTEN = 18,
+    COLOR_DODGE = 19,
+    COLOR_BURN = 20,
+    HARD_LIGHT = 21,
+    SOFT_LIGHT = 22,
+    DIFFERENCE = 23,
+    EXCLUSION = 24,
+    MULTIPLY = 25,
+    HUE = 26,
+    SATURATION = 27,
+    COLOR = 28,
+    LUMINOSITY = 29
 }
 export interface PopupOptions {
     message: string;
@@ -8151,7 +7955,7 @@ export interface CommonMethod {
         return this;
     }
     aspectRatio(value: number | undefined): this {return this;}
-    clickEffect(value: ClickEffect | undefined): this {return this;}
+    clickEffect(value: ClickEffect | null | undefined): this {return this;}
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
     onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
     onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
@@ -8748,7 +8552,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public aspectRatio(value: number | undefined): this {
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         return this
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
@@ -9529,14 +9333,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("backgroundEffect")) {
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            if (((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) && (RuntimeType.UNDEFINED == sysOptions_type)) {
                 const value_casted = options as (BackgroundEffectOptions | undefined)
                 this.getPeer()?.backgroundEffect0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            if (((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) && ((RuntimeType.OBJECT == sysOptions_type) || (RuntimeType.UNDEFINED == sysOptions_type))) {
                 const options_casted = options as (BackgroundEffectOptions | undefined)
-                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
+                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
                 this.getPeer()?.backgroundEffect1Attribute(options_casted, sysOptions_casted)
                 return this
             }
@@ -9737,18 +9541,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         if (this.checkPriority("foregroundColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
-                this.getPeer()?.foregroundColor0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
-                this.getPeer()?.foregroundColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
+            this.getPeer()?.foregroundColor0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10120,35 +9915,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public sepia(value: number | undefined): this {
         if (this.checkPriority("sepia")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.sepia0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.sepia1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.sepia0Attribute(value_casted)
+            return this
         }
         return this
     }
     public invert(value: number | InvertOptions | undefined): this {
         if (this.checkPriority("invert")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | InvertOptions | undefined)
-                this.getPeer()?.invert0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | InvertOptions | undefined)
-                this.getPeer()?.invert1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (number | InvertOptions | undefined)
+            this.getPeer()?.invert0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10195,16 +9972,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.useEffect0Attribute(value_casted)
                 return this
             }
-            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.OBJECT == effectType_type) || (RuntimeType.OBJECT == effectType_type))) {
+            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.NUMBER == effectType_type) || (RuntimeType.UNDEFINED == effectType_type))) {
                 const useEffect_casted = useEffect as (boolean | undefined)
                 const effectType_casted = effectType as (EffectType | undefined)
                 this.getPeer()?.useEffect1Attribute(useEffect_casted, effectType_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.OBJECT == effectType_type) || (RuntimeType.OBJECT == effectType_type))) {
-                const useEffect_casted = useEffect as (boolean | undefined)
-                const effectType_casted = effectType as (EffectType)
-                this.getPeer()?.useEffect2Attribute(useEffect_casted, effectType_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -10214,34 +9985,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public renderGroup(value: boolean | undefined): this {
         if (this.checkPriority("renderGroup")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.renderGroup0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.renderGroup1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.renderGroup0Attribute(value_casted)
+            return this
         }
         return this
     }
     public freeze(value: boolean | undefined): this {
         if (this.checkPriority("freeze")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.freeze0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.freeze1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.freeze0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10297,18 +10051,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public rotate(value: RotateOptions | undefined): this {
         if (this.checkPriority("rotate")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (RotateOptions | undefined)
-                this.getPeer()?.rotate0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (RotateOptions | undefined)
-                this.getPeer()?.rotate1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (RotateOptions | undefined)
+            this.getPeer()?.rotate0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10506,20 +10251,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         if (this.checkPriority("clickEffect")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ClickEffect | null | undefined)
+            this.getPeer()?.clickEffect0Attribute(value_casted)
         }
         return this
     }
@@ -10759,14 +10494,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("geometryTransition")) {
             const id_type = runtimeType(id)
             const options_type = runtimeType(options)
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && (RuntimeType.UNDEFINED == options_type)) {
                 const value_casted = id as (string | undefined)
                 this.getPeer()?.geometryTransition0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const id_casted = id as (string | undefined)
-                const options_casted = options as (GeometryTransitionOptions)
+                const options_casted = options as (GeometryTransitionOptions | undefined)
                 this.getPeer()?.geometryTransition1Attribute(id_casted, options_casted)
                 return this
             }
@@ -11006,18 +10741,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public renderFit(value: RenderFit | undefined): this {
         if (this.checkPriority("renderFit")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (RenderFit | undefined)
+            this.getPeer()?.renderFit0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -11143,23 +10869,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backgroundBlurStyle")) {
-            const style_type = runtimeType(style)
-            const options_type = runtimeType(options)
-            const sysOptions_type = runtimeType(sysOptions)
-            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
-                const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
-                this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
-                const style_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions)
-                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
-                this.getPeer()?.backgroundBlurStyle1Attribute(style_casted, options_casted, sysOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const style_casted = style as (BlurStyle | undefined)
+            const options_casted = options as (BackgroundBlurStyleOptions | undefined)
+            const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
+            this.getPeer()?.backgroundBlurStyle1Attribute(style_casted, options_casted, sysOptions_casted)
+            return this
         }
         return this
     }
@@ -11302,7 +11016,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         if (this.checkPriority("sharedTransition")) {
             const id_casted = id as (string | undefined)
-            const options_casted = options as (sharedTransitionOptions)
+            const options_casted = options as (sharedTransitionOptions | undefined)
             this.getPeer()?.sharedTransitionAttribute(id_casted, options_casted)
             return this
         }
@@ -11333,7 +11047,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
             const value_casted = value as (BlendMode | undefined)
-            const type_casted = type as (BlendApplyType)
+            const type_casted = type as (BlendApplyType | undefined)
             this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
             return this
         }

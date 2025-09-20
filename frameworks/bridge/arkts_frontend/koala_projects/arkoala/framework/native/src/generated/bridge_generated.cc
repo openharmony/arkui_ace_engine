@@ -23744,118 +23744,46 @@ void impl_TabContentInterface_setTabContentOptions(Ark_NativePointer thisPtr) {
         GetNodeModifiers()->getTabContentModifier()->setTabContentOptions(self);
 }
 KOALA_INTEROP_DIRECT_V1(TabContentInterface_setTabContentOptions, Ark_NativePointer)
-void impl_TabContentAttribute_tabBar0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_TabContentAttribute_tabBar(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_String_Resource_CustomBuilder_TabBarOptions value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Union_String_Resource_CustomBuilder_TabBarOptions value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_ComponentContent>(thisDeserializer.readComponentContent());
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = thisDeserializer.readSubTabBarStyle();
+            } else if (valueValueTempTmpBuf_UnionSelector == 2) {
+                valueValueTempTmpBuf_.selector = 2;
+                valueValueTempTmpBuf_.value2 = thisDeserializer.readBottomTabBarStyle();
+            } else if (valueValueTempTmpBuf_UnionSelector == 3) {
+                valueValueTempTmpBuf_.selector = 3;
+                valueValueTempTmpBuf_.value3 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (valueValueTempTmpBuf_UnionSelector == 4) {
+                valueValueTempTmpBuf_.selector = 4;
+                valueValueTempTmpBuf_.value4 = thisDeserializer.readResource();
+            } else if (valueValueTempTmpBuf_UnionSelector == 5) {
+                valueValueTempTmpBuf_.selector = 5;
+                valueValueTempTmpBuf_.value5 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+            } else if (valueValueTempTmpBuf_UnionSelector == 6) {
+                valueValueTempTmpBuf_.selector = 6;
+                valueValueTempTmpBuf_.value6 = thisDeserializer.readTabBarOptions();
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readResource();
-            }
-            else if (value_value_buf__selector == 2) {
-                value_value_buf_.selector = 2;
-                value_value_buf_.value2 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
-            }
-            else if (value_value_buf__selector == 3) {
-                value_value_buf_.selector = 3;
-                value_value_buf_.value3 = thisDeserializer.readTabBarOptions();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Union_String_Resource_CustomBuilder_TabBarOptions>(value_value_buf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions>(valueValueTempTmpBuf_);
         }
-        Opt_Union_String_Resource_CustomBuilder_TabBarOptions value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar0(self, (const Opt_Union_String_Resource_CustomBuilder_TabBarOptions*)&value_value);
+        Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTabContentModifier()->setTabBar(self, static_cast<Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabContentAttribute_tabBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_SubTabBarStyle_BottomTabBarStyle value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Union_SubTabBarStyle_BottomTabBarStyle value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = thisDeserializer.readSubTabBarStyle();
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readBottomTabBarStyle();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Union_SubTabBarStyle_BottomTabBarStyle>(value_value_buf_);
-        }
-        Opt_Union_SubTabBarStyle_BottomTabBarStyle value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar1(self, (const Opt_Union_SubTabBarStyle_BottomTabBarStyle*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabContentAttribute_tabBar2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Type_TabContentAttribute_tabBar_content value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Type_TabContentAttribute_tabBar_content value_value_buf_ = {};
-            value_value_buf_.selector = value_value_buf__selector;
-            if (value_value_buf__selector == 0) {
-                value_value_buf_.selector = 0;
-                value_value_buf_.value0 = static_cast<Ark_ComponentContent>(thisDeserializer.readComponentContent());
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = thisDeserializer.readSubTabBarStyle();
-            }
-            else if (value_value_buf__selector == 2) {
-                value_value_buf_.selector = 2;
-                value_value_buf_.value2 = thisDeserializer.readBottomTabBarStyle();
-            }
-            else if (value_value_buf__selector == 3) {
-                value_value_buf_.selector = 3;
-                value_value_buf_.value3 = static_cast<Ark_String>(thisDeserializer.readString());
-            }
-            else if (value_value_buf__selector == 4) {
-                value_value_buf_.selector = 4;
-                value_value_buf_.value4 = thisDeserializer.readResource();
-            }
-            else if (value_value_buf__selector == 5) {
-                value_value_buf_.selector = 5;
-                value_value_buf_.value5 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
-            }
-            else if (value_value_buf__selector == 6) {
-                value_value_buf_.selector = 6;
-                value_value_buf_.value6 = thisDeserializer.readTabBarOptions();
-            }
-            else {
-                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
-            }
-            value_value_buf.value = static_cast<Ark_Type_TabContentAttribute_tabBar_content>(value_value_buf_);
-        }
-        Opt_Type_TabContentAttribute_tabBar_content value_value = value_value_buf;;
-        GetNodeModifiers()->getTabContentModifier()->setTabBar2(self, (const Opt_Type_TabContentAttribute_tabBar_content*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar2, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(TabContentAttribute_tabBar, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabContentAttribute_onWillShow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

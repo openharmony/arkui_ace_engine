@@ -3324,6 +3324,8 @@ typedef struct Ark_TimePickerDialogOptions Ark_TimePickerDialogOptions;
 typedef struct Opt_TimePickerDialogOptions Opt_TimePickerDialogOptions;
 typedef struct Ark_Type_TabContentAttribute_tabBar_content Ark_Type_TabContentAttribute_tabBar_content;
 typedef struct Opt_Type_TabContentAttribute_tabBar_content Opt_Type_TabContentAttribute_tabBar_content;
+typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Ark_Union_PopupOptions_CustomPopupOptions Ark_Union_PopupOptions_CustomPopupOptions;
 typedef struct Opt_Union_PopupOptions_CustomPopupOptions Opt_Union_PopupOptions_CustomPopupOptions;
 typedef struct Ark_Union_RichEditorImageSpanResult_RichEditorTextSpanResult Ark_Union_RichEditorImageSpanResult_RichEditorTextSpanResult;
@@ -3685,35 +3687,36 @@ typedef struct Opt_BlendApplyType {
     Ark_BlendApplyType value;
 } Opt_BlendApplyType;
 typedef enum Ark_BlendMode {
-    ARK_BLEND_MODE_CLEAR = 0,
-    ARK_BLEND_MODE_SRC = 1,
-    ARK_BLEND_MODE_DST = 2,
-    ARK_BLEND_MODE_SRC_OVER = 3,
-    ARK_BLEND_MODE_DST_OVER = 4,
-    ARK_BLEND_MODE_SRC_IN = 5,
-    ARK_BLEND_MODE_DST_IN = 6,
-    ARK_BLEND_MODE_SRC_OUT = 7,
-    ARK_BLEND_MODE_DST_OUT = 8,
-    ARK_BLEND_MODE_SRC_ATOP = 9,
-    ARK_BLEND_MODE_DST_ATOP = 10,
-    ARK_BLEND_MODE_XOR = 11,
-    ARK_BLEND_MODE_PLUS = 12,
-    ARK_BLEND_MODE_MODULATE = 13,
-    ARK_BLEND_MODE_SCREEN = 14,
-    ARK_BLEND_MODE_OVERLAY = 15,
-    ARK_BLEND_MODE_DARKEN = 16,
-    ARK_BLEND_MODE_LIGHTEN = 17,
-    ARK_BLEND_MODE_COLOR_DODGE = 18,
-    ARK_BLEND_MODE_COLOR_BURN = 19,
-    ARK_BLEND_MODE_HARD_LIGHT = 20,
-    ARK_BLEND_MODE_SOFT_LIGHT = 21,
-    ARK_BLEND_MODE_DIFFERENCE = 22,
-    ARK_BLEND_MODE_EXCLUSION = 23,
-    ARK_BLEND_MODE_MULTIPLY = 24,
-    ARK_BLEND_MODE_HUE = 25,
-    ARK_BLEND_MODE_SATURATION = 26,
-    ARK_BLEND_MODE_COLOR = 27,
-    ARK_BLEND_MODE_LUMINOSITY = 28,
+    ARK_BLEND_MODE_NONE = 0,
+    ARK_BLEND_MODE_CLEAR = 1,
+    ARK_BLEND_MODE_SRC = 2,
+    ARK_BLEND_MODE_DST = 3,
+    ARK_BLEND_MODE_SRC_OVER = 4,
+    ARK_BLEND_MODE_DST_OVER = 5,
+    ARK_BLEND_MODE_SRC_IN = 6,
+    ARK_BLEND_MODE_DST_IN = 7,
+    ARK_BLEND_MODE_SRC_OUT = 8,
+    ARK_BLEND_MODE_DST_OUT = 9,
+    ARK_BLEND_MODE_SRC_ATOP = 10,
+    ARK_BLEND_MODE_DST_ATOP = 11,
+    ARK_BLEND_MODE_XOR = 12,
+    ARK_BLEND_MODE_PLUS = 13,
+    ARK_BLEND_MODE_MODULATE = 14,
+    ARK_BLEND_MODE_SCREEN = 15,
+    ARK_BLEND_MODE_OVERLAY = 16,
+    ARK_BLEND_MODE_DARKEN = 17,
+    ARK_BLEND_MODE_LIGHTEN = 18,
+    ARK_BLEND_MODE_COLOR_DODGE = 19,
+    ARK_BLEND_MODE_COLOR_BURN = 20,
+    ARK_BLEND_MODE_HARD_LIGHT = 21,
+    ARK_BLEND_MODE_SOFT_LIGHT = 22,
+    ARK_BLEND_MODE_DIFFERENCE = 23,
+    ARK_BLEND_MODE_EXCLUSION = 24,
+    ARK_BLEND_MODE_MULTIPLY = 25,
+    ARK_BLEND_MODE_HUE = 26,
+    ARK_BLEND_MODE_SATURATION = 27,
+    ARK_BLEND_MODE_COLOR = 28,
+    ARK_BLEND_MODE_LUMINOSITY = 29,
 } Ark_BlendMode;
 typedef struct Opt_BlendMode {
     Ark_Tag tag;
@@ -20098,6 +20101,23 @@ typedef struct Opt_Type_TabContentAttribute_tabBar_content {
     Ark_Tag tag;
     Ark_Type_TabContentAttribute_tabBar_content value;
 } Opt_Type_TabContentAttribute_tabBar_content;
+typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ComponentContent value0;
+        Ark_SubTabBarStyle value1;
+        Ark_BottomTabBarStyle value2;
+        Ark_String value3;
+        Ark_Resource value4;
+        CustomNodeBuilder value5;
+        Ark_TabBarOptions value6;
+    };
+} Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions {
+    Ark_Tag tag;
+    Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions value;
+} Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Ark_Union_PopupOptions_CustomPopupOptions {
     Ark_Int32 selector;
     union {
@@ -23270,12 +23290,8 @@ typedef struct GENERATED_ArkUITabContentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setTabContentOptions)(Ark_NativePointer node);
-    void (*setTabBar0)(Ark_NativePointer node,
-                       const Opt_Union_String_Resource_CustomBuilder_TabBarOptions* value);
-    void (*setTabBar1)(Ark_NativePointer node,
-                       const Opt_Union_SubTabBarStyle_BottomTabBarStyle* value);
-    void (*setTabBar2)(Ark_NativePointer node,
-                       const Opt_Type_TabContentAttribute_tabBar_content* value);
+    void (*setTabBar)(Ark_NativePointer node,
+                      const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value);
     void (*setOnWillShow)(Ark_NativePointer node,
                           const Opt_VoidCallback* value);
     void (*setOnWillHide)(Ark_NativePointer node,

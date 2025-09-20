@@ -18,16 +18,6 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
-void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), bgBlurStyle]() {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ViewAbstract::SetBackgroundBlurStyle(frameNode.GetRawPtr(), bgBlurStyle);
-    });
-}
-
 void SetBackgroundEffectMultiThread(FrameNode* frameNode,
     const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
 {

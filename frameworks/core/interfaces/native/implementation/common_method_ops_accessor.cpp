@@ -77,9 +77,7 @@ void AdvancedBlendModeObjectImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstractModelStatic::SetBlender(frameNode, convValue);
-    BlendApplyType blendApplyType = BlendApplyType::FAST;
     std::optional<BlendApplyType> blendApplyTypeOpt = Converter::OptConvertPtr<BlendApplyType>(type);
-    blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyTypeOpt);
 }
 void AdvancedBlendModeEnumImpl(Ark_NativePointer node,
