@@ -2047,6 +2047,10 @@ void TextFieldPattern::FireEventHubOnChange(const std::u16string& text)
     changeValueInfo.oldContent = callbackOldContent_;
     changeValueInfo.rangeBefore = callbackRangeBefore_;
     changeValueInfo.rangeAfter = callbackRangeAfter_;
+    auto inspectorId = host->GetInspectorId().value_or("");
+    auto uniqueId = host->GetId();
+    TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
+    UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
     eventHub->FireOnChange(changeValueInfo);
 }
 
@@ -3674,6 +3678,10 @@ void TextFieldPattern::AddTextFireOnChange()
         changeValueInfo.rangeBefore = pattern->callbackRangeBefore_;
         changeValueInfo.rangeAfter = pattern->callbackRangeAfter_;
         layoutProperty->UpdatePreviewText(changeValueInfo.previewText);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        auto uniqueId = host->GetId();
+        TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
+        UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
         eventHub->FireOnChange(changeValueInfo);
 
         pattern->RecordTextInputEvent();

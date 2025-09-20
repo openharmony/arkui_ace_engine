@@ -65,6 +65,8 @@ private:
     napi_value ProcessAfterPanEndUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNodeRenderStateRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNodeRenderStateUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTextChangeEventRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTextChangeEventUnRegister(napi_env env, napi_callback_info info);
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);
@@ -79,6 +81,7 @@ private:
     bool isTabContentStateUpdateFuncSetted_ = false;
     bool isRouterPageHandleFuncSetted_ = false;
     bool isDestinationSwitchHandleFuncSetted_ = false;
+    bool isTextChangeEventHandleFuncSetted_ = false;
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };
