@@ -30,8 +30,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void SetTextBackgroundStyle(const JSCallbackInfo& info);
-    static TextBackgroundStyle ParseTextBackgroundStyle(const JSCallbackInfo& info);
-    static TextBackgroundStyle ParseTextBackgroundStyle(const JSRef<JSObject>& obj);
+    static TextBackgroundStyle ParseTextBackgroundStyle(const JSCallbackInfo& info, bool needResObj = false);
+    static TextBackgroundStyle ParseTextBackgroundStyle(const JSRef<JSObject>& obj, bool needResObj = false);
+private:
+    static void ParseTextBackgroundStyleRadius(const JSRef<JSObject>& obj, TextBackgroundStyle& textBackgroundStyle);
 };
 } // namespace OHOS::Ace::Framework
 

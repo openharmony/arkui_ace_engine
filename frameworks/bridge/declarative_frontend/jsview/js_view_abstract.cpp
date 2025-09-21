@@ -10213,7 +10213,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     }
 }
 
-bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform)
+bool JSViewAbstract::ParseShadowProps(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
 {
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
@@ -10239,7 +10240,12 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     if (ParseJsShadowColorStrategy(jsColor, shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
     } else if (ParseJsColor(jsColor, color, colorResObj)) {
-        if (SystemProperties::ConfigChangePerform() && colorResObj) {
+        if (needResObj && colorResObj) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsColor);
+            JSViewAbstract::CompleteResourceObject(jsObj);
+            colorResObj = JSViewAbstract::GetResourceObject(jsObj);
+        }
+        if ((SystemProperties::ConfigChangePerform() || needResObj) && colorResObj) {
             auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
                 Color colorValue;
                 ResourceParseUtils::ParseResColor(colorResObj, colorValue);

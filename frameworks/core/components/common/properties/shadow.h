@@ -270,6 +270,20 @@ public:
         }
     }
 
+    void ReloadResourcesByKey(const std::string& key)
+    {
+        auto res = resMap_.find(key);
+        if (res != resMap_.end()) {
+            auto resourceUpdater = res->second;
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    bool HasKey(const std::string& key) const
+    {
+        return resMap_.find(key) != resMap_.end();
+    }
+
 private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;

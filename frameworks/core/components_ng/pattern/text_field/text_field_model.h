@@ -52,6 +52,9 @@ struct Font {
     std::optional<Color> strokeColor;
     std::optional<SuperscriptStyle> superscript;
 
+    RefPtr<ResourceObject> fontColorResObj;
+    RefPtr<ResourceObject> strokeColorResObj;
+
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
