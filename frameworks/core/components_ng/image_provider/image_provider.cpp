@@ -372,6 +372,10 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
         RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, errorInfo, data);
         if (!imageObj) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Download data invalid, parse failed. src[%{private}s], config[%{public}s], dataSize=%{public}zu",
+                downLoadConfig.imageDfxConfig.GetImageSrc().c_str(),
+                downLoadConfig.imageDfxConfig.ToStringWithoutSrc().c_str(), imageData.size());
             ImageProvider::FailCallback(downLoadConfig.taskKey, "After download successful, imageObject Create fail",
                 errorInfo, downLoadConfig.sync, containerId);
             return;
