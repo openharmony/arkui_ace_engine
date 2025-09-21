@@ -13366,7 +13366,7 @@ typedef struct Ark_MarqueeOptions {
     /* kind: Interface */
     Ark_Boolean start;
     Opt_Float64 step;
-    Opt_Number loop;
+    Opt_Int32 loop;
     Opt_Boolean fromStart;
     Ark_String src;
 } Ark_MarqueeOptions;
