@@ -35,6 +35,9 @@ public:
 private:
     void LoadPage(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
+    // For Arkts1.2
+    void LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
+        bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
     RefPtr<FrameNode> LoadPlaceHolderPage();
     RefPtr<ResourceWrapper> CreateResourceWrapper();
     bool DetectPrimaryPage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);

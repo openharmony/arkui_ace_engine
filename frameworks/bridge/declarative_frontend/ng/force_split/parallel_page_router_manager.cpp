@@ -123,6 +123,70 @@ void ParallelPageRouterManager::LoadPage(
     TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
 }
 
+void ParallelPageRouterManager::LoadPageExtender(
+    int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition, bool isPush)
+{
+    ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
+    CHECK_RUN_ON(JS);
+    bool needClearSecondaryPage = CheckSecondaryPageNeedClear(isPush);
+    if (!CheckStackSize(target, needClearSecondaryPage)) {
+        return;
+    }
+    NotifyForceFullScreenChangeIfNeeded(target.url, PipelineContext::GetCurrentContext());
+    auto pageNode = CreatePageExtender(pageId, target);
+    if (!pageNode) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page: %{public}s", target.url.c_str());
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
+    CHECK_NULL_VOID(stageManager);
+
+    RefPtr<FrameNode> preLastPage = nullptr;
+    if (!pageRouterStack_.empty()) {
+        preLastPage = pageRouterStack_.rbegin()->Upgrade();
+    }
+    std::list<WeakPtr<FrameNode>> prevPageRouterStack;
+    std::copy(pageRouterStack_.begin(), pageRouterStack_.end(), std::back_inserter(prevPageRouterStack));
+    auto removePageSize = stageManager->UpdateSecondaryPageNeedRemoved(needClearSecondaryPage);
+    while (removePageSize > 0) {
+        pageRouterStack_.pop_back();
+        removePageSize--;
+    };
+    pageRouterStack_.emplace_back(pageNode);
+    if (intentInfo_.has_value()) {
+        if (!OnPageReadyAndHandleIntent(pageNode, needHideLast)) {
+            intentInfo_.reset();
+            std::swap(prevPageRouterStack, pageRouterStack_);
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "OnPageReadyAndHandleIntent Failed");
+            return;
+        }
+    } else if (!OnPageReady(pageNode, needHideLast, needTransition)) {
+        std::swap(prevPageRouterStack, pageRouterStack_);
+        return;
+    }
+    stageManager->RemoveSecondaryPagesOfPrimaryHomePage();
+
+    if (DetectPrimaryPage(target, preLastPage)) {
+        auto loadPlaceHolderPageCallback = [weakMgr = WeakClaim(this)]() -> RefPtr<FrameNode> {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_RETURN(mgr, nullptr);
+            return mgr->LoadPlaceHolderPage();
+        };
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "url: %{public}s was recognised as primary page", target.url.c_str());
+        stageManager->OnPrimaryPageDetected(pageNode, std::move(loadPlaceHolderPageCallback), pageRouterStack_);
+    }
+
+    pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+
+    if (!SetOnKeyEvent(pageNode)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "Fail to init the keyEvent of page");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+}
+
 int32_t ParallelPageRouterManager::GetLastPageIndex()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
