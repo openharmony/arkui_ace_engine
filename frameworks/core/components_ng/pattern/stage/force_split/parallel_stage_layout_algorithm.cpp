@@ -98,7 +98,9 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     auto stageWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     if (primaryIndex_ == -1) {
         auto pageWrapper = layoutWrapper->GetOrCreateChildByIndex(stageSize - 1);
+        CHECK_NULL_VOID(pageWrapper);
         auto geometryNode = pageWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
         auto pageSize = geometryNode->GetFrameSize().Width();
         const int32_t half = 2;
         auto offsetX = (stageWidth - pageSize) / half;
@@ -111,6 +113,7 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     auto primaryPageWrapper = layoutWrapper->GetOrCreateChildByIndex(primaryIndex_);
     CHECK_NULL_VOID(primaryPageWrapper);
     auto primaryGeometryNode = primaryPageWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(primaryGeometryNode);
     auto primaryPageWidth = primaryGeometryNode->GetFrameSize().Width();
     constexpr int32_t PAGE_NUMBER = 2;
     auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
@@ -124,7 +127,9 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
 
     // layout divider
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(dividerWrapper);
     auto dividerGeometry = dividerWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(dividerGeometry);
     offset.SetX(dividerOffset);
     offset.SetY(0.0f);
     dividerGeometry->SetMarginFrameOffset(offset);
@@ -136,6 +141,7 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     offset.SetX(dividerOffset + dividerWidth);
     offset.SetY(0.0f);
     auto geometryNode = detailPageWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(offset);
     detailPageWrapper->Layout();
 }
