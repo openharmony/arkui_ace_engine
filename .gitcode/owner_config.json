@@ -122,11 +122,12 @@
             "npisanov",
             "huaweimaxuchu"
         ],
-        "arkuilayout1": [
+        "arkuilayout": [
             "lanshouren",
             "little-bear-sleeps",
             "zju_ljz",
             "camlostshi",
+            "WendongPang",
             "fenglinbailu",
             "skrobagleb",
             "spirinandrey",
@@ -416,6 +417,9 @@
         },
         "fenglinbailu": {
             "info": "[布局类组件 liubin]"
+        },
+        "WendongPang": {
+            "info": "[安全区&键盘避让相关 pangwendong]"
         },
         "little-bear-sleeps": {
             "info": "[布局类组件 linhu]"
