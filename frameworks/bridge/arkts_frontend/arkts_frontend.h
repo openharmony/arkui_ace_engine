@@ -396,7 +396,6 @@ public:
     static void* preloadArkTSRuntime;
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange() override;
-    void InitXBarProxy() override;
 protected:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
