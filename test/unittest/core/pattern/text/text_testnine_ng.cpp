@@ -445,6 +445,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
     // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
     auto renderContext = pageNode->GetRenderContext();
     renderContext->UpdateClipEdge(true);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 20.0f, 30.0f));
 
     pattern->HandleLongPress(info);
     EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
@@ -472,6 +473,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
     // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
     auto renderContext = pageNode->GetRenderContext();
     renderContext->UpdateClipEdge(true);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 20.0f, 30.0f));
 
     pattern->HandleLongPress(info);
     EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());

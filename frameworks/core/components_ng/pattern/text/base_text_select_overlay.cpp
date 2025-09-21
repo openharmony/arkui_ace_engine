@@ -1198,19 +1198,11 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
-            auto isOverTheParentBottom = GreatNotEqual(contentRect.Top(), parentContentRect.Bottom());
-            contentRect = contentRect.IntersectRectT(parentContentRect);
-            if (isOverTheParentBottom) {
-                contentRect.SetTop(parentContentRect.Bottom());
-            }
+            contentRect = contentRect.Constrain(parentContentRect);
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
-        contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
-        contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
         parent = parent->GetAncestorNodeOfFrame(true);
     }
-    contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
-    contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
     return true;
 }
 
@@ -1227,7 +1219,7 @@ bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& nod
     if (geometryNode->GetContent()) {
         contentRect = geometryNode->GetContentRect();
     } else {
-        contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
+        contentRect = RectF(OffsetF(0.0f, 0.0f), renderContext->GetPaintRectWithoutTransform().GetSize());
     }
     return true;
 }
