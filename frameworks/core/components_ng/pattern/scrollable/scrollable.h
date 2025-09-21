@@ -598,6 +598,7 @@ public:
     void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
     void StopAxisAnimation();
+    void CheckStopFlingInTouchUp();
 
     void AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
