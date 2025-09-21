@@ -158,25 +158,6 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
 }
 
-void WebSelectOverlay::IsNeedResetHandleReverse(SelectHandleInfo firstHandleInfo, SelectHandleInfo secondHandleInfo)
-{
-    auto firstRect = firstHandleInfo.paintRect;
-    auto secondRect = secondHandleInfo.paintRect;
-    float lowerHandleTop = 0.0f;
-    RectF heighterHandleRect;
-    if (GreatNotEqual(firstRect.Top(), secondRect.Top())) {
-        lowerHandleTop = firstRect.Top() + 0.5f;
-        heighterHandleRect = secondRect;
-    } else {
-        lowerHandleTop = secondRect.Top() + 0.5f;
-        heighterHandleRect = firstRect;
-    }
-    bool inSameLine = GreatNotEqual(lowerHandleTop, heighterHandleRect.Top()) &&
-                      LessNotEqual(lowerHandleTop, heighterHandleRect.Bottom());
-    needResetHandleReverse_ = inSameLine ? GreatNotEqual(firstRect.Left(), secondRect.Left())
-                                         : GreatNotEqual(firstRect.Top(), secondRect.Top());
-}
-
 void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
 {
     selectInfo.onClick = [weak = AceType::WeakClaim(this)](const GestureEvent& info, bool isFirst) {
@@ -336,7 +317,6 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
             webSelectInfo_.isNewAvoid = false;
         }
         webSelectInfo_.handleReverse = false;
-        IsNeedResetHandleReverse(firstHandleInfo, secondHandleInfo);
         if (SelectOverlayIsOn()) {
             UpdateIsSelectAll();
             UpdateAllHandlesOffset();
@@ -554,7 +534,6 @@ void WebSelectOverlay::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInf
         CheckHandles(selectInfo.firstHandle, beginTouchHandle);
         CheckHandles(selectInfo.secondHandle, endTouchHandle);
         QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
-        IsNeedResetHandleReverse(selectInfo.firstHandle, selectInfo.secondHandle);
         if (pattern && !(pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_)) {
             selectInfo.menuOptionItems = pattern->menuOptionParam_;
         }
@@ -1211,7 +1190,6 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->CopySelectionMenuParams(selectInfo, WebElementType::TEXT, ResponseType::LONG_PRESS);
-    selectInfo.checkHandleReverse = [](const RectF& first, const RectF& second) { return false; };
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(

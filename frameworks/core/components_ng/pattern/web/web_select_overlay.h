@@ -99,7 +99,6 @@ public:
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-    void IsNeedResetHandleReverse(SelectHandleInfo firstHandleInfo, SelectHandleInfo secondHandleInfo);
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
     void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();

@@ -2473,32 +2473,6 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsNeedResetHandleReverseTest
- * @tc.desc: Test IsNeedResetHandleReverse.
- * @tc.type: FUNC
- */
-HWTEST_F(WebSelectOverlayTest, IsNeedResetHandleReverseTest, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    WebSelectOverlay g_overlay(g_webPattern);
-    SelectHandleInfo start;
-    RectF startRect;
-    startRect.SetOffset({ 1.0f, 1.0f });
-    startRect.SetSize({ 1.0f, 1.0f });
-    start.paintRect = startRect;
-    SelectHandleInfo end;
-    RectF endRect;
-    endRect.SetOffset({ 2.0f, 1.2f });
-    endRect.SetSize({ 1.0f, 1.0f });
-    end.paintRect = endRect;
-    g_overlay.IsNeedResetHandleReverse(start, end);
-    EXPECT_FALSE(g_overlay.needResetHandleReverse_);
-    g_overlay.IsNeedResetHandleReverse(end, start);
-    EXPECT_TRUE(g_overlay.needResetHandleReverse_);
-#endif
-}
-
-/**
  * @tc.name: RegisterSelectOverlayEvent
  * @tc.desc: RegisterSelectOverlayEvent.
  * @tc.type: FUNC
