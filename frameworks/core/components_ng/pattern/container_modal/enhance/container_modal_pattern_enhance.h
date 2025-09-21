@@ -70,11 +70,10 @@ public:
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();
-    virtual void CallMenuWidthChange(int32_t resId);
+    void CallMenuWidthChange(int32_t resId);
     int32_t AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener);
     void RemoveButtonsRectChangeListener(int32_t id);
-    virtual void SetColorConfigurationUpdate();
-    virtual void SetMaximizeIconIsRecover();
+
 private:
     RefPtr<FrameNode> GetButtonRowByInspectorId()
     {
@@ -106,6 +105,8 @@ private:
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
     void BuildMenuList();
 
+    void SetColorConfigurationUpdate();
+    void SetMaximizeIconIsRecover();
     void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) override;
 
     VisibleType controlButtonVisibleBeforeAnim_;
