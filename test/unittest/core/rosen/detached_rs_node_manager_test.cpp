@@ -26,7 +26,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
-#include "core/common/rosen/detached_rs_node_manager.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #undef private
