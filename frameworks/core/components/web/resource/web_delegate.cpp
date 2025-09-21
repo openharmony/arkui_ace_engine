@@ -3545,10 +3545,9 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
 
 void WebDelegate::SetSurfaceDensity(const double& density)
 {
-    if (density_ == density || density == 0.0) {
+    if (NearZero(density)) {
         return;
     }
-    density_ = density;
     auto context = context_.Upgrade();
     if (!context) {
         return;
