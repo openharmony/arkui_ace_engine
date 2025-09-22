@@ -31,7 +31,10 @@ void DialogTheme::Builder::ParsePattern(
         SystemProperties::GetDeviceType() == DeviceType::WATCH;
     theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
-    theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+    theme->titleTextStyle_.SetFontWeight(FontWeight(static_cast<int32_t>(dialogPattern->GetAttr<double>(
+        "title_text_font_weight", DIALOG_TITLE_TEXT_FONT_WEIGHT))));
+    theme->buttonBorderRadius_ =
+        dialogPattern->GetAttr<Dimension>("dialog_button_border_radius", DIALOG_BUTTON_BORDER_RADIUS);
     theme->subtitleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("subtitle_text_color", Color::BLACK));
     theme->subtitleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
     theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
