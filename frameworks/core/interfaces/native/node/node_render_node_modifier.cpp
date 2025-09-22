@@ -486,9 +486,14 @@ int32_t GetRotation(ArkUIRenderNodeHandle handle, float* x, float* y, float* z)
 template<typename ModifierName, auto Setter, typename T>
 void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
 {
-    auto modifier = std::make_shared<ModifierName>();
-    (*modifier.*Setter)(value);
-    rsNode->AddModifier(modifier);
+    if (auto existingModifier = rsNode->GetModifierByType(OHOS::Rosen::ModifierNG::RSModifierType::TRANSFORM)) {
+        auto modifier = std::static_pointer_cast<ModifierName>(existingModifier);
+        (*modifier.*Setter)(value);
+    } else {
+        auto modifier = std::make_shared<ModifierName>();
+        (*modifier.*Setter)(value);
+        rsNode->AddModifier(modifier);
+    }
 }
 
 int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
@@ -505,7 +510,7 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
     if (!TransformUtil::DecomposeTransform(transform, matrix4)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    std::shared_ptr<RSNode> rsNodeShared(rsNode);
+
     Rosen::Vector4f perspectiveValue { transform.perspective[0], transform.perspective[1],
         transform.perspective[INDEX_2], transform.perspective[INDEX_3] };
     Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
@@ -516,19 +521,19 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
     Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[INDEX_2] };
 
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
-        Rosen::Vector4f>(rsNodeShared, perspectiveValue);
+        Rosen::Vector4f>(rsNode, perspectiveValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
-        Rosen::Vector2f>(rsNodeShared, xyTranslateValue);
+        Rosen::Vector2f>(rsNode, xyTranslateValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslateZ,
-        float>(rsNodeShared, transform.translate[INDEX_2]);
+        float>(rsNode, transform.translate[INDEX_2]);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
-        Rosen::Vector2f>(rsNodeShared, xyScaleValue);
+        Rosen::Vector2f>(rsNode, xyScaleValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScaleZ,
-        float>(rsNodeShared, transform.scale[INDEX_2]);
+        float>(rsNode, transform.scale[INDEX_2]);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetSkew,
-        Rosen::Vector3f>(rsNodeShared, skewValue);
+        Rosen::Vector3f>(rsNode, skewValue);
     AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetQuaternion,
-        Rosen::Quaternion>(rsNodeShared, quaternion);
+        Rosen::Quaternion>(rsNode, quaternion);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -1192,7 +1197,7 @@ ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
     RSRecordingPath rsPath;
-    rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+    rsPath.AddRect({ rectF.GetX(), rectF.GetY(), rectF.Width(), rectF.Height() });
     rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
     return ERROR_CODE_NO_ERROR;
 }
