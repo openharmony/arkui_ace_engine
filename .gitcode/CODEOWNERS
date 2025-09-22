@@ -3211,6 +3211,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/res
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/pasteButton.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/saveButton.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/securityComponent.ts @harylee
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
@@ -3319,6 +3322,9 @@ frameworks/core/interfaces/native/implementation/baseline_offset_style_accessor.
 frameworks/core/interfaces/native/implementation/baseline_offset_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_peer.h @huawei_g_five
+frameworks/core/interfaces/native/implementation/paste_button_modifier.cpp @harylee
+frameworks/core/interfaces/native/implementation/save_button_modifier.cpp @harylee
+frameworks/core/interfaces/native/implementation/security_component_method_modifier.cpp @harylee
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
