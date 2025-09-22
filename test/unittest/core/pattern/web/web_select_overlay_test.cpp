@@ -5754,6 +5754,7 @@ HWTEST_F(WebSelectOverlayTest, OnHandleMarkInfoChange001, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
     WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
     WebSelectOverlay overlay(textBase);
 
