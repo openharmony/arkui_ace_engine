@@ -3955,9 +3955,24 @@ let DividerMode;
 function wrapBuilder(builder) {
   return new WrappedBuilder(builder);
 }
+
 class WrappedBuilder {
   constructor(builder) {
     this.builder = builder;
+  }
+}
+
+function mutableBuilder(builder) {
+  return new MutableBuilder(builder);
+}
+
+class MutableBuilder {
+  constructor(builder) {
+    this.builder = builder;
+  }
+  // Only for internal toolchain usage.
+  _dispatchBuilder(builder, ...args) {
+    this.mutableBuilderImpl.bind(this)(builder, ...args);
   }
 }
 
