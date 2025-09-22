@@ -21,7 +21,6 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
-#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +28,7 @@ namespace {
 const float PICKER_DEFAULT_HEIGHT = 910.0f;
 const float PICKER_DEFAULT_WIDTH = 300.0f;
 const float UNDEFINED_SIZE = -1.0f;
+const float HALF = 2.0;
 } // namespace
 
 void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -59,8 +59,8 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->SetActiveChildRange(-1, -1);
     } else {
         // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
-        int32_t startIndex = GetLoopIndex(GetStartIndex()) < totalItemCount_ ? GetLoopIndex(GetStartIndex()) : 0;
-        int32_t endIndex = std::min(GetLoopIndex(GetEndIndex()), totalItemCount_ - 1);
+        int32_t startIndex = ContainerPickerUtils::GetLoopIndex(GetStartIndex(), totalItemCount_);
+        int32_t endIndex = ContainerPickerUtils::GetLoopIndex(GetEndIndex(), totalItemCount_);
         if (!isLoop_) {
             layoutWrapper->SetActiveChildRange(
                 startIndex, endIndex, std::min(1, startIndex), std::min(1, totalItemCount_ - 1 - endIndex));
@@ -134,7 +134,6 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
     auto isWidthDefined = false;
     float width = GetCrossAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
-
     if (NonNegative(width)) {
         isWidthDefined = true;
     }
@@ -166,10 +165,10 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    startMainPos_ = std::max((height_ - PICKER_DEFAULT_HEIGHT) / 2, 0.0f);
+    startMainPos_ = std::max((height_ - PICKER_DEFAULT_HEIGHT) / HALF, 0.0f);
     endMainPos_ = startMainPos_ + std::min(height_, PICKER_DEFAULT_HEIGHT);
-    middleItemStartPos_ = height_ / 2 - 65;
-    middleItemEndPos_ = height_ / 2 + 65;
+    middleItemStartPos_ = (height_ - PICKER_ITEM_DEFAULT_HEIGHT) / HALF;
+    middleItemEndPos_ = (height_ + PICKER_ITEM_DEFAULT_HEIGHT) / HALF;
 }
 
 float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrapper) const
@@ -179,7 +178,8 @@ float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrap
     }
     float maxSize = 0.0f;
     for (const auto& pos : itemPosition_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(pos.first), false);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(
+            ContainerPickerUtils::GetLoopIndex(pos.first, totalItemCount_), false);
         if (!wrapper) {
             continue;
         }
@@ -209,7 +209,7 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
     int32_t middleIndexInVisibleWindow = selectedIndex_;
     prevItemPosition_ = itemPosition_;
     if (!itemPosition_.empty()) {
-        auto middleItem = CalcCurrentMiddleItem();
+        auto middleItem = ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
         middleIndexInVisibleWindow = middleItem.first;
         startPos = middleItem.second.startPos;
         endPos = middleItem.second.endPos;
@@ -218,16 +218,6 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
 
     MeasureBelow(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow, startPos);
     MeasureAbove(layoutWrapper, layoutConstraint, middleIndexInVisibleWindow - 1, GetStartPosition());
-}
-
-void ContainerPickerLayoutAlgorithm::AdjustStartInfo(
-    int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos)
-{
-    startIndexInVisibleWindow = startIndex;
-    auto iter = itemPosition.find(startIndex);
-    if (iter != itemPosition.end()) {
-        startPos = iter->second.startPos;
-    }
 }
 
 void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
@@ -250,7 +240,7 @@ void ContainerPickerLayoutAlgorithm::MeasureBelow(LayoutWrapper* layoutWrapper,
         return;
     }
 
-    if (LessNotEqual(currentEndPos, endMainPos_ + contentMainSize_ / 2)) {
+    if (LessNotEqual(currentEndPos, endMainPos_ + contentMainSize_ / HALF)) {
         AdjustOffsetOnBelow(currentEndPos);
     }
 }
@@ -275,7 +265,7 @@ void ContainerPickerLayoutAlgorithm::MeasureAbove(LayoutWrapper* layoutWrapper,
         return;
     }
 
-    if (GreatNotEqual(currentStartPos, startMainPos_ - contentMainSize_ / 2)) {
+    if (GreatNotEqual(currentStartPos, startMainPos_ - contentMainSize_ / HALF)) {
         AdjustOffsetOnAbove(currentStartPos);
     }
 }
@@ -288,7 +278,7 @@ bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(LayoutWrapper* layoutWrapp
         return false;
     }
 
-    auto measureIndex = GetLoopIndex(currentIndex + 1);
+    auto measureIndex = ContainerPickerUtils::GetLoopIndex(currentIndex + 1, totalItemCount_);
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     ++currentIndex;
     wrapper->Measure(layoutConstraint);
@@ -314,8 +304,8 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
         return false;
     }
 
-    auto measureIndex = GetLoopIndex(currentIndex - 1);
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(measureIndex));
+    auto measureIndex = ContainerPickerUtils::GetLoopIndex(currentIndex - 1, totalItemCount_);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     --currentIndex;
     wrapper->Measure(layoutConstraint);
     measuredItems_.insert(measureIndex);
@@ -396,9 +386,7 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = padding.Offset();
 
     // layout items.
-    std::set<int32_t> layoutIndexSet;
     for (auto& pos : itemPosition_) {
-        layoutIndexSet.insert(GetLoopIndex(pos.first));
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         LayoutItem(layoutWrapper, paddingOffset, pos);
@@ -408,60 +396,13 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void ContainerPickerLayoutAlgorithm::LayoutItem(
     LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos)
 {
-    auto layoutIndex = GetLoopIndex(pos.first);
+    auto layoutIndex = ContainerPickerUtils::GetLoopIndex(pos.first, totalItemCount_);
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(layoutIndex);
+    CHECK_NULL_VOID(wrapper);
 
     offset += OffsetF(0.0f, pos.second.startPos);
     CHECK_NULL_VOID(wrapper->GetGeometryNode());
-    TranslateAndRotate(wrapper->GetHostNode(), offset);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
-}
-
-std::pair<int32_t, PickerItemInfo> ContainerPickerLayoutAlgorithm::CalcCurrentMiddleItem() const
-{
-    if (itemPosition_.empty()) {
-        return std::make_pair(0, PickerItemInfo {});
-    }
-    auto middlePos = height_ / 2;
-    for (const auto& item : itemPosition_) {
-        auto index = isLoop_ ? item.first : GetLoopIndex(item.first);
-        auto startPos = item.second.startPos;
-        auto endPos = item.second.endPos;
-        if (LessOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos)) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-        if (LessOrEqual(startPos, middlePos) && LessOrEqual(endPos, middlePos) && !isLoop_ &&
-            index == totalItemCount_ - 1) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-        if (GreatOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos) && !isLoop_ && index == 0) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-    }
-    return std::make_pair(itemPosition_.begin()->first,
-        PickerItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
-}
-
-void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset)
-{
-    float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
-    float pi = 3.14159;
-    float radius = 130 * 10 / (2 * pi);
-    float yScale = (pi * radius) / PICKER_DEFAULT_HEIGHT;
-    float radian = (offsetY * yScale) / radius;
-    float angle = radian * (180 / pi);
-    float correctFactor = angle > 0 ? 1.0 : -1.0;
-    double translateY = correctFactor * radius * std::sin(std::abs(radian)) - offsetY * yScale;
-
-    if (GreatNotEqual(angle, 90.0)) {
-        angle = 90.0;
-    } else if (LessNotEqual(angle, -90.0)) {
-        angle = -90.0;
-    } else {
-        translateY = translateY / yScale;
-        offset.AddY(translateY);
-    }
-    NG::ViewAbstract::SetRotate(node.GetRawPtr(), NG::Vector5F(1.0f, 0.0f, 0.0f, -angle, 0.0f));
 }
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,7 @@ constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr float ITEM_HEIGHT_PX = 40.0 * 3.25;
 constexpr int32_t VELOCITY_TRANS = 1000;
 constexpr float PICKER_SPEED_TH = 0.25f;
+constexpr int32_t DEFAULT_FONT_SIZE = 20;
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -136,10 +137,7 @@ bool ContainerPickerPattern::IsLoop() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (HasRepeatTotalCountDifference(host)) {
-        return false;
-    }
-    if (displayCount_ > host->TotalChildCount()) {
+    if (displayCount_ > totalItemCount_) {
         return false;
     }
     auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
@@ -147,37 +145,12 @@ bool ContainerPickerPattern::IsLoop() const
     return props->GetCanLoopValue(true);
 }
 
-bool ContainerPickerPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
-{
-    CHECK_NULL_RETURN(node, false);
-    auto& children = node->GetChildren();
-    for (const auto& child : children) {
-        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
-        if (repeat2) {
-            auto repeatRealCount = repeat2->FrameCount();
-            auto repeatVirtualCount =
-                (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
-            if (repeatVirtualCount > repeatRealCount) {
-                return true;
-            }
-        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-                   AceType::InstanceOf<ForEachNode>(child) || AceType::InstanceOf<CustomNode>(child)) {
-            continue;
-        } else {
-            if (HasRepeatTotalCountDifference(child)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 void ContainerPickerPattern::SetDefaultTextStyle() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     for (const auto& item : itemPosition_) {
-        auto index = GetLoopIndex(item.first);
+        auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
         auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
         SetDefaultTextStyle(child);
     }
@@ -191,15 +164,11 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
         CHECK_NULL_VOID(textLayoutProperty);
         bool modified = false;
         if (!textLayoutProperty->GetFontSize().has_value()) {
-            textLayoutProperty->UpdateFontSize(Dimension(20, DimensionUnit::FP));
+            textLayoutProperty->UpdateFontSize(Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
             modified = true;
         }
         if (!textLayoutProperty->GetTextColor().has_value()) {
             textLayoutProperty->UpdateTextColor(Color::FromString("#66182431"));
-            modified = true;
-        }
-        if (!textLayoutProperty->GetTextAlign().has_value()) {
-            textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
             modified = true;
         }
 
@@ -677,31 +646,6 @@ void ContainerPickerPattern::CreateAnimation(double from, double to)
         nullptr, nullptr, context);
 }
 
-std::pair<int32_t, PickerItemInfo> ContainerPickerPattern::CalcCurrentMiddleItem() const
-{
-    if (itemPosition_.empty()) {
-        return std::make_pair(0, PickerItemInfo {});
-    }
-    auto middlePos = height_ / 2;
-    for (const auto& item : itemPosition_) {
-        auto index = GetLoopIndex(item.first);
-        auto startPos = item.second.startPos;
-        auto endPos = item.second.endPos;
-        if (LessOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos)) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-        if (LessOrEqual(startPos, middlePos) && LessOrEqual(endPos, middlePos) && !IsLoop() &&
-            index == totalItemCount_ - 1) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-        if (GreatOrEqual(startPos, middlePos) && GreatOrEqual(endPos, middlePos) && !IsLoop() && index == 0) {
-            return std::make_pair(index, PickerItemInfo { item.second.startPos, endPos });
-        }
-    }
-    return std::make_pair(itemPosition_.begin()->first,
-        PickerItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
-}
-
 void ContainerPickerPattern::PickerMarkDirty(PropertyChangeFlag extraFlag)
 {
     auto host = GetHost();
@@ -711,7 +655,8 @@ void ContainerPickerPattern::PickerMarkDirty(PropertyChangeFlag extraFlag)
 
 void ContainerPickerPattern::FireEvent()
 {
-    auto currentMiddleItem = CalcCurrentMiddleItem();
+    auto currentMiddleItem =
+        ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, IsLoop());
     auto newSelectedIndex_ = currentMiddleItem.first;
     if (newSelectedIndex_ != selectedIndex_) {
         selectedIndex_ = newSelectedIndex_;

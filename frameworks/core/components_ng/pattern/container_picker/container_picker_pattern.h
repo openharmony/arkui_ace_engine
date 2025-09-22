@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/event/pan_event.h"
@@ -72,19 +73,6 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<ContainerPickerEventHub>();
-    }
-
-     int32_t GetLoopIndex(int32_t originalIndex) const
-    {
-        if (totalItemCount_ <= 0) {
-            return originalIndex;
-        }
-        auto loopIndex = originalIndex;
-        while (loopIndex < 0) {
-            loopIndex = loopIndex + totalItemCount_;
-        }
-        loopIndex %= totalItemCount_;
-        return loopIndex;
     }
 
     void SetSelectedIndex(int32_t index)
@@ -151,7 +139,6 @@ private:
         double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
     void UpdateColumnChildPosition(double offsetY);
     bool IsLoop() const;
-    bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
     void SetDefaultTextStyle() const;
     void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
     void CreateAnimation();
@@ -183,7 +170,7 @@ private:
     float contentMainSize_ = 0.0f;
     float mainDeltaSum_ = 0.0f;
 
-    ContainerPickerLayoutAlgorithm::PositionMap itemPosition_;
+    ContainerPickerUtils::PositionMap itemPosition_;
 
     bool animationCreated_ = false;
     bool isLoop_ = true;

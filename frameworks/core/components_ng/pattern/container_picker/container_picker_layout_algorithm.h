@@ -22,32 +22,23 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 
 namespace OHOS::Ace::NG {
 
-struct PickerItemInfo {
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    RefPtr<FrameNode> node = nullptr;
-    OffsetF finalOffset = OffsetF();
-    CancelableCallback<void()> task = CancelableCallback<void()>();
-    bool isFinishAnimation = false;
-};
-
 class ACE_EXPORT ContainerPickerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ContainerPickerLayoutAlgorithm, LayoutAlgorithm);
+
 public:
     ContainerPickerLayoutAlgorithm() = default;
     ~ContainerPickerLayoutAlgorithm() override = default;
 
-    using PositionMap = std::map<int32_t, PickerItemInfo>;
-
-    void SetItemPosition(const PositionMap& itemPosition)
+    void SetItemPosition(const ContainerPickerUtils::PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
     }
 
-    PositionMap&& GetItemPosition()
+    ContainerPickerUtils::PositionMap&& GetItemPosition()
     {
         return std::move(itemPosition_);
     }
@@ -92,19 +83,6 @@ public:
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
-    int32_t GetLoopIndex(int32_t originalIndex) const
-    {
-        if (totalItemCount_ <= 0) {
-            return originalIndex;
-        }
-        auto loopIndex = originalIndex;
-        while (loopIndex < 0) {
-            loopIndex = loopIndex + totalItemCount_;
-        }
-        loopIndex %= totalItemCount_;
-        return loopIndex;
-    }
-
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
@@ -147,14 +125,11 @@ public:
         return childLayoutConstraint_;
     }
 
-    void TranslateAndRotate(RefPtr<FrameNode> textNode, OffsetF& offset);
-
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
     void MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
-    // void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
     void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
@@ -167,20 +142,17 @@ private:
     bool MeasureAboveItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float endPos, float& startPos);
     bool NeedMeasureBelow(int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const;
-    bool NeedMeasureAbove(
-        int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
+    bool NeedMeasureAbove(int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
     void AdjustOffsetOnBelow(float currentEndPos);
     void AdjustOffsetOnAbove(float currentStartPos);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
-    void AdjustStartInfo(
-        int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
-    
+
     LayoutConstraintF childLayoutConstraint_;
     LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
-    PositionMap itemPosition_;
-    PositionMap prevItemPosition_;
-    PositionMap itemPositionInAnimation_;
+    ContainerPickerUtils::PositionMap itemPosition_;
+    ContainerPickerUtils::PositionMap prevItemPosition_;
+    ContainerPickerUtils::PositionMap itemPositionInAnimation_;
     Axis axis_ = Axis::VERTICAL;
 
     std::optional<int32_t> jumpIndex_;
@@ -192,13 +164,12 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
-    float height_ = 0.0f; // usage: record picker real height
+    float height_ = 0.0f;          // usage: record picker real height
     float contentMainSize_ = 0.0f; // usage: picker content area height
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
-    float pickerItemHeight_ = 40.0f;
     float dividerSpacingFontScale_ = 1.0f;
     float gradientFontScale_ = 1.0f;
     bool mainSizeIsMeasured_ = false;
