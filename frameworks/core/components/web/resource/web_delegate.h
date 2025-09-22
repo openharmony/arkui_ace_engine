@@ -576,7 +576,9 @@ class RenderWeb;
 
 class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
 public:
-    NWebDragEventImpl(double x, double y, NWeb::DragAction action) : x_(x), y_(y), action_(action) {}
+    NWebDragEventImpl(double x, double y, NWeb::DragAction action, NWeb::NWebDragData::DragOperation op,
+        NWeb::NWebDragData::DragOperationsMask allowed_op)
+        : x_(x), y_(y), action_(action), op_(op), allowed_op_(allowed_op) {}
     ~NWebDragEventImpl() = default;
 
     double GetX() override
@@ -594,10 +596,27 @@ public:
         return action_;
     }
 
+    NWeb::NWebDragData::DragOperation GetDragOperation() const override
+    {
+        return op_;
+    }
+
+    NWeb::NWebDragData::DragOperationsMask GetAllowedDragOperation() const override
+    {
+        return allowed_op_;
+    }
+
+    bool IsDragOpValid() const override
+    {
+        return true;
+    }
+
 private:
     double x_ = 0.0;
     double y_ = 0.0;
     NWeb::DragAction action_ = NWeb::DragAction::DRAG_START;
+    NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY;
+    NWeb::NWebDragData::DragOperationsMask allowed_op_ = NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
 };
 
 class NWebTouchPointInfoImpl : public OHOS::NWeb::NWebTouchPointInfo {
@@ -1190,6 +1209,7 @@ public:
         return op_;
     }
     NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
+    NWeb::NWebDragData::DragOperationsMask allowed_op_ = NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnActivateContent();

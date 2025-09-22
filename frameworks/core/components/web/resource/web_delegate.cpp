@@ -6387,6 +6387,7 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
 
 bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData)
 {
+    CHECK_NULL_RETURN(dragData, false);
     const void* data = nullptr;
     size_t len = 0;
     int width = 0;
@@ -6407,7 +6408,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
     }
-
+    allowed_op_ = dragData->GetAllowedDragOperation();
     if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
@@ -6981,9 +6982,12 @@ void WebDelegate::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupM
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
     if (nweb_) {
-        std::shared_ptr<NWebDragEventImpl> dragEvent =
-	    std::make_shared<NWebDragEventImpl>(x, y, static_cast<OHOS::NWeb::DragAction>(dragAction));
+        std::shared_ptr<NWebDragEventImpl> dragEvent = std::make_shared<NWebDragEventImpl>(
+            x, y, static_cast<OHOS::NWeb::DragAction>(dragAction), op_, allowed_op_);
         nweb_->SendDragEvent(dragEvent);
+    }
+    if (dragAction == DragAction::DRAG_END || dragAction == DragAction::DRAG_CANCEL) {
+        allowed_op_ = OHOS::NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
     }
 }
 

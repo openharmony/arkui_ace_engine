@@ -319,6 +319,8 @@ public:
     MOCK_METHOD(bool, SetFileUri, (const std::string& uri), (override));
     MOCK_METHOD(std::string, GetImageFileName, (), (override));
     MOCK_METHOD(void, ClearImageFileNames, (), (override));
+    MOCK_METHOD(DragOperationsMask, GetAllowedDragOperation, (), (const, override));
+    MOCK_METHOD(void, SetAllowedDragOperation, (DragOperationsMask allowed_op), (override));
     int kDefaultDragStartX = 10;
     int kDefaultDragStartY = 20;
 };
