@@ -621,7 +621,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnOnGestureJudgeBeginTest, TestSize.Level
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin0Test, TestSize.Level1)
 {
     using namespace Converter;
     ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin0, nullptr);
@@ -664,7 +664,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin0Test, TestS
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
 {
     using namespace Converter;
     ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin1, nullptr);

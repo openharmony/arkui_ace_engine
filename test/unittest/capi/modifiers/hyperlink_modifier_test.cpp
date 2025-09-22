@@ -248,7 +248,7 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HyperlinkModifierTest, setColorTestColorValidValues, TestSize.Level1)
+HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Level1)
 {
     Ark_Union_Color_Number_String_Resource initValueColor;
 

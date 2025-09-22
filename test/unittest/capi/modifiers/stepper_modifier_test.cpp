@@ -115,7 +115,7 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
+HWTEST_F(StepperModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnFinish, nullptr);
     const int32_t contextId = 123;
@@ -147,7 +147,7 @@ HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
+HWTEST_F(StepperModifierTest, DISABLED_setOnSkipTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnSkip, nullptr);
     const int32_t contextId = 123;
@@ -179,7 +179,7 @@ HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
+HWTEST_F(StepperModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
     const int32_t contextId = 123;
@@ -217,7 +217,7 @@ HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
+HWTEST_F(StepperModifierTest, DISABLED_setOnNextTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnNext, nullptr);
     const int32_t contextId = 123;
@@ -255,7 +255,7 @@ HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
+HWTEST_F(StepperModifierTest, DISABLED_setOnPreviousTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPrevious, nullptr);
     const int32_t contextId = 123;

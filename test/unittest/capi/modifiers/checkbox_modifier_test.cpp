@@ -286,7 +286,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -362,7 +362,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

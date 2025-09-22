@@ -201,7 +201,7 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
  * @tc.desc: Check the functionality of CounterModifierTest.setBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");

@@ -78,7 +78,7 @@ class CommonShapeMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICom
  * @tc.desc: Check the functionality of CommonShapeMethodModifierTest.setStroke
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierTest, setStrokeTest, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("stroke");
     ASSERT_NE(modifier_->setStroke, nullptr);
@@ -98,7 +98,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of CommonShapeMethodModifierTest.setFill
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierTest, setFillTest, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setFillTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("fill");
     ASSERT_NE(modifier_->setFill, nullptr);

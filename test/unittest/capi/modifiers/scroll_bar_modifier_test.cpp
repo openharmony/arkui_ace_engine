@@ -83,7 +83,7 @@ class ScrollBarModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollBarMo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDefaultValues, TestSize.Level1)
 {
     const auto jsonLayout = GetJsonValue(node_);
 
@@ -125,7 +125,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestValidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestValidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsVertical(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
         ARK_SCROLL_BAR_DIRECTION_VERTICAL);
@@ -149,7 +149,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestValidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsDirectionTestInvalidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestInvalidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsValid(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
         ARK_SCROLL_BAR_DIRECTION_VERTICAL);

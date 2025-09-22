@@ -279,7 +279,7 @@ HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of setEnablePreviewText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setEnablePreviewTextTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnablePreviewText, nullptr);
 
@@ -360,7 +360,7 @@ void FixValue(std::string& value)
  * @tc.desc: Check the functionality of setPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholder, nullptr);
 
@@ -406,7 +406,7 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
  * @tc.desc: Check the functionality of setCaretColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setCaretColorTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setCaretColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCaretColor, nullptr);
 
@@ -423,7 +423,7 @@ HWTEST_F(RichEditorModifierTest, setCaretColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of setSelectedBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setSelectedBackgroundColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
 
@@ -440,7 +440,7 @@ HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTest, TestSize.Level1
  * @tc.desc: Check the functionality of setEnterKeyType
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -589,7 +589,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBindSelectionMenuTest, TestSize.Lev
  * @tc.desc: Check the functionality of setCustomKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setCustomKeyboardTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);

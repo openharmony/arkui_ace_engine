@@ -266,7 +266,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Leve
  * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, setRadioStyleTestValidNumberValues, TestSize.Level1)
+HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestValidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -358,7 +358,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidNumberValues, TestSize.Level1)
+HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestInvalidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

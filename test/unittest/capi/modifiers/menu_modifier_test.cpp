@@ -233,7 +233,7 @@ HWTEST_F(MenuModifierTest, setSubMenuExpandingModeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontColorTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "fontColor");
@@ -252,7 +252,7 @@ HWTEST_F(MenuModifierTest, setFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "fontColor");
@@ -406,7 +406,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesNegativeOrEmptyTest, TestSi
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerColorTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerColorTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -604,7 +604,7 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerUndefinedTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerColorTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerColorTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);

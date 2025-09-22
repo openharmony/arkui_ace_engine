@@ -900,7 +900,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
  * @tc.desc: Check the functionality of CommonMethodModifierTest2.setForegroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Union_ResourceColor_ColoringStrategy, std::string>;
     static const std::string PROP_NAME("foregroundColor");

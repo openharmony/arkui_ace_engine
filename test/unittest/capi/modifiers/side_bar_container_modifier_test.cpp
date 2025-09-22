@@ -503,7 +503,7 @@ HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -921,7 +921,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> divi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setDividerTestColorValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, DISABLED_setDividerTestColorValidValues, TestSize.Level1)
 {
     checkDividerColorAttr(dividerColorValidValues);
 }

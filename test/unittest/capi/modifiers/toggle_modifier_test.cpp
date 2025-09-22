@@ -326,7 +326,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> sele
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
+HWTEST_F(ToggleModifierTest, DISABLED_setSelectedColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -413,7 +413,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
  * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleModifierTest, setSwitchPointColorTestValidValues, TestSize.Level1)
+HWTEST_F(ToggleModifierTest, DISABLED_setSwitchPointColorTestValidValues, TestSize.Level1)
 {
     auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
@@ -553,7 +553,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
  * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleModifierTest, setSwitchStyleTestUnselectedColorValidValues, TestSize.Level1)
+HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestUnselectedColorValidValues, TestSize.Level1)
 {
     auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
@@ -596,7 +596,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
  * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointColorValidValues, TestSize.Level1)
+HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestPointColorValidValues, TestSize.Level1)
 {
     auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));

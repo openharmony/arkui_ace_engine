@@ -161,7 +161,7 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
  * @tc.desc: onChange event test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, SetOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {

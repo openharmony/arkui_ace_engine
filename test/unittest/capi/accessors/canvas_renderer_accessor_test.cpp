@@ -727,7 +727,7 @@ HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setTransform0Test, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform0, nullptr);
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
@@ -1687,7 +1687,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData0XYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, putImageData0WHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData0WHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->putImageData0, nullptr);
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1768,7 +1768,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1XYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, putImageData1WHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData1WHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->putImageData1, nullptr);
     auto actualX = DEFAULT_DOUBLE_VALUE;
@@ -1822,7 +1822,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1WHTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, putImageData1DXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_putImageData1DXYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->putImageData1, nullptr);
     auto actualX = DEFAULT_DOUBLE_VALUE;

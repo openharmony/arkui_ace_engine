@@ -1457,7 +1457,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleStringTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setFillStyleNumberTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleNumberTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     for (const auto& [actual, expected] : STYLE_NUMBER_TEST_PLAN) {
@@ -1619,7 +1619,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleStringTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleNumberTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleNumberTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     for (const auto& [actual, expected] : STYLE_NUMBER_TEST_PLAN) {

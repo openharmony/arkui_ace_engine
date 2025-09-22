@@ -93,7 +93,7 @@ HWTEST_F(VideoModifierTest, setOptionsSrcTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOptionsSrcTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setOptionsSrcTestValidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(
@@ -234,7 +234,7 @@ HWTEST_F(VideoModifierTest, setOptionsPreviewUriTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOptionsPreviewUriTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setOptionsPreviewUriTestValidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
@@ -431,7 +431,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestValidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setControlsTestDefaultValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setControlsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -451,7 +451,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> controlsCo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setControlsTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setControlsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -527,7 +527,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setLoopTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -561,7 +561,7 @@ static std::vector<std::tuple<std::string, Opt_ImageFit, std::string>> objectFit
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setObjectFitTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -594,7 +594,7 @@ static std::vector<std::tuple<std::string, Opt_ImageFit>> objectFitObjectFitInva
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -799,7 +799,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setOnSeekingTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();

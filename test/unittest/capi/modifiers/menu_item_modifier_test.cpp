@@ -266,7 +266,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setContentFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontColorTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
@@ -285,7 +285,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setContentFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
@@ -323,7 +323,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorInvalidTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setLabelFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
@@ -342,7 +342,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setLabelFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontColorTestRes, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");

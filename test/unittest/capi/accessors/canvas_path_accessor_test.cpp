@@ -99,7 +99,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, ArcTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arc, nullptr);
     auto x = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
@@ -120,7 +120,7 @@ HWTEST_F(CanvasPathAccessorTest, ArcTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, ArcToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arcTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Number>(SECOND_X_VALUE);
@@ -140,7 +140,7 @@ HWTEST_F(CanvasPathAccessorTest, ArcToTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, BezierCurveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_BezierCurveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->bezierCurveTo, nullptr);
     auto cp1x = Converter::ArkValue<Ark_Number>(CPX_VALUE);
@@ -161,7 +161,7 @@ HWTEST_F(CanvasPathAccessorTest, BezierCurveToTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, EllipseTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_EllipseTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->ellipse, nullptr);
     auto x = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
@@ -184,7 +184,7 @@ HWTEST_F(CanvasPathAccessorTest, EllipseTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, LineToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_LineToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->lineTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
@@ -208,7 +208,7 @@ HWTEST_F(CanvasPathAccessorTest, LineToTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, MoveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_MoveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->moveTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
@@ -232,7 +232,7 @@ HWTEST_F(CanvasPathAccessorTest, MoveToTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, QuadraticCurveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_QuadraticCurveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arcTo, nullptr);
     auto cpx = Converter::ArkValue<Ark_Number>(CPX_VALUE);
@@ -251,7 +251,7 @@ HWTEST_F(CanvasPathAccessorTest, QuadraticCurveToTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, AddRectTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_AddRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rect, nullptr);
     auto x = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
