@@ -247,12 +247,10 @@ void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
         PARAM_TOTAL_COUNT = 2,
         PARAM_CHILD_INDEX = 3,
         PARAM_ARRAY_PAIRS = 4,
-        PARAM_RECYCLE_RID = 5,
     };
 
     if (!info[PARAM_ELMTID]->IsNumber() || !info[PARAM_ARR_LEN]->IsNumber() || !info[PARAM_TOTAL_COUNT]->IsNumber() ||
-        !info[PARAM_CHILD_INDEX]->IsNumber() || !info[PARAM_ARRAY_PAIRS]->IsArray() ||
-        !info[PARAM_RECYCLE_RID]->IsArray()) {
+        !info[PARAM_CHILD_INDEX]->IsNumber() || !info[PARAM_ARRAY_PAIRS]->IsArray()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::UpdateL1Rid4Index - invalid parameters ERROR");
         return;
     }
@@ -273,17 +271,8 @@ void JSRepeatVirtualScroll2::UpdateL1Rid4Index(const JSCallbackInfo& info)
         l1Rid4Index[index] = rid;
     }
 
-    auto arrayOfRidNeedToRecycle = JSRef<JSArray>::Cast(info[PARAM_RECYCLE_RID]);
-    std::unordered_set<uint32_t> ridNeedToRecycle;
-    for (size_t i = 0; i < arrayOfRidNeedToRecycle->Length(); i++) {
-        auto rid = arrayOfRidNeedToRecycle->GetValueAt(i);
-        if (rid->IsNumber()) {
-            ridNeedToRecycle.emplace(rid->ToNumber<uint32_t>());
-        }
-    }
-
     RepeatVirtualScroll2Model::GetInstance()->UpdateL1Rid4Index(
-        repeatElmtId, arrLen, totalCount, invalidateContainerLayoutFromChildIndex, l1Rid4Index, ridNeedToRecycle);
+        repeatElmtId, arrLen, totalCount, invalidateContainerLayoutFromChildIndex, l1Rid4Index);
 }
 
 void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
