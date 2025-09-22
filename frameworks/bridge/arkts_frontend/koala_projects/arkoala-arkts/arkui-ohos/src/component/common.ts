@@ -5852,7 +5852,12 @@ export class ArkCommonMethodPeer extends PeerNode {
             const message_value  = message!
             let message_value_type : int32 = RuntimeType.UNDEFINED
             message_value_type = runtimeType(message_value)
-            if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
+            if (TypeChecker.isStyledString(message_value, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const message_value_1  = message_value as StyledString
+                thisSerializer.writeStyledString(message_value_1)
+            }
+            else if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
                 thisSerializer.writeInt8(0 as int32)
                 const message_value_0  = message_value as ResourceStr
                 let message_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -5867,11 +5872,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                     const message_value_0_1  = message_value_0 as Resource
                     thisSerializer.writeResource(message_value_0_1)
                 }
-            }
-            else if (TypeChecker.isStyledString(message_value, false)) {
-                thisSerializer.writeInt8(1 as int32)
-                const message_value_1  = message_value as StyledString
-                thisSerializer.writeStyledString(message_value_1)
             }
         }
         let options_type : int32 = RuntimeType.UNDEFINED
