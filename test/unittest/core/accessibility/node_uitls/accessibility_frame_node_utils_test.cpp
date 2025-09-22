@@ -185,7 +185,7 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, UpdateAccessibilityVisibleToRoot002, T
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("V2::PAGE_ETS_TAG",
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode1, nullptr);
     auto frameNode2 = FrameNode::CreateFrameNode("frameNode2",

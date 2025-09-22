@@ -1722,6 +1722,7 @@ template<>
 void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 {
     switch (src) {
+        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
         case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
         case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
         case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;
@@ -2394,6 +2395,16 @@ void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& sr
         case ARK_DATE_PICKER_MODE_YEAR_AND_MONTH: dst = DatePickerMode::YEAR_AND_MONTH; break;
         case ARK_DATE_PICKER_MODE_MONTH_AND_DAY: dst = DatePickerMode::MONTH_AND_DAY; break;
         default: LOGE("Unexpected enum value in Ark_DatePickerMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src)
+{
+    switch (src) {
+        case ARK_EFFECT_TYPE_DEFAULT: dst = EffectType::DEFAULT; break;
+        case ARK_EFFECT_TYPE_WINDOW_EFFECT: dst = EffectType::WINDOW_EFFECT; break;
+        default: LOGE("Unexpected enum value in Ark_EffectType: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

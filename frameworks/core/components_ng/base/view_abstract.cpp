@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "ui/base/ace_type.h"
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -3090,6 +3091,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    AceType::Claim(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
@@ -4321,7 +4323,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
                         menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                         targetNodePosition.GetY() };
     }
-    if (menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuPosition);
         return ERROR_CODE_NO_ERROR;
     }
@@ -4440,7 +4442,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (expandDisplay && menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
@@ -4474,8 +4476,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
-        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow) {
         SubwindowManager::GetInstance()->ShowMenuNG(
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
@@ -7247,6 +7248,7 @@ void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& va
 void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
 {
     CHECK_NULL_VOID(frameNode);
+    AceType::Claim(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);

@@ -286,6 +286,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         pattern->SetSyncLoad(true);
     } else if (options.imageAttribute.has_value()) {
         pattern->SetSyncLoad(options.imageAttribute.value().syncLoad);
+        pattern->SetSupportSvg2(options.imageAttribute.value().supportSvg2);
     }
     auto index = host->GetChildren().size();
     imageNodes.push_back(imageNode);
@@ -3265,7 +3266,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         IF_TRUE(focusHub->IsCurrentFocus(), HandleOnEditChanged(true));
         RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
         if (focusHub->RequestFocusImmediately()) {
-            IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
+            IF_TRUE(textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true, info.GetSourceDevice());
         }
     }
@@ -4000,7 +4001,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
             isLongPressSelectArea, isLongPressByMouse, isMouseClickWithShift);
         return;
     }
-    HandleDoubleClickOrLongPress(info, host);
+    CHECK_NULL_VOID(!HandleDoubleClickOrLongPress(info, host));
     if (IsSelected()) {
         TriggerAvoidOnCaretChangeNextFrame();
     } else {
@@ -4044,10 +4045,10 @@ bool RichEditorPattern::HandleLongPressOnAiSelection()
     return true;
 }
 
-void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
+bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
 {
     auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_RETURN(focusHub, false);
     isLongPress_ = true;
     auto localOffset = info.GetLocalLocation();
     if (selectOverlay_->HasRenderTransform()) {
@@ -4065,7 +4066,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
-    CHECK_NULL_VOID(!HandleLongPressOnAiSelection());
+    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     focusHub->RequestFocusImmediately();
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
@@ -4089,6 +4090,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     } else {
         StopTwinkling();
     }
+    return false;
 }
 
 void RichEditorPattern::StartVibratorByLongPress()
@@ -4142,12 +4144,20 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     showSelect_ = true;
-    if (!selectOverlay_->IsUsingMouse()) {
-        selectOverlay_->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
-    }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
     TriggerAvoidOnCaretChangeNextFrame();
+    if (!selectOverlay_->IsUsingMouse()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([selectOverlay = WeakPtr<RichEditorSelectOverlay>(selectOverlay_), isShowMenu]() {
+                auto overlay = selectOverlay.Upgrade();
+                CHECK_NULL_VOID(overlay);
+                overlay->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+            }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
+    }
     MarkContentNodeForRender();
 }
 
@@ -5237,6 +5247,9 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
     auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
+        std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
+        privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
+        inputMethod->SendPrivateCommand(privateCommand);
         textFieldManager->SetIsImeAttached(true);
         textFieldManager->SetAttachInputId(host->GetId());
     }
@@ -7182,7 +7195,7 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
 bool RichEditorPattern::HandleOnEscape()
 {
     CloseSelectOverlay();
-    return false;
+    return true;
 }
 
 void RichEditorPattern::HandleOnUndoAction()
@@ -8388,12 +8401,13 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
-    auto lastCaretPos = GetLastCaretPos();
-    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !isTriggerAvoidOnCaretAvoidMode_) {
+    auto lastCaretPosY = GetLastCaretPos();
+    auto caretPosY = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+    if (lastCaretPosY.has_value() && caretPosY > lastCaretPosY.value() && !CheckIfNeedAvoidOnCaretChange(caretPosY)
+        && !isTriggerAvoidOnCaretAvoidMode_) {
         return;
     }
-    SetLastCaretPos(caretPos);
+    SetLastCaretPos(caretPosY);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     textFieldManager->SetHeight(NearZero(caretHeight) ?
         richEditorTheme->GetDefaultCaretHeight().ConvertToPx() : caretHeight);
@@ -8404,6 +8418,20 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
         CHECK_NULL_VOID(textFieldManager);
         textFieldManager->TriggerAvoidOnCaretChange();
     }, TaskExecutor::TaskType::UI, "ArkUIRichEditorTriggerAvoidOnCaretChange", PriorityType::VIP);
+}
+
+bool RichEditorPattern::CheckIfNeedAvoidOnCaretChange(float caretPos)
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto safeAreaMgr = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaMgr, true);
+    auto keyboard = safeAreaMgr->GetKeyboardInset();
+    return keyboard.Length() > 0 && GreatNotEqual(caretPos, keyboard.start - KEYBOARD_AVOID_OFFSET.ConvertToPx());
+#else
+    return true;
+#endif
 }
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

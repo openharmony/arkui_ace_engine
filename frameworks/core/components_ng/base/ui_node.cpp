@@ -599,13 +599,13 @@ void UINode::AllowForceDark(bool forceDarkAllowed)
 {
     forceDarkAllowed_ = forceDarkAllowed;
 
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() && forceDarkAllowed) {
         return;
     }
 
     if (context_) {
         context_->NeedReloadResource(true);
-        context_->AddNeedReloadNodes(WeakClaim(this));
+        context_->AddNeedReloadNodes(this);
     }
     for (const auto& child : GetChildren()) {
         child->AllowForceDark(forceDarkAllowed);
@@ -624,11 +624,11 @@ void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
     if (!GetForceDarkAllowed() || (!child->GetForceDarkAllowed() && !(child->GetForceDarkAllowedByUser()))) {
         child->forceDarkAllowed_ = GetForceDarkAllowed();
         pipelineContext->NeedReloadResource(true);
-        pipelineContext->AddNeedReloadNodes(WeakClaim(AceType::RawPtr(child)));
+        pipelineContext->AddNeedReloadNodes(AceType::RawPtr(child));
     }
     if (!child->GetForceDarkAllowed() && GetForceDarkAllowed() && child->GetForceDarkAllowedByUser()) {
         pipelineContext->NeedReloadResource(true);
-        pipelineContext->AddNeedReloadNodes(WeakClaim(AceType::RawPtr(child)));
+        pipelineContext->AddNeedReloadNodes(AceType::RawPtr(child));
     }
     for (const auto& uiChild : child->GetChildren()) {
         child->UpdateForceDarkAllowedNode(uiChild);

@@ -526,7 +526,7 @@ HWTEST_F(WebPatternTest, UpdateScrollBarWithBorderRadius, TestSize.Level1)
 
 /**
  * @tc.name: IsShowHandle
- * @tc.desc: Test IsShowHandle.
+ * @tc.desc: Test IsShowHandle
  * @tc.type: FUNC
  */
 HWTEST_F(WebPatternTest, IsShowHandle, TestSize.Level1)

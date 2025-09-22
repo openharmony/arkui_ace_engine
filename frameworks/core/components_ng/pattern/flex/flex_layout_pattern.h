@@ -20,6 +20,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
@@ -97,6 +98,9 @@ public:
         auto space = layoutProperty->GetSpace();
         if (space.has_value()) {
             DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
+        }
+        if (vOverflowHandler_) {
+            DumpLog::GetInstance().AddDesc(std::string("OverflowInfo: ").append(vOverflowHandler_->ToString().c_str()));
         }
     }
 
@@ -205,6 +209,37 @@ public:
         return (measuredAddress_ && layoutedAddress_ && (measuredAddress_.value() == layoutedAddress_.value()));
     }
 
+    bool GetIsVertical() const override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        if (!property) {
+            return false;
+        }
+        bool isVertical = isWrap_;
+        if (property->GetFlexDirection().has_value()) {
+            isVertical |= property->GetFlexDirection().value() == FlexDirection::COLUMN ||
+                         property->GetFlexDirection().value() == FlexDirection::COLUMN_REVERSE;
+        }
+        return isVertical;
+    }
+
+    bool IsVerticalReverseLayout() const override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        if (!property) {
+            return false;
+        }
+        return property->GetFlexDirection().value_or(FlexDirection::ROW) == FlexDirection::COLUMN_REVERSE;
+    }
+
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override
+    {
+        if (!vOverflowHandler_) {
+            vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+        }
+        return vOverflowHandler_;
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;
@@ -212,6 +247,7 @@ private:
     FlexLayoutResult layoutResult_;
     std::optional<uintptr_t> measuredAddress_;
     std::optional<uintptr_t> layoutedAddress_;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
 };

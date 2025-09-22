@@ -1583,34 +1583,29 @@ HWTEST_F(VideoTestExtraAddNg, UpdatePreviewImage002, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetContentTransition().value_or(ContentTransitionType::IDENTITY),
         ContentTransitionType::OPACITY);
     EXPECT_EQ(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
-    EXPECT_EQ(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
 
     videoPattern->SetContentTransition(ContentTransitionType::IDENTITY);
     videoPattern->UpdatePreviewImage();
     EXPECT_EQ(imageRenderProperty->GetContentTransition().value_or(ContentTransitionType::IDENTITY),
         ContentTransitionType::IDENTITY);
     EXPECT_NE(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
-    EXPECT_NE(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
 
-    videoPattern->SetTransparentBackgroundColor();
+    videoPattern->renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     videoPattern->SetContentTransition(ContentTransitionType::OPACITY);
     imageSourceInfo.src_ = "IsValid false";
     layoutProperty->UpdatePosterImageInfo(imageSourceInfo);
     videoPattern->UpdatePreviewImage();
     EXPECT_NE(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
-    EXPECT_NE(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
 
-    videoPattern->SetTransparentBackgroundColor();
+    videoPattern->renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     videoPattern->isInitialState_ = false;
     videoPattern->UpdatePreviewImage();
     EXPECT_NE(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
-    EXPECT_NE(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
 
-    videoPattern->SetTransparentBackgroundColor();
+    videoPattern->renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     videoPattern->showFirstFrame_ = true;
     videoPattern->UpdatePreviewImage();
     EXPECT_NE(videoPattern->renderContextForMediaPlayer_->GetBackgroundColorValue(), Color::TRANSPARENT);
-    EXPECT_NE(frameNode->GetRenderContext()->GetBackgroundColorValue(), Color::TRANSPARENT);
 }
 } // namespace OHOS::Ace::NG

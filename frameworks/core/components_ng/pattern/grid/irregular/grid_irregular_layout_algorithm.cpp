@@ -354,7 +354,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 
 void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
-    Jump(mainSize);
+    Jump(mainSize, true);
 
     if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
@@ -368,19 +368,16 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 }
 
-void GridIrregularLayoutAlgorithm::Jump(float mainSize)
+void GridIrregularLayoutAlgorithm::Jump(float mainSize, bool considerContentOffset)
 {
-    float scrollToEndLine = false;
     if (info_.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
         GridIrregularFiller filler(&info_, wrapper_);
         filler.FillMatrixOnly(info_.GetChildrenCount() - 1);
         info_.PrepareJumpToBottom();
-        scrollToEndLine = true;
     }
 
     if (info_.jumpIndex_ == LAST_ITEM) {
         info_.jumpIndex_ = info_.GetChildrenCount() - 1;
-        scrollToEndLine = true;
     }
 
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
@@ -399,10 +396,10 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize)
     GridLayoutRangeSolver solver(&info_, wrapper_);
     const auto res = solver.FindRangeOnJump(info_.jumpIndex_, jumpLineIdx, mainGap_);
     info_.currentOffset_ = res.pos;
-    if (res.startRow == 0) {
+    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset) {
         info_.currentOffset_ += info_.contentStartOffset_;
     }
-    if (scrollToEndLine || info_.jumpIndex_ == info_.GetChildrenCount() - 1) {
+    if (info_.scrollAlign_ == ScrollAlign::END) {
         info_.currentOffset_ -= info_.contentEndOffset_;
     }
     info_.startMainLineIndex_ = res.startRow;

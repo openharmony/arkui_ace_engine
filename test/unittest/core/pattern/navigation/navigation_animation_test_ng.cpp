@@ -373,6 +373,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest001, TestSize.Leve
     auto preDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     preDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    EXPECT_EQ(preDestination->GetNavDestinationMode(), NavDestinationMode::DIALOG);
     preDestination->SetIndex(0);
     std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
     preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(preDestination)));

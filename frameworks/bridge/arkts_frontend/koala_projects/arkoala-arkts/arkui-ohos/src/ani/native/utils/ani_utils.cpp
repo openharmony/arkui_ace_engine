@@ -14,6 +14,8 @@
  */
 
 #include "ani_utils.h"
+#include <sstream>
+#include <iostream>
 
 #include <string>
 
@@ -308,5 +310,121 @@ bool AniUtils::GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const 
         return false;
     }
     return true;
+}
+
+ani_object AniUtils::CreateDoubleObject(ani_env* env, double value)
+{
+    ani_status state;
+    static const char* className = "Lstd/core/Double;";
+    ani_class persion_cls;
+    if ((state = env->FindClass(className, &persion_cls)) != ANI_OK) {
+        HILOGE("FindClass std/core/Double failed, %{public}d", state);
+        return nullptr;
+    }
+    ani_method personInfoCtor;
+    if ((state = env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) != ANI_OK) {
+        HILOGE("Class_FindMethod Double ctor failed, %{public}d", state);
+        return nullptr;
+    }
+    ani_object personInfoObj;
+    ani_double aniValue = value;
+    if ((state = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, aniValue)) != ANI_OK) {
+        HILOGE("New Double object failed, %{public}d", state);
+        return nullptr;
+    }
+    return personInfoObj;
+}
+double ReplaceInfinity(const float& value)
+{
+    double res = static_cast<double>(value);
+    if (GreatOrEqual(res, Infinity<double>())) {
+        return std::numeric_limits<double>::infinity();
+    }
+    if (LessOrEqual(res, -Infinity<double>())) {
+        return -std::numeric_limits<double>::infinity();
+    }
+    return res;
+}
+ani_object AniUtils::FloatToNumberObject(ani_env* env, const float& value)
+{
+    auto widthDoouble = ReplaceInfinity(value);
+    return AniUtils::CreateDoubleObject(env, widthDoouble);
+}
+int32_t AniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& result)
+{
+    ani_status state;
+    ani_class booleanClass;
+    if ((state = env->FindClass("Lstd/core/Boolean;", &booleanClass)) != ANI_OK) {
+        HILOGE("FindClass std/core/Boolean failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    ani_method booleanClassCtor;
+    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanClassCtor)) != ANI_OK) {
+        HILOGE("Class_FindMethod Boolean ctor failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    ani_boolean aniValue = value;
+    if ((state = env->Object_New(booleanClass, booleanClassCtor, &result, aniValue)) != ANI_OK) {
+        HILOGE("New Boolean object failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    return static_cast<int32_t>(state);
+}
+
+int32_t AniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& result)
+{
+    ani_module stdCoreModule;
+    auto state = env->FindModule("Lstd/core;", &stdCoreModule);
+    if (state != ANI_OK) {
+        HILOGE("Find module core failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    ani_function fn;
+    state = env->Module_FindFunction(stdCoreModule, "getNearestNonBootRuntimeLinker", ":Lstd/core/RuntimeLinker;", &fn);
+    if (state != ANI_OK) {
+        HILOGE("Find function getNearestNonBootRuntimeLinker failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    state = env->Function_Call_Ref(fn, &result);
+    if (state != ANI_OK) {
+        HILOGE("Call getNearestNonBootRuntimeLinker failed, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    ani_boolean isUndef = ANI_FALSE;
+    state = env->Reference_IsUndefined(result, &isUndef);
+    if (isUndef == ANI_TRUE) {
+        HILOGE("Result of getNearestNonBootRuntimeLinker is undefined, %{public}d", state);
+        return static_cast<int32_t>(state);
+    }
+    return static_cast<int32_t>(state);
+}
+
+void AniUtils::ClearAniPendingError(ani_env* env)
+{
+    ani_boolean result = ANI_FALSE;
+    env->ExistUnhandledError(&result);
+    if (result != ANI_FALSE) {
+        std::ostringstream oss;
+        auto rdbufBak = std::cerr.rdbuf(oss.rdbuf());
+        env->DescribeError();
+        std::cerr.rdbuf(rdbufBak);
+        HILOGE("ani pending error: %{public}s", oss.str().c_str());
+        env->ResetError();
+    }
+}
+
+ani_env* AniUtils::GetAniEnv(ani_vm* vm)
+{
+    if (!vm) {
+        HILOGW("GetAniEnv from null vm");
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    ani_status status;
+    if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        HILOGW("GetAniEnv from vm failed, status: %{public}d", status);
+        return nullptr;
+    }
+    return env;
 }
 }

@@ -76,7 +76,7 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void OnAccessibilityParentRectInfoUpdate() override;
 
-    void InitializeAccessibility();
+    void InitializeAccessibility() override;
     void ResetAccessibilityChildTreeCallback();
 
     void SetBackgroundTransparent(bool backgroundTransparent);

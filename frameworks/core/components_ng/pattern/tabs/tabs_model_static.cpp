@@ -248,52 +248,22 @@ void TabsModelStatic::SetTabBarPosition(FrameNode* frameNode, const std::optiona
 
 void TabsModelStatic::InitIndex(FrameNode* frameNode, const std::optional<int32_t>& indexOpt)
 {
-    auto index = (indexOpt && (*indexOpt >= 0)) ? *indexOpt : 0;
-
     CHECK_NULL_VOID(frameNode);
+    int32_t index = -1; // undefined case
+    if (indexOpt) {
+        index = *indexOpt >= 0 ? *indexOpt : 0;
+    }
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-
-    // Create part
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
-    auto hasTabBarNode = tabsNode->HasTabBarNode();
-    if (!hasTabBarNode) {
-        tabsLayoutProperty->UpdateIndex(index);
-        return;
+    if (tabsLayoutProperty->GetIndex().has_value()) {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == index || index < 0) {
+            return;
+        }
     }
-    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
-    CHECK_NULL_VOID(preIndex != index);
-
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    if (tabsPattern && tabsPattern->GetInterceptStatus()) {
-        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
-        CHECK_NULL_VOID(ret && !(*ret));
-    }
-
-    // SetIndex part
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabsLayoutProperty->UpdateIndex(index);
-    swiperLayoutProperty->UpdateIndex(index);
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->UpdateTextColorAndFontWeight(index);
-    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    // end of SetIndex part
-
-    // continue of the Create part
-    tabBarPattern->SetMaskAnimationByCreate(true);
-    tabBarPattern->UpdateImageColor(index);
-    tabBarPattern->UpdateSymbolStats(index, -1);
-    tabBarPattern->UpdateSymbolStats(-1, preIndex);
+    tabsLayoutProperty->UpdateIndexSetByUser(index);
 }
 
 RefPtr<TabsControllerNG> TabsModelStatic::GetSwiperController(FrameNode* frameNode)

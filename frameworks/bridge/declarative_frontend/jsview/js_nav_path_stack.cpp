@@ -44,6 +44,8 @@ constexpr char JS_NAV_PATH_ONPOP_NAME[] = "onPop";
 constexpr char JS_NAV_PATH_ISENTRY_NAME[] = "isEntry";
 constexpr char JS_NAV_PATH_NAVDESTINATIONID_NAME[] = "navDestinationId";
 constexpr int32_t ARGC_COUNT_THREE = 3;
+
+constexpr char JS_NAV_PATH_STACK_EXTENT_CLASS_NAME[] = "NavPathStackExtent";
 }
 
 void JSNavPathStack::JSBind(BindingTarget globalObj)
@@ -55,6 +57,52 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
     JSClass<JSNavPathStack>::CustomMethod("setPathStack", &JSNavPathStack::SetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("isHomeName", &JSNavPathStack::IsHomeName);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
+}
+
+JSRef<JSObject> JSNavPathStack::CreateNavPathStackObjFromStatic(
+    const RefPtr<NG::PipelineContext>& context, const RefPtr<NG::NavigationStack>& stack)
+{
+    JSRef<JSObject> empty;
+    auto stackExtentObj = CreateNavPathStackExtentJSObject();
+    if (stackExtentObj->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "create static navPathStack failed");
+        return empty;
+    }
+
+    return stackExtentObj;
+}
+
+JSRef<JSObject> JSNavPathStack::CreateNavPathStackExtentJSObject()
+{
+    JSRef<JSObject> empty;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, empty);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, empty);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_NAV_PATH_STACK_EXTENT_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    napi_value obj;
+    ret = napi_new_instance(env, constructor, 0, nullptr, &obj);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+    if (!value->IsObject()) {
+        return empty;
+    }
+    return JSRef<JSObject>::Cast(value);
 }
 
 void JSNavPathStack::Constructor(const JSCallbackInfo& info)

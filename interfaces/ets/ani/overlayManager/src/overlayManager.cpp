@@ -169,34 +169,40 @@ static ani_object GetOverlayManagerOptions(ani_env* env)
     CHECK_NULL_RETURN(overlayManager, options);
 
     auto overlayInfo = overlayManager->GetOverlayManagerOptions();
-    if (overlayInfo.has_value()) {
-        ani_class cls;
-        if (ANI_OK != env->FindClass("L@ohos/arkui/UIContext/OverlayManagerOptionsInner;", &cls)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass OverlayManagerOptionsInner failed");
-            return options;
-        }
-        ani_method ctor;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find OverlayManagerOptionsInner ctor");
-            return options;
-        }
-        if (ANI_OK != env->Object_New(cls, ctor, &options)) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Create OverlayManagerOptionsInner object failed");
-            return options;
-        }
-
-        ani_object renderRootOverlayObj;
-        CreateAniBoolean(env, overlayInfo->renderRootOverlay, renderRootOverlayObj);
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "renderRootOverlay", renderRootOverlayObj)) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property renderRootOverlay failed");
-        }
-
-        ani_object enableBackPressedEventObj;
-        CreateAniBoolean(env, overlayInfo->enableBackPressedEvent, enableBackPressedEventObj);
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "enableBackPressedEvent", enableBackPressedEventObj)) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property enableBackPressedEvent failed");
-        }
+    if (!overlayInfo.has_value()) {
+        overlayInfo = NG::OverlayManagerInfo {
+            .renderRootOverlay = true,
+            .enableBackPressedEvent = false,
+        };
     }
+
+    ani_class cls;
+    if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptionsInner", &cls)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass OverlayManagerOptionsInner failed");
+        return options;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find OverlayManagerOptionsInner ctor");
+        return options;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &options)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Create OverlayManagerOptionsInner object failed");
+        return options;
+    }
+
+    ani_object renderRootOverlayObj;
+    CreateAniBoolean(env, overlayInfo->renderRootOverlay, renderRootOverlayObj);
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "renderRootOverlay", renderRootOverlayObj)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property renderRootOverlay failed");
+    }
+
+    ani_object enableBackPressedEventObj;
+    CreateAniBoolean(env, overlayInfo->enableBackPressedEvent, enableBackPressedEventObj);
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(options, "enableBackPressedEvent", enableBackPressedEventObj)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Set property enableBackPressedEvent failed");
+    }
+
     return options;
 }
 

@@ -951,9 +951,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
 
     auto currentIndex = startIndex - 1;
     auto marginValue = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
-    if (!NearZero(prevMargin_) && startIndex == 0 && swiperLayoutProperty->GetPrevMarginIgnoreBlankValue(false)) {
-        marginValue += prevMargin_ + spaceWidth_;
-    }
+    marginValue -= Positive(ignoreBlankOffset_) ? 0.0f : ignoreBlankOffset_;
     do {
         currentStartPos = currentEndPos;
         auto result = LayoutForwardItem(layoutWrapper, layoutConstraint, currentIndex, currentStartPos, currentEndPos);

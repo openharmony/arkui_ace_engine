@@ -384,13 +384,16 @@ public:
 
     virtual void CallNativeHandler(const std::string& event, const std::string& params) {}
 
-    virtual void GetBackgroundBlurStyleOption(napi_value value, BlurStyleOption& styleOption)
+    virtual void GetBackgroundBlurStyleOption(
+        napi_value value, BlurStyleOption& styleOption, bool& hasBlurStyleOptionInactiveColor)
     {
-        JSViewAbstractBridge::GetBackgroundBlurStyleOption(value, styleOption);
+        JSViewAbstractBridge::GetBackgroundBlurStyleOption(value, styleOption, hasBlurStyleOptionInactiveColor);
     }
-    virtual void GetBackgroundEffect(napi_value value, EffectOption& styleOption)
+    virtual void GetBackgroundEffect(
+        napi_value value, EffectOption& styleOption, bool& hasEffectOptionColor, bool& hasEffectOptionInactiveColor)
     {
-        JSViewAbstractBridge::GetBackgroundEffect(value, styleOption);
+        JSViewAbstractBridge::GetBackgroundEffect(
+            value, styleOption, hasEffectOptionColor, hasEffectOptionInactiveColor);
     }
 
 protected:

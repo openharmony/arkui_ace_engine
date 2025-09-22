@@ -1073,9 +1073,6 @@ void VideoPattern::OnModifyDone()
     UpdateControllerBar();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    bgColor_ = renderContext->GetBackgroundColor().value_or(Color::BLACK);
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
         ContainerScope scope(instanceId_);
@@ -1248,7 +1245,8 @@ void VideoPattern::UpdatePreviewImage()
     CHECK_NULL_VOID(imageRenderProperty);
     imageRenderProperty->UpdateContentTransition(contentTransition_);
     if (contentTransition_ != ContentTransitionType::IDENTITY) {
-        SetTransparentBackgroundColor();
+        CHECK_NULL_VOID(renderContextForMediaPlayer_);
+        renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     } else {
         UpdateBackgroundColor();
     }
@@ -1261,17 +1259,6 @@ void VideoPattern::UpdatePreviewImage()
     }
     posterLayoutProperty->UpdateImageFit(imageFit);
     image->MarkModifyDone();
-}
-
-void VideoPattern::SetTransparentBackgroundColor()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    CHECK_NULL_VOID(renderContextForMediaPlayer_);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 
 void VideoPattern::UpdateControllerBar()
@@ -2431,11 +2418,6 @@ void VideoPattern::SetContentTransition(ContentTransitionType contentTransition)
 
 void VideoPattern::UpdateBackgroundColor()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(bgColor_);
     CHECK_NULL_VOID(renderContextForMediaPlayer_);
     renderContextForMediaPlayer_->UpdateBackgroundColor(surfaceBgColor_);
 }

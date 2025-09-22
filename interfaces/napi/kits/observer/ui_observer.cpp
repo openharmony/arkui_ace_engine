@@ -86,6 +86,10 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::PanGestureInfos
 std::unordered_map<NG::FrameNode*, std::shared_ptr<UIObserver::NodeRenderListener>>
     UIObserver::specifiedNodeRenderStateListeners_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::textChangeEventListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedTextChangeEventListeners_;
+
 template<typename ListenerList, typename... Args>
 void SafeIterateListeners(const ListenerList& listeners, void (UIObserverListener::*callback)(Args...), Args... args)
 {
@@ -1821,6 +1825,93 @@ void UIObserver::HandleTabContentStateChange(const NG::TabContentInfo& tabConten
 
     for (const auto& listener : holder) {
         listener->OnTabContentStateChange(tabContentInfo);
+    }
+}
+
+// UIObserver.on(type: "textChange", callback)
+// register a global listener without options
+void UIObserver::RegisterTextChangeEventCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(textChangeEventListeners_.begin(), textChangeEventListeners_.end(), listener) !=
+        textChangeEventListeners_.end()) {
+        return;
+    }
+    textChangeEventListeners_.emplace_back(listener);
+}
+
+// UIObserver.on(type: "textChange", options, callback)
+// register a listener on a specified textChange
+void UIObserver::RegisterTextChangeEventCallback(
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedTextChangeEventListeners_.find(id);
+    if (iter == specifiedTextChangeEventListeners_.end()) {
+        specifiedTextChangeEventListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "textChange", callback)
+void UIObserver::UnRegisterTextChangeEventCallback(napi_value cb)
+{
+    if (cb == nullptr) {
+        textChangeEventListeners_.clear();
+        return;
+    }
+
+    textChangeEventListeners_.erase(
+        std::remove_if(
+            textChangeEventListeners_.begin(),
+            textChangeEventListeners_.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        textChangeEventListeners_.end()
+    );
+}
+
+// UIObserver.off(type: "textChange", options, callback)
+void UIObserver::UnRegisterTextChangeEventCallback(const std::string& id, napi_value cb)
+{
+    auto iter = specifiedTextChangeEventListeners_.find(id);
+    if (iter == specifiedTextChangeEventListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (cb == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleTextChangeEvent(const NG::TextChangeEventInfo& info)
+{
+    for (const auto& listener : textChangeEventListeners_) {
+        listener->OnTextChangeEvent(info);
+    }
+
+    auto iter = specifiedTextChangeEventListeners_.find(info.id);
+    if (iter == specifiedTextChangeEventListeners_.end()) {
+        return;
+    }
+
+    auto holder = iter->second;
+    for (const auto& listener : holder) {
+        listener->OnTextChangeEvent(info);
     }
 }
 

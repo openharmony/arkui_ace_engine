@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -62,7 +63,7 @@ public:
         return { isVertical_, true, ScopeType::FLEX };
     }
 
-    bool GetIsVertical() const
+    bool GetIsVertical() const override
     {
         return isVertical_;
     }
@@ -105,6 +106,9 @@ public:
         if (space.has_value()) {
             DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
         }
+        if (vOverflowHandler_) {
+            DumpLog::GetInstance().AddDesc(std::string("OverflowInfo: ").append(vOverflowHandler_->ToString().c_str()));
+        }
     }
 
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override
@@ -114,13 +118,32 @@ public:
         json->Put("FlexBetweenSpace", static_cast<double>(layoutResult_.betweenSpace));
     }
 
+    bool IsVerticalReverseLayout() const override
+    {
+        if (!isVertical_) {
+            return false;
+        }
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto flexProperty = AceType::DynamicCast<FlexLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_RETURN(flexProperty, false);
+        return flexProperty->GetFlexLayoutAttribute()->GetIsReverse().value_or(false);
+    }
+
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override
+    {
+        if (!vOverflowHandler_) {
+            vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+        }
+        return vOverflowHandler_;
+    }
 private:
     bool isVertical_ = false;
     FlexMeasureResult measureResult_;
     FlexLayoutResult layoutResult_;
     std::optional<uintptr_t> measuredAddress_;
     std::optional<uintptr_t> layoutedAddress_;
-
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
     ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
 };
 } // namespace OHOS::Ace::NG

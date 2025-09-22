@@ -2836,10 +2836,10 @@ ArkUINativeModuleValue CommonBridge::SetColorBlend(ArkUIRuntimeCallInfo *runtime
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorBlendObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetColorBlend(nativeNode);
-        } else {
-            auto cbColorRawPtr = AceType::RawPtr(colorBlendObj);
-            GetArkUINodeModifiers()->getCommonModifier()->setColorBlend(nativeNode, color.GetValue(), cbColorRawPtr);
-        }
+    } else {
+        auto cbColorRawPtr = AceType::RawPtr(colorBlendObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setColorBlend(nativeNode, color.GetValue(), cbColorRawPtr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

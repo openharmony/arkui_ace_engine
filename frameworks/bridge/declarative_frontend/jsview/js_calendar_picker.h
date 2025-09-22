@@ -68,6 +68,8 @@ private:
 
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate = false);
     static void ParseDisabledDateRange(const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData);
+    static void ParseCalendarPickerDialogBlurStyleOption(const JSRef<JSObject>& paramObj, DialogProperties& properties);
+    static void ParseCalendarPickerDialogEffectOption(const JSRef<JSObject>& paramObj, DialogProperties& properties);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_PICKER_H

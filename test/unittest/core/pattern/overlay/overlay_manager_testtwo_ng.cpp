@@ -2162,6 +2162,39 @@ HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OverlayManagerTwoTestNg_OnPopMenuAnimationFinished2
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(select);
+    select->MountToParent(rootNode_);
+    rootNode_->MarkDirtyNode();
+    const WeakPtr<FrameNode> menuWK(select);
+    EXPECT_NE(menuWK.Upgrade(), nullptr);
+    const WeakPtr<UINode> rootWeak = overlayManager->GetRootNode();
+    EXPECT_NE(rootWeak.Upgrade(), nullptr);
+    const WeakPtr<OverlayManager> weakManager_(overlayManager);
+    EXPECT_NE(weakManager_.Upgrade(), nullptr);
+    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
+    EXPECT_EQ(overlayManager->isMenuShow_, false);
+    rootNode_->children_.pop_back();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
  * @tc.name: OverlayManagerTwoTestNg_PopMenuAnimation
  * @tc.desc: Test SheetView::CreateTitleColumn.
  * @tc.type: FUNC

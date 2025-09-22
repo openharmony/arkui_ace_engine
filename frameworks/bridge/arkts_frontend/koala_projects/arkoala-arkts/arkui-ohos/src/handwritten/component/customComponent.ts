@@ -25,6 +25,7 @@ import { GeometryInfo, Layoutable, Measurable, SizeResult } from './common';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
+import promptAction from '@ohos/promptAction';
 import { Theme } from '@ohos/arkui/theme';
 import { ArkThemeScopeManager } from "arkui/handwritten/theme/ArkThemeScopeManager";
 
@@ -75,6 +76,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr); 
+    }
+
+    getDialogController(): promptAction.DialogController | undefined {
+        return promptAction.getDialogController(this.getPeer()!.peer.ptr);
     }
 
     aboutToAppear(): void {

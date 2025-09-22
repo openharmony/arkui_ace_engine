@@ -20,6 +20,7 @@
 
 #include "ui/view/layout/layout_algorithm.h"
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
@@ -97,6 +98,7 @@ public:
     {
         return postponeForIgnore_;
     }
+    void HandleContentOverflow(LayoutWrapper* layoutWrapper);
 
 protected:
     virtual void OnReset() {}

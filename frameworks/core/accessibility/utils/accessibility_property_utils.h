@@ -18,30 +18,17 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
 
 class AccessibilityPropertyUtils {
 public:
-    static std::string GetContent(const RefPtr<AccessibilityProperty>& accessibilityProperty)
-    {
-        CHECK_NULL_RETURN(accessibilityProperty, "");
-        if (accessibilityProperty->HasUserTextValue()) {
-            return accessibilityProperty->GetUserTextValue();
-        }
-        return accessibilityProperty->GetGroupText();
-    }
-    static std::string GetAccessibilityText(const RefPtr<AccessibilityProperty>& accessibilityProperty)
-    {
-        CHECK_NULL_RETURN(accessibilityProperty, "");
-        if (!accessibilityProperty->HasUserTextValue() && accessibilityProperty->GetAccessibilityText().empty() &&
-            accessibilityProperty->IsAccessibilityGroup() && accessibilityProperty->IsAccessibilityTextPreferred()) {
-            return accessibilityProperty->GetGroupPreferAccessibilityText();
-        }
-        return accessibilityProperty->GetAccessibilityText();
-    }
+    static std::string GetContent(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    static std::string GetAccessibilityText(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    static std::string GetComponentType(
+        const RefPtr<FrameNode>& node, const RefPtr<AccessibilityProperty>& accessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
 

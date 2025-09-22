@@ -1621,4 +1621,11 @@ void WebClientImpl::OnRefreshAccessedHistoryV2(const std::string& url, bool isRe
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnRefreshAccessedHistory(url, isReload, isMainFrame);
 }
+
+void WebClientImpl::OnRemoveBlanklessFrameWithAnimation(int delayTime)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->RemoveSnapshotFrameNode(delayTime, true);
+}
 } // namespace OHOS::Ace

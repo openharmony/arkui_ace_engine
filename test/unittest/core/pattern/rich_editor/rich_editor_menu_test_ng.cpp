@@ -427,7 +427,7 @@ HWTEST_F(RichEditorMenuTestNg, OnMenuItemAction003, TestSize.Level1)
     auto selectOverlayInfo = selectOverlay->GetSelectOverlayInfo();
     auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
     EXPECT_FALSE(selectInfoFirstHandle.isShow);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**

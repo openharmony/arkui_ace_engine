@@ -85,7 +85,7 @@ struct DragControllerAsyncCtx {
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
-    std::optional<DimensionOffset> touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    std::optional<DimensionOffset> touchPoint;
     DragAction* dragAction = nullptr;
     NG::DragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&, const ArkUIDragStatus)>
@@ -383,7 +383,8 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         return false;
     }
     asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
-        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value(), asyncCtx->pixelMapList };
+        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
+        asyncCtx->pixelMapList };
     return true;
 }
 
@@ -506,7 +507,8 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
-        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value(), asyncCtx->pixelMapList };
+        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
+        asyncCtx->pixelMapList };
     for (auto& pixelMap : asyncCtx->pixelMapList) {
         if (!pixelMap) {
             LOGE("AceDrag, skip null pixelMap");
@@ -708,7 +710,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     NG::PreparedAsyncCtxForAnimate asyncCtxData;
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
-        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value(), asyncCtx->pixelMapList };
+        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
+        asyncCtx->pixelMapList };
     if (!CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, asyncCtx->pixelMap)) {
         LOGE("AceDrag, create preview node failed.");
         return false;
@@ -877,7 +880,11 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     }
     dragAsyncContext->hasHandle = asyncCtx.hasHandle;
     void* touchPointPtr = asyncCtx.touchPoint;
-    dragAsyncContext->touchPoint = *static_cast<DimensionOffset*>(touchPointPtr);
+    if (touchPointPtr) {
+        dragAsyncContext->touchPoint = *static_cast<DimensionOffset*>(touchPointPtr);
+    } else {
+        dragAsyncContext->touchPoint.reset();
+    }
     dragAsyncContext->customBuilderNode = asyncCtx.customBuilderNode;
     dragAsyncContext->customBuilderNodeList = asyncCtx.customBuilderNodeList;
     dragAsyncContext->asyncCallback = asyncCtx.asyncCallback;

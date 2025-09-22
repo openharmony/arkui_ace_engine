@@ -207,6 +207,12 @@ export default namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    export interface DialogBuilderOptions {
+        builder?: long;
+        destroyFunc?: ((ptr: long) => void);
+        builderWithId?: ((dialogId: number) => long);
+    }
+
     class Cleaner {
         private ptr: long = 0
         constructor(ptr: long) {
@@ -286,7 +292,7 @@ export default namespace promptAction {
     export native function openCustomDialog1(content: long, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export native function openCustomDialog(builder: long, options: CustomDialogOptions,
+    export native function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export native function updateCustomDialog(content: long, options: BaseDialogOptions): Promise<void>;
@@ -298,9 +304,24 @@ export default namespace promptAction {
     export native function openCustomDialogWithController(content: long, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
-        optionsInternal?: DialogOptionsInternal): Promise<number>;
+    export native function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
+        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export native function getTopOrder(): number | undefined;
     export native function getBottomOrder(): number | undefined;
+
+    export native function getDialogNode(content: long): long | undefined;
+    export native function setDialogController(dialog: long, controller: DialogController): boolean;
+    export function getDialogController(content: long): DialogController | undefined {
+        let dialog = getDialogNode(content);
+        if (dialog === undefined) {
+            return undefined;
+        }
+
+        let controller = new DialogController();
+        if (setDialogController(dialog, controller)) {
+            return controller;
+        }
+        return undefined;
+    }
 }

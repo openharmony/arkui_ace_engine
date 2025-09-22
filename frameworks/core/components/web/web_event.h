@@ -1592,6 +1592,7 @@ public:
     virtual bool IsAILink() const { return false; }
     virtual int GetSourceTypeV2() const { return 0; }
     virtual int GetMediaTypeV2() const { return 0; }
+    virtual int GetContextMenuMediaType() const { return 0; }
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {

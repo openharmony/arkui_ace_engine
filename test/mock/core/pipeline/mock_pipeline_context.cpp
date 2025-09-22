@@ -592,7 +592,8 @@ void PipelineContext::OnRawKeyboardChangedCallback() {}
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {}
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
@@ -684,10 +685,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
 bool PipelineContext::OnBackPressed()
 {
-    auto deviceType = SystemProperties::GetDeviceType();
-    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
-        return true;
-    }
     return false;
 }
 
@@ -1455,6 +1452,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
     return g_isContainerControlButtonVisible;
 }
 
+void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
@@ -1500,7 +1499,7 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
-void NG::PipelineContext::AddNeedReloadNodes(const WeakPtr<NG::UINode>& node) {}
+void NG::PipelineContext::AddNeedReloadNodes(NG::UINode* node) {}
 
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
 {

@@ -136,6 +136,7 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
 
 void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap)
 {
+    auto oldEndLine = endMainLineIndex_;
     auto remainSize = mainSize - overScrollOffset;
     for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
         remainSize -= (lineHeightMap_[i] + mainGap);
@@ -146,6 +147,17 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             endIndex_ = endLine->second.rbegin()->second;
             endMainLineIndex_ = i;
             break;
+        }
+    }
+    // last line height maybe zero
+    if (NearZero(remainSize + mainGap) && endMainLineIndex_ < oldEndLine) {
+        auto newEndLine = endMainLineIndex_ + 1;
+        if (NearZero(lineHeightMap_[newEndLine])) {
+            auto endLine = gridMatrix_.find(newEndLine);
+            CHECK_NULL_VOID(endLine != gridMatrix_.end());
+            CHECK_NULL_VOID(!endLine->second.empty());
+            endIndex_ = endLine->second.rbegin()->second;
+            endMainLineIndex_ = newEndLine;
         }
     }
 }
@@ -159,10 +171,9 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
     const bool atOrOutOfStart = reachStart_ && GreatOrEqual(currentOffset_, contentStartOffset_);
     if (irregular) {
-        return !atOrOutOfStart &&
-               Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
+        return !atOrOutOfStart && Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
     }
-    const float endPos = currentOffset_ + totalHeightOfItemsInView_;
+    const float endPos = currentOffset_ + totalHeightOfItemsInView_ + contentEndOffset_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
            LessNotEqualCustomPrecision(endPos, lastMainSize_ - contentEndPadding_, -0.01f);
 }
@@ -344,6 +355,23 @@ void GridLayoutInfo::GetLineHeights(
     }
 }
 
+void GridLayoutInfo::MakeLineHeightsAvailable(float& regularHeight, float& irregularHeight)
+{
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
+        irregularHeight = lastIrregularMainSize_;
+    } else {
+        lastIrregularMainSize_ = irregularHeight;
+    }
+    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
+        regularHeight = lastRegularMainSize_;
+    } else {
+        lastRegularMainSize_ = regularHeight;
+    }
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
+}
+
 float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const
 {
     if (options.irregularIndexes.empty()) {
@@ -435,19 +463,15 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
-        irregularHeight = lastIrregularMainSize_;
-    } else {
-        lastIrregularMainSize_ = irregularHeight;
+    if (Negative(irregularHeight) && Negative(regularHeight) && NonPositive(lastRegularMainSize_)) {
+        if (startIndex_ != 0 && !NearZero(currentHeight_)) {
+            SkipRegularLines(
+                Positive(currentOffset_ - prevHeight_), mainGap, (currentHeight_ / startIndex_) * crossCount_);
+        }
+        TAG_LOGI(ACE_GRID, "skip and reset both happend.");
+        return;
     }
-    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
-        regularHeight = lastRegularMainSize_;
-    } else {
-        lastRegularMainSize_ = regularHeight;
-    }
-    if (Negative(irregularHeight)) {
-        irregularHeight = regularHeight;
-    }
+    MakeLineHeightsAvailable(regularHeight, irregularHeight);
 
     float totalHeight = 0;
     int32_t lastIndex = -1;
@@ -473,6 +497,29 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     currentOffset_ = totalHeight + static_cast<double>(regularHeight) * lines - targetContent;
     int32_t startIdx = lines * crossCount_ + lastIndex + 1;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
+}
+
+void GridLayoutInfo::SkipRegularLines(bool forward, float mainGap, float averageHeight)
+{
+    auto lineHeight = averageHeight + mainGap;
+    if (LessOrEqual(lineHeight, 0.0)) {
+        return;
+    }
+    int32_t estimatedLines = currentOffset_ / lineHeight;
+    if (forward && startIndex_ < estimatedLines * crossCount_) {
+        startIndex_ = 0;
+        currentOffset_ = 0;
+    } else {
+        auto newIndex = startIndex_ - estimatedLines * crossCount_;
+        auto childrenCount = GetChildrenCount();
+        // keep offset and startIndex if startIndex is in the last line
+        newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
+        if (newIndex > startIndex_) {
+            estimatedLines = (newIndex - startIndex_) / crossCount_;
+            currentOffset_ += lineHeight * estimatedLines;
+            startIndex_ = newIndex;
+        }
+    }
 }
 
 float GridLayoutInfo::GetCurrentLineHeight() const
@@ -576,25 +623,26 @@ float GridLayoutInfo::GetAnimatePosIrregular(int32_t targetIdx, int32_t height, 
     }
     auto it = FindInMatrix(targetIdx);
     if (it == gridMatrix_.end()) {
-        return -1.0f;
+        return -1.0f - contentStartOffset_;
     }
     if (align == ScrollAlign::AUTO) {
         align = TransformAutoScrollAlign(targetIdx, height, lastMainSize_, mainGap);
     }
     switch (align) {
         case ScrollAlign::START:
-            return GetTotalHeightFromZeroIndex(it->first, mainGap);
+            return GetTotalHeightFromZeroIndex(it->first, mainGap) - contentStartOffset_;
         case ScrollAlign::CENTER: {
             auto [center, offset] = FindItemCenter(it->first, height, mainGap);
             float res = GetTotalHeightFromZeroIndex(center, mainGap) + offset - lastMainSize_ / 2.0f;
-            return std::max(res, 0.0f);
+            return std::max(res, -contentStartOffset_);
         }
         case ScrollAlign::END: {
-            float res = GetTotalHeightFromZeroIndex(it->first + height, mainGap) - mainGap - lastMainSize_;
-            return std::max(res, 0.0f);
+            float res =
+                GetTotalHeightFromZeroIndex(it->first + height, mainGap) - mainGap - lastMainSize_ + contentEndOffset_;
+            return std::max(res, -contentStartOffset_);
         }
         default:
-            return -1.0f;
+            return -1.0f - contentStartOffset_;
     }
 }
 
@@ -623,6 +671,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     // Depending on align, calculate where you need to scroll to
     switch (align) {
         case ScrollAlign::START:
+            targetPos += currentGridLayoutInfo.contentStartOffset_;
         case ScrollAlign::NONE:
             break;
         case ScrollAlign::CENTER: {
@@ -630,7 +679,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
             break;
         }
         case ScrollAlign::END: {
-            targetPos -= (lastMainSize - targetLineHeight);
+            targetPos -= (lastMainSize - targetLineHeight - contentEndOffset_);
             break;
         }
         case ScrollAlign::AUTO: {
@@ -656,8 +705,9 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
                 }
             }
             if (startMainLineIndex >= targetLineIndex) {
+                targetPos -= currentGridLayoutInfo.contentStartOffset_;
             } else if (targetLineIndex >= endMainLineIndex) {
-                targetPos -= (lastMainSize - targetLineHeight);
+                targetPos -= (lastMainSize - targetLineHeight - currentGridLayoutInfo.contentEndOffset_);
             } else {
                 return false;
             }

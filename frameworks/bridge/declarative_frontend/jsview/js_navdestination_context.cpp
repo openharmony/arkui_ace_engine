@@ -142,6 +142,19 @@ void JSNavDestinationContext::GetNavDestinationId(const JSCallbackInfo& info)
     info.SetReturnValue(idStr);
 }
 
+void JSNavDestinationContext::SetNavDestinationMode(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination context not support set NavDestinationMode");
+}
+
+void JSNavDestinationContext::GetNavDestinationMode(const JSCallbackInfo& info)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int8_t>(context_->GetMode()))));
+}
+
 void JSNavDestinationContext::JSBind(BindingTarget target)
 {
     JSClass<JSNavDestinationContext>::Declare("NavDestinationContext");
@@ -151,6 +164,8 @@ void JSNavDestinationContext::JSBind(BindingTarget target)
         &JSNavDestinationContext::SetPathStack);
     JSClass<JSNavDestinationContext>::CustomProperty("navDestinationId", &JSNavDestinationContext::GetNavDestinationId,
         &JSNavDestinationContext::SetNavDestinationId);
+    JSClass<JSNavDestinationContext>::CustomProperty(
+        "mode", &JSNavDestinationContext::GetNavDestinationMode, &JSNavDestinationContext::SetNavDestinationMode);
     JSClass<JSNavDestinationContext>::CustomMethod("getConfigInRouteMap", &JSNavDestinationContext::GetRouteInfo);
     JSClass<JSNavDestinationContext>::Bind(
         target, &JSNavDestinationContext::Constructor, &JSNavDestinationContext::Destructor);

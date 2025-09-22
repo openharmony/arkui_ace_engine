@@ -101,6 +101,10 @@ public:
 
     void GetNavDestinationId(const JSCallbackInfo& info);
 
+    void SetNavDestinationMode(const JSCallbackInfo& info);
+
+    void GetNavDestinationMode(const JSCallbackInfo& info);
+
     void SetNavDestinationContext(const RefPtr<NG::NavDestinationContext> context)
     {
         context_ = context;

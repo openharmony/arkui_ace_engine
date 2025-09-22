@@ -277,7 +277,7 @@ class AllowForceDarkModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('allowForceDark');
   applyPeer(node: KNode, reset: boolean): void {
-    getUINativeModule().common.allowForceDark(node);
+    getUINativeModule().common.allowForceDark(node, this.value);
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -2738,8 +2738,8 @@ class AccessibilitySelectedModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
-  constructor(value: Array<UniformDataType>) {
+class AllowDropModifier extends ModifierWithKey<Array<UniformDataType> | Array<string>> {
+  constructor(value: Array<UniformDataType> | Array<string>) {
     super(value);
   }
   static identity: Symbol = Symbol('allowDrop');
@@ -5347,7 +5347,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  allowDrop(value: Array<UniformDataType>): this {
+  allowDrop(value: Array<UniformDataType> | Array<string>): this {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
   }

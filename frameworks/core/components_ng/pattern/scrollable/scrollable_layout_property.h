@@ -44,8 +44,11 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);
+    virtual void OnContentStartOffsetUpdate(float /* contentStartOffset */) const {}
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
+    virtual void OnContentEndOffsetUpdate(float /* contentEndOffset */) const {}
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

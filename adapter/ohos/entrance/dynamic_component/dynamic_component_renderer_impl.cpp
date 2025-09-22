@@ -24,6 +24,11 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -289,6 +294,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     rendererDumpInfo_.ReSet();
     // create UI Content
     TAG_LOGI(aceLogTag_, "create UI Content");
+    ACE_SCOPED_TRACE("create UI Content");
     uiContent_ = UIContent::Create(abilityContext, runtime_, true);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->SetUIContentType(uIContentType_);
@@ -717,15 +723,59 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
     int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
 {
     CHECK_NULL_VOID(uiContent_);
+    auto hostContainer = Platform::AceContainer::GetContainer(hostInstanceId_);
+    CHECK_NULL_VOID(hostContainer);
+    auto hostContext = hostContainer->GetPipelineContext();
+    CHECK_NULL_VOID(hostContext);
+    Rosen::SizeChangeReason reason = Rosen::SizeChangeReason::UNDEFINED;
+    sptr<Rosen::Session> windowSceneSession = nullptr;
+    if (hostContainer->IsSceneBoardWindow()) {
+        auto windowScenePattern = GetWindowScene();
+        if (windowScenePattern) {
+            windowSceneSession = windowScenePattern->GetSession();
+            if (windowSceneSession) {
+                reason = static_cast<Rosen::SizeChangeReason>(windowSceneSession->GetSizeChangeReason());
+                orientation = GetSCBOrientation(windowScenePattern->GetHost());
+            }
+        }
+    }
+
     auto adaptiveSize = ComputeAdaptiveSize(size);
     ViewportConfig vpConfig(adaptiveSize.Width(), adaptiveSize.Height(), density);
     vpConfig.SetPosition(0, 0);
     vpConfig.SetOrientation(orientation);
-    TAG_LOGI(aceLogTag_, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
-        uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
 
     auto option = CopyAnimationOption(animationOpt);
-    auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_, offset]() {
+    auto hostRSTransaction =
+        DynamicComponentRendererImpl::GetSyncRSTransactionByInstanceId(hostInstanceId_);
+    uint64_t syncId = 0;
+    if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
+        syncId = hostRSTransaction->GetSyncId();
+        auto subRSUIContext =
+            DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent_->GetInstanceId());
+        auto subRSTransaction =
+            DynamicComponentRendererImpl::GetCommonRSTransactionByRSUIcontext(subRSUIContext);
+        if (subRSUIContext && subRSTransaction) {
+            hostRSTransaction->AddSubSyncTransaction(subRSTransaction, subRSUIContext->GetToken(), syncId);
+        } else {
+            TAG_LOGW(aceLogTag_, "AddSubSyncTransaction failed due to invalid subRSUIContext[%{public}d],"
+            " subRSTransaction[%{public}d]", subRSUIContext != nullptr, subRSTransaction != nullptr);
+        }
+    }
+ 
+    bool optionIsValid = option && option->IsValid();
+    TAG_LOGI(aceLogTag_, "Update DC[%{public}d] Size: %{public}s -> [%{public}d x %{public}d], "
+        "reason:[%{public}d], hasSyncTransaction:[%{public}d], orientation:[%{public}d], "
+        "syncId:[%{public}s], optionIsValid:[%{public}d]", uiContent_->GetInstanceId(),
+        size.ToString().c_str(), vpConfig.Width(), vpConfig.Height(), static_cast<int32_t>(reason),
+        hostRSTransaction == nullptr, orientation, std::to_string(syncId).c_str(), optionIsValid);
+    ACE_SCOPED_TRACE("[AceDynamicComponent]Update DC[%d] Size:[%s]->[%d x %d], reason:[%d], "
+        "hasSyncTransaction:[%d], orientation:[%d], syncId:[%s], optionIsValid:[%d]",
+        uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height(),
+        static_cast<int32_t>(reason), hostRSTransaction != nullptr, orientation,
+        std::to_string(syncId).c_str(), optionIsValid);
+    auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_,
+        offset, reason, hostRSTransaction, syncId]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -746,9 +796,29 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
         renderer->viewport_.SetWidth(config.Width());
         renderer->viewport_.SetHeight(config.Height());
         renderer->density_ = config.Density();
-        TAG_LOGI(aceLogTag, "update card viewport: [%{public}d x %{public}d]",
-            config.Width(), config.Height());
-        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, *option);
+        bool optionIsValid = option == nullptr ? false : option->IsValid();
+        TAG_LOGI(aceLogTag, "Handle Update DC[%{public}d] config:[%{public}s], syncId:[%{public}s],"
+            " optionIsValid:[%{public}d], reason:[%{public}d], hasSyncTransaction:[%{public}d]",
+            uiContent->GetInstanceId(), config.ToString().c_str(),  std::to_string(syncId).c_str(),
+            optionIsValid, static_cast<int32_t>(reason), hostRSTransaction != nullptr);
+        ACE_SCOPED_TRACE("Handle Update DC[%d] config:[%s], syncId:[%s], optionIsValid:[%d], reason:[%d],"
+            " hasSyncTransaction:[%d]", uiContent->GetInstanceId(), config.ToString().c_str(),
+            std::to_string(syncId).c_str(), optionIsValid, static_cast<int32_t>(reason),
+            hostRSTransaction == nullptr);
+        if (option == nullptr) {
+            TAG_LOGI(aceLogTag, "option points to nullptr");
+            return;
+        }
+        uiContent->UpdateViewportConfigWithAnimation(
+            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction);
+        if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
+            auto subRSUIContext =
+                DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent->GetInstanceId());
+            CHECK_NULL_VOID(subRSUIContext);
+            TAG_LOGI(aceLogTag, "RemoveSubSyncTransaction syncId: %{public}s",
+                std::to_string(syncId).c_str());
+            hostRSTransaction->RemoveSubSyncTransaction(subRSUIContext->GetToken(), syncId);
+        }
     };
     bool contentReady = false;
     {
@@ -761,7 +831,8 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
+            "ArkUIDynamicComponentUpdateViewport", PriorityType::VIP);
     }
 }
 
@@ -813,8 +884,56 @@ void DynamicComponentRendererImpl::UpdateIsolatedViewportConfig(const SizeF& siz
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
+        taskExecutor->PostTask(std::move(task),
+            TaskExecutor::TaskType::UI, "ArkUIIsolatedComponentUpdateViewport");
     }
+}
+
+int32_t DynamicComponentRendererImpl::GetSCBOrientation(const RefPtr<FrameNode>& windowSceneNode)
+{
+    CHECK_NULL_RETURN(windowSceneNode, 0);
+    auto parent = windowSceneNode->GetParent();
+    while (parent && parent->GetTag() != V2::SCREEN_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, 0);
+    auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(parentNode, 0);
+    auto screenPattern = parentNode->GetPattern<NG::ScreenPattern>();
+    CHECK_NULL_RETURN(screenPattern, 0);
+    auto screenSession = screenPattern->GetScreenSession();
+    CHECK_NULL_RETURN(screenSession, 0);
+    return static_cast<int32_t>(screenSession->GetScreenProperty().GetDisplayOrientation());
+}
+ 
+std::shared_ptr<Rosen::RSUIContext> DynamicComponentRendererImpl::GetRSUIContextByInstanceId(
+    int32_t instanceId)
+{
+    auto pipelineContext = NG::PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector =  window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    return rsUIDirector->GetRSUIContext();
+}
+ 
+std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetCommonRSTransactionByRSUIcontext(
+    const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    auto transactionController = rsUIContext->GetSyncTransactionHandler();
+    CHECK_NULL_RETURN(transactionController, nullptr);
+    return transactionController->GetCommonRSTransaction();
+}
+ 
+std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetSyncRSTransactionByInstanceId(int32_t instanceId)
+{
+    auto rsUIContext = DynamicComponentRendererImpl::GetRSUIContextByInstanceId(instanceId);
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    auto transactionController = rsUIContext->GetSyncTransactionHandler();
+    CHECK_NULL_RETURN(transactionController, nullptr);
+    return transactionController->GetRSTransaction();
 }
 
 void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& offset)
@@ -985,12 +1104,9 @@ void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
 
 void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
 {
-    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
-        return;
-    }
     auto dynamicHost = host_.Upgrade();
     CHECK_NULL_VOID(dynamicHost);
-    auto pattern = AceType::DynamicCast<DynamicPattern>(dynamicHost->GetPattern());
+    auto pattern = AceType::DynamicCast<PlatformAccessibilityBase>(dynamicHost->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->InitializeAccessibility();
 }

@@ -287,6 +287,7 @@ public:
     bool IsAILink() const override;
     int GetSourceTypeV2() const override;
     int GetMediaTypeV2() const override;
+    int GetContextMenuMediaType() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -1420,7 +1421,7 @@ public:
     int GetLastHitTestResult();
     int GetHitTestResult();
 
-    void RemoveSnapshotFrameNode(int removeDelayTime);
+    void RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate = false);
     void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
@@ -1708,7 +1709,6 @@ private:
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
-    double density_ = 0.0;
 
     bool isVisible_ = false;
 

@@ -615,6 +615,15 @@ void PipelineContext::FlushOnceVsyncTask()
         onceVsyncListener_ = nullptr;
     }
 }
+void PipelineContext::FlushDragEventVoluntarily()
+{
+    auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "FlushDragEventVoluntarily GetDragDrapManager error, manager is nullptr");
+        return;
+    }
+    manager->DispatchLastDragEventVoluntarily(isTransFlag_);
+}
 
 void PipelineContext::FlushDragEvents()
 {
@@ -631,13 +640,19 @@ void PipelineContext::FlushDragEvents()
     if (dragEvents.empty()) {
         canUseLongPredictTask_ = true;
         nodeToPointEvent_.clear();
+        manager->SetIsFlushDragEvent(false);
         return;
     }
     std::string extraInfo = manager->GetExtraInfo();
     canUseLongPredictTask_ = false;
+    bool isFlushed = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
+        if (!isFlushed && !iter->second.empty()) {
+            isFlushed = true;
+        }
         FlushDragEvents(manager, extraInfo, iter->first, iter->second);
     }
+    manager->SetIsFlushDragEvent(isFlushed);
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
@@ -727,11 +742,12 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
     }
 }
 
-void PipelineContext::AddNeedReloadNodes(const WeakPtr<UINode>& node)
+void PipelineContext::AddNeedReloadNodes(UINode* node)
 {
-    CHECK_NULL_VOID(node.Upgrade());
-    if (std::find(needReloadNodes_.begin(), needReloadNodes_.end(), node) == needReloadNodes_.end()) {
-        needReloadNodes_.push_back(node);
+    CHECK_NULL_VOID(node);
+    auto weakNode = WeakClaim(node);
+    if (std::find(needReloadNodes_.begin(), needReloadNodes_.end(), weakNode) == needReloadNodes_.end()) {
+        needReloadNodes_.push_back(weakNode);
     }
 }
 
@@ -878,6 +894,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         HandleVisibleAreaChangeEvent(nanoTimestamp);
     }
     UpdateFormLinkInfos();
+    FlushDragEventVoluntarily();
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -1737,8 +1754,32 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
+bool PipelineContext::FlushSafeArea(
+    int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas)
+{
+    bool safeAreaUpdated = false;
+    for (auto& avoidArea : safeAvoidAreas) {
+        if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_SYSTEM) {
+            safeAreaUpdated |= safeAreaManager_->UpdateSystemSafeArea(avoidArea.second);
+        } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR) {
+            safeAreaUpdated |= safeAreaManager_->UpdateNavSafeArea(avoidArea.second);
+        } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_CUTOUT) {
+            safeAreaUpdated |= safeAreaManager_->UpdateCutoutSafeArea(
+                avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
+        }
+    }
+    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight, height);
+    if (safeAreaUpdated) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+        return true;
+    }
+    return false;
+}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     ACE_SCOPED_TRACE("PipelineContext::OnSurfaceChanged");
     CHECK_RUN_ON(UI);
@@ -1761,8 +1802,12 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         return;
     }
     if (container->IsUseStageModel()) {
-        callback();
-        FlushBuild();
+        bool isDCRotation = (type == WindowSizeChangeReason::ROTATION) &&
+            (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT);
+        if (!isDCRotation) {
+            callback();
+            FlushBuild();
+        }
     } else {
         taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
     }
@@ -1772,8 +1817,9 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
+    StartWindowSizeChangeAnimate(width, height, type, rsTransaction, safeAvoidArea);
 #else
+    FlushSafeArea(width, height, safeAvoidArea);
     SetRootRect(width, height, 0.0);
 #endif
 }
@@ -1866,40 +1912,53 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform)
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
+        FlushSafeArea(width, height, safeAvoidArea);
         SetRootRect(width, height, 0.0);
         return;
     }
     switch (type) {
         case WindowSizeChangeReason::FULL_TO_SPLIT:
         case WindowSizeChangeReason::FULL_TO_FLOATING: {
-            StartFullToMultWindowAnimation(width, height, type, rsTransaction);
+            StartFullToMultWindowAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            StartWindowMaximizeAnimation(width, height, rsTransaction);
+            StartWindowMaximizeAnimation(width, height, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::MAXIMIZE_TO_SPLIT:
         case WindowSizeChangeReason::SPLIT_TO_MAXIMIZE: {
-            StartSplitWindowAnimation(width, height, type, rsTransaction);
+            StartSplitWindowAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT:
         case WindowSizeChangeReason::RECOVER_IN_IMPLICIT: {
-            MaximizeInImplictAnimation(width, height, type, rsTransaction);
+            MaximizeInImplictAnimation(width, height, type, rsTransaction, safeAvoidArea);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
             if (textFieldManager_) {
                 DynamicCast<TextFieldManagerNG>(textFieldManager_)->ScrollTextFieldToSafeArea();
+            }
+            auto container = Container::GetContainer(instanceId_);
+            CHECK_NULL_VOID(container);
+            auto uIContentType = container->GetUIContentType();
+            if (uIContentType == UIContentType::DYNAMIC_COMPONENT) {
+                auto frontend = weakFrontend_.Upgrade();
+                if (frontend) {
+                    frontend->OnSurfaceChanged(width, height);
+                }
+                FlushBuild();
             }
             FlushUITasks();
             if (!textFieldManager_) {
@@ -1909,6 +1968,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
             break;
@@ -1919,6 +1979,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
+            FlushSafeArea(width, height, safeAvoidArea);
             SetRootRect(width, height, 0.0f);
         }
     }
@@ -1970,7 +2031,8 @@ void PipelineContext::PostKeyboardAvoidTask()
 }
 
 void PipelineContext::StartWindowMaximizeAnimation(
-    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "Root node start RECOVER/MAXIMIZE animation, width = %{public}d, height = %{public}d", width, height);
@@ -1992,9 +2054,10 @@ void PipelineContext::StartWindowMaximizeAnimation(
     auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
     auto weak = WeakClaim(this);
-    Animate(option, curve, [width, height, weak]() {
+    Animate(option, curve, [width, height, weak, safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2005,8 +2068,9 @@ void PipelineContext::StartWindowMaximizeAnimation(
 #endif
 }
 
-void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2027,9 +2091,10 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
     auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingFraction, 0);
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
-    Animate(option, springMotion, [width, height, weak]() {
+    Animate(option, springMotion, [width, height, weak, safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2041,7 +2106,8 @@ void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t heig
 }
 
 void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
         "Root node start split window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2055,9 +2121,10 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
+    Animate(option, curve, [width, height, weak = WeakClaim(this), safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2069,7 +2136,8 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
 }
 
 void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
         "Maximize window in implict animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
@@ -2083,9 +2151,10 @@ void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, 
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
+    Animate(option, curve, [width, height, weak = WeakClaim(this), safeAvoidArea]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        pipeline->FlushSafeArea(width, height, safeAvoidArea);
         pipeline->SetRootRect(width, height, 0.0);
         pipeline->FlushUITasks();
     });
@@ -2803,12 +2872,6 @@ bool PipelineContext::OnBackPressed()
     if (!frontend) {
         // return back.
         return false;
-    }
-
-    auto deviceType = SystemProperties::GetDeviceType();
-    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
-        LOGW("disableSwipeBack set in wearable device, will NOT consume this back-press event");
-        return true;
     }
 
     // If the tag of the last child of the rootnode is video, exit full screen.
@@ -4488,33 +4551,28 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
-    if (dragManager && !dragManager->IsDragged()) {
-        if (event.action == AxisAction::BEGIN) {
-            isBeforeDragHandleAxis_ = true;
-            TouchRestrict touchRestrict { TouchRestrict::NONE };
-            touchRestrict.sourceType = event.sourceType;
-            touchRestrict.hitTestType = SourceType::TOUCH;
-            touchRestrict.inputEventType = InputEventType::AXIS;
-            // If received rotate event, no need to touchtest.
-            if (!event.isRotationEvent) {
-                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
-                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
-                auto formEventMgr = this->GetFormEventManager();
-                if (formEventMgr) {
-                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
-                }
-                auto formGestureMgr =  this->GetFormGestureManager();
-                if (formGestureMgr) {
-                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
-                        etsSerializedGesture, eventManager_);
-                }
+    if (event.action == AxisAction::BEGIN) {
+        isBeforeDragHandleAxis_ = true;
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = event.sourceType;
+        touchRestrict.hitTestType = SourceType::TOUCH;
+        touchRestrict.inputEventType = InputEventType::AXIS;
+        // If received rotate event, no need to touchtest.
+        if (!event.isRotationEvent) {
+            eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+            auto formEventMgr = this->GetFormEventManager();
+            if (formEventMgr) {
+                formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+            }
+            auto formGestureMgr =  this->GetFormGestureManager();
+            if (formGestureMgr) {
+                formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                    etsSerializedGesture, eventManager_);
             }
         }
-        eventManager_->DispatchTouchEvent(scaleEvent);
-    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
-        eventManager_->DispatchTouchEvent(scaleEvent);
-        isBeforeDragHandleAxis_ = false;
     }
+    eventManager_->DispatchTouchEvent(scaleEvent);
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -5145,7 +5203,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
             return;
         }
     }
-
+    manager->SetLastDragPointerEvent(pointerEvent, node);
     if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
         action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
         if (!eventManager_->touchDelegatesMap_.empty()) {
@@ -6524,6 +6582,14 @@ std::string PipelineContext::GetModuleName()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+void PipelineContext::SetEnableSwipeBack(bool isEnable)
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto rootPattern = rootNode_->GetPattern<RootPattern>();
+    CHECK_NULL_VOID(rootPattern);
+    rootPattern->SetEnableSwipeBack(isEnable);
 }
 
 void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)

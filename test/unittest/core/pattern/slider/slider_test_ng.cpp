@@ -514,7 +514,9 @@ HWTEST_F(SliderTestNg, SliderTestNg006, TestSize.Level1)
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
@@ -2213,7 +2215,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest001, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 1.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
@@ -2266,7 +2271,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest002, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 2.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
@@ -2609,5 +2617,51 @@ HWTEST_F(SliderTestNg, CreateWithStringResourceObj, TestSize.Level1)
     ASSERT_NE(resMgr, nullptr);
     auto count = resMgr->resMap_.count(key);
     EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest
+ * @tc.desc: Test SliderContentModifier Constructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderContentModifierTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parameters.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    parameters.blockColor = std::nullopt;
+    parameters.blockGradientColor = SliderModelNG::CreateSolidGradient(TEST_COLOR);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    std::vector<GradientColor> gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), TEST_COLOR);
+    }
+    parameters.blockColor = TEST_COLOR;
+    parameters.blockGradientColor = std::nullopt;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), TEST_COLOR);
+    }
+    parameters.blockGradientColor = std::nullopt;
+    parameters.blockColor = std::nullopt;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color themeColor = theme->GetBlockColor();
+    gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), themeColor);
+    }
 }
 } // namespace OHOS::Ace::NG

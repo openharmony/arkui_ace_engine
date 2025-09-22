@@ -43,6 +43,12 @@ public:
             return nullptr;
         }
         auto paintParameters = UpdateContentParameters();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, nullptr);
+        auto theme = context->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, nullptr);
         if (!sliderContentModifier_) {
             sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
                 paintParameters,
@@ -50,7 +56,7 @@ public:
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePosition(imageCenter);
-                });
+                }, theme);
             sliderContentModifier_->SetHost(GetHost());
         }
         InitAccessibilityVirtualNodeTask();
@@ -389,9 +395,12 @@ private:
     void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
-    void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
-    void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
-    void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetSelectPosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
+    void GetBackgroundPosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
+    void GetCirclePosition(
+        SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction);
     void UpdateBlock();
     void LayoutImageNode();
     void UpdateImagePosition(const PointF& imageCenter);

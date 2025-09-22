@@ -1261,6 +1261,8 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = false;
     }
 
+    bool CheckIfNeedAvoidOnCaretChange(float caretPos);
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool IsTriggerAvoidOnCaretAvoidMode()
@@ -1467,7 +1469,7 @@ private:
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
-    void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    bool HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
     bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
@@ -1918,6 +1920,7 @@ private:
     RefPtr<RichEditorContentPattern> contentPattern_;
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
+    // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)

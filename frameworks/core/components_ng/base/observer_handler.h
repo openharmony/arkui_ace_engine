@@ -168,6 +168,15 @@ struct PanGestureInfo {
     CurrentCallbackState callbackState;
 };
 
+struct TextChangeEventInfo {
+    std::string id;
+    int32_t uniqueId;
+    std::string content;
+    TextChangeEventInfo(std::string id, int32_t uniqueId, std::string content)
+        : id(std::move(id)), uniqueId(uniqueId), content(std::move(content))
+    {}
+};
+
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };
 
 enum class GestureActionPhase { WILL_START = 0, WILL_END = 1, UNKNOWN = 2 };
@@ -181,6 +190,7 @@ public:
     void NotifyNavigationStateChangeForAni(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
+    void NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     void NotifyDensityChange(double density);
     void NotifyWillClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
@@ -200,9 +210,11 @@ public:
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
+    void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
+    using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
@@ -217,11 +229,13 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
+    using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
+    void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
@@ -250,11 +264,13 @@ public:
     void SetWillClickHandleFuncForAni(WillClickHandleFuncForAni func);
     using DidClickHandleFuncForAni = std::function<void()>;
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
+    void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    RouterPageHandleFuncForAni routerPageHandleFuncForAni_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
@@ -265,6 +281,7 @@ private:
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
+    TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
 
     BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;
     AfterPanStartHandleFuncForAni afterPanStartHandleFuncForAni_ = nullptr;

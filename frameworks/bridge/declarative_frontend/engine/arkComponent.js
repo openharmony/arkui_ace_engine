@@ -209,7 +209,7 @@ class AllowForceDarkModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    getUINativeModule().common.allowForceDark(node);
+    getUINativeModule().common.allowForceDark(node, this.value);
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -9481,6 +9481,23 @@ class ImageSpanColorFilterModifier extends ModifierWithKey {
   }
 }
 ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
+class ImageSpanSupportSvg2Modifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetSupportSvg2(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setSupportSvg2(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageSpanSupportSvg2Modifier.identity = Symbol('supportSvg2');
 class ImageSpanBorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9570,6 +9587,10 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   colorFilter(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity, ImageSpanColorFilterModifier, value);
+    return this;
+  }
+  supportSvg2(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanSupportSvg2Modifier.identity, ImageSpanSupportSvg2Modifier, value);
     return this;
   }
   borderRadius(value) {

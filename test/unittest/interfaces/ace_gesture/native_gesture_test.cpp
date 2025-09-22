@@ -135,6 +135,7 @@ HWTEST_F(NativeGestureTest, NativeGestureTest003, TestSize.Level1)
         return GESTURE_INTERRUPT_RESULT_REJECT;
     };
     int userData = 1;
+    
     gestureAPI->setGestureInterrupterToNode(gestureNode, &userData, onInterruptCallback);
     auto ret = gestureAPI->gestureApi1->addGestureToNode(gestureNode, group, PRIORITY, NORMAL_GESTURE_MASK);
     EXPECT_EQ(ret, 0);

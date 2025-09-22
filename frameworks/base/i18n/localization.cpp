@@ -67,7 +67,6 @@ const char DEFAULT_LANGUAGE[] = "en-US";
 constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
 constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
 constexpr uint32_t SECONDS_IN_HOUR = 3600;
-std::shared_mutex indexJsonMutex_;
 
 const char CHINESE_LEAP[] = u8"\u95f0";
 const char CHINESE_FIRST[] = u8"\u521d";
@@ -147,7 +146,6 @@ MeasureUnit* GetMeasureUnit(TimeUnitStyle timeUnitStyle, UErrorCode& status)
 void GetLocalJsonObject(InternalResource::ResourceId id, std::string language, std::unique_ptr<JsonValue>& indexJson,
     std::unique_ptr<JsonValue>& json)
 {
-    std::unique_lock<std::shared_mutex> lock(indexJsonMutex_);
     if (indexJson == nullptr) {
         size_t size = 0;
         const uint8_t* buf = InternalResource::GetInstance().GetResource(id, size);
@@ -171,11 +169,13 @@ void GetLocalJsonObject(InternalResource::ResourceId id, std::string language, s
     }
 }
 
-} // namespace
-
 // for entry.json
 static std::unique_ptr<JsonValue> g_indexJsonEntry = nullptr;
 static std::unique_ptr<JsonValue> g_indexJsonError = nullptr;
+static std::mutex g_indexJsonEntryMutex;
+static std::mutex g_indexJsonErrorMutex;
+
+} // namespace
 
 Localization::~Localization() = default;
 
@@ -813,7 +813,10 @@ std::string Localization::GetEntryLetters(const std::string& lettersIndex)
     if (iter != LANGUAGE_CODE_MAP.end()) {
         language = iter->second;
     }
-    GetLocalJsonObject(InternalResource::ResourceId::ENTRY_JSON, language, g_indexJsonEntry, localJsonEntry);
+    {
+        std::lock_guard<std::mutex> lock(g_indexJsonEntryMutex);
+        GetLocalJsonObject(InternalResource::ResourceId::ENTRY_JSON, language, g_indexJsonEntry, localJsonEntry);
+    }
     if (localJsonEntry == nullptr) {
         LOGW("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
         return "";
@@ -850,7 +853,10 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
     if (iter != LANGUAGE_CODE_MAP.end()) {
         language = iter->second;
     }
-    GetLocalJsonObject(InternalResource::ResourceId::ERRORINFO_JSON, language, g_indexJsonError, localJsonError);
+    {
+        std::lock_guard<std::mutex> lock(g_indexJsonErrorMutex);
+        GetLocalJsonObject(InternalResource::ResourceId::ERRORINFO_JSON, language, g_indexJsonError, localJsonError);
+    }
     if (localJsonError == nullptr) {
         LOGW("read JsonObject fail. language: %{public}s.", selectLanguage_.c_str());
         return "";

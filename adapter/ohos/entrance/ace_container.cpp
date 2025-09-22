@@ -1538,6 +1538,13 @@ UIContentErrorCode AceContainer::SetViewNew(
 
     if (container->isFormRender_) {
         auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        if (!window->GetRSSurfaceNode()) {
+            TAG_LOGW(AceLogTag::ACE_FORM,
+                "SurfaceNode is null, try to create form render window again, instanceId_:%{public}d.",
+                view->GetInstanceId());
+            window->Destroy();
+            window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        }
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -3489,6 +3496,7 @@ void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 void  AceContainer::OnFrontUpdated(
     const ConfigurationChange& configurationChange, const std::string& configuration)
 {
+    ContainerScope scope(instanceId_);
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
@@ -3706,11 +3714,20 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN(container, nullptr);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, container is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(context, nullptr);
-    auto window = static_cast<FormRenderWindow*>(context->GetWindow());
-    CHECK_NULL_RETURN(window, nullptr);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, context is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
+    auto window = static_cast<FormRenderWindow *>(context->GetWindow());
+    if (!window) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, window is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
     return window->GetRSSurfaceNode();
 }
 

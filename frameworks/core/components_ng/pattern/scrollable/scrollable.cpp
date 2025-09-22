@@ -524,9 +524,11 @@ void Scrollable::HandleTouchUp()
         return;
     }
     if (CanStayOverScroll()) {
-        if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
+        if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
             isUserFling_ = false;
-            onDidStopFlingCallback_();
+            if (onDidStopFlingCallback_) {
+                onDidStopFlingCallback_();
+            }
         }
         isTouchStopAnimation_ = false;
         return;
@@ -549,9 +551,11 @@ void Scrollable::HandleTouchUp()
             return;
         }
     }
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_ && onDidStopFlingCallback_) {
+    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
         isUserFling_ = false;
-        onDidStopFlingCallback_();
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
     }
     isTouchStopAnimation_ = false;
 }
@@ -938,6 +942,12 @@ void Scrollable::ProcessAxisEndEvent()
         HandleOverScroll(0);
         SetCanStayOverScroll(false);
     }
+    if (isUserFling_) {
+        isUserFling_ = false;
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
+    }
     if (onDidStopDraggingCallback_) {
         onDidStopDraggingCallback_(false);
     }
@@ -1205,8 +1215,10 @@ void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSna
             scroll->updateSnapAnimationCount_--;
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->state_ = AnimationState::IDLE;
-                if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
-                    scroll->onDidStopFlingCallback_();
+                if (scroll->isUserFling_) {
+                    if (scroll->onDidStopFlingCallback_) {
+                        scroll->onDidStopFlingCallback_();
+                    }
                     scroll->isUserFling_ = false;
                 }
                 scroll->axisSnapDistance_ = 0.f;
@@ -1393,8 +1405,10 @@ void Scrollable::StartSpringMotion(
                 return;
             }
             scroll->state_ = AnimationState::IDLE;
-            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_ && !scroll->isTouchStopAnimation_) {
-                scroll->onDidStopFlingCallback_();
+            if (scroll->isUserFling_ && !scroll->isTouchStopAnimation_ && !scroll->isDragOuterScrollBarStopAnimation_) {
+                if (scroll->onDidStopFlingCallback_) {
+                    scroll->onDidStopFlingCallback_();
+                }
                 scroll->isUserFling_ = false;
             }
             scroll->currentVelocity_ = 0.0;
@@ -1458,8 +1472,10 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
             ACE_SCOPED_TRACE(
                 "Scrollable updated spring animation finish, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
             scroll->state_ = AnimationState::IDLE;
-            if (scroll->onDidStopFlingCallback_ && scroll->isUserFling_) {
-                scroll->onDidStopFlingCallback_();
+            if (scroll->isUserFling_) {
+                if (scroll->onDidStopFlingCallback_) {
+                    scroll->onDidStopFlingCallback_();
+                }
                 scroll->isUserFling_ = false;
             }
             scroll->currentVelocity_ = 0.0;
@@ -1487,13 +1503,19 @@ void Scrollable::ProcessScrollMotionStop(int32_t source)
         if (state_ == AnimationState::TRANSITION) {
             // didn't trigger spring animation
             state_ = AnimationState::IDLE;
+            isUserFling_ = false;
+            if (onDidStopFlingCallback_) {
+                onDidStopFlingCallback_();
+            }
         }
         return;
     }
 
-    if (onDidStopFlingCallback_ && !isTouchStopAnimation_ && source != SCROLL_FROM_AXIS &&
-        source != SCROLL_FROM_LAYOUT) {
-        onDidStopFlingCallback_();
+    if (!isTouchStopAnimation_ && !isDragOuterScrollBarStopAnimation_ && source != SCROLL_FROM_AXIS &&
+            source != SCROLL_FROM_LAYOUT) {
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
         isUserFling_ = false;
     }
 
@@ -1935,7 +1957,7 @@ void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)
     if (onDidStopDraggingCallback_) {
         onDidStopDraggingCallback_(isWillFling);
     }
-    if (isTouchStopAnimation_ && !isWillFling) {
+    if (isUserFling_ && !isWillFling) {
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
         }
@@ -1953,7 +1975,7 @@ void Scrollable::HandleScrollBarOnWillStartFling()
 
 void Scrollable::HandleScrollBarOnDidStopFling()
 {
-    if (isUserFling_ && !isTouchStopAnimation_) {
+    if (isUserFling_ && !isTouchStopAnimation_ && !isDragOuterScrollBarStopAnimation_) {
         isUserFling_ = false;
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();

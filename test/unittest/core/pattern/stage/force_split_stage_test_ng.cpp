@@ -319,6 +319,7 @@ HWTEST_F(ParallelStageTestNg, ParallelStagePatternTest002, TestSize.Level1)
     auto mockPipelineContext = AceType::DynamicCast<MockPipelineContext>(pipeline);
     ASSERT_NE(mockPipelineContext, nullptr);
     auto stageManager = mockPipelineContext->stageManager_;
+    ASSERT_NE(stageManager, nullptr);
     stageManager->isForceSplit_ = false;
     isSplit.reset();
     stagePattern->OnWindowSizeChanged(ENABLE_SPLIT_MODE_WIDTH, 600, WindowSizeChangeReason::RESIZE);

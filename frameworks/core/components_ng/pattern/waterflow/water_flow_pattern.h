@@ -231,6 +231,11 @@ public:
 
     void OnColorModeChange(uint32_t colorMode) override;
 
+    float GetContentStartOffset() const override
+    {
+        return layoutInfo_->contentStartOffset_;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

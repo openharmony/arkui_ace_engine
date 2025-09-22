@@ -30,6 +30,9 @@ constexpr char ANI_NAVDESTINATION_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver
 constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/NavDestinationState;";
 constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "Larkui/component/navDestination/NavDestinationMode;";
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
+constexpr char ROUTER_UPDATE[] = "routerPageUpdate";
+constexpr char ANI_ROUTER_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/RouterPageInfo;";
+constexpr char ANI_ROUTER_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/RouterPageState;";
 constexpr char NAVDESTINATION_PARAM_WITHID[] =
     "Lstd/core/String;L@ohos/arkui/observer/uiObserver/NavDestinationSwitchObserverOptions;Lstd/core/Object;:V";
 } // namespace
@@ -377,6 +380,44 @@ public:
             holder.end());
     }
 
+    // UIObserver.on(type: "routerPageUpdate", UIContext, callback)
+    void RegisterRouterPageCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            specifiedRouterPageListeners_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    // UIObserver.off(type: "routerPageUpdate", UIContext, callback)
+    void UnRegisterRouterPageCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
     void HandleDensityChange(ani_env* env, double density)
     {
         auto currentId = Container::CurrentId();
@@ -493,6 +534,26 @@ public:
         }
     }
 
+    void HandleRouterPageStateChange(ani_env* env, NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
+    {
+        auto currentId = Container::CurrentIdSafelyWithCheck();
+        auto iter = specifiedRouterPageListeners_.find(currentId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            return;
+        }
+        ani_object res;
+        CreateRouterPageInfo(env, pageInfo, res);
+        std::vector<ani_ref> cbParam;
+        cbParam.emplace_back(res);
+        ani_ref fnReturnVal;
+
+        auto holder = iter->second;
+        for (const auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnReturnVal);
+        }
+    }
+
     ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
     {
         ani_boolean isEquals = false;
@@ -547,6 +608,45 @@ public:
         env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
     }
 
+    void CreateRouterPageInfo(ani_env* env, const NG::RouterPageInfoNG& pageInfo, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_ROUTER_INFO_CLS, &cls);
+        ani_method routerInfoCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+        env->Object_New(cls, routerInfoCtor, &res);
+
+        env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(pageInfo.index));
+
+        ani_string routerName {};
+        env->String_NewUTF8(pageInfo.name.c_str(), pageInfo.name.size(), &routerName);
+        env->Object_SetPropertyByName_Ref(res, "name", routerName);
+
+        ani_string routerPath {};
+        env->String_NewUTF8(pageInfo.path.c_str(), pageInfo.path.size(), &routerPath);
+        env->Object_SetPropertyByName_Ref(res, "path", routerPath);
+
+        ani_string routerPageId {};
+        env->String_NewUTF8(pageInfo.pageId.c_str(), pageInfo.pageId.size(), &routerPageId);
+        env->Object_SetPropertyByName_Ref(res, "pageId", routerPageId);
+
+        ani_enum routerState;
+        env->FindEnum(ANI_ROUTER_STATE_TYPE, &routerState);
+        ani_enum_item routerStateItem;
+        env->Enum_GetEnumItemByIndex(routerState, static_cast<ani_size>(pageInfo.state), &routerStateItem);
+        env->Object_SetPropertyByName_Ref(res, "state", routerStateItem);
+
+        ani_class uiContextUtil;
+        env->FindClass("Larkui/handwritten/UIContextUtil;", &uiContextUtil);
+        ani_static_method getUiContext;
+        env->Class_FindStaticMethod(
+            uiContextUtil, "getOrCreateUIContextById", "I:L@ohos/arkui/UIContext/UIContext;", &getUiContext);
+        ani_int instanceId = Container::CurrentIdSafelyWithCheck();
+        ani_ref uiContext;
+        env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);
+        env->Object_SetPropertyByName_Ref(res, "context", uiContext);
+    }
+
 private:
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
@@ -560,6 +660,7 @@ private:
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidClickCbMap_;
     std::list<ani_ref> unspecifiedNavigationListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
 };
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
@@ -623,12 +724,13 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
         observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == "didLayout") {
         observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == ROUTER_UPDATE) {
+        observer->RegisterRouterPageCallback(idMs, fnObjGlobalRef);
     }
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
 {
-    LOGE("lzr in off");
     auto* observer = Unwrapp(env, object);
     if (observer == nullptr) {
         LOGE("observer-ani context is null.");
@@ -636,7 +738,11 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
     }
     std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
     ani_ref fnObjGlobalRef = nullptr;
-    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
 
     const int idMs = 100000;
     if (typeStr == "densityUpdate") {
@@ -659,6 +765,8 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
         observer->UnRegisterWillDrawCallback(env, idMs, fnObjGlobalRef);
     } else if (typeStr == "didLayout") {
         observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == ROUTER_UPDATE) {
+        observer->UnRegisterRouterPageCallback(env, idMs, fnObjGlobalRef);
     }
 }
 
@@ -750,6 +858,11 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleNavigationStateChange(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+    auto routerPageInfoChangeCallback = [observer, env](
+                                            NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
+        observer->HandleRouterPageStateChange(env, context, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");

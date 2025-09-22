@@ -6683,7 +6683,9 @@ bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     bool hasDarkRes = false;
     auto params = resObj->GetParams();
     if (resId == -1 && !params.empty() && params.back().value.has_value()) {
-        hasDarkRes = resourceAdapter->ExistDarkResByName(params.back().value.value(),
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
+        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
             std::to_string(resObj->GetType()));
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
@@ -11802,6 +11804,65 @@ void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPrev
     }
 }
 
+void JSViewAbstract::ParseDialogShadowProps(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto shadowValue = obj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
+
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_EQUAL_VOID(shadowValue->IsObject(), false);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(shadowValue);
+    auto jsColor = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    RefPtr<ResourceObject> colorResObj;
+    if (!ParseJsShadowColorStrategy(jsColor, shadowColorStrategy) && ParseJsColor(jsColor, color, colorResObj) &&
+        !CheckDarkResource(colorResObj)) {
+        properties.hasInvertColor.hasShadowColor = true;
+    }
+}
+
+void JSViewAbstract::SetDialogHasBorderColor(
+    NG::BorderColorProperty& borderColor, std::optional<Color>& color, bool& hasBorderColor, const std::string& key)
+{
+    CHECK_NULL_VOID(color);
+    hasBorderColor = true;
+    auto it = borderColor.resMap_.find(key);
+    if (it != borderColor.resMap_.end() && CheckDarkResource(it->second.resObj)) {
+        hasBorderColor = false;
+    }
+}
+
+void JSViewAbstract::SetDialogHasBorderColorProps(
+    NG::BorderColorProperty& borderColor, DialogProperties& properties, RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    if (borderColor.multiValued) {
+        SetDialogHasBorderColor(
+            borderColor, borderColor.topColor, properties.hasInvertColor.hasBorderTopColor, "borderColor.top");
+        SetDialogHasBorderColor(
+            borderColor, borderColor.bottomColor, properties.hasInvertColor.hasBorderBottomColor, "borderColor.bottom");
+        SetDialogHasBorderColor(
+            borderColor, borderColor.leftColor, properties.hasInvertColor.hasBorderLeftColor, "borderColor.start");
+        SetDialogHasBorderColor(
+            borderColor, borderColor.rightColor, properties.hasInvertColor.hasBorderRightColor, "borderColor.end");
+        SetDialogHasBorderColor(
+            borderColor, borderColor.startColor, properties.hasInvertColor.hasBorderStartColor, "borderColor.start");
+        SetDialogHasBorderColor(
+            borderColor, borderColor.endColor, properties.hasInvertColor.hasBorderEndColor, "borderColor.end");
+    } else {
+        if (!CheckDarkResource(resObj)) {
+            properties.hasInvertColor.hasBorderTopColor = true;
+            properties.hasInvertColor.hasBorderBottomColor = true;
+            properties.hasInvertColor.hasBorderLeftColor = true;
+            properties.hasInvertColor.hasBorderRightColor = true;
+        }
+    }
+}
+
 void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     // Parse cornerRadius.
@@ -11817,7 +11878,9 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
         properties.borderWidth = borderWidth;
         auto colorValue = obj->GetProperty("borderColor");
         NG::BorderColorProperty borderColor;
-        if (ParseBorderColorProps(colorValue, borderColor)) {
+        RefPtr<ResourceObject> borderColorResObj;
+        if (ParseBorderColorProps(colorValue, borderColor, borderColorResObj)) {
+            SetDialogHasBorderColorProps(borderColor, properties, borderColorResObj);
             properties.borderColor = borderColor;
         } else {
             borderColor.SetColor(Color::BLACK);
@@ -11833,11 +11896,7 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
                 { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
         }
     }
-    auto shadowValue = obj->GetProperty("shadow");
-    Shadow shadow;
-    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
-        properties.shadow = shadow;
-    }
+    ParseDialogShadowProps(obj, properties);
     auto widthValue = obj->GetProperty("width");
     CalcDimension width;
     if (ParseJsDimensionVpNG(widthValue, width, true)) {

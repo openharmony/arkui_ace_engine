@@ -18,6 +18,7 @@
 #include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
+#include "adapter/ohos/capability/feature_config/features/ui_correction_parser.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 
@@ -30,6 +31,7 @@ namespace OHOS::Ace {
 const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODEL(UINodeGcParamParser),
     ADD_PARSER_MODEL(SyncLoadParser),
+    ADD_PARSER_MODEL(UICorrectionParser),
 };
 
 FeatureParamManager::FeatureParamManager() = default;
@@ -38,6 +40,21 @@ FeatureParamManager::~FeatureParamManager() = default;
 void FeatureParamManager::Init(const std::string& bundleName)
 {
     FeatureParamParseEntry(bundleName);
+    UICorrectionParamParseEntry(bundleName);
+}
+
+void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleName)
+{
+    if (!uiCorrectionParser_) {
+        uiCorrectionParser_ = std::make_shared<ConfigXMLParserBase>();
+    }
+    if (uiCorrectionParser_->LoadUICorrectionConfigXML() != PARSE_EXEC_SUCCESS) {
+        LOGW("ArkUiFeatureParamManager failed to load UI correction config file");
+        return;
+    }
+    if (uiCorrectionParser_->ParseUICorrectionConfigXMLWithBundleName(bundleName) != PARSE_EXEC_SUCCESS) {
+        LOGW("ArkUiFeatureParamManager failed to parse UI correction config file");
+    }
 }
 
 void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
@@ -65,6 +82,22 @@ void FeatureParamManager::SetSyncLoadEnableParam(bool enabled, uint32_t deadline
 bool FeatureParamManager::IsSyncLoadEnabled() const
 {
     return syncLoadEnabled_ || SystemProperties::IsSyncLoadEnabled();
+}
+
+bool FeatureParamManager::IsPageOverflowEnabled() const
+{
+    return pageOverflowEnabled_;
+}
+
+bool FeatureParamManager::IsDialogCorrectionEnabled() const
+{
+    return dialogCorrectionEnabled_;
+}
+
+void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled)
+{
+    pageOverflowEnabled_ = pageOverflowEnabled;
+    dialogCorrectionEnabled_ = dialogCorrectionEnabled;
 }
 
 uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const

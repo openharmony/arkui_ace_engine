@@ -296,6 +296,8 @@ public:
     void SetImageLayoutStyle(const JSCallbackInfo& info) {}
     void GetImageColorFilter(const JSCallbackInfo& info);
     void SetImageColorFilter(const JSCallbackInfo& info) {}
+    void GetSupportSvg2(const JSCallbackInfo& info);
+    void SetSupportSvg2(const JSCallbackInfo& info) {}
 
     const RefPtr<ImageSpan>& GetImageSpan();
     void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);

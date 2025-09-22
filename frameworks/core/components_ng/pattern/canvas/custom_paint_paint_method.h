@@ -50,6 +50,12 @@ enum class FilterType {
     HUE_ROTATE
 };
 
+enum class SmoothingQuality : int8_t {
+    LOW = 0,
+    MEDIUM,
+    HIGH
+};
+
 struct FilterProperty {
     FilterType filterType_;
     std::string filterParam_;
@@ -245,7 +251,13 @@ public:
 
     void SetSmoothingQuality(const std::string& quality)
     {
-        smoothingQuality_ = quality;
+        if (quality == "low") {
+            smoothingQuality_ = SmoothingQuality::LOW;
+        } else if (quality == "medium") {
+            smoothingQuality_ = SmoothingQuality::MEDIUM;
+        } else if (quality == "high") {
+            smoothingQuality_ =  SmoothingQuality::HIGH;
+        }
     }
 
     void SetFontSize(const Dimension& size)
@@ -380,56 +392,49 @@ protected:
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
-    std::vector<PaintHolder> saveStates_;
+    RSBrush imageBrush_;
+    RSColorMatrix colorMatrix_;
     LineDashParam lineDash_;
+
     RSMatrix matrix_;
-    std::vector<RSMatrix> matrixStates_;
-    std::vector<LineDashParam> lineDashStates_;
-
-    bool smoothingEnabled_ = true;
-    std::string smoothingQuality_ = "low";
-    bool antiAlias_ = false;
-    std::unique_ptr<RSParagraph> paragraph_;
-    std::unique_ptr<RSParagraph> shadowParagraph_;
-
-    WeakPtr<PipelineBase> context_;
-
-    bool isPathChanged_ = true;
-    bool isPath2dChanged_ = true;
     RSPath rsPath_;
     RSPath rsPath2d_;
-    RSBrush imageBrush_;
+    std::vector<PaintHolder> saveStates_;
+    std::vector<RSMatrix> matrixStates_;
+    std::vector<LineDashParam> lineDashStates_;
+    std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
+    std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
+
     RSSamplingOptions sampleOptions_;
+
+    WeakPtr<PipelineBase> context_;
+    std::shared_ptr<RSColorFilter> colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    std::shared_ptr<RSImageFilter> blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     std::shared_ptr<RSCanvas> rsCanvas_;
 
-    Ace::CanvasImage canvasImage_;
-    std::unique_ptr<Shadow> imageShadow_;
-    RSColorMatrix colorMatrix_;
+    std::unique_ptr<RSParagraph> paragraph_;
+    std::unique_ptr<RSParagraph> shadowParagraph_;
+    RefPtr<CanvasModifier> contentModifier_;
+    RefPtr<ImageCache> imageCache_;
+    SizeF lastLayoutSize_;
     double density_ = 1.0;
 
-#ifndef ACE_UNITTEST
-    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
-    ImageSourceInfo currentSource_;
-    ImageSourceInfo loadingSource_;
-#endif
-
-    RefPtr<CanvasModifier> contentModifier_;
-
-    SizeF lastLayoutSize_;
-    RefPtr<ImageCache> imageCache_;
+    const float defaultOpacity = 1.0f;
+    int32_t apiVersion_ = 0;
+    SmoothingQuality smoothingQuality_ = SmoothingQuality::LOW;
     enum DrawImageType {
         THREE_PARAMS,
         FIVE_PARAMS,
         NINE_PARAMS,
     };
+
+    bool smoothingEnabled_ = true;
+    bool antiAlias_ = false;
+    bool isPathChanged_ = true;
+    bool isPath2dChanged_ = true;
+
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
-    const float defaultOpacity = 1.0f;
-    std::shared_ptr<RSColorFilter> colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
-    std::shared_ptr<RSImageFilter> blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
-    std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
-    std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
-    int32_t apiVersion_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

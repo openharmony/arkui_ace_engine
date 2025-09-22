@@ -436,21 +436,6 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
     return true;
 }
 
-static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
-{
-    ani_boolean isUndefined;
-    env->Reference_IsUndefined(object, &isUndefined);
-    if (!isUndefined) {
-        return false;
-    }
-    ani_int aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &aniValue)) {
-        return false;
-    }
-    value = static_cast<int32_t>(aniValue);
-    return true;
-}
-
 static void GetSnapshot(const std::string& componentId, OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     const OHOS::Ace::NG::SnapshotOptions& options)
 {
@@ -538,10 +523,9 @@ void GetSnapshotByUniqueId(int32_t uniqueId,
 #endif
 }
 
-static void ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_object id, ani_object options)
+static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
 {
-    int32_t uniqueId;
-    GetAniIntValue(env, id, uniqueId);
+    int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
     GetOptionsScale(env, options, snapshotOptions.scale);
     GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);
@@ -549,6 +533,7 @@ static void ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_object id, an
 
     ani_object result = {};
     GetSnapshotByUniqueId(uniqueId, CreateCallbackFunc(env, nullptr, result), snapshotOptions);
+    return result;
 }
 
 std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniqueId(
@@ -560,10 +545,9 @@ std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniq
     return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
-static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_object id, ani_object options)
+static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
 {
-    int32_t uniqueId;
-    GetAniIntValue(env, id, uniqueId);
+    int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
     GetOptionsScale(env, options, snapshotOptions.scale);
     GetOptionsWaitUntilRenderFinished(env, options, snapshotOptions.waitUntilRenderFinished);

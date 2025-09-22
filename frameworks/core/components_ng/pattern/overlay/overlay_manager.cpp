@@ -1478,7 +1478,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
             (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
-        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
+        (!menuPattern->IsSelectMenu())) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }
@@ -1517,7 +1517,7 @@ bool OverlayManager::CheckSelectSubWindowToClose(
     CHECK_NULL_RETURN(menuPattern, false);
     auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProp, false);
-    if (expandDisplay && menuPattern->GetTargetTag() == V2::SELECT_ETS_TAG &&
+    if (expandDisplay && !menuPattern->IsSelectMenu() &&
         menuLayoutProp->GetShowInSubWindowValue(false)) {
         auto subWindowManager = SubwindowManager::GetInstance();
         CHECK_NULL_RETURN(subWindowManager, false);
@@ -2811,7 +2811,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         CHECK_NULL_RETURN(menuChild, false);
         menuFrameNode = DynamicCast<FrameNode>(menuChild);
     }
-
+    CHECK_NULL_RETURN(menuFrameNode, false);
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
@@ -5274,6 +5274,7 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
 void OverlayManager::PlayDefaultModalIn(
     const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
 {
+    CHECK_NULL_VOID(context);
     context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -5752,7 +5753,7 @@ void OverlayManager::PlaySheetTransition(
     auto sheetObject = sheetPattern->GetSheetObject();
     CHECK_NULL_VOID(sheetObject);
     if (sheetObject->IsSheetObjectBase() && isTransitionIn && isFirstTransition &&
-        NearZero(sheetHeight_)) {
+        NearZero(sheetPattern->GetSheetHeightForTranslate())) {
         return;
     }
     sheetPattern->SheetTransitionForOverlay(isTransitionIn, isFirstTransition);
@@ -6402,7 +6403,7 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
     switch (sheetType) {
         case SheetType::SHEET_BOTTOMLANDSPACE:
             if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                sheetHeight_ = largeHeight;
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
                 break;
             }
             [[fallthrough]];
@@ -6418,14 +6419,14 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
             }
             break;
         case SheetType::SHEET_CENTER:
-            sheetHeight_ = (sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE;
+            sheetPattern->SetSheetHeightForTranslate((sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE);
 
             if (sheetStyle.showInSubWindow.value_or(false)) {
-                sheetHeight_ = sheetMaxHeight - sheetPattern->GetSheetOffset();
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight - sheetPattern->GetSheetOffset());
             }
             break;
         case SheetType::SHEET_POPUP:
-            sheetHeight_ = sheetMaxHeight;
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight);
             break;
         default:
             break;
@@ -6458,17 +6459,17 @@ void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetSty
         auto sheetTheme = context->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * MEDIUM_SIZE_PRE);
             }
         } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
-            sheetHeight_ *= sheetTheme->GetLargePercent();
+            auto height = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(height * sheetTheme->GetLargePercent());
         } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
-            sheetHeight_ = sheetPattern->GetFitContentHeight();
-            if (GreatNotEqual(sheetHeight_, largeHeight)) {
-                sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(sheetPattern->GetFitContentHeight());
+            if (GreatNotEqual(sheetPattern->GetSheetHeightForTranslate(), largeHeight)) {
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
             }
         }
     } else {
@@ -6479,11 +6480,11 @@ void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetSty
             height = sheetStyle.sheetHeight.height->ConvertToPx();
         }
         if (height > largeHeight) {
-            sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else if (height < 0) {
-            sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else {
-            sheetHeight_ = height;
+            sheetPattern->SetSheetHeightForTranslate(height);
         }
     }
 }
@@ -6502,17 +6503,17 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
         auto sheetTheme = context->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * MEDIUM_SIZE_PRE);
             }
         } else if (selection.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
-            sheetHeight_ *= sheetTheme->GetLargePercent();
+            auto height = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(height * sheetTheme->GetLargePercent());
         } else if (selection.sheetMode == SheetMode::AUTO) {
-            sheetHeight_ = sheetPattern->GetFitContentHeight();
-            if (GreatNotEqual(sheetHeight_, largeHeight)) {
-                sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(sheetPattern->GetFitContentHeight());
+            if (GreatNotEqual(sheetPattern->GetSheetHeightForTranslate(), largeHeight)) {
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
             }
         }
     } else {
@@ -6523,11 +6524,11 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
             height = selection.height->ConvertToPx();
         }
         if (height > largeHeight) {
-            sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else if (height < 0) {
-            sheetHeight_ = largeHeight;
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else {
-            sheetHeight_ = height;
+            sheetPattern->SetSheetHeightForTranslate(height);
         }
     }
 }
@@ -8224,6 +8225,7 @@ RefPtr<FrameNode> OverlayManager::GetPixelMapContentNodeForSubwindow() const
     CHECK_NULL_RETURN(rootNode, nullptr);
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
         if (node && node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
             continue;
         }

@@ -23,6 +23,7 @@ build_component_ng("form_pattern_ng") {
     "form_node.cpp",
     "form_pattern.cpp",
     "form_special_style.cpp",
+    "form_util.cpp",
   ]
 
   if (is_ohos_standard_system) {
@@ -36,6 +37,7 @@ build_component_ng("form_pattern_ng") {
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
+      "image_framework:image_native",
     ]
   }
 }

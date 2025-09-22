@@ -518,4 +518,22 @@ HWTEST_F(ObserverTestNg, ObserverTestNg018, TestSize.Level1)
     info = UIObserverHandler::GetInstance().GetScrollEventState(frameNode);
     ASSERT_EQ(info->axis, Axis::NONE);
 }
+
+/**
+ * @tc.name: ObserverTestNg019
+ * @tc.desc: Test the TextChangeEventInfo of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg019, TestSize.Level1)
+{
+    int32_t uniqueId = 1;
+    TextChangeEventInfo info("test1", uniqueId, "HelloWorld");
+    UIObserverHandler::TextChangeEventHandleFunc handleFunc = [](const TextChangeEventInfo& info) -> void {
+        EXPECT_EQ(info.id, "test1");
+        EXPECT_EQ(info.uniqueId, 1);
+        EXPECT_EQ(info.content, "HelloWorld");
+    };
+    UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
+    UIObserverHandler::GetInstance().SetHandleTextChangeEventFunc(std::move(handleFunc));
+}
 }

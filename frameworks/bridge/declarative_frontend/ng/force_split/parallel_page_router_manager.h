@@ -35,6 +35,9 @@ public:
 private:
     void LoadPage(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
+    // For Arkts1.2
+    void LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
+        bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
     RefPtr<FrameNode> LoadPlaceHolderPage();
     RefPtr<ResourceWrapper> CreateResourceWrapper();
     bool DetectPrimaryPage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);
@@ -45,7 +48,7 @@ private:
     bool CheckSecondaryPageNeedClear(bool isPush);
     bool CheckStackSize(const RouterPageInfo& target, bool needClearSecondaryPage);
     void NotifyForceFullScreenChangeIfNeeded(
-        const std::string& curTopPageName, const RefPtr<PipelineContext>& context);
+        const std::string& curTopPageName, const RefPtr<PipelineContext>& context) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPageRouterManager);
 };

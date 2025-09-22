@@ -225,6 +225,29 @@ interface ChipOptions {
   onClicked?: () => void
 }
 
+class LengthMetricsCache {
+  private static _cache: Map<string, LengthMetrics> = new Map();
+  public static get(key: string, defaultValue: LengthMetrics): LengthMetrics {
+    if (LengthMetricsCache._cache.has(key)) {
+      return LengthMetricsCache._cache.get(key)!;
+    }
+    try {
+      const res: Resource = {
+        id: -1,
+        type: 10002,
+        params: [key],
+        bundleName: '__harDefaultBundleName__',
+        moduleName: '__harDefaultModuleName__',
+      };
+      const metrics = LengthMetrics.resource(res);
+      LengthMetricsCache._cache.set(key, metrics);
+      return metrics;
+    } catch (error) {
+      return defaultValue;
+    }
+  }
+}
+
 @Builder
 export function Chip(options: ChipOptions) {
   ChipComponent({
@@ -293,14 +316,14 @@ export struct ChipComponent {
       },
       defaultFontSize: 14,
       localizedNormalMargin: {
-        start: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
-        end: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
+        start: LengthMetricsCache.get('sys.float.chip_normal_text_margin', LengthMetrics.vp(6)),
+        end: LengthMetricsCache.get('sys.float.chip_normal_text_margin', LengthMetrics.vp(6)),
         top: LengthMetrics.vp(0),
         bottom: LengthMetrics.vp(0)
       },
       localizedSmallMargin: {
-        start: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
-        end: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
+        start: LengthMetricsCache.get('sys.float.chip_small_text_margin', LengthMetrics.vp(4)),
+        end: LengthMetricsCache.get('sys.float.chip_small_text_margin', LengthMetrics.vp(4)),
         top: LengthMetrics.vp(0),
         bottom: LengthMetrics.vp(0),
       }
@@ -325,8 +348,10 @@ export struct ChipComponent {
     defaultSymbol: {
       normalFontColor: [$r('sys.color.chip_usually_icon_color')],
       activatedFontColor: [$r('sys.color.chip_active_icon_color')],
-      normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
-      smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
+      normalSymbolFontSize: 
+        LengthMetricsCache.get('sys.float.chip_normal_icon_size', LengthMetrics.vp(16)).value as Length,
+      smallSymbolFontSize: 
+        LengthMetricsCache.get('sys.float.chip_small_icon_size', LengthMetrics.vp(16)).value as Length,
       defaultEffect: -1,
     },
     chipNode: {
@@ -352,26 +377,26 @@ export struct ChipComponent {
       focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
       focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
       localizedNormalPadding: {
-        start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
-        end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
+        start: LengthMetricsCache.get('sys.float.chip_normal_text_padding', LengthMetrics.vp(16)),
+        end: LengthMetricsCache.get('sys.float.chip_normal_text_padding', LengthMetrics.vp(16)),
         top: LengthMetrics.vp(4),
         bottom: LengthMetrics.vp(4)
       },
       localizedSmallPadding: {
-        start: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
-        end: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
+        start: LengthMetricsCache.get('sys.float.chip_small_text_padding', LengthMetrics.vp(12)),
+        end: LengthMetricsCache.get('sys.float.chip_small_text_padding', LengthMetrics.vp(12)),
         top: LengthMetrics.vp(4),
         bottom: LengthMetrics.vp(4)
       },
       localizedActivatedNormalPadding: {
-        start: LengthMetrics.resource($r('sys.float.chip_activated_normal_text_padding')),
-        end: LengthMetrics.resource($r('sys.float.chip_activated_normal_text_padding')),
+        start: LengthMetricsCache.get('sys.float.chip_activated_normal_text_padding', LengthMetrics.vp(16)),
+        end: LengthMetricsCache.get('sys.float.chip_activated_normal_text_padding', LengthMetrics.vp(16)),
         top: LengthMetrics.vp(4),
         bottom: LengthMetrics.vp(4)
       },
       localizedActivatedSmallPadding: {
-        start: LengthMetrics.resource($r('sys.float.chip_activated_small_text_padding')),
-        end: LengthMetrics.resource($r('sys.float.chip_activated_small_text_padding')),
+        start: LengthMetricsCache.get('sys.float.chip_activated_small_text_padding', LengthMetrics.vp(12)),
+        end: LengthMetricsCache.get('sys.float.chip_activated_small_text_padding', LengthMetrics.vp(12)),
         top: LengthMetrics.vp(4),
         bottom: LengthMetrics.vp(4)
       },

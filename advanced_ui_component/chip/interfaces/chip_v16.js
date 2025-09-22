@@ -48,6 +48,30 @@ export var AccessibilitySelectedType;
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
+
+class LengthMetricsCache {
+  static _cache = new Map();
+  static get(key, defaultValue) {
+    if (this._cache.has(key)) {
+      return this._cache.get(key);
+    }
+    try {
+      const res = {
+        id: -1,
+        type: 10002,
+        params: [key],
+        bundleName: '__harDefaultBundleName__',
+        moduleName: '__harDefaultModuleName__',
+      };
+      const metrics = LengthMetrics.resource(res);
+      this._cache.set(key, metrics);
+      return metrics;
+    } catch (error) {
+      return defaultValue;
+    }
+  }
+}
+
 export function Chip(options, parent = null) {
   const __options__ = options;
   {
@@ -277,38 +301,14 @@ export class ChipComponent extends ViewPU {
         },
         defaultFontSize: 14,
         localizedNormalMargin: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_normal_text_margin'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_normal_text_margin'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_normal_text_margin', LengthMetrics.vp(6)),
+          end: LengthMetricsCache.get('sys.float.chip_normal_text_margin', LengthMetrics.vp(6)),
           top: LengthMetrics.vp(0),
           bottom: LengthMetrics.vp(0),
         },
         localizedSmallMargin: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_small_text_margin'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_small_text_margin'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_small_text_margin', LengthMetrics.vp(4)),
+          end: LengthMetricsCache.get('sys.float.chip_small_text_margin', LengthMetrics.vp(4)),
           top: LengthMetrics.vp(0),
           bottom: LengthMetrics.vp(0),
         },
@@ -409,20 +409,8 @@ export class ChipComponent extends ViewPU {
             moduleName: '__harDefaultModuleName__',
           },
         ],
-        normalSymbolFontSize: LengthMetrics.resource({
-          id: -1,
-          type: 10002,
-          params: ['sys.float.chip_normal_icon_size'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        }).value,
-        smallSymbolFontSize: LengthMetrics.resource({
-          id: -1,
-          type: 10002,
-          params: ['sys.float.chip_small_icon_size'],
-          bundleName: '__harDefaultBundleName__',
-          moduleName: '__harDefaultModuleName__',
-        }).value,
+        normalSymbolFontSize: LengthMetricsCache.get('sys.float.chip_normal_icon_size', LengthMetrics.vp(16)).value,
+        smallSymbolFontSize: LengthMetricsCache.get('sys.float.chip_small_icon_size', LengthMetrics.vp(16)).value,
         defaultEffect: -1,
       },
       chipNode: {
@@ -538,74 +526,26 @@ export class ChipComponent extends ViewPU {
           moduleName: '__harDefaultModuleName__',
         },
         localizedNormalPadding: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_normal_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_normal_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_normal_text_padding', LengthMetrics.vp(16)),
+          end: LengthMetricsCache.get('sys.float.chip_normal_text_padding', LengthMetrics.vp(16)),
           top: LengthMetrics.vp(4),
           bottom: LengthMetrics.vp(4),
         },
         localizedSmallPadding: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_small_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_small_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_small_text_padding', LengthMetrics.vp(12)),
+          end: LengthMetricsCache.get('sys.float.chip_small_text_padding', LengthMetrics.vp(12)),
           top: LengthMetrics.vp(4),
           bottom: LengthMetrics.vp(4),
         },
         localizedActivatedNormalPadding: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_activated_normal_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_activated_normal_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_activated_normal_text_padding', LengthMetrics.vp(16)),
+          end: LengthMetricsCache.get('sys.float.chip_activated_normal_text_padding', LengthMetrics.vp(16)),
           top: LengthMetrics.vp(4),
           bottom: LengthMetrics.vp(4),
         },
         localizedActivatedSmallPadding: {
-          start: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_activated_small_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
-          end: LengthMetrics.resource({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.chip_activated_small_text_padding'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          }),
+          start: LengthMetricsCache.get('sys.float.chip_activated_small_text_padding', LengthMetrics.vp(12)),
+          end: LengthMetricsCache.get('sys.float.chip_activated_small_text_padding', LengthMetrics.vp(12)),
           top: LengthMetrics.vp(4),
           bottom: LengthMetrics.vp(4),
         },

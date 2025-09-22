@@ -571,10 +571,6 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
         (recursiveHost->GetTag() == V2::STAGE_ETS_TAG)) {
         return;
     }
-    if (IsIgnoreTypeTrivial(ignoreType) && !isScrollableAxis_ &&
-        recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace, adjustingRect, ignoreType)) {
-        return;
-    }
     if (pattern && pattern->AccumulatingTerminateHelper(adjustingRect, totalExpand, fromSelf, ignoreType)) {
         return;
     }

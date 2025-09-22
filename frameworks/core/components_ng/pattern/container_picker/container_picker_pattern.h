@@ -45,6 +45,11 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    void SetContentMainSize(float contentMainSize)
+    {
+        contentMainSize_ = contentMainSize;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -61,6 +66,8 @@ private:
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerPickerPattern);
+
+    float contentMainSize_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

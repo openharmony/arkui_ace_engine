@@ -771,6 +771,9 @@ void ScrollBarPattern::InitPanRecognizer()
 
 void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyPreDragStart();
+    }
     StopMotion();
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start");

@@ -16,27 +16,30 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, Finalizable, SerializerBase, registerCallback } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
-import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from "./units"
-import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
-import { Callback_Boolean_Void } from "./navigation"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
-import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
-import { Callback_String_Void } from "./gridRow"
-import { PasteEvent, KeyboardOptions } from "./richEditor"
-import { CopyOptions, TextAlign, Color } from "./enums"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-
-import { Deserializer } from "./peers/Deserializer"
+import { int32, int64, float32, unsafeCast } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr,
+    wrapCallback, NativeBuffer, Finalizable, SerializerBase, registerCallback } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent,
+    ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common';
+import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from './units';
+import { SymbolGlyphModifier } from '../SymbolGlyphModifier';
+import { Callback_Boolean_Void } from './navigation';
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue,
+    EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from './textCommon';
+import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback,
+    OnPasteCallback} from './textInput';
+import { Callback_String_Void } from './gridRow';
+import { PasteEvent, KeyboardOptions } from './richEditor';
+import { CopyOptions, TextAlign, Color } from './enums';
+import { Resource } from 'global.resource';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { Deserializer } from './peers/Deserializer';
 
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

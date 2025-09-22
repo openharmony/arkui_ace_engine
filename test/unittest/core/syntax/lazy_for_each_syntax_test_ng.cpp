@@ -1054,7 +1054,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxPostIdleTaskTest001, TestSize.Lev
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->needPredict_ = false;
-    lazyForEachNode->PostIdleTask();
+    lazyForEachNode->PostIdleTask(0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 
     /**
@@ -1062,7 +1062,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxPostIdleTaskTest001, TestSize.Lev
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->needPredict_ = true;
-    lazyForEachNode->PostIdleTask();
+    lazyForEachNode->PostIdleTask(0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 

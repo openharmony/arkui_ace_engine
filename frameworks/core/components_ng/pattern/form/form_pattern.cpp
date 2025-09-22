@@ -44,7 +44,7 @@
 #endif
 
 #include "core/common/udmf/udmf_client.h"
-#include "form_pattern.h"
+#include "form_util.h"
 
 static const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
@@ -434,6 +434,17 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    if (!pixelMap) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is null");
+        return;
+    }
+    
+    if (!isDynamic_ && FormUtil::IsTransparent(pixelMap)) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is transparent");
+        needSnapshotAgain_ = true;
+        return;
+    }
+
     auto uiTaskExecutor =
         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
@@ -445,8 +456,24 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "call.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "HandleOnSnapshot.");
     CHECK_NULL_VOID(pixelMap);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("DelayRemoveFormChildNode").append(nodeIdStr));
+
+    executor->RemoveTask(
+        TaskExecutor::TaskType::UI, std::string("ArkUIFormSetNonTransparentAfterRecover_").append(nodeIdStr));
+    executor->RemoveTask(
+        TaskExecutor::TaskType::UI, std::string("ArkUIFormDeleteImageNodeAfterRecover_").append(nodeIdStr));
+
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
     isSnapshot_ = true;
@@ -455,7 +482,8 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
 void FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "call, treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    TAG_LOGD(AceLogTag::ACE_FORM, "OnAccessibilityChildTreeRegister, treeId: %{public}d, id: %{public}" PRId64, treeId,
+        accessibilityId);
     if (formManagerBridge_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
         return;
@@ -703,6 +731,9 @@ void FormPattern::OnModifyDone()
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
         TAG_LOGD(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY %{public}d", isEnable);
     }
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
+        isBeenLayout_ = false;
+    }
     GetWantParam(info);
     HandleFormComponent(info);
 
@@ -714,6 +745,7 @@ void FormPattern::OnModifyDone()
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "skip measure and layout");
         return false;
     }
     isBeenLayout_ = true;
@@ -1657,7 +1689,7 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
             isRecover,
             isSkeletonAnimEnable_,
             isTransparencyEnable_);
-        externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+        node->SetAlpha(TRANSPARENT_VAL);
     } else {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1,%{public}d,"
                                   "%{public}d,%{public}d",
@@ -1665,7 +1697,7 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
             isRecover,
             isSkeletonAnimEnable_,
             isTransparencyEnable_);
-        externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+        node->SetAlpha(NON_TRANSPARENT_VAL);
     }
 
     auto renderContext = host->GetRenderContext();
@@ -2240,14 +2272,18 @@ void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, do
     if (formChildNodeType == FormChildNodeType::FORM_SURFACE_NODE) {
         auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
         CHECK_NULL_VOID(externalRenderContext);
-        externalRenderContext->OnOpacityUpdate(opacity);
+        auto rsNode = externalRenderContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetAlpha(opacity);
     } else if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE ||
         formChildNodeType == FormChildNodeType::FORM_SKELETON_NODE) {
         auto childNode = GetFormChildNode(formChildNodeType);
         CHECK_NULL_VOID(childNode);
         auto renderContext = DynamicCast<NG::RosenRenderContext>(childNode->GetRenderContext());
         CHECK_NULL_VOID(renderContext);
-        renderContext->OnOpacityUpdate(opacity);
+        auto rsNode = renderContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetAlpha(opacity);
     }
 }
 
@@ -2329,7 +2365,9 @@ void FormPattern::SetExternalRenderOpacity(double opacity)
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetOpacity(opacity);
+    auto rsNode = externalRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetAlpha(opacity);
 }
 
 bool FormPattern::ShouldDoSkeletonAnimation()

@@ -73,7 +73,7 @@ public:
         return imageSource_;
     }
 
-    void SetImageSource(std::string& imageSource)
+    void SetImageSource(const std::string& imageSource)
     {
         imageSource_ = imageSource;
     }
@@ -83,17 +83,17 @@ public:
         return size_;
     }
 
-    void SetSizeX(Dimension& sizeX)
+    void SetSizeX(const Dimension& sizeX)
     {
         size_.first = sizeX;
     }
 
-    void SetSizeY(Dimension& sizeY)
+    void SetSizeY(const Dimension& sizeY)
     {
         size_.second = sizeY;
     }
 
-    void SetSize(std::pair<Dimension, Dimension>& size)
+    void SetSize(const std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
     }
@@ -103,7 +103,7 @@ public:
         return imageFit_;
     }
 
-    void SetImageFit(ImageFit& imageFit)
+    void SetImageFit(const ImageFit& imageFit)
     {
         imageFit_ = imageFit;
     }
@@ -320,12 +320,12 @@ struct ParticleAnnulusRegion {
         center_ = center;
     }
 
-    void SetCenterX(CalcDimension& centerX)
+    void SetCenterX(const CalcDimension& centerX)
     {
         center_.first = centerX;
     }
 
-    void SetCenterY(CalcDimension& centerY)
+    void SetCenterY(const CalcDimension& centerY)
     {
         center_.second = centerY;
     }
@@ -416,7 +416,7 @@ public:
     {
         return particle_;
     }
-    void SetParticle(Particle& particle)
+    void SetParticle(const Particle& particle)
     {
         particle_ = particle;
     }
@@ -430,17 +430,17 @@ public:
         return emitterRate_;
     }
 
-    void SetPosition(std::pair<Dimension, Dimension>& point)
+    void SetPosition(const std::pair<Dimension, Dimension>& point)
     {
         position_ = point;
     }
 
-    void SetPositionX(Dimension& pointX)
+    void SetPositionX(const Dimension& pointX)
     {
         position_->first = pointX;
     }
 
-    void SetPositionY(Dimension& pointY)
+    void SetPositionY(const Dimension& pointY)
     {
         position_->second = pointY;
     }
@@ -450,17 +450,17 @@ public:
         return position_;
     }
 
-    void SetSize(std::pair<Dimension, Dimension>& size)
+    void SetSize(const std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
     }
 
-    void SetSizeX(Dimension& sizeX)
+    void SetSizeX(const Dimension& sizeX)
     {
         size_->first = sizeX;
     }
 
-    void SetSizeY(Dimension& sizeY)
+    void SetSizeY(const Dimension& sizeY)
     {
         size_->second = sizeY;
     }
@@ -470,7 +470,7 @@ public:
         return size_;
     }
 
-    void SetShape(ParticleEmitterShape& shape)
+    void SetShape(const ParticleEmitterShape& shape)
     {
         shape_ = shape;
     }
@@ -480,7 +480,7 @@ public:
         return shape_;
     }
 
-    void SetAnnulusRegion(ParticleAnnulusRegion& annulusRegion)
+    void SetAnnulusRegion(const ParticleAnnulusRegion& annulusRegion)
     {
         annulusRegion_ = annulusRegion;
     }
@@ -593,7 +593,7 @@ public:
         return animations_;
     }
 
-    void SetNullStr(const std::string noneValue)
+    void SetNullStr(const std::string& noneValue)
     {
         noneValue_ = noneValue;
     }
@@ -914,17 +914,17 @@ public:
     {
         return range_;
     }
-    void SetRange(std::pair<Color, Color>& range)
+    void SetRange(const std::pair<Color, Color>& range)
     {
         range_ = range;
     }
 
-    void SetRangeFirst(Color& rangeFirst)
+    void SetRangeFirst(const Color& rangeFirst)
     {
         range_.first = rangeFirst;
     }
 
-    void SetRangeSecond(Color& rangeSecond)
+    void SetRangeSecond(const Color& rangeSecond)
     {
         range_.second = rangeSecond;
     }
@@ -933,7 +933,7 @@ public:
     {
         return distribution_;
     }
-    void SetDistribution(DistributionType& distribution)
+    void SetDistribution(const DistributionType& distribution)
     {
         distribution_ = distribution;
     }
@@ -941,7 +941,7 @@ public:
     {
         return updater_;
     }
-    void SetUpdater(ParticleColorPropertyUpdater& updater)
+    void SetUpdater(const ParticleColorPropertyUpdater& updater)
     {
         updater_ = updater;
     }
@@ -1005,7 +1005,7 @@ public:
     {
         return speed_;
     }
-    void SetSpeedRange(std::pair<float, float>& speed)
+    void SetSpeedRange(const std::pair<float, float>& speed)
     {
         speed_ = speed;
     }
@@ -1013,7 +1013,7 @@ public:
     {
         return angle_;
     }
-    void SetAngleRange(std::pair<float, float>& angle)
+    void SetAngleRange(const std::pair<float, float>& angle)
     {
         angle_ = angle;
     }
@@ -1064,7 +1064,7 @@ public:
         return angle_;
     }
 
-    void SetAngle(ParticleFloatPropertyOption& angle)
+    void SetAngle(const ParticleFloatPropertyOption& angle)
     {
         angle_ = angle;
     }
@@ -1095,7 +1095,7 @@ public:
         return emitter_;
     }
 
-    void SetEmitterOption(EmitterOption& emitter)
+    void SetEmitterOption(const EmitterOption& emitter)
     {
         emitter_ = emitter;
     }
@@ -1115,7 +1115,7 @@ public:
         return opacityOption_;
     }
 
-    void SetParticleOpacityOption(ParticleFloatPropertyOption& opacityOption)
+    void SetParticleOpacityOption(const ParticleFloatPropertyOption& opacityOption)
     {
         opacityOption_ = opacityOption;
     }
@@ -1125,7 +1125,7 @@ public:
         return scaleOption_;
     }
 
-    void SetParticleScaleOption(ParticleFloatPropertyOption& scaleOption)
+    void SetParticleScaleOption(const ParticleFloatPropertyOption& scaleOption)
     {
         scaleOption_ = scaleOption;
     }
@@ -1135,7 +1135,7 @@ public:
         return velocityOption_;
     }
 
-    void SetParticleVelocityOption(VelocityProperty& velocityOption)
+    void SetParticleVelocityOption(const VelocityProperty& velocityOption)
     {
         velocityOption_ = velocityOption;
     }
@@ -1145,7 +1145,7 @@ public:
         return accelerationOption_;
     }
 
-    void SetParticleAccelerationOption(AccelerationProperty& accelerationOption)
+    void SetParticleAccelerationOption(const AccelerationProperty& accelerationOption)
     {
         accelerationOption_ = accelerationOption;
     }
@@ -1155,7 +1155,7 @@ public:
         return spinOption_;
     }
 
-    void SetParticleSpinOption(ParticleFloatPropertyOption& spinOption)
+    void SetParticleSpinOption(const ParticleFloatPropertyOption& spinOption)
     {
         spinOption_ = spinOption;
     }

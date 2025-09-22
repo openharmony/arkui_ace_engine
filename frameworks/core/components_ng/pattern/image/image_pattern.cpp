@@ -1288,6 +1288,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 void ImagePattern::OnRecycle()
 {
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnRecycle. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
+    ACE_SCOPED_TRACE("OnRecycle %s", imageDfxConfig_.ToStringWithSrc().c_str());
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1305,6 +1306,7 @@ void ImagePattern::OnRecycle()
 
 void ImagePattern::OnReuse()
 {
+    ACE_SCOPED_TRACE("OnReuse %s", imageDfxConfig_.ToStringWithSrc().c_str());
     RegisterWindowStateChangedCallback();
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
@@ -1620,6 +1622,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
 
     json->PutExtAttr("syncLoad", syncLoad_ ? "true" : "false", filter);
+    json->PutExtAttr("supportSvg2", supportSvg2_ ? "true" : "false", filter);
     json->PutExtAttr("draggable", enableDrag_ ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
@@ -1863,6 +1866,7 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("visibility: ").append(previousVisibility_ ? "true" : "false"));
     DumpMenmoryNameId();
 }
 
@@ -2320,7 +2324,7 @@ void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     } else {
         json->Put("imageLoadingContext", "null");
     }
-
+    json->Put("supportSvg2", supportSvg2_);
     json->Put("draggable", enableDrag_);
     json->Put("enableAnalyzer", isEnableAnalyzer_);
 }

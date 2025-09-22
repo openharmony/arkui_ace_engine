@@ -24,7 +24,7 @@ void StagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto container = Container::Current();
-    if (container && container->IsDynamicRender()) {
+    if (container && container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     }
     auto pipeline = PipelineContext::GetCurrentContext();

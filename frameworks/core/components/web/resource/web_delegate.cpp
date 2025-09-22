@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
@@ -607,6 +608,14 @@ int ContextMenuParamOhos::GetMediaTypeV2() const
     return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
 }
 
+int ContextMenuParamOhos::GetContextMenuMediaType() const
+{
+    if (param_) {
+        return param_->GetContextMenuMediaType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuDataMediaType::CMD_MT_NONE;
+}
+
 int ContextMenuParamOhos::GetInputFieldType() const
 {
     if (param_) {
@@ -971,6 +980,8 @@ WebDelegate::~WebDelegate()
     UnregisterAvoidAreaChangeListener(instanceId_);
     UnRegisterConfigObserver();
     UnregisterFreeMultiWindowListener();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(surfaceRsNode_);
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -3566,10 +3577,9 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
 
 void WebDelegate::SetSurfaceDensity(const double& density)
 {
-    if (density_ == density || density == 0.0) {
+    if (NearZero(density)) {
         return;
     }
-    density_ = density;
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3651,7 +3661,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
         return false;
     }
     bool isBrowserUsage = nweb_->IsNWebEx();
-    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
+    if ((OHOS::system::GetDeviceType() != "2in1" && !IsPcMode()) || !isBrowserUsage) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
         return false;
     }
@@ -6199,19 +6209,19 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), isAnimate]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
-            webPattern->RemoveSnapshotFrameNode();
+            webPattern->RemoveSnapshotFrameNode(isAnimate);
         },
         TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }
@@ -9268,12 +9278,7 @@ void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type)
 
 bool WebDelegate::IsPcMode()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_RETURN(container, false);
-    int32_t instanceId = container->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    return window->IsPcWindow();
+    return SystemProperties::IsPCMode();
 }
 
 class WebFreeMultiWindowListener : public OHOS::Rosen::ISwitchFreeMultiWindowListener {

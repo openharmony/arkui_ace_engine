@@ -177,12 +177,13 @@ float ParseBrightness(const ArkUI_AttributeItem* item, int32_t index)
     return brightness;
 }
 
-uint32_t ParseColor(const ArkUI_AttributeItem* item, int32_t index)
+uint32_t ParseColor(const ArkUI_AttributeItem* item, int32_t index, bool& isColor)
 {
     auto size = item->size;
     uint32_t color = COLOR_TRANSPARENT;
     if (size > index) {
         color = ColorAlphaAdapt(item->value[index].u32);
+        isColor = true;
     }
     return color;
 }
@@ -728,17 +729,14 @@ int32_t SetBackgroundEffect(ArkUI_NativeDialogHandle handle, const ArkUI_Attribu
     float radius = ParseRadius(backgroundEffect, EFFECT_RADIUS);
     float saturation = ParseSaturation(backgroundEffect, EFFECT_SATURATION);
     float brightness = ParseBrightness(backgroundEffect, EFFECT_BRIGHTNESS);
-    uint32_t color = ParseColor(backgroundEffect, EFFECT_COLOR);
+    bool isColor = false;
+    uint32_t color = ParseColor(backgroundEffect, EFFECT_COLOR, isColor);
     int32_t adaptiveColor = ParseAdaptiveColor(backgroundEffect, EFFECT_ADAPTIVE_COLOR);
     uint32_t grayScaleBlack = ParseGrayScaleBlack(backgroundEffect, EFFECT_GRAY_SCALE_BLACK);
     uint32_t grayScaleWhite = ParseGrayScaleWhite(backgroundEffect, EFFECT_GRAY_SCALE_WHITE);
     int32_t policy = ParsePolicy(backgroundEffect, EFFECT_POLICY);
     bool isValidColor = false;
-    uint32_t inactiveColor = COLOR_TRANSPARENT;
-    if (size > EFFECT_COLOR_INDEX) {
-        inactiveColor = ColorAlphaAdapt(backgroundEffect->value[EFFECT_COLOR_INDEX].u32);
-        isValidColor = true;
-    }
+    uint32_t inactiveColor = ParseColor(backgroundEffect, EFFECT_COLOR_INDEX, isValidColor);
     float floatArray[NUM_3];
     floatArray[NUM_0] = radius;
     floatArray[NUM_1] = saturation;
@@ -751,8 +749,11 @@ int32_t SetBackgroundEffect(ArkUI_NativeDialogHandle handle, const ArkUI_Attribu
     uintArray[NUM_1] = grayScaleBlack;
     uintArray[NUM_2] = grayScaleWhite;
     uintArray[NUM_3] = inactiveColor;
+    int boolArray[NUM_2];
+    boolArray[NUM_0] = isColor;
+    boolArray[NUM_1] = isValidColor;
     int result =
-        impl->getDialogAPI()->setBackgroundEffect(handle->controller, &floatArray, &intArray, &uintArray, isValidColor);
+        impl->getDialogAPI()->setBackgroundEffect(handle->controller, &floatArray, &intArray, &uintArray, &boolArray);
     return result;
 }
 } // namespace OHOS::Ace::NG::DialogModel

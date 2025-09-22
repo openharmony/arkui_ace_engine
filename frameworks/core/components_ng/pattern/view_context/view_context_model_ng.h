@@ -38,8 +38,6 @@ public:
         const RefPtr<NG::FrameNode>& sheetContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId) override;
     int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId) override;
-    static void closeAnimationInternal(const AnimationOption& option, bool needFlush);
-    static void openAnimationInternal(const AnimationOption& option);
 
 private:
     static thread_local std::set<FrameNode*> pendingAnimationNodes_;

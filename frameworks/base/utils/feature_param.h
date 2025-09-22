@@ -31,6 +31,8 @@ public:
     static uint32_t GetSyncloadResponseDeadline();
     // UINodeGcParamParser
     static bool IsUINodeGcEnabled();
+    static bool IsPageOverflowEnabled();
+    static bool IsDialogCorrectionEnabled();
 };
 } // namespace OHOS::Ace
 

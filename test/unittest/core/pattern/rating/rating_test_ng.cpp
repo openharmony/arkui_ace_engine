@@ -59,6 +59,7 @@ constexpr double RATING_SCORE_2 = -2;
 constexpr double RATING_SCORE_3 = 3.5;
 constexpr double RATING_SCORE_4 = 3.0;
 constexpr double RATING_SCORE_5 = 1.0;
+constexpr double RATING_SCORE_10 = 10.0f;
 constexpr int32_t RATING_STAR_NUM_1 = -1;
 const std::string RATING_BACKGROUND_URL = "common/img1.png";
 const std::string RATING_FOREGROUND_URL = "common/img2.png";
@@ -1996,7 +1997,7 @@ HWTEST_F(RatingTestNg, RatingNGTest076, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetIndicatorValue(false), true);
     auto paintProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    EXPECT_EQ(paintProperty->GetRatingScoreValue(), 10.0f);
+    EXPECT_EQ(paintProperty->GetRatingScoreValue(), RATING_SCORE_10);
 }
 
 /**

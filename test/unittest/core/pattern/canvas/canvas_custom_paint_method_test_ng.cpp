@@ -26,7 +26,6 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
@@ -1543,19 +1542,17 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest040, TestSize
     paintMethod->state_.strokeState.SetLineDashOffset(1.0);
     paintMethod->UpdateLineDash(pen);
     RSBrush brush(RSColor(0xffffffff));
-    paintMethod->smoothingQuality_ = "medium";
+    paintMethod->smoothingQuality_ = SmoothingQuality::MEDIUM;
     float percentNum = 1.0f;
     FilterProperty filter;
     RSSamplingOptions options;
     paintMethod->InitImagePaint(&pen, &brush, options);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->smoothingQuality_ = "high";
+    paintMethod->smoothingQuality_ = SmoothingQuality::HIGH;
     paintMethod->InitImagePaint(&pen, &brush, options);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->smoothingQuality_ = "test";
-    paintMethod->InitImagePaint(&pen, &brush, options);
     paintMethod->smoothingEnabled_ = false;
-    paintMethod->smoothingQuality_ = "high";
+    paintMethod->smoothingQuality_ = SmoothingQuality::HIGH;
     paintMethod->InitImagePaint(&pen, &brush, options);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
 }

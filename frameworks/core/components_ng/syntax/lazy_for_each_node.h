@@ -30,6 +30,15 @@
 
 namespace OHOS::Ace::NG {
 
+enum LazyForEachIdleTaskSource {
+    POST_IDLE_TASK = 0,
+    ON_DATA_RELOADED = 1,
+    GET_FRAME_CHILD = 2,
+    RECYCLE_ITEMS = 3,
+    REMOVE_CHILD_IN_RENDER_TREE = 4,
+    SET_ACTIVE_RANGE = 5
+};
+
 class ACE_EXPORT LazyForEachNode : public ForEachBaseNode, public V2::DataChangeListener {
     DECLARE_ACE_TYPE(LazyForEachNode, ForEachBaseNode, DataChangeListener);
 
@@ -102,7 +111,7 @@ public:
     {
         return isLoop_;
     }
-    void PostIdleTask();
+    void PostIdleTask(uint32_t taskSource);
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
@@ -234,6 +243,12 @@ private:
         // disappearingChildren_ is correct before calling GenerateOneDepthVisibleFrameWithTransition.
         GetChildren();
         UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    }
+
+    int32_t GetParentId() const
+    {
+        auto parent = GetParent();
+        return parent? parent->GetId() : -1;
     }
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
