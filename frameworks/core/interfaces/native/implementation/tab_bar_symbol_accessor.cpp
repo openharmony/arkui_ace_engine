@@ -23,16 +23,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabBarSymbolAccessor {
 void DestroyPeerImpl(Ark_TabBarSymbol peer)
 {
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl *>(peer);
-    if (peerImpl) {
-        peerImpl->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TabBarSymbol ConstructImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<TabBarSymbolPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<TabBarSymbolPeer *>(Referenced::RawPtr(peerImpl));
+    return PeerUtils::CreatePeer<TabBarSymbolPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_SymbolGlyphModifier GetNormalImpl(Ark_TabBarSymbol peer)
 {
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl *>(peer);
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeer *>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     auto glyphModifier = peerImpl->GetNormal().Upgrade();
     CHECK_NULL_RETURN(glyphModifier, nullptr);
@@ -49,7 +44,7 @@ Ark_SymbolGlyphModifier GetNormalImpl(Ark_TabBarSymbol peer)
 void SetNormalImpl(Ark_TabBarSymbol peer,
                    Ark_SymbolGlyphModifier normal)
 {
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeer*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto glyphModifier = reinterpret_cast<SymbolGlyphModifierPeer *>(normal);
     CHECK_NULL_VOID(glyphModifier);
@@ -58,7 +53,7 @@ void SetNormalImpl(Ark_TabBarSymbol peer,
 Opt_SymbolGlyphModifier GetSelectedImpl(Ark_TabBarSymbol peer)
 {
     auto optModifier = Converter::ArkValue<Opt_SymbolGlyphModifier>();
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeer*>(peer);
     CHECK_NULL_RETURN(peerImpl, optModifier);
     auto glyphModifier = peerImpl->GetSelected().Upgrade();
     CHECK_NULL_RETURN(glyphModifier, optModifier);
@@ -68,7 +63,7 @@ Opt_SymbolGlyphModifier GetSelectedImpl(Ark_TabBarSymbol peer)
 void SetSelectedImpl(Ark_TabBarSymbol peer,
                      const Opt_SymbolGlyphModifier* selected)
 {
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<TabBarSymbolPeer*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto glyphModifierOpt = Converter::OptConvertPtr<Ark_SymbolGlyphModifier>(selected);
     if (glyphModifierOpt) {

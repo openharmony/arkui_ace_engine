@@ -15,42 +15,41 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TAB_BAR_SYMBOL_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TAB_BAR_SYMBOL_PEER_IMPL_H
 
-#include <optional>
+#include "symbol_glyph_modifier_peer.h"
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "symbol_glyph_modifier_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-class TabBarSymbolPeerImpl : public Referenced {
+struct TabBarSymbolPeer : public OHOS::Ace::Referenced {
+protected:
+    TabBarSymbolPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
+
 public:
-    TabBarSymbolPeerImpl() = default;
-
-    void SetNormal(OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> normal)
+    void SetNormal(OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> normal)
     {
         normal_ = normal;
     }
 
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> GetNormal()
+    OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> GetNormal()
     {
         return normal_;
     }
 
-    void SetSelected(OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> selected)
+    void SetSelected(OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> selected)
     {
         selected_ = selected;
     }
 
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> GetSelected()
+    OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> GetSelected()
     {
         return selected_;
     }
 
 private:
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> normal_;
-    OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::SymbolGlyphModifierPeerImpl> selected_;
+    OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> normal_;
+    OHOS::Ace::WeakPtr<SymbolGlyphModifierPeer> selected_;
 };
-} // namespace OHOS::Ace::NG::GeneratedModifier
 
-struct TabBarSymbolPeer : public OHOS::Ace::NG::GeneratedModifier::TabBarSymbolPeerImpl {};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TAB_BAR_SYMBOL_PEER_IMPL_H
