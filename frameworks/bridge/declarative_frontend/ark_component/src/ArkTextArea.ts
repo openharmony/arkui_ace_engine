@@ -1410,6 +1410,23 @@ class TextAreaStrokeColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class TextAreaScrollBarColorModifier extends ModifierWithKey<ColorMetrics> {
+  constructor(value: ColorMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaBarColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetScrollBarColor(node);
+    } else {
+      getUINativeModule().textArea.setScrollBarColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1799,6 +1816,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  scrollBarColor(value: ColorMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
     return this;
   }
 }

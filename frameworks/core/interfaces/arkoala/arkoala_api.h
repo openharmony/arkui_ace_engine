@@ -4810,6 +4810,9 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    ArkUI_Uint32 (*getTextAreaScrollBarColor)(ArkUINodeHandle node);
+    void (*resetTextAreaScrollBarColor)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {

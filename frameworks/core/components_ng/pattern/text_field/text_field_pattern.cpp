@@ -11956,6 +11956,13 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                 }
             }
         },
+        {"scrollBarColor", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto barColor = Color(*realValue);
+                    prop->UpdateScrollBarColor(barColor);
+                }
+            }
+        },
     };
 
     auto it = handlers.find(key);

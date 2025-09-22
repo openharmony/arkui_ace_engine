@@ -237,7 +237,13 @@ void TextFieldPaintMethod::UpdateScrollBar()
     textFieldOverlayModifier_->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto defaultValue = Color(0x66182431);
+    auto barColorValue = textFieldLayoutProperty->GetScrollBarColorValue(defaultValue);
+    textFieldOverlayModifier_->SetBarColor(barColorValue);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 
