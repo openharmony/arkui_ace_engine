@@ -19,6 +19,14 @@
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 
 namespace OHOS::Ace::NG {
+void TabContentModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetShallowBuilder(std::move(shallowBuilder));
+}
+
 void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt)
 {
     CHECK_NULL_VOID(frameNode);

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { memo } from "@koalaui/runtime/annotations"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { TabContentAttribute, ArkTabContentComponent, ArkTabContentPeer } from "#generated"
+import { TabContentAttribute, ArkTabContentComponent, ArkTabContentPeer, LazyBuild } from "#generated"
+import { pointer } from '@koalaui/interop'
 
 @memo
 export function TabContentImpl(
@@ -33,7 +33,10 @@ export function TabContentImpl(
     NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (peer: ArkTabContentPeer): void => {
         receiver.setPeer(peer)
         style?.(receiver)
+        const peerPtr : pointer = receiver.getPeer().getPeerPtr()
         receiver.setPeer(undefined)
-        content_?.()
+        if (content_) {
+            LazyBuild.SetTabContentLazyBuilder(peerPtr, content_!)
+        }
     })
 }

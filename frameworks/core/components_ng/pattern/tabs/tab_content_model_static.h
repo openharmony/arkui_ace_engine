@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,6 +29,7 @@ using TabBarBuilderFunc = std::function<void()>;
 
 class ACE_EXPORT TabContentModelStatic {
 public:
+    static void SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder);
     static void SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt);
     static void SetLabelStyle(FrameNode* frameNode, const std::optional<LabelStyle>& labelStyleOpt);
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
