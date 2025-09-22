@@ -9135,6 +9135,27 @@ void RichEditorPattern::CloseHandleAndSelect()
     MarkContentNodeForRender();
 }
 
+bool RichEditorPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto rect = host->GetGeometryNode()->GetFrameRect();
+    auto computeSuccess = paragraphs_.CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
+    IF_TRUE(!computeSuccess, caretCaretMetric = CaretMetricsF(OffsetF(0.0f, rect.Height()), 0.0f));
+    return computeSuccess;
+}
+
+void RichEditorPattern::AdjustHandleByLineMetrics(int32_t index, bool isFirst,
+OffsetF& handleOffset, float& handleHeight)
+{
+    CaretMetricsF lineMetrics;
+    TextAffinity textAffinity = isFirst ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM;
+    bool computeSuccess = CalcCaretMetricsByPosition(index, lineMetrics, textAffinity);
+    CHECK_NULL_VOID(computeSuccess && handleHeight > lineMetrics.height);
+    handleOffset = lineMetrics.offset + richTextRect_.GetOffset();
+    handleHeight = lineMetrics.height;
+}
+
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto globalOffset = GetGlobalOffset();
@@ -9161,6 +9182,8 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
         auto endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
         firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
+        AdjustHandleByLineMetrics(baseOffset, true, startOffset, startSelectHeight);
+        AdjustHandleByLineMetrics(destinationOffset, false, endOffset, endSelectHeight);
         firstHandleOffset = startOffset + globalOffset;
         secondHandleOffset = endOffset + globalOffset;
         firstHandleOffset.SetX(firstHandleOffset.GetX() - firstHandlePaintSize.Width() / 2.0f);
