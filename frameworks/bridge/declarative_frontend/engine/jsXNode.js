@@ -290,9 +290,20 @@ class JSBuilderNode extends BaseNode {
             this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
+    clearChildBuilderNodeWeakMap() {
+        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild?.deref();
+            if (child instanceof JSBuilderNode) {
+                child.__parentViewOfBuildNode = undefined;
+                this.removeChildBuilderNode(child.id__());
+            }
+        });
+        this.clearChildBuilderNode();
+    }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+        this.clearChildBuilderNodeWeakMap();
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
