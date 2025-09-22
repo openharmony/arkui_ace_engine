@@ -599,6 +599,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkRichEditor.ts @arkui
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRichText.ts @arkweb-committer-group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRowSplit.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRow.ts @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_component/src/ArkScrollable.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkScrollBar.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkScroll.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSearch.ts @huawei_g_five
@@ -977,6 +978,10 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.cpp @arkuipopupwindow_all
@@ -2975,6 +2980,8 @@ frameworks/core/interfaces/native/node/row_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/row_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/row_split_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/row_split_modifier.h @arkuilayout1
+frameworks/core/interfaces/native/node/scrollable_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/scrollable_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/scroller_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/scroller_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/search_modifier.cpp @huawei_g_five
