@@ -6716,13 +6716,14 @@ void CheckOuterBorderColorResObj(NG::BorderColorProperty& borderColors, RefPtr<R
 }
 
 void ProcessOptionalColorResources(FrameNode* frameNode, 
-    const std::optional<Color>& color, std::vector<RefPtr<ResourceObject>>& vectorResObj)
+    std::optional<Color>& color, std::vector<RefPtr<ResourceObject>>& vectorResObj)
 {
     if (color.has_value()) {
         RefPtr<ResourceObject> colorResObj;
         auto colorVal = color.value();
         ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, colorVal,
             frameNode->GetTag());
+        color = colorVal;
         vectorResObj.emplace_back(colorResObj);
     } else {
         vectorResObj.emplace_back(nullptr);
