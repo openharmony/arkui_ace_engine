@@ -234,7 +234,7 @@ export struct EditableTitleBar {
         this.maxFontScale = uiContent.getMaxFontScale();
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
@@ -563,7 +563,7 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -615,7 +615,7 @@ struct ImageMenuItem {
         uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
@@ -641,7 +641,7 @@ struct ImageMenuItem {
           resourceString = context?.resourceManager?.getStringSync(resource as Long);
         }
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | String = (err as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to EditableTitleBar toStringFormat, code: ${code}, message: ${message}`)
       }
@@ -1010,7 +1010,7 @@ struct EditableTitleBarDialog {
         this.mainWindowStage = hostContext?.windowStage.getMainWindowSync();
       }
     } catch (error) {
-      let code: undefined | number = (error as ClassCastError)?.code;
+      let code: undefined | int = (error as ClassCastError)?.code;
       let message: undefined | String = (error as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `EditableTitleBar getMainWindowStage error, code: ${code},message:${message}`);
     }
@@ -1051,7 +1051,7 @@ function getNumberByResource(resourceId: number, defaultNumber: number): number 
       return resourceNumber / densityPixels;
     }
   } catch (error) {
-    let code: number = (error as ClassCastError).code;
+    let code: int = (error as ClassCastError).code;
     let message: string = (error as ClassCastError).message;
     hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
     return 0;

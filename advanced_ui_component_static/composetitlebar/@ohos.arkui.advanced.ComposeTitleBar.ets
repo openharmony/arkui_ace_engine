@@ -189,7 +189,7 @@ export struct ComposeTitleBar {
       try {
         this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
       } catch (exception) {
-        let code: undefined| number = (exception as ClassCastError)?.code;
+        let code: undefined| int = (exception as ClassCastError)?.code;
         let message: undefined | string = (exception as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'ComposeTitleBar',
           `Faild to getFrameNodeByUniqueId,cause, code: ${code}, message: ${message}`);
@@ -283,7 +283,7 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
@@ -308,7 +308,7 @@ struct CollapsibleMenuSection {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -510,7 +510,7 @@ struct ImageMenuItem {
         resourceString = (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringSync((resource as Resource).id);
       } catch (err) {
-        let code: number = (err as ClassCastError)?.code ?? 0;
+        let code: int = (err as ClassCastError)?.code ?? 0;
         let message: string = (err as ClassCastError)?.message ?? '';
         hilog.error(ERROR_CODE, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
       }
@@ -524,7 +524,7 @@ struct ImageMenuItem {
         return (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager!.getStringByNameSync('icon_back');
       } catch (err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace',
           `Faild to ComposeTitleBar getStringByNameSync icon_back,code: ${code},message:${message}`);
@@ -534,7 +534,7 @@ struct ImageMenuItem {
         return (this.getUIContext()
           .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
       } catch(err) {
-        let code: undefined | number = (err as ClassCastError)?.code;
+        let code: undefined | int = (err as ClassCastError)?.code;
         let message: undefined | string = (err as ClassCastError)?.message;
         hilog.error(ERROR_CODE, 'Ace',
           `Faild to ComposeTitleBar getStringByNameSync ohos_toolbar_more,code: ${code},message:${message}`);
@@ -576,7 +576,7 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: undefined | number = (err as ClassCastError)?.code;
+      let code: undefined | int = (err as ClassCastError)?.code;
       let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
@@ -599,7 +599,7 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
@@ -940,7 +940,7 @@ struct ComposeTitleBarDialog {
         this.maxLines = this.horizontalsScreenLines;
       }
     } catch (exception) {
-      let code: undefined | number = (exception as ClassCastError)?.code;
+      let code: undefined | int = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }

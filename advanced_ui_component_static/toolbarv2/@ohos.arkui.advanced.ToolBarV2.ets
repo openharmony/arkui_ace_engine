@@ -333,7 +333,7 @@ export struct ToolBarV2 {
       this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
       this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
     } catch (err) {
-      let code: undefined|Double = (err as ClassCastError)?.code;
+      let code: undefined|int = (err as ClassCastError)?.code;
       let message: undefined|string = (err as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `Faild to toolBarV2 getMaxFontScale, code: ${code}, message: ${message}`);
