@@ -120,6 +120,12 @@ void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto property = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(property);
+    auto axis = property->GetAxis().value_or(Axis::VERTICAL);
+    if (axis == Axis::FREE) {
+        contentStartOffset_ = 0.0f;
+        contentEndOffset_ = 0.0f;
+        return;
+    }
     auto startOffset = property->GetContentStartOffset();
     if (!startOffset.has_value()) {
         contentStartOffset_ = 0.0f;

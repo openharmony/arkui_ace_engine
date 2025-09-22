@@ -597,15 +597,15 @@ ScrollAlign GridLayoutInfo::TransformAutoScrollAlign(
         auto [line, _] = FindItemInRange(itemIdx);
         float topPos = GetItemTopPos(line, mainGap);
         float botPos = GetItemBottomPos(line, height, mainGap);
-        if (NonPositive(topPos) && GreatOrEqual(botPos, mainSize)) {
+        if (NonPositive(topPos - contentStartOffset_) && GreatOrEqual(botPos, mainSize - contentEndOffset_)) {
             // item occupies the whole viewport
             return ScrollAlign::NONE;
         }
         // scrollAlign start / end if the item is not fully in viewport
-        if (Negative(topPos)) {
+        if (LessNotEqual(topPos, contentStartOffset_)) {
             return ScrollAlign::START;
         }
-        if (GreatNotEqual(botPos, mainSize)) {
+        if (GreatNotEqual(botPos, mainSize  - contentEndOffset_)) {
             return ScrollAlign::END;
         }
         return ScrollAlign::NONE;
@@ -671,7 +671,8 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     // Depending on align, calculate where you need to scroll to
     switch (align) {
         case ScrollAlign::START:
-            targetPos += currentGridLayoutInfo.contentStartOffset_;
+            targetPos -= currentGridLayoutInfo.contentStartOffset_;
+            break;
         case ScrollAlign::NONE:
             break;
         case ScrollAlign::CENTER: {
@@ -679,7 +680,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
             break;
         }
         case ScrollAlign::END: {
-            targetPos -= (lastMainSize - targetLineHeight - contentEndOffset_);
+            targetPos -= (lastMainSize - targetLineHeight - currentGridLayoutInfo.contentEndOffset_);
             break;
         }
         case ScrollAlign::AUTO: {
@@ -695,7 +696,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
                                  targetPosBeforeStartIndex - targetLineHeight;
             // This is handled when the targetLine line is the same as the endLine line. As for the period between
             // startLine and endLine, follow the following process
-            if (GreatOrEqual(height2Top, 0.f) && GreatOrEqual(height2Bottom, 0.f)) {
+            if (GreatOrEqual(height2Top, contentStartOffset_) && GreatOrEqual(height2Bottom, contentEndOffset_)) {
                 return false;
             }
             // When the row height is greater than the screen height and occupies the entire screen height, do nothing

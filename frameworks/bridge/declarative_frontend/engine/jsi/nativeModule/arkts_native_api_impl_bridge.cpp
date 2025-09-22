@@ -5600,6 +5600,14 @@ void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetOnDidStopFling));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidStopFling"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetOnDidStopFling));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetContentStartOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetContentStartOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetContentEndOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetContentEndOffset));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scrollable"), scrollable);
 }
 
@@ -6155,14 +6163,6 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapAlign));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapAlign));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentStartOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentStartOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentStartOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentStartOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentEndOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentEndOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentEndOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentEndOffset));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetDivider));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),

@@ -3433,12 +3433,6 @@ struct ArkUIListModifier {
     void (*setScrollSnapAlign)(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign);
     void (*resetScrollSnapAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getScrollSnapAlign)(ArkUINodeHandle node);
-    void (*setContentStartOffset)(ArkUINodeHandle node, ArkUI_Float32 startOffset);
-    void (*resetContentStartOffset)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getContentStartOffset)(ArkUINodeHandle node);
-    void (*setContentEndOffset)(ArkUINodeHandle node, ArkUI_Float32 endOffset);
-    void (*resetContentEndOffset)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getContentEndOffset)(ArkUINodeHandle node);
     void (*listSetDivider)(ArkUINodeHandle node, const ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*listResetDivider)(ArkUINodeHandle node);
@@ -4011,6 +4005,14 @@ struct ArkUIScrollableModifier {
     void (*resetOnWillStartFling)(ArkUINodeHandle node);
     void (*setOnDidStopFling)(ArkUINodeHandle node, void* callback);
     void (*resetOnDidStopFling)(ArkUINodeHandle node);
+    void (*setContentStartOffset)(ArkUINodeHandle node, ArkUI_Float32 startOffset);
+    void (*resetContentStartOffset)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getContentStartOffset)(ArkUINodeHandle node);
+    void (*setContentEndOffset)(ArkUINodeHandle node, ArkUI_Float32 endOffset);
+    void (*resetContentEndOffset)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getContentEndOffset)(ArkUINodeHandle node);
+    void (*createWithResourceObjContentStartOffset)(ArkUINodeHandle node, void* resObj);
+    void (*createWithResourceObjContentEndOffset)(ArkUINodeHandle node, void* resObj);
 };
 
 struct ArkUIScrollModifier {

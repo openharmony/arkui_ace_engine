@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -409,20 +409,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 void JSList::SetSticky(int32_t sticky)
 {
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
-}
-
-void JSList::SetContentStartOffset(const JSCallbackInfo& info)
-{
-    double value = 0.0;
-    ParseJsDouble(info[0], value);
-    ListModel::GetInstance()->SetContentStartOffset(value);
-}
-
-void JSList::SetContentEndOffset(const JSCallbackInfo& info)
-{
-    double value = 0.0;
-    ParseJsDouble(info[0], value);
-    ListModel::GetInstance()->SetContentEndOffset(value);
 }
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
@@ -937,8 +923,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
-    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
-    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);

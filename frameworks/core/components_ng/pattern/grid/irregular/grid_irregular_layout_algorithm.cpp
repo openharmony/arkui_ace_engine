@@ -396,17 +396,19 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize, bool considerContentOffs
     GridLayoutRangeSolver solver(&info_, wrapper_);
     const auto res = solver.FindRangeOnJump(info_.jumpIndex_, jumpLineIdx, mainGap_);
     info_.currentOffset_ = res.pos;
-    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset) {
-        info_.currentOffset_ += info_.contentStartOffset_;
-    }
-    if (info_.scrollAlign_ == ScrollAlign::END) {
-        info_.currentOffset_ -= info_.contentEndOffset_;
-    }
     info_.startMainLineIndex_ = res.startRow;
     info_.startIndex_ = res.startIdx;
     info_.endMainLineIndex_ = res.endRow;
     info_.endIndex_ = res.endIdx;
     info_.jumpIndex_ = EMPTY_JUMP_INDEX;
+    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset) {
+        info_.currentOffset_ += info_.contentStartOffset_;
+        MeasureOnOffset(mainSize);
+    }
+    if (info_.scrollAlign_ == ScrollAlign::END) {
+        info_.currentOffset_ -= info_.contentEndOffset_;
+        MeasureOnOffset(mainSize);
+    }
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()

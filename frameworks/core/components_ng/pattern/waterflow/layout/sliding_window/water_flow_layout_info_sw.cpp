@@ -523,7 +523,7 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>&
 
 float WaterFlowLayoutInfoSW::TopFinalPos() const
 {
-    return -(StartPosWithMargin() + delta_);
+    return -(StartPosWithMargin() + delta_) + contentStartOffset_;
 };
 
 float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
