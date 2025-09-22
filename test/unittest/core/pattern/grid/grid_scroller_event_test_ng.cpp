@@ -2090,4 +2090,41 @@ HWTEST_F(GridScrollerEventTestNg, OnWillStartDragging001, TestSize.Level1)
 
     EXPECT_TRUE(isOnWillStartDraggingCallBack);
 }
+
+/**
+ * @tc.name: onDidStopDragging001
+ * @tc.desc: Test onDidStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, onDidStopDragging001, TestSize.Level1)
+{
+    bool isDidStopDraggingCallBack = false;
+    bool isFlingAfterDrag = false;
+    auto onDidStopDragging = [&isDidStopDraggingCallBack, &isFlingAfterDrag](bool isWillFling) {
+        isDidStopDraggingCallBack = true;
+        isFlingAfterDrag = isWillFling;
+    };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateFixedItems(20);
+    CreateDone();
+    eventHub_->SetOnDidStopDragging(onDidStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isDidStopDraggingCallBack);
+    EXPECT_TRUE(isFlingAfterDrag);
+}
 } // namespace OHOS::Ace::NG

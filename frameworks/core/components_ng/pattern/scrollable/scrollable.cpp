@@ -510,6 +510,17 @@ void Scrollable::HandleTouchDown(bool fromcrown)
     }
 }
 
+void Scrollable::CheckStopFlingInTouchUp()
+{
+    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
+        isUserFling_ = false;
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
+    }
+    isTouchStopAnimation_ = false;
+}
+
 void Scrollable::HandleTouchUp()
 {
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
@@ -521,16 +532,11 @@ void Scrollable::HandleTouchUp()
     }
     isTouching_ = false;
     if (nestedScrolling_) {
+        CheckStopFlingInTouchUp();
         return;
     }
     if (CanStayOverScroll()) {
-        if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
-            isUserFling_ = false;
-            if (onDidStopFlingCallback_) {
-                onDidStopFlingCallback_();
-            }
-        }
-        isTouchStopAnimation_ = false;
+        CheckStopFlingInTouchUp();
         return;
     }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
@@ -551,13 +557,7 @@ void Scrollable::HandleTouchUp()
             return;
         }
     }
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
-        isUserFling_ = false;
-        if (onDidStopFlingCallback_) {
-            onDidStopFlingCallback_();
-        }
-    }
-    isTouchStopAnimation_ = false;
+    CheckStopFlingInTouchUp();
 }
 
 void Scrollable::HandleTouchCancel()
@@ -1957,8 +1957,9 @@ void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)
     if (onDidStopDraggingCallback_) {
         onDidStopDraggingCallback_(isWillFling);
     }
-    if (isUserFling_ && !isWillFling) {
-        if (onDidStopFlingCallback_) {
+    if (!isWillFling) {
+        isScrollBarDragging_ = false;
+        if (isUserFling_ && onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
         }
     }
