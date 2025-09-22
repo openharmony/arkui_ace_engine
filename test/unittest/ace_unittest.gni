@@ -99,7 +99,6 @@ template("ace_unittest") {
 
       deps = ace_unittest_deps
       deps += [
-        "$ace_root/frameworks/core/components/theme:build_theme_code",
         "$ace_root/test/unittest:ace_base",
         "$ace_root/test/unittest:ace_components_base",
         "$ace_root/test/unittest:ace_components_event",
@@ -179,7 +178,6 @@ template("ace_unittest") {
       include_dirs += include_dir
       deps = ace_unittest_deps
       deps += [
-        "$ace_root/frameworks/core/components/theme:build_theme_code",
         "$ace_root/test/unittest:ace_base",
         "$ace_root/test/unittest:ace_components_base",
         "$ace_root/test/unittest:ace_components_event",

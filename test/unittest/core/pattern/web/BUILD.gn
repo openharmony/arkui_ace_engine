@@ -80,7 +80,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -192,7 +191,6 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

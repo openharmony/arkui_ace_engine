@@ -71,7 +71,7 @@ template("build_component_ng") {
 
       deps = []
       deps += extra_deps
-      deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+      deps += []
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs
