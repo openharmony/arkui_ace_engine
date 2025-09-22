@@ -82,6 +82,8 @@ public:
             theme->scaleHoverOrFocus_ = togglePattern->GetAttr<double>("scale_focus_status_button", 1.0);
             theme->borderWidth_ = togglePattern->GetAttr<Dimension>("border_width_status_button", Dimension());
             theme->borderColorChecked_ = togglePattern->GetAttr<Color>("border_color_status_button_checked", Color());
+            theme->borderWidthUnchecked_ =
+                togglePattern->GetAttr<Dimension>("border_width_status_button_unchecked", theme->borderWidth_);
             theme->borderColorUnchecked_ = togglePattern->GetAttr<Color>(
                 "border_color_status_button_unchecked", Color());
             theme->bgColorFocusChecked_ = togglePattern->GetAttr<Color>(
@@ -160,6 +162,11 @@ public:
         return borderWidth_;
     }
 
+    const Dimension& GetBorderWidthUnchecked() const
+    {
+        return borderWidthUnchecked_;
+    }
+
     const Color& GetTextColor() const
     {
         return textColor_;
@@ -222,6 +229,7 @@ private:
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Dimension borderWidth_;
+    Dimension borderWidthUnchecked_;
     Color textColor_;
     Color borderColorUnchecked_;
     Color borderColorChecked_;

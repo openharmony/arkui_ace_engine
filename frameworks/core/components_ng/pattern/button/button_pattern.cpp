@@ -796,6 +796,11 @@ void ButtonPattern::HandlePressedStyle()
         AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
             TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
+    if (scaleModify_ && isPress_) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetScale(1.0f, 1.0f);
+    }
 }
 
 void ButtonPattern::HandleNormalStyle()
@@ -826,6 +831,9 @@ void ButtonPattern::HandleNormalStyle()
         } else {
             AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
         }
+    }
+    if (scaleModify_ && isHover_) {
+        HandleHoverEvent(true);
     }
 }
 
