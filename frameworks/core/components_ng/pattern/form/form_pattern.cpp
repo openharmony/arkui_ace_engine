@@ -2429,6 +2429,11 @@ void FormPattern::DoSkeletonAnimation()
     optionAlpha.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
+    // Before executing the animation, restore alpha to opacity.
+    externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    auto rsNode = externalRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetAlpha(NON_TRANSPARENT_VAL);
     externalRenderContext->OpacityAnimation(optionAlpha, 0, 1);
 
     auto lastFrameChild = AceType::DynamicCast<FrameNode>(skeletonNode);
