@@ -64,10 +64,9 @@ void FfiOHOSAceFrameworkScrollableBaseOnWillScroll(
 {
     auto lambda = [callback = CJLambda::Create(callback)]
         (const Dimension& offset, const ScrollState& state, ScrollSource scrollSource) {
-        ScrollFrameResult scrollRes { .offset = offset };
         auto res =
             callback(offset.Value(), static_cast<int32_t>(state), static_cast<int32_t>(scrollSource));
-        scrollRes.offset =  Dimension { res, DimensionUnit::VP };
+        ScrollFrameResult scrollRes { .offset = Dimension { res, DimensionUnit::VP } };
         return scrollRes;
     };
     ScrollableModelNG::SetOnWillScroll(std::move(lambda));

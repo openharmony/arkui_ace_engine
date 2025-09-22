@@ -217,9 +217,8 @@ void FfiOHOSAceFrameworkWaterFlowSetOnScrollFrameBegin(double (*callback)(double
 {
     auto lambda = CJLambda::Create(callback);
     auto onScrollBegin = [lambda](const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
-        ScrollFrameResult scrollRes { .offset = offset };
         auto result = lambda(offset.Value(), static_cast<int32_t>(state));
-        scrollRes.offset = Dimension(result, DimensionUnit::VP);
+        ScrollFrameResult scrollRes { .offset = Dimension(result, DimensionUnit::VP) };
         return scrollRes;
     };
     WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));

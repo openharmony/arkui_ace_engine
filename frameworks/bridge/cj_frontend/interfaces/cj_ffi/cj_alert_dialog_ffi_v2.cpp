@@ -333,7 +333,7 @@ void FfiOHOSShowAlertDialogParamWithConfirmShadowStyle(
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
+        if (shadowTheme) {
             shadow = shadowTheme->GetShadow(style, colorMode);
         }
     }
@@ -404,7 +404,7 @@ void FfiOHOSShowAlertDialogParamWithButtonsShadowStyle(NativeAlertDialogParamV2 
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
+        if (shadowTheme) {
             shadow = shadowTheme->GetShadow(style, colorMode);
         }
     }
@@ -509,7 +509,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParamV2 
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
+        if (shadowTheme) {
             shadow = shadowTheme->GetShadow(style, colorMode);
         }
     }
