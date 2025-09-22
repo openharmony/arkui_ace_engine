@@ -29,7 +29,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { default as curves } from "@ohos.curves"
-import { extractors, hookSwiperAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -956,6 +956,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
+    attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
     setSwiperOptions(controller?: SwiperController): this {
         return this
     }
@@ -1070,9 +1071,6 @@ export type ContentWillScrollCallback = (result: SwiperContentWillScrollResult) 
 
 export class ArkSwiperComponent extends ArkCommonMethodComponent implements SwiperAttribute {
     getPeer(): ArkSwiperPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkSwiperPeer)
     }
     public setSwiperOptions(controller?: SwiperController): this {
@@ -1357,10 +1355,8 @@ export function SwiperImpl(
     const receiver = remember<ArkSwiperComponent>((): ArkSwiperComponent => {
         return new ArkSwiperComponent()
     })
-    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (peer: ArkSwiperPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (_: ArkSwiperPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -1369,7 +1365,7 @@ export class Indicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     constructor() {
@@ -1380,27 +1376,27 @@ export class Indicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
@@ -1409,7 +1405,7 @@ export class DotIndicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     _itemWidth?: Length | undefined
@@ -1429,63 +1425,63 @@ export class DotIndicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
-    itemWidth(value: Length): this {
+    itemWidth(value: Length | undefined): this {
         this._itemWidth = value
         return this
     }
-    itemHeight(value: Length): this {
+    itemHeight(value: Length | undefined): this {
         this._itemHeight = value
         return this
     }
-    selectedItemWidth(value: Length): this {
+    selectedItemWidth(value: Length | undefined): this {
         this._selectedItemWidth = value
         return this
     }
-    selectedItemHeight(value: Length): this {
+    selectedItemHeight(value: Length | undefined): this {
         this._selectedItemHeight = value
         return this
     }
-    mask(value: boolean): this {
+    mask(value: boolean | undefined): this {
         this._mask = value
         return this
     }
-    color(value: ResourceColor): this {
+    color(value: ResourceColor | undefined): this {
         this._color = value
         return this
     }
-    selectedColor(value: ResourceColor): this {
+    selectedColor(value: ResourceColor | undefined): this {
         this._selectedColor = value
         return this
     }
-    maxDisplayCount(maxDisplayCount: number): this {
+    maxDisplayCount(maxDisplayCount: number | undefined): this {
         this._maxDisplayCount = maxDisplayCount
         return this
     }
-    space(space: LengthMetrics): this {
+    space(space: LengthMetrics | undefined): this {
         this._space = space
         return this
     }
@@ -1494,7 +1490,7 @@ export class DigitIndicator {
     _left?: Length | undefined
     _top?: Length | undefined
     _right?: Length | undefined
-    _bottom?: Length | undefined
+    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
     _fontColor?: ResourceColor | undefined
@@ -1509,43 +1505,43 @@ export class DigitIndicator {
     static digit(): DigitIndicator {
         return new DigitIndicator()
     }
-    left(value: Length): this {
+    left(value: Length | undefined): this {
         this._left = value
         return this
     }
-    top(value: Length): this {
+    top(value: Length | undefined): this {
         this._top = value
         return this
     }
-    right(value: Length): this {
+    right(value: Length | undefined): this {
         this._right = value
         return this
     }
-    bottom(value: Length): this {
-        this._bottom = value
+    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
+        this._bottom = bottom
         return this
     }
-    start(value: LengthMetrics): this {
+    start(value: LengthMetrics | undefined): this {
         this._start = value
         return this
     }
-    end(value: LengthMetrics): this {
+    end(value: LengthMetrics | undefined): this {
         this._end = value
         return this
     }
-    fontColor(value: ResourceColor): this {
+    fontColor(value: ResourceColor | undefined): this {
         this._fontColor = value
         return this
     }
-    selectedFontColor(value: ResourceColor): this {
+    selectedFontColor(value: ResourceColor | undefined): this {
         this._selectedFontColor = value
         return this
     }
-    digitFont(value: Font): this {
+    digitFont(value: Font | undefined): this {
         this._digitFont = value
         return this
     }
-    selectedDigitFont(value: Font): this {
+    selectedDigitFont(value: Font | undefined): this {
         this._selectedDigitFont = value
         return this
     }
