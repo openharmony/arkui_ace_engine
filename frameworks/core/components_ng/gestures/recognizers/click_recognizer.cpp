@@ -81,7 +81,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
         localPoint = localPoint + paintRect.GetOffset();
-        if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
+        if (!host->InResponseRegionList(localPoint, responseRegionBuffer_, false)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
                 event.touchEventId);

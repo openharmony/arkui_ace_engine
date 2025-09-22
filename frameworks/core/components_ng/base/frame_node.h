@@ -1088,7 +1088,8 @@ public:
 
     void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList, const RectF& windowRect);
 
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
+    bool InResponseRegionList(const PointF& parentLocalPoint,
+        const std::vector<RectF>& responseRegionList, bool needForCheckTransformValid = true);
 
     bool GetMonopolizeEvents() const;
 

@@ -3469,9 +3469,10 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     }
 }
 
-bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList)
+bool FrameNode::InResponseRegionList(
+    const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList, bool needForCheckTransformValid)
 {
-    if (IsPaintRectWithTransformValid()) {
+    if (needForCheckTransformValid && IsPaintRectWithTransformValid()) {
         return false;
     }
     for (const auto& rect : responseRegionList) {
