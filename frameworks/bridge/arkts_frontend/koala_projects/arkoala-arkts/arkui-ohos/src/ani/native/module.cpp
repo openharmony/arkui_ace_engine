@@ -1317,6 +1317,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromDrawContextPtr)
         },
+        ani_native_function {
+            "_Extractors_ToDrawingCanvasPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawingCanvasPtr)
+        },
+        ani_native_function {
+            "_Extractors_FromDrawingCanvasPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromDrawingCanvasPtr)
+        },
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

@@ -163,10 +163,10 @@ export namespace extractors {
   }
 
   export function toDrawingCanvasPtr(value: drawing.Canvas): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToDrawingCanvasPtr(value);
   }
   export function fromDrawingCanvasPtr(ptr: KPointer): drawing.Canvas {
-    const x: Object = {};
+    const x: Object = ArkUIAniModule._Extractors_FromDrawingCanvasPtr(ptr);
     return x as drawing.Canvas;
   }
 
