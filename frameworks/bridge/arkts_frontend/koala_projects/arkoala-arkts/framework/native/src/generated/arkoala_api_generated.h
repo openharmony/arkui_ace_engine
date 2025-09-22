@@ -20621,6 +20621,11 @@ typedef struct GENERATED_ArkUIComponentRootModifier {
                                    Ark_Int32 flags);
 } GENERATED_ArkUIComponentRootModifier;
 
+typedef struct GENERATED_ArkUIConditionScopeModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+} GENERATED_ArkUIConditionScopeModifier;
+
 typedef struct GENERATED_ArkUIContainerSpanModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -26415,6 +26420,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUICommonShapeMethodModifier* (*getCommonShapeMethodModifier)();
     const GENERATED_ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const GENERATED_ArkUIComponentRootModifier* (*getComponentRootModifier)();
+    const GENERATED_ArkUIConditionScopeModifier* (*getConditionScopeModifier)();
     const GENERATED_ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
     const GENERATED_ArkUICounterModifier* (*getCounterModifier)();
     const GENERATED_ArkUICustomBuilderRootModifier* (*getCustomBuilderRootModifier)();
@@ -26720,6 +26726,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_COMMON_SHAPE_METHOD,
     GENERATED_ARKUI_COMPONENT_3D,
     GENERATED_ARKUI_COMPONENT_ROOT,
+    GENERATED_ARKUI_CONDITION_SCOPE,
     GENERATED_ARKUI_CONTAINER_SPAN,
     GENERATED_ARKUI_COUNTER,
     GENERATED_ARKUI_CUSTOM_BUILDER_ROOT,

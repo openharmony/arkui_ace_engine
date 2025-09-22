@@ -5275,6 +5275,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return new TreeNode("ComponentRoot", id, flags);;
     }
     } // ComponentRootModifier
+    namespace ConditionScopeModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return new TreeNode("ConditionScope", id, flags);;
+        }
+        string out("construct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return new TreeNode("ConditionScope", id, flags);;
+    }
+    } // ConditionScopeModifier
     namespace ContainerSpanModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -21323,6 +21341,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIComponentRootModifierImpl;
     }
 
+    const GENERATED_ArkUIConditionScopeModifier* GetConditionScopeModifier()
+    {
+        static const GENERATED_ArkUIConditionScopeModifier ArkUIConditionScopeModifierImpl {
+            ConditionScopeModifier::ConstructImpl,
+        };
+        return &ArkUIConditionScopeModifierImpl;
+    }
+
     const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
     {
         static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
@@ -23218,6 +23244,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCommonShapeMethodModifier,
             GetComponent3DModifier,
             GetComponentRootModifier,
+            GetConditionScopeModifier,
             GetContainerSpanModifier,
             GetCounterModifier,
             GetCustomBuilderRootModifier,

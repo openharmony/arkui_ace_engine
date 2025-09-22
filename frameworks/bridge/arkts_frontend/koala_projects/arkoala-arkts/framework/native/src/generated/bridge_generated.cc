@@ -25781,6 +25781,10 @@ Ark_NativePointer impl_ComponentRoot_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getComponentRootModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(ComponentRoot_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_ConditionScope_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getConditionScopeModifier()->construct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ConditionScope_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
 Ark_NativePointer impl_CustomBuilderRoot_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCustomBuilderRootModifier()->construct(id, flags);
 }
