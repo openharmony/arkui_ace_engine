@@ -8838,6 +8838,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_GestureFocusMode* value)
     {
     }
+    void ForceEnableZoomImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+    {
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -11701,6 +11705,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::RegisterNativeEmbedRuleImpl,
             WebAttributeModifier::BindSelectionMenuImpl,
             WebAttributeModifier::GestureFocusModeImpl,
+            WebAttributeModifier::ForceEnableZoomImpl,
         };
         return &ArkUIWebModifierImpl;
     }

@@ -3121,6 +3121,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_gestureFocusMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    forceEnableZoomAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_forceEnableZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
@@ -3805,6 +3817,7 @@ export interface WebAttribute extends CommonMethod {
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
     gestureFocusMode(value: GestureFocusMode | undefined): this
+    forceEnableZoom(value: boolean | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -3933,6 +3946,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions
     gestureFocusMode_value?: GestureFocusMode | undefined
+    forceEnableZoom_value?: boolean | undefined
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -4315,6 +4329,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     public gestureFocusMode(value: GestureFocusMode | undefined): this {
+        return this
+    }
+    public forceEnableZoom(value: boolean | undefined): this {
         return this
     }
 }
@@ -5388,6 +5405,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public forceEnableZoom(value: boolean | undefined): this {
+        if (this.checkPriority("forceEnableZoom")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.forceEnableZoomAttribute(value_casted)
+        }
+        return this
     }
 }
 /** @memo */
