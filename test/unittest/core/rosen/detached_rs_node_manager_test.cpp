@@ -26,8 +26,8 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
-#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 
 #undef private
 #undef protected
@@ -53,11 +53,23 @@ HWTEST_F(DetachedRsNodeManagerTest, DetachedRsNodeManagerTest001, TestSize.Level
     EXPECT_NE(DetachedRsNodeManager::GetInstance().taskExecutor_, nullptr);
 
     auto rsUIDirector = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector->Init(true, true);
+    rsUIDirector->Init(true, true,  std::make_shared<Rosen::RSUIContext>());
     auto rsContext = rsUIDirector->GetRSUIContext();
+    EXPECT_NE(rsContext, nullptr);
     auto rsNode = Rosen::RSCanvasNode::Create(false, false, rsContext);
 
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+
+    rsContext->DetachFromUI();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+
+    rsContext->rsTransactionHandler_ = nullptr;
+    DetachedRsNodeManager::GetInstance().FlushImplicitTransaction(rsContext);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(nullptr);
     EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
 }
 } // namespace OHOS::Ace::NG
