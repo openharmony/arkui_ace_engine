@@ -1338,20 +1338,10 @@ void SubwindowManager::HideSubWindowNG()
     }
 }
 
-void SubwindowManager::HideToastSubWindowNG()
+void SubwindowManager::HideToastSubWindowNG(int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide toast subwindow enter");
-    RefPtr<Subwindow> subwindow;
-    auto container = Container::Current();
-    auto containerId = Container::CurrentId();
-    CHECK_NULL_VOID(container);
-    if (container->IsDialogContainer()) {
-        subwindow = GetCurrentDialogWindow();
-    } else if (containerId != -1) {
-        // get the subwindow which overlay node in, not current
-        auto parentContainer = containerId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(containerId) : containerId;
-        subwindow = GetToastSubwindow(parentContainer);
-    }
+    RefPtr<Subwindow> subwindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId);
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {

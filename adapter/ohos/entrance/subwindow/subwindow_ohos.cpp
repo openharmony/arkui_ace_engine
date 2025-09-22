@@ -502,15 +502,14 @@ RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
 std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& toastInfo,
     std::function<void(int32_t)>&& callback)
 {
-    return [toastInfo, callbackParam = std::move(callback)]() {
+    return [weak = WeakClaim(this), toastInfo, callbackParam = std::move(callback)]() {
+        auto subwindowOhos = weak.Upgrade();
+        CHECK_NULL_VOID(subwindowOhos);
         int32_t posX = 0;
         int32_t posY = 0;
         int32_t width = 0;
         int32_t height = 0;
         float density = 1.0f;
-        auto subwindowOhos =
-            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
-        CHECK_NULL_VOID(subwindowOhos);
         subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
         auto childContainerId = subwindowOhos->GetChildContainerId();
         auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
@@ -1560,13 +1559,9 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get toast dialog window property enter");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
-    if (subwindowOhos) {
-        auto dialogWindow = subwindowOhos->GetDialogWindow();
-        if (dialogWindow) {
-            auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow->GetDisplayId());
-            defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
-        }
+    if (dialogWindow_) {
+        auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow_->GetDisplayId());
+        defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
     }
 
     if (defaultDisplay) {
@@ -1659,6 +1654,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     dialogWindow_->NapiSetUIContent("", (napi_env)nullptr, (napi_value)nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
+    SubwindowManager::GetInstance()->AddInstanceSubwindowMap(childContainerId_, AceType::Claim(this));
     ContainerScope scope(childContainerId_);
 
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
@@ -1811,8 +1807,9 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
         return;
     }
-
-    SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
+    if (toastInfo.showMode != NG::ToastShowMode::SYSTEM_TOP_MOST) {
+        SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
+    }
     if (!handler_->PostTask(GetInitToastDelayTask(toastInfo, std::move(callback)))) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
@@ -1836,13 +1833,7 @@ void SubwindowOhos::CloseToast(const int32_t toastId, std::function<void(int32_t
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close toast enter");
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        auto subwindowOhos =
-            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
-        CHECK_NULL_VOID(subwindowOhos);
-        auto childContainerId = subwindowOhos->GetChildContainerId();
-        CHECK_NULL_VOID(childContainerId);
-        ContainerScope scope(childContainerId);
-        Platform::DialogContainer::CloseToast(childContainerId, toastId, std::move(callback));
+        Platform::DialogContainer::CloseToast(childContainerId_, toastId, std::move(callback));
     } else {
         auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
         CHECK_NULL_VOID(aceContainer);
@@ -2268,9 +2259,8 @@ void SubwindowOhos::HideEventColumn()
 
 void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
-    auto callback = []() {
-        auto subwindowOhos =
-            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+    auto callback = [weak = WeakClaim(this)]() {
+        auto subwindowOhos = weak.Upgrade();
         CHECK_NULL_VOID(subwindowOhos);
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
