@@ -194,11 +194,8 @@ ArkUI_Int32 GetCurrentInstanceId()
 
 ArkUI_Int32 GetFocusedInstanceId()
 {
-    auto container = Container::GetFocused();
-    auto currentInstance = -1;
-    if (container) {
-        currentInstance = container->GetInstanceId();
-    } else if (ContainerScope::RecentActiveId() == -1) {
+    auto currentInstance = ContainerScope::RecentActiveId();
+    if (currentInstance == -1) {
         currentInstance = ContainerScope::SingletonId();
     }
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
