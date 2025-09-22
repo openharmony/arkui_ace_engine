@@ -18,20 +18,28 @@
 #include <cstdint>
 
 #include "bundlemgr/bundle_mgr_interface.h"
+#include "bundlemgr/bundle_event_callback_host.h"
 
 #include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 
+struct PluginHspInfo {
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    PluginHspInfo(std::string bundleName, std::string moduleName) : bundleName(bundleName), moduleName(moduleName) {}
+};
+
+class NavigationBundleEventCallback;
+
 class ACE_EXPORT NavigationRouteOhos : public NG::NavigationRoute {
     DECLARE_ACE_TYPE(NavigationRouteOhos, NG::NavigationRoute);
 
 public:
-    explicit NavigationRouteOhos(const std::string& bundleName)
-    {
-        InitRouteMap();
-    }
-    ~NavigationRouteOhos() = default;
+    explicit NavigationRouteOhos(const std::string& bundleName);
+
+    ~NavigationRouteOhos();
 
     bool GetRouteItem(const std::string& name, NG::RouteItem& info) override;
 
@@ -47,13 +55,27 @@ public:
     void InitRouteMap() override;
 
 private:
+    bool IsPluginRouteInfo(const std::string& bundleName, const std::string& moduleName);
+    void UpdatePluginHspInfos(sptr<AppExecFwk::IBundleMgr> bundleManager);
+    void RegisteHspUpdateCallback();
     bool GetRouteItemFromBundle(const std::string& name, AppExecFwk::RouterItem& routeItem);
     int32_t LoadPageFromHapModule(const std::string& name);
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     AppExecFwk::RouterItem GetRouteItem(const std::string name);
     std::vector<AppExecFwk::RouterItem> allRouteItems_;
     std::vector<AppExecFwk::HapModuleInfo> moduleInfos_;
+    std::vector<PluginHspInfo> pluginHspInfos_;
     std::vector<std::string> names_;
+    sptr<NavigationBundleEventCallback> navigationBundleEventCallback_ = nullptr;
+};
+
+class NavigationBundleEventCallback : public AppExecFwk::BundleEventCallbackHost {
+public:
+    explicit NavigationBundleEventCallback(WeakPtr<NavigationRouteOhos> navigationRoute)
+        : navigationRoute_(navigationRoute) {}
+    void OnReceiveEvent(const EventFwk::CommonEventData eventData) override;
+private:
+    WeakPtr<NavigationRouteOhos> navigationRoute_;
 };
 } // namespace OHOS::Ace
 #endif
