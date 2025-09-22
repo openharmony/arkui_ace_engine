@@ -94,9 +94,9 @@ public:
         return ignoreOrientation_;
     }
 
-    bool GetDetectPrimaryPageEnable() const
+    bool IsForceSplitSupported() const
     {
-        return isDetectPrimaryPage_;
+        return isForceSplitSupported_;
     }
 
     void OnForceSplitConfigUpdate()
@@ -185,7 +185,7 @@ protected:
 private:
     bool isForceSplit_ = false;
     std::string homePageConfig_;
-    bool isDetectPrimaryPage_ = false;
+    bool isForceSplitSupported_ = false;
     bool ignoreOrientation_ = false;
 };
 } // namespace OHOS::Ace::NG
