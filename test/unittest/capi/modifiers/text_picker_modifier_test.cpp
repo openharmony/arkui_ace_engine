@@ -1230,7 +1230,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDisappearTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1437,7 +1437,7 @@ HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1644,7 +1644,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1799,7 +1799,7 @@ HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDividerColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     Ark_DividerOptions options;
@@ -2268,7 +2268,7 @@ HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_defaultTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);

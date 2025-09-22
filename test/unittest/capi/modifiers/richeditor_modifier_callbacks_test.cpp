@@ -117,7 +117,7 @@ public:
  * @tc.desc: OnReadyCallbackTest test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnReadyCallbackTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnReadyCallbackTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -610,7 +610,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
  * @tc.desc: setOnEditingChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnEditingChangeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnEditingChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {

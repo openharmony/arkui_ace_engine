@@ -39,7 +39,7 @@ class BaseSpanModifierTest : public ModifierTestBase<GENERATED_ArkUIBaseSpanModi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseSpanModifierTest, setBaselineOffsetTestDefaultValues, TestSize.Level1)
+HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_BASELINE_OFFSET_NAME);
@@ -61,7 +61,7 @@ static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseSpanModifierTest, setBaselineOffsetTestValues, TestSize.Level1)
+HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

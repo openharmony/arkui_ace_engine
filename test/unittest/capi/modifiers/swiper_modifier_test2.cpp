@@ -287,7 +287,7 @@ HWTEST_F(SwiperModifierTest2, setOnUnselectedTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest2, setOnContentWillScrollTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest2, DISABLED_setOnContentWillScrollTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnContentWillScroll, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

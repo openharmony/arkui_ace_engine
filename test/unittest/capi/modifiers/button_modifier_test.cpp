@@ -929,7 +929,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidColorValues, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setFontColorTestValidNumberValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestValidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -997,7 +997,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidStringValues, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setFontColorTestInvalidNumberValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestInvalidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

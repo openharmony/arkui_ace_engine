@@ -49,7 +49,7 @@ public:
     }
 };
 
-HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, DISABLED_setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();

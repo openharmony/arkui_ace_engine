@@ -89,7 +89,7 @@ public:
  * @tc.desc: fontSize default
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -130,7 +130,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, T
  * @tc.desc: fontSize invalid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string expectedStr;

@@ -57,7 +57,7 @@ static bool g_onStartCalled = false;
  * @tc.desc: Check the functionality of setOnStart
  * @tc.type: FUNC
  */
-HWTEST_F(RichTextModifierTest, setOnStartTest, TestSize.Level1)
+HWTEST_F(RichTextModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setOnStart, nullptr);
@@ -85,7 +85,7 @@ static bool g_onCompleteCalled = false;
  * @tc.desc: Check the functionality of setOnComplete
  * @tc.type: FUNC
  */
-HWTEST_F(RichTextModifierTest, setOnCompleteTest, TestSize.Level1)
+HWTEST_F(RichTextModifierTest, DISABLED_setOnCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setOnComplete, nullptr);

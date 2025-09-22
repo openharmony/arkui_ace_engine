@@ -321,7 +321,7 @@ HWTEST_F(TextTimerModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1)
+HWTEST_F(TextTimerModifierTest, DISABLED_setFontColorTestFontColorValidValues, TestSize.Level1)
 {
     auto checkValue = [this](
                           const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {

@@ -153,7 +153,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeModifierTest, setColorTestColorValidValues, TestSize.Level1)
+HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueColor;
 

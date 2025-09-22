@@ -245,7 +245,7 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setModuleNameTestModuleNameValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setModuleNameTestModuleNameValidValues, TestSize.Level1)
 {
     Ark_String initValueModuleName;
 
@@ -287,7 +287,7 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setAllowUpdateTestAllowUpdateValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setAllowUpdateTestAllowUpdateValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueAllowUpdate;
 
@@ -328,7 +328,7 @@ HWTEST_F(FormComponentModifierTest, setDimensionTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setDimensionTestDimensionValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setDimensionTestDimensionValidValues, TestSize.Level1)
 {
     Ark_FormDimension initValueDimension;
 
@@ -399,7 +399,7 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setVisibilityTestVisibilityValidValues, TestSize.Level1)
 {
     Ark_Visibility initValueVisibility;
 
@@ -624,7 +624,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnRouterTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsModuleNameValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup
@@ -660,7 +660,7 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsDimensionValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup

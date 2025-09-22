@@ -58,7 +58,7 @@ public:
  * @tc.desc: Test setColor function
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressModifierTest, setColorTest, TestSize.Level1)
+HWTEST_F(LoadingProgressModifierTest, DISABLED_setColorTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);

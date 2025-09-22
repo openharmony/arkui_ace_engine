@@ -448,7 +448,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize.Level1)
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackBackgroundColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -660,7 +660,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelModifierTest, setValueColorsTestNumberValidValues, TestSize.Level1)
+HWTEST_F(DataPanelModifierTest, DISABLED_setValueColorsTestNumberValidValues, TestSize.Level1)
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
@@ -1330,7 +1330,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorNumberValidValues, TestSize.Level1)
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;

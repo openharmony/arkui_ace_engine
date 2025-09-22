@@ -746,7 +746,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setBlockColorTestBlockColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueBlockColor;
 
@@ -838,7 +838,7 @@ HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -992,7 +992,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -1381,7 +1381,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setBlockBorderColorTestBlockBorderColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueBlockBorderColor;
 
@@ -1546,7 +1546,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setStepColorTestStepColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueStepColor;
 

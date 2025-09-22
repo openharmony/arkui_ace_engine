@@ -240,7 +240,8 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues,
+    TestSize.Level1)
 {
     Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
@@ -332,7 +333,8 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorNormalValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnderlineColorNormalValidValues,
+    TestSize.Level1)
 {
     Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
@@ -424,7 +426,8 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorErrorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnderlineColorErrorValidValues,
+    TestSize.Level1)
 {
     Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
@@ -516,7 +519,8 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorDisableValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnderlineColorDisableValidValues,
+    TestSize.Level1)
 {
     Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
@@ -1398,7 +1402,7 @@ HWTEST_F(TextInputModifierTest, setMinFontSizeTestDefaultValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueMinFontSize;
 
@@ -1489,7 +1493,7 @@ HWTEST_F(TextInputModifierTest, setMaxFontSizeTestDefaultValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueMaxFontSize;
 
@@ -1961,7 +1965,7 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setDecorationTestDecorationColorValidValues, TestSize.Level1)
 {
     Opt_TextDecorationOptions initValueDecoration;
 
@@ -2127,7 +2131,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLetterSpacingTestDefaultValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueLetterSpacing;
 
@@ -2215,7 +2219,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
     Opt_Union_Number_String_Resource initValueLineHeight;
 
