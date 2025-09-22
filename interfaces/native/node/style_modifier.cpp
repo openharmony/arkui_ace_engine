@@ -918,8 +918,8 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_BUTTON) {
-        fullImpl->getNodeModifiers()->getButtonModifier()->setButtonBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+        fullImpl->getNodeModifiers()->getButtonModifier()->setButtonBackgroundColorPtr(
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputBackgroundColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
@@ -4376,8 +4376,8 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
                 node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_BUTTON:
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColor(
-                node->uiNodeHandle, item->value[0].u32);
+            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColorPtr(
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontColor(
@@ -8439,7 +8439,8 @@ int32_t SetToggleSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     }
     auto* fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSelectedColor(node->uiNodeHandle, item->value[0].u32);
+    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSelectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8465,8 +8466,8 @@ int32_t SetToggleSwitchPointColor(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     }
     auto* fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(
-        node->uiNodeHandle, item->value[0].u32);
+    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSwitchPointColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8517,7 +8518,8 @@ int32_t SetToggleUnselectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     }
     auto* fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleUnselectedColor(node->uiNodeHandle, item->value[0].u32);
+    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleUnselectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14485,7 +14487,8 @@ int32_t SetCheckboxSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelectedColor(node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14506,8 +14509,8 @@ int32_t SetCheckboxUnSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setUnSelectedColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setUnSelectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14688,7 +14691,8 @@ int32_t SetCheckboxGroupSelectedColor(ArkUI_NodeHandle node, const ArkUI_Attribu
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectedColor(node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14710,8 +14714,8 @@ int32_t SetCheckboxGroupUnSelectedColor(ArkUI_NodeHandle node, const ArkUI_Attri
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupUnSelectedColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupUnSelectedColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14797,7 +14801,8 @@ int32_t SetSliderBlockColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setBlockColor(node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setBlockColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14818,8 +14823,8 @@ int32_t SetSliderTrackColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setTrackBackgroundColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setTrackBackgroundColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14841,7 +14846,8 @@ int32_t SetSliderSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSelectColor(node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSelectColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

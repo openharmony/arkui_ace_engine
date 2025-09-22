@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_slider_modifier.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/pattern/slider/slider_custom_content_options.h"
@@ -255,18 +256,19 @@ void SetBlockColor(ArkUINodeHandle node, uint32_t color)
 void SetBlockColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetBlockColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        if (colorRawPtr) {
-            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-            auto colorResObj = AceType::Claim(color);
-            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_COLOR);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
+        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::BLOCK_COLOR);
     }
+    SetBlockColor(node, result.GetValue());
 }
 
 void SetLinearBlockColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength)
@@ -305,18 +307,19 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
 void SetTrackBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetTrackBackgroundColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        if (colorRawPtr) {
-            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-            auto colorResObj = AceType::Claim(color);
-            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::TRACK_COLOR);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::TRACK_COLOR);
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
+        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::TRACK_COLOR);
     }
+    SetTrackBackgroundColor(node, result.GetValue());
 }
 
 void SetLinearTrackBackgroundColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient,
@@ -356,18 +359,19 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
 void SetSelectColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetSelectColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        if (colorRawPtr) {
-            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-            auto colorResObj = AceType::Claim(color);
-            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::SELECT_COLOR);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::SELECT_COLOR);
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
+        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::SELECT_COLOR);
     }
+    SetSelectColor(node, result.GetValue());
 }
 
 void SetLinearSelectColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Int32 colorLength)

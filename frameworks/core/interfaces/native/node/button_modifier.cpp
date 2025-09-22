@@ -16,6 +16,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/core/components/button/button_theme.h"
@@ -162,14 +163,19 @@ void SetButtonFontColor(ArkUINodeHandle node, uint32_t fontColor)
 void SetButtonFontColorPtr(ArkUINodeHandle node, uint32_t fontColor, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetButtonFontColor(node, fontColor);
+    Color result = Color(fontColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        ButtonModelNG::CreateWithColorResourceObj(frameNode, colorResObj, ButtonColorType::FONT_COLOR);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::FONT_COLOR);
     }
+    SetButtonFontColor(node, result.GetValue());
 }
 
 void ResetButtonFontColor(ArkUINodeHandle node)
@@ -472,6 +478,23 @@ void SetButtonBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::BackgroundColor(frameNode, Color(color), true);
+}
+
+void SetButtonBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::BACKGROUND_COLOR);
+    }
+    ButtonModelNG::BackgroundColor(frameNode, result, true);
 }
 
 void SetButtonBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
@@ -828,6 +851,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonLabelStyle = SetButtonLabelStyle,
         .resetButtonLabelStyle = ResetButtonLabelStyle,
         .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .setButtonBackgroundColorPtr = SetButtonBackgroundColorPtr,
         .setButtonBackgroundColorWithColorSpace = SetButtonBackgroundColorWithColorSpace,
         .resetButtonBackgroundColor = ResetButtonBackgroundColor,
         .setButtonBorderRadius = SetButtonBorderRadius,

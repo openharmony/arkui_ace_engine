@@ -3161,6 +3161,7 @@ struct ArkUIButtonModifier {
         const ArkUI_Float32* dimensionArray, const ArkUI_Uint32* dataCountArray);
     void (*resetButtonLabelStyle)(ArkUINodeHandle node);
     void (*setButtonBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setButtonBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*setButtonBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
     void (*resetButtonBackgroundColor)(ArkUINodeHandle node);
