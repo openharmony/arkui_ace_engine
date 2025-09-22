@@ -134,7 +134,7 @@ double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
-    if (end && SystemProperties::IsVelocityWithoutUpPoint()) {
+    if (end && event.sourceType == SourceType::TOUCH && SystemProperties::IsVelocityWithoutUpPoint()) {
         return;
     }
     if (isFirstPoint_) {
