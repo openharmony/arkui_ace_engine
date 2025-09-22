@@ -31,11 +31,11 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SideBarContainerAttribute): void { }
+    applyPressedAttribute(instance: SideBarContainerAttribute): void { }
+    applyFocusedAttribute(instance: SideBarContainerAttribute): void { }
+    applyDisabledAttribute(instance: SideBarContainerAttribute): void { }
+    applySelectedAttribute(instance: SideBarContainerAttribute): void { }
     _showSideBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showSideBar_0_0value?: boolean | Bindable<boolean> | undefined
     _controlButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

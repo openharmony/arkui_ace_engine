@@ -31,11 +31,11 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TimePickerAttribute): void { }
+    applyPressedAttribute(instance: TimePickerAttribute): void { }
+    applyFocusedAttribute(instance: TimePickerAttribute): void { }
+    applyDisabledAttribute(instance: TimePickerAttribute): void { }
+    applySelectedAttribute(instance: TimePickerAttribute): void { }
     _useMilitaryTime_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _useMilitaryTime_0_0value?: boolean | undefined
     _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

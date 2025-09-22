@@ -32,11 +32,11 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RectAttribute): void { }
+    applyPressedAttribute(instance: RectAttribute): void { }
+    applyFocusedAttribute(instance: RectAttribute): void { }
+    applyDisabledAttribute(instance: RectAttribute): void { }
+    applySelectedAttribute(instance: RectAttribute): void { }
     _radiusWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusWidth_0_0value?: double | string | undefined
     _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

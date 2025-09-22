@@ -32,11 +32,11 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ButtonAttribute): void { }
+    applyPressedAttribute(instance: ButtonAttribute): void { }
+    applyFocusedAttribute(instance: ButtonAttribute): void { }
+    applyDisabledAttribute(instance: ButtonAttribute): void { }
+    applySelectedAttribute(instance: ButtonAttribute): void { }
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: ButtonType | undefined
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

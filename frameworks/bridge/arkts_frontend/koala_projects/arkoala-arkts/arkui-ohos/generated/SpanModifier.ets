@@ -34,11 +34,11 @@ export class SpanModifier extends BaseSpanModifier implements SpanAttribute,Attr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SpanAttribute): void { }
+    applyPressedAttribute(instance: SpanAttribute): void { }
+    applyFocusedAttribute(instance: SpanAttribute): void { }
+    applyDisabledAttribute(instance: SpanAttribute): void { }
+    applySelectedAttribute(instance: SpanAttribute): void { }
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

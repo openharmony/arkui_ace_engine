@@ -29,11 +29,11 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RowSplitAttribute): void { }
+    applyPressedAttribute(instance: RowSplitAttribute): void { }
+    applyFocusedAttribute(instance: RowSplitAttribute): void { }
+    applyDisabledAttribute(instance: RowSplitAttribute): void { }
+    applySelectedAttribute(instance: RowSplitAttribute): void { }
     _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _resizeable_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {

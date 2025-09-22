@@ -29,11 +29,11 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ListItemAttribute): void { }
+    applyPressedAttribute(instance: ListItemAttribute): void { }
+    applyFocusedAttribute(instance: ListItemAttribute): void { }
+    applyDisabledAttribute(instance: ListItemAttribute): void { }
+    applySelectedAttribute(instance: ListItemAttribute): void { }
     _selectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectable_0_0value?: boolean | undefined
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

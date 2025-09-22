@@ -30,11 +30,11 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RowAttribute): void { }
+    applyPressedAttribute(instance: RowAttribute): void { }
+    applyFocusedAttribute(instance: RowAttribute): void { }
+    applyDisabledAttribute(instance: RowAttribute): void { }
+    applySelectedAttribute(instance: RowAttribute): void { }
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: VerticalAlign | undefined
     _justifyContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

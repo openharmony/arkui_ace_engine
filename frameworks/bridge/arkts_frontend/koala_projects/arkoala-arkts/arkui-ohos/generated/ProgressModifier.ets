@@ -33,11 +33,11 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ProgressAttribute): void { }
+    applyPressedAttribute(instance: ProgressAttribute): void { }
+    applyFocusedAttribute(instance: ProgressAttribute): void { }
+    applyDisabledAttribute(instance: ProgressAttribute): void { }
+    applySelectedAttribute(instance: ProgressAttribute): void { }
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _value_0_0value?: number | undefined
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

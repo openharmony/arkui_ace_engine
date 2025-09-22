@@ -29,11 +29,11 @@ export class FlexModifier extends CommonMethodModifier implements FlexAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: FlexAttribute): void { }
+    applyPressedAttribute(instance: FlexAttribute): void { }
+    applyFocusedAttribute(instance: FlexAttribute): void { }
+    applyDisabledAttribute(instance: FlexAttribute): void { }
+    applySelectedAttribute(instance: FlexAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkFlexPeer;

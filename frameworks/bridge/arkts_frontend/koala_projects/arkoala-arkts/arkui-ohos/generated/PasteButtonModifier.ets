@@ -31,11 +31,11 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PasteButtonAttribute): void { }
+    applyPressedAttribute(instance: PasteButtonAttribute): void { }
+    applyFocusedAttribute(instance: PasteButtonAttribute): void { }
+    applyDisabledAttribute(instance: PasteButtonAttribute): void { }
+    applySelectedAttribute(instance: PasteButtonAttribute): void { }
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: PasteButtonCallback | undefined
     applyModifierPatch(node: PeerNode): void {

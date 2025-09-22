@@ -29,11 +29,11 @@ export class FlowItemModifier extends CommonMethodModifier implements FlowItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: FlowItemAttribute): void { }
+    applyPressedAttribute(instance: FlowItemAttribute): void { }
+    applyFocusedAttribute(instance: FlowItemAttribute): void { }
+    applyDisabledAttribute(instance: FlowItemAttribute): void { }
+    applySelectedAttribute(instance: FlowItemAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkFlowItemPeer;

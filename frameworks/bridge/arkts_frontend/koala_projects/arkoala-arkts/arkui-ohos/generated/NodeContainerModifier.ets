@@ -29,11 +29,11 @@ export class NodeContainerModifier extends CommonMethodModifier implements NodeC
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: NodeContainerAttribute): void { }
+    applyPressedAttribute(instance: NodeContainerAttribute): void { }
+    applyFocusedAttribute(instance: NodeContainerAttribute): void { }
+    applyDisabledAttribute(instance: NodeContainerAttribute): void { }
+    applySelectedAttribute(instance: NodeContainerAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkNodeContainerPeer;

@@ -35,11 +35,11 @@ export class WaterFlowModifier extends ScrollableCommonMethodModifier implements
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: WaterFlowAttribute): void { }
+    applyPressedAttribute(instance: WaterFlowAttribute): void { }
+    applyFocusedAttribute(instance: WaterFlowAttribute): void { }
+    applyDisabledAttribute(instance: WaterFlowAttribute): void { }
+    applySelectedAttribute(instance: WaterFlowAttribute): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _columnsTemplate_0_0value?: string | undefined
     _itemConstraintSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

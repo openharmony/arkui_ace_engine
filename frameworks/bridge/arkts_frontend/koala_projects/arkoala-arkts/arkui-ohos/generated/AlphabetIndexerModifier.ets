@@ -32,11 +32,11 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: AlphabetIndexerAttribute): void { }
+    applyPressedAttribute(instance: AlphabetIndexerAttribute): void { }
+    applyFocusedAttribute(instance: AlphabetIndexerAttribute): void { }
+    applyDisabledAttribute(instance: AlphabetIndexerAttribute): void { }
+    applySelectedAttribute(instance: AlphabetIndexerAttribute): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

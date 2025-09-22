@@ -31,11 +31,11 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: HyperlinkAttribute): void { }
+    applyPressedAttribute(instance: HyperlinkAttribute): void { }
+    applyFocusedAttribute(instance: HyperlinkAttribute): void { }
+    applyDisabledAttribute(instance: HyperlinkAttribute): void { }
+    applySelectedAttribute(instance: HyperlinkAttribute): void { }
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: Color | int32 | string | Resource | undefined
     applyModifierPatch(node: PeerNode): void {

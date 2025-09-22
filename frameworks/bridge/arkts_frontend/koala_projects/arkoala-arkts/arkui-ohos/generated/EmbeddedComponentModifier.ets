@@ -30,11 +30,11 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: EmbeddedComponentAttribute): void { }
+    applyPressedAttribute(instance: EmbeddedComponentAttribute): void { }
+    applyFocusedAttribute(instance: EmbeddedComponentAttribute): void { }
+    applyDisabledAttribute(instance: EmbeddedComponentAttribute): void { }
+    applySelectedAttribute(instance: EmbeddedComponentAttribute): void { }
     _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

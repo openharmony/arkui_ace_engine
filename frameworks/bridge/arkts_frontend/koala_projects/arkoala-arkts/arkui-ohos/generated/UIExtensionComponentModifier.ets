@@ -31,11 +31,11 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: UIExtensionComponentAttribute): void { }
+    applyPressedAttribute(instance: UIExtensionComponentAttribute): void { }
+    applyFocusedAttribute(instance: UIExtensionComponentAttribute): void { }
+    applyDisabledAttribute(instance: UIExtensionComponentAttribute): void { }
+    applySelectedAttribute(instance: UIExtensionComponentAttribute): void { }
     _onRemoteReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onRemoteReady_0_0value?: ((value0: UIExtensionProxy) => void) | undefined
     _onReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

@@ -30,11 +30,11 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ImageAnimatorAttribute): void { }
+    applyPressedAttribute(instance: ImageAnimatorAttribute): void { }
+    applyFocusedAttribute(instance: ImageAnimatorAttribute): void { }
+    applyDisabledAttribute(instance: ImageAnimatorAttribute): void { }
+    applySelectedAttribute(instance: ImageAnimatorAttribute): void { }
     _images_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _images_0_0value?: Array<ImageFrameInfo> | undefined
     _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

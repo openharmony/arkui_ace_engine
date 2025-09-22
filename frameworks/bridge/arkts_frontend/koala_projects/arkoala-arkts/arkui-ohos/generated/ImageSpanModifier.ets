@@ -36,11 +36,11 @@ export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ImageSpanAttribute): void { }
+    applyPressedAttribute(instance: ImageSpanAttribute): void { }
+    applyFocusedAttribute(instance: ImageSpanAttribute): void { }
+    applyDisabledAttribute(instance: ImageSpanAttribute): void { }
+    applySelectedAttribute(instance: ImageSpanAttribute): void { }
     _verticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _verticalAlign_0_0value?: ImageSpanAlignment | undefined
     _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

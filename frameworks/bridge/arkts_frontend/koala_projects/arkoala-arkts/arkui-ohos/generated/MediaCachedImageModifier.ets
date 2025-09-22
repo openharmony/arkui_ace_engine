@@ -31,11 +31,11 @@ export class MediaCachedImageModifier extends ImageModifier implements MediaCach
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: MediaCachedImageAttribute): void { }
+    applyPressedAttribute(instance: MediaCachedImageAttribute): void { }
+    applyFocusedAttribute(instance: MediaCachedImageAttribute): void { }
+    applyDisabledAttribute(instance: MediaCachedImageAttribute): void { }
+    applySelectedAttribute(instance: MediaCachedImageAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkMediaCachedImagePeer;

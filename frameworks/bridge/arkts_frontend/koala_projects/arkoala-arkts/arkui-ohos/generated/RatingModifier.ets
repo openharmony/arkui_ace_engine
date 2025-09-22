@@ -29,11 +29,11 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RatingAttribute): void { }
+    applyPressedAttribute(instance: RatingAttribute): void { }
+    applyFocusedAttribute(instance: RatingAttribute): void { }
+    applyDisabledAttribute(instance: RatingAttribute): void { }
+    applySelectedAttribute(instance: RatingAttribute): void { }
     _stars_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stars_0_0value?: number | undefined
     _stepSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

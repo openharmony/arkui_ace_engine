@@ -37,11 +37,11 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SearchAttribute): void { }
+    applyPressedAttribute(instance: SearchAttribute): void { }
+    applyFocusedAttribute(instance: SearchAttribute): void { }
+    applyDisabledAttribute(instance: SearchAttribute): void { }
+    applySelectedAttribute(instance: SearchAttribute): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _searchIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

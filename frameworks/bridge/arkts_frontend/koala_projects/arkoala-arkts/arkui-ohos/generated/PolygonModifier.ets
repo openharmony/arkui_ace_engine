@@ -33,11 +33,11 @@ export class PolygonModifier extends CommonShapeMethodModifier implements Polygo
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PolygonAttribute): void { }
+    applyPressedAttribute(instance: PolygonAttribute): void { }
+    applyFocusedAttribute(instance: PolygonAttribute): void { }
+    applyDisabledAttribute(instance: PolygonAttribute): void { }
+    applySelectedAttribute(instance: PolygonAttribute): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
     applyModifierPatch(node: PeerNode): void {

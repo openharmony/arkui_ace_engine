@@ -29,11 +29,11 @@ export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModif
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CustomLayoutRoot): void { }
+    applyPressedAttribute(instance: CustomLayoutRoot): void { }
+    applyFocusedAttribute(instance: CustomLayoutRoot): void { }
+    applyDisabledAttribute(instance: CustomLayoutRoot): void { }
+    applySelectedAttribute(instance: CustomLayoutRoot): void { }
     _subscribeOnMeasureSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subscribeOnMeasureSize_0_0value?: Callback_onMeasureSize_SizeResult
     _subscribeOnPlaceChildren_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

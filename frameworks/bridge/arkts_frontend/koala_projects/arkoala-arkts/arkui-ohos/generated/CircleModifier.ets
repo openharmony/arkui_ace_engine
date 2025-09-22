@@ -30,11 +30,11 @@ export class CircleModifier extends CommonShapeMethodModifier implements CircleA
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CircleAttribute): void { }
+    applyPressedAttribute(instance: CircleAttribute): void { }
+    applyFocusedAttribute(instance: CircleAttribute): void { }
+    applyDisabledAttribute(instance: CircleAttribute): void { }
+    applySelectedAttribute(instance: CircleAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkCirclePeer;

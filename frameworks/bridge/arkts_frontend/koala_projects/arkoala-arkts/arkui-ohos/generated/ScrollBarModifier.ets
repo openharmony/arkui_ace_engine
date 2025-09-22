@@ -29,11 +29,11 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ScrollBarAttribute): void { }
+    applyPressedAttribute(instance: ScrollBarAttribute): void { }
+    applyFocusedAttribute(instance: ScrollBarAttribute): void { }
+    applyDisabledAttribute(instance: ScrollBarAttribute): void { }
+    applySelectedAttribute(instance: ScrollBarAttribute): void { }
     _enableNestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableNestedScroll_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {

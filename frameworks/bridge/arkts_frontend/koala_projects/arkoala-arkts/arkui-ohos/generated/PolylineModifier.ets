@@ -33,11 +33,11 @@ export class PolylineModifier extends CommonShapeMethodModifier implements Polyl
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PolylineAttribute): void { }
+    applyPressedAttribute(instance: PolylineAttribute): void { }
+    applyFocusedAttribute(instance: PolylineAttribute): void { }
+    applyDisabledAttribute(instance: PolylineAttribute): void { }
+    applySelectedAttribute(instance: PolylineAttribute): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
     applyModifierPatch(node: PeerNode): void {

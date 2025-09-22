@@ -32,11 +32,11 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: MenuAttribute): void { }
+    applyPressedAttribute(instance: MenuAttribute): void { }
+    applyFocusedAttribute(instance: MenuAttribute): void { }
+    applyDisabledAttribute(instance: MenuAttribute): void { }
+    applySelectedAttribute(instance: MenuAttribute): void { }
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

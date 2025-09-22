@@ -27,11 +27,11 @@ export class ComponentRootModifier implements ComponentRoot,AttributeModifier<Co
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ComponentRoot): void { }
+    applyPressedAttribute(instance: ComponentRoot): void { }
+    applyFocusedAttribute(instance: ComponentRoot): void { }
+    applyDisabledAttribute(instance: ComponentRoot): void { }
+    applySelectedAttribute(instance: ComponentRoot): void { }
     applyModifierPatch(node: PeerNode): void {
         const peer = node as ArkComponentRootPeer;
     }

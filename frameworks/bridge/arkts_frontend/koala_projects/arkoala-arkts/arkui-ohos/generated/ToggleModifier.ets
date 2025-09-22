@@ -32,11 +32,11 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ToggleAttribute): void { }
+    applyPressedAttribute(instance: ToggleAttribute): void { }
+    applyFocusedAttribute(instance: ToggleAttribute): void { }
+    applyDisabledAttribute(instance: ToggleAttribute): void { }
+    applySelectedAttribute(instance: ToggleAttribute): void { }
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: ((value0: boolean) => void) | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
