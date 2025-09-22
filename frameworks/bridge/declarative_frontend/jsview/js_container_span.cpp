@@ -27,7 +27,7 @@ void JSContainerSpan::SetTextBackgroundStyle(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetTextBackgroundStyle(textBackgroundStyle);
 }
 
-TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackInfo& info)
+TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackInfo& info, bool needResObj)
 {
     TextBackgroundStyle textBackgroundStyle;
     auto jsValue = info[0];
@@ -35,10 +35,10 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackIn
         return textBackgroundStyle;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
-    return ParseTextBackgroundStyle(obj);
+    return ParseTextBackgroundStyle(obj, needResObj);
 }
 
-TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObject>& obj)
+TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObject>& obj, bool needResObj)
 {
     TextBackgroundStyle textBackgroundStyle;
     JSRef<JSVal> colorValue = obj->GetProperty("color");
@@ -47,7 +47,12 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObje
     if (ParseJsColor(colorValue, colorVal, colorResObj)) {
         textBackgroundStyle.backgroundColor = colorVal;
     }
-    if (SystemProperties::ConfigChangePerform() && colorResObj) {
+    if (needResObj && colorResObj) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorValue);
+        JSViewAbstract::CompleteResourceObject(jsObj);
+        colorResObj = JSViewAbstract::GetResourceObject(jsObj);
+    }
+    if ((SystemProperties::ConfigChangePerform() || needResObj) && colorResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, TextBackgroundStyle& textBackgroundStyle) {
             Color color;
             ResourceParseUtils::ParseResColor(colorResObj, color);
@@ -55,9 +60,16 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObje
         };
         textBackgroundStyle.AddResource("textBackgroundStyle.color", colorResObj, std::move(updateFunc));
     }
+    ParseTextBackgroundStyleRadius(obj, textBackgroundStyle);
+    return textBackgroundStyle;
+}
+
+void JSContainerSpan::ParseTextBackgroundStyleRadius(
+    const JSRef<JSObject>& obj, TextBackgroundStyle& textBackgroundStyle)
+{
     JSRef<JSVal> radiusValue = obj->GetProperty("radius");
     if (!radiusValue->IsString() && !radiusValue->IsNumber() && !radiusValue->IsObject()) {
-        return textBackgroundStyle;
+        return;
     }
     CalcDimension radius;
     RefPtr<ResourceObject> radiusResObj;
@@ -87,7 +99,6 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObje
         textBackgroundStyle.backgroundRadius = { topLeft, topRight, bottomRight, bottomLeft };
         textBackgroundStyle.backgroundRadius->multiValued = true;
     }
-    return textBackgroundStyle;
 }
 
 void JSContainerSpan::JSBind(BindingTarget globalObj)

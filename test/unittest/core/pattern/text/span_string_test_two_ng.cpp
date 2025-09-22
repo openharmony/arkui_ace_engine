@@ -1791,10 +1791,10 @@ HWTEST_F(MutableSpanStringTestNg, MultiTypeDecorationSpanStringTest, TestSize.Le
     std::optional<TextDecorationOptions> optionsFalse({false});
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3));
+            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
-            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3));
+            Color::RED, TextDecorationStyle::WAVY, optionsTrue, 0, 3, nullptr));
     auto subspan1 = spanString->GetSpan(0, 3, SpanType::Decoration);
     auto subDecorationSpan1 = AceType::DynamicCast<DecorationSpan>(subspan1);
     ASSERT_NE(subDecorationSpan1, nullptr);
@@ -1804,10 +1804,10 @@ HWTEST_F(MutableSpanStringTestNg, MultiTypeDecorationSpanStringTest, TestSize.Le
 
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-        Color::RED, TextDecorationStyle::WAVY, optionsTrue, 4, 6));
+        Color::RED, TextDecorationStyle::WAVY, optionsTrue, 4, 6, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
-            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 4, 6));
+            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 4, 6, nullptr));
     auto subspan2 = spanString->GetSpan(4, 2, SpanType::Decoration);
     auto subDecorationSpan2 = AceType::DynamicCast<DecorationSpan>(subspan2);
     ASSERT_NE(subDecorationSpan2, nullptr);
@@ -1817,10 +1817,10 @@ HWTEST_F(MutableSpanStringTestNg, MultiTypeDecorationSpanStringTest, TestSize.Le
 
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-        Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9));
+        Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}),
-            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9));
+            Color::RED, TextDecorationStyle::WAVY, optionsFalse, 7, 9, nullptr));
     auto subspan3 = spanString->GetSpan(7, 2, SpanType::Decoration);
     auto subDecorationSpan3 = AceType::DynamicCast<DecorationSpan>(subspan3);
     ASSERT_NE(subDecorationSpan3, nullptr);

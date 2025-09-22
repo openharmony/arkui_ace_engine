@@ -1420,7 +1420,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
     auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
-        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr);
     decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
     buffer.clear();
     buffer = decorationSpan->ToString();
