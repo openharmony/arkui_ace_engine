@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,32 +39,10 @@ public:
         CHECK_NULL_RETURN(property, {});
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
-        auto displayCount = 7;
-        if (NonPositive(static_cast<double>(displayCount))) {
-            return layoutConstraint;
-        }
         auto childSelfIdealSize = idealSize;
+        auto width = idealSize.CrossSize(Axis::VERTICAL);
+        childSelfIdealSize.SetWidth(width);
         childSelfIdealSize.SetHeight(PICKER_ITEM_DEFAULT_HEIGHT);
-        return CheckLayoutPolicyConstraint(property, childSelfIdealSize, layoutConstraint);
-    }
-
-    static LayoutConstraintF CheckLayoutPolicyConstraint(const RefPtr<ContainerPickerLayoutProperty>& property,
-        OptionalSizeF childSelfIdealSize, LayoutConstraintF layoutConstraint)
-    {
-        auto layoutPolicy = property->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-            // crosss axis set maxSize and reset IdealSize'cross width/heigth, when layoutPolicy is matchParent
-            if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-                auto widthOpt = childSelfIdealSize.Width();
-                if (widthOpt) {
-                    layoutConstraint.maxSize.SetWidth(widthOpt.value());
-                }
-                auto height = childSelfIdealSize.Height();
-                childSelfIdealSize.Reset();
-                childSelfIdealSize.SetHeight(height);
-            }
-        }
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
     }

@@ -98,6 +98,7 @@ public:
         json->PutExtAttr("pickerIndicatorStyle", pickerIndicatorStyle, filter);
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CanLoop, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHapticFeedback, bool, PROPERTY_UPDATE_MEASURE);
 

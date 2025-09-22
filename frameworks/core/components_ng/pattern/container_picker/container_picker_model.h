@@ -21,11 +21,10 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
-using ContainerPickerChangeEvent = std::function<void(const double&)>;
 
 class ACE_EXPORT ContainerPickerModel {
 public:
@@ -33,8 +32,9 @@ public:
     static void SetCanLoop(const bool isLoop);
     static void SetEnableHapticFeedback(const bool isEnableHapticFeedback);
     static void SetOnChange(ContainerPickerChangeEvent&& onChange);
-    static void SetOnScrollStop(ContainerPickerChangeEvent&& onChange);
+    static void SetOnScrollStop(ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(const PickerIndicatorStyle& style);
+    static void SetSelectedIndex(int32_t index);
 };
 } // namespace OHOS::Ace::NG
 

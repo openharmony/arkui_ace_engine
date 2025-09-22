@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_LAYOUT_ALGORITHM_H
 
 #include <optional>
+
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
@@ -40,7 +42,7 @@ public:
 
     using PositionMap = std::map<int32_t, PickerItemInfo>;
 
-    void SetItemsPosition(const PositionMap& itemPosition)
+    void SetItemPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
     }
@@ -77,9 +79,6 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
-            return itemPosition_.rbegin()->second.endPos;
-        }
         return itemPosition_.rbegin()->second.endPos;
     }
 
@@ -106,9 +105,14 @@ public:
         return loopIndex;
     }
 
-    void SetCurrentIndex(int32_t currentIndex)
+    void SetIsLoop(bool isLoop)
     {
-        currentIndex_ = currentIndex;
+        isLoop_ = isLoop;
+    }
+
+    void SetSelectedIndex(int32_t index)
+    {
+        selectedIndex_ = index;
     }
 
     float GetCurrentOffset() const
@@ -119,7 +123,6 @@ public:
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
-        oldContentMainSize_ = contentMainSize;
     }
 
     float GetContentMainSize() const
@@ -127,37 +130,54 @@ public:
         return contentMainSize_;
     }
 
+    void SetHeight(float height)
+    {
+        height_ = height;
+    }
+
+    float GetHeight() const
+    {
+        return height_;
+    }
+
+    void CalcMainAndMiddlePos();
+
     const LayoutConstraintF& GetLayoutConstraint() const
     {
         return childLayoutConstraint_;
     }
 
+    void TranslateAndRotate(RefPtr<FrameNode> textNode, OffsetF& offset);
+
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
-    void MeasureSize(LayoutConstraintF& contentConstraint);
-    void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
-    void MeasurePicker(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void MeasureSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    // void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
+    void MeasurePickerItems(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void SetPatternContentMainSize(LayoutWrapper* layoutWrapper);
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
+    void MeasureBelow(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
+    void MeasureAbove(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
         float endPos, bool cachedLayout = false);
-    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    bool MeasureBelowItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float startPos, float& endPos);
-    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    bool MeasureAboveItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float endPos, float& startPos);
-    void SetInactiveOnForward(LayoutWrapper* layoutWrapper);
-    void SetInactiveOnBackward(LayoutWrapper* layoutWrapper);
-    bool NeedMeasureForward(int32_t currentIndex, float currentEndPos, float forwardEndPos, bool cachedLayout) const;
-    bool NeedMeasureBackward(
-        int32_t currentIndex, float currentStartPos, float backwardStartPos, bool isStretch, bool cachedLayout) const;
-    void AdjustOffsetOnForward(float currentEndPos);
-    void AdjustOffsetOnBackward(float currentStartPos);
+    bool NeedMeasureBelow(int32_t currentIndex, float currentStartPos, float endMainPos, bool cachedLayout) const;
+    bool NeedMeasureAbove(
+        int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
+    void AdjustOffsetOnBelow(float currentEndPos);
+    void AdjustOffsetOnAbove(float currentStartPos);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
-    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward) const;
-    void AdjustStartInfoOnSwipeByGroup(
+    void AdjustStartInfo(
         int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
+    std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    
     LayoutConstraintF childLayoutConstraint_;
+    LayoutCalPolicy widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     PositionMap itemPosition_;
     PositionMap prevItemPosition_;
     PositionMap itemPositionInAnimation_;
@@ -167,15 +187,15 @@ private:
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> measuredItems_;
 
-    int32_t showCount_ = 7;
     int32_t totalItemCount_ = 0;
-    int32_t currentIndex_ = 0;
+    int32_t selectedIndex_ = 0;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
-    float targetStartPos_ = 0.0f;
-    float contentMainSize_ = 0.0f;
-    float oldContentMainSize_ = 0.0f;
-    float contentCrossSize_ = 0.0f;
+    float topPadding_ = 0.0f;
+    float height_ = 0.0f; // usage: record picker real height
+    float contentMainSize_ = 0.0f; // usage: picker content area height
+    float middleItemStartPos_ = 0.0f;
+    float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
     float pickerItemHeight_ = 40.0f;
@@ -183,7 +203,7 @@ private:
     float gradientFontScale_ = 1.0f;
     bool mainSizeIsMeasured_ = false;
     bool measured_ = false;
-    bool isLoop_ = true;
+    bool isLoop_ = false;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
 

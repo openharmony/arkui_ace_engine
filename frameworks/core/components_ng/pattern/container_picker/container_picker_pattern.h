@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
@@ -41,6 +42,7 @@ enum class ContainerPickerDirection {
     DOWN,
 };
 
+
 class ACE_EXPORT ContainerPickerPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ContainerPickerPattern, NestableScrollContainer);
 
@@ -60,13 +62,52 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ContainerPickerEventHub>();
+    }
+
+     int32_t GetLoopIndex(int32_t originalIndex) const
+    {
+        if (totalItemCount_ <= 0) {
+            return originalIndex;
+        }
+        auto loopIndex = originalIndex;
+        while (loopIndex < 0) {
+            loopIndex = loopIndex + totalItemCount_;
+        }
+        loopIndex %= totalItemCount_;
+        return loopIndex;
+    }
+
+    void SetSelectedIndex(int32_t index)
+    {
+        if (index < 0 || index >= totalItemCount_) {
+            index = 0;
+        }
+        if (index != selectedIndex_) {
+            selectedIndex_ = index;
+            itemPosition_.clear();
+        }
+    }
+
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void FireChangeEvent();
+    void FireScrollStopEvent();
+
+protected:
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -109,41 +150,50 @@ private:
     double GetDragDeltaLessThanJumpInterval(
         double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
     void UpdateColumnChildPosition(double offsetY);
-    bool IsLoop()
-    {
-        return true;
-    }
+    bool IsLoop() const;
+    bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
+    void SetDefaultTextStyle() const;
+    void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
     void CreateAnimation();
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     void CreateSnapProperty();
     void CreateAnimation(double from, double to);
     void PickerMarkDirty(PropertyChangeFlag extraFlag);
+    void FireEvent();
+    void UpdateClipEdge();
+    std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
 
     int32_t containerPickerId_ = -1;
+    int32_t displayCount_ = 9;
+    int32_t totalItemCount_ = 0;
     bool isDragging_ = false;
     bool isItemClickEventCreated_ = false;
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;
+    LayoutConstraintF layoutConstraint_;
     bool isFirstAxisAction_ = true;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
-    int32_t currentIndex_ = 0;
+    int32_t selectedIndex_ = 0;
     bool crossMatchChild_ = false;
     float currentDelta_ = 0.0f;
+    float currentOffset_ = 0.0f;
     float currentIndexOffset_ = 0.0f;
     float totalOffset_ = 0.0f; // indicates the offset of the actual layout
-    float contentMainSize_ = 650.0f;
+    float height_ = 0.0f;
+    float contentMainSize_ = 0.0f;
     float mainDeltaSum_ = 0.0f;
 
     ContainerPickerLayoutAlgorithm::PositionMap itemPosition_;
 
     bool animationCreated_ = false;
+    bool isLoop_ = true;
     double timeStart_ = 0.0;
     double timeEnd = 0.0;
     double scrollDelta_ = 0.0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
+    float offsetCurSet_ = 0.0f;
     float lastAnimationScroll_ = 0.0f;
-    int32_t showCount_= 7;
 
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
