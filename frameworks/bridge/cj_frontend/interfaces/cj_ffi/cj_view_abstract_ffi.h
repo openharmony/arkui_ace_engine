@@ -861,6 +861,8 @@ void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& r
 void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect>& result);
 void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option);
 RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId);
+bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
+void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj, Color& color, bool state);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H
