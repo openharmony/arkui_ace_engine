@@ -2660,8 +2660,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             height = rootSize.Height() - positionY;
         }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight,
-            positionY, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
+        float newKeyboardOffset = !manager->CheckInRichEditor() ?
+            context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize) :
+            context->CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize,
+                onFocusField && manager->GetIfFocusTextFieldIsInline());
         newKeyboardOffset = round(newKeyboardOffset);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
