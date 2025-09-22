@@ -150,6 +150,8 @@ function openInterop(): void {
     registerMakeBuilderParameterStaticProxy();
     registerUpdateInteropExtendableComponent();
     registerResetInteropExtendableComponent();
+    registerTransferCompatibleBuilderCallback();
+    registertransferCompatibleDynamicBuilderCallback();
 }
 
 function closeInterop(): void {
@@ -354,8 +356,22 @@ export function registerMakeBuilderParameterStaticProxy(): void {
     registerCallback.invoke(makeBuilderParameterStaticProxy);
 }
 
+export function registerTransferCompatibleBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
+    const callback = (builder: Any) => { return transferCompatibleBuilder(builder).unwrap()!};
+    registerCallback.invoke(callback);
+}
+
+type ESValueOrUndefined  = ESValue | undefined;
+
 /** @memo */
 export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    compatibleWrappedBuilderInternal(builder, ...args);
+}
+
+/** @memo */
+export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArray<ESValueOrUndefined>): void {
     compatibleComponent((() => {
         const global = ESValue.getGlobal();
         const viewStackProcessor = global.getProperty('ViewStackProcessor');
@@ -430,7 +446,7 @@ export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESVal
         if (args.length !== 1) {
             return;
         }
-        const param = args[0]
+        const param = args[0] as ESValue;
         if (param.typeOf() !== 'object') {
             return;
         }
@@ -638,4 +654,28 @@ export function registerResetInteropExtendableComponent(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerResetInteropExtendableComponent');
     registerCallback.invoke(resetInteropExtendableComponent);
+}
+
+function registertransferCompatibleDynamicBuilderCallback(): void {
+    const global = ESValue.getGlobal();
+    const registerCallback = global.getProperty('registerTransferCompatibleDynamicBuilderCallback');
+    registerCallback.invoke(transferCompatibleDynamicBuilder);
+}
+
+function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) => void):
+/** @memo */
+(...args: FixedArray<Any>) => void {
+    return (
+        /** @memo */
+        (...args: FixedArray<Any>) => {
+            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length]; 
+            for (let i = 0; i < args.length; i++) {
+                if (args[i] instanceof ESValue) {
+                    argsESValue[i] = args[i] as ESValue;
+                }
+                argsESValue[i] = ESValue.wrap(args[i]);
+            }
+            compatibleWrappedBuilderInternal(builder, ...argsESValue);
+        }
+    )
 }

@@ -47,6 +47,8 @@ class InteropExtractorModule {
     static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
     static updateInteropExtendableComponent?: (dynamicComponent: any) => void;
     static resetInteropExtendableComponent?: ()=> void;
+    static transferCompatibleBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
+    static transferCompatibleDynamicBuilder?: (builder: (...args: any[]) => void) => (...args: any[]) => void;
 }
 
 class StaticInteropHook {
@@ -81,4 +83,12 @@ function registerUpdateInteropExtendableComponent(callback: (dynamicComponent: O
 
 function registerResetInteropExtendableComponent(callback: () => void) {
     InteropExtractorModule.resetInteropExtendableComponent = callback;
+}
+
+function registerTransferCompatibleBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+    InteropExtractorModule.transferCompatibleBuilder = callback;
+}
+
+function registerTransferCompatibleDynamicBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+    InteropExtractorModule.transferCompatibleDynamicBuilder = callback;
 }
