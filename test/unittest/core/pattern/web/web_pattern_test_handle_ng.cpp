@@ -367,13 +367,6 @@ public:
     {
         // Do nothing or implement actual behavior
     }
-
-    DragOperationsMask GetAllowedDragOperation() const override
-    {
-        return DragOperationsMask::DRAG_ALLOW_EVERY;
-    }
-
-    void SetAllowedDragOperation(DragOperationsMask allowed_op) override {}
 };
 
 class MockTaskExecutorTest : public Ace::TaskExecutor {

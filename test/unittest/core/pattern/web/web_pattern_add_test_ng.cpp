@@ -289,11 +289,6 @@ public:
         return "";
     }
     void ClearImageFileNames() override {}
-    DragOperationsMask GetAllowedDragOperation() const override
-    {
-        return DragOperationsMask::DRAG_ALLOW_EVERY;
-    }
-    void SetAllowedDragOperation(DragOperationsMask allowed_op) override {}
 };
 
 class NWebDragDataTrueDummy : public NWeb::NWebDragData {
@@ -356,11 +351,6 @@ public:
         return "example_image.jpg";
     }
     void ClearImageFileNames() override {}
-    DragOperationsMask GetAllowedDragOperation() const override
-    {
-        return DragOperationsMask::DRAG_ALLOW_EVERY;
-    }
-    void SetAllowedDragOperation(DragOperationsMask allowed_op) override {}
 };
 
 class WebPatternAddTestNg : public testing::Test {
