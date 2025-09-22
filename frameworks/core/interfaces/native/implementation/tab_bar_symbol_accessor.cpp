@@ -44,9 +44,8 @@ void SetNormalImpl(Ark_TabBarSymbol peer,
                    Ark_SymbolGlyphModifier normal)
 {
     CHECK_NULL_VOID(peer);
-    auto glyphModifier = reinterpret_cast<SymbolGlyphModifierPeer *>(normal);
-    CHECK_NULL_VOID(glyphModifier);
-    peer->SetNormal(AceType::WeakClaim(glyphModifier));
+    CHECK_NULL_VOID(normal);
+    peer->SetNormal(AceType::WeakClaim(normal));
 }
 Opt_SymbolGlyphModifier GetSelectedImpl(Ark_TabBarSymbol peer)
 {
@@ -61,14 +60,8 @@ void SetSelectedImpl(Ark_TabBarSymbol peer,
                      const Opt_SymbolGlyphModifier* selected)
 {
     CHECK_NULL_VOID(peer);
-    auto glyphModifierOpt = Converter::OptConvertPtr<Ark_SymbolGlyphModifier>(selected);
-    if (glyphModifierOpt) {
-        auto glyphModifier = reinterpret_cast<SymbolGlyphModifierPeer*>(glyphModifierOpt.value());
-        CHECK_NULL_VOID(glyphModifier);
-        peer->SetSelected(AceType::WeakClaim(glyphModifier));
-    } else {
-        peer->SetSelected(nullptr);
-    }
+    auto glyphModifierOpt = Converter::GetOptPtr(selected);
+    peer->SetSelected(glyphModifierOpt ? AceType::WeakClaim(glyphModifierOpt.value()) : nullptr);
 }
 } // TabBarSymbolAccessor
 const GENERATED_ArkUITabBarSymbolAccessor* GetTabBarSymbolAccessor()
