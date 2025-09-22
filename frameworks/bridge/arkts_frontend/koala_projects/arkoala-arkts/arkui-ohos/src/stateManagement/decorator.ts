@@ -212,7 +212,7 @@ export interface IStateMgmtFactory {
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
-    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback): IMonitorDecoratedVariable;
+    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: ExtendableComponent): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -228,7 +228,9 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
 
-export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {}
+export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
+    setOwner(owningView: ExtendableComponent);
+}
 
 export interface IMonitor {
     readonly dirty: Array<string>;

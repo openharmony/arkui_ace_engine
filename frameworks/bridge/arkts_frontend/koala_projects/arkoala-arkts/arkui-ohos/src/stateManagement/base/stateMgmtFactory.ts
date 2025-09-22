@@ -567,8 +567,9 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeMonitor(
         pathLambda: Array<IMonitorPathInfo>,
-        monitorFunction: (m: IMonitor) => void
+        monitorFunction: (m: IMonitor) => void,
+        owningView?: ExtendableComponent
     ): IMonitorDecoratedVariable {
-        return new MonitorFunctionDecorator(pathLambda, monitorFunction);
+        return new MonitorFunctionDecorator(pathLambda, monitorFunction, owningView);
     }
 }
