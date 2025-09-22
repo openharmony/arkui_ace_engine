@@ -27,7 +27,7 @@ import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
 import { Color, BorderStyle } from "./enums"
-import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
+import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookConditionScopeAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
 import { DataPanelConfiguration } from "./dataPanel"
@@ -64,6 +64,7 @@ import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentRootModifier } from "./../ComponentRootModifier"
 import { CustomBuilderRootModifier } from "./../CustomBuilderRootModifier"
+import { ConditionScopeModifier } from "./../ConditionScopeModifier"
 import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
@@ -2624,6 +2625,19 @@ export class ArkCustomBuilderRootPeer extends PeerNode {
         return _peer
     }
 }
+export class ArkConditionScopePeer extends PeerNode {
+    attributeSet?: ConditionScopeModifier;
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkConditionScopePeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._ConditionScope_construct(peerId, flags)
+        const _peer  = new ArkConditionScopePeer(_peerPtr, peerId, 'ConditionScope', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+}
 export class ArkCustomLayoutRootPeer extends PeerNode {
     attributeSet?: CustomLayoutRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -2923,6 +2937,16 @@ export class ArkCustomBuilderRootStyle implements CustomBuilderRoot {
         throw new Error("Not implemented")
     }
 }
+export interface ConditionScope {
+    attributeModifier(value: AttributeModifier<ConditionScope> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkConditionScopeStyle implements ConditionScope {
+    public attributeModifier(value: AttributeModifier<ConditionScope> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
 export type Callback_onMeasureSize_SizeResult = (selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions) => SizeResult;
 export type Callback_onPlaceChildren_Void = (selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions) => void;
 export interface CustomLayoutRoot {
@@ -2993,6 +3017,22 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
     }
     public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
         hookCustomBuilderRootAttributeModifier(this, value);
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export class ArkConditionScopeComponent extends ComponentBase implements ConditionScope {
+    getPeer(): ArkConditionScopePeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
+        return (this.peer as ArkConditionScopePeer)
+    }
+    public attributeModifier(value: AttributeModifier<ConditionScope> | undefined): this {
+        hookConditionScopeAttributeModifier(this, value);
         return this
     }
     public applyAttributesFinish(): void {

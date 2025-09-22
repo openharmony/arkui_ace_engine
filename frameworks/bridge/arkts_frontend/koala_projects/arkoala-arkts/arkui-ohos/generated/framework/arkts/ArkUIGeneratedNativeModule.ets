@@ -3089,6 +3089,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CustomBuilderRoot_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
+    native static _ConditionScope_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
     native static _CustomLayoutRoot_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _CustomLayoutRoot_setSubscribeOnMeasureSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

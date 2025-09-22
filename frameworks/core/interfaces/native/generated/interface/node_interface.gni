@@ -66,6 +66,7 @@ generated_sources = [
   "implementation/controller_handler_accessor.cpp",
   "implementation/counter_modifier.cpp",
   "implementation/custom_builder_root_modifier.cpp",
+  "implementation/condition_scope_modifier.cpp",
   "implementation/custom_dialog_controller_accessor.cpp",
   "implementation/custom_dialog_controller_extender_accessor.cpp",
   "implementation/custom_layout_root_modifier.cpp",
