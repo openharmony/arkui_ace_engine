@@ -39,6 +39,17 @@ constexpr int32_t LAYERED_TYPE = 1;
 constexpr int32_t ANIMATED_TYPE = 2;
 constexpr int32_t PIXELMAP_TYPE = 3;
 } // namespace
+
+void ImageModelStatic::SetSrc(FrameNode* frameNode, const std::optional<ImageSourceInfo>& info)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (info) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, frameNode);
+    }
+}
+
 void ImageModelStatic::SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value)
 {
     CHECK_NULL_VOID(frameNode);
