@@ -223,6 +223,9 @@ class PersistentStorage {
     ): boolean {
         const ttype = Type.of(defaultValue);
         let isSimpleType = false;
+        if (!toJson && !fromJson && this.simpleTypeSet.has(ttype)) {
+            isSimpleType = true;
+        }
         try {
             if (!isSimpleType && (!toJson || !fromJson)) {
                 StateMgmtConsole.log(
