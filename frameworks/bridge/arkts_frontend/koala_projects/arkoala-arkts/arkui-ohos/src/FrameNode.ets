@@ -15,7 +15,7 @@
 
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
-import { NodePosition, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
+import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
     Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer,
     NativeThunk, SerializerBase
@@ -470,19 +470,19 @@ export class FrameNode implements MaterializedBase {
         // return FrameNodeExtender.getLayoutPosition(this)
         return { x: 0, y: 0 } as NodePosition;
     }
-   public getUserConfigBorderWidth(): Edges<LengthMetrics> {
+   public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigBorderWidth()
         let lengthMetrics: LengthMetrics = new LengthMetrics(0);
         return { top: lengthMetrics, left: lengthMetrics,
           bottom: lengthMetrics, right: lengthMetrics };
     }
-    public getUserConfigPadding(): Edges<LengthMetrics> {
+    public getUserConfigPadding(): NodeEdges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigPadding()
         let lengthMetrics: LengthMetrics = new LengthMetrics(0);
         return { top: lengthMetrics, left: lengthMetrics,
           bottom: lengthMetrics, right: lengthMetrics }
     }
-    public getUserConfigMargin(): Edges<LengthMetrics> {
+    public getUserConfigMargin(): NodeEdges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigMargin()
         let lengthMetrics: LengthMetrics = new LengthMetrics(0);
         return { top: lengthMetrics, left: lengthMetrics,
