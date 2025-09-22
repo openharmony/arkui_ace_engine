@@ -23,7 +23,7 @@ import { ContextRecord } from 'arkui/base/UIContextImpl';
 import { ExtendableComponent, IExtendableComponent } from './extendableComponent';
 import { GeometryInfo, Layoutable, Measurable, SizeResult } from './common';
 import { Theme } from '@ohos.arkui.theme';
-import { LocalStorage } from '@ohos.arkui.stateManagement';
+import { LocalStorage, StateUpdateLoop } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import promptAction from '@ohos/promptAction';
@@ -186,6 +186,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         } else {
             throw new Error('not an entry custom component');
         }
+    }
+    setActiveCount(active: boolean): void {
+        this.instance.isActive_ += active ? 1 : -1;
+        if (this.instance.isActive_ > 1) {
+            console.log(`activeCount_error: ${this.instance.isActive_}`);
+        }
+    }
+    isViewActive(): boolean {
+        return this.instance.isActive_ > 0;
+    }
+    setActiveInternal(active: boolean, isReuse: boolean): void {
+        this.setActiveCount(active);
+        if (this.isViewActive()) {
+            StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
+        }
+        this.instance.propagateToChild(active, isReuse);
     }
     pageTransition(): void {
         if (this.instance instanceof PageLifeCycle) {
