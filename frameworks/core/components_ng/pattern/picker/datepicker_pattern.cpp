@@ -2845,6 +2845,8 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
             return date.month.has_value() ? (dayStr + "-" + monthStr) : dayStr;
         } else if (language == "en") {
             return date.month.has_value() ? (monthStr + " " + dayStr) : dayStr;
+        } else if (language == "ar") {
+            return date.month.has_value() ? (dayStr + " " + monthStr) : dayStr;
         } else {
             return date.month.has_value() ? (monthStr + dayStr) : dayStr;
         }
