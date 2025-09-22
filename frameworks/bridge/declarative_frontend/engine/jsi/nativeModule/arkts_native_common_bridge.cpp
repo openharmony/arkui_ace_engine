@@ -87,6 +87,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
+constexpr int32_t DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
@@ -8137,7 +8138,7 @@ void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int
 
 void CommonBridge::GetLongPressGestureValue(
     ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
-    bool& limitFingerCount, uint32_t argNumber)
+    bool& limitFingerCount, int32_t& allowableMovement, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -8160,6 +8161,11 @@ void CommonBridge::GetLongPressGestureValue(
     Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 3); // 3: get the fourth arg
     if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
         limitFingerCount = limitFingerCountArg->ToBoolean(vm)->Value();
+    }
+    Local<JSValueRef> allowableMovementArg = runtimeCallInfo->GetCallArgRef(argNumber + NUM_4);
+    if (!allowableMovementArg.IsNull() && !allowableMovementArg->IsUndefined()) {
+        auto allowableMovementValue = static_cast<int32_t>(allowableMovementArg->ToNumber(vm)->Value());
+        allowableMovement = allowableMovementValue <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMovementValue;
     }
 }
 
@@ -9788,14 +9794,16 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGesture(ArkUIRuntimeCallInfo* r
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, NUM_5);
+    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);
+    GetArkUINodeModifiers()->getGestureModifier()->setLongPressGestureAllowableMovement(gesture, allowableMovement);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_11, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_12, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -9953,15 +9961,17 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, NUM_3);
+    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);
+    GetArkUINodeModifiers()->getGestureModifier()->setLongPressGestureAllowableMovement(gesture, allowableMovement);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_11);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }

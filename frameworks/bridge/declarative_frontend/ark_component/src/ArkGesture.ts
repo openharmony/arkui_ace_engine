@@ -66,6 +66,7 @@ class LongPressGestureHandler extends GestureHandler {
     fingers?: number;
     repeat?: boolean;
     duration?: number;
+    allowableMovement?: number;
     gestureTag?: string;
     limitFingerCount?: boolean;
     allowedTypes?: Array<SourceTool>;
@@ -78,6 +79,7 @@ class LongPressGestureHandler extends GestureHandler {
             this.fingers = options.fingers;
             this.repeat = options.repeat;
             this.duration = options.duration;
+            this.allowableMovement = options.allowableMovement;
             this.limitFingerCount = options.isFingerCountLimited;
         }
     }

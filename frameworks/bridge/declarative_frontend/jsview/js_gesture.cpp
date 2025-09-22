@@ -222,6 +222,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
+constexpr int32_t DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
@@ -245,6 +246,7 @@ constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
 constexpr char LIMIT_FINGER_COUNT[] = "isFingerCountLimited";
 constexpr char GESTURE_DISTANCE_MAP[] = "distanceMap";
+constexpr char ALLOWABLE_MOVEMENT[] = "allowableMovement";
 } // namespace
 
 void JSGesture::Create(const JSCallbackInfo& info)
@@ -324,12 +326,14 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
     bool isLimitFingerCount = false;
+    int32_t allowableMovementNum = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> repeat = obj->GetProperty(LONG_PRESS_REPEAT);
         JSRef<JSVal> duration = obj->GetProperty(LONG_PRESS_DURATION);
         JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
+        JSRef<JSVal> allowableMovement = obj->GetProperty(ALLOWABLE_MOVEMENT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -345,8 +349,14 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
         if (limitFingerCount->IsBoolean()) {
             isLimitFingerCount = limitFingerCount->ToBoolean();
         }
+        if (allowableMovement->IsNumber()) {
+            int32_t allowableMoveNumber = allowableMovement->ToNumber<int32_t>();
+            allowableMovementNum =
+                allowableMoveNumber <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMoveNumber;
+        }
     }
-    LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum, isLimitFingerCount);
+    LongPressGestureModel::GetInstance()->Create(
+        fingersNum, repeatResult, durationNum, isLimitFingerCount, allowableMovementNum);
 }
 
 napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done)

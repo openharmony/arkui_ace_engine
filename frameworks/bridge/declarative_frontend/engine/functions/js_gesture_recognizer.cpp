@@ -255,6 +255,14 @@ void JSTapRecognizer::GetCount(const JSCallbackInfo& args)
     }
 }
 
+void JSLongPressRecognizer::GetAllowableMovement(const JSCallbackInfo& args)
+{
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (recognizer) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(allowableMovement_)));
+    }
+}
+
 void JSLongPressRecognizer::GetDuration(const JSCallbackInfo& args)
 {
     auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
@@ -457,6 +465,7 @@ void JSLongPressRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSLongPressRecognizer>::CustomMethod("isFingerCountLimit", &JSGestureRecognizer::IsFingerCountLimit);
     JSClass<JSLongPressRecognizer>::CustomMethod("isRepeat", &JSLongPressRecognizer::GetRepeat);
     JSClass<JSLongPressRecognizer>::CustomMethod("getDuration", &JSLongPressRecognizer::GetDuration);
+    JSClass<JSLongPressRecognizer>::CustomMethod("getAllowableMovement", &JSLongPressRecognizer::GetAllowableMovement);
     JSClass<JSLongPressRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
     JSClass<JSLongPressRecognizer>::CustomMethod("preventBegin", &JSGestureRecognizer::PreventBegin);
     JSClass<JSLongPressRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);

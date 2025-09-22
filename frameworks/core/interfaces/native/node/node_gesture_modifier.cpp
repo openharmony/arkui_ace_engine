@@ -42,6 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t MAX_POINTS = 10;
+    constexpr int32_t DEFAULT_ALLOWABLE_MOVEMENT = 15;
     constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 }
 ArkUIGesture* createPanGesture(
@@ -928,6 +929,22 @@ ArkUI_Int32 setGestureRecognizerLimitFingerCount(ArkUIGesture* gesture, bool lim
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t allowableMovement)
+{
+    auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
+    CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
+    longPressGesture->SetAllowableMovement(allowableMovement <= 0 ? DEFAULT_ALLOWABLE_MOVEMENT : allowableMovement);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getLongPressGestureAllowableMovement(ArkUIGesture* gesture, int32_t* allowableMovement)
+{
+    auto longPressGesture = Referenced::Claim(reinterpret_cast<LongPressGesture*>(gesture));
+    CHECK_NULL_RETURN(longPressGesture, ERROR_CODE_PARAM_INVALID);
+    *allowableMovement = longPressGesture->GetAllowableMovement();
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool getGestureRecognizerEnabled(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -1271,6 +1288,8 @@ const ArkUIGestureModifier* GetGestureModifier()
         .setInnerGestureParallelTo = setInnerGestureParallelTo,
         .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
         .setGestureRecognizerLimitFingerCount = setGestureRecognizerLimitFingerCount,
+        .setLongPressGestureAllowableMovement = setLongPressGestureAllowableMovement,
+        .getLongPressGestureAllowableMovement = getLongPressGestureAllowableMovement,
         .getGestureRecognizerEnabled = getGestureRecognizerEnabled,
         .getGestureRecognizerState = getGestureRecognizerState,
         .gestureEventTargetInfoIsScrollBegin = gestureEventTargetInfoIsScrollBegin,

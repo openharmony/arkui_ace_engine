@@ -25,16 +25,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double MAX_THRESHOLD = 15.0;
 constexpr int32_t MAX_LONGPRESS_FINGERS = 10;
 constexpr int32_t DEFAULT_LONGPRESS_FINGERS = 1;
 constexpr int32_t DEFAULT_LONGPRESS_DURATION = 500;
 } // namespace
 
-LongPressRecognizer::LongPressRecognizer(
-    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft, bool isLimitFingerCount)
+LongPressRecognizer::LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat, bool isForDrag,
+    bool isDisableMouseLeft, bool isLimitFingerCount, int32_t allowableMovement)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
-      isDisableMouseLeft_(isDisableMouseLeft)
+      isDisableMouseLeft_(isDisableMouseLeft), allowableMovement_(allowableMovement)
 {
     if (fingers_ > MAX_LONGPRESS_FINGERS || fingers_ < DEFAULT_LONGPRESS_FINGERS) {
         fingers_ = DEFAULT_LONGPRESS_FINGERS;
@@ -236,7 +235,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    if (offset.GetDistance() > MAX_THRESHOLD) {
+    if (offset.GetDistance() > allowableMovement_) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress move over max threshold");
         extraInfo_ += "Reject: move over max threshold.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -531,6 +530,7 @@ RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
         << "isForDrag: " << isForDrag_ << ", "
         << "repeat: " << repeat_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "allowableMovement: " << allowableMovement_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
