@@ -1325,10 +1325,10 @@ public:
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
 
-    bool HasOnNativeEmbedGestureEventV2()
+    bool HasOnNativeEmbedMouseEventV2()
     {
 #ifdef OHOS_STANDARD_SYSTEM
-        return static_cast<bool>(OnNativeEmbedGestureEventV2_);
+        return static_cast<bool>(OnNativeEmbedMouseEventV2_);
 #else
         return false;
 #endif

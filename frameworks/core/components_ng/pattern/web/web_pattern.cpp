@@ -1815,7 +1815,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     auto button = static_cast<MouseButton>(info.GetButton());
     bool isSupportMouse = button == MouseButton::LEFT_BUTTON
         || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
-    if (delegate_ && delegate_->HasOnNativeEmbedGestureEventV2() && isSupportMouse) {
+    if (delegate_ && delegate_->HasOnNativeEmbedMouseEventV2() && isSupportMouse) {
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         if (info.GetAction() == MouseAction::PRESS) {
