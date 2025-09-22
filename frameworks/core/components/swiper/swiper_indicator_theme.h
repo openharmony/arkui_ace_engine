@@ -184,7 +184,8 @@ public:
             theme->indicatorDigitVerticalPadding_ = SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT;
             theme->indicatorDotPadding_ = SWIPER_INDICATOR_DOT_PADDING_DEFAULT;
             theme->indicatorDigitHeight_ = SWIPER_INDICATOR_DIGIT_HEIGHT;
-            theme->indicatorDotItemSpace_ = SWIPER_INDICATOR_DOT_ITEM_SPACE;
+            theme->indicatorDotItemSpace_ =
+                swiperPattern->GetAttr<Dimension>("swiper_indicator_dot_item_space", SWIPER_INDICATOR_DOT_ITEM_SPACE);
             theme->arcSelectedItemColor_ = swiperPattern->GetAttr<Color>("dot_active_color", Color::TRANSPARENT);
             theme->arcItemColor_ = swiperPattern->GetAttr<Color>("dot_color", Color::TRANSPARENT);
             theme->arcMaskStartColor_ = swiperPattern->GetAttr<Color>("mask_color_start", Color::TRANSPARENT);
