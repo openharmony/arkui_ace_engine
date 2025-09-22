@@ -23,6 +23,7 @@ group("advanced_ui_component_static") {
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
       "segmentbutton:segmentButton",
+      "foldsplitcontainer:foldSplitContainer"
     ]
   }
 }
