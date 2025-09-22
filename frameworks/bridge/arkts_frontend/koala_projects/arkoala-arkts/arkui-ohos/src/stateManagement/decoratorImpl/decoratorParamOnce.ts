@@ -22,7 +22,7 @@ import { uiUtils } from '../base/uiUtilsImpl';
 export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamOnceDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T) {
-        super('@Once', owningView, varName);
+        super('@Param @Once', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
     }
 
