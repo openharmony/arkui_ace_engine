@@ -232,15 +232,15 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
     ani_ref func;
     env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "onGetItemMainSizeByIndex", &func);
 
-    ani_class ClassGetItemMainSizeByIndex;
-    env->FindClass("Lstd/core/Function1;", &ClassGetItemMainSizeByIndex);
-    ani_boolean isGetItemMainSizeByIndex;
-    env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
-
     isUndefined = false;
+    ani_boolean isGetItemMainSizeByIndex = ANI_FALSE;
     env->Reference_IsUndefined(func, &isUndefined);
-
-    if (isGetItemMainSizeByIndex && !isUndefined) {
+    if (!isUndefined) {
+        ani_class ClassGetItemMainSizeByIndex;
+        env->FindClass("std.core.Function1", &ClassGetItemMainSizeByIndex);
+        env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
+    }
+    if (isGetItemMainSizeByIndex) {
         ani_ref fnObjGlobalRef = nullptr;
         env->GlobalReference_Create(func, &fnObjGlobalRef);
         auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
