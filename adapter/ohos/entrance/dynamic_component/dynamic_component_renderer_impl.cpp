@@ -788,9 +788,21 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             renderer->UpdateParentOffsetToWindow(offset);
             config.SetPosition(offset.GetX(), offset.GetY());
         }
+        bool isTransactionWithRot = hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION;
+        auto removeTransaction = [isTransactionWithRot, uiContent, aceLogTag, syncId]() {
+            if (isTransactionWithRot) {
+                auto subRSUIContext =
+                    DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent->GetInstanceId());
+                CHECK_NULL_VOID(subRSUIContext);
+                TAG_LOGI(aceLogTag, "RemoveSubSyncTransaction syncId: %{public}s",
+                    std::to_string(syncId).c_str());
+                hostRSTransaction->RemoveSubSyncTransaction(subRSUIContext->GetToken(), syncId);
+            }
+        };
         if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()
             && renderer->density_ == config.Density()) {
             TAG_LOGW(aceLogTag, "card viewport not changed");
+            removeTransaction();
             return;
         }
         renderer->viewport_.SetWidth(config.Width());
@@ -807,18 +819,12 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             hostRSTransaction == nullptr);
         if (option == nullptr) {
             TAG_LOGI(aceLogTag, "option points to nullptr");
+            removeTransaction();
             return;
         }
         uiContent->UpdateViewportConfigWithAnimation(
             config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction);
-        if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
-            auto subRSUIContext =
-                DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent->GetInstanceId());
-            CHECK_NULL_VOID(subRSUIContext);
-            TAG_LOGI(aceLogTag, "RemoveSubSyncTransaction syncId: %{public}s",
-                std::to_string(syncId).c_str());
-            hostRSTransaction->RemoveSubSyncTransaction(subRSUIContext->GetToken(), syncId);
-        }
+        removeTransaction();
     };
     bool contentReady = false;
     {
