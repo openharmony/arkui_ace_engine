@@ -1573,7 +1573,6 @@ private:
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
-    double density_ = 0.0;
 
     bool isVisible_ = false;
 #endif
