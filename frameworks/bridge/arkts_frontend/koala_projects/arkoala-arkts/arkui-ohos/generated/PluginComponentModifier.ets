@@ -30,11 +30,11 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PluginComponentAttribute): void { }
+    applyPressedAttribute(instance: PluginComponentAttribute): void { }
+    applyFocusedAttribute(instance: PluginComponentAttribute): void { }
+    applyDisabledAttribute(instance: PluginComponentAttribute): void { }
+    applySelectedAttribute(instance: PluginComponentAttribute): void { }
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: VoidCallback | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

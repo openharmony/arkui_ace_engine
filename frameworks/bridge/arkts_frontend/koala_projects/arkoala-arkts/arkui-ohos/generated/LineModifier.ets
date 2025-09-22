@@ -32,11 +32,11 @@ export class LineModifier extends CommonShapeMethodModifier implements LineAttri
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: LineAttribute): void { }
+    applyPressedAttribute(instance: LineAttribute): void { }
+    applyFocusedAttribute(instance: LineAttribute): void { }
+    applyDisabledAttribute(instance: LineAttribute): void { }
+    applySelectedAttribute(instance: LineAttribute): void { }
     _startPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _startPoint_0_0value?: ShapePoint | undefined
     _endPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

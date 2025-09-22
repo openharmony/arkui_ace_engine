@@ -30,11 +30,11 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PathAttribute): void { }
+    applyPressedAttribute(instance: PathAttribute): void { }
+    applyFocusedAttribute(instance: PathAttribute): void { }
+    applyDisabledAttribute(instance: PathAttribute): void { }
+    applySelectedAttribute(instance: PathAttribute): void { }
     _commands_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _commands_0_0value?: string | undefined
     applyModifierPatch(node: PeerNode): void {

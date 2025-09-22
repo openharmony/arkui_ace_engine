@@ -34,11 +34,11 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: GaugeAttribute): void { }
+    applyPressedAttribute(instance: GaugeAttribute): void { }
+    applyFocusedAttribute(instance: GaugeAttribute): void { }
+    applyDisabledAttribute(instance: GaugeAttribute): void { }
+    applySelectedAttribute(instance: GaugeAttribute): void { }
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _value_0_0value?: number | undefined
     _startAngle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

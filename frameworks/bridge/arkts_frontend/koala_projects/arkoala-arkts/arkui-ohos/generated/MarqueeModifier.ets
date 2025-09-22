@@ -32,11 +32,11 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: MarqueeAttribute): void { }
+    applyPressedAttribute(instance: MarqueeAttribute): void { }
+    applyFocusedAttribute(instance: MarqueeAttribute): void { }
+    applyDisabledAttribute(instance: MarqueeAttribute): void { }
+    applySelectedAttribute(instance: MarqueeAttribute): void { }
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontColor_0_0value?: ResourceColor | undefined
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

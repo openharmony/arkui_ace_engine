@@ -33,11 +33,11 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SaveButtonAttribute): void { }
+    applyPressedAttribute(instance: SaveButtonAttribute): void { }
+    applyFocusedAttribute(instance: SaveButtonAttribute): void { }
+    applyDisabledAttribute(instance: SaveButtonAttribute): void { }
+    applySelectedAttribute(instance: SaveButtonAttribute): void { }
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: SaveButtonCallback | undefined
     _setIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

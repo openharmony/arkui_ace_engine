@@ -36,11 +36,11 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SelectAttribute): void { }
+    applyPressedAttribute(instance: SelectAttribute): void { }
+    applyFocusedAttribute(instance: SelectAttribute): void { }
+    applyDisabledAttribute(instance: SelectAttribute): void { }
+    applySelectedAttribute(instance: SelectAttribute): void { }
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selected_0_0value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
     _value_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

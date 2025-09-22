@@ -36,11 +36,11 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TextInputAttribute): void { }
+    applyPressedAttribute(instance: TextInputAttribute): void { }
+    applyFocusedAttribute(instance: TextInputAttribute): void { }
+    applyDisabledAttribute(instance: TextInputAttribute): void { }
+    applySelectedAttribute(instance: TextInputAttribute): void { }
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _type_0_0value?: InputType | undefined
     _contentType_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

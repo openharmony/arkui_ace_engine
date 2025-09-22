@@ -30,11 +30,11 @@ export class EllipseModifier extends CommonShapeMethodModifier implements Ellips
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: EllipseAttribute): void { }
+    applyPressedAttribute(instance: EllipseAttribute): void { }
+    applyFocusedAttribute(instance: EllipseAttribute): void { }
+    applyDisabledAttribute(instance: EllipseAttribute): void { }
+    applySelectedAttribute(instance: EllipseAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkEllipsePeer;

@@ -35,11 +35,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RichEditorAttribute): void { }
+    applyPressedAttribute(instance: RichEditorAttribute): void { }
+    applyFocusedAttribute(instance: RichEditorAttribute): void { }
+    applyDisabledAttribute(instance: RichEditorAttribute): void { }
+    applySelectedAttribute(instance: RichEditorAttribute): void { }
     _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReady_0_0value?: VoidCallback | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

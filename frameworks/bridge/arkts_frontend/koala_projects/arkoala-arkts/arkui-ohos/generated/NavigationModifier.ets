@@ -35,11 +35,11 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: NavigationAttribute): void { }
+    applyPressedAttribute(instance: NavigationAttribute): void { }
+    applyFocusedAttribute(instance: NavigationAttribute): void { }
+    applyDisabledAttribute(instance: NavigationAttribute): void { }
+    applySelectedAttribute(instance: NavigationAttribute): void { }
     _navBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _navBarWidth_0_0value?: Length | Bindable<Length> | undefined
     _navBarPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

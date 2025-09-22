@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwiperAnimationStartCallback, SwiperAnimationEvent, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperAttribute } from "./component/swiper"
+import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwiperAnimationStartCallback, SwiperAnimationEvent, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, SwiperAttribute, AutoPlayOptions, ArrowStyle, SwiperAutoFill } from "./component/swiper"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 import { IndicatorComponentController } from "./component/indicatorcomponent"
@@ -34,11 +34,11 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SwiperAttribute): void { }
+    applyPressedAttribute(instance: SwiperAttribute): void { }
+    applyFocusedAttribute(instance: SwiperAttribute): void { }
+    applyDisabledAttribute(instance: SwiperAttribute): void { }
+    applySelectedAttribute(instance: SwiperAttribute): void { }
     _index_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _index_0_0value?: number | Bindable<number> | undefined
     _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

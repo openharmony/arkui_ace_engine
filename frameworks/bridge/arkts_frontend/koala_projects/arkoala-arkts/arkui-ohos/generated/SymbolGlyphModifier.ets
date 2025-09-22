@@ -36,11 +36,11 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SymbolGlyphAttribute): void { }
+    applyPressedAttribute(instance: SymbolGlyphAttribute): void { }
+    applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
+    applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
+    applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

@@ -37,11 +37,11 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: NavDestinationAttribute): void { }
+    applyPressedAttribute(instance: NavDestinationAttribute): void { }
+    applyFocusedAttribute(instance: NavDestinationAttribute): void { }
+    applyDisabledAttribute(instance: NavDestinationAttribute): void { }
+    applySelectedAttribute(instance: NavDestinationAttribute): void { }
     _hideTitleBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideTitleBar_0_0value?: boolean | undefined
     _hideBackButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

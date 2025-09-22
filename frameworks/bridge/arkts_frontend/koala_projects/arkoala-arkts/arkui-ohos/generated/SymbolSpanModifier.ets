@@ -33,11 +33,11 @@ export class SymbolSpanModifier extends CommonMethodModifier implements SymbolSp
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: SymbolSpanAttribute): void { }
+    applyPressedAttribute(instance: SymbolSpanAttribute): void { }
+    applyFocusedAttribute(instance: SymbolSpanAttribute): void { }
+    applyDisabledAttribute(instance: SymbolSpanAttribute): void { }
+    applySelectedAttribute(instance: SymbolSpanAttribute): void { }
     _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize_0_0value?: double | string | Resource | undefined
     _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

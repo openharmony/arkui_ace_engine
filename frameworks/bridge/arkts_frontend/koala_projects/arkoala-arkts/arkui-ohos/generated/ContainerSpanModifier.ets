@@ -28,11 +28,11 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ContainerSpanAttribute): void { }
+    applyPressedAttribute(instance: ContainerSpanAttribute): void { }
+    applyFocusedAttribute(instance: ContainerSpanAttribute): void { }
+    applyDisabledAttribute(instance: ContainerSpanAttribute): void { }
+    applySelectedAttribute(instance: ContainerSpanAttribute): void { }
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     applyModifierPatch(node: PeerNode): void {

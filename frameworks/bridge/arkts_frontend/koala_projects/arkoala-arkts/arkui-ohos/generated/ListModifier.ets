@@ -34,11 +34,11 @@ export class ListModifier extends ScrollableCommonMethodModifier implements List
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ListAttribute): void { }
+    applyPressedAttribute(instance: ListAttribute): void { }
+    applyFocusedAttribute(instance: ListAttribute): void { }
+    applyDisabledAttribute(instance: ListAttribute): void { }
+    applySelectedAttribute(instance: ListAttribute): void { }
     _alignListItem_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignListItem_0_0value?: ListItemAlign | undefined
     _listDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

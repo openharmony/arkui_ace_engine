@@ -32,11 +32,11 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: PatternLockAttribute): void { }
+    applyPressedAttribute(instance: PatternLockAttribute): void { }
+    applyFocusedAttribute(instance: PatternLockAttribute): void { }
+    applyDisabledAttribute(instance: PatternLockAttribute): void { }
+    applySelectedAttribute(instance: PatternLockAttribute): void { }
     _sideLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _sideLength_0_0value?: Length | undefined
     _circleRadius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

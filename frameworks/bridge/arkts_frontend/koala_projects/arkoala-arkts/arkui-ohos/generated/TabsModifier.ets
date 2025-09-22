@@ -32,11 +32,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: TabsAttribute): void { }
+    applyPressedAttribute(instance: TabsAttribute): void { }
+    applyFocusedAttribute(instance: TabsAttribute): void { }
+    applyDisabledAttribute(instance: TabsAttribute): void { }
+    applySelectedAttribute(instance: TabsAttribute): void { }
     _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _vertical_0_0value?: boolean | undefined
     _barPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

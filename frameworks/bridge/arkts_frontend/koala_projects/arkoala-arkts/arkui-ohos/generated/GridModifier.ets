@@ -35,11 +35,11 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: GridAttribute): void { }
+    applyPressedAttribute(instance: GridAttribute): void { }
+    applyFocusedAttribute(instance: GridAttribute): void { }
+    applyDisabledAttribute(instance: GridAttribute): void { }
+    applySelectedAttribute(instance: GridAttribute): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _columnsTemplate_0_0value?: string | undefined
     _rowsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

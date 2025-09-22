@@ -27,11 +27,11 @@ export class CustomBuilderRootModifier implements CustomBuilderRoot,AttributeMod
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CustomBuilderRoot): void { }
+    applyPressedAttribute(instance: CustomBuilderRoot): void { }
+    applyFocusedAttribute(instance: CustomBuilderRoot): void { }
+    applyDisabledAttribute(instance: CustomBuilderRoot): void { }
+    applySelectedAttribute(instance: CustomBuilderRoot): void { }
     applyModifierPatch(node: PeerNode): void {
         const peer = node as ArkCustomBuilderRootPeer;
     }

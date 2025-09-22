@@ -32,11 +32,11 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: CheckboxAttribute): void { }
+    applyPressedAttribute(instance: CheckboxAttribute): void { }
+    applyFocusedAttribute(instance: CheckboxAttribute): void { }
+    applyDisabledAttribute(instance: CheckboxAttribute): void { }
+    applySelectedAttribute(instance: CheckboxAttribute): void { }
     _select_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _select_0_0value?: boolean | Bindable<boolean> | undefined
     _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

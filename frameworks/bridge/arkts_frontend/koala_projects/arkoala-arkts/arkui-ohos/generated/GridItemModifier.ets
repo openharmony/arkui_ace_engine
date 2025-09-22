@@ -29,11 +29,11 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: GridItemAttribute): void { }
+    applyPressedAttribute(instance: GridItemAttribute): void { }
+    applyFocusedAttribute(instance: GridItemAttribute): void { }
+    applyDisabledAttribute(instance: GridItemAttribute): void { }
+    applySelectedAttribute(instance: GridItemAttribute): void { }
     _rowStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rowStart_0_0value?: number | undefined
     _rowEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

@@ -29,11 +29,11 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RadioAttribute): void { }
+    applyPressedAttribute(instance: RadioAttribute): void { }
+    applyFocusedAttribute(instance: RadioAttribute): void { }
+    applyDisabledAttribute(instance: RadioAttribute): void { }
+    applySelectedAttribute(instance: RadioAttribute): void { }
     _checked_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _checked_0_0value?: boolean | Bindable<boolean> | undefined
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

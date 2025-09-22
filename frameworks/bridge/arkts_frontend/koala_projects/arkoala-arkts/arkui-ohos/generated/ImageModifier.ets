@@ -37,11 +37,11 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ImageAttribute): void { }
+    applyPressedAttribute(instance: ImageAttribute): void { }
+    applyFocusedAttribute(instance: ImageAttribute): void { }
+    applyDisabledAttribute(instance: ImageAttribute): void { }
+    applySelectedAttribute(instance: ImageAttribute): void { }
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: string | Resource | image.PixelMap | undefined
     _matchTextDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

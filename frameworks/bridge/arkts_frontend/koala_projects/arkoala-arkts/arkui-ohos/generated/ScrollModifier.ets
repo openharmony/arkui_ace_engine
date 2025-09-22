@@ -34,11 +34,11 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: ScrollAttribute): void { }
+    applyPressedAttribute(instance: ScrollAttribute): void { }
+    applyFocusedAttribute(instance: ScrollAttribute): void { }
+    applyDisabledAttribute(instance: ScrollAttribute): void { }
+    applySelectedAttribute(instance: ScrollAttribute): void { }
     _scrollable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollable_0_0value?: ScrollDirection | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

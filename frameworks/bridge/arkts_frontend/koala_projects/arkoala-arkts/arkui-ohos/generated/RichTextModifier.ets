@@ -29,11 +29,11 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: RichTextAttribute): void { }
+    applyPressedAttribute(instance: RichTextAttribute): void { }
+    applyFocusedAttribute(instance: RichTextAttribute): void { }
+    applyDisabledAttribute(instance: RichTextAttribute): void { }
+    applySelectedAttribute(instance: RichTextAttribute): void { }
     _onStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onStart_0_0value?: (() => void) | undefined
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL

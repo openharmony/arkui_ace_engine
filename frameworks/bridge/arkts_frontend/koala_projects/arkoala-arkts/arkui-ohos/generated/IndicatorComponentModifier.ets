@@ -30,11 +30,11 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: Object): void { }
-    applyPressedAttribute(instance: Object): void { }
-    applyFocusedAttribute(instance: Object): void { }
-    applyDisabledAttribute(instance: Object): void { }
-    applySelectedAttribute(instance: Object): void { }
+    applyNormalAttribute(instance: IndicatorComponentAttribute): void { }
+    applyPressedAttribute(instance: IndicatorComponentAttribute): void { }
+    applyFocusedAttribute(instance: IndicatorComponentAttribute): void { }
+    applyDisabledAttribute(instance: IndicatorComponentAttribute): void { }
+    applySelectedAttribute(instance: IndicatorComponentAttribute): void { }
     _initialIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _initialIndex_0_0value?: number | undefined
     _count_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
