@@ -66,8 +66,10 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
             CHECK_NULL_VOID(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
-            auto dialogContext = dialog->GetRenderContext();
-            CHECK_NULL_VOID(dialogContext);
+            auto maskNode = pattern->GetExtraMaskNode() ? pattern->GetExtraMaskNode() : dialog;
+            CHECK_NULL_VOID(maskNode);
+            auto maskContext = maskNode->GetRenderContext();
+            CHECK_NULL_VOID(maskContext);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
             auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -86,17 +88,19 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
             // app subwindow dialog's mask is on top of the main window
             // No need to update app subwindow dialog's background color.
             if ((!isSubWindow && isModal) || isSceneBoardDialog) {
-                dialogContext->UpdateBackgroundColor(maskColor);
+                maskContext->UpdateBackgroundColor(maskColor);
             }
-            dialog->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            dialog->MarkModifyDone();
+            maskNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            maskNode->MarkModifyDone();
         };
         auto pattern = dialog->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->AddResObj("dialog.maskcolor", resObj, std::move(updateFunc));
         
-        auto dialogContext = dialog->GetRenderContext();
-        CHECK_NULL_VOID(dialogContext);
+        auto maskNode = pattern->GetExtraMaskNode() ? pattern->GetExtraMaskNode() : dialog;
+        CHECK_NULL_VOID(maskNode);
+        auto maskContext = maskNode->GetRenderContext();
+        CHECK_NULL_VOID(maskContext);
         auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
         CHECK_NULL_VOID(dialogLayoutProp);
         auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
@@ -104,7 +108,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         auto isSceneBoardDialog = dialogLayoutProp->GetIsSceneBoardDialog().value_or(false);
         // if the current mode is dark color mode，update property immediately.
         if ((!isSubWindow && isModal) || isSceneBoardDialog) {
-            dialogContext->UpdateBackgroundColor(maskColor);
+            maskContext->UpdateBackgroundColor(maskColor);
         }
     }
 }
