@@ -36,6 +36,7 @@ void FfiOHOSAceFrameworkRefreshCreate(bool refreshing, double offsetValue, int32
     }
     if (RefreshModel::GetInstance() == nullptr) {
         LOGE("Refresh Instance is null");
+        return;
     }
     RefreshModel::GetInstance()->Create();
     RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());
@@ -74,6 +75,7 @@ void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
     }
     if (RefreshModel::GetInstance() == nullptr) {
         LOGE("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent, Refresh Instance is null");
+        return;
     }
     RefreshModel::GetInstance()->Create();
     RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());

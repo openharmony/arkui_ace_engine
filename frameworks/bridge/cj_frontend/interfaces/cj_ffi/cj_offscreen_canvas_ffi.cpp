@@ -1027,6 +1027,7 @@ void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageDataWithDirty(int
     if (context == nullptr) {
         LOGE("NativeCanvasRenderer GetImageData error, Cannot get OffscreenRenderingContext by id: %{public}" PRId64,
             contextId);
+        return;
     }
     auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
     if (nativeImagedata == nullptr) {
@@ -1042,6 +1043,7 @@ void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(
     if (context == nullptr) {
         LOGE("NativeCanvasRenderer GetImageData error, Cannot get OffscreenRenderingContext by id: %{public}" PRId64,
             contextId);
+        return;
     }
     auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
     if (nativeImagedata == nullptr) {

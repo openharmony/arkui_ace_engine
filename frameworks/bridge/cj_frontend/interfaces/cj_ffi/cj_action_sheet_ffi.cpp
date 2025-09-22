@@ -324,7 +324,7 @@ void FfiOHOSAceFrameworkActionSheetShowWithShadowStyle(NativeActionSheetOptions 
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
+        if (shadowTheme) {
             shadow = shadowTheme->GetShadow(style, colorMode);
         }
     }
