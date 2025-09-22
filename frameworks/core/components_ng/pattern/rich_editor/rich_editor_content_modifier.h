@@ -53,6 +53,7 @@ public:
 
 private:
     void PaintCustomSpan(DrawingContext& drawingContext);
+    float AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect);
     RichEditorParagraphManager* const pManager_;
     WeakPtr<OHOS::Ace::NG::Pattern> pattern_;
     RefPtr<PropertyFloat> richTextRectX_;
