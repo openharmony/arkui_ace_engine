@@ -467,11 +467,7 @@ class WebStandardFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webStandardFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebStandardFont(node);
-    } else {
-      getUINativeModule().web.setWebStandardFont(node, this.value);
-    }
+    getUINativeModule().web.setWebStandardFont(node, this.value);
   }
 }
 
@@ -481,11 +477,7 @@ class WebSerifFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webSerifFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebSerifFont(node);
-    } else {
-      getUINativeModule().web.setWebSerifFont(node, this.value);
-    }
+    getUINativeModule().web.setWebSerifFont(node, this.value);
   }
 }
 
@@ -495,11 +487,7 @@ class WebSansSerifFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webSansSerifFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebSansSerifFont(node);
-    } else {
-      getUINativeModule().web.setWebSansSerifFont(node, this.value);
-    }
+    getUINativeModule().web.setWebSansSerifFont(node, this.value);
   }
 }
 
@@ -509,11 +497,7 @@ class WebFixedFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webFixedFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebFixedFont(node);
-    } else {
-      getUINativeModule().web.setWebFixedFont(node, this.value);
-    }
+    getUINativeModule().web.setWebFixedFont(node, this.value);
   }
 }
 
@@ -523,11 +507,7 @@ class WebFantasyFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webFantasyFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebFantasyFont(node);
-    } else {
-      getUINativeModule().web.setWebFantasyFont(node, this.value);
-    }
+    getUINativeModule().web.setWebFantasyFont(node, this.value);
   }
 }
 
@@ -537,11 +517,7 @@ class WebCursiveFontModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('webCursiveFontModifier');
   applyPeer (node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().web.resetWebCursiveFont(node);
-    } else {
-      getUINativeModule().web.setWebCursiveFont(node, this.value);
-    }
+    getUINativeModule().web.setWebCursiveFont(node, this.value);
   }
 }
 

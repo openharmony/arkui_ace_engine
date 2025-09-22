@@ -31767,11 +31767,7 @@ class WebStandardFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebStandardFont(node);
-    } else {
-      getUINativeModule().web.setWebStandardFont(node, this.value);
-    }
+    getUINativeModule().web.setWebStandardFont(node, this.value);
   }
 }
 WebStandardFontModifier.identity = Symbol('webStandardFontModifier');
@@ -31781,11 +31777,7 @@ class WebSerifFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebSerifFont(node);
-    } else {
-      getUINativeModule().web.setWebSerifFont(node, this.value);
-    }
+    getUINativeModule().web.setWebSerifFont(node, this.value);
   }
 }
 WebSerifFontModifier.identity = Symbol('webSerifFontModifier');
@@ -31795,11 +31787,7 @@ class WebSansSerifFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebSansSerifFont(node);
-    } else {
-      getUINativeModule().web.setWebSansSerifFont(node, this.value);
-    }
+    getUINativeModule().web.setWebSansSerifFont(node, this.value);
   }
 }
 WebSansSerifFontModifier.identity = Symbol('webSansSerifFontModifier');
@@ -31809,11 +31797,7 @@ class WebFixedFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebFixedFont(node);
-    } else {
-      getUINativeModule().web.setWebFixedFont(node, this.value);
-    }
+    getUINativeModule().web.setWebFixedFont(node, this.value);
   }
 }
 WebFixedFontModifier.identity = Symbol('webFixedFontModifier');
@@ -31823,11 +31807,7 @@ class WebFantasyFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebFantasyFont(node);
-    } else {
-      getUINativeModule().web.setWebFantasyFont(node, this.value);
-    }
+    getUINativeModule().web.setWebFantasyFont(node, this.value);
   }
 }
 WebFantasyFontModifier.identity = Symbol('webFantasyFontModifier');
@@ -31837,11 +31817,7 @@ class WebCursiveFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer (node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetWebCursiveFont(node);
-    } else {
-      getUINativeModule().web.setWebCursiveFont(node, this.value);
-    }
+    getUINativeModule().web.setWebCursiveFont(node, this.value);
   }
 }
 WebCursiveFontModifier.identity = Symbol('webCursiveFontModifier');

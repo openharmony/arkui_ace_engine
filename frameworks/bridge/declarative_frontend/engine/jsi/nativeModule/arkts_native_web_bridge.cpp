@@ -961,10 +961,15 @@ ArkUINativeModuleValue WebBridge::SetWebStandardFont(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebStandardFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebStandardFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
         auto mode = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getWebModifier()->setWebStandardFont(nativeNode, mode.c_str());
     } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebStandardFont");
         GetArkUINodeModifiers()->getWebModifier()->resetWebStandardFont(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -987,10 +992,15 @@ ArkUINativeModuleValue WebBridge::SetWebSerifFont(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebSerifFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebSerifFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
         auto mode = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getWebModifier()->setWebSerifFont(nativeNode, mode.c_str());
     } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebSerifFont");
         GetArkUINodeModifiers()->getWebModifier()->resetWebSerifFont(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1013,10 +1023,15 @@ ArkUINativeModuleValue WebBridge::SetWebSansSerifFont(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebSansSerifFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebSansSerifFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
         auto mode = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getWebModifier()->setWebSansSerifFont(nativeNode, mode.c_str());
     } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebSansSerifFont");
         GetArkUINodeModifiers()->getWebModifier()->resetWebSansSerifFont(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1039,10 +1054,15 @@ ArkUINativeModuleValue WebBridge::SetWebFixedFont(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebFixedFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebFixedFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
         auto mode = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getWebModifier()->setWebFixedFont(nativeNode, mode.c_str());
     } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebFixedFont");
         GetArkUINodeModifiers()->getWebModifier()->resetWebFixedFont(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1065,10 +1085,15 @@ ArkUINativeModuleValue WebBridge::SetWebFantasyFont(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString(vm)) {
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebFantasyFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebFantasyFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
         auto mode = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getWebModifier()->setWebFantasyFont(nativeNode, mode.c_str());
     } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebFantasyFont");
         GetArkUINodeModifiers()->getWebModifier()->resetWebFantasyFont(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1091,8 +1116,17 @@ ArkUINativeModuleValue WebBridge::SetWebCursiveFont(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto mode = secondArg->ToString(vm)->ToString(vm);
-    GetArkUINodeModifiers()->getWebModifier()->setWebCursiveFont(nativeNode, mode.c_str());
+    if (secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebCursiveFont(nativeNode, "null");
+    } else if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getWebModifier()->setWebCursiveFont(nativeNode, "undefined");
+    } else if (secondArg->IsString(vm)) {
+        auto mode = secondArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getWebModifier()->setWebCursiveFont(nativeNode, mode.c_str());
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebBridge::ResetWebCursiveFont");
+        GetArkUINodeModifiers()->getWebModifier()->resetWebCursiveFont(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
