@@ -376,6 +376,7 @@ struct ArkUIAxisEvent {
     ArkUI_Float32 height;
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int64 deviceId;
+    ArkUI_Uint32 axes;
 };
 
 struct ArkUIDragEvent {

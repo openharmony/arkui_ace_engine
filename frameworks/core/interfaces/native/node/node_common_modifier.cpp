@@ -11841,6 +11841,7 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
+        event.axisEvent.axes = info.GetAxes();
 
         SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);

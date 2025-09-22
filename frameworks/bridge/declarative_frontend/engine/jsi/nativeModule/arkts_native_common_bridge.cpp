@@ -10659,7 +10659,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
     const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "getPinchAxisScaleValue", "target",
         "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState",
-        "axisVertical", "axisHorizontal", "axisPinch", "globalDisplayX", "globalDisplayY", "targetDisplayId" };
+        "axisVertical", "axisHorizontal", "axisPinch", "globalDisplayX", "globalDisplayY", "targetDisplayId",
+        "hasAxis" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -10685,7 +10686,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
         panda::NumberRef::New(vm, info.GetPinchAxisScale()),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
-        panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));

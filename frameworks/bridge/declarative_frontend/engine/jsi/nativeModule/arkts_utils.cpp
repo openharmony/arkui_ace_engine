@@ -2571,6 +2571,24 @@ Local<JSValueRef> ArkTSUtils::JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* inf
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetPinchAxisScale());
 }
 
+Local<JSValueRef> ArkTSUtils::JsHasAxis(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto vm = info->GetVM();
+    auto param = info->GetCallArgRef(0);
+    AxisType axisType;
+    if (!param->IsNumber()) {
+        return panda::BooleanRef::New(info->GetVM(), false);
+    }
+    axisType = static_cast<AxisType>(param->ToNumber(vm)->Value());
+    return panda::BooleanRef::New(info->GetVM(), eventInfo->HasAxis(axisType));
+}
+
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (!jsValue->IsObject(vm)) {
