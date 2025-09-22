@@ -38,19 +38,19 @@ public:
     ColorAnimatableArithmetic Minus(const ColorAnimatableArithmetic& value) const override;
     ColorAnimatableArithmetic Multiply(const float scale) const override;
     bool IsEqual(const ColorAnimatableArithmetic& value) const override;
-    const std::vector<Color>& GetColors() const
+    const std::vector<LinearColor>& GetColors() const
     {
         return colors_;
     }
 
-    void PaddingColors(size_t size, const Color& defaultColor)
+    void PaddingColors(size_t size, const LinearColor& defaultColor)
     {
         auto color = colors_.size() == 0 ? defaultColor : colors_.back();
         colors_.insert(colors_.end(), size, color);
     }
 
 private:
-    std::vector<Color> colors_;
+    std::vector<LinearColor> colors_;
 };
 
 class ColorStopAnimatableArithmetic : public Rosen::RSAnimatableArithmetic<ColorStopAnimatableArithmetic> {
