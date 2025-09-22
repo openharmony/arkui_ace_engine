@@ -515,7 +515,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     if (image) {
         SuccessCallback(image, key, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     } else {
-        FailCallback(key, "Failed to decode image", obj->GetSourceInfo().GetContainerId());
+        FailCallback(key, "Failed to decode image", imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     }
 }
 } // namespace OHOS::Ace::NG
