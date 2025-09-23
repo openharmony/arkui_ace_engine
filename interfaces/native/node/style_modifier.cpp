@@ -7992,7 +7992,8 @@ int32_t SetProgressColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getProgressModifier()->setProgressColor(node->uiNodeHandle, item->value[0].u32);
+    fullImpl->getNodeModifiers()->getProgressModifier()->setProgressColorPtr(
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8614,7 +8615,8 @@ int32_t SetLoadingProgressColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     }
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setColor(node->uiNodeHandle, item->value[NUM_0].u32);
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setColorPtr(
+        node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
