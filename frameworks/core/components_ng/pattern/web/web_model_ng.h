@@ -247,6 +247,8 @@ public:
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
     void SetEnableDataDetector(bool isEnabled) override;
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
+    void SetEnableSelectedDataDetector(bool isEnabled) override;
+    void SetSelectedDataDetectorConfig(const TextDetectConfig& config) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
     void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
@@ -375,6 +377,8 @@ public:
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
     static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
+    static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetSelectedDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
     static void SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnClientAuthenticationRequest(

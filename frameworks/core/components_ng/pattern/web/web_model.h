@@ -226,6 +226,8 @@ public:
     virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetEnableDataDetector(bool isEnabled) {};
     virtual void SetDataDetectorConfig(const TextDetectConfig& config) {};
+    virtual void SetEnableSelectedDataDetector(bool isEnabled) {};
+    virtual void SetSelectedDataDetectorConfig(const TextDetectConfig& config) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}

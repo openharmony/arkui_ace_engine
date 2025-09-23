@@ -89,6 +89,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);

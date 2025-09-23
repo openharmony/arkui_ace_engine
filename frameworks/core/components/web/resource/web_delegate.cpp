@@ -3492,6 +3492,7 @@ void WebDelegate::InitWebViewWithSurface()
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->InitDataDetector();
+            pattern->InitSelectDataDetector();
             pattern->InitAIDetectResult();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");

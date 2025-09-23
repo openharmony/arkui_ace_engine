@@ -4886,6 +4886,22 @@ void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
     adapter->SetDataDetectorConfig(config);
 }
 
+void WebPattern::UpdateEnableSelectDataDetector(bool isEnabled)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateEnableSelectDataDetector");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetSelectDataDetectorEnable(isEnabled);
+}
+
+void WebPattern::UpdateSelectedDataDetectorConfig(const TextDetectConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateSelectDataDetectorConfig");
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    adapter->SetSelectedDataDetectorConfig(config);
+}
+
 void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
 {
     if (webSelectOverlay_) {
@@ -8713,6 +8729,14 @@ void WebPattern::InitDataDetector()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitDataDetector");
     webDataDetectorAdapter_->Init();
+}
+
+void WebPattern::InitSelectDataDetector()
+{
+    auto adapter = GetDataDetectorAdapter();
+    CHECK_NULL_VOID(adapter);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitSelectDataDetector");
+    adapter->InitSelectDataDetector();
 }
 
 void WebPattern::InitAIDetectResult()

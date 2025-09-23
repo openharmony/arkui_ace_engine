@@ -1320,6 +1320,34 @@ class WebDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConf
   }
 }
 
+class WebEnableSelectedDataDetectorModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebEnableSelectedDataDetectorModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableSelectedDataDetector(node);
+    } else {
+      getUINativeModule().web.setEnableSelectedDataDetector(node, this.value);
+    }
+  }
+}
+
+class WebSelectedDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
+  constructor(value: TextDataDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webSelectedDataDetectorConfigModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetSelectedDataDetectorConfig(node);
+    } else {
+      getUINativeModule().web.setSelectedDataDetectorConfig(node, this.value.types);
+    }
+  }
+}
+
 class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
   constructor(value: GestureFocusMode) {
     super(value);
@@ -1929,6 +1957,14 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   dataDetectorConfig(config: TextDataDetectorConfig): this {
     modifierWithKey(this._modifiersWithKeys, WebDataDetectorConfigModifier.identity, WebDataDetectorConfigModifier, config);
+    return this;
+  }
+  enableSelectedDataDetector(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableSelectedDataDetectorModifier.identity, WebEnableSelectedDataDetectorModifier, enabled);
+    return this;
+  }
+  SelecteddataDetectorConfig(config: TextDataDetectorConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, config);
     return this;
   }
   gestureFocusMode(mode: GestureFocusMode): this {

@@ -1467,6 +1467,22 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
     webPattern->UpdateDataDetectorConfig(config);
 }
 
+void WebModelNG::SetEnableSelectedDataDetector(bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableSelectDataDetector(isEnabled);
+}
+
+void WebModelNG::SetSelectedDataDetectorConfig(const TextDetectConfig& config)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectedDataDetectorConfig(config);
+}
+
 void WebModelNG::SetForceEnableZoom(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2427,6 +2443,24 @@ void WebModelNG::SetDataDetectorConfig(FrameNode* frameNode, const TextDetectCon
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateDataDetectorConfig(config);
+}
+
+void WebModelNG::SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableDataDetector(isEnabled);
+}
+
+void WebModelNG::SetSelectedDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectedDataDetectorConfig(config);
 }
 
 void WebModelNG::SetGestureFocusMode(GestureFocusMode mode)

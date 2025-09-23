@@ -732,6 +732,8 @@ public:
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
+    void UpdateEnableSelectDataDetector(bool isEnabled);
+    void UpdateSelectedDataDetectorConfig(const TextDetectConfig& config);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
     void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -898,6 +900,7 @@ public:
 
     bool GetDataDetectorEnable();
     void InitDataDetector();
+    void InitSelectDataDetector();
     void InitAIDetectResult();
     void CloseDataDetectorMenu();
 
