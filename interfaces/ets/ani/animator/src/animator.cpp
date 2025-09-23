@@ -80,6 +80,51 @@ static FillMode StringToFillMode(const std::string &fillMode)
     }
 }
 
+static bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const char* className)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return false;
+    }
+    ani_boolean isInstance;
+    if (env->Object_InstanceOf(object, cls, &isInstance)) {
+        return false;
+    }
+    return (bool)isInstance;
+}
+
+static std::string FillModeToString(const FillMode& fillMode)
+{
+    switch (fillMode) {
+        case FillMode::NONE:
+            return ANIMATOR_FILLMODE_NONE;
+        case FillMode::BACKWARDS:
+            return ANIMATOR_FILLMODE_BACKWARDS;
+        case FillMode::BOTH:
+            return ANIMATOR_FILLMODE_BOTH;
+        case FillMode::FORWARDS:
+            [[fallthrough]];
+        default:
+            return ANIMATOR_FILLMODE_FORWARDS;
+    }
+}
+
+static std::string AnimationDirectionToString(const AnimationDirection& direction)
+{
+    switch (direction) {
+        case AnimationDirection::ALTERNATE:
+            return ANIMATOR_DIRECTION_ALTERNATE;
+        case AnimationDirection::REVERSE:
+            return ANIMATOR_DIRECTION_REVERSE;
+        case AnimationDirection::ALTERNATE_REVERSE:
+            return ANIMATOR_DIRECTION_ALTERNATE_REVERSE;
+        case AnimationDirection::NORMAL:
+            [[fallthrough]];
+        default:
+            return ANIMATOR_DIRECTION_NORMAL;
+    }
+}
+
 class AnimatorResult final {
 public:
     AnimatorResult() = default;
@@ -419,7 +464,25 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Na
     ani_ref directionAni;
     ani_double beginAni;
     ani_double endAni;
-
+    if (IsInstanceOfCls(env, obj, "@ohos.animator.SimpleAnimatorOptions")) {
+        auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, obj);
+        CHECK_NULL_VOID(simpleAnimatorOption);
+        option->begin = simpleAnimatorOption->GetBegin();
+        option->end = simpleAnimatorOption->GetEnd();
+        option->duration = simpleAnimatorOption->GetDuration().has_value() ?
+            simpleAnimatorOption->GetDuration().value() : ANIMATOR_DEFALUT_DURATION;
+        option->easing = simpleAnimatorOption->GetEasing().has_value() ?
+            simpleAnimatorOption->GetEasing().value() : ANIMATOR_DEFALUT_EASING;
+        option->delay = simpleAnimatorOption->GetDelay().has_value() ?
+            simpleAnimatorOption->GetDelay().value() : ANIMATOR_DEFALUT_DELAY;
+        option->fill = simpleAnimatorOption->GetFill().has_value() ?
+            FillModeToString(simpleAnimatorOption->GetFill().value()) : ANIMATOR_FILLMODE_FORWARDS;
+        option->direction = simpleAnimatorOption->GetDirection().has_value() ?
+            AnimationDirectionToString(simpleAnimatorOption->GetDirection().value()) : ANIMATOR_DIRECTION_NORMAL;
+        option->iterations = simpleAnimatorOption->GetIterations().has_value() ?
+            simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
+        return;
+    }
     env->Object_GetPropertyByName_Double(obj, "duration", &durationAni);
     env->Object_GetPropertyByName_Double(obj, "iterations", &iterationsAni);
     env->Object_GetPropertyByName_Double(obj, "delay", &delayAni);
@@ -428,13 +491,9 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Na
     env->Object_GetPropertyByName_Ref(obj, "easing", &easingAni);
     env->Object_GetPropertyByName_Ref(obj, "fill", &fillAni);
     env->Object_GetPropertyByName_Ref(obj, "direction", &directionAni);
-    std::string easing = "ease";
-    std::string fill = "none";
-    std::string direction = "normal";
-    easing = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(easingAni));
-    fill = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(fillAni));
-    direction = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(directionAni));
-
+    std::string easing = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(easingAni));
+    std::string fill = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(fillAni));
+    std::string direction = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(directionAni));
     option->duration = durationAni > 0 ? durationAni : 0;
     option->iterations = iterationsAni >= -1 ? iterationsAni : 1;
     option->begin = beginAni;
@@ -748,45 +807,6 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
     animator->SetExpectedFrameRateRange(frameRateRange);
 }
 
-bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const char* className)
-{
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return false;
-    }
-    ani_boolean isInstance;
-    if (env->Object_InstanceOf(object, cls, &isInstance)) {
-        return false;
-    }
-    return (bool)isInstance;
-}
-
-std::string FillModeToString(const FillMode& fillMode)
-{
-    if (fillMode == FillMode::NONE) {
-        return ANIMATOR_FILLMODE_NONE;
-    } else if (fillMode == FillMode::BACKWARDS) {
-        return ANIMATOR_FILLMODE_BACKWARDS;
-    } else if (fillMode == FillMode::BOTH) {
-        return ANIMATOR_FILLMODE_BOTH;
-    } else {
-        return ANIMATOR_FILLMODE_FORWARDS;
-    }
-}
-
-std::string AnimationDirectionToString(const AnimationDirection& direction)
-{
-    if (direction == AnimationDirection::ALTERNATE) {
-        return ANIMATOR_DIRECTION_ALTERNATE;
-    } else if (direction == AnimationDirection::REVERSE) {
-        return ANIMATOR_DIRECTION_REVERSE;
-    } else if (direction == AnimationDirection::ALTERNATE_REVERSE) {
-        return ANIMATOR_DIRECTION_ALTERNATE_REVERSE;
-    } else {
-        return ANIMATOR_DIRECTION_NORMAL;
-    }
-}
-
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object animatorObj = {};
@@ -805,28 +825,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
 
     // create animatot and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
-    if (IsInstanceOfCls(env, aniOption, "L@ohos/animator/SimpleAnimatorOptions;")) {
-        auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, aniOption);
-        if (simpleAnimatorOption == nullptr) {
-            return animatorObj;
-        }
-        option->begin = simpleAnimatorOption->GetBegin();
-        option->end = simpleAnimatorOption->GetEnd();
-        option->duration = simpleAnimatorOption->GetDuration().has_value() ?
-            simpleAnimatorOption->GetDuration().value() : ANIMATOR_DEFALUT_DURATION;
-        option->easing = simpleAnimatorOption->GetEasing().has_value() ?
-            simpleAnimatorOption->GetEasing().value() : ANIMATOR_DEFALUT_EASING;
-        option->delay = simpleAnimatorOption->GetDelay().has_value() ?
-            simpleAnimatorOption->GetDelay().value() : ANIMATOR_DEFALUT_DELAY;
-        option->fill = simpleAnimatorOption->GetFill().has_value() ?
-            FillModeToString(simpleAnimatorOption->GetFill().value()) : ANIMATOR_FILLMODE_FORWARDS;
-        option->direction = simpleAnimatorOption->GetDirection().has_value() ?
-            AnimationDirectionToString(simpleAnimatorOption->GetDirection().value()) : ANIMATOR_DIRECTION_NORMAL;
-        option->iterations = simpleAnimatorOption->GetIterations().has_value() ?
-            simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
-    } else {
-        ParseAnimatorOption(env, aniOption, option);
-    }
+    ParseAnimatorOption(env, aniOption, option);
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());
     auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
@@ -848,12 +847,15 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     if (!animatorResult) {
         return;
     }
-    auto option = std::make_shared<Napi::AnimatorOption>();
-    ParseAnimatorOption(env, options, option);
+    auto option = animatorResult->GetAnimatorOption();
+    if (!option) {
+        return;
+    }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
         return;
     }
+    ParseAnimatorOption(env, options, option);
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -1064,7 +1066,8 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"setOnRepeat", nullptr, reinterpret_cast<void *>(SetOnrepeat)},
         ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
         ani_native_function{"update", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIUpdate)},
-        ani_native_function{"reset", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIReset)},
+        ani_native_function{"reset", "X{C{@ohos.animator.AnimatorOptions}C{@ohos.animator.SimpleAnimatorOptions}}:",
+            reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
         ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}

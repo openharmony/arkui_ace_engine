@@ -16,15 +16,14 @@
 #include "shape.h"
 
 namespace OHOS::Ace {
-struct PathPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::Path> pathShape;
-};
+namespace {
+const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.PathShape";
+} // namespace
 
 void ANICreatePathShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return;
     }
     PathPeer* shapePeer = new PathPeer();
@@ -43,8 +42,7 @@ void ANICreatePathShapeWithParam(
     if (GetIsUndefinedObject(env, aniOption)) {
         return;
     }
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
-    if (!IsInstanceOfCls(env, object, className)) {
+    if (!IsInstanceOfCls(env, object, ANI_SHAPE_NAME)) {
         return;
     }
     std::string commands = ParseCommands(env, aniOption);
@@ -155,9 +153,8 @@ ani_object ANIPathShapeCommands(ani_env* env, [[maybe_unused]] ani_object object
 
 ani_status PathShape::BindPathShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/PathShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return ANI_ERROR;
     }
 
