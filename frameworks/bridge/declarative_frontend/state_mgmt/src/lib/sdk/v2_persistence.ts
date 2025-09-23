@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -296,7 +296,7 @@ class PersistenceV2Impl extends StorageHelper {
       return existedValue;
     }
 
-    const observedValue: T | undefined = this.getConnectDefaultValue(key, type, defaultCreator);
+    let observedValue: T | undefined = this.getConnectDefaultValue(key, type, defaultCreator);
     if (!observedValue) {
       return undefined;
     }
@@ -306,7 +306,15 @@ class PersistenceV2Impl extends StorageHelper {
 
     // Not in memory, but in disk
     if (PersistenceV2Impl.storage_.has(key)) {
-      return this.getValueFromDisk(key, id, observedValue, type);
+      let [value, error] = this.getValueFromDisk(key, id, observedValue, type);
+      if (!error) {
+          // No error, return valid  object
+          return value;
+      } else {
+          // Default object partially restored, create new clean default object
+          this.disconnectValue(key);
+          observedValue = this.getConnectDefaultValue(key, type, defaultCreator);
+      }
     }
 
     // Neither in memory or in disk
@@ -332,7 +340,7 @@ class PersistenceV2Impl extends StorageHelper {
       return existedValue;
     }
 
-    const observedValue: T | undefined = this.getConnectDefaultValue(key,
+    let observedValue: T | undefined = this.getConnectDefaultValue(key,
       connectOptions.type, connectOptions.defaultCreator);
     if (!observedValue) {
       return undefined;
@@ -345,7 +353,15 @@ class PersistenceV2Impl extends StorageHelper {
     const areaMode: number = this.getAreaMode(connectOptions.areaMode);
     this.globalMapAreaMode_.set(key, areaMode);
     if (PersistenceV2Impl.storage_.has(key, areaMode)) {
-      return this.getValueFromDisk(key, id, observedValue, connectOptions.type, areaMode);
+      let [value, error] = this.getValueFromDisk(key, id, observedValue, connectOptions.type, areaMode);
+      if (!error) {
+          // No error, return valid  object
+          return value;
+      } else {
+          // Create new clean default object
+          this.disconnectValue(key);
+          observedValue = this.getConnectDefaultValue(key, connectOptions.type, connectOptions.defaultCreator);
+      }
     }
 
     // Neither in memory or in disk
@@ -551,24 +567,31 @@ class PersistenceV2Impl extends StorageHelper {
   }
 
   private getValueFromDisk<T extends object>(key: string, id: number, observedValue: T,
-    type: TypeConstructorWithArgs<T>, areaMode?: number | undefined): T | undefined {
+    type: TypeConstructorWithArgs<T>, areaMode?: number | undefined): [T | undefined, boolean] {
     let newObservedValue: T;
+    let json: string = "";
 
     try {
-      const json: string = PersistenceV2Impl.storage_.get(key, areaMode);
+      json = PersistenceV2Impl.storage_.get(key, areaMode);
+    } catch (err) {
+      this.errorHelper(key, PersistError.Unknown, err);
+      return [undefined, true];
+    }
 
+    try {
       // Adding ref for persistence
       ObserveV2.getObserve().startRecordDependencies(this, id);
       newObservedValue = JSONCoder.parseTo(observedValue, json) as T;
       ObserveV2.getObserve().stopRecordDependencies();
     } catch (err) {
+      ObserveV2.getObserve().stopRecordDependencies();
       this.errorHelper(key, PersistError.Serialization, err);
+      return [undefined, true];
     }
 
     this.checkTypeByInstanceOf(key, type, newObservedValue);
-
     this.connectNewValue(key, newObservedValue, this.getTypeName(type), areaMode);
-    return newObservedValue;
+    return [newObservedValue, false];
   }
 
   private setValueToDisk<T extends object>(key: string, id: number, observedValue: T,
