@@ -430,8 +430,9 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 
 ScrollAlign WaterFlowSegmentedLayout::TransformAutoScroll(const WaterFlowLayoutInfo::ItemInfo& item) const
 {
-    const bool isAbove = Negative(info_->currentOffset_ + item.mainOffset);
-    const bool isBelow = GreatNotEqual(info_->currentOffset_ + item.mainOffset + item.mainSize, mainSize_);
+    const bool isAbove = LessNotEqual(info_->currentOffset_ + item.mainOffset, info_->contentStartOffset_);
+    const bool isBelow =
+        GreatNotEqual(info_->currentOffset_ + item.mainOffset + item.mainSize, mainSize_ - info_->contentEndOffset_);
     if (isAbove && isBelow) {
         // possible when the item is larger than viewport
         return ScrollAlign::NONE;
@@ -463,7 +464,7 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
         default:
             break;
     }
-    offset = std::min(-info_->contentStartOffset_, offset);
+    offset = std::min(info_->contentStartOffset_, offset);
     return offset;
 }
 

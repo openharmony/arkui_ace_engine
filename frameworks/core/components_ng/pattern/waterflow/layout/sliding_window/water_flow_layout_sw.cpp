@@ -620,10 +620,12 @@ void WaterFlowLayoutSW::ClearFront()
 ScrollAlign WaterFlowLayoutSW::ParseAutoAlign(int32_t jumpIdx, bool inView)
 {
     if (inView) {
-        if (Negative(info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]))) {
+        if (LessNotEqual(info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]),
+                         info_->contentStartOffset_)) {
             return ScrollAlign::START;
         }
-        if (Negative(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]))) {
+        if (LessNotEqual(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]),
+                         info_->contentEndOffset_)) {
             return ScrollAlign::END;
         }
         // item is already fully in viewport

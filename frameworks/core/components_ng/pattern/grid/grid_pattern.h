@@ -160,8 +160,9 @@ public:
 
     bool IsAtBottomWithDelta() const override
     {
-        return info_.offsetEnd_ ||
-               GreatNotEqual(EstimateHeight() + info_.lastMainSize_ + info_.contentEndOffset_, GetTotalHeight());
+        return info_.offsetEnd_ || GreatNotEqual(EstimateHeight() + info_.lastMainSize_ + info_.contentStartOffset_ +
+                                                     info_.contentEndOffset_,
+                                       GetTotalHeight());
     }
 
     bool IsFadingBottom() const override;

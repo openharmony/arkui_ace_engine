@@ -647,4 +647,264 @@ HWTEST_F(WaterFlowSWTest, ContentOffsetTest003, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
 }
+
+/**
+ * @tc.name: ScrollToIndexStartWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Start without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToIndexStartWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    bool smooth = false;
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -280);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    ScrollToIndex(13, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    ScrollToIndex(17, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: AnimateToIndexStartWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Start with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, AnimateToIndexStartWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::START;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -280);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    AnimateToIndexWithTicks(17, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ScrollToIndexEndWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::End without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToIndexEndWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::END;
+    bool smooth = false;
+
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+
+    ScrollToIndex(13, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -330);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollToIndex(17, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -630);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: AnimateToIndexEndWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::End with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, AnimateToIndexEndWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::END;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+
+    AnimateToIndexWithTicks(13, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -330);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    AnimateToIndexWithTicks(17, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -630);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ScrollToIndexAutoWithContentOffset
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Auto without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToIndexAutoWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::AUTO;
+    bool smooth = false;
+
+    ScrollToIndex(19, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    // Scroll forward, item 5 is at top
+    ScrollToIndex(5, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -280);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    // Scroll backward, item 15 is at end
+    ScrollToIndex(15, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -530);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    // item 11 is in view
+    ScrollToIndex(11, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -530);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    ScrollBy(0, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    // item 7 is at top without contentStartOffset
+    ScrollToIndex(7, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -480);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 480);
+
+    ScrollTo(300);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -300);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 14);
+    // item 14 is at bottom without contentEndOffset
+    ScrollToIndex(14, false, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -330);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    ScrollToIndex(0, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
+
+/**
+ * @tc.name: AnimateToIndexAutoWithContentOffsetTest
+ * @tc.desc: Test ScrollToIndex with ContentOffset and ScrollAlign::Auto with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, AnimateToIndexAutoWithContentOffsetTest, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ScrollAlign scrollAlign = ScrollAlign::AUTO;
+
+    AnimateToIndexWithTicks(19, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -830);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 830);
+
+    // Scroll forward, item 5 is at top
+    AnimateToIndexWithTicks(5, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -280);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 280);
+
+    // Scroll backward, item 15 is at end
+    AnimateToIndexWithTicks(15, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -530);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    // item 11 is in view
+    AnimateToIndexWithTicks(11, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -530);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 530);
+
+    ScrollBy(0, -CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    // item 7 is at top without contentStartOffset
+    AnimateToIndexWithTicks(7, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -480);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 480);
+
+    ScrollTo(300);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -300);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 14);
+    // item 14 is at bottom without contentEndOffset
+    AnimateToIndexWithTicks(14, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -330);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 330);
+
+    AnimateToIndexWithTicks(0, scrollAlign);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20);
+}
 } // namespace OHOS::Ace::NG

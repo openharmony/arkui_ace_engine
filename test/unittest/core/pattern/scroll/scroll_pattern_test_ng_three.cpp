@@ -584,4 +584,33 @@ HWTEST_F(ScrollPatternThreeTestNg, GetContentStartOffsetWithInvalidValueTest, Te
 
     EXPECT_FLOAT_EQ(pattern_->GetContentStartOffset(), 0.0f);
 }
+
+/**
+ * @tc.name: ResetPositionTest
+ * @tc.desc: test ScrollPattern::ResetPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, ResetPositionTest, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->lastOffset_, 0.0);
+
+    ScrollBy(0, -50);
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET - 50);
+    EXPECT_EQ(pattern_->lastOffset_, CONTENT_START_OFFSET);
+
+    ScrollBy(0, -50);
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET - 100);
+    EXPECT_EQ(pattern_->lastOffset_, CONTENT_START_OFFSET - 50);
+
+    pattern_->ResetPosition();
+    EXPECT_EQ(pattern_->currentOffset_, CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->lastOffset_, CONTENT_START_OFFSET);
+}
 } // namespace OHOS::Ace::NG
