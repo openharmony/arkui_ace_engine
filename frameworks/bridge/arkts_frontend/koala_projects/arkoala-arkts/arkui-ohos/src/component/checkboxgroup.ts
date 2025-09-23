@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -30,6 +30,7 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { CheckboxGroupOpsHandWritten } from "./../handwritten"
 
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -307,7 +308,7 @@ export interface CheckboxGroupResult {
 export type CheckboxGroupInterface = (options?: CheckboxGroupOptions) => CheckboxGroupAttribute;
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
-    selectAll(value: boolean | undefined): this
+    selectAll(value: boolean | Bindable<boolean> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     unselectedColor(value: ResourceColor | undefined): this
     mark(value: MarkStyle | undefined): this
@@ -322,7 +323,7 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     mark_value?: MarkStyle | undefined
     onChange_value?: OnCheckboxGroupChangeCallback | undefined
     checkboxShape_value?: CheckBoxShape | undefined
-    public selectAll(value: boolean | undefined): this {
+    public selectAll(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
@@ -356,8 +357,8 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    public selectAll(value: boolean | undefined): this {
-        if (this.checkPriority("selectAll")) {
+    public selectAll(value: boolean | Bindable<boolean> | undefined): this {
+        if (this.checkPriority("selectAll") && (typeof value === "boolean" || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (boolean | undefined)
@@ -371,6 +372,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
             }
             throw new Error("Can not select appropriate overload")
         }
+        CheckboxGroupOpsHandWritten.hookCheckboxGroupAttributeSelectAllImpl(this.getPeer().peer.ptr, (value as Bindable<boolean>));
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {

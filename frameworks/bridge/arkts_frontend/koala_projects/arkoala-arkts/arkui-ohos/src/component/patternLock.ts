@@ -448,7 +448,7 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     }
     public skipUnselectedPoint(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPatternLockComponent extends ArkCommonMethodComponent implements PatternLockAttribute {
     getPeer(): ArkPatternLockPeer {

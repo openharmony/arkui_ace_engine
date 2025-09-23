@@ -155,12 +155,14 @@ template("ace_osal_ohos_source_set") {
         "input:libmmi-client",
         "napi:ace_napi",
         "resource_management:global_resmgr",
+        "runtime_core:ani",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [
           "accessibility/accessibility_hidumper_osal.cpp",
           "accessibility/element_info/accessibility_node_osal.cpp",
+          "accessibility/focus_move/accessibility_focus_strategy.cpp",
           "js_accessibility_manager.cpp",
           "js_third_accessibility_hover_ng.cpp",
           "js_third_provider_interaction_operation.cpp",

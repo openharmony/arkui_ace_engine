@@ -2667,4 +2667,37 @@ HWTEST_F(SecurityComponentModelTestNg, SetTextIconSpace002, TestSize.Level0)
     SecurityComponentModelNG::SetTextIconSpace(frameNode.rawPtr_, value);
     ASSERT_FALSE(value);
 }
+
+/**
+ * @tc.name: SetQiangjiProperty001
+ * @tc.desc: Test set properties for qiangji
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+
+    SecurityComponentModelNG::SetAlign(frameNode.GetRawPtr(), Alignment::CENTER_LEFT);
+    SecurityComponentModelNG::SetMaxFontScale(frameNode.GetRawPtr(), 1.5);
+    SecurityComponentModelNG::SetMinFontScale(frameNode.GetRawPtr(), 1.0);
+    SecurityComponentModelNG::SetMaxLines(frameNode.GetRawPtr(), 1);
+    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode.GetRawPtr(), Dimension(30.0));
+    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode.GetRawPtr(), Dimension(20.0));
+    SecurityComponentModelNG::SetHeightAdaptivePolicy(
+        frameNode.GetRawPtr(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_EQ(property->GetAlignment().value_or(Alignment::CENTER_RIGHT), Alignment::CENTER_LEFT);
+    ASSERT_EQ(property->GetMaxFontScale().value_or(0.0), 1.5);
+    ASSERT_EQ(property->GetMinFontScale().value_or(0.0), 1.0);
+    ASSERT_EQ(property->GetMaxLines().value_or(0), 1);
+    ASSERT_EQ(property->GetAdaptMaxFontSize().value_or(Dimension(0.0)).ConvertToVp(), 30.0);
+    ASSERT_EQ(property->GetAdaptMinFontSize().value_or(Dimension(0.0)).ConvertToVp(), 20.0);
+    ASSERT_EQ(property->GetHeightAdaptivePolicy().value_or(
+        TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+}
 } // namespace OHOS::Ace::NG

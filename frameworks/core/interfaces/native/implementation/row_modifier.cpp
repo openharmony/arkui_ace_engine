@@ -75,12 +75,15 @@ void SetRowOptions1Impl(Ark_NativePointer node,
     }
     Converter::VisitUnion(arkUnion.value(),
         [frameNode](const Ark_RowOptions& value) {
+            //RowModelNG::SetSpace(frameNode, Converter::OptConvert<Dimension>(value.space));
         },
         [frameNode](const Ark_RowOptionsV2& value) {
             LOGE("ARKOALA RowInterfaceModifier::SetRowOptions1Impl  Ark_RowOptionsV2 is not implemented.");
         },
         []() {}
     );
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //RowModelNG::SetSetRowOptions1(frameNode, convValue);
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {

@@ -4053,5 +4053,37 @@ HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: AddNeedReloadNodes001
+ * @tc.desc: Test AddNeedReloadNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, AddNeedReloadNodes001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps1: AddNeedReloadNodes with nullptr.
+     * @tc.expected: needReloadNodes_ is empty.
+     */
+    RefPtr<UINode> dirtyNode;
+    context_->AddNeedReloadNodes(AceType::RawPtr(dirtyNode));
+    EXPECT_EQ(context_->needReloadNodes_.size(), 0);
+
+    /**
+     * @tc.steps2: AddNeedReloadNodes with new node.
+     * @tc.expected: needReloadNodes_ size is 1.
+     */
+    dirtyNode = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    context_->AddNeedReloadNodes(AceType::RawPtr(dirtyNode));
+    EXPECT_EQ(context_->needReloadNodes_.size(), 1);
+
+    /**
+     * @tc.steps3: AddNeedReloadNodes with node witch is in needReloadNodes_.
+     * @tc.expected: needReloadNodes_ size is 1.
+     */
+    context_->AddNeedReloadNodes(AceType::RawPtr(dirtyNode));
+    EXPECT_EQ(context_->needReloadNodes_.size(), 1);
+}
 } // namespace NG
 } // namespace OHOS::Ace

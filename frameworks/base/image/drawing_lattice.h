@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,17 +26,9 @@ class ACE_EXPORT DrawingLattice : public AceType {
 public:
     static RefPtr<DrawingLattice> CreateDrawingLattice(void* sptrAddr);
     static RefPtr<DrawingLattice> CreateDrawingLatticeFromNative(void* sptrAddr);
-#if defined(ACE_STATIC)
-    /**
-     * @description: Create ace lattice by drawing lattice ani
-     * @param aniAddr ani lattice of drawing lattice
-     * @return  ace lattice object
-     *
-     * only for arkts 1.2
-     */
-    static RefPtr<DrawingLattice> CreateDrawingLatticeFromAni(void* aniAddr);
-#endif
-    virtual void* GetDrawingLatticeSptrAddr() = 0; //define the return value as void is for tdd compilation
+
+    // define the return value as void is for tdd compilation
+    virtual void* GetDrawingLatticeSptrAddr() = 0;
     virtual std::string DumpToString() = 0;
 };
 

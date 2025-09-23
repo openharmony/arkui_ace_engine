@@ -89,8 +89,8 @@ struct RouterPageInfo {
     bool isUseIntent = false;
 };
 
-class PageRouterManager : public AceType {
-    DECLARE_ACE_TYPE(PageRouterManager, AceType);
+class ACE_FORCE_EXPORT PageRouterManager : public AceType {
+    DECLARE_ACE_TYPE(PageRouterManager, AceType)
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;
@@ -180,9 +180,11 @@ public:
     void Push(const RouterPageInfo& target);
 
     // For ArkTS1.2
-    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target);
-    RefPtr<FrameNode> ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& enterFinishCallback);
-    RefPtr<FrameNode> RunPageExtender(const RouterPageInfo& target);
+    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    RefPtr<FrameNode> ReplaceExtender(
+        const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
+    RefPtr<FrameNode> RunPageExtender(
+        const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
 
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
@@ -269,6 +271,9 @@ protected:
         return static_cast<int32_t>(pageRouterStack_.size()) - 1;
     }
 
+    virtual void NotifyForceFullScreenChangeIfNeeded(
+        const std::string& curTopPageName, const RefPtr<PipelineContext>& context) {}
+
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStackByRouteName(
         const std::string& name, bool needIgnoreBegin = false);
@@ -325,8 +330,8 @@ protected:
     static bool OnCleanPageStack();
 
     // For ArkTS1.2
-    virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
-        bool needHideLast = true, bool needTransition = true, bool isPush = false);
+    virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target, void* jsNode,
+        bool needHideLast = true, bool needTransition = true);
     RefPtr<FrameNode> CreatePageExtender(int32_t pageId, const RouterPageInfo& target);
 
     UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,

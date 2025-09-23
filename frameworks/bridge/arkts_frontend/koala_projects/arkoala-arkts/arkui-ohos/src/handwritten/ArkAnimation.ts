@@ -22,13 +22,22 @@ export function _animateTo(param: AnimateParam, event: (() => void)): void {
     if (!event) {
         return;
     }
-    AnimationExtender.OpenImplicitAnimation(param);
-    event();
-    addPartialUpdate(event, param, (before: boolean) => {
+    let newEvent = ()=>{
+        AnimationExtender.OpenImplicitAnimation(param);
+        event();
+    }
+    addPartialUpdate(newEvent, param, (before: boolean) => {
         if (!before) {
             AnimationExtender.CloseImplicitAnimation();
         }
     })
+}
+
+export function _animateToImmediately(param: AnimateParam, event: (() => void)): void {
+    if (!event) {
+        return;
+    }
+    AnimationExtender.AnimateToImmediatelyImpl(param, event);
 }
 
 export function _animationStart(param: AnimateParam | undefined, isFirstBuild: boolean) {

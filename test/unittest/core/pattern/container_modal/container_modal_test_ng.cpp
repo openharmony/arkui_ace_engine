@@ -1060,4 +1060,55 @@ HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc3, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: CheckNodeOnContainerModalTitle
+ * @tc.desc: Test function CheckNodeOnContainerModalTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, CheckNodeOnContainerModalTitle, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: init ContainerModal.
+     */
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps2: call CheckNodeOnContainerModalTitle when frameNode not has parent.
+     * @tc.expected: result is false.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    auto result = pattern_->CheckNodeOnContainerModalTitle(frameNode);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps3: call CheckNodeOnContainerModalTitle when frameNode parent is column.
+     * @tc.expected: result is false.
+     */
+    auto column =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    column->AddChild(frameNode);
+    result = pattern_->CheckNodeOnContainerModalTitle(frameNode);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps5: call CheckNodeOnContainerModalTitle when frameNode  parent is toolbarItem.
+     * @tc.expected: result is true.
+     */
+    auto toolbarItem = FrameNode::GetOrCreateFrameNode(
+        V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
+    toolbarItem->AddChild(column);
+    result = pattern_->CheckNodeOnContainerModalTitle(frameNode);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps4: call CheckNodeOnContainerModalTitle when frameNode  parent is containerNode.
+     * @tc.expected: result is false.
+     */
+    frameNode_->AddChild(toolbarItem);
+    result = pattern_->CheckNodeOnContainerModalTitle(toolbarItem);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

@@ -442,6 +442,7 @@ void ImagePattern::OnImageLoadSuccess()
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
     }
+    bool isStaticImage = image_->IsStatic();
     PrepareAnimation(image_);
     if (enableDrag_) {
         EnableDrag();
@@ -477,6 +478,11 @@ void ImagePattern::OnImageLoadSuccess()
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
+    /*
+     * Only mark dirty for static images.
+     * Animated images maintain their own dirty marking logic, so no need to trigger here.
+     */
+    CHECK_NULL_VOID(isStaticImage);
     host->MarkNeedRenderOnly();
 }
 
@@ -485,7 +491,7 @@ bool ImagePattern::SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto id = host->GetInspectorId();
-    if (id.has_value()) {
+    if (id.has_value() && !id.value().empty()) {
         std::string result = std::string("id:") + id.value();
         pixelMap->SetMemoryName(result);
         hasSetPixelMapMemoryName_ = true;
@@ -1266,7 +1272,7 @@ bool ImagePattern::RecycleImageData()
     if (!rsRenderContext) {
         return false;
     }
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
         imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
@@ -1288,6 +1294,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 void ImagePattern::OnRecycle()
 {
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnRecycle. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
+    ACE_SCOPED_TRACE("OnRecycle %s", imageDfxConfig_.ToStringWithSrc().c_str());
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1305,6 +1312,7 @@ void ImagePattern::OnRecycle()
 
 void ImagePattern::OnReuse()
 {
+    ACE_SCOPED_TRACE("OnReuse %s", imageDfxConfig_.ToStringWithSrc().c_str());
     RegisterWindowStateChangedCallback();
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
@@ -1620,6 +1628,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
 
     json->PutExtAttr("syncLoad", syncLoad_ ? "true" : "false", filter);
+    json->PutExtAttr("supportSvg2", supportSvg2_ ? "true" : "false", filter);
     json->PutExtAttr("draggable", enableDrag_ ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
@@ -1863,6 +1872,7 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("visibility: ").append(previousVisibility_ ? "true" : "false"));
     DumpMenmoryNameId();
 }
 
@@ -2238,7 +2248,7 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s ResetImage.",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
@@ -2255,7 +2265,7 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetAltImage",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetAltImage",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
@@ -2320,7 +2330,7 @@ void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     } else {
         json->Put("imageLoadingContext", "null");
     }
-
+    json->Put("supportSvg2", supportSvg2_);
     json->Put("draggable", enableDrag_);
     json->Put("enableAnalyzer", isEnableAnalyzer_);
 }

@@ -1625,6 +1625,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_AccessibilityCallback* value)
     {
     }
+    void OnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                             const AccessibilityTransparentCallback* value)
+    {
+    }
     void HoverEffectImpl(Ark_NativePointer node,
                          const Opt_HoverEffect* value)
     {
@@ -4239,7 +4243,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
     }
     void OnWillScrollImpl(Ark_NativePointer node,
@@ -8407,7 +8411,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void InitialScaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float32* value)
     {
     }
     void UserAgentImpl(Ark_NativePointer node,
@@ -8490,12 +8494,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_Callback_Literal_Function_handler_Object_error_Void* value)
     {
     }
-    void OnRenderExited0Impl(Ark_NativePointer node,
+    void OnRenderExitedImpl(Ark_NativePointer node,
                              const Opt_Callback_OnRenderExitedEvent_Void* value)
-    {
-    }
-    void OnRenderExited1Impl(Ark_NativePointer node,
-                             const Opt_Callback_Literal_Object_detail_Boolean* value)
     {
     }
     void OnShowFileSelectorImpl(Ark_NativePointer node,
@@ -8832,10 +8832,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_CustomNodeBuilder* content,
                                const Opt_WebResponseType* responseType,
                                const Opt_SelectionMenuOptionsExt* options)
-    {
-    }
-    void ForceEnableZoomImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
     {
     }
     } // WebAttributeModifier
@@ -9389,6 +9385,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::OnHoverImpl,
             CommonMethodModifier::OnHoverMoveImpl,
             CommonMethodModifier::OnAccessibilityHoverImpl,
+            CommonMethodModifier::OnAccessibilityHoverTransparentImpl,
             CommonMethodModifier::HoverEffectImpl,
             CommonMethodModifier::OnMouseImpl,
             CommonMethodModifier::OnTouchImpl,
@@ -11615,8 +11612,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OnRefreshAccessedHistoryImpl,
             WebAttributeModifier::OnUrlLoadInterceptImpl,
             WebAttributeModifier::OnSslErrorReceiveImpl,
-            WebAttributeModifier::OnRenderExited0Impl,
-            WebAttributeModifier::OnRenderExited1Impl,
+            WebAttributeModifier::OnRenderExitedImpl,
             WebAttributeModifier::OnShowFileSelectorImpl,
             WebAttributeModifier::OnFileSelectorShowImpl,
             WebAttributeModifier::OnResourceLoadImpl,
@@ -11700,7 +11696,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::NativeEmbedOptionsImpl,
             WebAttributeModifier::RegisterNativeEmbedRuleImpl,
             WebAttributeModifier::BindSelectionMenuImpl,
-            WebAttributeModifier::ForceEnableZoomImpl,
         };
         return &ArkUIWebModifierImpl;
     }
@@ -11952,6 +11947,58 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &modifiersImpl;
     }
+    namespace AlphabetIndexerOpsAccessor {
+    Ark_NativePointer RegisterIndexerSelectedCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Number* index,
+                                                          const IndexerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterIndexerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // AlphabetIndexerOpsAccessor
+    namespace ListItemOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   Ark_Boolean value,
+                                                   const SelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // ListItemOpsAccessor
+    namespace RefreshOpsAccessor {
+    Ark_NativePointer RegisterRefreshingCallbackImpl(Ark_NativePointer node,
+                                                     Ark_Boolean value,
+                                                     const RefreshingCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterRefreshingCallback(frameNode, convValue);
+        return {};
+    }
+    } // RefreshOpsAccessor
+    namespace SwiperOpsAccessor {
+    Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const IndexCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterIndexCallback(frameNode, convValue);
+        return {};
+    }
+    } // SwiperOpsAccessor
     namespace AnimationExtenderAccessor {
     void SetClipRectImpl(Ark_NativePointer node,
                          Ark_Float32 x,
@@ -11961,6 +12008,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetSetClipRect(frameNode, convValue);
     }
     void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
     {
@@ -11973,12 +12023,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetStartDoubleAnimation(frameNode, convValue);
     }
     void AnimationTranslateImpl(Ark_NativePointer node,
                                 const Ark_TranslateOptions* options)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetAnimationTranslate(frameNode, convValue);
     }
     } // AnimationExtenderAccessor
     namespace BaseContextAccessor {
@@ -12163,6 +12219,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(root);
+        //auto convValue = Converter::OptConvert<type>(root); // for enums
+        //undefinedModelNG::SetEndFrame(frameNode, convValue);
     }
     void SyncInstanceIdImpl(Ark_Int32 instanceId)
     {
@@ -12206,6 +12265,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(panGestureOptions);
+        //auto convValue = Converter::OptConvert<type>(panGestureOptions); // for enums
+        //undefinedModelNG::SetCreatePanGestureWithPanGestureOptions(frameNode, convValue);
         return {};
     }
     Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
@@ -12236,48 +12298,72 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnAction(frameNode, convValue);
     }
     void SetOnActionStartImpl(Ark_NativePointer gesture,
                               const Callback_GestureEvent_Void* onActionStart)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionStart(frameNode, convValue);
     }
     void SetOnActionUpdateImpl(Ark_NativePointer gesture,
                                const Callback_GestureEvent_Void* onActionUpdate)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionUpdate(frameNode, convValue);
     }
     void SetOnActionEndImpl(Ark_NativePointer gesture,
                             const Callback_GestureEvent_Void* onActionEnd)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionEnd(frameNode, convValue);
     }
     void SetOnActionCancelImpl(Ark_NativePointer gesture,
                                const Callback_GestureEvent_Void* onActionCancel)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionCancel(frameNode, convValue);
     }
     void SetOnCancelImpl(Ark_NativePointer gesture,
                          const Callback_Void* onCancel)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnCancel(frameNode, convValue);
     }
     void SetGestureTagImpl(Ark_NativePointer gesture,
                            const Ark_String* tag)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetGestureTag(frameNode, convValue);
     }
     void SetAllowedTypesImpl(Ark_NativePointer gesture,
                              const Array_SourceTool* types)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetAllowedTypes(frameNode, convValue);
     }
     void AddGestureToNodeImpl(Ark_NativePointer node,
                               const Ark_Number* priority,
@@ -12287,23 +12373,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetAddGestureToNode(frameNode, convValue);
     }
     void AddGestureToGroupImpl(Ark_NativePointer group,
                                Ark_NativePointer gesture)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(group);
+        //auto convValue = Converter::OptConvert<type>(group); // for enums
+        //undefinedModelNG::SetAddGestureToGroup(frameNode, convValue);
     }
     void RemoveGestureByTagImpl(Ark_NativePointer node,
                                 const Ark_String* tag)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRemoveGestureByTag(frameNode, convValue);
     }
     void ClearGesturesImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetClearGestures(frameNode, convValue);
     }
     } // GestureOpsAccessor
     namespace FocusControllerAccessor {
@@ -12667,8 +12765,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetOnStateStyleChange(frameNode, convValue);
     }
     } // StateStylesOpsAccessor
+    namespace DragDropOpsAccessor {
+    void RegisterOnDragStartImpl(Ark_NativePointer node,
+                                    const Callback_onDragStart* onDragStart)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterOnDragStart(frameNode, convValue);
+    }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+    }
+    } // DragDropOpsAccessor
     namespace UIContextAtomicServiceBarAccessor {
     Ark_Frame GetBarRectImpl()
     {
@@ -13245,6 +13367,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_UIFontConfig GetUIFontConfigImpl()
+    {
+        return {};
+    }
     } // GlobalScope_ohos_fontAccessor
     namespace GlobalScope_ohos_measure_utilsAccessor {
     Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
@@ -13443,6 +13569,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
+    {
+        return {};
+    }
+    Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -13983,6 +14113,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RenderNodeAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        return {};
+    }
+    Ark_Number GetMaxFontScaleImpl()
+    {
+        return {};
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace TabsOpsAccessor {
     Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
                                           const Opt_BarMode* value,
@@ -13990,6 +14135,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterBarMode(frameNode, convValue);
         return {};
     }
     Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -13998,10 +14146,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterBarBackgroundBlurStyle(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const IndexCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterIndexCallback(frameNode, convValue);
         return {};
     }
     } // TabsOpsAccessor
-    namespace UIContextImpAccessor {
+    namespace IUIContextAccessor {
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -14010,7 +14172,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
-    } // UIContextImpAccessor
+    } // IUIContextAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -14018,6 +14180,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectedCallback(frameNode, convValue);
         return {};
     }
     } // GridItemOpsAccessor
@@ -14091,6 +14256,147 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // VisualEffectAccessor
+    namespace CheckboxGroupOpsAccessor {
+    Ark_NativePointer RegisterSelectAllCallbackImpl(Ark_NativePointer node,
+                                                    Ark_Boolean isAllSelected,
+                                                    const SelectAllCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectAllCallback(frameNode, convValue);
+        return {};
+    }
+    } // CheckboxGroupOpsAccessor
+    namespace CheckboxOpsAccessor {
+    Ark_NativePointer RegisterSelectCallbackImpl(Ark_NativePointer node,
+                                                 Ark_Boolean isSelected,
+                                                 const SelectCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectCallback(frameNode, convValue);
+        return {};
+    }
+    } // CheckboxOpsAccessor
+    namespace DatePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterDatePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Int64 selected,
+                                                             const DatePickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterDatePickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // DatePickerSelectedOpsAccessor
+    namespace MenuItemOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   Ark_Boolean value,
+                                                   const MenuSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // MenuItemOpsAccessor
+    namespace RadioOpsAccessor {
+    Ark_NativePointer RegisterCheckedCallbackImpl(Ark_NativePointer node,
+                                                  Ark_Boolean isChecked,
+                                                  const CheckedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterCheckedCallback(frameNode, convValue);
+        return {};
+    }
+    } // RadioOpsAccessor
+    namespace RatingOpsAccessor {
+    Ark_NativePointer RegisterRatingCallbackImpl(Ark_NativePointer node,
+                                                 const Ark_Number* rating,
+                                                 const RatingCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterRatingCallback(frameNode, convValue);
+        return {};
+    }
+    } // RatingOpsAccessor
+    namespace SelectOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   const Ark_Union_Number_Resource* numCount,
+                                                   const SelectSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
+                                                const Ark_ResourceStr* resStr,
+                                                const SelectValueCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterValueCallback(frameNode, convValue);
+        return {};
+    }
+    } // SelectOpsAccessor
+    namespace SliderOpsAccessor {
+    Ark_NativePointer RegisterValueCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const ValueCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterValueCallback(frameNode, convValue);
+        return {};
+    }
+    } // SliderOpsAccessor
+    namespace ToggleOpsAccessor {
+    Ark_NativePointer RegisterIsOnCallbackImpl(Ark_NativePointer node,
+                                               Ark_Boolean isOn,
+                                               const IsOnCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterIsOnCallback(frameNode, convValue);
+        return {};
+    }
+    } // ToggleOpsAccessor
+    namespace NavigationOpsAccessor {
+    Ark_NativePointer RegisterNavBarWidthCallbackImpl(Ark_NativePointer node,
+                                                      const Ark_Length* value,
+                                                      const NavBarWidthCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterNavBarWidthCallback(frameNode, convValue);
+        return {};
+    }
+    } // NavigationOpsAccessor
     namespace NavExtenderAccessor {
     void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                     const NavExtender_OnUpdateStack* callback)
@@ -14104,6 +14410,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetCheckNeedCreate(frameNode, convValue);
         return {};
     }
     Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
@@ -14116,6 +14425,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSetNavigationOptions(frameNode, convValue);
     }
     void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
                                    Ark_Int32 index,
@@ -14127,6 +14439,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSetNavigationMode(frameNode, convValue);
     }
     void HideTitleBarImpl(Ark_NativePointer navigation,
                           Ark_Boolean isHide,
@@ -14134,6 +14449,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetHideTitleBar(frameNode, convValue);
     }
     void HideToolBarImpl(Ark_NativePointer navigation,
                          Ark_Boolean isHide,
@@ -14141,36 +14459,54 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetHideToolBar(frameNode, convValue);
     }
     void HideNavBarImpl(Ark_NativePointer navigation,
                         Ark_Boolean hide)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetHideNavBar(frameNode, convValue);
     }
     void HideBackButtonImpl(Ark_NativePointer navigation,
                             Ark_Boolean hide)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetHideBackButton(frameNode, convValue);
     }
     void SetNavBarStateChangeImpl(Ark_NativePointer navigation,
                                   const Callback_Boolean_Void* stateCallback)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSetNavBarStateChange(frameNode, convValue);
     }
     void SetTitleModeChangeImpl(Ark_NativePointer navigation,
                                 const Callback_NavigationTitleMode_Void* titleCallback)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSetTitleModeChange(frameNode, convValue);
     }
     void SetTitleModeImpl(Ark_NativePointer navigation,
                           Ark_NavigationTitleMode titleMode)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSetTitleMode(frameNode, convValue);
     }
     void TitleImpl(Ark_NativePointer navigation,
                    const Ark_String* title,
@@ -14178,12 +14514,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetTitle(frameNode, convValue);
     }
     void SubTitleImpl(Ark_NativePointer navigation,
                       const Ark_String* subTitle)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(navigation);
+        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+        //undefinedModelNG::SetSubTitle(frameNode, convValue);
     }
     void PushPathImpl(Ark_NavPathStack pathStack,
                       Ark_NavPathInfo info,
@@ -14219,16 +14561,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // NavExtenderAccessor
-    namespace StepperOpsAccessor {
-    Ark_NativePointer RegisterStepperIndexCallbackImpl(Ark_NativePointer node,
-                                                       const Ark_Number* value,
-                                                       const StepperIndexCallback* callback)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
-    }
-    } // StepperOpsAccessor
     namespace SearchOpsAccessor {
     Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
                                                       const Ark_String* value,
@@ -14236,15 +14568,58 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSearchValueCallback(frameNode, convValue);
         return {};
     }
-+    } // SearchOpsAccessor
+    } // SearchOpsAccessor
+    namespace SideBarContainerOpsAccessor {
+    Ark_NativePointer RegisterShowSideBarCallbackImpl(Ark_NativePointer node,
+                                                      Ark_Boolean value,
+                                                      const ShowSideBarCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterShowSideBarCallback(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer RegisterSideBarWidthCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const SideBarWidthCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSideBarWidthCallback(frameNode, convValue);
+        return {};
+    }
+    } // SideBarContainerOpsAccessor
+    namespace StepperOpsAccessor {
+    Ark_NativePointer RegisterStepperIndexCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const StepperIndexCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterStepperIndexCallback(frameNode, convValue);
+        return {};
+    }
+    } // StepperOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetEmitTextInputEvent(frameNode, convValue);
     }
     } // EventEmulatorAccessor
     namespace TextFieldOpsAccessor {
@@ -14254,6 +14629,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTextFieldValueCallback(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
@@ -14261,6 +14639,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetWidth(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,
@@ -14268,6 +14649,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetHeight(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
@@ -14275,6 +14659,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetPadding(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
@@ -14282,6 +14669,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetMargin(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
@@ -14289,6 +14679,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorder(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
@@ -14296,6 +14689,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderWidth(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
@@ -14303,6 +14699,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderColor(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
@@ -14310,6 +14709,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderStyle(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
@@ -14317,6 +14719,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderRadius(frameNode, convValue);
         return {};
     }
     Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
@@ -14324,9 +14729,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBackgroundColor(frameNode, convValue);
         return {};
     }
     } // TextFieldOpsAccessor
+    namespace TextPickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTextPickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Union_Number_Array_Number* selected,
+                                                             const TextPickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTextPickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // TextPickerSelectedOpsAccessor
+    namespace TextPickerValueOpsAccessor {
+    Ark_NativePointer RegisterTextPickerValueCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Union_String_Array_String* value,
+                                                          const TextPickerValueCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTextPickerValueCallback(frameNode, convValue);
+        return {};
+    }
+    } // TextPickerValueOpsAccessor
+    namespace TimePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             Ark_Int64 selected,
+                                                             const TimePickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTimePickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // TimePickerSelectedOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -14337,11 +14784,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AlertDialogAccessor
+
     namespace PromptActionAccessor {
-    void ShowToastImpl(const Ark_ShowToastOptions* value)
+    void OpenPopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_PopupCommonOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdatePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_PopupCommonOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void ClosePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_MenuOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_MenuOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
     {
     }
     } // PromptActionAccessor
+
     namespace SpringPropAccessor {
     void DestroyPeerImpl(Ark_SpringProp peer)
     {
@@ -15225,12 +15721,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Ark_Number* scrollStep)
     {
     }
-    Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
-    {
-        return {};
-    }
-    void SetPropagationImpl(Ark_AxisEvent peer,
-                            const Callback_Void* propagation)
+    void PropagationImpl(Ark_AxisEvent peer)
     {
     }
     } // AxisEventAccessor
@@ -15491,12 +15982,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Map_AxisModel_Number* axisMap)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
-                                const Callback_Void* stopPropagation)
+    Void StopPropagationImpl(Ark_FocusAxisEvent peer)
     {
     }
     } // FocusAxisEventAccessor
@@ -16837,6 +17323,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // OffscreenCanvasRenderingContext2DAccessor
+    namespace OverlayOpsAccessor {
+    void SetOverlayAttributeImpl(Ark_NativePointer node,
+                                    const Opt_Union_String_CustomBuilder* value,
+                                    const Opt_OverlayOptions* options)
+    {
+    }
+    } // OverlayOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -16933,6 +17426,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void CloseImpl(Ark_CustomDialogController peer)
+    {
+    }
+    void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
     {
     }
     } // CustomDialogControllerAccessor
@@ -17603,6 +18099,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_String GetIdImpl(Ark_EventTargetInfo peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
     {
         return {};
     }
@@ -18663,6 +19163,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // BounceSymbolEffectAccessor
+    namespace BuilderNodeOpsAccessor {
+    void DestroyPeerImpl(Ark_BuilderNodeOps peer)
+    {
+        auto peerImpl = reinterpret_cast<BuilderNodeOpsPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_BuilderNodeOps CtorImpl()
+    {
+        return new BuilderNodeOpsPeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void CreateImpl(Ark_BuilderNodeOps peer,
+                    const Callback_Void* buildFunc)
+    {
+    }
+    void DisposeNodeImpl(Ark_BuilderNodeOps peer)
+    {
+    }
+    void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                            const Callback_Void* configurationUpdateFunc)
+    {
+    }
+    void SetOptionsImpl(Ark_BuilderNodeOps peer,
+                        const Ark_BuilderNodeOptions* options)
+    {
+    }
+    Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
+                                   Ark_TouchEvent event)
+    {
+        return {};
+    }
+    Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer,
+                                                        Ark_NativePointer node)
+    {
+        return {};
+    }
+    } // BuilderNodeOpsAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -19532,11 +20074,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number XImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Number YImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
@@ -19576,15 +20118,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
@@ -19634,7 +20176,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_ConsoleMessage CtorImpl(const Ark_String* message,
                                 const Ark_String* sourceId,
-                                const Ark_Number* lineNumber,
+                                const Ark_Int32* lineNumber,
                                 Ark_MessageLevel messageLevel)
     {
         return new ConsoleMessagePeer(message, sourceId, lineNumber, messageLevel);
@@ -19651,7 +20193,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
+    Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
     {
         return {};
     }
@@ -19721,7 +20263,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
+    Opt_Union_String_Int32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
     {
         return {};
     }
@@ -19741,12 +20283,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
+    Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
     {
         return {};
     }
     void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                             const Ark_Union_String_Number_Resource_Buffer* data)
+                             const Ark_Union_String_Int32_Resource_Buffer* data)
     {
     }
     void SetResponseEncodingImpl(Ark_WebResourceResponse peer,
@@ -19766,7 +20308,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetResponseCodeImpl(Ark_WebResourceResponse peer,
-                             const Ark_Number* code)
+                             const Ark_Int32* code)
     {
     }
     void SetResponseIsReadyImpl(Ark_WebResourceResponse peer,
@@ -19798,7 +20340,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
+    Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
     {
         return {};
     }
@@ -20302,6 +20844,87 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LetterSpacingStyleAccessor
+    namespace LevelOrderAccessor {
+    void DestroyPeerImpl(Ark_LevelOrder peer)
+    {
+        auto peerImpl = reinterpret_cast<LevelOrderPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LevelOrder ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_LevelOrder ClampImpl(const Ark_Number* order)
+    {
+        return {};
+    }
+    Ark_Number GetOrderImpl(Ark_LevelOrder peer)
+    {
+        return {};
+    }
+    } // LevelOrderAccessor
+    namespace DismissPopupActionAccessor {
+    void DestroyPeerImpl(Ark_DismissPopupAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissPopupActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissPopupAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissPopupAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissPopupAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissPopupAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissPopupActionAccessor
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissDialogActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissDialogAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissDialogAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -20456,9 +21079,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_MutableStyledString CtorImpl()
+    Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                     const Opt_Array_StyleOptions* styles)
     {
-        return new MutableStyledStringPeer();
+        return new MutableStyledStringPeer(value, styles);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -20535,7 +21159,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
+    Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
     {
         return new ImageAttachmentPeer(value);
     }
@@ -20742,6 +21366,95 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RouterExtenderAccessor
+    namespace ContentModifierHelperAccessor {
+    void ContentModifierRadioImpl(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const RadioModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierButtonImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ButtonModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierButtonImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierCheckBoxImpl(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const CheckBoxModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierCheckBoxImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierRatingImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const RatingModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierRatingImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierSliderImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const SliderModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierSliderImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierToggleImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ToggleModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierToggleImpl(Ark_NativePointer node)
+    {
+    } 
+    }
+    const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
+    {
+        static const GENERATED_ArkUIAlphabetIndexerOpsAccessor AlphabetIndexerOpsAccessorImpl {
+            AlphabetIndexerOpsAccessor::RegisterIndexerSelectedCallbackImpl,
+        };
+        return &AlphabetIndexerOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIListItemOpsAccessor* GetListItemOpsAccessor()
+    {
+        static const GENERATED_ArkUIListItemOpsAccessor ListItemOpsAccessorImpl {
+            ListItemOpsAccessor::RegisterSelectedCallbackImpl,
+        };
+        return &ListItemOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIRefreshOpsAccessor* GetRefreshOpsAccessor()
+    {
+        static const GENERATED_ArkUIRefreshOpsAccessor RefreshOpsAccessorImpl {
+            RefreshOpsAccessor::RegisterRefreshingCallbackImpl,
+        };
+        return &RefreshOpsAccessorImpl;
+    }
+    const GENERATED_ArkUISwiperOpsAccessor* GetSwiperOpsAccessor()
+    {
+        static const GENERATED_ArkUISwiperOpsAccessor SwiperOpsAccessorImpl {
+            SwiperOpsAccessor::RegisterIndexCallbackImpl,
+        };
+        return &SwiperOpsAccessorImpl;
+    }
     const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     {
         static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
@@ -21005,6 +21718,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StateStylesOpsAccessor::OnStateStyleChangeImpl,
         };
         return &StateStylesOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor()
+    {
+        static const GENERATED_ArkUIDragDropOpsAccessor DragDropOpsAccessorImpl {
+            DragDropOpsAccessor::RegisterOnDragStartImpl,
+        };
+        return &DragDropOpsAccessorImpl;
     }
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
     {
@@ -21297,6 +22017,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -21384,6 +22105,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::GetAttachedFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByIdImpl,
             FrameNodeAccessor::GetFrameNodeByUniqueIdImpl,
+            FrameNodeAccessor::GetCommonEventImpl,
             FrameNodeAccessor::ReuseImpl,
             FrameNodeAccessor::RecycleImpl,
             FrameNodeAccessor::GetFrameNodePtrImpl,
@@ -21588,20 +22310,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
+    }
+
     const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
     {
         static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
             TabsOpsAccessor::RegisterBarModeImpl,
+            TabsOpsAccessor::RegisterIndexCallbackImpl,
         };
         return &TabsOpsAccessorImpl;
     }
-    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
-        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
-            UIContextImpAccessor::FreezeUINode0Impl,
-            UIContextImpAccessor::FreezeUINode1Impl,
+        static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::FreezeUINode0Impl,
+            IUIContextAccessor::FreezeUINode1Impl,
         };
-        return &UIContextImpAccessorImpl;
+        return &IUIContextAccessorImpl;
     }
 
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
@@ -21644,6 +22384,86 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct VisualEffectPeer {
         virtual ~VisualEffectPeer() = default;
     };
+    const GENERATED_ArkUINavigationOpsAccessor* GetNavigationOpsAccessor()
+    {
+        static const GENERATED_ArkUINavigationOpsAccessor NavigationOpsAccessorImpl {
+            NavigationOpsAccessor::RegisterNavBarWidthCallbackImpl,
+        };
+        return &NavigationOpsAccessorImpl;
+    }
+    const GENERATED_ArkUICheckboxGroupOpsAccessor* GetCheckboxGroupOpsAccessor()
+    {
+        static const GENERATED_ArkUICheckboxGroupOpsAccessor CheckboxGroupOpsAccessorImpl {
+            CheckboxGroupOpsAccessor::RegisterSelectAllCallbackImpl,
+        };
+        return &CheckboxGroupOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUICheckboxOpsAccessor* GetCheckboxOpsAccessor()
+    {
+        static const GENERATED_ArkUICheckboxOpsAccessor CheckboxOpsAccessorImpl {
+            CheckboxOpsAccessor::RegisterSelectCallbackImpl,
+        };
+        return &CheckboxOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* GetDatePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUIDatePickerSelectedOpsAccessor DatePickerSelectedOpsAccessorImpl {
+            DatePickerSelectedOpsAccessor::RegisterDatePickerSelectedCallbackImpl,
+        };
+        return &DatePickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIMenuItemOpsAccessor* GetMenuItemOpsAccessor()
+    {
+        static const GENERATED_ArkUIMenuItemOpsAccessor MenuItemOpsAccessorImpl {
+            MenuItemOpsAccessor::RegisterSelectedCallbackImpl,
+        };
+        return &MenuItemOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIRadioOpsAccessor* GetRadioOpsAccessor()
+    {
+        static const GENERATED_ArkUIRadioOpsAccessor RadioOpsAccessorImpl {
+            RadioOpsAccessor::RegisterCheckedCallbackImpl,
+        };
+        return &RadioOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIRatingOpsAccessor* GetRatingOpsAccessor()
+    {
+        static const GENERATED_ArkUIRatingOpsAccessor RatingOpsAccessorImpl {
+            RatingOpsAccessor::RegisterRatingCallbackImpl,
+        };
+        return &RatingOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUISelectOpsAccessor* GetSelectOpsAccessor()
+    {
+        static const GENERATED_ArkUISelectOpsAccessor SelectOpsAccessorImpl {
+            SelectOpsAccessor::RegisterSelectedCallbackImpl,
+            SelectOpsAccessor::RegisterValueCallbackImpl,
+        };
+        return &SelectOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUISliderOpsAccessor* GetSliderOpsAccessor()
+    {
+        static const GENERATED_ArkUISliderOpsAccessor SliderOpsAccessorImpl {
+            SliderOpsAccessor::RegisterValueCallbackImpl,
+        };
+        return &SliderOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIToggleOpsAccessor* GetToggleOpsAccessor()
+    {
+        static const GENERATED_ArkUIToggleOpsAccessor ToggleOpsAccessorImpl {
+            ToggleOpsAccessor::RegisterIsOnCallbackImpl,
+        };
+        return &ToggleOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
     {
         static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
@@ -21674,20 +22494,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NavExtenderAccessorImpl;
     }
 
-    const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor()
-    {
-        static const GENERATED_ArkUIStepperOpsAccessor StepperOpsAccessorImpl {
-            StepperOpsAccessor::RegisterStepperIndexCallbackImpl,
-        };
-        return &StepperOpsAccessorImpl;
-    }
-
     const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor()
     {
         static const GENERATED_ArkUISearchOpsAccessor SearchOpsAccessorImpl {
             SearchOpsAccessor::RegisterSearchValueCallbackImpl,
         };
         return &SearchOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUISideBarContainerOpsAccessor* GetSideBarContainerOpsAccessor()
+    {
+        static const GENERATED_ArkUISideBarContainerOpsAccessor SideBarContainerOpsAccessorImpl {
+            SideBarContainerOpsAccessor::RegisterShowSideBarCallbackImpl,
+            SideBarContainerOpsAccessor::RegisterSideBarWidthCallbackImpl,
+        };
+        return &SideBarContainerOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor()
+    {
+        static const GENERATED_ArkUIStepperOpsAccessor StepperOpsAccessorImpl {
+            StepperOpsAccessor::RegisterStepperIndexCallbackImpl,
+        };
+        return &StepperOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
@@ -21717,6 +22546,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &TextFieldOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUITextPickerSelectedOpsAccessor* GetTextPickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerSelectedOpsAccessor TextPickerSelectedOpsAccessorImpl {
+            TextPickerSelectedOpsAccessor::RegisterTextPickerSelectedCallbackImpl,
+        };
+        return &TextPickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerValueOpsAccessor* GetTextPickerValueOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerValueOpsAccessor TextPickerValueOpsAccessorImpl {
+            TextPickerValueOpsAccessor::RegisterTextPickerValueCallbackImpl,
+        };
+        return &TextPickerValueOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITimePickerSelectedOpsAccessor* GetTimePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITimePickerSelectedOpsAccessor TimePickerSelectedOpsAccessorImpl {
+            TimePickerSelectedOpsAccessor::RegisterTimePickerSelectedCallbackImpl,
+        };
+        return &TimePickerSelectedOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     {
         static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
@@ -21736,7 +22589,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
     {
         static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
-            PromptActionAccessor::ShowToastImpl,
+            PromptActionAccessor::OpenPopupImpl,
+            PromptActionAccessor::UpdatePopupImpl,
+            PromptActionAccessor::ClosePopupImpl,
+            PromptActionAccessor::OpenMenuImpl,
+            PromptActionAccessor::UpdateMenuImpl,
+            PromptActionAccessor::CloseMenuImpl,
         };
         return &PromptActionAccessorImpl;
     }
@@ -22089,8 +22947,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
-            AxisEventAccessor::GetPropagationImpl,
-            AxisEventAccessor::SetPropagationImpl,
+            AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
     }
@@ -22189,8 +23046,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FocusAxisEventAccessor::GetFinalizerImpl,
             FocusAxisEventAccessor::GetAxisMapImpl,
             FocusAxisEventAccessor::SetAxisMapImpl,
-            FocusAxisEventAccessor::GetStopPropagationImpl,
-            FocusAxisEventAccessor::SetStopPropagationImpl,
+            FocusAxisEventAccessor::StopPropagationImpl,
         };
         return &FocusAxisEventAccessorImpl;
     }
@@ -22455,7 +23311,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
             Path2DAccessor::DestroyPeerImpl,
-            Path2DAccessor::CtorImpl,
+            Path2DAccessor::Construct0Impl,
+            Path2DAccessor::Construct1Impl,
+            Path2DAccessor::Construct2Impl,
+            Path2DAccessor::Construct3Impl,
+            Path2DAccessor::Construct4Impl,
+            Path2DAccessor::Construct5Impl,
             Path2DAccessor::GetFinalizerImpl,
             Path2DAccessor::AddPathImpl,
         };
@@ -22628,7 +23489,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICanvasRenderingContext2DAccessor CanvasRenderingContext2DAccessorImpl {
             CanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            CanvasRenderingContext2DAccessor::CtorImpl,
+            CanvasRenderingContext2DAccessor::ConstructImpl,
             CanvasRenderingContext2DAccessor::GetFinalizerImpl,
             CanvasRenderingContext2DAccessor::ToDataURLImpl,
             CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
@@ -22651,7 +23512,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor OffscreenCanvasRenderingContext2DAccessorImpl {
             OffscreenCanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            OffscreenCanvasRenderingContext2DAccessor::CtorImpl,
+            OffscreenCanvasRenderingContext2DAccessor::ConstructImpl,
             OffscreenCanvasRenderingContext2DAccessor::GetFinalizerImpl,
             OffscreenCanvasRenderingContext2DAccessor::ToDataURLImpl,
             OffscreenCanvasRenderingContext2DAccessor::TransferToImageBitmapImpl,
@@ -22666,7 +23527,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
             OffscreenCanvasAccessor::DestroyPeerImpl,
-            OffscreenCanvasAccessor::CtorImpl,
+            OffscreenCanvasAccessor::ConstructImpl,
             OffscreenCanvasAccessor::GetFinalizerImpl,
             OffscreenCanvasAccessor::TransferToImageBitmapImpl,
             OffscreenCanvasAccessor::GetContext2dImpl,
@@ -22713,6 +23574,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }
@@ -23048,6 +23910,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::CtorImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::IsScrollableComponentImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -23533,6 +24396,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct BounceSymbolEffectPeer {
         virtual ~BounceSymbolEffectPeer() = default;
+    };
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
+    {
+        static const GENERATED_ArkUIBuilderNodeOpsAccessor BuilderNodeOpsAccessorImpl {
+            BuilderNodeOpsAccessor::DestroyPeerImpl,
+            BuilderNodeOpsAccessor::CtorImpl,
+            BuilderNodeOpsAccessor::GetFinalizerImpl,
+            BuilderNodeOpsAccessor::CreateImpl,
+            BuilderNodeOpsAccessor::DisposeNodeImpl,
+            BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
+            BuilderNodeOpsAccessor::SetOptionsImpl,
+            BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
+        };
+        return &BuilderNodeOpsAccessorImpl;
+    }
+
+    struct BuilderNodeOpsPeer {
+        virtual ~BuilderNodeOpsPeer() = default;
     };
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
@@ -24357,6 +25239,55 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LetterSpacingStylePeer {
         virtual ~LetterSpacingStylePeer() = default;
     };
+
+    const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor()
+    {
+        static const GENERATED_ArkUILevelOrderAccessor LevelOrderAccessorImpl {
+            LevelOrderAccessor::DestroyPeerImpl,
+            LevelOrderAccessor::ConstructImpl,
+            LevelOrderAccessor::GetFinalizerImpl,
+            LevelOrderAccessor::ClampImpl,
+            LevelOrderAccessor::GetOrderImpl,
+        };
+        return &LevelOrderAccessorImpl;
+    }
+
+    struct LevelOrderPeer {
+        virtual ~LevelOrderPeer() = default;
+    };
+    const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissPopupActionAccessor DismissPopupActionAccessorImpl {
+            DismissPopupActionAccessor::DestroyPeerImpl,
+            DismissPopupActionAccessor::ConstructImpl,
+            DismissPopupActionAccessor::GetFinalizerImpl,
+            DismissPopupActionAccessor::DismissImpl,
+            DismissPopupActionAccessor::GetReasonImpl,
+            DismissPopupActionAccessor::SetReasonImpl,
+        };
+        return &DismissPopupActionAccessorImpl;
+    }
+
+    struct DismissPopupActionPeer {
+        virtual ~DismissPopupActionPeer() = default;
+    };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -24567,9 +25498,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &RouterExtenderAccessorImpl;
     }
+    const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
+    {
+        static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
+            ContentModifierHelperAccessor::ContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ResetContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ContentModifierSliderImpl,
+            ContentModifierHelperAccessor::ResetContentModifieSliderImpl,
+            ContentModifierHelperAccessor::ContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ResetContentModifieToggleImpl,
+        };
+        return &ContentModifierHelperAccessorImpl;
+    }
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
+            GetAlphabetIndexerOpsAccessor,
+            GetListItemOpsAccessor,
+            GetRefreshOpsAccessor,
+            GetSwiperOpsAccessor,
             GetAnimationExtenderAccessor,
             GetBaseContextAccessor,
             GetContextAccessor,
@@ -24584,6 +25537,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRestrictedWorkerAccessor,
             GetUIContextAccessor,
             GetStateStylesOpsAccessor,
+            GetDragDropOpsAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIContextDispatchKeyEventAccessor,
             GetDrawableDescriptorAccessor,
@@ -24616,18 +25570,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNodeContentAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetTabsOpsAccessor,
-            GetUIContextImpAccessor,
+            GetIUIContextAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
+            GetNavigationOpsAccessor,
+            GetCheckboxGroupOpsAccessor,
+            GetCheckboxOpsAccessor,
+            GetMenuItemOpsAccessor,
+            GetRadioOpsAccessor,
+            GetRatingOpsAccessor,
+            GetSelectOpsAccessor,
+            GetSliderOpsAccessor,
+            GetToggleOpsAccessor,
+			GetDatePickerSelectedOpsAccessor,
             GetNavExtenderAccessor,
-            GetStepperOpsAccessor,
             GetSearchOpsAccessor,
+            GetSideBarContainerOpsAccessor,
+            GetStepperOpsAccessor,
             GetEventEmulatorAccessor,
             GetTextFieldOpsAccessor,
+            GetTextPickerSelectedOpsAccessor,
+            GetTextPickerValueOpsAccessor,
+            GetTimePickerSelectedOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
+            GetPromptActionAccessor,
             GetSpringPropAccessor,
             GetSpringMotionAccessor,
             GetFrictionMotionAccessor,
@@ -24718,6 +25689,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAppearSymbolEffectAccessor,
             GetDisappearSymbolEffectAccessor,
             GetBounceSymbolEffectAccessor,
+            GetBuilderNodeOpsAccessor,
             GetPulseSymbolEffectAccessor,
             GetTabsControllerAccessor,
             GetTabContentTransitionProxyAccessor,
@@ -24766,6 +25738,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDecorationStyleAccessor,
             GetBaselineOffsetStyleAccessor,
             GetLetterSpacingStyleAccessor,
+            GetLevelOrderAccessor,
+            GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,
@@ -24777,8 +25752,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomSpanAccessor,
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
-            GetPromptActionAccessor,
             GetRouterExtenderAccessor,
+            GetContentModifierHelperAccessor,
         };
         return &accessorsImpl;
     }

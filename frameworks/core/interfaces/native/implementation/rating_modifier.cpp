@@ -17,7 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -175,6 +175,8 @@ void ContentModifier0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RatingModelNG::SetContentModifier0(frameNode, convValue);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
 void ContentModifier1Impl(Ark_NativePointer node,
@@ -182,6 +184,8 @@ void ContentModifier1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RatingModelNG::SetContentModifier1(frameNode, convValue);
 }
 void _onChangeEvent_ratingImpl(Ark_NativePointer node,
                                const Callback_Number_Void* callback)

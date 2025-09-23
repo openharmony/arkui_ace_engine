@@ -21,19 +21,16 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_accessibility_session_adapter.cpp",
     "xcomponent_controller_ng.cpp",
     "xcomponent_ext_surface_callback_client.cpp",
+    "xcomponent_inner_surface_controller.cpp",
     "xcomponent_layout_algorithm.cpp",
     "xcomponent_model_ng.cpp",
+    "xcomponent_model_static.cpp",
     "xcomponent_paint_method.cpp",
     "xcomponent_pattern.cpp",
+    "xcomponent_pattern_multithread.cpp",
     "xcomponent_pattern_v2.cpp",
     "xcomponent_utils.cpp",
-    "xcomponent_inner_surface_controller.cpp",
-    "xcomponent_pattern_multithread.cpp",
   ]
-
-  if (ace_engine_feature_enable_static_instructive_code) {
-    sources += [ "xcomponent_model_static.cpp" ]
-  }
 
   if (is_ohos_standard_system) {
     deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]

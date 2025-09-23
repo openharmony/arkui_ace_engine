@@ -107,7 +107,12 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
                 const value_value_element : ResourceColor | LinearGradient = value_value[i]
                 let value_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_value_element_type = runtimeType(value_value_element)
-                if ((TypeChecker.isColor(value_value_element)) || (RuntimeType.NUMBER == value_value_element_type) || (RuntimeType.STRING == value_value_element_type) || (RuntimeType.OBJECT == value_value_element_type)) {
+                if (TypeChecker.isLinearGradient(value_value_element)) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_element_1  = value_value_element as LinearGradient
+                    thisSerializer.writeLinearGradient(value_value_element_1)
+                }
+                else if ((TypeChecker.isColor(value_value_element)) || (RuntimeType.NUMBER == value_value_element_type) || (RuntimeType.STRING == value_value_element_type) || (RuntimeType.OBJECT == value_value_element_type)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_value_element_0  = value_value_element as ResourceColor
                     let value_value_element_0_type : int32 = RuntimeType.UNDEFINED
@@ -132,12 +137,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
                         const value_value_element_0_3  = value_value_element_0 as Resource
                         thisSerializer.writeResource(value_value_element_0_3)
                     }
-                }
-                else if (TypeChecker.isLinearGradient(value_value_element)) {
-                    thisSerializer.writeInt8(1 as int32)
-                    const value_value_element_1  = value_value_element as LinearGradient
-                    thisSerializer.writeLinearGradient(value_value_element_1)
-                }
+                } 
             }
         }
         ArkUIGeneratedNativeModule._DataPanelAttribute_valueColors(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -268,7 +268,7 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-        }
+    }
 }
 export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
     getPeer(): ArkDataPanelPeer {

@@ -16,11 +16,10 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_shared_library("focusController_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
-  sources = [
-    "./src/focusController.cpp"
-  ]
+  sources = [ "./src/focusController.cpp" ]
   external_deps = [
     "napi:ace_napi",
     "runtime_core:ani",
@@ -33,7 +32,7 @@ ohos_shared_library("focusController_ani") {
 
 generate_static_abc("focusController") {
   base_url = "./ets"
-  files = [ 
+  files = [
     "./ets/@ohos.arkui.focusController.ets",
     "./ets/arkui.component.focus.ets",
   ]

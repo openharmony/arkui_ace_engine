@@ -55,4 +55,17 @@ void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityE
         }
     });
 }
+
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKeyMultiThread(
+    const std::string& accessibilityNextFocusInspectorKey)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), accessibilityNextFocusInspectorKey]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        // no need send event when node is free
+        host->UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
+    });
+}
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,10 @@ import(
 
 build_component_ng("syntax_ng") {
   sources = [
+    "arkoala_condition_scope.cpp",
+    "arkoala_for_each_node.cpp",
+    "arkoala_lazy_node.cpp",
+    "arkoala_syntax_item.cpp",
     "content_slot_model_ng.cpp",
     "content_slot_node.cpp",
     "for_each_model_ng.cpp",

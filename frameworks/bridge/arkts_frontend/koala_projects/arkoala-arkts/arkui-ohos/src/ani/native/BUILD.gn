@@ -13,36 +13,103 @@
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
 group("ace_ani_native_package") {
-  deps = [ "ui_extension:arkuiuiextension_group" ]
+  deps = [
+    "custom:arkuicustomnode_group",
+    "ui_extension:arkuiuiextension_group",
+  ]
 }
+config("ani_utils_common_config") {
+  include_dirs = [
+    "./"
+  ]
+}
+ohos_source_set("ani_utils_common") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 
+  configs = [ "$ace_root:ace_config" ]
+  public_configs = [ ":ani_utils_common_config" ]
+  sources = [
+    "utils/ani_utils.cpp",
+  ]
+
+  external_deps = [
+    "runtime_core:ani",
+  ]
+}
 ohos_shared_library("arkoala_native_ani") {
+  shlib_type = "ani"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
   include_dirs = [
     "./",
-    "common/",
-    "web/",
-    "content_slot/",
+    "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
   ]
+
+  deps = [ ":ani_utils_common" ]
+  if (!build_ohos_sdk) {
+    deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
+  }
 
   sources = [
+    "animation/animation_ani_impl.cpp",
+    "canvas/canvas_module.cpp",
     "common/common_module.cpp",
+    "componentSnapshot/componentSnapshot_module.cpp",
+    "condition_scope/condition_scope.cpp",
+    "content_slot/content_slot_module.cpp",
+    "custom_node/custom_node_module.cpp",
+
+    #"dragController/drag_controller_module.cpp",
+    #"drag_and_drop/native_drag_drop_global.cpp",
+    "image/image_module.cpp",
+    "image_span/image_span_module.cpp",
+    "interop/interop_module.cpp",
+    "list/list_children_main_size_module.cpp",
     "load.cpp",
     "module.cpp",
-    "web/web_module_methods.cpp",
+    "rich_editor/rich_editor_module.cpp",
+    "search/search_module.cpp",
+    "shape/shape_module_methods.cpp",
+    "stateMgmt/stateMgmt_module.cpp",
+    "styled_string/styled_string_module.cpp",
     "utils/convert_utils.cpp",
-    "content_slot/content_slot_module.cpp",
+    "video/video_module_methods.cpp",
+    "water_flow/waterFlowSection_module.cpp",
+    "web/web_module_methods.cpp",
+    "xcomponent/xcomponent_module_methods.cpp",
   ]
-
+  if (ace_engine_feature_wearable) {
+    sources -= [
+      "canvas/canvas_module.cpp",
+      "module.cpp",
+    ]
+  }
   external_deps = [
+    "graphic_2d:drawing_ani",
     "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_taihe",
+    "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "udmf:libudmf",
+    "udmf:udmf_client",
+
+    #"udmf:udmf_taihe_native",
   ]
 
   configs = [ "$ace_root:ace_config" ]
+  defines = []
+  if (pixel_map_support) {
+    defines += [ "PIXEL_MAP_SUPPORTED" ]
+  }
+  if (enable_rosen_backend) {
+    defines += [ "ENABLE_ROSEN_BACKEND" ]
+  }
   output_extension = "so"
 }

@@ -43,6 +43,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnAreaChangedInner() override;
+    void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name);
 
     FormLinkInfo formLinkInfo_;
 };

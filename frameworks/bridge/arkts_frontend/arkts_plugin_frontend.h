@@ -29,6 +29,7 @@
 
 typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
+typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace {
 /**
@@ -39,10 +40,7 @@ class ACE_FORCE_EXPORT ArktsPluginFrontend : public PluginFrontend {
     DECLARE_ACE_TYPE(ArktsPluginFrontend, PluginFrontend);
 
 public:
-    explicit ArktsPluginFrontend(void* runtime) : env_(reinterpret_cast<ani_env*>(runtime))
-    {
-        type_ = FrontendType::ARK_TS;
-    }
+    explicit ArktsPluginFrontend(void* runtime);
     ~ArktsPluginFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
@@ -211,7 +209,7 @@ public:
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<PipelineContext> pipeline_;
-    ani_env* env_; // ani_env
+    ani_vm* vm_ = nullptr; // ani_vm
     ani_ref app_ = nullptr;
     bool foregroundFrontend_ = false;
     std::string pluginBundleName_;

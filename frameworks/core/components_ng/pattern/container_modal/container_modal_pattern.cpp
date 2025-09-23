@@ -1139,4 +1139,22 @@ RefPtr<PipelineContext> ContainerModalPattern::GetContextRefPtr()
     CHECK_NULL_RETURN(containerNode, nullptr);
     return containerNode->GetContextRefPtr();
 }
+
+bool ContainerModalPattern::CheckNodeOnContainerModalTitle(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto containerNode = GetHost();
+    CHECK_NULL_RETURN(containerNode, false);
+    auto parent = node->GetParent();
+    while (parent) {
+        if (parent == containerNode) {
+            break;
+        }
+        if (parent->GetTag() == V2::TOOLBARITEM_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParent();
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

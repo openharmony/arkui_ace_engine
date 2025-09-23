@@ -237,4 +237,45 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus005, TestSize.Level
     dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
     EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgPlus006
+ * @tc.desc: Test DispatchLastDragEventVoluntarily.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a dragDropManager.
+     */
+    auto manager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(manager, nullptr);
+    DragPointerEvent pointerEvent;
+    manager->lastDragPointerEvent_ = pointerEvent;
+    manager->lastDragPointerEvent_.pointerEventId = 13;
+    manager->lastDragPointerEvent_.pullId = 1;
+    manager->isFlushed_ = true;
+    /**
+     * @tc.steps: step2. test DispatchLastDragEventVoluntarily.
+     */
+    manager->DispatchLastDragEventVoluntarily(true);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->DispatchLastDragEventVoluntarily(false);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->isFlushed_ = false;
+    manager->DispatchLastDragEventVoluntarily(false);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->DispatchLastDragEventVoluntarily(true);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->currentPullId_ = 1;
+    manager->DispatchLastDragEventVoluntarily(true);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->lastDragPointerEvent_.sourceTool = SourceTool::MOUSE;
+    manager->DispatchLastDragEventVoluntarily(true);
+    EXPECT_NE(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+    manager->lastDragPointerEvent_.action = PointerAction::PULL_MOVE;
+    manager->DispatchLastDragEventVoluntarily(true);
+    EXPECT_EQ(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
+}
 }

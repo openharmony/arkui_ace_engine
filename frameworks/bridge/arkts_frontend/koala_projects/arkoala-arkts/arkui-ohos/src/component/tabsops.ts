@@ -24,6 +24,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
+import { IndexCallback } from "./common"
 export class TabsOps {
     public static registerBarMode(node: KPointer, value: BarMode | undefined, options: ScrollableBarModeOptions | undefined): KPointer {
         const node_casted = node as (KPointer)
@@ -74,6 +75,19 @@ export class TabsOps {
             thisSerializer.writeBackgroundBlurStyleOptions(options_value)
         }
         const retval  = ArkUIGeneratedNativeModule._TabsOps_registerBarBackgroundBlurStyle(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static registerIndexCallback(node: KPointer, value: number, callback: IndexCallback): KPointer {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (number)
+        const callback_casted = callback as (IndexCallback)
+        return TabsOps.registerIndexCallback_serialize(node_casted, value_casted, callback_casted)
+    }
+    private static registerIndexCallback_serialize(node: KPointer, value: number, callback: IndexCallback): KPointer {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._TabsOps_registerIndexCallback(node, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

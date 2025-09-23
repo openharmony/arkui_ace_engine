@@ -903,7 +903,6 @@ struct ArkUIOverlayOptions {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
     ArkUI_CharPtr content;
-    ArkUI_Int32 direction;
 };
 
 union ArkUIInt32orFloat32 {

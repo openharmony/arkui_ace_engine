@@ -273,7 +273,7 @@ public:
             styleOption = textStyle.GetTextDecorationStyle();
         }
         return AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({type}), colorOption, styleOption, options, 0, length);
+            std::vector<TextDecoration>({ type }), colorOption, styleOption, options, 0, length, nullptr);
     }
 
     bool NeedTypingParagraphStyle(const RefPtr<MutableSpanString>& styledString, int32_t changeStart, int32_t changeLength)

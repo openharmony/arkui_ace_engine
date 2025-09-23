@@ -825,8 +825,7 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    int32_t length = finalHeight * finalWidth * 4;
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     // Height or Width is ZERO or Overflow.
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {

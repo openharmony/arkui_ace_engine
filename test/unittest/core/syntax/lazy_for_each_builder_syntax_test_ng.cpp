@@ -2113,60 +2113,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange001, Test
 }
 
 /**
- * @tc.name: LazyForEachBuilderSetActiveChildRange002
- * @tc.desc: Create LazyForEach.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create CreateLazyForEachBuilder
-     * @tc.expected: Create CreateLazyForEachBuilder success.
-     */
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    ASSERT_NE(lazyForEachBuilder, nullptr);
-
-    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[2].first,
-        LazyForEachCacheChild(-1, lazyForEachBuilder->cachedItems_[2].second));
-    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[3].first,
-        LazyForEachCacheChild(-1, std::move(lazyForEachBuilder->cachedItems_[3].second)));
-
-    /**
-     * @tc.steps: step2. Invoke SetActiveChildRange function.
-     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
-     */
-    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 1);
-    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 5);
-    EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: LazyForEachBuilderSetActiveChildRange003
- * @tc.desc: Create LazyForEach.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create CreateLazyForEachBuilder
-     * @tc.expected: Create CreateLazyForEachBuilder success.
-     */
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    ASSERT_NE(lazyForEachBuilder, nullptr);
-    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
-        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
-    }
-
-    /**
-     * @tc.steps: step2. Invoke SetActiveChildRange function.
-     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
-     */
-    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 0);
-    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: LazyForEachBuilderGetChildIndex001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC

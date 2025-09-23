@@ -47,6 +47,7 @@ UIObserverHandler& UIObserverHandler::GetInstance()
 
 void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
 {
+    NotifyNavigationStateChangeForAni(weakPattern, state);
     CHECK_NULL_VOID(navigationHandleFunc_);
     auto ref = weakPattern.Upgrade();
     CHECK_NULL_VOID(ref);
@@ -80,6 +81,28 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     pathInfo->CloseScope();
 }
 
+void UIObserverHandler::NotifyNavigationStateChangeForAni(
+    const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+{
+    CHECK_NULL_VOID(navigationHandleFuncForAni_);
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
+    
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+    navigationHandleFuncForAni_(info);
+}
+
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
 {
     auto ref = weakPattern.Upgrade();
@@ -101,8 +124,32 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     scrollEventHandleFunc_(id, uniqueId, eventType, offset, axis);
 }
 
+void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
+{
+    CHECK_NULL_VOID(pageInfo);
+    CHECK_NULL_VOID(routerPageHandleFuncForAni_);
+    auto container = Container::CurrentSafelyWithCheck();
+    if (!container) {
+        LOGW("notify router event failed, current UI instance invalid");
+        return;
+    }
+    napi_value context = GetUIContextValue();
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        container->GetModuleName()
+    };
+    int32_t index = pageInfo->GetPageIndex();
+    std::string name = pageInfo->GetPageUrl();
+    std::string path = pageInfo->GetPagePath();
+    std::string pageId = std::to_string(pageInfo->GetPageId());
+    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    routerPageHandleFuncForAni_(info, routerPageInfo);
+}
+
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
 {
+    NotifyRouterPageStateChangeForAni(pageInfo, state);
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
     auto container = Container::Current();
@@ -156,7 +203,13 @@ void UIObserverHandler::NotifyWillClick(
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    if (willClickHandleFunc_) {
+        willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    }
+
+    if (willClickHandleFuncForAni_) {
+        willClickHandleFuncForAni_();
+    }
 }
 
 void UIObserverHandler::NotifyDidClick(
@@ -171,20 +224,54 @@ void UIObserverHandler::NotifyDidClick(
         AceApplicationInfo::GetInstance().GetProcessName(),
         container->GetModuleName()
     };
-    didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+
+    if (didClickHandleFunc_) {
+        didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+    }
+
+    if (didClickHandleFuncForAni_) {
+        didClickHandleFuncForAni_();
+    }
 }
 
 void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
     const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(panGestureHandleFunc_);
     auto getCurrent = Container::Current();
     CHECK_NULL_VOID(getCurrent);
     AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
 
-    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+    if (panGestureHandleFunc_) {
+        panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+    }
+
+    if (panGestureInfo.callbackState == CurrentCallbackState::START) {
+        if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
+            // beforePanStart
+            if (beforePanStartHandleFuncForAni_) {
+                beforePanStartHandleFuncForAni_();
+            }
+        } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
+            // afterPanStart
+            if (afterPanStartHandleFuncForAni_) {
+                afterPanStartHandleFuncForAni_();
+            }
+        }
+    } else if (panGestureInfo.callbackState == CurrentCallbackState::END) {
+        if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
+            // beforePanEnd
+            if (beforePanEndHandleFuncForAni_) {
+                beforePanEndHandleFuncForAni_();
+            }
+        } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
+            // afterPanEnd
+            if (afterPanEndHandleFuncForAni_) {
+                afterPanEndHandleFuncForAni_();
+            }
+        }
+    }
 }
 
 void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gestureListenerType,
@@ -374,9 +461,20 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     navDestinationSwitchHandleFunc_(info, switchInfo);
 }
 
+void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
+{
+    CHECK_NULL_VOID(textChangeEventHandleFunc_);
+    textChangeEventHandleFunc_(info);
+}
+
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func)
+{
+    navigationHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)
@@ -387,6 +485,11 @@ void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc fun
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 {
     routerPageHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func)
+{
+    routerPageHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
@@ -434,9 +537,44 @@ void UIObserverHandler::SetHandleGestureHandleFunc(GestureHandleFunc func)
     gestureHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetBeforePanStartHandleFuncForAni(BeforePanStartHandleFuncForAni func)
+{
+    beforePanStartHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetAfterPanStartHandleFuncForAni(AfterPanStartHandleFuncForAni func)
+{
+    afterPanStartHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetBeforePanEndHandleFuncForAni(BeforePanEndHandleFuncForAni func)
+{
+    beforePanEndHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetAfterPanEndHandleFuncForAni(AfterPanEndHandleFuncForAni func)
+{
+    afterPanEndHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetWillClickHandleFuncForAni(WillClickHandleFuncForAni func)
+{
+    willClickHandleFuncForAni_ = func;
+}
+
+void UIObserverHandler::SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func)
+{
+    didClickHandleFuncForAni_ = func;
+}
+
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
 {
     tabContentStateHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)
+{
+    textChangeEventHandleFunc_ = std::move(func);
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

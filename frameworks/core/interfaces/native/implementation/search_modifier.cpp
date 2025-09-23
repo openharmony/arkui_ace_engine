@@ -24,7 +24,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
@@ -212,7 +212,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indentValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> indentValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        indentValue = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     SearchModelStatic::SetTextIndent(frameNode, indentValue);
 }
 void OnEditChangeImpl(Ark_NativePointer node,
@@ -740,21 +743,18 @@ void OnWillChangeImpl(Ark_NativePointer node,
     }
     auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {
         Converter::ConvContext ctx;
-        Ark_TextChangeOptions textChangeOptions = {
-            .rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
-            .rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
-            .oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
-            .oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
-        };
         Ark_EditableTextChangeValue changeValue = {
             .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
             .previewText = {
                 .tag = INTEROP_TAG_OBJECT,
-                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText),
+                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText, &ctx),
             },
             .options = {
                 .tag = INTEROP_TAG_OBJECT,
-                .value = textChangeOptions
+                .value.rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
+                .value.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
+                .value.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
+                .value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
             }
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)

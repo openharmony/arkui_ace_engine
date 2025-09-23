@@ -39,6 +39,11 @@ const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
 const static double DEFAULT_ICON_FONT_SIZE = 24;
+#ifdef SECURITY_COMPONENT_ENABLE
+static bool g_isVerified = false;
+static bool g_hasCustomPermission = false;
+static std::mutex g_verifyPermMutex;
+#endif
 static inline RefPtr<FrameNode> GetSecCompChildNode(const FrameNode* parent, const std::string& tag)
 {
     CHECK_NULL_RETURN(parent, nullptr);
@@ -81,7 +86,14 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::HORIZONTAL);
     bool hasCustomPermission = false;
 #ifdef SECURITY_COMPONENT_ENABLE
-    hasCustomPermission = SecurityComponentHandler::HasCustomPermissionForSecComp();
+    {
+        std::lock_guard<std::mutex> lock(g_verifyPermMutex);
+        if (!g_isVerified) {
+            g_hasCustomPermission = SecurityComponentHandler::HasCustomPermissionForSecComp();
+            g_isVerified = true;
+        }
+        hasCustomPermission = g_hasCustomPermission;
+    }
 #endif
     property->UpdateHasCustomPermissionForSecComp(hasCustomPermission);
 }
@@ -818,6 +830,23 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const std::optional<Dim
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
 }
 
+void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode,
+    const std::optional<BorderRadiusProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("Background is not exist.");
+        return;
+    }
+
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius,
+            value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,
     const std::optional<Dimension>& right, const std::optional<Dimension>& top,
     const std::optional<Dimension>& bottom)
@@ -938,9 +967,29 @@ void SecurityComponentModelNG::SetAlign(const Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, alignment);
 }
 
+void SecurityComponentModelNG::SetAlign(FrameNode* frameNode, const std::optional<Alignment>& alignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (alignment) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, alignment.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetMaxFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxFontScale, value);
+}
+
+void SecurityComponentModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxFontScale, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetMinFontScale(const float value)
@@ -948,9 +997,29 @@ void SecurityComponentModelNG::SetMinFontScale(const float value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MinFontScale, value);
 }
 
+void SecurityComponentModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MinFontScale, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MinFontScale, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetMaxLines(const int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxLines, value);
+}
+
+void SecurityComponentModelNG::SetMaxLines(FrameNode* frameNode, const std::optional<const int32_t>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxLines, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxLines, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetAdaptMaxFontSize(const Dimension& value)
@@ -958,13 +1027,45 @@ void SecurityComponentModelNG::SetAdaptMaxFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value);
 }
 
+void SecurityComponentModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value);
 }
 
+void SecurityComponentModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, value);
+}
+
+void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
+    const std::optional<TextHeightAdaptivePolicy>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, value.value(),
+            frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

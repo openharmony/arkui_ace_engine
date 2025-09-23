@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
@@ -1154,9 +1155,17 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
     CHECK_NULL_VOID(result);
     auto stack = result->pathStack.Upgrade();
     CHECK_NULL_VOID(stack);
-    auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
-    CHECK_NULL_VOID(jsStack);
-    auto navPathStackObj = jsStack->GetDataSourceObj();
+    JSRef<JSObject> navPathStackObj;
+    if (stack->IsStaticStack()) {
+        // ArkTS1.2
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get static navPathStack");
+        navPathStackObj = JSNavPathStack::CreateNavPathStackObjFromStatic(AceType::Claim(pipeline), stack);
+    } else {
+        // ArkTS1.1
+        auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+        CHECK_NULL_VOID(jsStack);
+        navPathStackObj = jsStack->GetDataSourceObj();
+    }
     CHECK_NULL_VOID(!navPathStackObj->IsEmpty());
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty<std::string>("navigationId", result->navigationId);

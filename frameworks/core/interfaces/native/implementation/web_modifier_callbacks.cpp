@@ -92,7 +92,7 @@ void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>&
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnProgressChangeEvent parameter;
-    parameter.newProgress = Converter::ArkValue<Ark_Number>(eventInfo->GetNewProgress());
+    parameter.newProgress = Converter::ArkValue<Ark_Int32>(eventInfo->GetNewProgress());
     arkCallback.InvokeSync(parameter);
 }
 
@@ -301,7 +301,7 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     parameter.mimetype = Converter::ArkValue<Ark_String>(eventInfo->GetMimetype());
     parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
     parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
-    parameter.contentLength = Converter::ArkValue<Ark_Number>(eventInfo->GetContentLength());
+    parameter.contentLength = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(eventInfo->GetContentLength()));
     arkCallback.Invoke(parameter);
 }
 
@@ -428,8 +428,8 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScaleChangeEvent parameter;
-    parameter.newScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeNewScale());
-    parameter.oldScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeOldScale());
+    parameter.newScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeNewScale());
+    parameter.oldScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeOldScale());
     arkCallback.Invoke(parameter);
 }
 
@@ -550,10 +550,10 @@ void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEv
     auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnSearchResultReceiveEvent parameter;
-    parameter.activeMatchOrdinal = Converter::ArkValue<Ark_Number>(eventInfo->GetActiveMatchOrdinal());
-    parameter.numberOfMatches = Converter::ArkValue<Ark_Number>(eventInfo->GetNumberOfMatches());
+    parameter.activeMatchOrdinal = Converter::ArkValue<Ark_Int32>(eventInfo->GetActiveMatchOrdinal());
+    parameter.numberOfMatches = Converter::ArkValue<Ark_Int32>(eventInfo->GetNumberOfMatches());
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
@@ -566,8 +566,8 @@ void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 
@@ -630,7 +630,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     CHECK_NULL_RETURN(eventInfo, false);
     Ark_OnClientAuthenticationEvent parameter;
     parameter.host = Converter::ArkValue<Ark_String>(eventInfo->GetHost());
-    parameter.port = Converter::ArkValue<Ark_Number>(eventInfo->GetPort());
+    parameter.port = Converter::ArkValue<Ark_Int32>(eventInfo->GetPort());
     std::vector<std::string> keyTypes = eventInfo->GetKeyTypes();
     Converter::ArkArrayHolder<Array_String> vecKeyTypes(keyTypes);
     parameter.keyTypes = vecKeyTypes.ArkValue();
@@ -640,7 +640,7 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
         auto peer = new ClientAuthenticationHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return false;
 }
 
@@ -885,9 +885,9 @@ void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaint
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_OnFirstContentfulPaintEvent parameter;
-        parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Number>(
+        parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Int64>(
             eventInfo->GetFirstContentfulPaintMs());
-        parameter.navigationStartTick = Converter::ArkValue<Ark_Number>(eventInfo->GetNavigationStartTick());
+        parameter.navigationStartTick = Converter::ArkValue<Ark_Int64>(eventInfo->GetNavigationStartTick());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -908,8 +908,8 @@ void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_FirstMeaningfulPaint parameter;
-        parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetFirstMeaningfulPaintTime());
-        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetFirstMeaningfulPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -930,13 +930,13 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
         auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_LargestContentfulPaint parameter;
-        parameter.imageBPP = Converter::ArkValue<Opt_Number>(eventInfo->GetImageBPP());
-        parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImageLoadEndTime());
-        parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Number>(
+        parameter.imageBPP = Converter::ArkValue<Opt_Float32>(static_cast<float>(eventInfo->GetImageBPP()));
+        parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImageLoadEndTime());
+        parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Int64>(
             eventInfo->GetLargestImageLoadStartTime());
-        parameter.largestImagePaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImagePaintTime());
-        parameter.largestTextPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestTextPaintTime());
-        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        parameter.largestImagePaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImagePaintTime());
+        parameter.largestTextPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestTextPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -992,8 +992,8 @@ void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCall
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnOverScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 
@@ -1158,7 +1158,7 @@ void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespond
     CHECK_NULL_VOID(eventInfo);
     Ark_RenderProcessNotRespondingData parameter;
     parameter.jsStack = Converter::ArkValue<Ark_String>(eventInfo->GetJsStack());
-    parameter.pid = Converter::ArkValue<Ark_Number>(eventInfo->GetPid());
+    parameter.pid = Converter::ArkValue<Ark_Int32>(eventInfo->GetPid());
     parameter.reason = Converter::ArkValue<Ark_RenderProcessNotRespondingReason>(
         static_cast<RenderProcessNotRespondingReason>(eventInfo->GetReason()));
     arkCallback.InvokeSync(parameter);

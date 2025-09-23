@@ -1115,6 +1115,29 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testFieldModelNg013
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(textFieldModelNG.GetBarState(frameNode), DisplayMode::AUTO);
+    textFieldModelNG.SetBarState(frameNode, DisplayMode::ON);
+    EXPECT_EQ(textFieldModelNG.GetBarState(frameNode), DisplayMode::ON);
+}
+
+/**
  * @tc.name: accessibilityProperty001
  * @tc.desc: test testInput accessibilityProperty
  * @tc.type: FUNC

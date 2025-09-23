@@ -190,6 +190,11 @@ public:
     virtual void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {}
 
+    virtual void FireNavigationInterceptionBeforeLifeCycle(const RefPtr<NavigationStack>& navigationStack,
+        const RefPtr<NG::NavDestinationContext>& from, const int32_t index, NG::NavigationOperation operation,
+        bool isAnimated)
+    {}
+
     virtual void FireNavigationModeChange(NavigationMode mode) {}
 
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
@@ -277,6 +282,11 @@ public:
     virtual void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) {}
 
     virtual bool CreateHomeDestination(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
+    {
+        return false;
+    }
+
+    virtual bool IsStaticStack()
     {
         return false;
     }

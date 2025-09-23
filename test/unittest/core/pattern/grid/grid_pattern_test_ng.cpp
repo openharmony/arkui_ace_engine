@@ -335,4 +335,60 @@ HWTEST_F(GridPatternTestNg, IsAtTopOrBottom, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
 }
+
+/**
+ * @tc.name: GridPattern.endHeight
+ * @tc.desc: test endHeight with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, EndHeightTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    float contentOffset = 20.f;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->endHeight_, 0.0f);
+    
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_FLOAT_EQ(pattern_->endHeight_, pattern_->GetTotalHeight() - contentOffset - HEIGHT);
+}
+
+/**
+ * @tc.name: GetContentStartOffsetTest
+ * @tc.desc: test GridPattern::GetContentStartOffsetTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetContentStartOffsetTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    float contentOffset = 20.f;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetContentStartOffset(), contentOffset);
+}
+
+/**
+ * @tc.name: GetContentStartOffsetWithInvalidValueTest
+ * @tc.desc: test GridPattern::GetContentStartOffsetTest with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetContentStartOffsetWithInvalidValueTest, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    float contentOffset = HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    EXPECT_FLOAT_EQ(pattern_->GetContentStartOffset(), 0.0f);
+}
 } // namespace OHOS::Ace::NG

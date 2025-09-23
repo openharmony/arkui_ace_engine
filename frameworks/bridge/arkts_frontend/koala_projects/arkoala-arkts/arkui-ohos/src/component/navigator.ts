@@ -145,7 +145,7 @@ export class ArkNavigatorStyle extends ArkCommonMethodStyle implements Navigator
     }
     public params(value: Object | undefined): this {
         return this
-        }
+    }
 }
 export class ArkNavigatorComponent extends ArkCommonMethodComponent implements NavigatorAttribute {
     getPeer(): ArkNavigatorPeer {

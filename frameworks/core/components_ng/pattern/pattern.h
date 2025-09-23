@@ -31,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
@@ -822,6 +823,20 @@ public:
     virtual bool ChildTentativelyLayouted()
     {
         return false;
+    }
+
+    virtual bool GetIsVertical() const
+    {
+        return false;
+    }
+
+    virtual bool IsVerticalReverseLayout() const
+    {
+        return false;
+    }
+    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
+    {
+        return nullptr;
     }
 
 protected:

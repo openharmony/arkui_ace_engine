@@ -22,10 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkRowSplitNode } from '../handwritten/modifiers/ArkRowSplitNode';
+import { ArkRowSplitAttributeSet, RowSplitModifier } from '../RowSplitModifier';
 
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -62,7 +64,7 @@ export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAt
     resizeable_value?: boolean | undefined
     public resizeable(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
     getPeer(): ArkRowSplitPeer {

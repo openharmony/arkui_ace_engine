@@ -76,7 +76,7 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void OnAccessibilityParentRectInfoUpdate() override;
 
-    void InitializeAccessibility();
+    void InitializeAccessibility() override;
     void ResetAccessibilityChildTreeCallback();
 
     void SetBackgroundTransparent(bool backgroundTransparent);
@@ -90,7 +90,7 @@ public:
 
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
-private:
+protected:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
     bool CheckDynamicRendererConstraint(void* runtime);

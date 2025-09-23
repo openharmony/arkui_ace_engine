@@ -2728,6 +2728,36 @@ typedef enum {
      */
     NODE_IMAGE_SPAN_BASELINE_OFFSET = 3003,
     /**
+     * @brief Defines the color filter of the image span.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem } parameter for setting the attribute:\n 
+     * .value [0].f32 to . value [19].f32: filter matrix array. \n 
+     * .size :5 x 4 filter array size. \n 
+     * .object : the pointer to OH _ Drawing _ ColorFilter . Either . value or . object is set. \n 
+     * \n 
+     * Format of the return value {@ link ArkUI _ AttributeItem ):\n 
+     * .value [0].f32 to . value [19].f32: filter matrix array. \n 
+     * .size: 5 x 4 filter array size. \n 
+     * .object: the pointer to OH_Drawing_ColorFilter. \n 
+     * 
+     * @since 21
+     */
+    NODE_IMAGE_SPAN_COLOR_FILTER = 3004,
+    /**
+     * @brief Set the range of SVG parsing capabilities supported through enable switch.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether color fliter support svg. The default value is <b>false</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: enable switch.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SPAN_SUPPORT_SVG2 = 3005,
+    /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4024,6 +4054,37 @@ typedef enum {
      * @since 20
      */
     NODE_TEXT_AREA_LINE_HEIGHT = 8031,
+
+    /**
+     * @brief Define bar state of the text area.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. The default value is <b>ARKUI_BAR_STATE_AUTO</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. \n
+     *
+     * @since 22
+     */
+     NODE_TEXT_AREA_BAR_STATE = 8032,
+
+    /**
+     * @brief Defines the color of the scrollbar. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     *
+     * @since 22
+     */
+    NODE_TEXT_AREA_SCROLL_BAR_COLOR = 8033,
+
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -8391,6 +8452,48 @@ typedef enum {
      * @since 20
      */
     NODE_SCROLL_EVENT_ON_ZOOM_STOP,
+    /**
+     * @brief Defines the callback for when the scrollable will start dragging.
+     *
+     * This event is triggered when the scrollable will start dragging. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING = 1002013,
+    /**
+     * @brief Defines the callback for when the scrollable did end dragging.
+     *
+     * This event is triggered when the scrollable did end dragging. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: whether start fling animation. \n
+     *
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING = 1002014,
+    /**
+     * @brief Defines the callback for when the scrollable will start fling.
+     *
+     * This event is triggered when the scrollable will start fling. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_WILL_START_FLING = 1002015,
+    /**
+     * @brief Defines the callback for when the scrollable did end fling.
+     *
+     * This event is triggered when the scrollable did end fling. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains no parameters: \n
+     * @since 22
+     */
+    NODE_SCROLL_EVENT_ON_DID_STOP_FLING = 1002016,
 
     /**
      * @brief Defines the event triggered when a child component enters or leaves the list display area.

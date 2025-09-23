@@ -1203,4 +1203,24 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew044, TestSize.Level1)
     std::string blurStyleStr = pattern->GetResCacheMapByKey("foregroundBlurStyle.blurStyle");
     EXPECT_EQ(blurStyleStr, "");
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew045
+ * @tc.desc: CanNodeBeDeleted().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew045, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+
+    bool canBeDeleted = false;
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    canBeDeleted = rosenRenderContext->CanNodeBeDeleted(pageNode);
+    EXPECT_EQ(canBeDeleted, false);
+    canBeDeleted = rosenRenderContext->CanNodeBeDeleted(nullptr);
+    EXPECT_EQ(canBeDeleted, false);
+}
+
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 namespace OHOS::Ace::NG {
-class PageRouterManagerFactory {
+class ACE_FORCE_EXPORT PageRouterManagerFactory {
 public:
     static RefPtr<PageRouterManager> CreateManager();
 };

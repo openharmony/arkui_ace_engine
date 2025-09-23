@@ -40,6 +40,9 @@
             "@koalaui/runtime/annotations": [
                 "../../incremental/runtime/annotations"
             ],
+            "@component_handwritten/*": [
+                "./arkui/component/*"
+            ],
             "@ohos/animator": [
                 "@ohos.animator.ets"
             ],
@@ -58,6 +61,9 @@
             "@ohos/font": [
                 "@ohos.font.ets"
             ],
+            "global/resource": [
+                "global/resource/resource.ets"
+            ],
             "@ohos/router": [
                 "@ohos.router.ets"
             ],
@@ -70,11 +76,17 @@
             "@ohos/graphics/drawing": [
                 "@ohos.graphics.drawing.ets"
             ],
+            "@ohos/intl": [
+                "@ohos.intl.ets"
+            ],
             "@ohos/arkui/graphics": [
                 "@ohos.arkui.graphics.ets"
             ],
             "@ohos/promptAction": [
                 "@ohos.promptAction.ets"
+            ],
+            "@ohos/overlayManager": [
+                "@ohos.overlayManager.ets"
             ],
             "@ohos/arkui/inspector": [
                 "@ohos.arkui.inspector.ets"
@@ -88,6 +100,9 @@
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
             ],
+            "@ohos/arkui/shape": [
+                "@ohos.arkui.shape.ets"
+            ],
             "@ohos/mediaquery": [
                 "@ohos.mediaquery.ets"
             ],
@@ -99,6 +114,15 @@
             ],
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"
+            ],
+            "@ohos/arkui/Parallelize": [
+                "./@ohos.arkui.Parallelize.ets"
+            ],
+            "@ohos/arkui/theme": [
+                "@ohos.arkui.theme.ets"
+            ],
+            "@ohos.arkui.component": [
+                "./arkui/component"
             ]
         }
     },

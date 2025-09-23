@@ -95,7 +95,7 @@ public:
     virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) = 0;
-#if defined(ACE_STATIC)
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
     virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) = 0;
 #endif

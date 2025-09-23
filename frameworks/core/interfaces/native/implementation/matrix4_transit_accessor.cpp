@@ -14,22 +14,12 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/render/adapter/matrix2d.h"
 #include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-namespace OHOS::Ace::NG {
-namespace Converter {
-template<>
-Point Convert(const Ark_Tuple_Number_Number& src)
-{
-    auto x = Converter::Convert<double>(src.value0);
-    auto y = Converter::Convert<double>(src.value1);
-    return Point(x, y);
-}
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+#include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix4TransitAccessor {
@@ -55,33 +45,33 @@ Ark_Matrix4Transit CopyImpl(Ark_Matrix4Transit peer)
 Ark_Matrix4Transit InvertImpl(Ark_Matrix4Transit peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
-    result->matrix = Matrix4::Invert(peer->matrix);
-    return result;
+    peer->matrix = Matrix4::Invert(peer->matrix);
+    return peer;
 }
 Ark_Matrix4Transit CombineImpl(Ark_Matrix4Transit peer,
                                Ark_Matrix4Transit options)
 {
-    CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
-    result->matrix = options->matrix * peer->matrix;
-    return result;
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, peer);
+    peer->matrix = options->matrix * peer->matrix;
+    return peer;
 }
 Ark_Matrix4Transit TranslateImpl(Ark_Matrix4Transit peer,
                                  const Ark_TranslateOption* options)
 {
-    CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, peer);
     auto x = Converter::ConvertOrDefault<double>(options->x, 0.0);
     auto y = Converter::ConvertOrDefault<double>(options->y, 0.0);
     auto z = Converter::ConvertOrDefault<double>(options->z, 0.0);
-    result->matrix = Matrix4::CreateTranslate(x, y, z) * peer->matrix;
-    return result;
+    peer->matrix = Matrix4::CreateTranslate(x, y, z) * peer->matrix;
+    return peer;
 }
 Ark_Matrix4Transit ScaleImpl(Ark_Matrix4Transit peer,
                              const Ark_ScaleOption* options)
 {
-    CHECK_NULL_RETURN(peer && options, nullptr);
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, peer);
     auto x = Converter::ConvertOrDefault<double>(options->x, 1.0);
     auto y = Converter::ConvertOrDefault<double>(options->y, 1.0);
     auto z = Converter::ConvertOrDefault<double>(options->z, 1.0);
@@ -96,27 +86,26 @@ Ark_Matrix4Transit ScaleImpl(Ark_Matrix4Transit peer,
         scaleMatrix = translate1 * scaleMatrix;
     }
 
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
-    result->matrix = scaleMatrix * peer->matrix;
-    return result;
+    peer->matrix = scaleMatrix * peer->matrix;
+    return peer;
 }
 Ark_Matrix4Transit SkewImpl(Ark_Matrix4Transit peer,
                             const Ark_Number* x,
                             const Ark_Number* y)
 {
-    CHECK_NULL_RETURN(peer && x && y, nullptr);
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(x && y, peer);
     auto convX = Converter::Convert<double>(*x);
     auto convY = Converter::Convert<double>(*y);
 
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
-    result->matrix = Matrix4::CreateFactorSkew(convX, convY) * peer->matrix;
-    return result;
+    peer->matrix = Matrix4::CreateFactorSkew(convX, convY) * peer->matrix;
+    return peer;
 }
 Ark_Matrix4Transit RotateImpl(Ark_Matrix4Transit peer,
                               const Ark_RotateOption* options)
 {
-    CHECK_NULL_RETURN(peer && options, nullptr);
-    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, peer);
 
     auto x = Converter::ConvertOrDefault<double>(options->x, 0.0);
     auto y = Converter::ConvertOrDefault<double>(options->y, 0.0);
@@ -132,9 +121,9 @@ Ark_Matrix4Transit RotateImpl(Ark_Matrix4Transit peer,
         rotateMatrix = rotateMatrix * translate2;
         rotateMatrix = translate1 * rotateMatrix;
     }
-    result->matrix = rotateMatrix * peer->matrix;
+    peer->matrix = rotateMatrix * peer->matrix;
 
-    return result;
+    return peer;
 }
 Ark_Tuple_Number_Number TransformPointImpl(Ark_Matrix4Transit peer,
                                            const Ark_Tuple_Number_Number* options)
@@ -147,8 +136,46 @@ Ark_Tuple_Number_Number TransformPointImpl(Ark_Matrix4Transit peer,
 Ark_Matrix4Transit SetPolyToPolyImpl(Ark_Matrix4Transit peer,
                                      const Ark_PolyToPolyOptions* options)
 {
-    LOGE("Matrix4TransitAccessor.SetPolyToPolyImpl not implemented");
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(options, peer);
+    auto result = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+
+    const auto srcPoint = Converter::Convert<std::vector<PointT<int32_t>>>(options->src);
+    const auto dstPoint = Converter::Convert<std::vector<PointT<int32_t>>>(options->dst);
+    const auto srcSize = static_cast<int32_t>(srcPoint.size());
+    const auto dstSize = static_cast<int32_t>(dstPoint.size());
+    const auto srcIndex = Converter::ConvertOrDefault<int32_t>(options->srcIndex, 0);
+    const auto dstIndex = Converter::ConvertOrDefault<int32_t>(options->dstIndex, 0);
+    const auto pointCount = Converter::ConvertOrDefault<int32_t>(options->pointCount, srcSize / 2);
+
+    if (pointCount <= 0 || pointCount > srcSize || pointCount > dstSize) {
+        LOGE("setpPolyToPoly pointCount out of range pointCount:%{public}d, src size:%{public}d, dst size:%{public}d",
+            pointCount, srcSize, dstSize);
+        return result;
+    }
+    if (srcIndex < 0 || (pointCount + srcIndex) > srcSize) {
+        LOGE("setpPolyToPoly srcIndex out of range srcIndex:%{public}d, pointCount:%{public}d, src size%{public}d",
+            srcIndex, pointCount, srcSize);
+        return result;
+    }
+    if (dstIndex < 0 || (pointCount + dstIndex) > dstSize) {
+        LOGE("setpPolyToPoly dstIndex out of range dstIndex:%{public}d, pointCount:%{public}d, dst size%{public}d",
+            dstIndex, pointCount, dstSize);
+        return result;
+    }
+
+    std::vector<PointT<int32_t>> totalPoint;
+    int srcLastIndex = pointCount + srcIndex;
+    for (int i = srcIndex; i < srcLastIndex; i++) {
+        totalPoint.push_back(srcPoint[i]);
+    }
+    int dstLastIndex = pointCount + dstIndex;
+    for (int i = dstIndex; i < dstLastIndex; i++) {
+        totalPoint.push_back(dstPoint[i]);
+    }
+    result->matrix = OHOS::Ace::NG::MatrixUtil::SetMatrixPolyToPoly(peer->matrix, totalPoint);
+
+    return result;
 }
 } // Matrix4TransitAccessor
 const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor()

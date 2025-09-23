@@ -18,7 +18,8 @@
 
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/pattern/shape/path_model_static.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 
 namespace OHOS::Ace::NG {
@@ -48,11 +49,10 @@ namespace PathModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PathModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PathModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PathModifier
 namespace PathInterfaceModifier {
@@ -80,9 +80,10 @@ void CommandsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<std::string>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        PathModelNG::SetCommands(frameNode, "");
         return;
     }
     PathModelNG::SetCommands(frameNode, *convValue);

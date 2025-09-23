@@ -44,5 +44,13 @@ KInt impl_InjectEvent(KByte* data, KInt size) {
 KOALA_INTEROP_2(InjectEvent, KInt, KByte*, KInt)
 
 void impl_EmulateTextInputEvent(KInt nodeId, const KStringPtr& text) {
+    /*
+    Ark_String str {
+        .chars = text.c_str(),
+        .length = static_cast<Ark_Int32>(text.length())
+    };
+    Opt_PreviewText preview;
+    preview.tag = ARK_TAG_UNDEFINED;
+    GetFullImpl()->getEventsAPI()->getTextInputEventsReceiver()->onChange(nodeId, str, preview);
+    */
 }
-// KOALA_INTEROP_V2(EmulateTextInputEvent, KInt, KStringPtr) // TODO Where to place it?

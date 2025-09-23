@@ -146,6 +146,12 @@ public:
     static void HandlePanGestureAccept(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
         const RefPtr<NG::PanRecognizer>& current, const RefPtr<NG::FrameNode>& frameNode,
         const NG::PanGestureInfo& panGestureInfo);
+    static void RegisterTextChangeEventCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterTextChangeEventCallback(
+        const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterTextChangeEventCallback(napi_value cb);
+    static void UnRegisterTextChangeEventCallback(const std::string& id, napi_value cb);
+    static void HandleTextChangeEvent(const NG::TextChangeEventInfo& info);
     using PanGestureListenersPair =
         std::pair<std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>&,
             std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>&>;
@@ -219,6 +225,9 @@ private:
     
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedDrawListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedLayoutListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> textChangeEventListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedTextChangeEventListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;

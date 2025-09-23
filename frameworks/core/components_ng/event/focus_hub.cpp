@@ -508,9 +508,7 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf(BlurReason reason)
 {
     auto frameNode = GetFrameNode();
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(frameNode, RemoveSelf, reason);
-#endif
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " remove self focus.",
             GetFrameName().c_str(), SEC_PARAM(GetFrameId()));

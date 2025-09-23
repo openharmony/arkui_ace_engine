@@ -268,7 +268,7 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     }
     public onLoad(value: (() => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkFormComponentComponent extends ArkCommonMethodComponent implements FormComponentAttribute {
     getPeer(): ArkFormComponentPeer {

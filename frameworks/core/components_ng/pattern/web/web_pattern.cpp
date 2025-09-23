@@ -111,6 +111,7 @@ const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
+constexpr int32_t SNAPSHOT_DURATION_TIME = 300;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t MOUSE_EVENT_MAX_SIZE = 10;
@@ -915,15 +916,54 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     snapshotNode->MarkModifyDone();
 }
 
-void WebPattern::RemoveSnapshotFrameNode()
+void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
 {
+    if (!isAnimate) {
+        RealRemoveSnapshotFrameNode();
+        return;
+    }
+    if (!snapshotImageNodeId_.has_value()) {
+        return;
+    }
+    if (isSnapshotImageAnimating_) {
+        return;
+    }
+    if (delegate_) {
+        delegate_->RecordBlanklessFrameSize(0, 0);
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode with animation");
+    auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    isSnapshotImageAnimating_ = true;
+    auto webPattern = WeakClaim(this);
+    AnimationOption option;
+    option.SetDuration(SNAPSHOT_DURATION_TIME);
+    option.SetCurve(Curves::FRICTION);
+    option.SetOnFinishEvent([webPattern]() {
+        auto web = webPattern.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_WEB, "blankless animation end");
+        CHECK_NULL_VOID(web);
+        web->RealRemoveSnapshotFrameNode();
+    });
+
+    auto snapshotRsContext = snapshotNode->GetRenderContext();
+    CHECK_NULL_VOID(snapshotRsContext);
+    snapshotRsContext->OpacityAnimation(option, 1.0, 0.0);
+    auto parent = snapshotNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless animation start");
+}
+
+void WebPattern::RealRemoveSnapshotFrameNode()
+{
+    isSnapshotImageAnimating_ = false;
     if (!snapshotImageNodeId_.has_value()) {
         return;
     }
     if (delegate_) {
         delegate_->RecordBlanklessFrameSize(0, 0);
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode");
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless RealRemoveSnapshotFrameNode");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
     snapshotImageNodeId_.reset();
     CHECK_NULL_VOID(snapshotNode);
@@ -3975,7 +4015,7 @@ void WebPattern::OnModifyDone()
             delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
             delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         }
-        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
+        delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(0));
         delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
         delegate_->UpdateAudioSessionType(GetAudioSessionTypeValue(WebAudioSessionType::AUTO));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));

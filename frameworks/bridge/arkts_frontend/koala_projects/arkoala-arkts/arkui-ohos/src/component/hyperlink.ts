@@ -117,7 +117,7 @@ export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements Hyperlink
     color_value?: Color | number | string | Resource | undefined
     public color(value: Color | number | string | Resource | undefined): this {
         return this
-        }
+    }
 }
 export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements HyperlinkAttribute {
     getPeer(): ArkHyperlinkPeer {

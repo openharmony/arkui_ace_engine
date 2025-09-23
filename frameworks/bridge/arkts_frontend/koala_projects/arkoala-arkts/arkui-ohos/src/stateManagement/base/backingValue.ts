@@ -12,23 +12,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /**
-  skeleton of a class to support 
+  skeleton of a class to support
   versioning of backing store values
 */
+import { IMutableStateMeta } from '../decorator';
+import { IBackingValue } from './iBackingValue';
+import { TypeChecker } from '#components';
+import { StateMgmtTool } from '#stateMgmtTool';
+import { STATE_MGMT_FACTORY } from '../decorator';
+import { ObserveSingleton } from './observeSingleton';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-export class BackingValue<T> {
-    private current_ : T;
+export class DecoratorBackingValue<T> implements IBackingValue<T> {
+    protected readonly propertyName_: string;
+    private value_: T;
+    protected readonly metaDependency_: IMutableStateMeta;
 
-    constructor(initValue : T) {
-        this.current_ = initValue;
+    constructor(propertyName: string, initValue: T) {
+        if (!this.isValueValid(initValue)) {
+            throw new TypeError(`${propertyName} init with non-Observed object. Type error.`);
+        }
+        this.propertyName_ = propertyName;
+        this.value_ = initValue;
+        this.metaDependency_ = STATE_MGMT_FACTORY.makeMutableStateMeta();
     }
 
-    public get value() : T {
-        return this.current_;
+    public get(shouldAddRef: boolean): T {
+        if (shouldAddRef) {
+            this.addRef();
+        }
+        return this.value_;
     }
-    public set value(newValue : T) {
-        this.current_ = newValue;
+
+    public set(newValue: T): boolean {
+        if (newValue !== this.value_) {
+            if (this.isValueValid(newValue)) {
+                this.value_ = newValue;
+                this.fireChange();
+                return true;
+            }
+        }
+        return false;
+    }
+    public setSilently(newValue: T): void {
+        if (this.isValueValid(newValue)) {
+            this.value_ = newValue;
+        }
+    }
+    public setNoCheck(newValue: T): void {
+        this.value_ = newValue;
+        this.fireChange();
+    }
+    // create dependency if currently rendering anything
+    // FIXME: make protected once compiler allows
+    // super.addRef on protected
+    public addRef(): void {
+        this.metaDependency_.addRef();
+    }
+
+    // notify change to any dependencies
+    // FIXME: make protected once compiler allows
+    // super.addRef on protected
+    public fireChange(): void {
+        this.metaDependency_.fireChange();
+    }
+
+    protected isValueValid(newValue: T): boolean {
+        // need add check
+        return true;
     }
 }

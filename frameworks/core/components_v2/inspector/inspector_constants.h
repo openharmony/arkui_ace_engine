@@ -307,11 +307,7 @@ ACE_EXPORT extern const char BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
 
 // common
-#ifdef ACE_STATIC
 ACE_FORCE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
-#else
-ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
-#endif
 // option
 ACE_EXPORT extern const char OPTION_COMPONENT_TAG[];
 ACE_EXPORT extern const char OPTION_ETS_TAG[];
@@ -537,7 +533,7 @@ ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[];
 
 // Normal dialog
 ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[];
-ACE_EXPORT extern const char DIALOG_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char DIALOG_ETS_TAG[];
 
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[];
@@ -678,6 +674,9 @@ ACE_EXPORT extern const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[];
 
 // LazyVGridLayout
 ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
+
+// Picker
+ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
 
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];

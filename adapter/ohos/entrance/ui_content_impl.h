@@ -465,7 +465,7 @@ public:
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
 
-private:
+protected:
     void RunIntentPageIfNeeded();
     void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
     UIContentErrorCode InitializeInner(

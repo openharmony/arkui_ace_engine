@@ -112,6 +112,8 @@ if (is_arkui_x) {
         "ability_base:zuri",
         "ability_runtime:app_context",
         "app_file_service:fileuri_native",
+        "bundle_framework:appexecfwk_core_headers",
+        "common_event_service:cesfwk_innerkits",
         "ffrt:libffrt",
         "image_framework:image",
         "image_framework:image_native",

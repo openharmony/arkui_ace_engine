@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
@@ -120,16 +121,20 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
-void TextDragPattern::CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset,
-    const RefPtr<FrameNode>& hostNode)
+void TextDragPattern::CalculateOverlayOffset(
+    RefPtr<FrameNode>& dragNode, OffsetF& offset, const RefPtr<FrameNode>& hostNode)
 {
     auto pipeline = dragNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
-    if (pipeline->CheckNodeOnContainerModalTitle(hostNode)) {
-        rootNode = pipeline->GetContainerModalNode();
+    auto containerModalNode = pipeline->GetContainerModalNode();
+    if (containerModalNode) {
+        auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+        if (containerModalPattern && containerModalPattern->CheckNodeOnContainerModalTitle(hostNode)) {
+            rootNode = containerModalNode;
+        }
     }
     CHECK_NULL_VOID(rootNode);
     auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();

@@ -16,7 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_static.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/callback_keeper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -24,6 +24,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
+constexpr double ITEM_DEFAULT_RADIUS = 8.0;
+constexpr double RADIUS_OFFSET = 4.0;
+constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
+} // namespace
 namespace Converter {
 
 template<>
@@ -69,6 +75,9 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node, const Ark_AlphabetInd
     CHECK_NULL_VOID(options);
     auto arrayValue = Converter::Convert<std::vector<std::string>>(options->arrayValue);
     auto index = Converter::Convert<int32_t>(options->selected);
+    if (index < 0 || index >= static_cast<int32_t>(arrayValue.size())) {
+        index = 0;
+    }
     IndexerModelStatic::SetArrayValue(frameNode, arrayValue);
     IndexerModelStatic::SetSelected(frameNode, index);
 }
@@ -184,12 +193,12 @@ void PopupItemFontImpl(Ark_NativePointer node, const Opt_Font* value)
 }
 void ItemSizeImpl(Ark_NativePointer node, const Opt_Union_String_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto size = Converter::OptConvert<Dimension>(*value);
-    // Validator::ValidateNonNegative(size);
-    // Validator::ValidateNonPercent(size);
-    // IndexerModelStatic::SetItemSize(frameNode, size.value_or(DEFAULT_ITEM_SIZE));
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto size = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(size);
+    Validator::ValidateNonPercent(size);
+    IndexerModelStatic::SetItemSize(frameNode, size.value_or(DEFAULT_ITEM_SIZE));
 }
 
 void FontImpl(Ark_NativePointer node, const Opt_Font* value)
@@ -283,31 +292,31 @@ void AutoCollapseImpl(Ark_NativePointer node, const Opt_Boolean* value)
 }
 void PopupItemBorderRadiusImpl(Ark_NativePointer node, const Opt_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto radius = Converter::OptConvert<Dimension>(*value);
-    // Validator::ValidateNonNegative(radius);
-    // if (!radius) {
-    //     radius = Dimension(POPUP_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-    // }
-    // const std::optional<Dimension>& popupBorderRadius =
-    //     Dimension(radius.value().Value() + RADIUS_OFFSET, DimensionUnit::VP);
-    // IndexerModelStatic::SetPopupItemBorderRadius(frameNode, *radius);
-    // IndexerModelStatic::SetPopupBorderRadius(frameNode, *popupBorderRadius);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radius = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(radius);
+    if (!radius) {
+        radius = Dimension(POPUP_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+    }
+    const std::optional<Dimension>& popupBorderRadius =
+        Dimension(radius.value().Value() + RADIUS_OFFSET, DimensionUnit::VP);
+    IndexerModelStatic::SetPopupItemBorderRadius(frameNode, *radius);
+    IndexerModelStatic::SetPopupBorderRadius(frameNode, *popupBorderRadius);
 }
 void ItemBorderRadiusImpl(Ark_NativePointer node, const Opt_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto radius = Converter::OptConvert<Dimension>(*value);
-    // Validator::ValidateNonNegative(radius);
-    // if (!radius) {
-    //     radius = Dimension(ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-    // }
-    // const std::optional<Dimension>& indexerBorderRadius =
-    //     Dimension(radius.value().Value() + RADIUS_OFFSET, DimensionUnit::VP);
-    // IndexerModelStatic::SetItemBorderRadius(frameNode, *radius);
-    // IndexerModelStatic::SetIndexerBorderRadius(frameNode, *indexerBorderRadius);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radius = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(radius);
+    if (!radius) {
+        radius = Dimension(ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+    }
+    const std::optional<Dimension>& indexerBorderRadius =
+        Dimension(radius.value().Value() + RADIUS_OFFSET, DimensionUnit::VP);
+    IndexerModelStatic::SetItemBorderRadius(frameNode, *radius);
+    IndexerModelStatic::SetIndexerBorderRadius(frameNode, *indexerBorderRadius);
 }
 void PopupBackgroundBlurStyleImpl(Ark_NativePointer node, const Opt_BlurStyle* value)
 {

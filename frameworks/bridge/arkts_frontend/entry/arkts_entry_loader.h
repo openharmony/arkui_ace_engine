@@ -42,6 +42,8 @@ public:
 
     ani_object GetPageEntryObj(const std::string& entryPath) const;
 
+    ani_object GetLinkObj();
+
     operator bool() const
     {
         return loadClass_;

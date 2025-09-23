@@ -205,6 +205,7 @@ void RichEditorUndoManager::AfterChangeByRecord(const UndoRedoRecord& record, bo
     CHECK_NULL_VOID(pattern);
     auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
+    pattern->ReportTextChange();
     CHECK_NULL_VOID(eventHub->HasOnDidChange());
     RichEditorChangeValue changeValue(isUndo ? TextChangeReason::UNDO : TextChangeReason::REDO);
     auto rangeBefore = isUndo ? record.rangeAfter : record.rangeBefore;

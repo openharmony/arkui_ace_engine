@@ -120,6 +120,12 @@ void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto property = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(property);
+    auto axis = property->GetAxis().value_or(Axis::VERTICAL);
+    if (axis == Axis::FREE) {
+        contentStartOffset_ = 0.0f;
+        contentEndOffset_ = 0.0f;
+        return;
+    }
     auto startOffset = property->GetContentStartOffset();
     if (!startOffset.has_value()) {
         contentStartOffset_ = 0.0f;
@@ -167,6 +173,8 @@ void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWr
         } else {
             currentOffset_ = DimensionToFloat(initialOffset.GetX(), selfSize.Width());
         }
+    } else if (!scrollPattern->IsInitialized()) {
+        currentOffset_ += contentStartOffset_;
     }
 }
 
@@ -222,10 +230,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
     float lastScrollableDistance = scrollableDistance_;
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
-        scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentStartOffset_ + contentEndOffset_;
+        scrollableDistance_ = childSize.Width() - viewPort_.Width();
     } else {
-        scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) +
-                              contentStartOffset_ + contentEndOffset_;
+        scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset_;
     }
     if (axis == Axis::FREE) {
         const auto effect = scroll->GetEdgeEffect();
@@ -237,9 +244,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             AdjustOffsetInFreeMode(currentOffset_, scrollableDistance_, effect, scroll->GetEffectEdge(), alwaysEnabled);
     } else if (UnableOverScroll(layoutWrapper)) {
         if (scrollableDistance_ > 0.0f) {
-            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, contentStartOffset_);
         } else {
-            currentOffset_ = Positive(currentOffset_) ? 0.0f : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+            currentOffset_ = GreatNotEqual(currentOffset_, contentStartOffset_)
+                                 ? contentStartOffset_
+                                 : std::clamp(currentOffset_, contentStartOffset_, -scrollableDistance_);
         }
     } else if (LessNotEqual(scrollableDistance_, lastScrollableDistance)) {
         if (GreatOrEqual(scrollableDistance_, 0.f) && LessOrEqual(-currentOffset_, lastScrollableDistance) &&
@@ -249,8 +258,8 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     viewPortExtent_ = childSize;
     viewPortLength_ = axis == Axis::FREE ? viewPort_.Width() : GetMainAxisSize(viewPort_, axis);
-    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_ + contentStartOffset_)
-                                                : OffsetF(currentOffset_ + contentStartOffset_, crossOffset_);
+    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_)
+                                                : OffsetF(currentOffset_, crossOffset_);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }
@@ -258,7 +267,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
-    if (layoutDirection == TextDirection::RTL && axis == Axis::VERTICAL) {
+    if (layoutDirection == TextDirection::RTL) {
         UpdateScrollAlignment(scrollAlignment);
     }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
@@ -304,7 +313,8 @@ bool ScrollLayoutAlgorithm::UnableOverScroll(LayoutWrapper* layoutWrapper) const
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(scrollNode, false);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
-    return (Positive(currentOffset_) && !scrollPattern->CanOverScrollStart(scrollPattern->GetScrollSource())) ||
+    return (GreatNotEqual(currentOffset_, contentStartOffset_) &&
+               !scrollPattern->CanOverScrollStart(scrollPattern->GetScrollSource())) ||
            (Negative(currentOffset_) && GreatNotEqual(-currentOffset_, scrollableDistance_) &&
                !scrollPattern->CanOverScrollEnd(scrollPattern->GetScrollSource()));
 }

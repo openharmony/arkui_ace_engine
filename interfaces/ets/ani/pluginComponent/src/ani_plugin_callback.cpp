@@ -78,7 +78,7 @@ void ANIPluginCallback::SetWant(const AAFwk::Want& want)
     want_ = want;
 }
 
-AAFwk::Want& ANIPluginCallback::GetWant()
+const AAFwk::Want& ANIPluginCallback::GetWant() const
 {
     return want_;
 }
@@ -88,7 +88,7 @@ void ANIPluginCallback::SetRequestParam(const std::shared_ptr<AceJSPluginRequest
     requestParam_ = param;
 }
 
-size_t ANIPluginCallback::GetID(void)
+size_t ANIPluginCallback::GetID(void) const
 {
     return uuid_;
 }

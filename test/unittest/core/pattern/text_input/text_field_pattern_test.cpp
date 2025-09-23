@@ -168,7 +168,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern007
- * @tc.desc: Test TextPattern HandleOnRedoAction.
+ * @tc.desc: Test TextPattern HandleOnRedoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
@@ -2326,6 +2326,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern101, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);

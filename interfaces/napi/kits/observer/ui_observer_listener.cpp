@@ -355,6 +355,35 @@ void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchIn
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::OnTextChangeEvent(const NG::TextChangeEventInfo& info)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER, "Handle text change event failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_value id = nullptr;
+    napi_value uniqueId = nullptr;
+    napi_value content = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_create_string_utf8(env_, info.id.c_str(), info.id.length(), &id);
+    napi_create_int32(env_, info.uniqueId, &uniqueId);
+    napi_create_string_utf8(env_, info.content.c_str(), info.content.length(), &content);
+    napi_set_named_property(env_, objValue, "id", id);
+    napi_set_named_property(env_, objValue, "uniqueId", uniqueId);
+    napi_set_named_property(env_, objValue, "content", content);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
 napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
 {
     napi_value objValue = nullptr;

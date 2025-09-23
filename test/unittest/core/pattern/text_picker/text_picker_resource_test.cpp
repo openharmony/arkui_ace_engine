@@ -41,6 +41,9 @@ constexpr uint32_t SELECTED_INDEX_1 = 1;
 constexpr double TEST_FONT_SIZE = 10.0;
 constexpr double TEST_MIN_FONT_SIZE = 9.0;
 constexpr double TEST_MAX_FONT_SIZE = 20.0;
+const Dimension FONT_SIZE_VALUE_DIMENSION = Dimension(20.1, DimensionUnit::PX);
+const std::vector<std::string> FONT_FAMILY_CURSIVE = { "cursive" };
+const std::vector<std::string> FONT_FAMILY_ARIAL = { "arial" };
 } // namespace
 
 class TextPickerResourceTest : public testing::Test {
@@ -411,6 +414,109 @@ HWTEST_F(TextPickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDisappearTextStyle002
+ * @tc.desc: Test TextPickerPattern UpdateDisappearTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateDisappearTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    pickerPattern->UpdateDisappearTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetDisappearFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateDisappearTextStyle003
+ * @tc.desc: Test TextPickerPattern UpdateDisappearTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateDisappearTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetDisappearTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    pickerPattern->UpdateDisappearTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetDisappearFontFamily().value(), FONT_FAMILY_ARIAL);    
+}
+
+/**
  * @tc.name: UpdateNormalTextStyle001
  * @tc.desc: Test TextPickerPattern UpdateNormalTextStyle.
  * @tc.type: FUNC
@@ -457,6 +563,109 @@ HWTEST_F(TextPickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNormalTextStyle002
+ * @tc.desc: Test TextPickerPattern UpdateNormalTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateNormalTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->normalOptionStyle_.SetTextColor(Color::GREEN);
+    theme->normalOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->normalOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateNormalTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    pickerPattern->UpdateNormalTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateNormalTextStyle003
+ * @tc.desc: Test TextPickerPattern UpdateNormalTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateNormalTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->normalOptionStyle_.SetTextColor(Color::GREEN);
+    theme->normalOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->normalOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetNormalTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateNormalTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    pickerPattern->UpdateNormalTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetFontFamily().value(), FONT_FAMILY_ARIAL);    
+}
+
+/**
  * @tc.name: UpdateSelectedTextStyle001
  * @tc.desc: Test TextPickerPattern UpdateSelectedTextStyle.
  * @tc.type: FUNC
@@ -500,6 +709,109 @@ HWTEST_F(TextPickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
 
     EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle002
+ * @tc.desc: Test TextPickerPattern UpdateSelectedTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateSelectedTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->selectedOptionStyle_.SetTextColor(Color::GREEN);
+    theme->selectedOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->selectedOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateSelectedTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    pickerPattern->UpdateSelectedTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetSelectedFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle003
+ * @tc.desc: Test TextPickerPattern UpdateSelectedTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateSelectedTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->selectedOptionStyle_.SetTextColor(Color::GREEN);
+    theme->selectedOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->selectedOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetSelectedTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateSelectedTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    pickerPattern->UpdateSelectedTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetSelectedFontFamily().value(), FONT_FAMILY_ARIAL);    
 }
 
 /**
@@ -554,6 +866,111 @@ HWTEST_F(TextPickerResourceTest, SetDefaultTextStyle001, TestSize.Level1)
     EXPECT_EQ(pickerProperty->GetDefaultFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
     EXPECT_EQ(pickerProperty->GetDefaultMinFontSize().value(), Dimension(TEST_MIN_FONT_SIZE));
     EXPECT_EQ(pickerProperty->GetDefaultMaxFontSize().value(), Dimension(TEST_MAX_FONT_SIZE));
+}
+
+/**
+ * @tc.name: UpdateDefaultTextStyle002
+ * @tc.desc: Test UpdateDefaultTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateDefaultTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(textTheme, nullptr);
+    textTheme->textStyle_.SetTextColor(Color::GREEN);
+    textTheme->textStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    textTheme->textStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateDefaultTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    pickerPattern->UpdateDefaultTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDefaultColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetDefaultFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetDefaultFontFamily().value(), FONT_FAMILY_CURSIVE);
+}
+
+/**
+ * @tc.name: UpdateDefaultTextStyle003
+ * @tc.desc: Test UpdateDefaultTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has value, the LayoutProperty value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateDefaultTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    ASSERT_NE(textTheme, nullptr);
+    textTheme->textStyle_.SetTextColor(Color::GREEN);
+    textTheme->textStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    textTheme->textStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetDefaultTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    TextPickerModelNG::GetInstance()->SetDefaultTextStyle(textTheme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateDefaultTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    pickerPattern->UpdateDefaultTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDefaultColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDefaultFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetDefaultFontFamily().value(), FONT_FAMILY_ARIAL);  
 }
 
 /**

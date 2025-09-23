@@ -473,7 +473,13 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
-    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false);
+    static bool ParseShadowProps(
+        const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false, bool needResObj = false);
+    static void ParseDialogShadowProps(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogHasBorderColor(NG::BorderColorProperty& borderColor, std::optional<Color>& color,
+        bool& hasBorderColor, const std::string& key);
+    static void SetDialogHasBorderColorProps(
+        NG::BorderColorProperty& borderColor, DialogProperties& properties, RefPtr<ResourceObject>& resObj);
     static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform = false);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
@@ -882,12 +888,12 @@ public:
     static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
         NG::BorderRadiusProperty& dimension);
     static bool CheckLengthMetrics(const JSRef<JSObject>& object);
+    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
 
 private:
-    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,

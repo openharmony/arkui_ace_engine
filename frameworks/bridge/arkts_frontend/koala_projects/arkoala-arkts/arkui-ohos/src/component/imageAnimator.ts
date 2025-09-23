@@ -28,7 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global.resource"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -298,7 +298,7 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     }
     public onFinish(value: (() => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements ImageAnimatorAttribute {
     getPeer(): ArkImageAnimatorPeer {

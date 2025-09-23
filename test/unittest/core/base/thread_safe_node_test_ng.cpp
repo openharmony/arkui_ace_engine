@@ -499,7 +499,22 @@ HWTEST_F(ThreadSafeNodeTestNg, ThreadSafeNodeTestNg016, TestSize.Level1)
      * @tc.steps: step2. thread unsafe uinode CheckThreadSafeNodeTree
      * @tc.expected: CheckThreadSafeNodeTree success
      */
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), true);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), true);
+
+    frameNode->setIsCNode(true);
     EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), false);
     EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), false);
+    frameNode->setIsCNode(false);
+
+    frameNode->SetIsArkTsFrameNode(true);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), false);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), false);
+    frameNode->SetIsArkTsFrameNode(false);
+
+    frameNode->SetIsRootBuilderNode(true);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(true), false);
+    EXPECT_EQ(frameNode->CheckThreadSafeNodeTree(false), false);
+    frameNode->SetIsRootBuilderNode(false);
 }
 } // namespace OHOS::Ace::NG

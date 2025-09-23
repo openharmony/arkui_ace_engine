@@ -24,10 +24,15 @@ config("ani_config") {
 }
 
 ohos_shared_library("animator_ani") {
+  shlib_type = "ani"
   public_configs = [ ":ani_config" ]
-  sources = [ "./src/sts_animator.cpp" ]
+  sources = [ "./src/animator.cpp" ]
   deps = [ "$ace_root/build:libace_compatible" ]
-  external_deps = [ "runtime_core:ani" ]
+  external_deps = [
+    "napi:ace_napi",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+  ]
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"
@@ -38,6 +43,7 @@ generate_static_abc("animator_ani_abc") {
   files = [
     "./ets/@ohos.animator.ets",
     "./ets/arkui.component.common.ets",
+    "./ets/arkui.component.enums.ets",
   ]
   paths_keys = [ "@ohos.animator" ]
   paths_values = [ "./ets/@ohos.animator.ets" ]

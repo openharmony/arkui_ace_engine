@@ -23,6 +23,7 @@ libace_sources = [
 ]
 
 arkoala_sources = [
+    './src/resource_color_helper.cc',
     './src/events.cc',
     './src/vsync.cc',
     './src/generated/bridge_generated.cc',

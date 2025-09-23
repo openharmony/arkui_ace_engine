@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { TypeChecker, ArkUIGeneratedNativeModule, ArkUINativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
@@ -25,9 +25,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Summary, IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
+import { ImageModifier } from "../ImageModifier"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global.resource"
@@ -35,12 +39,9 @@ import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ResizableOptions } from "./image"
-import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
+import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { FocusBoxStyle, FocusPriority } from "./focus"
-import { TransformationMatrix } from "./arkui-common"
-import { UniformDataType } from "./arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
-import { PixelMap } from "./arkui-pixelmap"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -48,19 +49,30 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
+import { Matrix4Transit } from "#external"
 import { ScrollState } from "./list"
 import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
+import { BindSheetHandWritten } from "./../handwritten"
 import { ArkCommonAttributeSet, applyUIAttributes, applyUIAttributesUpdate } from "../handwritten/modifiers/ArkCommonModifier"
 import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
+import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
-import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-export interface ICurve {
-    interpolate(fraction: number): number
-}
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading,
+    hookDragPreviewOptions } from "../handwritten/ArkDragDrop"
+import { ArkUIAniModule } from "arkui.ani"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl,
+    hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl,
+    hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl,
+    hookCustomPropertyImpl
+} from "../handwritten/CommonHandWritten"
+import { CommonMethodModifier, AttributeUpdaterFlag } from "../CommonMethodModifier"
+import { ICurve as ICurve_} from "#external"
+export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -89,30 +101,6 @@ export class ICurveInternal implements MaterializedBase,ICurve {
         const obj : ICurveInternal = new ICurveInternal()
         obj.peer = new Finalizable(ptr, ICurveInternal.getFinalizer())
         return obj
-    }
-}
-export class DrawModifierInternal {
-    public static fromPtr(ptr: KPointer): DrawModifier {
-        const obj : DrawModifier = new DrawModifier()
-        return obj
-    }
-}
-export class DrawModifier  {
-    weakRefOfPeerNode ?: WeakRef<PeerNode>;
-    constructor() {
-    }
-    public drawBehind(drawContext: DrawContext): void {
-        return
-    }
-    public drawContent(drawContext: DrawContext): void {
-        return
-    }
-    public drawFront(drawContext: DrawContext): void {
-        return
-    }
-    public invalidate(): void {
-        hookDrawModifierInvalidateImpl(this);
-        return
     }
 }
 export class TransitionEffectInternal {
@@ -292,7 +280,7 @@ export class TransitionEffect implements MaterializedBase {
 }
 export interface BaseEvent {
     target: EventTarget
-    timestamp: int64
+    timestamp: number
     source: SourceType
     axisHorizontal?: number | undefined
     axisVertical?: number | undefined
@@ -317,10 +305,10 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     set target(target: EventTarget) {
         this.setTarget(target)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get source(): SourceType {
@@ -426,11 +414,11 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         this.setTarget_serialize(target_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -552,12 +540,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._BaseEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getSource_serialize(): SourceType {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getSource(this.peer!.ptr)
@@ -777,7 +765,7 @@ export interface DragEvent {
     getVelocityY(): number
     getVelocity(): number
     getModifierKeyState?: ((keys: Array<string>) => boolean)
-    executeDropAnimation(customDropAnimation: (() => void)): void
+    executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void
     startDataLoading(options: DataSyncOptions): string
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -834,14 +822,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     public setData(unifiedData: UnifiedData): void {
         const unifiedData_casted = unifiedData as (UnifiedData)
-        this.setData_serialize(unifiedData_casted)
+        ArkUIAniModule._DragEvent_Set_Data(this.peer!.ptr, unifiedData_casted)
         return
     }
     public getData(): UnifiedData {
-        return this.getData_serialize()
+        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr) as UnifiedData
+        return data
     }
     public getSummary(): Summary {
-        return this.getSummary_serialize()
+        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr) as (Summary)
+        return summary
     }
     public setResult(dragResult: DragResult): void {
         const dragResult_casted = dragResult as (DragResult)
@@ -869,14 +859,13 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             return this.getModifierKeyState_serialize(keys_casted)
         }
     }
-    public executeDropAnimation(customDropAnimation: (() => void)): void {
-        const customDropAnimation_casted = customDropAnimation as ((() => void))
+    public executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void {
+        const customDropAnimation_casted = customDropAnimation as (((data: undefined) => void))
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
     public startDataLoading(options: DataSyncOptions): string {
-        const options_casted = options as (DataSyncOptions)
-        return this.startDataLoading_serialize(options_casted)
+        return hookDragEventStartDataLoading(this.peer!.ptr, options)
     }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
@@ -918,20 +907,6 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getY(this.peer!.ptr)
         return retval
     }
-    private setData_serialize(unifiedData: UnifiedData): void {
-        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, toPeerPtr(unifiedData))
-    }
-    private getData_serialize(): UnifiedData {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : UnifiedData = UnifiedDataInternal.fromPtr(retval)
-        return obj
-    }
-    private getSummary_serialize(): Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Summary = retvalDeserializer.readSummary()
-        return returnResult
-    }
     private setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, TypeChecker.DragResult_ToNumeric(dragResult))
     }
@@ -940,8 +915,15 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return TypeChecker.DragResult_FromNumeric(retval)
     }
     private getPreviewRect_serialize(): Rectangle {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Rectangle = retvalDeserializer.readRectangle()
         return returnResult
     }
@@ -968,7 +950,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.release()
         return retval
     }
-    private executeDropAnimation_serialize(customDropAnimation: (() => void)): void {
+    private executeDropAnimation_serialize(customDropAnimation: ((data: undefined) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1018,11 +1000,11 @@ export interface KeyEvent {
     keySource: KeySource
     deviceId: number
     metaKey: number
-    timestamp: int64
+    timestamp: number
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     unicode?: number | undefined
-    getModifierKeyState(keys: Array<string>): boolean
+    getModifierKeyState?: ((keys: Array<string>) => boolean)
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1065,10 +1047,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set metaKey(metaKey: number) {
         this.setMetaKey(metaKey)
     }
-    get timestamp(): int64 {
+    get timestamp(): number {
         return this.getTimestamp()
     }
-    set timestamp(timestamp: int64) {
+    set timestamp(timestamp: number) {
         this.setTimestamp(timestamp)
     }
     get stopPropagation(): (() => void) {
@@ -1090,6 +1072,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const unicode_NonNull  = (unicode as number)
         this.setUnicode(unicode_NonNull)
     }
+    get getModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return this.getGetModifierKeyState();
+    }
+    set getModifierKeyState(getModifierKeyState: ((keys: Array<string>) => boolean) | undefined) {
+        // setter is not implemented
+    }
     static ctor_keyevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_ctor()
         return retval
@@ -1101,9 +1089,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._KeyEvent_getFinalizer()
     }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
+    public getGetModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return (keys: Array<string>): boolean => {
+            const keys_casted = keys as (Array<string>)
+            return this.getModifierKeyState_serialize(keys_casted)
+        }
     }
     private getType(): KeyType {
         return this.getType_serialize()
@@ -1153,11 +1143,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setMetaKey_serialize(metaKey_casted)
         return
     }
-    private getTimestamp(): int64 {
+    private getTimestamp(): number {
         return this.getTimestamp_serialize()
     }
-    private setTimestamp(timestamp: int64): void {
-        const timestamp_casted = timestamp as (int64)
+    private setTimestamp(timestamp: number): void {
+        const timestamp_casted = timestamp as (number)
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
@@ -1238,12 +1228,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setMetaKey_serialize(metaKey: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
-    private getTimestamp_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
+    private getTimestamp_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
-    private setTimestamp_serialize(timestamp: int64): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
+    private setTimestamp_serialize(timestamp: number): void {
+        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getStopPropagation_serialize(): (() => void) {
         // @ts-ignore
@@ -1272,8 +1262,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, TypeChecker.IntentionCode_ToNumeric(intentionCode))
     }
     private getUnicode_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setUnicode_serialize(unicode: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, unicode)
@@ -1286,7 +1290,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 }
 export class ProgressMaskInternal {
     public static fromPtr(ptr: KPointer): ProgressMask {
-        const obj : ProgressMask = new ProgressMask(undefined, undefined, undefined)
+        const obj : ProgressMask = new ProgressMask()
         obj.peer = new Finalizable(ptr, ProgressMask.getFinalizer())
         return obj
     }
@@ -1324,12 +1328,11 @@ export class ProgressMask implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(value?: number, total?: number, color?: ResourceColor) {
-        if (((value) !== (undefined)) || ((total) !== (undefined)) || ((color) !== (undefined)))
-        {
-            const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
-            this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
-        }
+    constructor(value: number, total: number, color: ResourceColor) {
+        const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
+        this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
+    }
+    constructor() {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
@@ -1386,9 +1389,9 @@ export class ProgressMask implements MaterializedBase {
 export interface Measurable {
     uniqueId?: number | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult
-    getMargin(): DirectionalEdgesT
-    getPadding(): DirectionalEdgesT
-    getBorderWidth(): DirectionalEdgesT
+    getMargin(): DirectionalEdgesT<number>
+    getPadding(): DirectionalEdgesT<number>
+    getBorderWidth(): DirectionalEdgesT<number>
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
     peer?: Finalizable | undefined = undefined
@@ -1417,13 +1420,13 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const constraint_casted = constraint as (ConstraintSizeOptions)
         return this.measure_serialize(constraint_casted)
     }
-    public getMargin(): DirectionalEdgesT {
+    public getMargin(): DirectionalEdgesT<number> {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT {
+    public getPadding(): DirectionalEdgesT<number> {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT {
+    public getBorderWidth(): DirectionalEdgesT<number> {
         return this.getBorderWidth_serialize()
     }
     private getUniqueId(): number | undefined {
@@ -1443,22 +1446,22 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
-    private getMargin_serialize(): DirectionalEdgesT {
+    private getMargin_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getPadding_serialize(): DirectionalEdgesT {
+    private getPadding_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getBorderWidth_serialize(): DirectionalEdgesT {
+    private getBorderWidth_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getUniqueId_serialize(): number | undefined {
@@ -1642,93 +1645,6 @@ export class TextContentControllerBase implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-}
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        const obj : ChildrenMainSize = new ChildrenMainSize(undefined)
-        obj.peer = new Finalizable(ptr, ChildrenMainSize.getFinalizer())
-        return obj
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): number {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: number) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    static ctor_childrenmainsize(childDefaultSize: number): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_ctor(childDefaultSize)
-        return retval
-    }
-    constructor(childDefaultSize?: number) {
-        if ((childDefaultSize) !== (undefined))
-        {
-            const ctorPtr : KPointer = ChildrenMainSize.ctor_childrenmainsize((childDefaultSize)!)
-            this.peer = new Finalizable(ctorPtr, ChildrenMainSize.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const childrenSize_casted = childrenSize as (Array<number> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: number, childSize: number): void {
-        const index_casted = index as (number)
-        const childSize_casted = childSize as (number)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): number {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: number): void {
-        const childDefaultSize_casted = childDefaultSize as (number)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    private splice_serialize(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let deleteCount_type : int32 = RuntimeType.UNDEFINED
-        deleteCount_type = runtimeType(deleteCount)
-        thisSerializer.writeInt8(deleteCount_type as int32)
-        if ((RuntimeType.UNDEFINED) != (deleteCount_type)) {
-            const deleteCount_value  = deleteCount!
-            thisSerializer.writeNumber(deleteCount_value)
-        }
-        let childrenSize_type : int32 = RuntimeType.UNDEFINED
-        childrenSize_type = runtimeType(childrenSize)
-        thisSerializer.writeInt8(childrenSize_type as int32)
-        if ((RuntimeType.UNDEFINED) != (childrenSize_type)) {
-            const childrenSize_value  = childrenSize!
-            thisSerializer.writeInt32(childrenSize_value.length as int32)
-            for (let i = 0; i < childrenSize_value.length; i++) {
-                const childrenSize_value_element : number = childrenSize_value[i]
-                thisSerializer.writeNumber(childrenSize_value_element)
-            }
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private update_serialize(index: number, childSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
-    }
-    private getChildDefaultSize_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
-        return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
 export interface UICommonEvent {
@@ -1991,8 +1907,9 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
-    _attributeSet?: ArkCommonAttributeSet;
+    _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -2073,9 +1990,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_height1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    drawModifierAttribute(value: DrawModifier | undefined): void {
-        hookDrawModifierAttributeImpl(this,value)
-    }
     responseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -2097,6 +2011,26 @@ export class ArkCommonMethodPeer extends PeerNode {
             else if (TypeChecker.isRectangle(value_value, false, false, false, false)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as Rectangle
+                let value_x_type : int32 = RuntimeType.UNDEFINED
+                value_x_type = runtimeType(value_value_1.x)
+                if ((RuntimeType.UNDEFINED) == (value_x_type)) {
+                    value_value_1.x  = 0
+                }
+                let value_y_type : int32 = RuntimeType.UNDEFINED
+                value_y_type = runtimeType(value_value_1.y)
+                if ((RuntimeType.UNDEFINED) == (value_y_type)) {
+                    value_value_1.y  = 0
+                }
+                let value_width_type : int32 = RuntimeType.UNDEFINED
+                value_width_type = runtimeType(value_value_1.width)
+                if ((RuntimeType.UNDEFINED) == (value_width_type)) {
+                    value_value_1.width  = '100%'
+                }
+                let value_height_type : int32 = RuntimeType.UNDEFINED
+                value_height_type = runtimeType(value_value_1.height)
+                if ((RuntimeType.UNDEFINED) == (value_height_type)) {
+                    value_value_1.height  = '100%'
+                }
                 thisSerializer.writeRectangle(value_value_1)
             }
         }
@@ -2371,6 +2305,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    
     backgroundColor0Attribute(value: ResourceColor | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3101,50 +3036,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_foregroundColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundColor1Attribute(value: ResourceColor | ColoringStrategy | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (TypeChecker.isColor(value_value_0)) {
-                    thisSerializer.writeInt8(0 as int32)
-                    const value_value_0_0  = value_value_0 as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
-                    thisSerializer.writeInt8(1 as int32)
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_value_0_type) {
-                    thisSerializer.writeInt8(2 as int32)
-                    const value_value_0_2  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
-                    thisSerializer.writeInt8(3 as int32)
-                    const value_value_0_3  = value_value_0 as Resource
-                    thisSerializer.writeResource(value_value_0_3)
-                }
-            }
-            else if (TypeChecker.isColoringStrategy(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as ColoringStrategy
-                thisSerializer.writeInt32(TypeChecker.ColoringStrategy_ToNumeric(value_value_1))
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     onClick0Attribute(value: ((event: ClickEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3210,6 +3101,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.holdAndWriteCallback(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAccessibilityHoverTransparentAttribute(value: AccessibilityTransparentCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHoverTransparent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hoverEffectAttribute(value: HoverEffect | undefined): void {
@@ -3464,6 +3367,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    SetOrCreateAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.peer.ptr, functionName, value, callback);
+    }
     transition0Attribute(value: TransitionOptions | TransitionEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3694,18 +3601,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_sepia0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    sepia1Attribute(value: number | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_sepia1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     invert0Attribute(value: number | InvertOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3727,29 +3622,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_invert0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    invert1Attribute(value: number | InvertOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as InvertOptions
-                thisSerializer.writeInvertOptions(value_value_1)
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_invert1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hueRotate0Attribute(value: number | string | undefined): void {
@@ -3853,25 +3725,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_useEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    useEffect2Attribute(useEffect: boolean | undefined, effectType?: EffectType): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let useEffect_type : int32 = RuntimeType.UNDEFINED
-        useEffect_type = runtimeType(useEffect)
-        thisSerializer.writeInt8(useEffect_type as int32)
-        if ((RuntimeType.UNDEFINED) != (useEffect_type)) {
-            const useEffect_value  = useEffect!
-            thisSerializer.writeBoolean(useEffect_value)
-        }
-        let effectType_type : int32 = RuntimeType.UNDEFINED
-        effectType_type = runtimeType(effectType)
-        thisSerializer.writeInt8(effectType_type as int32)
-        if ((RuntimeType.UNDEFINED) != (effectType_type)) {
-            const effectType_value  = (effectType as EffectType)
-            thisSerializer.writeInt32(TypeChecker.EffectType_ToNumeric(effectType_value))
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_useEffect2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     renderGroup0Attribute(value: boolean | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3884,18 +3737,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_renderGroup0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    renderGroup1Attribute(value: boolean | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_renderGroup1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     freeze0Attribute(value: boolean | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3906,18 +3747,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeBoolean(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_freeze0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    freeze1Attribute(value: boolean | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_freeze1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     translate0Attribute(value: TranslateOptions | undefined): void {
@@ -4004,26 +3833,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_rotate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    rotate1Attribute(value: RotateOptions | undefined): void {
+    transform0Attribute(value: object | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeRotateOptions(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_rotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    transform0Attribute(value: TransformationMatrix | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeTransformationMatrix(value_value)
+            const value_curve_value  = value!
+            const value_curve_value_2  = value_curve_value as Matrix4Transit
+            thisSerializer.writeInt64(Object.values(value_curve_value_2)[0] as int64)
         }
         ArkUIGeneratedNativeModule._CommonMethod_transform0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -4445,28 +4263,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_aspectRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    clickEffect0Attribute(value: ClickEffect | undefined): void {
+    clickEffect0Attribute(value: ClickEffect | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
+        if (value !== null) {
+            value_type = runtimeType(value)
+        }
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeClickEffect(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_clickEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    clickEffect1Attribute(value: ClickEffect | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeClickEffect(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_clickEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
@@ -4756,15 +4564,14 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ShadowOptions
-                thisSerializer.writeShadowOptions(value_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_value)) {
+            if (TypeChecker.isShadowStyle(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as ShadowStyle
                 thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            } else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_shadow0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -4962,39 +4769,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_maskShape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    maskShape1Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isCircleShape(value_value)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as CircleShape
-                thisSerializer.writeCircleShape(value_value_0)
-            }
-            else if (TypeChecker.isEllipseShape(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as EllipseShape
-                thisSerializer.writeEllipseShape(value_value_1)
-            }
-            else if (TypeChecker.isPathShape(value_value)) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as PathShape
-                thisSerializer.writePathShape(value_value_2)
-            }
-            else if (TypeChecker.isRectShape(value_value)) {
-                thisSerializer.writeInt8(3 as int32)
-                const value_value_3  = value_value as RectShape
-                thisSerializer.writeRectShape(value_value_3)
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_maskShape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     keyAttribute(value: string | undefined): void {
@@ -5562,25 +5336,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_accessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    customPropertyAttribute(name: string | undefined, value: Object | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let name_type : int32 = RuntimeType.UNDEFINED
-        name_type = runtimeType(name)
-        thisSerializer.writeInt8(name_type as int32)
-        if ((RuntimeType.UNDEFINED) != (name_type)) {
-            const name_value  = name!
-            thisSerializer.writeString(name_value)
-        }
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let types_type : int32 = RuntimeType.UNDEFINED
@@ -5608,7 +5363,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void {
+    backgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let builder_type : int32 = RuntimeType.UNDEFINED
         builder_type = runtimeType(builder)
@@ -5714,25 +5469,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeBackgroundImageOptions(options_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_backgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = (value as BlurStyle)
-            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeBackgroundBlurStyleOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -6039,60 +5775,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_chainMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dragPreviewOptionsAttribute(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeDragPreviewOptions(value_value)
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeDragInteractionOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    overlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as ComponentContent
-                thisSerializer.writeComponentContent(value_value_2)
-            }
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeOverlayOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -6170,7 +5852,12 @@ export class ArkCommonMethodPeer extends PeerNode {
             const message_value  = message!
             let message_value_type : int32 = RuntimeType.UNDEFINED
             message_value_type = runtimeType(message_value)
-            if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
+            if (TypeChecker.isStyledString(message_value, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const message_value_1  = message_value as StyledString
+                thisSerializer.writeStyledString(message_value_1)
+            }
+            else if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
                 thisSerializer.writeInt8(0 as int32)
                 const message_value_0  = message_value as ResourceStr
                 let message_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -6185,11 +5872,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                     const message_value_0_1  = message_value_0 as Resource
                     thisSerializer.writeResource(message_value_0_1)
                 }
-            }
-            else if (TypeChecker.isStyledString(message_value, false)) {
-                thisSerializer.writeInt8(1 as int32)
-                const message_value_1  = message_value as StyledString
-                thisSerializer.writeStyledString(message_value_1)
             }
         }
         let options_type : int32 = RuntimeType.UNDEFINED
@@ -7020,7 +6702,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_backToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let edgeEffect_type : int32 = RuntimeType.UNDEFINED
         edgeEffect_type = runtimeType(edgeEffect)
@@ -7039,7 +6721,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions): void {
+    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let enabled_type : int32 = RuntimeType.UNDEFINED
         enabled_type = runtimeType(enabled)
@@ -7075,6 +6757,10 @@ export interface ProvideOptions {
     allowOverride?: string;
 }
 export interface AnimatableArithmetic<T> {
+    plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    multiply(scale:number): AnimatableArithmetic<T>;
+    equals(rhs:AnimatableArithmetic<T>): boolean;
 }
 export type ReuseIdCallback = () => string;
 export interface ReuseOptions {
@@ -7429,7 +7115,9 @@ export enum SourceType {
     MOUSE = 1,
     Mouse = 1,
     TOUCH_SCREEN = 2,
-    TouchScreen = 2
+    TouchScreen = 2,
+    KEYBOARD = 4,
+    JOYSTICK = 5
 }
 export enum SourceTool {
     UNKNOWN = 0,
@@ -7626,10 +7314,9 @@ export enum DragBehavior {
     COPY = 0,
     MOVE = 1
 }
-export interface DataSyncOptions {
-    _DataSyncOptionsStub: string;
-}
+
 export enum DragResult {
+    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -7770,8 +7457,54 @@ export enum DismissReason {
     SLIDE_DOWN = 3
 }
 export interface DismissPopupAction {
-    dismiss: ((data: undefined) => void);
+    dismiss(): void;
     reason: DismissReason;
+}
+
+export class DismissPopupActionInternal implements MaterializedBase, DismissPopupAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr?: KPointer) {
+        if (!peerPtr) {
+            peerPtr = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
+        }
+        this.peer = new Finalizable(peerPtr!, DismissPopupActionInternal.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissPopupAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissPopupActionInternal {
+        return new DismissPopupActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as DismissReason
+        this.setReason_serialize(reason_casted)
+    }
+    private dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval = ArkUIGeneratedNativeModule._DismissPopupAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
 }
 export interface PopupStateChangeParam {
     isVisible: boolean;
@@ -7818,7 +7551,7 @@ export interface TipsOptions {
 
 export interface PopupButton {
     value: string;
-    action: ((data: undefined) => void);
+    action: (() => void);
 }
 export interface Literal_String_value_Callback_Void_action {
     value: string;
@@ -7832,35 +7565,36 @@ export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
 export enum BlendMode {
-    CLEAR = 0,
-    SRC = 1,
-    DST = 2,
-    SRC_OVER = 3,
-    DST_OVER = 4,
-    SRC_IN = 5,
-    DST_IN = 6,
-    SRC_OUT = 7,
-    DST_OUT = 8,
-    SRC_ATOP = 9,
-    DST_ATOP = 10,
-    XOR = 11,
-    PLUS = 12,
-    MODULATE = 13,
-    SCREEN = 14,
-    OVERLAY = 15,
-    DARKEN = 16,
-    LIGHTEN = 17,
-    COLOR_DODGE = 18,
-    COLOR_BURN = 19,
-    HARD_LIGHT = 20,
-    SOFT_LIGHT = 21,
-    DIFFERENCE = 22,
-    EXCLUSION = 23,
-    MULTIPLY = 24,
-    HUE = 25,
-    SATURATION = 26,
-    COLOR = 27,
-    LUMINOSITY = 28
+    NONE,
+    CLEAR = 1,
+    SRC = 2,
+    DST = 3,
+    SRC_OVER = 4,
+    DST_OVER = 5,
+    SRC_IN = 6,
+    DST_IN = 7,
+    SRC_OUT = 8,
+    DST_OUT = 9,
+    SRC_ATOP = 10,
+    DST_ATOP = 11,
+    XOR = 12,
+    PLUS = 13,
+    MODULATE = 14,
+    SCREEN = 15,
+    OVERLAY = 16,
+    DARKEN = 17,
+    LIGHTEN = 18,
+    COLOR_DODGE = 19,
+    COLOR_BURN = 20,
+    HARD_LIGHT = 21,
+    SOFT_LIGHT = 22,
+    DIFFERENCE = 23,
+    EXCLUSION = 24,
+    MULTIPLY = 25,
+    HUE = 26,
+    SATURATION = 27,
+    COLOR = 28,
+    LUMINOSITY = 29
 }
 export interface PopupOptions {
     message: string;
@@ -7963,7 +7697,7 @@ export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
     showInSubWindow?: boolean;
 }
-export interface TouchTestInfo {
+export class TouchTestInfo {
     windowX: number;
     windowY: number;
     parentX: number;
@@ -7972,10 +7706,23 @@ export interface TouchTestInfo {
     y: number;
     rect: RectResult;
     id: string;
+    constructor() {
+        this.windowX = 0;
+        this.windowY = 0;
+        this.parentX = 0;
+        this.parentY = 0;
+        this.x = 0;
+        this.y = 0;
+        this.rect = { x: 0, y: 0, width: 0, height: 0 };
+        this.id = "";
+    }
 }
-export interface TouchResult {
+export class TouchResult {
     strategy: TouchTestStrategy;
     id?: string;
+    constructor() {
+        this.strategy = TouchTestStrategy.DEFAULT;
+    }
 }
 export interface PixelStretchEffectOptions {
     top?: Length;
@@ -8086,114 +7833,119 @@ export type Callback_DragEvent_String_Void = (event: DragEvent, extraParams?: st
 export type Callback_PreDragStatus_Void = (parameter: PreDragStatus) => void;
 export type Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 export type Callback_TouchEvent_HitTestMode = (parameter: TouchEvent) => HitTestMode;
-export interface Literal_Alignment_align {
+export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
-    width(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    height(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    drawModifier(value: DrawModifier | undefined): this
-    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    size(value: SizeOptions | undefined): this
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    touchable(value: boolean | undefined): this
-    hitTestBehavior(value: HitTestMode | undefined): this
-    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this
-    layoutWeight(value: number | string | undefined): this
-    chainWeight(value: ChainWeightOptions | undefined): this
-    padding(value: Padding | Length | LocalizedPadding | undefined): this
-    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this
-    margin(value: Padding | Length | LocalizedPadding | undefined): this
-    backgroundColor(value: ResourceColor | undefined): this
-    pixelRound(value: PixelRoundPolicy | undefined): this
-    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this
-    backgroundImagePosition(value: Position | Alignment | undefined): this
-    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this
-    backgroundImageResizable(value: ResizableOptions | undefined): this
-    foregroundEffect(value: ForegroundEffectOptions | undefined): this
-    visualEffect(value: VisualEffect | undefined): this
-    backgroundFilter(value: Filter | undefined): this
-    foregroundFilter(value: Filter | undefined): this
-    compositingFilter(value: Filter | undefined): this
-    opacity(value: number | Resource | undefined): this
-    border(value: BorderOptions | undefined): this
-    borderStyle(value: BorderStyle | EdgeStyles | undefined): this
-    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this
-    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this
-    borderImage(value: BorderImageOption | undefined): this
-    outline(value: OutlineOptions | undefined): this
-    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this
-    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this
-    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
-    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    onClick(event: ((event: ClickEvent) => void) | undefined): this
-    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
-    onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this
-    onAccessibilityHover(value: AccessibilityCallback | undefined): this
-    hoverEffect(value: HoverEffect | undefined): this
-    onMouse(value: ((event: MouseEvent) => void) | undefined): this
-    onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
-    onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
-    onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this
-    onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this
-    focusable(value: boolean | undefined): this
-    nextFocus(value: FocusMovement | undefined): this
-    tabStop(value: boolean | undefined): this
-    onFocus(value: (() => void) | undefined): this
-    onBlur(value: (() => void) | undefined): this
-    tabIndex(value: number | undefined): this
-    defaultFocus(value: boolean | undefined): this
-    groupDefaultFocus(value: boolean | undefined): this
-    focusOnTouch(value: boolean | undefined): this
-    focusBox(value: FocusBoxStyle | undefined): this
-    animationStart(value: AnimateParam | undefined): this
-    animationStop(value: AnimateParam | undefined):this
-    transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
-    motionBlur(value: MotionBlurOptions | undefined): this
-    brightness(value: number | undefined): this
-    contrast(value: number | undefined): this
-    grayscale(value: number | undefined): this
-    colorBlend(value: Color | string | Resource | undefined): this
-    saturate(value: number | undefined): this
-    sepia(value: number | undefined): this
-    invert(value: number | InvertOptions | undefined): this
-    hueRotate(value: number | string | undefined): this
-    useShadowBatching(value: boolean | undefined): this
-    useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this
-    renderGroup(value: boolean | undefined): this
-    freeze(value: boolean | undefined): this
-    translate(value: TranslateOptions | undefined): this
-    scale(value: ScaleOptions | undefined): this
-    gridSpan(value: number | undefined): this
-    gridOffset(value: number | undefined): this
-    rotate(value: RotateOptions | undefined): this
-    transform(value: TransformationMatrix | undefined | Object | undefined): this
-    onAppear(value: (() => void) | undefined): this
-    onDisAppear(value: (() => void) | undefined): this
-    onAttach(value: (() => void) | undefined): this
-    onDetach(value: (() => void) | undefined): this
-    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this
-    visibility(value: Visibility | undefined): this
-    flexGrow(value: number | undefined): this
-    flexShrink(value: number | undefined): this
-    flexBasis(value: number | string | undefined): this
-    alignSelf(value: ItemAlign | undefined): this
-    displayPriority(value: number | undefined): this
-    zIndex(value: number | undefined): this
-    direction(value: Direction | undefined): this
-    align(value: Alignment | undefined): this
-    position(value: Position | Edges | LocalizedEdges | undefined): this
-    markAnchor(value: Position | LocalizedPosition | undefined): this
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    enabled(value: boolean | undefined): this
-    useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
-    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
+    width(value: Length | undefined | Length | LayoutPolicy | undefined): this {return this;}
+    height(value: Length | undefined | Length | LayoutPolicy | undefined):this {return this;}
+    drawModifier(value: DrawModifier | undefined): this {return this;}
+    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {return this;}
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {return this;}
+    size(value: SizeOptions | undefined): this {return this;}
+    constraintSize(value: ConstraintSizeOptions | undefined): this {return this;}
+    touchable(value: boolean | undefined): this {return this;}
+    hitTestBehavior(value: HitTestMode | undefined): this {return this;}
+    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {return this;}
+    layoutWeight(value: number | string | undefined): this {return this;}
+    chainWeight(value: ChainWeightOptions | undefined): this {return this;}
+    padding(value: Padding | Length | LocalizedPadding | undefined): this {return this;}
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {return this;}
+    margin(value: Padding | Length | LocalizedPadding | undefined): this {return this;}
+    backgroundColor(value: ResourceColor | undefined): this {return this;}
+    pixelRound(value: PixelRoundPolicy | undefined): this {return this;}
+    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {return this;}
+    backgroundImagePosition(value: Position | Alignment | undefined): this {return this;}
+    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    backgroundImageResizable(value: ResizableOptions | undefined): this {return this;}
+    foregroundEffect(value: ForegroundEffectOptions | undefined): this {return this;}
+    visualEffect(value: VisualEffect | undefined): this {return this;}
+    backgroundFilter(value: Filter | undefined): this {return this;}
+    foregroundFilter(value: Filter | undefined): this {return this;}
+    compositingFilter(value: Filter | undefined): this {return this;}
+    opacity(value: number | Resource | undefined): this {return this;}
+    border(value: BorderOptions | undefined): this {return this;}
+    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {return this;}
+    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {return this;}
+    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {return this;}
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {return this;}
+    borderImage(value: BorderImageOption | undefined): this {return this;}
+    outline(value: OutlineOptions | undefined): this {return this;}
+    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {return this;}
+    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {return this;}
+    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {return this;}
+    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {return this;}
+    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {return this;}
+    onClick(event: ((event: ClickEvent) => void) | undefined): this {return this;}
+    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {return this;}
+    onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {return this;}
+    onAccessibilityHover(value: AccessibilityCallback | undefined): this {return this;}
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {return this;}
+    hoverEffect(value: HoverEffect | undefined): this {return this;}
+    onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
+    onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
+    onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {return this;}
+    onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
+    onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {return this;}
+    onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
+    onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
+    onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this {return this;}
+    onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this {return this;}
+    focusable(value: boolean | undefined): this {return this;}
+    nextFocus(value: FocusMovement | undefined): this {return this;}
+    tabStop(value: boolean | undefined): this {return this;}
+    onFocus(value: (() => void) | undefined): this {return this;}
+    onBlur(value: (() => void) | undefined): this {return this;}
+    tabIndex(value: number | undefined): this {return this;}
+    defaultFocus(value: boolean | undefined): this {return this;}
+    groupDefaultFocus(value: boolean | undefined): this {return this;}
+    focusOnTouch(value: boolean | undefined): this {return this;}
+    focusBox(value: FocusBoxStyle | undefined): this {return this;}
+    // when use buildSystem memo-plugin will insert animation declaration
+    animationStart(value: AnimateParam | undefined): this {return this;}
+    animationStop(value: AnimateParam | undefined):this {return this;}
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
+    transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {return this;}
+    motionBlur(value: MotionBlurOptions | undefined): this {return this;}
+    brightness(value: number | undefined): this {return this;}
+    contrast(value: number | undefined): this {return this;}
+    grayscale(value: number | undefined): this {return this;}
+    colorBlend(value: Color | string | Resource | undefined): this {return this;}
+    saturate(value: number | undefined): this {return this;}
+    sepia(value: number | undefined): this {return this;}
+    invert(value: number | InvertOptions | undefined): this {return this;}
+    hueRotate(value: number | string | undefined): this {return this;}
+    useShadowBatching(value: boolean | undefined): this {return this;}
+    useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this {return this;}
+    renderGroup(value: boolean | undefined): this {return this;}
+    freeze(value: boolean | undefined): this {return this;}
+    translate(value: TranslateOptions | undefined): this {return this;}
+    scale(value: ScaleOptions | undefined): this {return this;}
+    gridSpan(value: number | undefined): this {return this;}
+    gridOffset(value: number | undefined): this {return this;}
+    rotate(value: RotateOptions | undefined): this {return this;}
+    transform(value: object | undefined): this {return this;}
+    onAppear(value: (() => void) | undefined): this {return this;}
+    onDisAppear(value: (() => void) | undefined): this {return this;}
+    onAttach(value: (() => void) | undefined): this {return this;}
+    onDetach(value: (() => void) | undefined): this {return this;}
+    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {return this;}
+    visibility(value: Visibility | undefined): this {return this;}
+    flexGrow(value: number | undefined): this {return this;}
+    flexShrink(value: number | undefined): this {return this;}
+    flexBasis(value: number | string | undefined): this {return this;}
+    alignSelf(value: ItemAlign | undefined): this {return this;}
+    displayPriority(value: number | undefined): this {return this;}
+    zIndex(value: number | undefined): this {return this;}
+    direction(value: Direction | undefined): this {return this;}
+    align(value: Alignment | undefined): this {return this;}
+    position(value: Position | Edges | LocalizedEdges | undefined): this {return this;}
+    markAnchor(value: Position | LocalizedPosition | undefined): this {return this;}
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {return this;}
+    enabled(value: boolean | undefined): this {return this;}
+    useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {return this;}
+    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {return this;}
     alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
         this.alignRules(value);
         return this;
@@ -8202,93 +7954,116 @@ export interface CommonMethod {
         this.alignRules(value);
         return this;
     }
-    aspectRatio(value: number | undefined): this
-    clickEffect(value: ClickEffect | undefined): this
-    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
-    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
-    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<UniformDataType> | undefined): this
-    draggable(value: boolean | undefined): this
-    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
-    onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
-    linearGradient(value: LinearGradientOptions | undefined): this
-    sweepGradient(value: SweepGradientOptions | undefined): this
-    radialGradient(value: RadialGradientOptions | undefined): this
-    motionPath(value: MotionPathOptions | undefined): this
-    shadow(value: ShadowOptions | ShadowStyle | undefined): this
-    clip(value: boolean | undefined): this
-    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    mask(value: ProgressMask | undefined): this
-    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    key(value: string | undefined): this
-    id(value: string | undefined): this
-    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this
-    stateStyles(value: StateStyles | undefined): this
-    restoreId(value: number | undefined): this
-    sphericalEffect(value: number | undefined): this
-    lightUpEffect(value: number | undefined): this
-    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this
-    accessibilityText(value: string | undefined | Resource | undefined): this
-    accessibilityNextFocusId(value: string | undefined): this
-    accessibilityDefaultFocus(value: boolean | undefined): this
-    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this
-    accessibilityScrollTriggerable(value: boolean | undefined): this
-    accessibilityRole(value: AccessibilityRoleType | undefined): this
-    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this
-    accessibilityTextHint(value: string | undefined): this
-    accessibilityDescription(value: string | undefined | Resource | undefined): this
-    accessibilityLevel(value: string | undefined): this
-    accessibilityVirtualNode(value: CustomBuilder | undefined): this
-    accessibilityChecked(value: boolean | undefined): this
-    accessibilitySelected(value: boolean | undefined): this
-    obscured(value: Array<ObscuredReasons> | undefined): this
-    reuseId(value: string | undefined): this
-    reuse(value: ReuseOptions | undefined): this
-    renderFit(value: RenderFit | undefined): this
-    gestureModifier(value: GestureModifier | undefined): this
-    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this
-    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this
-    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this
-    monopolizeEvents(value: boolean | undefined): this
-    onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this
-    onSizeChange(value: SizeChangeCallback | undefined): this
-    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
-    customProperty(name: string | undefined, value: Object | undefined): this
-    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
-    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
-    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
-    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this
-    systemBarEffect(): this
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this
-    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this
-    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this
-    advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
-    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
-    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
-    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
-    bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
-    bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-    attributeModifier<T>(value: AttributeModifier<T>): this
+    aspectRatio(value: number | undefined): this {return this;}
+    clickEffect(value: ClickEffect | null | undefined): this {return this;}
+    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
+    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {return this;}
+    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    allowDrop(value: Array<UniformDataType> | null | undefined): this {return this;}
+    draggable(value: boolean | undefined): this {return this;}
+    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {return this;}
+    onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this {return this;}
+    linearGradient(value: LinearGradientOptions | undefined): this {return this;}
+    sweepGradient(value: SweepGradientOptions | undefined): this {return this;}
+    radialGradient(value: RadialGradientOptions | undefined): this {return this;}
+    motionPath(value: MotionPathOptions | undefined): this {return this;}
+    shadow(value: ShadowOptions | ShadowStyle | undefined): this {return this;}
+    clip(value: boolean | undefined): this {return this;}
+    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {return this;}
+    mask(value: ProgressMask | undefined): this {return this;}
+    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {return this;}
+    key(value: string | undefined): this {return this;}
+    id(value: string | undefined): this {return this;}
+    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {return this;}
+    stateStyles(value: StateStyles | undefined): this {return this;}
+    restoreId(value: number | undefined): this {return this;}
+    sphericalEffect(value: number | undefined): this {return this;}
+    lightUpEffect(value: number | undefined): this {return this;}
+    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {return this;}
+    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {return this;}
+    accessibilityGroupWithValue(isGroup: boolean | undefined): this {
+        this.accessibilityGroup(isGroup);
+        return this;
+    }
+    accessibilityGroupWithConfig(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+        this.accessibilityGroup(isGroup, accessibilityOptions);
+        return this;
+    }
+    accessibilityText(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityTextOfStringType(value: string | undefined): this {
+        this.accessibilityText(value);
+        return this;
+    }
+    accessibilityTextOfResourceType(value: Resource | undefined): this {
+        this.accessibilityText(value);
+        return this;
+    }
+    accessibilityNextFocusId(value: string | undefined): this {return this;}
+    accessibilityDefaultFocus(value: boolean | undefined): this {return this;}
+    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {return this;}
+    accessibilityScrollTriggerable(value: boolean | undefined): this {return this;}
+    accessibilityRole(value: AccessibilityRoleType | undefined): this {return this;}
+    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {return this;}
+    accessibilityTextHint(value: string | undefined): this {return this;}
+    accessibilityDescription(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityDescriptionOfStringType(value: string | undefined): this {
+        this.accessibilityDescription(value);
+        return this;
+    }
+    accessibilityDescriptionOfResourceType(value: Resource | undefined): this {
+        this.accessibilityDescription(value);
+        return this;
+    }
+    accessibilityLevel(value: string | undefined): this {return this;}
+    accessibilityVirtualNode(value: CustomBuilder | undefined): this {return this;}
+    accessibilityChecked(value: boolean | undefined): this {return this;}
+    accessibilitySelected(value: boolean | undefined): this {return this;}
+    obscured(value: Array<ObscuredReasons> | undefined): this {return this;}
+    reuseId(value: string | undefined): this {return this;}
+    reuse(value: ReuseOptions | undefined): this {return this;}
+    renderFit(value: RenderFit | undefined): this {return this;}
+    gestureModifier(value: GestureModifier | undefined): this {return this;}
+    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {return this;}
+    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {return this;}
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {return this;}
+    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {return this;}
+    monopolizeEvents(value: boolean | undefined): this {return this;}
+    onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {return this;}
+    onSizeChange(value: SizeChangeCallback | undefined): this {return this;}
+    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {return this;}
+    customProperty(name: string, value: CustomProperty): this {return this;}
+    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {return this;}
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {return this;}
+    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {return this;}
+    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {return this;}
+    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {return this;}
+    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {return this;}
+    systemBarEffect(): this {return this;}
+    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {return this;}
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {return this;}
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {return this;}
+    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {return this;}
+    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {return this;}
+    advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {return this;}
+    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {return this;}
+    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {return this;}
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {return this;}
+    bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {return this;}
+    bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {return this;}
+    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {return this;}
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | undefined
@@ -8334,6 +8109,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onHover_value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
     onHoverMove_value?: ((parameter: HoverEvent) => void) | undefined
     onAccessibilityHover_value?: AccessibilityCallback | undefined
+    onAccessibilityHoverTransparent_value?: AccessibilityTransparentCallback | undefined
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
@@ -8373,7 +8149,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     gridSpan_value?: number | undefined
     gridOffset_value?: number | undefined
     rotate_value?: RotateOptions | undefined
-    transform_value?: TransformationMatrix | undefined
+    transform_value?: Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: (() => void) | undefined
@@ -8402,7 +8178,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragLeave_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDrop_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragEnd_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    allowDrop_value?: Array<UniformDataType> | undefined
+    allowDrop_value?: Array<UniformDataType> | null | undefined
     draggable_value?: boolean | undefined
     dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined
     onPreDrag_value?: ((parameter: PreDragStatus) => void) | undefined
@@ -8579,6 +8355,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         return this
     }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        return this
+    }
     public hoverEffect(value: HoverEffect | undefined): this {
         return this
     }
@@ -8588,7 +8367,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => boolean) | undefined): this {
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     public onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {
@@ -8642,10 +8424,12 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     public animation(value: AnimateParam | undefined): this {
         return this
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         return this
     }
     public motionBlur(value: MotionBlurOptions | undefined): this {
@@ -8702,7 +8486,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public rotate(value: RotateOptions | undefined): this {
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined ): this {
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
@@ -8768,7 +8552,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public aspectRatio(value: number | undefined): this {
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         return this
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
@@ -8789,7 +8573,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         return this
     }
     public draggable(value: boolean | undefined): this {
@@ -8933,13 +8717,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
@@ -9021,9 +8805,6 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
-        return this
-    }
-    public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
 }
@@ -9144,7 +8925,12 @@ export interface GeometryInfo extends SizeResult {
     padding: Padding;
 }
 export interface Layoutable {
-    stub: string;
+    measureResult: MeasureResult;
+    uniqueId?: number | undefined;
+    layout(position: Position): void;
+    getMargin(): DirectionalEdgesT<number>;
+    getPadding(): DirectionalEdgesT<number>;
+    getBorderWidth(): DirectionalEdgesT<number>;
 }
 export interface SizeResult {
     width: number;
@@ -9204,8 +8990,8 @@ export interface ScrollableCommonMethod extends CommonMethod {
     clipContent(value: ContentClipMode | RectShape | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
@@ -9253,10 +9039,10 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public backToTop(value: boolean | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         return this
     }
 }
@@ -9312,45 +9098,16 @@ export interface KeyframeState {
 export type Callback<T,V = void> = (data: T) => V;
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
 export type AccessibilityCallback = (isHover: boolean, event: AccessibilityHoverEvent) => void;
+export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<number>;
     expectedUpdateInterval?: number;
 }
 export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: number) => void;
-export class UIGestureEvent {
-    private peer?: PeerNode
-    setPeer(peer?: PeerNode) {
-        this.peer = peer
-    }
-    addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(priority ?? GesturePriority.NORMAL, this.peer, mask);
-        }
-    }
-    addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(2, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(2, this.peer, mask);
-        }
-    }
-    removeGestureByTag(tag: string): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.removeGestureByTag(peerNode.peer.ptr, tag);
-        }
-    }
-    clearGestures(): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.clearGestures(peerNode.peer.ptr);
-        }
-    }
-}
+export type SelectedCallback = (selected: boolean) => void;
+export type IndexCallback = (value: number) => void;
+export type IndexerSelectedCallback = (index: number) => void;
+export type RefreshingCallback = (refreshing: boolean) => void;
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
 }
@@ -9376,29 +9133,13 @@ export interface DateRange {
 }
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
 
-    protected _modifierHost: ArkBaseNode | undefined
-    setModifierHost(value: ArkBaseNode): void {
-        this._modifierHost = value
-    }
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkBaseNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
-    }
-    getAttributeSet(): ArkCommonAttributeSet  {
-        return this.getPeer()._attributeSet as ArkCommonAttributeSet;
-    }
+    _attributeOptimizer: CommonAttributeOptimizer;
 
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof CommonModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as CommonModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkCommonAttributeSet();
-        }
+    constructor(optimizer: CommonAttributeOptimizer) {
+        this._attributeOptimizer = optimizer;
+    }
+    constructor() {
+        this._attributeOptimizer = new CommonAttributeOptimizer(new CommonMethodModifier());
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -9447,9 +9188,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
-            const value_casted = value as (DrawModifier | undefined)
-            this.getPeer()?.drawModifierAttribute(value_casted)
-            return this
+            hookDrawModifier(this, value)
         }
         return this
     }
@@ -9594,14 +9333,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("backgroundEffect")) {
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            if (((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) && (RuntimeType.UNDEFINED == sysOptions_type)) {
                 const value_casted = options as (BackgroundEffectOptions | undefined)
                 this.getPeer()?.backgroundEffect0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            if (((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) && ((RuntimeType.OBJECT == sysOptions_type) || (RuntimeType.UNDEFINED == sysOptions_type))) {
                 const options_casted = options as (BackgroundEffectOptions | undefined)
-                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
+                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
                 this.getPeer()?.backgroundEffect1Attribute(options_casted, sysOptions_casted)
                 return this
             }
@@ -9627,33 +9366,26 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public visualEffect(value: VisualEffect | undefined): this {
         if (this.checkPriority("visualEffect")) {
-            const value_casted = value as (VisualEffect | undefined)
-            this.getPeer()?.visualEffectAttribute(value_casted)
+            hookCommonMethodVisualEffectImpl(this, value)
             return this
         }
         return this
     }
     public backgroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("backgroundFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.backgroundFilterAttribute(value_casted)
-            return this
+            hookCommonMethodBackgroundFilterImpl(this, value)
         }
         return this
     }
     public foregroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("foregroundFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.foregroundFilterAttribute(value_casted)
-            return this
+            hookCommonMethodForegroundFilterImpl(this, value)
         }
         return this
     }
     public compositingFilter(value: Filter | undefined): this {
         if (this.checkPriority("compositingFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.compositingFilterAttribute(value_casted)
-            return this
+            hookCommonMethodCompositingFilterImpl(this, value)
         }
         return this
     }
@@ -9809,18 +9541,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         if (this.checkPriority("foregroundColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
-                this.getPeer()?.foregroundColor0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
-                this.getPeer()?.foregroundColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ResourceColor | ColoringStrategy | undefined)
+            this.getPeer()?.foregroundColor0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -9833,6 +9556,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.onClick0Attribute(value_casted)
                 return this
             }
+            // if (((RuntimeType.FUNCTION == event_type) || (RuntimeType.UNDEFINED == event_type)) && ((RuntimeType.NUMBER == distanceThreshold_type) || (RuntimeType.UNDEFINED == distanceThreshold_type))) {
+            //     const event_casted = event as (((event: ClickEvent) => void) | undefined)
+            //     const distanceThreshold_casted = distanceThreshold as (number | undefined)
+            //     this.getPeer()?.onClick1Attribute(event_casted, distanceThreshold_casted)
+            //     return this
+            // }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -9869,6 +9598,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {       
+        if (this.checkPriority("onAccessibilityHoverTransparent")) {
+            const value_casted = value as (AccessibilityTransparentCallback | undefined)
+            this.getPeer()?.onAccessibilityHoverTransparentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onMouse(value: ((event: MouseEvent) => void) | undefined): this {
         if (this.checkPriority("onMouse")) {
             const value_casted = value as (((event: MouseEvent) => void) | undefined)
@@ -9885,7 +9622,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    public onKeyEventWithVoid(value: ((event: KeyEvent) => void) | undefined): this {
+        if (this.checkPriority("onKeyEvent")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (((parameter: KeyEvent) => void) | undefined)
+                this.getPeer()?.onKeyEvent0Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onKeyEventWithBoolean(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
@@ -10034,7 +9783,16 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const function_type = runtimeType(callback)
+        if (RuntimeType.FUNCTION === function_type) {
+            this.getPeer()?.SetOrCreateAnimatableProperty(functionName, value, callback);
+        } else {
+            throw new Error('__createOrSetAnimatableProperty format error')
+        }
+    }
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
             const onFinish_type = runtimeType(onFinish)
@@ -10157,35 +9915,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public sepia(value: number | undefined): this {
         if (this.checkPriority("sepia")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.sepia0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.sepia1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.sepia0Attribute(value_casted)
+            return this
         }
         return this
     }
     public invert(value: number | InvertOptions | undefined): this {
         if (this.checkPriority("invert")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | InvertOptions | undefined)
-                this.getPeer()?.invert0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | InvertOptions | undefined)
-                this.getPeer()?.invert1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (number | InvertOptions | undefined)
+            this.getPeer()?.invert0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10232,16 +9972,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.useEffect0Attribute(value_casted)
                 return this
             }
-            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.OBJECT == effectType_type) || (RuntimeType.OBJECT == effectType_type))) {
+            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.NUMBER == effectType_type) || (RuntimeType.UNDEFINED == effectType_type))) {
                 const useEffect_casted = useEffect as (boolean | undefined)
                 const effectType_casted = effectType as (EffectType | undefined)
                 this.getPeer()?.useEffect1Attribute(useEffect_casted, effectType_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == useEffect_type) || (RuntimeType.UNDEFINED == useEffect_type)) && ((RuntimeType.OBJECT == effectType_type) || (RuntimeType.OBJECT == effectType_type))) {
-                const useEffect_casted = useEffect as (boolean | undefined)
-                const effectType_casted = effectType as (EffectType)
-                this.getPeer()?.useEffect2Attribute(useEffect_casted, effectType_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -10251,34 +9985,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public renderGroup(value: boolean | undefined): this {
         if (this.checkPriority("renderGroup")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.renderGroup0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.renderGroup1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.renderGroup0Attribute(value_casted)
+            return this
         }
         return this
     }
     public freeze(value: boolean | undefined): this {
         if (this.checkPriority("freeze")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.freeze0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (boolean | undefined)
-                this.getPeer()?.freeze1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.freeze0Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -10334,26 +10051,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public rotate(value: RotateOptions | undefined): this {
         if (this.checkPriority("rotate")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (RotateOptions | undefined)
-                this.getPeer()?.rotate0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (RotateOptions | undefined)
-                this.getPeer()?.rotate1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (RotateOptions | undefined)
+            this.getPeer()?.rotate0Attribute(value_casted)
+            return this
         }
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined): this {
         if (this.checkPriority("transform")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (TransformationMatrix | undefined)
+                const value_casted = value as (object | undefined)
                 this.getPeer()?.transform0Attribute(value_casted)
                 return this
             }
@@ -10543,28 +10251,16 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         if (this.checkPriority("clickEffect")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ClickEffect | null | undefined)
+            this.getPeer()?.clickEffect0Attribute(value_casted)
         }
         return this
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
-            this.getPeer()?.onDragStartAttribute(value_casted)
-            return this
+            hookRegisterOnDragStartImpl(this, value)
         }
         return this
     }
@@ -10594,20 +10290,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         if (this.checkPriority("onDrop")) {
-            const eventCallback_type = runtimeType(eventCallback)
-            const dropOptions_type = runtimeType(dropOptions)
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-                this.getPeer()?.onDrop0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-                const dropOptions_casted = dropOptions as (DropOptions)
-                this.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookOnDrop(this, eventCallback, dropOptions)
         }
         return this
     }
@@ -10619,11 +10302,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            const value_casted = value as (Array<UniformDataType> | undefined)
-            this.getPeer()?.allowDropAttribute(value_casted)
-            return this
+            hookAllowDropAttribute(this, value)
         }
         return this
     }
@@ -10637,20 +10318,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         if (this.checkPriority("dragPreview")) {
-            const preview_type = runtimeType(preview)
-            const config_type = runtimeType(config)
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const value_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                this.getPeer()?.dragPreview0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                const config_casted = config as (PreviewConfiguration)
-                this.getPeer()?.dragPreview1Attribute(preview_casted, config_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookDragPreview(this, preview, config)
         }
         return this
     }
@@ -10768,11 +10436,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.clipShape0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.clipShape1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -10807,11 +10470,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.maskShape0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.maskShape1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -10836,14 +10494,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("geometryTransition")) {
             const id_type = runtimeType(id)
             const options_type = runtimeType(options)
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && (RuntimeType.UNDEFINED == options_type)) {
                 const value_casted = id as (string | undefined)
                 this.getPeer()?.geometryTransition0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const id_casted = id as (string | undefined)
-                const options_casted = options as (GeometryTransitionOptions)
+                const options_casted = options as (GeometryTransitionOptions | undefined)
                 this.getPeer()?.geometryTransition1Attribute(id_casted, options_casted)
                 return this
             }
@@ -10853,9 +10511,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            hookStateStyleImpl(this.getPeer(), value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -11085,31 +10741,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public renderFit(value: RenderFit | undefined): this {
         if (this.checkPriority("renderFit")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (RenderFit | undefined)
+            this.getPeer()?.renderFit0Attribute(value_casted)
+            return this
         }
         return this
     }
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
-            if (value === undefined) {
-                return this;
-            }
-            const value_casted = value as GestureModifier
-            let gestureEvent = this.getOrCreateGestureEvent();
-            gestureEvent.clearGestures();
-            value_casted.applyGesture(gestureEvent);
-            return this
+            hookCommonMethodGestureModifierImpl(this, value);
         }
         return this
     }
@@ -11197,14 +10837,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         if (this.checkPriority("customProperty")) {
-            const name_casted = name as (string | undefined)
-            const value_casted = value as (Object | undefined)
-            this.getPeer()?.customPropertyAttribute(name_casted, value_casted)
-            return this
+            hookCustomPropertyImpl(this, name, value);
         }
-        return this
+        return this;
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
@@ -11215,10 +10852,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (Literal_Alignment_align)
+            const options_casted = options as (BackgroundOptions | undefined)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
@@ -11226,36 +10863,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_type = runtimeType(src)
-            const repeat_type = runtimeType(repeat)
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
-                const src_casted = src as (ResourceStr | PixelMap | undefined)
-                const repeat_casted = repeat as (ImageRepeat)
-                this.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
-                return this
-            }
+            hookBackgroundImageImpl(this, src, repeat)
         }
         return this
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backgroundBlurStyle")) {
-            const style_type = runtimeType(style)
-            const options_type = runtimeType(options)
-            const sysOptions_type = runtimeType(sysOptions)
-            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
-                const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
-                this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
-                const style_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions)
-                const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
-                this.getPeer()?.backgroundBlurStyle1Attribute(style_casted, options_casted, sysOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const style_casted = style as (BlurStyle | undefined)
+            const options_casted = options as (BackgroundBlurStyleOptions | undefined)
+            const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
+            this.getPeer()?.backgroundBlurStyle1Attribute(style_casted, options_casted, sysOptions_casted)
+            return this
         }
         return this
     }
@@ -11308,43 +10926,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(0, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(0, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodGestureImpl(this, gesture, mask)
         }
         return this
     }
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(1, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(1, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodPriorityGestureImpl(this, gesture, mask)
         }
         return this
     }
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(2, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(2, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodParallelGestureImpl(this, gesture, mask)
         }
         return this
     }
@@ -11422,7 +11016,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         if (this.checkPriority("sharedTransition")) {
             const id_casted = id as (string | undefined)
-            const options_casted = options as (sharedTransitionOptions)
+            const options_casted = options as (sharedTransitionOptions | undefined)
             this.getPeer()?.sharedTransitionAttribute(id_casted, options_casted)
             return this
         }
@@ -11439,55 +11033,36 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
         if (this.checkPriority("dragPreviewOptions")) {
-            const value_casted = value as (DragPreviewOptions | undefined)
-            const options_casted = options as (DragInteractionOptions)
-            this.getPeer()?.dragPreviewOptionsAttribute(value_casted, options_casted)
+            hookDragPreviewOptions(this, value, options)
             return this
         }
         return this
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         if (this.checkPriority("overlay")) {
-            const value_casted = value as (string | CustomBuilder | ComponentContent | undefined)
-            const options_casted = options as (OverlayOptions)
-            this.getPeer()?.overlayAttribute(value_casted, options_casted)
-            return this
+            hookOverlayImpl(this, value, options)
         }
         return this
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
-            const value_type = runtimeType(value)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const value_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const mode_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode1Attribute(mode_casted, type_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (BlendMode | undefined)
+            const type_casted = type as (BlendApplyType | undefined)
+            this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
+            return this
         }
         return this
     }
     public advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
-            const effect_casted = effect as (BlendMode | BrightnessBlender | undefined)
-            const type_casted = type as (BlendApplyType)
-            this.getPeer()?.advancedBlendModeAttribute(effect_casted, type_casted)
-            return this
+            hookCommonMethodAdvancedBlendModeImpl(this, effect, type)
         }
         return this
     }
     public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
         if (this.checkPriority("bindTips")) {
             const message_casted = message as (TipsMessageType | undefined)
-            const options_casted = options as (TipsOptions)
+            const options_casted = options as (TipsOptions | undefined)
             this.getPeer()?.bindTipsAttribute(message_casted, options_casted)
             return this
         }
@@ -11534,27 +11109,34 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {
         if (this.checkPriority("bindContentCover")) {
-            const isShow_type = runtimeType(isShow)
-            const builder_type = runtimeType(builder)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.UNDEFINED == type_type))) {
-                const isShow_casted = isShow as (boolean | undefined)
-                const builder_casted = builder as (CustomBuilder | undefined)
-                const options_casted = type as (ContentCoverOptions)
-                this.getPeer()?.bindContentCover1Attribute(isShow_casted, builder_casted, options_casted)
-                return this
+            if (typeof isShow === "boolean" || typeof isShow === undefined) {
+                const isShow_type = runtimeType(isShow)
+                const builder_type = runtimeType(builder)
+                const type_type = runtimeType(type)
+                if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.FUNCTION == builder_type) || (RuntimeType.UNDEFINED == builder_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.UNDEFINED == type_type))) {
+                    const isShow_casted = isShow as (boolean | undefined)
+                    const builder_casted = builder as (CustomBuilder | undefined)
+                    const options_casted = type as (ContentCoverOptions)
+                    this.getPeer()?.bindContentCover1Attribute(isShow_casted, builder_casted, options_casted)
+                }
+            } else {
+                BindSheetHandWritten.hookBindContentCoverShowImpl(this.getPeer().peer.ptr,
+                    (isShow as Bindable<boolean>), (builder as (CustomBuilder | undefined)) , (type as (ContentCoverOptions)));
             }
-            throw new Error("Can not select appropriate overload")
         }
         return this
     }
     public bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         if (this.checkPriority("bindSheet")) {
-            const isShow_casted = isShow as (boolean | undefined)
-            const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (SheetOptions)
-            this.getPeer()?.bindSheetAttribute(isShow_casted, builder_casted, options_casted)
-            return this
+            if (typeof isShow === "boolean" || typeof isShow === undefined) {
+                const isShow_casted = isShow as (boolean | undefined)
+                const builder_casted = builder as (CustomBuilder | undefined)
+                const options_casted = options as (SheetOptions)
+                this.getPeer()?.bindSheetAttribute(isShow_casted, builder_casted, options_casted)
+            } else {
+                BindSheetHandWritten.hookSheetShowImpl(this.getPeer().peer.ptr,
+                    (isShow as Bindable<boolean>), (builder as (CustomBuilder | undefined)), (options as (SheetOptions)));
+            }
         }
         return this
     }
@@ -11580,40 +11162,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("keyboardShortcut")) {
             const value_casted = value as (string | FunctionKey | undefined)
             const keys_casted = keys as (Array<ModifierKey> | undefined)
-            const action_casted = action as ((() => void))
+            const action_casted = action as ((() => void) | undefined)
             this.getPeer()?.keyboardShortcutAttribute(value_casted, keys_casted, action_casted)
             return this
         }
         return this
     }
-    public attributeModifier<T>(modifier: AttributeModifier<T>): this {
-
-        let peerNode = this.getPeer()
-        this.initAttributeSet(modifier);
-        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
-        if (isAttributeUpdater) {
-            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
-            if (!attributeUpdater.peerNode_) {
-                attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else if (this.getPeer() !== attributeUpdater.peerNode_) {
-                attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
-            }
-            attributeUpdater.peerNode_ = this.getPeer();
-            attributeUpdater.attribute = this.getModifierHost() as T
-            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
-                let attribute = this.getModifierHost()! as T;
-                this.getModifierHost()!.constructParam(...params);
-                return attribute;
-            };
-        }
-        this.applyModifierByState(isAttributeUpdater, modifier);
-        return this;
-    }
-    public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-    }
-
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        this._attributeOptimizer.applyModifierPatch(this.getPeer()); 
         super.applyAttributesFinish()
     }
 }
@@ -11838,19 +11395,19 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(edgeEffect_casted, options_casted)
             return this
         }
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         if (this.checkPriority("fadingEdge")) {
             const enabled_casted = enabled as (boolean | undefined)
-            const options_casted = options as (FadingEdgeOptions)
+            const options_casted = options as (FadingEdgeOptions | undefined)
             this.getPeer()?.fadingEdgeAttribute(enabled_casted, options_casted)
             return this
         }
@@ -11875,9 +11432,6 @@ export function dollar_rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     _animateTo(value, event)
-}
-export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)
@@ -12120,8 +11674,21 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setY(this.peer!.ptr, y)
     }
     private getHand_serialize(): InteractionHand | undefined {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const hand_buf_runtimeType = (retvalDeserializer.readInt8() as int32)
+        let hand_buf : InteractionHand | undefined
+        if ((RuntimeType.UNDEFINED) != (hand_buf_runtimeType)) {
+            hand_buf = TypeChecker.InteractionHand_FromNumeric(retvalDeserializer.readInt32())
+        }
+        return hand_buf;
     }
     private setHand_serialize(hand: InteractionHand): void {
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, TypeChecker.InteractionHand_ToNumeric(hand))
@@ -12204,7 +11771,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         this.setDisplayY(displayY_NonNull)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation()
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -12278,50 +11845,137 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return
     }
     private getX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setX_serialize(x: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setX(this.peer!.ptr, x)
     }
     private getY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setY_serialize(y: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setY(this.peer!.ptr, y)
     }
     private getWindowX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowX_serialize(windowX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowX(this.peer!.ptr, windowX)
     }
     private getWindowY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getWindowY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setWindowY_serialize(windowY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
     private getDisplayX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayX_serialize(displayX: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayX(this.peer!.ptr, displayX)
     }
     private getDisplayY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getDisplayY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDisplayY_serialize(displayY: number): void {
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, displayY)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12335,7 +11989,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return obj
     }
 }
-export interface MouseEvent {
+export interface MouseEvent extends BaseEvent {
     button: MouseButton
     action: MouseAction
     displayX: number
@@ -12413,7 +12067,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setY(y)
     }
     get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getStopPropagation()
     }
     set stopPropagation(stopPropagation: (() => void)) {
         this.setStopPropagation(stopPropagation)
@@ -12433,7 +12087,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setRawDeltaY(rawDeltaY_NonNull)
     }
     get pressedButtons(): Array<MouseButton> | undefined {
-        throw new Error("Not implemented")
+        return this.getPressedButtons()
     }
     set pressedButtons(pressedButtons: Array<MouseButton> | undefined) {
         const pressedButtons_NonNull  = (pressedButtons as Array<MouseButton>)
@@ -12634,8 +12288,17 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12644,22 +12307,66 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getRawDeltaX_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        //@ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRawDeltaX_serialize(rawDeltaX: number): void {
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaX(this.peer!.ptr, rawDeltaX)
     }
     private getRawDeltaY_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        //@ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaY(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRawDeltaY_serialize(rawDeltaY: number): void {
         ArkUIGeneratedNativeModule._MouseEvent_setRawDeltaY(this.peer!.ptr, rawDeltaY)
     }
     private getPressedButtons_serialize(): Array<MouseButton> | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getPressedButtons(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getPressedButtons(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : Array<MouseButton> | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType)) {
+            const buffer_length: int32 = retvalDeserializer.readInt32()
+            let buffer: Array<MouseButton> = new Array<MouseButton>(buffer_length)
+            for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+                buffer[buffer_i] = (retvalDeserializer.readInt32() as int32) as MouseButton
+            }
+            returnResult = buffer;
+        }
+        return returnResult
     }
     private setPressedButtons_serialize(pressedButtons: Array<MouseButton>): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -12886,7 +12593,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setStopPropagation(stopPropagation)
     }
     get preventDefault(): (() => void) {
-        throw new Error("Not implemented")
+        return this.getPreventDefault();
     }
     set preventDefault(preventDefault: (() => void)) {
         this.setPreventDefault(preventDefault)
@@ -13037,7 +12744,6 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             exactRetValue.push(new Byte(retval[i]))
         }
         let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
         let returnResult = retvalDeserializer.readCallback_Void(true);
         return returnResult;
     }
@@ -13048,8 +12754,17 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         thisSerializer.release()
     }
     private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult;
     }
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -13072,7 +12787,7 @@ export interface AxisEvent extends BaseEvent {
     x: number
     y: number
     scrollStep?: number | undefined
-    propagation: (() => void)
+    propagation(): void
     getHorizontalAxisValue(): number
     getVerticalAxisValue(): number
     getPinchAxisScaleValue(): number
@@ -13127,11 +12842,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const scrollStep_NonNull  = (scrollStep as number)
         this.setScrollStep(scrollStep_NonNull)
     }
-    get propagation(): (() => void) {
-        return this.getPropagation()
-    }
-    set propagation(propagation: (() => void)) {
-        this.setPropagation(propagation)
+    public propagation(): void {
+        this.propagation_serialize()
     }
     static ctor_axisevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_ctor()
@@ -13218,14 +12930,6 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    private getPropagation(): (() => void) {
-        return this.getPropagation_serialize()
-    }
-    private setPropagation(propagation: (() => void)): void {
-        const propagation_casted = propagation as ((() => void))
-        this.setPropagation_serialize(propagation_casted)
-        return
-    }
     private getHorizontalAxisValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -13308,25 +13012,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     private setScrollStep_serialize(scrollStep: number): void {
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, scrollStep)
     }
-    private getPropagation_serialize(): (() => void) {
-        // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr) as FixedArray<byte>
-        // @ts-ignore
-        let exactRetValue: byte[] = new Array<byte>
-        for (let i = 0; i < retval.length; i++) {
-            // @ts-ignore
-            exactRetValue.push(new Byte(retval[i]))
-        }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        
-        let returnResult = retvalDeserializer.readCallback_Void(true);
-        return returnResult;
-    }
-    private setPropagation_serialize(propagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(propagation)
-        ArkUIGeneratedNativeModule._AxisEvent_setPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    private propagation_serialize(): void {
+        ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
     public static fromPtr(ptr: KPointer): AxisEventInternal {
         const obj : AxisEventInternal = new AxisEventInternal()
@@ -13336,20 +13023,17 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
 }
 export interface FocusAxisEvent {
     axisMap: Map<AxisModel, number>
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
     get axisMap(): Map<AxisModel, number> {
-        throw new Error("Not implemented")
+        return this.getAxisMap()
     }
     set axisMap(axisMap: Map<AxisModel, number>) {
         this.setAxisMap(axisMap)
     }
-    get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
     }
     static ctor_focusaxisevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_ctor()
@@ -13371,21 +13055,19 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         this.setAxisMap_serialize(axisMap_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getAxisMap_serialize(): Map<AxisModel, number> {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_size : int32 = retvalDeserializer.readInt32()
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._FocusAxisEvent_getAxisMap(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
         let buffer : Map<AxisModel, number> = new Map<AxisModel, number>()
-        // TODO: TS map resize
-        for (let buffer_i = 0; buffer_i < buffer_size; buffer_i++) {
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
             const buffer_key : AxisModel = TypeChecker.AxisModel_FromNumeric(retvalDeserializer.readInt32())
             const buffer_value : number = (retvalDeserializer.readNumber() as number)
             buffer.set(buffer_key, buffer_value)
@@ -13405,15 +13087,8 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._FocusAxisEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    private stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
     public static fromPtr(ptr: KPointer): FocusAxisEventInternal {
         const obj : FocusAxisEventInternal = new FocusAxisEventInternal()
@@ -13436,11 +13111,11 @@ export namespace focusControl {
 }
 
 export interface AttributeModifier<T> {
-    applyNormalAttribute(instance: T) : void;
-    applyPressedAttribute(instance: T) : void;
-    applyFocusedAttribute(instance: T) : void;
-    applyDisabledAttribute(instance: T) : void;
-    applySelectedAttribute(instance: T) : void;
+    applyNormalAttribute(instance: T): void {}
+    applyPressedAttribute(instance: T) : void {}
+    applyFocusedAttribute(instance: T) : void {}
+    applyDisabledAttribute(instance: T) : void {}
+    applySelectedAttribute(instance: T) : void {}
 }
 
 export interface Type_CommonMethod_linearGradient_value {
@@ -13466,4 +13141,70 @@ export interface Type_CommonMethod_radialGradient_value {
 export interface Bindable<T> {
     readonly value: T;
     readonly onChange: (value: T) => void;
+}
+export type BindableResourceStr = string | Resource | ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>
+export type BindableResourceStrArray = string[] | Resource[] | ResourceStr[] | Bindable<ResourceStr[]> | Bindable<Resource[]> | Bindable<string[]>
+
+export class CommonAttributeOptimizer {
+    _attribute: CommonMethodModifier;
+    _disable: boolean = false;
+    _updater: boolean = false;
+    _peer?: PeerNode // frameNode 和 attributeUpdater 需要设置
+    constructor(attributeSet: CommonMethodModifier) {
+        this._attribute = attributeSet;
+    }
+    requestMarkDirty(): boolean {
+        markDirty(this._peer!, NodeDirtyFlag.NODE_NEED_ALL);
+        return true;
+    }
+    nextFrame(): void {
+        setFrameCallback();
+    }
+    applyModifierPatch(node: ArkCommonMethodPeer): void {
+        if (this._disable) {
+            return;
+        }
+        this._attribute.applyModifierPatch(node);
+    }
+    checkWidthPriority(value: Length | LayoutPolicy | undefined): boolean {
+        if (!this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.width(value);
+        if (this._attribute._width_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._width_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+    checkBackgroundColorPriority(value: ResourceColor | undefined): boolean {
+        if (this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.backgroundColor(value);
+        if (this._attribute._backgroundColor_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._backgroundColor_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+}
+export enum NodeDirtyFlag {
+    NODE_NEED_MEASURE = 1,
+    NODE_NEED_LAYOUT = 2,
+    NODE_NEED_RENDER = 3,
+    NODE_NEED_ALL = 4,
+}
+export function markDirty(node: PeerNode, flag: NodeDirtyFlag) {
+    ArkUIAniModule._FrameNode_MarkDirtyNode(node.getPeerPtr());
+}
+export function setFrameCallback(): void {
+    const thisSerializer: Serializer = Serializer.hold()
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
+        thisSerializer.length(), 0);
+    thisSerializer.release()
 }

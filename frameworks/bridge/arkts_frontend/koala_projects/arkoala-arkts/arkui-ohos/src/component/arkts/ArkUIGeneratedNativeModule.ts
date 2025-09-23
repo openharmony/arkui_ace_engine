@@ -336,6 +336,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_onAccessibilityHover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_onAccessibilityHoverTransparent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_hoverEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_onMouse(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1229,9 +1231,9 @@ export class ArkUIGeneratedNativeModule {
     native static _GridAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridItem_construct(id: KInt, flags: KInt): KPointer
@@ -1491,9 +1493,9 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _ListAttribute_lanes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1753,6 +1755,14 @@ export class ArkUIGeneratedNativeModule {
     native static _PanelAttribute_onHeightChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PanelAttribute__onChangeEvent_mode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetDisturbanceFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetEmitterProperty(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_ParticleConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetParticleOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PasteButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -2716,11 +2726,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabContentInterface_setTabContentOptions(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TabContentAttribute_tabBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabContentAttribute_onWillShow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3256,6 +3262,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Toggle_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
+    native static _Toggle_button_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _Toggle_checkbox_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
     native static _ToggleInterface_setToggleOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ToggleAttribute_onChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3402,9 +3412,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_onSslErrorReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _WebAttribute_onRenderExited(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_onShowFileSelector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3572,13 +3580,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_bindSelectionMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_forceEnableZoom(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _WindowScene_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _WindowSceneInterface_setWindowSceneOptions(ptr: KPointer, persistentId: number): void
     @ani.unsafe.Direct
     native static _WindowSceneAttribute_attractionEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _WithTheme_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _WithThemeInterface_setWithThemeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _XComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3704,11 +3714,25 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LinearIndicatorAttribute_indicatorLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _AlphabetIndexerOps_registerIndexerSelectedCallback(node: KPointer, index: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _LinearIndicatorAttribute_onChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ListItemOps_registerSelectedCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _RefreshOps_registerRefreshingCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SwiperOps_registerIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TabsOps_registerIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _AnimationExtender_SetClipRect(node: KPointer, x: KFloat, y: KFloat, width: KFloat, height: KFloat): void
     @ani.unsafe.Direct
+    native static _AnimationExtender_KeyFrameAnimation(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _AnimationExtender_OpenImplicitAnimation(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _AnimationExtender_OpenImplicitAnimationImmediately(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AnimationExtender_CloseImplicitAnimation(): void
     @ani.unsafe.Direct
@@ -3798,6 +3822,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SystemOps_setFrameCallback(thisArray: KSerializerBuffer, thisLength: int32, delayTime: number): void
     @ani.unsafe.Quick
     native static _SystemOps_getResourceId(bundleName: KStringPtr, moduleName: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Quick
+    native static _SystemOps_resourceToLengthMetrics(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _SystemOps_colorMetricsResourceColor(thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
@@ -3923,6 +3951,28 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getAttachedFrameNodeById(ptr: KPointer, id: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _UIContext_getFrameNodeByUniqueId(ptr: KPointer, id: number): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getId(name: KPointer): string
+    @ani.unsafe.Direct
+    native static _FrameNode_getUniqueId(point: KPointer): int32
+    @ani.unsafe.Direct
+    native static _FrameNode_isVisible(point: KPointer): boolean 
+    @ani.unsafe.Direct
+    native static _FrameNode_isClipToFrame(point: KPointer): boolean 
+    @ani.unsafe.Direct
+    native static _FrameNode_isAttached(point: KPointer): boolean 
+    @ani.unsafe.Quick
+    native static _FrameNode_getInspectorInfo(point: KPointer): string 
+    @ani.unsafe.Direct
+    native static _FrameNode_onDraw(point: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Direct
+    native static _FrameNode_invalidate(point: KPointer): void 
+    @ani.unsafe.Direct
+    native static _FrameNode_disposeTree(point: KPointer): void 
+    @ani.unsafe.Direct
+    native  static _FrameNode_setCrossLanguageOptions(point: KPointer, attributeSettings:boolean): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getCrossLanguageOptions(point: KPointer): boolean 
     @ani.unsafe.Direct
     native static _UIContext_vp2px(ptr: KPointer, value: number): number
     @ani.unsafe.Direct
@@ -3940,10 +3990,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContext_setDynamicDimming(ptr: KPointer, id: KStringPtr, value: number): void
     @ani.unsafe.Quick
-    native static _UIContext_getWindowName(ptr: KPointer): KInteropReturnBuffer
+    native static _UIContext_getWindowName(instanceId: number): string
+    @ani.unsafe.Quick
+    native static _UIContext_getWindowWidthBreakpoint(instanceId: number): number
+    @ani.unsafe.Quick
+    native static _UIContext_getWindowHeightBreakpoint(instanceId: number): number
     native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
+    @ani.unsafe.Quick
+    native static _PromptAction_openPopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_updatePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_closePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_openMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_updateMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_closeMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     native static _UIContext_clearResourceCache(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _UIContext_isFollowingSystemFontScale(ptr: KPointer): boolean
@@ -3951,6 +4017,12 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getMaxFontScale(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerOnDragStart(node: KPointer,  thisArray: KSerializerBuffer, thisLength: int32) : void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerDragPreview(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerOnDrop(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -4050,6 +4122,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(actionType: KInt, sourceType: KInt, time: KLong): void
     @ani.unsafe.Direct
+    native static _commonMethodOps_VisualEffectHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_BackgroundFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_ForegroundFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_CompositingFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_AdvancedBlendModeObjectImpl(node: KPointer, effect: KLong, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_AdvancedBlendModeEnumImpl(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonShape_ctor(): KPointer
     @ani.unsafe.Direct
     native static _CommonShape_getFinalizer(): KPointer
@@ -4141,6 +4225,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_font_getFontByName(fontName: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _GlobalScope_ohos_font_getUIFontConfig(): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScope_ohos_measure_utils_measureText(thisArray: KSerializerBuffer, thisLength: int32): number
     @ani.unsafe.Quick
@@ -4201,10 +4287,22 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_dispose(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNode_getOpacity(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNode_setMeasuredSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setLayoutPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_measure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_layout(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setNeedsLayout(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _FrameNode_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNode_getCommonEvent(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNode_getIdByFrameNode(ptr: KPointer, node: KPointer): number
     @ani.unsafe.Direct
@@ -4231,8 +4329,34 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_createTypedFrameNode(type: KStringPtr): KPointer
     @ani.unsafe.Quick
     native static _FrameNode_getNodeType(ptr: KPointer): string
-    @ani.unsafe.Direct
-    native static _FrameNode_applyAttributesFinish(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToParent(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToScreen(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToWindow(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToParentWithTransform(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToScreenWithTransform(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getPositionToWindowWithTransform1(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getMeasuredSize(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getLayoutPosition(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigBorderWidth(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigPadding(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigMargin(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_getUserConfigSize(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_createByRawPtr(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _FrameNode_unWrapRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct
@@ -4485,16 +4609,26 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNode_getLengthMetricsUnit(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
-    @ani.unsafe.Quick
-    native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
-    native static _UIContextImp_freezeUINode1(id: number, isFrozen: KInt): void
+    native static _GlobalScopeUicontextFontScale_isFollowingSystemFontScale(): boolean
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextFontScale_getMaxFontScale(): number
+    @ani.unsafe.Direct
+    native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
+    @ani.unsafe.Direct
+    native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _TabsOps_registerBarMode(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TabsOps_registerBarBackgroundBlurStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _GridItemOps_registerSelectedCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _BindSheetOps_registerShowCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _BindSheetOps_registerBindContentCoverCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _Filter_ctor(): KPointer
     @ani.unsafe.Direct
@@ -4515,6 +4649,14 @@ export class ArkUIGeneratedNativeModule {
     native static _VisualEffect_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _VisualEffect_backgroundColorBlender(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _NavigationOps_registerNavBarWidthCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _CheckboxGroupOps_registerSelectAllCallback(node: KPointer, isAllSelected: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _CheckboxOps_registerSelectCallback(node: KPointer, isSelected: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _MenuItemOps_registerSelectedCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4568,13 +4710,35 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
     @ani.unsafe.Direct
+    native static _SideBarContainerOps_registerShowSideBarCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SideBarContainerOps_registerSideBarWidthCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _StepperOps_registerStepperIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _RadioOps_registerCheckedCallback(node: KPointer, isChecked: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _RatingOps_registerRatingCallback(node: KPointer, rating: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SelectOps_registerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SelectOps_registerValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SliderOps_registerValueCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void
     @ani.unsafe.Direct
     native static _TextFieldOps_registerTextFieldValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _DatePickerSelectedOps_registerDatePickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextPickerSelectedOps_registerTextPickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextPickerValueOps_registerTextPickerValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TimePickerSelectedOps_registerTimePickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TextFieldOps_textFieldOpsSetWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4596,11 +4760,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextFieldOps_textFieldOpsSetBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _ToggleOps_registerIsOnCallback(node: KPointer, isOn: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct
     native static _AlertDialog_show(thisArray: KSerializerBuffer, thisLength: int32): undefined
-    @ani.unsafe.Direct
-    native static _PromptAction_showToast(thisArray: KSerializerBuffer, thisLength: int32): undefined
     @ani.unsafe.Direct
     native static _SpringProp_ctor(mass: number, stiffness: number, damping: number): KPointer
     @ani.unsafe.Direct
@@ -4802,8 +4966,8 @@ export class ArkUIGeneratedNativeModule {
     native static _HoverEvent_getDisplayY(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _HoverEvent_setDisplayY(ptr: KPointer, displayY: number): void
-    @ani.unsafe.Direct
-    native static _HoverEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _HoverEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _HoverEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4850,8 +5014,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getY(ptr: KPointer): number
     @ani.unsafe.Direct
     native static _MouseEvent_setY(ptr: KPointer, y: number): void
-    @ani.unsafe.Direct
-    native static _MouseEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MouseEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MouseEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -4920,8 +5084,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TouchEvent_getPreventDefault(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _TouchEvent_getPreventDefault(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setPreventDefault(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4966,10 +5130,8 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getScrollStep(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_setScrollStep(ptr: KPointer, scrollStep: number): void
-    @ani.unsafe.Quick
-    native static _AxisEvent_getPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _AxisEvent_setPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _AxisEvent_propagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _PixelMapMock_ctor(): KPointer
     @ani.unsafe.Direct
@@ -5075,9 +5237,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FocusAxisEvent_setAxisMap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _FocusAxisEvent_getStopPropagation(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _FocusAxisEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _FocusAxisEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _ProgressMask_ctor(value: number, total: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5264,6 +5424,20 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavPathStack_setPathStack(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NodeContainerOps_addNodeContainerRootNode(self: KPointer, child: KPointer): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToAppear(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToDisappear(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToResize(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnAttach(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnDetach(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnTouchEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationTransitionProxy_ctor(): KPointer
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_getFinalizer(): KPointer
@@ -5314,7 +5488,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CanvasPath_rect(ptr: KPointer, x: number, y: number, w: number, h: number): void
     @ani.unsafe.Direct
-    native static _Path2D_ctor(): KPointer
+    native static _Path2D_construct0(): KPointer
+    @ani.unsafe.Direct
+    native static _Path2D_construct1(unit: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _Path2D_construct2(path: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _Path2D_construct3(path: KPointer, unit: KInt): KPointer
+    @ani.unsafe.Quick
+    native static _Path2D_construct4(d: KStringPtr): KPointer
+    @ani.unsafe.Quick
+    native static _Path2D_construct5(description: KStringPtr, unit: KInt): KPointer
     @ani.unsafe.Direct
     native static _Path2D_getFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -5528,7 +5712,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CanvasRenderer_setTextBaseline(ptr: KPointer, textBaseline: KStringPtr): void
     @ani.unsafe.Direct
-    native static _CanvasRenderingContext2D_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _CanvasRenderingContext2D_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -5547,7 +5731,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _OffscreenCanvasRenderingContext2D_ctor(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _OffscreenCanvasRenderingContext2D_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvasRenderingContext2D_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -5555,7 +5739,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _OffscreenCanvas_ctor(width: number, height: number): KPointer
+    native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct    
+    native static _OverlayOps_setOverlayAttribute(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -5590,6 +5776,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Direct
+    native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct
     native static _LinearGradient_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5828,6 +6016,8 @@ export class ArkUIGeneratedNativeModule {
     native static _EventTargetInfo_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _EventTargetInfo_getId(ptr: KPointer): string
+    @ani.unsafe.Direct
+    native static _EventTargetInfo_isScrollableComponent(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _GestureRecognizer_ctor(): KPointer
     @ani.unsafe.Direct
@@ -6205,6 +6395,22 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BounceSymbolEffect_setDirection(ptr: KPointer, direction: KInt): void
     @ani.unsafe.Direct
+    native static _BuilderNodeOps_ctor(): KPointer
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_create(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_disposeNode(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setUpdateConfigurationCallback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_postTouchEvent(ptr: KPointer, event: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setRootFrameNodeInBuilderNode(ptr: KPointer, node: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _PulseSymbolEffect_ctor(): KPointer
     @ani.unsafe.Direct
     native static _PulseSymbolEffect_getFinalizer(): KPointer
@@ -6398,11 +6604,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebKeyboardController_insertText(ptr: KPointer, text: KStringPtr): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_deleteForward(ptr: KPointer, length: number): void
+    native static _WebKeyboardController_deleteForward(ptr: KPointer, length: int32): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_deleteBackward(ptr: KPointer, length: number): void
+    native static _WebKeyboardController_deleteBackward(ptr: KPointer, length: int32): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_sendFunctionKey(ptr: KPointer, key: number): void
+    native static _WebKeyboardController_sendFunctionKey(ptr: KPointer, key: int32): void
     @ani.unsafe.Direct
     native static _WebKeyboardController_close(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -6512,9 +6718,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuParam_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_x(ptr: KPointer): number
+    native static _WebContextMenuParam_x(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_y(ptr: KPointer): number
+    native static _WebContextMenuParam_y(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _WebContextMenuParam_getLinkUrl(ptr: KPointer): string
     @ani.unsafe.Quick
@@ -6534,11 +6740,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuParam_isEditable(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getEditStateFlags(ptr: KPointer): number
+    native static _WebContextMenuParam_getEditStateFlags(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getPreviewWidth(ptr: KPointer): number
+    native static _WebContextMenuParam_getPreviewWidth(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getPreviewHeight(ptr: KPointer): number
+    native static _WebContextMenuParam_getPreviewHeight(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebContextMenuResult_ctor(): KPointer
     @ani.unsafe.Direct
@@ -6556,7 +6762,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuResult_selectAll(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _ConsoleMessage_ctor(message: KStringPtr, sourceId: KStringPtr, lineNumber: number, messageLevel: KInt): KPointer
+    native static _ConsoleMessage_ctor(message: KStringPtr, sourceId: KStringPtr, lineNumber: int32, messageLevel: KInt): KPointer
     @ani.unsafe.Direct
     native static _ConsoleMessage_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -6564,7 +6770,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ConsoleMessage_getSourceId(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _ConsoleMessage_getLineNumber(ptr: KPointer): number
+    native static _ConsoleMessage_getLineNumber(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -6600,7 +6806,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceResponse_getResponseHeader(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _WebResourceResponse_getResponseCode(ptr: KPointer): number
+    native static _WebResourceResponse_getResponseCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseData(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -6612,7 +6818,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseHeader(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: number): void
+    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: int32): void
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseIsReady(ptr: KPointer, IsReady: KInt): void
     @ani.unsafe.Direct
@@ -6624,7 +6830,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceError_getErrorInfo(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _WebResourceError_getErrorCode(ptr: KPointer): number
+    native static _WebResourceError_getErrorCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _JsGeolocation_ctor(): KPointer
     @ani.unsafe.Direct
@@ -6808,6 +7014,34 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LetterSpacingStyle_getLetterSpacing(ptr: KPointer): number
     @ani.unsafe.Direct
+    native static _LevelOrder_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_clamp(order: number): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_getOrder(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
     native static _TextShadowStyle_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TextShadowStyle_getFinalizer(): KPointer
@@ -6854,7 +7088,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UrlStyle_getUrl(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _MutableStyledString_ctor(): KPointer
+    native static _MutableStyledString_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _MutableStyledString_getFinalizer(): KPointer
     native static _MutableStyledString_replaceString(ptr: KPointer, start: number, length: number, other: KStringPtr): void
@@ -6958,16 +7192,43 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_cursorControl_restoreDefault(): void
     @ani.unsafe.Quick
     native static _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean
-    @ani.unsafe.Quick
-    native static _RouterExtender_RouterPush1attribute(url: KStringPtr): KPointer
-    @ani.unsafe.Direct
+    native static _RouterExtender_RouterPush1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     native static _RouterExtender_RouterReplace1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_MoveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void
     @ani.unsafe.Direct
     native static _RouterExtender_RouterBack0attribute(): void
-    @ani.unsafe.Quick
-    native static _RouterExtender_RouterRunPage(url: KStringPtr): KPointer
+    @ani.unsafe.Direct
+    native static _RouterExtender_RouterBack1attribute(thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _RouterExtender_RouterRunPage(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_RouterClear(): void
+    @ani.unsafe.Quick
+    native static _RouterExtender_ShowAlertBeforeBackPage(message: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_HideAlertBeforeBackPage(): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierRadio(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierRadio(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierCheckbox(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierCheckbox(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierRating(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierRating(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierSlider(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierSlider(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierToggle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierToggle(node: KPointer): void
 }

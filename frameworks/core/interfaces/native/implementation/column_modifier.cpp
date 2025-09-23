@@ -80,6 +80,8 @@ void SetColumnOptions1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //ColumnModelNG::SetSetColumnOptions1(frameNode, convValue);
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {

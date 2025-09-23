@@ -91,6 +91,10 @@ void NavigationPatternTestTwoNg::TearDownTestSuite()
 }
 
 void PerformTransition(const RefPtr<NavigationTransitionProxy>& proxy) {}
+void PerformTransitionFinish(const RefPtr<NavigationTransitionProxy>& proxy)
+{
+    proxy->SetIsFinished(true);
+}
 
 void HandleEnd(bool success) {}
 
@@ -103,6 +107,15 @@ NavigationTransition CustomNavigationAnimation(RefPtr<NavDestinationContext> fro
 {
     struct NavigationTransition navigationTransition;
     navigationTransition.transition = PerformTransition;
+    navigationTransition.endCallback = HandleEnd;
+    return navigationTransition;
+}
+
+NavigationTransition CustomNavigationAnimationFinish(
+    RefPtr<NavDestinationContext> fromContext, RefPtr<NavDestinationContext> toContext, NavigationOperation operation)
+{
+    struct NavigationTransition navigationTransition;
+    navigationTransition.transition = PerformTransitionFinish;
     navigationTransition.endCallback = HandleEnd;
     return navigationTransition;
 }
@@ -1346,6 +1359,33 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_048, TestSize.Leve
 }
 
 /**
+ * @tc.name: NavigationPatternTestOne_049
+ * @tc.desc: Test Navigation Interception Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_049, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    std::optional<std::pair<std::string, RefPtr<UINode>>> optPair;
+        // set topNavPath->second is not nullptr
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    std::optional<std::pair<std::string, RefPtr<UINode>>> topNavPath =
+        std::pair<std::string, RefPtr<UINode>>("preTopNavDestination", preTopNavDestination);
+    navigationPattern->FireInterceptionBeforeLifeCycleEvent(topNavPath, 1);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    navigationPattern->isReplace_ = 1;
+    navigationPattern->FireInterceptionBeforeLifeCycleEvent(optPair, 1);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
  * @tc.name: UpdatePreNavDesZIndex001
  * @tc.desc: Branch: if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) = false
  *           Condition: replaceVal != 0 = false
@@ -1965,5 +2005,35 @@ HWTEST_F(NavigationPatternTestTwoNg, OnModifyDone001, TestSize.Level1)
     ASSERT_EQ(mockPattern->callTime_, 1);
     ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::END));
     NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: TriggerCustomAnimation
+ * @tc.desc: test when finish, preNode enable value is correct
+ *           branch if (proxy->GetIsFinished()) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, TriggerCustomAnimation001, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    navigationPattern->onTransition_ = CustomNavigationAnimationFinish;
+    auto eventHub = preTopNavDestination->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    navigationPattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, true);
+    EXPECT_TRUE(eventHub->IsEnabled());
+
+    navigationPattern->onTransition_ = CustomNavigationAnimation;
+    navigationPattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, true);
+    EXPECT_FALSE(eventHub->IsEnabled());
 }
 } // namespace OHOS::Ace::NG

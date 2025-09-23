@@ -319,6 +319,8 @@ public:
     MOCK_METHOD(bool, SetFileUri, (const std::string& uri), (override));
     MOCK_METHOD(std::string, GetImageFileName, (), (override));
     MOCK_METHOD(void, ClearImageFileNames, (), (override));
+    MOCK_METHOD(DragOperationsMask, GetAllowedDragOperation, (), (const, override));
+    MOCK_METHOD(void, SetAllowedDragOperation, (DragOperationsMask allowed_op), (override));
     int kDefaultDragStartX = 10;
     int kDefaultDragStartY = 20;
 };
@@ -4597,7 +4599,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_007, TestSize.Level1)
 HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-   auto* stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
@@ -4613,6 +4615,35 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
     webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: CreateSnapshotImageFrameNode_002
+ * @tc.desc: CreateSnapshotImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
+    webPattern->RemoveSnapshotFrameNode(true);
+    webPattern->RemoveSnapshotFrameNode(true);
     ASSERT_NE(webPattern, nullptr);
     MockPipelineContext::TearDown();
 #endif

@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -285,6 +286,6 @@ void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::o
     // } else {
     //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
     // }
-    // ViewAbstract::SetPrivacySensitive(frameNode, flag);
+    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
 } // namespace OHOS::Ace::NG

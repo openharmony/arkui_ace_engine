@@ -184,7 +184,9 @@ bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     bool hasDarkRes = false;
     auto params = resObj->GetParams();
     if (resId == -1 && !params.empty() && params.back().value.has_value()) {
-        hasDarkRes = resourceAdapter->ExistDarkResByName(params.back().value.value(),
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
+        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(),
             std::to_string(resObj->GetType()));
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
@@ -2567,6 +2569,24 @@ Local<JSValueRef> ArkTSUtils::JsGetPinchAxisScaleValue(ArkUIRuntimeCallInfo* inf
         return JSValueRef::Undefined(info->GetVM());
     }
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetPinchAxisScale());
+}
+
+Local<JSValueRef> ArkTSUtils::JsHasAxis(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto vm = info->GetVM();
+    auto param = info->GetCallArgRef(0);
+    AxisType axisType;
+    if (!param->IsNumber()) {
+        return panda::BooleanRef::New(info->GetVM(), false);
+    }
+    axisType = static_cast<AxisType>(param->ToNumber(vm)->Value());
+    return panda::BooleanRef::New(info->GetVM(), eventInfo->HasAxis(axisType));
 }
 
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)

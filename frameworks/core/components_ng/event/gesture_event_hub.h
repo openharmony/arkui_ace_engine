@@ -394,6 +394,10 @@ public:
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
     bool IsGestureEmpty() const;
+    bool IsGestureHierarchyEmpty() const
+    {
+        return gestureHierarchy_.empty();
+    }
 
     bool IsPanEventEmpty() const;
 

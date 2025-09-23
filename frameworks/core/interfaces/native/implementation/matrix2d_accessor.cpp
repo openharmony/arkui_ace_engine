@@ -69,7 +69,7 @@ Ark_Matrix2D Rotate1Impl(Ark_Matrix2D peer,
     CHECK_NULL_RETURN(degree, {});
     CHECK_NULL_RETURN(rx, {});
     CHECK_NULL_RETURN(ry, {});
-    auto angle = static_cast<double>(Converter::Convert<float>(*degree));
+    auto angle = Converter::Convert<double>(*degree);
     auto optX = Converter::OptConvert<float>(*rx);
     auto optY = Converter::OptConvert<float>(*ry);
     peer->Rotate(angle, optX, optY);
@@ -141,7 +141,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
+    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleY)
@@ -174,7 +174,7 @@ void SetTranslateYImpl(Ark_Matrix2D peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(translateY);
-    auto ty = static_cast<double>(Converter::Convert<float>(*translateY));
+    auto ty = Converter::Convert<double>(*translateY);
     peer->SetTranslateY(ty);
 }
 } // Matrix2DAccessor

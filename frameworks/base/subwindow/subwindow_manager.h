@@ -85,7 +85,7 @@ public:
 
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
-    int32_t GetParentContainerId(int32_t containerId);
+    ACE_FORCE_EXPORT int32_t GetParentContainerId(int32_t containerId);
     int32_t GetSubContainerId(int32_t parentContainerId);
     const std::vector<int32_t> GetAllSubContainerId(int32_t parentContainerId);
 
@@ -169,7 +169,7 @@ public:
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
-    void HideToastSubWindowNG();
+    void HideToastSubWindowNG(int32_t instanceId);
     ToastWindowType GetToastWindowType(int32_t instanceId);
     ACE_FORCE_EXPORT void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
@@ -191,6 +191,7 @@ public:
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
+    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
@@ -243,15 +244,20 @@ public:
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
     void RemoveSubwindowByNodeId(const int32_t nodeId);
     void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
+    void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
 
-#if defined(ACE_STATIC)
+    // ArkTS 1.2
+    ACE_FORCE_EXPORT void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastNGStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void CloseToastStatic(
+        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void ShowDialogStatic(DialogProperties& dialogProps,
         std::function<void(int32_t, int32_t)>&& callback);
     ACE_FORCE_EXPORT void ShowActionMenuStatic(DialogProperties& dialogProps,
         std::function<void(int32_t, int32_t)>&& callback);
     ACE_FORCE_EXPORT void OpenCustomDialogStatic(DialogProperties &dialogProps,
         std::function<void(int32_t)> &&callback);
-#endif
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);
@@ -264,7 +270,6 @@ private:
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
     SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
     void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
-    void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
     RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);

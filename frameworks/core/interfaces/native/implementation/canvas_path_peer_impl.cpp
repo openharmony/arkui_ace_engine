@@ -22,9 +22,7 @@ constexpr size_t GCTHRESHOLD = 50;
 
 CanvasPathPeerImpl::CanvasPathPeerImpl()
 {
-    if (OHOS::Ace::Container::GreatOrEqualAPITargetVersion(OHOS::Ace::PlatformVersion::VERSION_FOURTEEN)) {
-        isJudgeSpecialValue_ = true;
-    }
+    isJudgeSpecialValue_ = true;
 }
 void CanvasPathPeerImpl::Path2DArc(const ArcParam& params)
 {

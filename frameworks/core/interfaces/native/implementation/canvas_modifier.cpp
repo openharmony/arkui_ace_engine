@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
@@ -44,23 +44,28 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     CHECK_NULL_VOID(pattern);
 
-    Converter::VisitUnion(*context,
-        [pattern](const Ark_CanvasRenderingContext2D& peer) {
-            CanvasRenderingContext2DPeerImpl* peerImplPtr = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-            CHECK_NULL_VOID(peerImplPtr);
-            peerImplPtr->SetInstanceId(Container::CurrentId());
-            peerImplPtr->SetCanvasPattern(pattern);
-            peerImplPtr->CanvasRendererPeerImpl::SetAntiAlias();
-            peerImplPtr->CanvasRendererPeerImpl::SetDensity();
+    Converter::VisitUnion(
+        *context,
+        [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const Ark_CanvasRenderingContext2D& peer) {
+            auto canvasPattern = weak.Upgrade();
+            CHECK_NULL_VOID(canvasPattern);
+            CHECK_NULL_VOID(peer);
+            peer->SetInstanceId(Container::CurrentId());
+            peer->SetCanvasPattern(canvasPattern);
+            peer->CanvasRendererPeerImpl::SetAntiAlias();
+            peer->CanvasRendererPeerImpl::SetDensity();
         },
-        [pattern](const Ark_DrawingRenderingContext &peer) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const Ark_DrawingRenderingContext& peer) {
+            auto canvasPattern = weak.Upgrade();
+            CHECK_NULL_VOID(canvasPattern);
             DrawingRenderingContextPeerImpl* peerImplPtr = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
             CHECK_NULL_VOID(peerImplPtr);
             peerImplPtr->SetInstanceId(Container::CurrentId());
-            peerImplPtr->SetCanvasPattern(pattern);
+            peerImplPtr->SetCanvasPattern(canvasPattern);
         },
-        []() {
-            // CanvasModelNG::DetachRenderContext(frameNode);
+        [weak = AceType::WeakClaim(frameNode)]() {
+            auto node = weak.Upgrade();
+            CanvasModelNG::DetachRenderContext(AceType::RawPtr(node));
         });
 }
 

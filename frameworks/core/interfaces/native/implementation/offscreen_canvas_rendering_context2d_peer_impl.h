@@ -63,8 +63,8 @@ public:
 private:
     static std::mutex mutex_;
     uint32_t id_ = 0;
-    double width_ = 0.0f;
-    double height_ = 0.0f;
+    double width_ = 0.0;
+    double height_ = 0.0;
     static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;
     static uint32_t offscreenPatternCount_;
 };

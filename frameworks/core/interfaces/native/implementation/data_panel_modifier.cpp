@@ -21,7 +21,7 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace {
 constexpr float DATA_PANEL_VALUE_MIN = 0.0;
@@ -42,7 +42,7 @@ namespace OHOS::Ace::NG::Converter {
 struct DataPanelOptions {
     std::optional<std::vector<double>> values;
     std::optional<double> max;
-    // std::optional<DataPanelType> type;
+    std::optional<DataPanelType> type;
 };
 
 template<>
@@ -74,7 +74,7 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
     return {
         .values = doubleArray,
         .max = max,
-        // .type = Converter::OptConvert<DataPanelType>(src.type)
+        .type = Converter::OptConvert<DataPanelType>(src.type)
     };
 }
 
@@ -144,7 +144,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
     // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {
@@ -158,7 +158,7 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     if (panelOptions.has_value()) {
         DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
         DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
-        // DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
+        DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
     } else {
         DataPanelModelStatic::SetValues(frameNode, std::nullopt);
         DataPanelModelStatic::SetMax(frameNode, std::nullopt);
@@ -207,10 +207,11 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Opt_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto width = value ? Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP) : std::nullopt;
     Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
 }
 void TrackShadowImpl(Ark_NativePointer node,
@@ -230,6 +231,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DataPanelModelNG::SetContentModifier(frameNode, convValue);
     LOGE("DataPanel::ContentModifierImpl isn't implemented. Ark_CustomObject isn't supported.");
 }
 } // DataPanelAttributeModifier

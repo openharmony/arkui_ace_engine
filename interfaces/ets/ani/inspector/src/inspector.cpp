@@ -20,10 +20,12 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "inspector_util.h"
  
 namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
+const char DRAW_CHILDREN_TYPE[] = "drawChildren";
 const char ANI_INSPECTOR_NS[] = "L@ohos/arkui/inspector/inspector;";
 const char ANI_COMPONENT_OBSERVER_CLS[] = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
 const char KOALA_INSPECTOR_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/Inspector;";
@@ -57,8 +59,15 @@ public:
     
     std::list<ani_ref>::iterator FindCbList(ani_ref& cb, const std::string& eventType, ani_env* env)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return std::find_if(cbLayoutList_.begin(), cbLayoutList_.end(), [env, cb](const ani_ref& item) -> bool {
+                ani_boolean rs;
+                env->Reference_StrictEquals(cb, item, &rs);
+                return rs == ANI_TRUE;
+            });
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
+            return std::find_if(cbDrawChildrenList_.begin(), cbDrawChildrenList_.end(),
+                [env, cb](const ani_ref& item) -> bool {
                 ani_boolean rs;
                 env->Reference_StrictEquals(cb, item, &rs);
                 return rs == ANI_TRUE;
@@ -106,8 +115,10 @@ public:
                 TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
                 return;
             }
-            if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+            if (LAYOUT_TYPE == eventType) {
                 arkTsFrontend->UnregisterLayoutInspectorCallback(id_);
+            } else if (DRAW_CHILDREN_TYPE == eventType) {
+                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(id_);
             } else {
                 arkTsFrontend->UnregisterDrawInspectorCallback(id_);
             }
@@ -127,24 +138,30 @@ public:
     
     std::list<ani_ref>&  GetCbListByType(const std::string& eventType)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return cbLayoutList_;
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
+            return cbDrawChildrenList_;
         }
         return cbDrawList_;
     }
     
     RefPtr<InspectorEvent> GetInspectorFuncByType(const std::string& eventType)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             return layoutEvent_;
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
+            return drawChildrenEvent_;
         }
         return drawEvent_;
     }
     
     void SetInspectorFuncByType(const std::string& eventType, const RefPtr<InspectorEvent>& fun)
     {
-        if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
+        if (LAYOUT_TYPE == eventType) {
             layoutEvent_ = fun;
+        } else if (DRAW_CHILDREN_TYPE == eventType) {
+            drawChildrenEvent_ = fun;
         } else {
             drawEvent_ = fun;
         }
@@ -153,8 +170,10 @@ private:
     std::string id_;
     std::list<ani_ref> cbLayoutList_;
     std::list<ani_ref> cbDrawList_;
+    std::list<ani_ref> cbDrawChildrenList_;
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
+    RefPtr<InspectorEvent> drawChildrenEvent_;
 };
 
 static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
@@ -166,30 +185,6 @@ static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
     return reinterpret_cast<ComponentObserver *>(nativeAddr);
 }
 
-ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::string& str)
-{
-    ani_size strSize;
-    ani_status status = env->String_GetUTF8Size(ani_str, &strSize);
-    if (status != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8Size failed %{public}d.", status);
-        return status;
-    }
-   
-    std::vector<char> buffer(strSize + 1); // +1 for null terminator
-    char* utf8Buffer = buffer.data();
-
-    ani_size bytes_written = 0;
-    status = env->String_GetUTF8(ani_str, utf8Buffer, buffer.size(), &bytes_written);
-    if (status != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8 failed %{public}d.", status);
-        return status;
-    }
-    
-    utf8Buffer[bytes_written] = '\0';
-    str = std::string(utf8Buffer);
-    return status;
-}
-
 static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
@@ -198,7 +193,7 @@ static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object f
     }
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
+    if (LAYOUT_TYPE != typeStr && DRAW_TYPE != typeStr && DRAW_CHILDREN_TYPE != typeStr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
@@ -218,7 +213,7 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
 {
     std::string typeStr;
     ANIUtils_ANIStringToStdString(env, type, typeStr);
-    if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
+    if (LAYOUT_TYPE != typeStr && DRAW_TYPE != typeStr && DRAW_CHILDREN_TYPE != typeStr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
             typeStr.c_str());
         return;
@@ -234,7 +229,7 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
     observer->RemoveCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
 }
 
-static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_double action, ani_string params)
+static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_int action, ani_string params)
 {
     std::string keyStr;
     ani_status status = ANIUtils_ANIStringToStdString(env, id, keyStr);
@@ -256,7 +251,7 @@ static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_double act
     return ANI_FALSE;
 }
 
-static ani_object AniGetInspectorTree(ani_env *env)
+static ani_string AniGetInspectorTree(ani_env *env)
 {
     ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspector(false);
@@ -271,6 +266,55 @@ static ani_object AniGetInspectorTree(ani_env *env)
         return nullptr;
     }
     return aniResult;
+}
+
+static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array_ref filters)
+{
+    bool isLayoutInspector = false;
+    const NG::InspectorFilter& inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
+    if (needThrow) {
+        AniThrow(env, "get inspector failed");
+        return nullptr;
+    }
+    ani_string result;
+    if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    return result;
+}
+ 
+static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array_ref filters)
+{
+    if (depth < 0) {
+        AniThrow(env, "invalid filter depth");
+        return nullptr;
+    }
+    bool isLayoutInspector = false;
+    NG::InspectorFilter inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
+    std::string idStr;
+    if (ANI_OK != ANIUtils_ANIStringToStdString(env, id, idStr)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    inspectorFilter.SetFilterID(idStr);
+    inspectorFilter.SetFilterDepth(depth);
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
+    if (needThrow) {
+        AniThrow(env, "get inspector failed");
+        return nullptr;
+    }
+    ani_string result;
+    if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        return nullptr;
+    }
+    return result;
 }
 
 static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
@@ -296,25 +340,27 @@ static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
     return ani_str;
 }
 
-static ani_object CreateComponentObserver(ani_env *env, ani_string id, const char *className)
+static ani_ref CreateComponentObserver(ani_env *env, ani_string id, const char *className)
 {
     ani_class cls;
+    ani_ref undefinedRef {};
+    env->GetUndefined(&undefinedRef);
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class");
-        return nullptr;
+        return undefinedRef;
     }
     
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get construct method.");
-        return nullptr;
+        return undefinedRef;
     }
     
     std::string key;
     ani_status status = ANIUtils_ANIStringToStdString(env, id, key);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get key of observer failed.");
-        return nullptr;
+        return undefinedRef;
     }
     TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani start to CreateComponentObserver key is %{public}s",
         key.c_str());
@@ -322,7 +368,7 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     auto arkTsFrontend = ComponentObserver::getFronted();
     if (arkTsFrontend == nullptr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
-        return nullptr;
+        return undefinedRef;
     }
     auto* observer = new ComponentObserver(key);
     
@@ -330,7 +376,7 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not new object.");
         delete observer;
-        return nullptr;
+        return undefinedRef;
     }
     
     auto layoutCallback = [observer, env]() -> void {
@@ -343,17 +389,24 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     };
     observer->SetInspectorFuncByType(DRAW_TYPE, AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback)));
     
+    auto drawChildrenCallback = [observer, env]() -> void {
+        observer->CallUserFunction(env, observer->GetCbListByType(DRAW_CHILDREN_TYPE));
+    };
+    observer->SetInspectorFuncByType(DRAW_CHILDREN_TYPE,
+        AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback)));
+
     arkTsFrontend->RegisterLayoutInspectorCallback(observer->GetInspectorFuncByType(LAYOUT_TYPE), key);
     arkTsFrontend->RegisterDrawInspectorCallback(observer->GetInspectorFuncByType(DRAW_TYPE), key);
+    arkTsFrontend->RegisterDrawChildrenInspectorCallback(observer->GetInspectorFuncByType(DRAW_CHILDREN_TYPE), key);
     return context_object;
 }
 
-static ani_object CreateComponentObserverForAni(ani_env *env, ani_string id)
+static ani_ref CreateComponentObserverForAni(ani_env *env, ani_string id)
 {
     return CreateComponentObserver(env, id, ANI_COMPONENT_OBSERVER_CLS);
 }
 
-static ani_object CreateComponentObserverForKoala(ani_env *env, [[maybe_unused]] ani_object object, ani_string id)
+static ani_ref CreateComponentObserverForKoala(ani_env *env, [[maybe_unused]] ani_object object, ani_string id)
 {
     return CreateComponentObserver(env, id, KOALA_COMPONENT_CLS);
 }
@@ -373,8 +426,12 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
         ani_native_function {"sendEventByKey", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
-        ani_native_function {"getInspectorTree", nullptr,
+        ani_native_function {"getInspectorTreeNative", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
+        ani_native_function {"getFilteredInspectorTree", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTree)},
+        ani_native_function {"getFilteredInspectorTreeById", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTreeById)},
     };
     
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {

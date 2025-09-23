@@ -124,7 +124,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     OffsetF offsetF(2.0, 3.0);
     OffsetF offsetF2(2.0, 3.0);
     frameNode->lastFrameRect_ = std::make_unique<RectF>();
-    frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f));
+    frameNode->lastParentOffsetToWindow_ =
+        std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f));
     frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
     DynamicComponentManager::HandleDynamicRenderOnAreaChange(frameNode, rectF, offsetF, offsetF2);
 
@@ -167,7 +168,8 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
-    auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
+    auto func =
+        [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     eventHub->SetOnAreaChanged(std::move(func));
     ASSERT_TRUE(eventHub->HasOnAreaChanged());
     frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();

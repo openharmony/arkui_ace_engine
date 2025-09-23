@@ -114,7 +114,6 @@ void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, std::function<RefP
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     UpdateRowPadding(row);
     RefPtr<UINode> unitNode = builder();
-    CHECK_NULL_VOID(unitNode);
     unitNode->MountToParent(row);
     pattern->AddHeader(row);
 }
@@ -128,7 +127,6 @@ void MenuItemGroupViewStatic::SetFooter(FrameNode* frameNode, std::function<RefP
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     UpdateRowPadding(row);
     RefPtr<UINode> unitNode = builder();
-    CHECK_NULL_VOID(unitNode);
     unitNode->MountToParent(row);
     pattern->AddFooter(row);
 }

@@ -24,13 +24,15 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global.resource"
-import { ComponentContent } from "./arkui-custom"
+import { ComponentContent } from "arkui/ComponentContent"
 import { VoidCallback, Length, ResourceColor, ResourceStr, Padding, Dimension, LocalizedPadding, Font } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { SymbolGlyphModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { VerticalAlign, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
+import { FrameNode } from "arkui/FrameNode"
+
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -45,108 +47,54 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
     setTabContentOptionsAttribute(): void {
         ArkUIGeneratedNativeModule._TabContentInterface_setTabContentOptions(this.peer.ptr)
     }
-    tabBar0Attribute(value: string | Resource | CustomBuilder | TabBarOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
+    tabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
+        thisSerializer.writeInt8(value_type)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
+            const value_value = value!
+            let value_value_type: int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
+            if (((RuntimeType.OBJECT) == (value_value_type)) && (value_value instanceof ComponentContent)) {
+                thisSerializer.writeInt8(0)
+                const value_value_0 = value_value as ComponentContent
+                let frameNode = value_value_0.getFrameNode()
+                let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+                thisSerializer.writePointer(contentPtr)
             }
-            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as Resource
-                thisSerializer.writeResource(value_value_1)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_2))
-            }
-            else if (TypeChecker.isTabBarOptions(value_value, false, false)) {
-                thisSerializer.writeInt8(3 as int32)
-                const value_value_3  = value_value as TabBarOptions
-                thisSerializer.writeTabBarOptions(value_value_3)
-            }
-        }
-        ArkUIGeneratedNativeModule._TabContentAttribute_tabBar0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    tabBar1Attribute(value: SubTabBarStyle | BottomTabBarStyle | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isSubTabBarStyle(value_value))) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as SubTabBarStyle
-                thisSerializer.writeSubTabBarStyle(value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isBottomTabBarStyle(value_value))) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as BottomTabBarStyle
-                thisSerializer.writeBottomTabBarStyle(value_value_1)
-            }
-        }
-        ArkUIGeneratedNativeModule._TabContentAttribute_tabBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    tabBar2Attribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isComponentContent(value_value)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ComponentContent
-                thisSerializer.writeComponentContent(value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isSubTabBarStyle(value_value))) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as SubTabBarStyle
+            else if (((RuntimeType.OBJECT) == (value_value_type)) && (value_value instanceof SubTabBarStyle)) {
+                thisSerializer.writeInt8(1)
+                const value_value_1 = value_value as SubTabBarStyle
                 thisSerializer.writeSubTabBarStyle(value_value_1)
             }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isBottomTabBarStyle(value_value))) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as BottomTabBarStyle
+            else if (((RuntimeType.OBJECT) == (value_value_type)) && (value_value instanceof BottomTabBarStyle)) {
+                thisSerializer.writeInt8(2)
+                const value_value_2 = value_value as BottomTabBarStyle
                 thisSerializer.writeBottomTabBarStyle(value_value_2)
             }
             else if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(3 as int32)
-                const value_value_3  = value_value as string
+                thisSerializer.writeInt8(3)
+                const value_value_3 = value_value as string
                 thisSerializer.writeString(value_value_3)
             }
             else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
-                thisSerializer.writeInt8(4 as int32)
-                const value_value_4  = value_value as Resource
+                thisSerializer.writeInt8(4)
+                const value_value_4 = value_value as Resource
                 thisSerializer.writeResource(value_value_4)
             }
             else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(5 as int32)
-                const value_value_5  = value_value as CustomBuilder
+                thisSerializer.writeInt8(5)
+                const value_value_5 = value_value as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_5))
             }
             else if (TypeChecker.isTabBarOptions(value_value, false, false)) {
-                thisSerializer.writeInt8(6 as int32)
-                const value_value_6  = value_value as TabBarOptions
+                thisSerializer.writeInt8(6)
+                const value_value_6 = value_value as TabBarOptions
                 thisSerializer.writeTabBarOptions(value_value_6)
             }
         }
-        ArkUIGeneratedNativeModule._TabContentAttribute_tabBar2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TabContentAttribute_tabBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillShowAttribute(value: VoidCallback | undefined): void {
@@ -217,7 +165,10 @@ export interface TabBarOptions {
 }
 export type TabContentInterface = () => TabContentAttribute;
 export interface TabContentAttribute extends CommonMethod {
-    tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
+    setTabContentOptions(): this {
+        return this
+    }
+    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
     onWillShow(value: VoidCallback | undefined): this
     onWillHide(value: VoidCallback | undefined): this
 }
@@ -225,7 +176,10 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     tabBar_value?: string | Resource | CustomBuilder | TabBarOptions | undefined
     onWillShow_value?: VoidCallback | undefined
     onWillHide_value?: VoidCallback | undefined
-    public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public setTabContentOptions(): this {
+        return this
+    }
+    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         return this
     }
     public onWillShow(value: VoidCallback | undefined): this {
@@ -246,25 +200,10 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public tabBar(value: SubTabBarStyle | BottomTabBarStyle | undefined | string | Resource | CustomBuilder | TabBarOptions | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         if (this.checkPriority("tabBar")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (SubTabBarStyle | BottomTabBarStyle | undefined)
-                this.getPeer()?.tabBar1Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (string | Resource | CustomBuilder | TabBarOptions | undefined)
-                this.getPeer()?.tabBar0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
-                this.getPeer()?.tabBar2Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
+            this.getPeer()?.tabBarAttribute(value_casted)
         }
         return this
     }
@@ -316,10 +255,16 @@ export class SubTabBarStyle {
     _labelStyle?: TabBarLabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _id?: string | undefined
-    constructor(content: ResourceStr | ResourceStr | ComponentContent) {
+    constructor(content: ResourceStr | ComponentContent) {
+        this._content = content
+    }
+    constructor(content: ResourceStr) {
         this._content = content
     }
     public static of(content: ResourceStr | ResourceStr | ComponentContent): SubTabBarStyle {
+        return new SubTabBarStyle(content)
+    }
+    public static of(content: ResourceStr): SubTabBarStyle {
         return new SubTabBarStyle(content)
     }
     indicator(value: SubTabBarIndicatorStyle): this {

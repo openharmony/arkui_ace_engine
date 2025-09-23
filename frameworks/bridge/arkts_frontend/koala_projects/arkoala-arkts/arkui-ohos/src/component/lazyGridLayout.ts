@@ -104,7 +104,7 @@ export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements Lazy
     }
     public columnsGap(value: LengthMetrics | undefined): this {
         return this
-        }
+    }
 }
 export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
     columnsTemplate(value: string | undefined): this
@@ -113,7 +113,7 @@ export class ArkLazyVGridLayoutStyle extends ArkLazyGridLayoutStyle implements L
     columnsTemplate_value?: string | undefined
     public columnsTemplate(value: string | undefined): this {
         return this
-        }
+    }
 }
 export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent implements LazyGridLayoutAttribute {
     getPeer(): ArkLazyGridLayoutPeer {

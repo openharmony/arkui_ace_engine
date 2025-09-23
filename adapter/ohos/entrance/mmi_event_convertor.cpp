@@ -599,6 +599,14 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
     event.deviceId = pointerEvent->GetDeviceId();
+    uint32_t axes { 0U };
+    axes |= pointerEvent->HasAxis(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL)
+                ? (1 << static_cast<uint32_t>(AxisType::VERTICAL_AXIS)): 0;
+    axes |= pointerEvent->HasAxis(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL)
+                ? (1 << static_cast<uint32_t>(AxisType::HORIZONTAL_AXIS)): 0;
+    axes |= pointerEvent->HasAxis(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH)
+                ? (1 << static_cast<uint32_t>(AxisType::PINCH_AXIS)): 0;
+    event.axes = axes;
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);

@@ -680,8 +680,8 @@ void SetTransform0Impl(Ark_CanvasRenderer peer,
     }
     auto param = TransformParam {
         .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*b)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewX = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewY = static_cast<double>(Converter::Convert<float>(*b)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
         .translateX = static_cast<double>(Converter::Convert<float>(*e)),
         .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
@@ -1080,7 +1080,7 @@ void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(shadowOffsetX);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto offsetX = static_cast<double>(Converter::Convert<float>(*shadowOffsetX));
+    auto offsetX = Converter::Convert<double>(*shadowOffsetX);
     peerImpl->SetShadowOffsetX(offsetX);
 }
 Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
@@ -1096,7 +1096,7 @@ void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(shadowOffsetY);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto offsetY = static_cast<double>(Converter::Convert<float>(*shadowOffsetY));
+    auto offsetY = Converter::Convert<double>(*shadowOffsetY);
     peerImpl->SetShadowOffsetY(offsetY);
 }
 Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)

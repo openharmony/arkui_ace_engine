@@ -31,6 +31,10 @@
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
 typedef struct napi_value__* napi_value;
+typedef struct __ani_env ani_env;
+typedef class __ani_ref* ani_ref;
+typedef struct __ani_vm ani_vm;
+typedef class __ani_object* ani_object;
 
 namespace OHOS::Ace {
 
@@ -170,20 +174,19 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
-#if defined(ACE_STATIC)
     // For ArkTS1.2
-    virtual void* PushExtender(
-        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    virtual void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return nullptr;
     };
     virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+        std::function<void()>&& enterFinishCallback, void* jsNode)
     {
         return nullptr;
     };
-    virtual void* RunPageExtender(
-        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    virtual void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return nullptr;
     };
@@ -191,7 +194,6 @@ public:
     virtual void ClearExtender() {};
     virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
     virtual void HideAlertBeforeBackPageExtender() {};
-#endif
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
@@ -388,6 +390,48 @@ public:
     }
     virtual void* GetEnv() { return nullptr; }
 
+    void RegisterLocalStorage(int32_t id, void* storage)
+    {
+        storageMap_.emplace(id, storage);
+    }
+
+    void UnRegisterLocalStorage(int32_t id)
+    {
+        storageMap_.erase(id);
+    }
+
+    virtual ani_object GetUIContext(int32_t instanceId)
+    {
+        return nullptr;
+    }
+    
+    virtual ani_ref GetSharedStorage(int32_t id)
+    {
+        return nullptr;
+    }
+
+    virtual void SetHostContext(int32_t instanceId, ani_ref* context) {}
+
+    virtual ani_ref* GetHostContext()
+    {
+        return nullptr;
+    }
+
+    virtual ani_vm *GetVM()
+    {
+        return nullptr;
+    }
+
+    virtual bool HandleMessage(void *frameNode, int32_t type, const std::string& param)
+    {
+        return false;
+    }
+
+    virtual void OpenStateMgmtInterop() {}
+
+    // For arkts 1.2
+    virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
+
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;
@@ -397,6 +441,7 @@ protected:
     State state_ = State::UNDEFINE;
     mutable std::recursive_mutex mutex_;
     mutable std::mutex destructMutex_;
+    std::unordered_map<int32_t, void*> storageMap_;
 };
 
 } // namespace OHOS::Ace

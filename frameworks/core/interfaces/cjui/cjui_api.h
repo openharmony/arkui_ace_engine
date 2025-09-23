@@ -1732,7 +1732,7 @@ struct CJUITextAreaModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderWidth)(ArkUINodeHandle node);
     void (*setTextAreaBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 topColorInt,
-        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 bottomColorInt, ArkUI_Uint32 leftColorInt);
+        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 bottomColorInt, ArkUI_Uint32 leftColorInt, void* colorRawPtr);
     void (*resetTextAreaBorderColor)(ArkUINodeHandle node);
     void (*setTextAreaBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetTextAreaBorderStyle)(ArkUINodeHandle node);
@@ -2146,6 +2146,8 @@ struct CJUIWebModifier {
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
     void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGestureFocusMode)(ArkUINodeHandle node);
+    void (*setRotateRenderEffect)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetRotateRenderEffect)(ArkUINodeHandle node);
     void (*setEnableDataDetector)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDataDetector)(ArkUINodeHandle node);
     void (*setDataDetectorConfigWithEvent)(

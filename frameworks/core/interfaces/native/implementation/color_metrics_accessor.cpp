@@ -19,6 +19,16 @@
 #include "arkoala_api_generated.h"
 #include "color_metrics_peer.h"
 
+namespace OHOS::Ace::NG {
+constexpr uint32_t MAX_CHANNEL_VALUE_U = 0xFF;
+constexpr uint32_t MIN_VALUE_U = 0;
+constexpr int32_t MAX_CHANNEL_VALUE = 0xFF;
+constexpr int32_t MIN_VALUE = 0;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_RED_OFFSET = 16;
+constexpr uint32_t COLOR_GREEN_OFFSET = 8;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorMetricsAccessor {
 void DestroyPeerImpl(Ark_ColorMetrics peer)
@@ -33,12 +43,32 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+uint32_t ClampUint32(uint32_t value)
+{
+    return std::min(std::max(value, MIN_VALUE_U), MAX_CHANNEL_VALUE_U);
+}
+uint32_t ClampInt32(int32_t value)
+{
+    return std::min(std::max(value, MIN_VALUE), MAX_CHANNEL_VALUE);
+}
+uint32_t Numeric(uint32_t value)
+{
+    auto red = ClampUint32((value >> COLOR_RED_OFFSET) & 0x000000FF);
+    auto green = ClampUint32((value >> COLOR_GREEN_OFFSET) & 0x000000FF);
+    auto blue = ClampUint32(value & 0x000000FF);
+    auto alpha = ClampUint32((value >> COLOR_ALPHA_OFFSET) & 0x000000FF);
+    if (alpha == 0) {
+        alpha = MAX_CHANNEL_VALUE;
+    }
+    return (alpha << COLOR_ALPHA_OFFSET) + (red << COLOR_RED_OFFSET) + (green << COLOR_GREEN_OFFSET) + blue;
+}
 Ark_ColorMetrics NumericImpl(const Ark_Number* value)
 {
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
     CHECK_NULL_RETURN(value, peer);
-    peer->colorValue.value = static_cast<uint32_t>(Converter::Convert<int32_t>(*value));
+    auto colorValue = Numeric(Converter::Convert<int32_t>(*value));
+    peer->colorValue.value = colorValue;
     return peer;
 }
 Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
@@ -48,11 +78,15 @@ Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
 {
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
-    peer->colorValue.argb.red = red ? static_cast<uint8_t>(Converter::Convert<int32_t>(*red)) : 0x00;
-    peer->colorValue.argb.green = green ? static_cast<uint8_t>(Converter::Convert<int32_t>(*green)) : 0x00;
-    peer->colorValue.argb.blue = blue ? static_cast<uint8_t>(Converter::Convert<int32_t>(*blue)) : 0x00;
-    auto optAlpha = alpha ? Converter::OptConvert<int32_t>(*alpha) : std::nullopt;
-    peer->colorValue.argb.alpha = optAlpha.has_value() ? static_cast<uint8_t>(optAlpha.value()) : 0xff;
+    peer->colorValue.argb.red = red ? ClampInt32(Converter::Convert<int32_t>(*red)) : 0x00;
+    peer->colorValue.argb.green = green ? ClampInt32(Converter::Convert<int32_t>(*green)) : 0x00;
+    peer->colorValue.argb.blue = blue ? ClampInt32(Converter::Convert<int32_t>(*blue)) : 0x00;
+    auto optAlpha = alpha ? Converter::OptConvert<float>(*alpha) : std::nullopt;
+    if (optAlpha.has_value()) {
+        peer->colorValue.argb.alpha = ClampInt32(optAlpha.value());
+    } else {
+        peer->colorValue.argb.alpha = 0xff;
+    }
     return peer;
 }
 Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)

@@ -85,17 +85,13 @@ private:
         }
         free(data);
         data = newData;
+        dataLength = newLength;
     }
 public:
     SerializerBase(CallbackResourceHolder* resourceHolder = nullptr):
         position(0), ownData(true), resourceHolder(resourceHolder) {
         this->dataLength = 256;
-        auto newData = malloc(this->dataLength);
-        if (newData) {
-            this->data = reinterpret_cast<uint8_t*>(newData);
-        } else {
-            this->data = nullptr;
-        }
+        this->data = reinterpret_cast<uint8_t*>(malloc(this->dataLength));
     }
 
     SerializerBase(uint8_t* data, uint32_t dataLength, CallbackResourceHolder* resourceHolder = nullptr):

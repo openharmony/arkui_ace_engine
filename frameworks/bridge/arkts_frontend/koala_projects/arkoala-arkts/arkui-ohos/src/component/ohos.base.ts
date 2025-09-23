@@ -21,3 +21,4 @@ import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { BusinessError } from "#external"
 export type ErrorCallback = (err: BusinessError) => void;
+export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data: T)=> void;

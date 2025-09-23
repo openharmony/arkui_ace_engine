@@ -35,7 +35,7 @@ void StepperModelStatic::SetIndex(FrameNode* frameNode, const std::optional<int3
     bool hasSwiperNode = stepperNode->HasSwiperNode();
     auto swiperId = stepperNode->GetSwiperId();
     RefPtr<FrameNode> swiperNode;
-    uint32_t value = static_cast<uint32_t>(index.value_or(0));
+    uint32_t value = index.value_or(0);
     if (!hasSwiperNode) {
         swiperNode = CreateSwiperChild(swiperId, value);
         swiperNode->MountToParent(Referenced::Claim(stepperNode));

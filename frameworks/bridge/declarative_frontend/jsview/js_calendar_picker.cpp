@@ -929,8 +929,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
 
     properties.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
-    JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
-    JSViewAbstract::SetDialogEffectOption(paramObj, properties);
+    ParseCalendarPickerDialogBlurStyleOption(paramObj, properties);
+    ParseCalendarPickerDialogEffectOption(paramObj, properties);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -944,5 +944,29 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
+
+void JSCalendarPickerDialog::ParseCalendarPickerDialogBlurStyleOption(
+    const JSRef<JSObject>& paramObj, DialogProperties& properties)
+{
+    auto blurStyleValue = paramObj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!properties.blurStyleOption.has_value()) {
+            properties.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, properties.blurStyleOption.value());
+    }
+}
+
+void JSCalendarPickerDialog::ParseCalendarPickerDialogEffectOption(
+    const JSRef<JSObject>& paramObj, DialogProperties& properties)
+{
+    auto effectOptionValue = paramObj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!properties.effectOption.has_value()) {
+            properties.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
+    }
 }
 } // namespace OHOS::Ace::Framework

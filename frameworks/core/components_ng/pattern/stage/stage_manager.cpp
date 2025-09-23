@@ -801,7 +801,7 @@ void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& hom
     TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s, "
         "ignoreOrientation: %{public}d", isForceSplit, homePage.c_str(), ignoreOrientation);
     //app support split mode, whether force split is enable or disable, the homepage will be recognized
-    isDetectPrimaryPage_ = true;
+    isForceSplitSupported_ = true;
     if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage && ignoreOrientation_ == ignoreOrientation) {
         return;
     }

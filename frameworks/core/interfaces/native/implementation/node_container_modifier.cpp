@@ -58,7 +58,7 @@ void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer chil
         pattern->AddBaseNode(nullptr);
         return;
     }
-    auto child = childPeer->node;
+    auto child = FrameNodePeer::GetFrameNodeByPeer(childPeer);
     pattern->AddBaseNode(child);
 }
 
@@ -69,6 +69,7 @@ void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
+    CHECK_NULL_VOID(context);
     auto aboutToAppearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
         ContainerScope scope(instanceId);
         callback.InvokeSync();
@@ -83,6 +84,7 @@ void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
+    CHECK_NULL_VOID(context);
     auto aboutToDisappearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
         ContainerScope scope(instanceId);
         callback.InvokeSync();

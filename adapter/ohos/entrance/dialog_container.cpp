@@ -26,6 +26,7 @@
 #include "core/common/text_field_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 
 namespace OHOS::Ace::Platform {
 DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : AceContainer(instanceId, type)
@@ -164,5 +165,4 @@ bool DialogContainer::OnBackPressed(int32_t instanceId)
 {
     return AceContainer::CloseWindow(instanceId);
 }
-
 } // namespace OHOS::Ace::Platform

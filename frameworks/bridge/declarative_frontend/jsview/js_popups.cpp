@@ -3011,22 +3011,46 @@ void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, Di
 void JSViewAbstract::SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     auto blurStyleValue = obj->GetProperty("backgroundBlurStyleOptions");
-    if (blurStyleValue->IsObject()) {
-        if (!properties.blurStyleOption.has_value()) {
-            properties.blurStyleOption.emplace();
-        }
-        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, properties.blurStyleOption.value());
+    CHECK_EQUAL_VOID(blurStyleValue->IsObject(), false);
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(blurStyleValue);
+    CHECK_EQUAL_VOID(jsOption->IsUndefined(), true);
+    if (!properties.blurStyleOption.has_value()) {
+        properties.blurStyleOption.emplace();
+    }
+    JSViewAbstract::ParseBlurStyleOption(jsOption, properties.blurStyleOption.value());
+
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    Color inactiveColor;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), inactiveColor, inactiveColorResObj) &&
+        !JSViewAbstract::CheckDarkResource(inactiveColorResObj)) {
+        properties.hasInvertColor.hasBlurStyleOptionInactiveColor = true;
     }
 }
 
 void JSViewAbstract::SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     auto effectOptionValue = obj->GetProperty("backgroundEffect");
-    if (effectOptionValue->IsObject()) {
-        if (!properties.effectOption.has_value()) {
-            properties.effectOption.emplace();
-        }
-        JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
+    CHECK_EQUAL_VOID(effectOptionValue->IsObject(), false);
+    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(effectOptionValue);
+    CHECK_EQUAL_VOID(jsOption->IsUndefined(), true);
+    if (!properties.effectOption.has_value()) {
+        properties.effectOption.emplace();
+    }
+    JSViewAbstract::ParseEffectOption(jsOption, properties.effectOption.value());
+
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsColor(jsOption->GetProperty("color"), color, colorResObj) &&
+        !JSViewAbstract::CheckDarkResource(colorResObj)) {
+        properties.hasInvertColor.hasEffectOptionColor = true;
+    }
+    Color inactiveColor;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), inactiveColor, inactiveColorResObj) &&
+        !JSViewAbstract::CheckDarkResource(inactiveColorResObj)) {
+        properties.hasInvertColor.hasEffectOptionInactiveColor = true;
     }
 }
 

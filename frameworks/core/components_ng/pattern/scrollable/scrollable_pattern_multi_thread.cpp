@@ -105,4 +105,30 @@ void ScrollablePattern::ScrollPageMultiThread(bool reverse, bool smooth, Accessi
         }
     });
 }
+void ScrollablePattern::SetFrictionMultiThread(double friction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([friction, weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto innerFriction = friction;
+        if (LessOrEqual(innerFriction, 0.0)) {
+            innerFriction =
+                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+            innerFriction = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION
+                                                                                                     : innerFriction;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+                auto context = pattern->GetContext();
+                CHECK_NULL_VOID(context);
+                auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+                innerFriction = scrollableTheme->GetFriction();
+            }
+        }
+        pattern->friction_ = innerFriction;
+        CHECK_NULL_VOID(pattern->scrollableEvent_);
+        auto scrollable = pattern->scrollableEvent_->GetScrollable();
+        scrollable->SetUnstaticFriction(innerFriction);
+    });
+}
 } // namespace OHOS::Ace::NG

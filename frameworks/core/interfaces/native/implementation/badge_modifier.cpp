@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"

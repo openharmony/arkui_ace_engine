@@ -35,8 +35,8 @@ public:
     static void JSOnDidStopDragging(const JSCallbackInfo& info);
     static void JSOnWillStartFling(const JSCallbackInfo& info);
     static void JSOnDidStopFling(const JSCallbackInfo& info);
-    static void SetContentStartOffset(const JSCallbackInfo& info);
-    static void SetContentEndOffset(const JSCallbackInfo& info);
+    static void JSContentStartOffset(const JSCallbackInfo& info);
+    static void JSContentEndOffset(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_BASE_H

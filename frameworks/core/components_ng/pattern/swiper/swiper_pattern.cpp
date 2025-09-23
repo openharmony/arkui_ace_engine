@@ -5985,7 +5985,8 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         isFinishAnimation_ = false;
     } else if (currentIndex_ != nextIndex) {
         UpdateCurrentIndex(nextIndex);
-        if (currentFocusIndex_ < currentIndex_ || currentFocusIndex_ >= currentIndex_ + GetDisplayCount()) {
+        if (currentFocusIndex_ < currentIndex_ - (Positive(GetPrevMargin()) ? 1 : 0) ||
+            currentFocusIndex_ >= currentIndex_ + GetDisplayCount() + (Positive(GetNextMargin()) ? 1 : 0)) {
             currentFocusIndex_ = currentIndex_;
         }
         auto host = GetHost();

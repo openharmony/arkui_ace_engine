@@ -57,6 +57,8 @@ constexpr float BUTTON_WIDTH = 200.0f;
 constexpr float BUTTON_HEIGHT = 100.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float TOP_PADDING = 0.0f;
+constexpr float BOTTOM_PADDING = 0.0f;
 constexpr bool STATE_EFFECT = true;
 const std::string CREATE_VALUE = "Hello World";
 const std::string BUTTON_VALUE = "Test";
@@ -1039,6 +1041,150 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest012, TestSize.Level1)
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Height(), 0);
+}
+
+/**
+ * @tc.name: ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001
+ * @tc.desc: Test HandleLabelCircleButtonConstraint and ButtonFunctionLayoutPolicyIsFixAtIdelSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionLayoutPolicyIsFixAtIdelSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<ButtonLayoutAlgorithm>(buttonPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
+     * HandleLabelLayoutPolicyIsFixAtIdelSizeButtonFrameSize.
+     * @tc.expected: step4. check whether the value of constraint frame szie.
+     */
+    SizeF frameSize;
+    auto layoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
+
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
+     * HandleLabelLayoutPolicyIsFixAtIdelSizeButtonFrameSize.
+     * @tc.expected: step4. check whether the value of constraint frame szie.
+     */
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
+
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
+     * HandleLabelLayoutPolicyIsFixAtIdelSizeButtonFrameSize.
+     * @tc.expected: step4. check whether the value of constraint frame szie.
+     */
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    buttonLayoutAlgorithm->childSize_.SetHeight(ZERO);
+    buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+    EXPECT_FLOAT_EQ(frameSize.Height(), ZERO);
+
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to call LayoutPolicyIsFixAtIdelSize and
+     * HandleLabelLayoutPolicyIsFixAtIdelSizeButtonFrameSize.
+     * @tc.expected: step4. check whether the value of constraint frame szie.
+     */
+    buttonLayoutAlgorithm->childSize_.SetHeight(BUTTON_HEIGHT);
+    buttonLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(layoutPolicyProperty, BOTTOM_PADDING, TOP_PADDING, frameSize);
+    EXPECT_FLOAT_EQ(frameSize.Width(), ZERO);
+}
+
+/**
+ * @tc.name: ButtonFunctionHandleAdaptiveTextTest001
+ * @tc.desc: test button layout using buttonType ROUNDED_RECTANGLE and Handle Adaptive Text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionHandleAdaptiveTextTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::ROUNDED_RECTANGLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraphByRoundedRect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    // set button width and height by user
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BUTTON_WIDTH), CalcLength()));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step3. use layoutAlgorithm to measure and layout.
+     * @tc.expected: check whether the value of geometry's frameSize and frameOffset is correct.
+     */
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_FLOAT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 }
 
 /**

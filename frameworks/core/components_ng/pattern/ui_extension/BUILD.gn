@@ -42,6 +42,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "ui_extension_component/session_wrapper_impl.cpp",
     "ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
     "ui_extension_component/ui_extension_adapter.cpp",
+    "ui_extension_component/ui_extension_model_adapter.cpp",
     "ui_extension_component/ui_extension_model_static.cpp",
     "ui_extension_component/ui_extension_node.cpp",
     "ui_extension_component/ui_extension_pattern.cpp",
@@ -51,8 +52,10 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # dynamic_component
   sources += [
+    "dynamic_component/arkts_dynamic_pattern.cpp",
     "dynamic_component/dynamic_component_manager.cpp",
     "dynamic_component/dynamic_model.cpp",
+    "dynamic_component/dynamic_model_static.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",
     "dynamic_component/dynamic_touch_delegate.cpp",
@@ -63,8 +66,8 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # preview_ui_extension_component
   sources += [
-    "preview_ui_extension_component/preview_ui_extension_adapter.cpp",
     "preview_ui_extension_component/preview_session_wrapper_impl.cpp",
+    "preview_ui_extension_component/preview_ui_extension_adapter.cpp",
     "preview_ui_extension_component/preview_ui_extension_pattern.cpp",
   ]
 

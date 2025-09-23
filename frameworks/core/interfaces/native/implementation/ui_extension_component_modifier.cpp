@@ -18,6 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
@@ -75,17 +76,45 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr int32_t FLAG_DC = 1000000;
+}
 namespace UIExtensionComponentModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer UecConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    // auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
-    // frameNode->IncRefCount();
+#ifdef ACE_STATIC
+    auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return {};
+#endif
 #else
     return {};
 #endif //WINDOW_SCENE_SUPPORTED
+}
+
+Ark_NativePointer DcConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNode = NG::DynamicModelStatic::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return {};
+#endif //WINDOW_SCENE_SUPPORTED
+}
+
+
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+    switch (flags) {
+        case FLAG_DC:
+            return DcConstructImpl(id, flags);
+        default:
+            return UecConstructImpl(id, flags);
+    }
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
@@ -128,22 +157,23 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
+#ifdef ACE_STATIC
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnRemoteReady(frameNode, nullptr);
         return;
     }
-    // auto onRemoteReady =
-    //     [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
-    //         auto accessor = GetUIExtensionProxyAccessor();
-    //         CHECK_NULL_VOID(accessor);
-    //         auto peer = accessor->ctor();
-    //         CHECK_NULL_VOID(peer);
-    //         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
-    //         uiExtensionProxyPeerPtr->SetProxy(proxy);
-    //         arkCallback.Invoke(peer);
-    //     };
-    // UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+    auto onRemoteReady = [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
+        auto accessor = GetUIExtensionProxyAccessor();
+        CHECK_NULL_VOID(accessor);
+        auto peer = accessor->ctor();
+        CHECK_NULL_VOID(peer);
+        auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
+        uiExtensionProxyPeerPtr->SetProxy(proxy);
+        arkCallback.Invoke(peer);
+    };
+    UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(Ark_NativePointer node,
@@ -161,7 +191,9 @@ void OnResultImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+#ifdef ACE_STATIC
+        UIExtensionModelNG::SetOnResult(frameNode, nullptr);
+#endif
         return;
     }
     auto onResult =
@@ -197,7 +229,9 @@ void OnResultImpl(Ark_NativePointer node,
             arkCallback.Invoke(parameter);
 #endif
         };
-    // UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
+#ifdef ACE_STATIC
+    UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReleaseImpl(Ark_NativePointer node,
@@ -206,17 +240,19 @@ void OnReleaseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
+#ifdef ACE_STATIC
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+       UIExtensionModelNG::SetOnRelease(frameNode, nullptr);
         return;
     }
-    // auto onRelease =
-    //     [arkCallback = CallbackHelper(*optValue)](int32_t index) {
-    //         Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
-    //         arkCallback.Invoke(arkIndex);
-    //     };
-    // UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
+    auto onRelease =
+        [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+            Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+            arkCallback.Invoke(arkIndex);
+        };
+    UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -225,25 +261,27 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef WINDOW_SCENE_SUPPORTED
+#ifdef ACE_STATIC
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnError(frameNode, nullptr);
         return;
     }
-    // auto instanceId = ContainerScope::CurrentId();
-    // auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
-    // auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
-    //     int32_t code, const std::string& name, const std::string& message) {
-    //     ContainerScope scope(instanceId);
-    //     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    //     CHECK_NULL_VOID(pipelineContext);
-    //     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    //     arkCallback.Invoke(Ark_BusinessError{
-    //         .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
-    //         .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-    //         .code = Converter::ArkValue<Ark_Number>(code)});
-    // };
-    // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+    auto instanceId = ContainerScope::CurrentId();
+    auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
+    auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
+        int32_t code, const std::string& name, const std::string& message) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke(Ark_BusinessError{
+            .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
+            .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
+            .code = Converter::ArkValue<Ark_Number>(code)});
+    };
+    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnTerminatedImpl(Ark_NativePointer node,
@@ -254,7 +292,9 @@ void OnTerminatedImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+#ifdef ACE_STATIC
+        UIExtensionModelNG::SetOnTerminated(frameNode, nullptr);
+#endif
         return;
     }
     auto onTerminated =
@@ -291,14 +331,20 @@ void OnTerminatedImpl(Ark_NativePointer node,
             arkCallback.Invoke(terminatedInfo);
 #endif
         };
-    // UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+#ifdef ACE_STATIC
+    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnDrawReadyImpl(Ark_NativePointer node,
                      const Opt_Callback_Void* value)
 {
+#ifdef ACE_STATIC
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    UIExtensionComponentModelNG::SetOnDrawReady(frameNode, convValue);
+#endif
 }
 } // UIExtensionComponentAttributeModifier
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()

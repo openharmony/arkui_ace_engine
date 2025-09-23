@@ -16,29 +16,33 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, Finalizable, SerializerBase, registerCallback } from "@koalaui/interop"
-import { Serializer } from "./peers/Serializer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
-import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from "./units"
-import { SymbolGlyphModifier } from "./arkui-external"
-import { Callback_Boolean_Void } from "./navigation"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
-import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
-import { Callback_String_Void } from "./gridRow"
-import { PasteEvent, KeyboardOptions } from "./richEditor"
-import { CopyOptions, TextAlign, Color } from "./enums"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { int32, int64, float32, unsafeCast } from '@koalaui/common';
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr,
+    wrapCallback, NativeBuffer, Finalizable, SerializerBase, registerCallback } from '@koalaui/interop';
+import { Serializer } from './peers/Serializer';
+import { ComponentBase } from './../ComponentBase';
+import { PeerNode } from './../PeerNode';
+import { ArkUIGeneratedNativeModule, TypeChecker } from '#components';
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent,
+    ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common';
+import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from './units';
+import { SymbolGlyphModifier } from '../SymbolGlyphModifier';
+import { Callback_Boolean_Void } from './navigation';
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue,
+    EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from './textCommon';
+import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback,
+    OnPasteCallback} from './textInput';
+import { Callback_String_Void } from './gridRow';
+import { PasteEvent, KeyboardOptions } from './richEditor';
+import { CopyOptions, TextAlign, Color } from './enums';
+import { Resource } from 'global.resource';
+import { CallbackKind } from './peers/CallbackKind';
+import { CallbackTransformer } from './peers/CallbackTransformer';
+import { NodeAttach, remember } from '@koalaui/runtime';
+import { Deserializer } from './peers/Deserializer';
 
-import { Deserializer } from "./peers/Deserializer"
 export class ArkSearchPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSearchPeer {
@@ -860,7 +864,7 @@ export enum SearchType {
     URL = 13
 }
 export interface SearchOptions {
-    value?: string;
+    value?: string | Bindable<string>;
     placeholder?: ResourceStr;
     icon?: string;
     controller?: SearchController;
@@ -1128,7 +1132,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     }
     public _onChangeEvent_value(callback: ((breakpoints: string) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkSearchComponent extends ArkCommonMethodComponent implements SearchAttribute {
     getPeer(): ArkSearchPeer {
@@ -1136,8 +1140,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     }
     public setSearchOptions(options?: SearchOptions): this {
         if (this.checkPriority("setSearchOptions")) {
-            const options_casted = options as (SearchOptions | undefined)
-            this.getPeer()?.setSearchOptionsAttribute(options_casted)
+            hookSetSearchOptions(this, options)
             return this
         }
         return this
@@ -1152,8 +1155,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     }
     public searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("searchIcon")) {
-            const value_casted = value as (IconOptions | SymbolGlyphModifier | undefined)
-            this.getPeer()?.searchIconAttribute(value_casted)
+            hookSetSearchIconSymbol(this, value)
             return this
         }
         return this

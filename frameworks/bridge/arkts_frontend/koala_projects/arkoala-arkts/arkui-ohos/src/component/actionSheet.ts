@@ -28,7 +28,8 @@ import { Resource } from "global.resource"
 import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
 import { DialogButtonStyle, BorderStyle } from "./enums"
-import { DialogAlignment, LevelOrder } from "./alertDialog"
+import { DialogAlignment } from "./alertDialog"
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 export class ActionSheet {
     public static show(value: ActionSheetOptions): undefined {
         const value_casted = value as (ActionSheetOptions)
@@ -48,9 +49,56 @@ export interface SheetInfo {
     action: VoidCallback;
 }
 export interface DismissDialogAction {
-    dismiss: (() => void);
+    dismiss(): void;
     reason: DismissReason;
 }
+
+export class DismissDialogActionInternal implements MaterializedBase, DismissDialogAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr?: KPointer) {
+        if (!peerPtr) {
+            peerPtr = ArkUIGeneratedNativeModule._DismissDialogAction_construct()
+        }
+        this.peer = new Finalizable(peerPtr!, DismissDialogActionInternal.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissDialogAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissDialogActionInternal {
+        return new DismissDialogActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as DismissReason
+        this.setReason_serialize(reason_casted)
+    }
+    private dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissDialogAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval = ArkUIGeneratedNativeModule._DismissDialogAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissDialogAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
+}
+
 export interface ActionSheetButtonOptions {
     enabled?: boolean;
     defaultFocus?: boolean;
@@ -61,12 +109,6 @@ export interface ActionSheetButtonOptions {
 export interface ActionSheetOffset {
     dx: number | string | Resource;
     dy: number | string | Resource;
-}
-export interface LevelMode {
-    _LevelModeStub: string;
-}
-export interface ImmersiveMode {
-    _ImmersiveModeStub: string;
 }
 export type Callback_DismissDialogAction_Void = (parameter: DismissDialogAction) => void;
 export interface ActionSheetOptions {
@@ -97,10 +139,10 @@ export interface ActionSheetOptions {
     shadow?: ShadowOptions | ShadowStyle;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
-    onDidAppear?: (() => void);
-    onDidDisappear?: (() => void);
-    onWillAppear?: (() => void);
-    onWillDisappear?: (() => void);
+    onDidAppear?: ((data: undefined) => void);
+    onDidDisappear?: ((data: undefined) => void);
+    onWillAppear?: ((data: undefined) => void);
+    onWillDisappear?: ((data: undefined) => void);
     levelMode?: LevelMode;
     levelUniqueId?: number;
     immersiveMode?: ImmersiveMode;

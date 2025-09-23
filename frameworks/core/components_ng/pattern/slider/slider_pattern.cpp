@@ -177,10 +177,6 @@ void SliderPattern::OnModifyDone()
         pattern->InitEvent();
     };
     context->AddBuildFinishCallBack(callback);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    InitPanEvent(gestureHub);
 }
 
 void SliderPattern::InitEvent()
@@ -194,6 +190,7 @@ void SliderPattern::InitEvent()
     CHECK_NULL_VOID(gestureHub);
     auto inputEventHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
+    InitPanEvent(gestureHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitMouseEvent(inputEventHub);
@@ -454,7 +451,8 @@ void SliderPattern::UpdateParentNodeSize()
         auto pointSize = GetStepPointAccessibilityVirtualNodeSize();
         auto rowWidth = pointSize.Width();
         auto rowHeight = pointSize.Height();
-        if (direction_ == Axis::HORIZONTAL) {
+        auto direction = GetDirection();
+        if (direction == Axis::HORIZONTAL) {
             rowWidth = rowWidth * pointCount;
         } else {
             rowHeight = rowHeight * pointCount;
@@ -717,7 +715,8 @@ SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
     CHECK_NULL_RETURN(geometryNode, SizeF());
     auto& hostContent = geometryNode->GetContent();
     CHECK_NULL_RETURN(hostContent, SizeF());
-    if (direction_ == Axis::HORIZONTAL) {
+    auto direction = GetDirection();
+    if (direction == Axis::HORIZONTAL) {
         pointNodeHeight = hostContent->GetRect().Height();
     } else {
         pointNodeWidth = hostContent->GetRect().Width();
@@ -1153,17 +1152,18 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
+    auto direction = GetDirection();
     if (info.GetInputEventType() == InputEventType::AXIS) {
         auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
         if (info.GetSourceTool() == SourceTool::MOUSE) {
             auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
-            if (direction_ == Axis::HORIZONTAL) {
+            if (direction == Axis::HORIZONTAL) {
                 offset > 0.0 ? MoveStep(1) : MoveStep(-1);
             } else {
                 reverse ? (offset > 0.0 ? MoveStep(1) : MoveStep(-1)) : (offset > 0.0 ? MoveStep(-1) : MoveStep(1));
             }
         } else {
-            auto offset = (direction_ == Axis::HORIZONTAL ? info.GetOffsetX() : info.GetOffsetY()) - axisOffset_;
+            auto offset = (direction == Axis::HORIZONTAL ? info.GetOffsetX() : info.GetOffsetY()) - axisOffset_;
             auto slipfactor = slipfactor_ > 0 ? slipfactor_ : DEFAULT_SLIP_FACTOR;
             if (std::abs(offset) > slipfactor) {
                 auto stepCount = static_cast<int32_t>(offset / slipfactor);
@@ -1601,7 +1601,8 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
         focusRadius = static_cast<float>(paintProperty->GetTrackBorderRadius().value().ConvertToPx()) +
                       static_cast<float>(focusDistance.ConvertToPx());
     }
-    if (direction_ == Axis::HORIZONTAL) {
+    auto direction = GetDirection();
+    if (direction == Axis::HORIZONTAL) {
         if (sliderMode == SliderModel::SliderMode::INSET) {
             offsetX += borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
             width = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
@@ -1656,10 +1657,11 @@ void SliderPattern::PaintFocusState()
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
     auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
+    auto direction = GetDirection();
     if (event.action == KeyAction::DOWN) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider on key event %{public}d", event.code);
-        if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
-            (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        if ((direction == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+            (direction == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
             FireChangeEvent(SliderChangeMode::Begin);
             reverse ? MoveStep(1) : MoveStep(-1);
             FireChangeEvent(SliderChangeMode::End);
@@ -1669,8 +1671,8 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
             PaintFocusState();
             return true;
         }
-        if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
-            (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        if ((direction == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+            (direction == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
             FireChangeEvent(SliderChangeMode::Begin);
             reverse ? MoveStep(-1) : MoveStep(1);
             FireChangeEvent(SliderChangeMode::End);
@@ -1933,10 +1935,10 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     const auto& content = GetHost()->GetGeometryNode()->GetContent();
     CHECK_NULL_RETURN(content, SliderContentModifier::Parameters());
     auto contentOffset = content->GetRect().GetOffset();
+    auto direction = GetDirection();
     // Distance between slide track and Content boundary
-    auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
+    auto centerWidth = direction == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
-
     auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_RETURN(sliderLayoutProperty, SliderContentModifier::Parameters());
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
@@ -1954,31 +1956,31 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     parameters.blockColor = paintProperty->GetBlockColor();
     parameters.blockGradientColor = paintProperty->GetBlockGradientColor();
     UpdateParameters();
-    GetSelectPosition(parameters, centerWidth, contentOffset);
-    GetBackgroundPosition(parameters, centerWidth, contentOffset);
-    GetCirclePosition(parameters, centerWidth, contentOffset);
+    GetSelectPosition(parameters, centerWidth, contentOffset, direction);
+    GetBackgroundPosition(parameters, centerWidth, contentOffset, direction);
+    GetCirclePosition(parameters, centerWidth, contentOffset, direction);
     UpdateCircleCenterOffset();
     return parameters;
 }
 
 void SliderPattern::GetSelectPosition(
-    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction)
 {
     float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
     PointF start;
     PointF end;
     if (!GetReverseValue(GetLayoutProperty<SliderLayoutProperty>())) {
-        start = direction_ == Axis::HORIZONTAL ? PointF(offset.GetX() + borderBlank_, offset.GetY() + centerWidth)
+        start = direction == Axis::HORIZONTAL ? PointF(offset.GetX() + borderBlank_, offset.GetY() + centerWidth)
                                                : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_);
-        end = direction_ == Axis::HORIZONTAL
+        end = direction == Axis::HORIZONTAL
                   ? PointF(offset.GetX() + borderBlank_ + sliderSelectLength, offset.GetY() + centerWidth)
                   : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderSelectLength);
     } else {
-        start = direction_ == Axis::HORIZONTAL
+        start = direction == Axis::HORIZONTAL
                     ? PointF(offset.GetX() + borderBlank_ + sliderLength_, offset.GetY() + centerWidth)
                     : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_);
         end =
-            direction_ == Axis::HORIZONTAL ?
+            direction == Axis::HORIZONTAL ?
                 PointF(offset.GetX() + borderBlank_ + sliderLength_ - sliderSelectLength, offset.GetY() + centerWidth) :
                 PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_ - sliderSelectLength);
     }
@@ -1987,13 +1989,13 @@ void SliderPattern::GetSelectPosition(
 }
 
 void SliderPattern::GetBackgroundPosition(
-    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction)
 {
     auto startPointX = offset.GetX();
     auto startPointY = offset.GetY();
-    auto start = direction_ == Axis::HORIZONTAL ? PointF(startPointX + borderBlank_, startPointY + centerWidth)
+    auto start = direction == Axis::HORIZONTAL ? PointF(startPointX + borderBlank_, startPointY + centerWidth)
                                                 : PointF(startPointX + centerWidth, startPointY + borderBlank_);
-    auto end = direction_ == Axis::HORIZONTAL
+    auto end = direction == Axis::HORIZONTAL
                    ? PointF(startPointX + borderBlank_ + sliderLength_, startPointY + centerWidth)
                    : PointF(startPointX + centerWidth, startPointY + borderBlank_ + sliderLength_);
     parameters.backStart = start;
@@ -2001,17 +2003,17 @@ void SliderPattern::GetBackgroundPosition(
 }
 
 void SliderPattern::GetCirclePosition(
-    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset, Axis direction)
 {
     float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
     PointF center;
     if (!GetReverseValue(GetLayoutProperty<SliderLayoutProperty>())) {
-        center = direction_ == Axis::HORIZONTAL
+        center = direction == Axis::HORIZONTAL
                      ? PointF(offset.GetX() + borderBlank_ + sliderSelectLength, offset.GetY() + centerWidth)
                      : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderSelectLength);
     } else {
         center =
-            direction_ == Axis::HORIZONTAL ?
+            direction == Axis::HORIZONTAL ?
                 PointF(offset.GetX() + borderBlank_ + sliderLength_ - sliderSelectLength, offset.GetY() + centerWidth) :
                 PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_ - sliderSelectLength);
     }
@@ -2128,8 +2130,9 @@ std::pair<OffsetF, float> SliderPattern::GetBubbleVertexPosition(
         return std::pair<OffsetF, float>();
     }
     auto sliderMode = sliderLayoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+    auto direction = GetDirection();
     if (sliderMode == SliderModel::SliderMode::OUTSET) {
-        if (direction_ == Axis::HORIZONTAL) {
+        if (direction == Axis::HORIZONTAL) {
             vertexOffsetFromBlock = blockSize.Height() * HALF + BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
             bubbleVertex.AddY(0 - vertexOffsetFromBlock);
         } else {
@@ -2138,7 +2141,7 @@ std::pair<OffsetF, float> SliderPattern::GetBubbleVertexPosition(
         }
     } else {
         vertexOffsetFromBlock = trackThickness * HALF + BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
-        if (direction_ == Axis::HORIZONTAL) {
+        if (direction == Axis::HORIZONTAL) {
             bubbleVertex.AddY(0 - vertexOffsetFromBlock);
         } else {
             bubbleVertex.AddX(0 - vertexOffsetFromBlock);

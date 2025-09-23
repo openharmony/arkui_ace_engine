@@ -40,14 +40,12 @@
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifdef ACE_STATIC
-#include "core/components_ng/syntax/arkoala_lazy_node.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -965,8 +963,20 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator();
+    }
     if (isBackToTopRunning_) {
-        StopAnimate();
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
+        }
         isBackToTopRunning_ = false;
     }
 }
@@ -1193,11 +1203,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        scrollable->SetIsScrollBarDragging(false);
-        if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        bool userFlingBeforeDrag = scrollable->GetIsUserFling();
+        if (scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
-        if (isWillFling && scrollable->GetOnWillStartFlingCallback()) {
+        if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
             scrollable->HandleScrollBarOnWillStartFling();
         }
     };
@@ -1207,9 +1218,11 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
+        scrollable->SetIsScrollBarDragging(false);
     };
     scrollBar_->SetScrollBarOnDidStopFlingCallback(std::move(scrollBarOnDidStopFlingCallback));
 
@@ -1494,26 +1507,41 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        scrollable->SetIsScrollBarDragging(false);
-        if (scrollable && scrollable->GetOnDidStopDraggingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        bool userFlingBeforeDrag = scrollable->GetIsUserFling();
+        if (scrollable->GetOnDidStopDraggingCallback()) {
             scrollable->HandleScrollBarOnDidStopDragging(isWillFling);
         }
-        if (isWillFling && scrollable->GetOnWillStartFlingCallback()) {
+        if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
             scrollable->HandleScrollBarOnWillStartFling();
         }
+        scrollable->SetIsDragOuterScrollBarStopAnimation(false);
     };
     auto scrollBarOnDidStopFlingCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto scrollable = pattern->GetScrollable();
-        if (scrollable && scrollable->GetOnDidStopFlingCallback()) {
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetOnDidStopFlingCallback()) {
             scrollable->HandleScrollBarOnDidStopFling();
         }
+        scrollable->SetIsScrollBarDragging(false);
     };
+
+    auto preDragStartCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto scrollable = pattern->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetIsUserFling()) {
+            scrollable->SetIsDragOuterScrollBarStopAnimation(true);
+        }
+    };
+
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
         std::move(scrollEndCallback), std::move(startSnapAnimationCallback), std::move(scrollbarFRcallback),
         std::move(scrollPageCallback), std::move(scrollBarOnDidStopDraggingCallback),
-        std::move(scrollBarOnDidStopFlingCallback) };
+        std::move(scrollBarOnDidStopFlingCallback), std::move(preDragStartCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
@@ -1553,6 +1581,9 @@ void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExt
 
 void ScrollablePattern::SetFriction(double friction)
 {
+    auto host = GetHost();
+    // call ScrollPageMultiThread by multi thread
+    FREE_NODE_CHECK(host, SetFriction, friction);
     if (LessOrEqual(friction, 0.0)) {
         friction =
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -1683,6 +1714,9 @@ void ScrollablePattern::StopAnimate()
     }
     if (scrollBar_) {
         scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator();
     }
 }
 
@@ -1863,8 +1897,11 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
         }
-        if ((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) ||
-            (pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta))) {
+        auto totalOffset = pattern->GetTotalOffset();
+        if (((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) &&
+                !GreatNotEqual(totalOffset, pattern->finalPosition_)) ||
+            ((pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta)) &&
+                !LessNotEqual(totalOffset, pattern->finalPosition_))) {
             delta = 0;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {

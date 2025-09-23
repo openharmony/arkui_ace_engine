@@ -168,7 +168,7 @@ HWTEST_F(ArkUIFeatureParamManagerTest, ParseXmlNodeNameWithIndexTest, TestSize.L
 {
     auto featureParser = std::make_unique<ConfigXMLParserBase>();
     xmlNode node;
-    auto ret = featureParser->ParseXmlNodeNameWithIndex(node, 4);
+    auto ret = featureParser->ParseXmlNodeNameWithIndex(node, 5);
     EXPECT_EQ(ret, ParseErrCode::PARSE_SIZE_ERROR);
     featureParser = nullptr;
 }

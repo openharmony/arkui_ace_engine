@@ -441,9 +441,9 @@ HWTEST_F(ScrollPatternThreeTestNg, GetOverScrollOffset_PositiveStart, TestSize.L
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
     ScrollBy(0, -contentOffset * 0.5);
-    EXPECT_EQ(pattern_->currentOffset_, -contentOffset * 0.5);
+    EXPECT_EQ(pattern_->currentOffset_, contentOffset * 0.5);
 
     auto result = pattern_->GetOverScrollOffset(contentOffset);
     EXPECT_DOUBLE_EQ(result.start, contentOffset * 0.5);
@@ -467,7 +467,7 @@ HWTEST_F(ScrollPatternThreeTestNg, GetOverScrollOffset_NegativeStart, TestSize.L
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
     pattern_->currentOffset_ -= contentOffset * 0.5;
     
     // startPos <= 0 && newStartPos > 0
@@ -550,5 +550,38 @@ HWTEST_F(ScrollPatternThreeTestNg, GetOverScrollOffset_ZeroScrollableDistance, T
     auto result = pattern_->GetOverScrollOffset(-5.0);
     EXPECT_DOUBLE_EQ(result.start, 0.0);
     EXPECT_DOUBLE_EQ(result.end, -5.0);
+}
+
+/**
+ * @tc.name: GetContentStartOffsetTest
+ * @tc.desc: test ScrollPattern::GetContentStartOffsetTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, GetContentStartOffsetTest, TestSize.Level1)
+{
+    CreateScroll();
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->GetContentStartOffset(), contentOffset);
+}
+
+/**
+ * @tc.name: GetContentStartOffsetWithInvalidValueTest
+ * @tc.desc: test ScrollPattern::GetContentStartOffsetTest with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, GetContentStartOffsetWithInvalidValueTest, TestSize.Level1)
+{
+    CreateScroll();
+    float contentOffset = HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_FLOAT_EQ(pattern_->GetContentStartOffset(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

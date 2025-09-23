@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
-#include <ani.h>
-
 #include "auto_fill_manager.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "if_system_ability_manager.h"
@@ -54,7 +52,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
@@ -358,14 +356,6 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
         AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
-
-void ReleaseStorageReference(void* sharedRuntime, void* storage)
-{
-    if (sharedRuntime && storage) {
-        auto* env = reinterpret_cast<ani_env*>(sharedRuntime);
-        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
-    }
-}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -654,8 +644,23 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::ARK_TS) {
-        LOGI("Init ARK_TS Frontend");
-        frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+        if (isDynamicRender_) {
+            LOGI("Init Dynamic Renderer ARK_TS Frontend");
+            auto arktsDynamicFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsDynamicFrontend(sharedRuntime_);
+            if (arktsDynamicFrontend == nullptr) {
+                LOGE("Create arktsDynamicFrontend failed.");
+                return;
+            }
+            frontend_ = arktsDynamicFrontend;
+        } else {
+            LOGI("Init ARK_TS Frontend");
+            auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);
+            if (arktsFrontend == nullptr) {
+                LOGE("Create arktsFrontend failed.");
+                return;
+            }
+            frontend_ = arktsFrontend;
+        }
     } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         // initialize after AttachView
         LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
@@ -1533,6 +1538,13 @@ UIContentErrorCode AceContainer::SetViewNew(
 
     if (container->isFormRender_) {
         auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        if (!window->GetRSSurfaceNode()) {
+            TAG_LOGW(AceLogTag::ACE_FORM,
+                "SurfaceNode is null, try to create form render window again, instanceId_:%{public}d.",
+                view->GetInstanceId());
+            window->Destroy();
+            window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        }
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -2463,20 +2475,13 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
         auto sp = frontend.Upgrade();
         auto contextRef = contextWeak.lock();
         if (!sp || !contextRef) {
-            ReleaseStorageReference(sharedRuntime, storage);
+            ArktsFrontendLoader::GetInstance().DeleteAniReference(sharedRuntime, storage);
             return;
         }
-        auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(sp);
-        if (!arktsFrontend) {
-            ReleaseStorageReference(sharedRuntime, storage);
-            return;
-        }
-#ifdef ACE_STATIC
         if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
-            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
+            sp->SetHostContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
         }
-#endif
-        arktsFrontend->RegisterLocalStorage(id, storage);
+        sp->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
 
@@ -2893,6 +2898,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         }
         frontend_->AttachPipelineContext(pipelineContext_);
+        if ((type_ == FrontendType::STATIC_HYBRID_DYNAMIC || type_ == FrontendType::DYNAMIC_HYBRID_STATIC) &&
+            subFrontend_) {
+            subFrontend_->AttachPipelineContext(pipelineContext_);
+        }
     } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
@@ -3487,6 +3496,7 @@ void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 void  AceContainer::OnFrontUpdated(
     const ConfigurationChange& configurationChange, const std::string& configuration)
 {
+    ContainerScope scope(instanceId_);
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
@@ -3553,6 +3563,9 @@ void AceContainer::UpdateConfiguration(
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
     NG::ImageDecoder::ClearPixelMapCache();
+
+    // For arkts 1.2
+    NotifyArkoalaConfigurationChange(configurationChange);
 }
 
 void AceContainer::UpdateConfigurationSyncForAll(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -3701,11 +3714,20 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN(container, nullptr);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, container is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(context, nullptr);
-    auto window = static_cast<FormRenderWindow*>(context->GetWindow());
-    CHECK_NULL_RETURN(window, nullptr);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, context is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
+    auto window = static_cast<FormRenderWindow *>(context->GetWindow());
+    if (!window) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "get surfaceNode failed, window is null, instanceId_:%{public}d", instanceId);
+        return nullptr;
+    }
     return window->GetRSSurfaceNode();
 }
 
@@ -4960,5 +4982,12 @@ UIContentErrorCode AceContainer::RunIntentPage()
     auto front = GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     return front->RunIntentPage();
+}
+
+void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange)
+{
+    auto frontend = GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    frontend->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
 }
 } // namespace OHOS::Ace::Platform

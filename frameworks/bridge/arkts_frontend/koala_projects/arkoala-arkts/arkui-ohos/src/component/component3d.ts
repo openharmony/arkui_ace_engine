@@ -238,7 +238,7 @@ export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Compone
     }
     public customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkComponent3DComponent extends ArkCommonMethodComponent implements Component3DAttribute {
     getPeer(): ArkComponent3DPeer {

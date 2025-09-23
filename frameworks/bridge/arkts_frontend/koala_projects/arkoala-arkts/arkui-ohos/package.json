@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rimraf build && rm -f arktsconfig-unmemoized-merged.json",
     "build:arkui-components": "npm run unmemoize && fast-arktsc --input-files ./arktsconfig-unmemoized-merged.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name arkui-components && ninja ${NINJA_OPTIONS} -f build/build.ninja",
-    "unmemoize": "ets-tsc -b ./tsconfig-unmemoize.json && cp -r ./src/component/arkts ./build/unmemoized/src/component"
+    "unmemoize": "ets-tsc -b ./tsconfig-unmemoize.json && cp -r ./src/stateManagement/tools/arkts ./build/unmemoized/src/stateManagement/tools && cp -r ./src/component/arkts ./build/unmemoized/src/component",
+    "build:m3:inc:ui2abc": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-m3.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-impl/build.ninja -k 1200 && mkdir -p ../build && cp ./build-m3-impl/arkui-m3.abc ../build/arkui.abc"
   }
 }

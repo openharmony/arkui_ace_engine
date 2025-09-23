@@ -154,6 +154,8 @@ public:
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
+    void SetTextAreaScrollBarColor(const Color& value) override;
+    void ResetTextAreaScrollBarColor() override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -303,6 +305,7 @@ public:
     static bool GetSelectAllValue(FrameNode* frameNode);
     static std::string GetInputFilter(FrameNode* frameNode);
     static InputStyle GetInputStyle(FrameNode* frameNode);
+    static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
     static RefPtr<TextFieldControllerBase> GetOrCreateController(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
@@ -355,6 +358,9 @@ public:
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
+    static void SetTextAreaScrollBarColor(FrameNode* frameNode, const Color& value);
+    static Color GetTextAreaScrollBarColor(FrameNode* frameNode);
+    static void ResetTextAreaScrollBarColor(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

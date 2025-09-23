@@ -839,6 +839,7 @@ public:
         return magnifierController_;
     }
 
+    void StyledStringRegisterResource();
     void UnRegisterResource(const std::string& key) override;
     void EmplaceSymbolColorIndex(int32_t index)
     {
@@ -922,6 +923,7 @@ public:
     }
 
     void UpdateStyledStringByColorMode();
+    virtual void MarkContentNodeForRender() {};
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -1033,6 +1035,7 @@ protected:
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+    void SetImageNodePattern(RefPtr<ImageSpanNode> imageNode, const ImageSpanAttribute& imageSpanAttr);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     void ShowAIEntityPreviewMenuTimer();

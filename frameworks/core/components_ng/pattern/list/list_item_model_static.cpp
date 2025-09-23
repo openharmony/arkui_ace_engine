@@ -76,6 +76,10 @@ void ListItemModelStatic::SetSelectable(FrameNode* frameNode, bool selectable)
 
 void ListItemModelStatic::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListItemStyle(style.value_or(V2::ListItemStyle::NONE));
 }
 
 void ListItemModelStatic::SetSelected(FrameNode* frameNode, bool selected)

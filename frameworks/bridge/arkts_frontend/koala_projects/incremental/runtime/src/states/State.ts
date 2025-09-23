@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, markableQueue, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
+import { Array_from_set, className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, markableQueue, Observable, ObservableHandler, refEqual, uint32, Utils } from "@koalaui/common"
 import { Dependencies, Dependency } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
+import { GlobalStateManager } from "./GlobalStateManager"
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
 export const CONTEXT_ROOT_NODE = "ohos.koala.context.root.node"
@@ -52,6 +53,10 @@ export interface StateManager extends StateContext {
     callCallbacks(): void
     frozen: boolean
     reset(): void
+    contextData: object | undefined
+    isDebugMode: boolean
+    setThreadChecker(callback: () => boolean): void;
+    _isNeedCreate: boolean
 }
 
 /**
@@ -110,6 +115,11 @@ export interface ComputableState<Value> extends Disposable, State<Value> {
      * If value will be recomputed on access.
      */
     readonly recomputeNeeded: boolean
+
+    /**
+      * force a complete rerender / update by executing all update functions
+      */
+    forceCompleteRerender(): void
 }
 
 /**
@@ -139,6 +149,9 @@ export interface StateContext {
         reuseKey?: string
     ): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
+    merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
+    terminate<Value>(rootScope: ComputableState<Value>): void
 }
 
 /**
@@ -196,6 +209,7 @@ interface ManagedState extends Disposable {
 }
 
 interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
+    forceCompleteRerender(): void
     hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
     readonly node: IncrementalNode | undefined
@@ -233,18 +247,19 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
      *              Scope     Node
      */
     invalidateOnReuse(): void
+    getCascadeParent(): ManagedScope | undefined
 }
 
-class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
-    protected manager: StateManagerImpl | undefined = undefined
-    private dependencies: Dependencies | undefined = undefined
+export class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
+    protected manager: StateManagerImpl | undefined
+    public dependencies: Dependencies | undefined
     protected snapshot: Value
     protected myModified = false
     protected myUpdated = true
     private readonly myGlobal: boolean
-    protected equivalent: Equivalent<Value> | undefined = undefined
-    private tracker: ValueTracker<Value> | undefined = undefined
-    private name: string | undefined = undefined
+    protected equivalent: Equivalent<Value> | undefined
+    private tracker: ValueTracker<Value> | undefined
+    private name: string | undefined
 
     /**
      * @param manager - current state manager to register with
@@ -278,6 +293,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     get value(): Value {
         this.onAccess()
         const manager = this.manager
+        this.checkUIThreadAccess()
         return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
     }
 
@@ -310,7 +326,8 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     }
 
     checkSetProhibited() {
-        if (this.dependencies?.empty != false) return // no dependencies
+        if (this.dependencies?.empty) return // no dependencies
+        this.manager?.checkThread();
         const scope = this.manager?.current
         if (scope === undefined) return // outside the incremental update
         if (scope?.node === undefined && scope?.parent === undefined) return // during animation
@@ -368,6 +385,16 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
         if (this.manager?.frozen == true) str += ",frozen"
         return str + "=" + this.value
     }
+
+    checkUIThreadAccess(): void {
+        const manager = this.manager
+        if (manager && manager.isDebugMode) {
+            const local = GlobalStateManager.GetLocalManager();
+            if (manager !== local) {
+                throw new Error('prohibited to access state from non-UI thread');
+            }
+        }
+    }
 }
 
 class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<Item> {
@@ -393,20 +420,20 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
     }
 
     set length(value: number) {
-        this.mutable.length = value
+        this.mutable.length = value.toInt()
     }
 
     at(index: number): Item {
         const array = this.value
-        return array[index < 0 ? array.length + index : index]
+        return array[(index < 0 ? array.length + index : index) as int32]
     }
 
     get(index: number): Item {
-        return this.value[index]
+        return this.value[index as int32]
     }
 
     set(index: number, item: Item): void {
-        this.mutable[index] = item
+        this.mutable[index as int32] = item
     }
 
     copyWithin(target: number, start: number, end?: number): Array<Item> {
@@ -439,7 +466,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
 
     splice(start: number, deleteCount: number | undefined, ...items: Item[]): Array<Item> {
         const array = this.mutable
-        return array.splice(start, deleteCount ?? array.length, ...items)
+        return array.splice(start, deleteCount ?? array.length.toDouble(), ...items)
     }
 
     unshift(...items: Item[]): number {
@@ -496,8 +523,8 @@ class ParameterImpl<Value> implements MutableState<Value> {
     update(value: Value, equivalent?: Equivalent<Value>): void {
         const isModified = ObservableHandler.dropModified(this._value)
         if (!refEqual<Value>(this._value, value)) {
-            this._value = value
             this._modified = isModified || (equivalent?.(this._value, value) != true)
+            this._value = value
         } else {
             this._modified = isModified
         }
@@ -534,8 +561,14 @@ export class StateManagerImpl implements StateManager {
     external: Dependency | undefined = undefined
     updateNeeded = false
     frozen: boolean = false
+    contextData: object | undefined = undefined;
     private readonly callbacks = markableQueue()
     readonly journal = new Journal()
+    isDebugMode: boolean = false
+    private threadCheckerCallback?: () => boolean
+    private childManager: Array<StateManagerImpl> = new Array<StateManagerImpl>()
+    private parentManager: StateManagerImpl | undefined = undefined
+    _isNeedCreate: boolean
 
     constructor() {
     }
@@ -562,6 +595,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     syncChanges(): void {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.syncChanges()
+        })
         this.journal.setMarker()
     }
 
@@ -570,6 +606,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     updateSnapshot(): uint32 {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.updateSnapshot()
+        })
         KoalaProfiler.counters?.updateSnapshotEnter()
         this.checkForStateComputing()
         // optimization: all states are valid and not modified
@@ -616,8 +655,10 @@ export class StateManagerImpl implements StateManager {
         scope.node = node
         scope.nodeRef = node
         scope.dependencies = new Dependencies()
+        this.current = scope // to attach named states to this scope
         scope.setNamedState(CONTEXT_ROOT_SCOPE, new StateImpl<ScopeImpl<Node>>(this, scope, false))
         scope.setNamedState(CONTEXT_ROOT_NODE, new StateImpl<Node>(this, node, false))
+        this.current = undefined
         return scope
     }
 
@@ -790,6 +831,83 @@ export class StateManagerImpl implements StateManager {
         const scope = this.current
         if (scope) throw new Error("prohibited when computing scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
     }
+
+    setThreadChecker(callback: () => boolean): void {
+        this.threadCheckerCallback = callback;
+    }
+
+    checkThread(): void {
+        if (this.isDebugMode) {
+            let isUIThread = this.threadCheckerCallback!()
+            if (isUIThread !== true) {
+                throw new Error("prohibited to modify a state when not in UI thread");
+            }
+        }
+    }
+
+    addChild(child: StateManagerImpl) {
+        this.childManager.push(child)
+    }
+
+    removeChild(child: StateManagerImpl) {
+        this.childManager = this.childManager.filter(item => item !== child)
+    }
+
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext {
+        let context = new StateManagerImpl();
+        context.parentManager = this
+        context.contextData = this.contextData
+        const task = () => {
+            Utils.traceBegin(`Do parallel task`);
+            const old = GlobalStateManager.GetLocalManager();
+            GlobalStateManager.SetLocalManager(context);
+            builder(context);
+            GlobalStateManager.SetLocalManager(old);
+            context.current = undefined
+            if (complete) {
+                complete();
+            }
+            Utils.traceEnd();
+            return undefined
+        }
+        //@ts-ignore
+        taskpool.execute(task).then(() => { }).catch((err: Error) => {
+            console.error('parallel run in taskpool error :', err);
+            console.error(err.stack);
+        })
+        return context;
+    }
+
+    merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
+        const mainContext = main as StateManagerImpl
+        Utils.traceBegin(`merge`)
+        mainContext.childManager.push(this)
+        const current = rootScope as ScopeImpl<Value>
+        const scope = main!.scope<void>(0, 1, () => {
+            return current.nodeRef!
+        }) as ScopeImpl<void>
+        compute()
+        if (scope.unchanged) {
+            scope.cached
+            Utils.traceEnd()
+            return
+        }
+        current.cascadeParent = scope
+        scope.recache()
+        Utils.traceEnd()
+    }
+
+    terminate<Value>(rootScope: ComputableState<Value>): void {
+        Utils.traceBegin(`sub manager terminate`)
+        const root = rootScope as ScopeImpl<Value>
+        const cascadeScope = root.cascadeParent as ScopeImpl<void>
+        cascadeScope.node = undefined
+        cascadeScope.nodeRef = undefined
+        root.dispose();
+        this.parentManager?.removeChild(this);
+        this.parentManager = undefined;
+        Utils.traceEnd()
+    }
 }
 
 class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, ComputableState<Value> {
@@ -820,6 +938,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     private _nodeRef: IncrementalNode | undefined = undefined
     private readonly _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
     nodeCount: uint32 = 0
+    cascadeParent: ManagedScope | undefined = undefined
 
     constructor(id: KoalaCallsiteKey, paramCount: int32, compute?: () => Value, cleanup?: (value: Value | undefined) => void, reuseKey?: string) {
         this._id = id // special type to distinguish scopes
@@ -891,6 +1010,15 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (child?.once)
                 continue
             child?.invalidateOnReuse()
+        }
+    }
+
+    forceCompleteRerender(): void {
+        this.recomputeNeeded = true
+        for (let child = this.child; child; child = child?.next) {
+            if (child?.once)
+                continue
+            child?.forceCompleteRerender()
         }
     }
 
@@ -1049,15 +1177,20 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         const current = this.manager?.current // parameters can update snapshot during recomposition
         let scope: ManagedScope = this
         while (true) { // fix optimization: !scope.myRecomputeNeeded
-            if (scope === current) break // parameters should not invalidate whole hierarchy
+            if (scope === current) {
+                scope.getCascadeParent()?.invalidate();
+                break // parameters should not invalidate whole hierarchy
+            }
             if (!scope.recomputeNeeded) KoalaProfiler.counters?.invalidation()
             scope.recomputeNeeded = true
             const parent = scope.parent
             if (parent) {
                 // TODO/DEBUG: investigate a case when invalid node has valid parent
                 // Button.IsHovered does not work properly with the optimization above
+                // if (this.myRecomputeNeeded && !parent.myRecomputeNeeded) console.log("parent of invalid scope is valid unexpectedly")
                 scope = parent
             } else {
+                scope.getCascadeParent()?.invalidate();
                 // mark top-level computable state as dirty if it has dependencies.
                 // they will be recomputed during the snapshot updating.
                 // we do not recompute other computable states and updatable nodes.
@@ -1067,6 +1200,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
                 break
             }
         }
+    }
+
+    getCascadeParent(): ManagedScope | undefined {
+        return this.cascadeParent
     }
 
     private recycleOrDispose(child: ManagedScope): void {

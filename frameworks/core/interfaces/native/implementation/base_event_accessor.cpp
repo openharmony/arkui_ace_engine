@@ -71,7 +71,7 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
+    return Converter::ArkValue<Ark_Int64>(tstamp);
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
                       Ark_Int64 timestamp)
@@ -102,42 +102,48 @@ Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetHorizontalAxis();
+    float value = peer->GetBaseInfo()->GetHorizontalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)
 {
-    LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisHorizontal);
+    peer->GetBaseInfo()->SetHorizontalAxis(Converter::Convert<float>(*axisHorizontal));
 }
 Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetVerticalAxis();
+    float value = peer->GetBaseInfo()->GetVerticalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
 {
-    LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisVertical);
+    peer->GetBaseInfo()->SetVerticalAxis(Converter::Convert<float>(*axisVertical));
 }
 Opt_Number GetAxisPinchImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetPinchAxisScale();
+    float value = peer->GetBaseInfo()->GetPinchAxisScale();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisPinchImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisPinch)
 {
-    LOGE("BaseEventAccessor.SetAxisPinchImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisPinch);
+    peer->GetBaseInfo()->SetPinchAxisScale(Converter::Convert<float>(*axisPinch));
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetForce()));
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetBaseInfo()->GetForce()));
 }
 void SetPressureImpl(Ark_BaseEvent peer,
                      const Ark_Number* pressure)
@@ -176,15 +182,14 @@ Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    if (peer->GetBaseInfo()->GetRollAngle() == std::nullopt) {
-        return invalid;
-    }
-    float value = peer->GetBaseInfo()->GetRollAngle().value_or(0.0f);
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Number>(peer->GetBaseInfo()->GetRollAngle());
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
                       const Ark_Number* rollAngle)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(rollAngle);
+    peer->GetBaseInfo()->SetRollAngle(Converter::Convert<float>(*rollAngle));
 }
 Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {

@@ -62,7 +62,7 @@ export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkContainerSpanComponent extends ComponentBase implements ContainerSpanAttribute {
     getPeer(): ArkContainerSpanPeer {

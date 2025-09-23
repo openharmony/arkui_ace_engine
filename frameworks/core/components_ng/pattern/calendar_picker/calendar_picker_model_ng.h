@@ -86,7 +86,7 @@ public:
 private:
     static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
     static std::string AddLeadingZeroToYear(uint32_t year);
-    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

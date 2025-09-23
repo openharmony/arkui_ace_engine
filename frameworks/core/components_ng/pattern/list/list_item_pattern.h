@@ -212,10 +212,13 @@ public:
     }
 
     void SetListItemStyle(V2::ListItemStyle style);
+    void SetListItemStyleMultiThread(V2::ListItemStyle style);
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+    void CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback);
+	
     void ExpandSwipeAction(ListItemSwipeActionDirection direction);
     void ExpandSwipeActionWithAnimate(ListItemSwipeIndex index);
 

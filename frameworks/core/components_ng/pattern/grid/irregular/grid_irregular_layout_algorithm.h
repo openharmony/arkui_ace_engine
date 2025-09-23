@@ -110,7 +110,7 @@ private:
     // ========================================== MeasureOnJump functions =====================================
 
     void MeasureOnJump(float mainSize);
-    void Jump(float mainSize);
+    void Jump(float mainSize, bool considerContentOffset = false);
 
     /**
      * @brief Find the line the jumpIdx item resides in. If not in matrix, fill the matrix up to [jumpIdx].

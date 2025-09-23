@@ -792,7 +792,6 @@ HWTEST_F(MenuItemModelStaticTestNg, SetOnChange001, TestSize.Level1)
     * @tc.steps: step2. set MenuItem onChange event
     */
     MenuItemModelStatic::SetOnChange(node, [](bool param) {
-
     });
     /**
      * @tc.steps: step3. do assert

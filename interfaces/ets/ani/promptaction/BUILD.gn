@@ -17,11 +17,16 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 #构建ANI库
 ohos_shared_library("promptAction_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [
+    "./src/dialog_params.cpp",
     "./src/promptAction.cpp",
-    "./src/promptActionUtils.cpp",
+    "./src/prompt_action_controller.cpp",
+    "./src/prompt_action_params.cpp",
+    "./src/prompt_action_utils.cpp",
+    "./src/toast_params.cpp",
   ]
   external_deps = [
     #"runtime_core:libarkruntime",

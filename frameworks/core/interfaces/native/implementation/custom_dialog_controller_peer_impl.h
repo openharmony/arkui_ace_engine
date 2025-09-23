@@ -23,14 +23,14 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CustomDialogControllerPeerImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType);
+    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType)
 public:
     CustomDialogControllerPeerImpl() = default;
     ~CustomDialogControllerPeerImpl() override = default;
 
     void SetOwnerView(Ark_NativePointer node);
-    void SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node);
-    void SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node);
+    void SetBuilder(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnCancel(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetAutoCancel(Opt_Boolean autoCancel);
     void SetDialogAlignment(Opt_DialogAlignment alignment);
     void SetOffset(Opt_Offset offset);
@@ -55,6 +55,18 @@ public:
     void SetKeyboardAvoidMode(Opt_KeyboardAvoidMode keyboardAvoidMode);
     void SetEnableHoverMode(Opt_Boolean enableHoverMode);
     void SetHoverModeArea(Opt_HoverModeAreaType hoverModeArea);
+    void SetBackgroundBlurStyleOptions(Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions);
+    void SetBackgroundEffect(Opt_BackgroundEffectOptions backgroundEffect);
+    void SetOnDidAppear(Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnDidDisappear(Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnWillAppear(Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnWillDisappear(Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
+    void SetLevelMode(Opt_LevelMode levelMode);
+    void SetLevelUniqueId(Opt_Number levelUniqueId);
+    void SetImersiveMode(Opt_ImmersiveMode immersiveMode);
+    void SetLevelOrder(Opt_LevelOrder levelOrder);
+    void SetFocusable(Opt_Boolean focusable);
 
     DialogProperties GetDialogProperties() const;
 
@@ -66,13 +78,19 @@ public:
         instanceId_ = id;
     }
 
+    WeakPtr<FrameNode> GetOwnerViewNode()
+    {
+        return ownerView_;
+    }
 private:
     RefPtr<UINode> GetWindowScene() const;
+    std::function<void()> TransformCallbackToFunctionVoid(
+        Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer);
 
     WeakPtr<FrameNode> ownerView_;
     DialogProperties dialogProperties_;
     std::vector<WeakPtr<AceType>> dialogs_;
-    std::function<RefPtr<UINode>()> builder_;
+    std::function<void()> builder_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier

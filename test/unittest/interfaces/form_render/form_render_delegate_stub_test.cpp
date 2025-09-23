@@ -19,8 +19,8 @@
 #include "appexecfwk_errors.h"
 #include "form_mgr_errors.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_stub.h"
-#include "test/mock/interfaces/mock_form_render_delegate_stub.h"
-#include "test/mock/interfaces/mock_i_remote_object_form.h"
+#include "test/unittest/interfaces/form_render/mock/mock_form_render_delegate_stub.h"
+#include "test/unittest/interfaces/form_render/mock/mock_i_remote_object_form.h"
 
 using namespace testing;
 using namespace testing::ext;

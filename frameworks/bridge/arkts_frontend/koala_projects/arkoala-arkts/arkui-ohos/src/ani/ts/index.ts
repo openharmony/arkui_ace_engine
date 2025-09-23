@@ -29,3 +29,17 @@ export class ArkUIAniUIExtensionOptions {
 
 export type ResultCallback = any
 export type BusinessError = any
+
+// DC
+export const ArkUIAniDynamicModal: any = undefined
+export class ArkUIAniDynamicOptions {
+    constructor() {
+        this.entryPoint = '';
+        this.workerId = 0;
+        this.backgroundTransparent = false;
+    }
+
+    entryPoint: string;
+    workerId: any;
+    backgroundTransparent: boolean;
+}

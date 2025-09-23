@@ -50,6 +50,9 @@ private:
     static ani_status SetOnRelease(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
+    static ani_status SetOnDrawReady(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
     // UiExtensionProxy
     static ani_status SendData(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

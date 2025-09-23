@@ -76,6 +76,7 @@ void XComponentPatternV2::OnAttachToFrameNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, InitSurface, host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 

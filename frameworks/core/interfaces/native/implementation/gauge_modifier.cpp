@@ -22,6 +22,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DEFAULT_GAUGE_VALUE = 0;
+constexpr double DEFAULT_GAUGE_MIN = 0;
+constexpr double DEFAULT_GAUGE_MAX = 100;
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -124,6 +127,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     // auto frameNode = GaugeModelNG::CreateFrameNode(id);
     // CHECK_NULL_RETURN(frameNode, nullptr);
     // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
     return {};
 }
 } // GaugeModifier
@@ -136,12 +140,21 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto min = Converter::OptConvert<float>(options->min);
     auto max = Converter::OptConvert<float>(options->max);
-    if (min && max && LessNotEqual(*max, *min)) {
-        min.reset();
-        max.reset();
+    if (!min) {
+        min = DEFAULT_GAUGE_MIN;
+    }
+    if (!max) {
+        max = DEFAULT_GAUGE_MAX;
+    }
+    if (LessNotEqual(*max, *min)) {
+        min = DEFAULT_GAUGE_MIN;
+        max = DEFAULT_GAUGE_MAX;
     }
     auto value = Converter::OptConvert<float>(options->value);
-    if (value && ((min && LessNotEqual(*value, *min)) || (max && GreatNotEqual(*value, *max)))) {
+    if (!value) {
+        value = DEFAULT_GAUGE_VALUE;
+    }
+    if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
         value = min;
     }
     GaugeModelStatic::SetValue(frameNode, value);
@@ -156,7 +169,12 @@ void ValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GaugeModelStatic::SetValue(frameNode, Converter::OptConvert<float>(*value));
+    auto convValue = Converter::OptConvert<float>(*value);
+    if (!convValue) {
+        GaugeModelNG::SetValue(frameNode, DEFAULT_GAUGE_VALUE);
+        return;
+    }
+    GaugeModelStatic::SetValue(frameNode, convValue);
 }
 void StartAngleImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -243,16 +261,16 @@ void StrokeWidthImpl(Ark_NativePointer node,
 void DescriptionImpl(Ark_NativePointer node,
                      const Opt_CustomNodeBuilder* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optValue = Converter::GetOptPtr(value);
-    // if (!optValue) {
-    //     // TODO: Reset value
-    //     return;
-    // }
-    // CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-    //     GaugeModelNG::SetDescription(frameNode, uiNode);
-    //     }, node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        GaugeModelStatic::SetDescription(frameNode, uiNode);
+        }, node);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Opt_GaugeShadowOptions* value)
@@ -260,8 +278,9 @@ void TrackShadowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
-    auto shadow = convValue.value_or(GaugeShadowOptions());
-    shadow.isShadowVisible = false;
+    GaugeShadowOptions defaultOptions;
+    defaultOptions.isShadowVisible = false;
+    auto shadow = convValue.value_or(defaultOptions);
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 void IndicatorImpl(Ark_NativePointer node,
@@ -298,6 +317,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()

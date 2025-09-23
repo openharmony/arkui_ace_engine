@@ -24,11 +24,10 @@
 #endif // XCOMPONENT_SUPPORTED
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
-struct XComponentControllerPeerImpl : public OHOS::Ace::Referenced {
+struct XComponentControllerPeerImpl : public Referenced {
 #ifdef XCOMPONENT_SUPPORTED
-    void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+        const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     std::shared_ptr<XComponentControllerNG> controller;
     void SetOnSurfaceCreatedEvent(const Callback_String_Void& callback);
     void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
@@ -47,4 +46,8 @@ private:
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct XComponentControllerPeer : public OHOS::Ace::NG::GeneratedModifier::XComponentControllerPeerImpl {
+};
+
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H

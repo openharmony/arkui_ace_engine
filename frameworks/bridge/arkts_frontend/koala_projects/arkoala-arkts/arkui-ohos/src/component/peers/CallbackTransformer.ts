@@ -13,53 +13,45 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import { PeerNode } from "../../PeerNode"
+import { KPointer, nullptr } from "@koalaui/interop"
+import { IncrementalNode } from "@koalaui/runtime"
 import { CustomBuilder } from "../common"
 import { CustomNodeBuilder } from "../customBuilder"
-import { ArkComponentRootPeer } from "../staticComponents"
-
-// TODO need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
-export type UIDetachedRootCreator = (
-    peerFactory: () => PeerNode,
-    /** @memo */
-    builder: () => void
-) => PeerNode
-
-function createUiDetachedRootStub(
-    factory: () => PeerNode,
-    /** @memo */
-    builder: () => void
-): PeerNode {
-    throw new Error("Not implemented")
-}
-
-let createUiDetachedRoot: UIDetachedRootCreator = createUiDetachedRootStub
-
-export function setUIDetachedRootCreator(creator: UIDetachedRootCreator): void {
-    createUiDetachedRoot = creator
-}
-
-function componentRootPeerFactory(): PeerNode {
-    return ArkComponentRootPeer.create(undefined)
-}
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
+import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
+import { ObserveSingleton } from "../../stateManagement/base/observeSingleton"
+import { ExtendableComponent } from "@component_handwritten/extendableComponent"
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        let currentExtendableComponent = ExtendableComponent.current;
         return (parentNodeId: KPointer): KPointer => {
-            const peer = createUiDetachedRoot(componentRootPeerFactory, value)
-            return peer.peer.ptr
+            let lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            let lastExtendableComponent = ExtendableComponent.current;
+            ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+            ExtendableComponent.current = currentExtendableComponent;
+            try {
+                const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(() => new IncrementalNode(), value)
+                return peer ? peer.peer.ptr : nullptr;
+            } finally {
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
+            }
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
         throw new Error("Not implemented")
     }
-    static transformToCallbackVoid(value: (data: undefined) => void): (() => void) {
+
+    static transfromToCallbackVoid(value: (data: undefined) => void): (() => void) {
         return () => {
             return value(undefined)
         }
     }
-    static transformFromCallbackVoid(value: () => void): ((data: undefined) => void) {
+
+    static transfromFromCallbackVoid(value: () => void): ((data: undefined) => void) {
         return (data: undefined) => {
             return value()
         }

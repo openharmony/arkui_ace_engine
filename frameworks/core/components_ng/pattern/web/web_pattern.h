@@ -908,7 +908,8 @@ public:
     }
 
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
-    void RemoveSnapshotFrameNode();
+    void RemoveSnapshotFrameNode(bool isAnimate = false);
+    void RealRemoveSnapshotFrameNode();
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
@@ -1327,6 +1328,7 @@ private:
     WebElementType curElementType_ = WebElementType::NONE;
     ResponseType curResponseType_ = ResponseType::LONG_PRESS;
     bool curContextMenuResult_ = false;
+    bool isSnapshotImageAnimating_ = false;
 
     bool isWindowShow_ = true;
     bool isActive_ = true;

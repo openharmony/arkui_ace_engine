@@ -140,7 +140,11 @@ void CustomDialogControllerModelStatic::SetOpenDialog(
     dialogProperties.onStatusChanged = [](bool) {};
     const auto buildFunc = [func = std::move(builder)]() {
         const auto node = func();
-        NG::ViewStackProcessor::GetInstance()->Push(node);
+        if (node) {
+            NG::ViewStackProcessor::GetInstance()->Push(node);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog build node is null.");
+        }
     };
 
     auto executor = context->GetTaskExecutor();

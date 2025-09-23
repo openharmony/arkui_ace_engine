@@ -21,7 +21,8 @@ import { unsafeCast } from "@koalaui/common"
 
 export class ComponentBase {
     protected peer?: PeerNode
-    protected isFirstBuild: boolean = true
+    public isFirstBuild: boolean = true
+    public isFirstRender: boolean = true
     protected gestureEvent: UIGestureEvent | undefined = undefined
     setPeer(peer: PeerNode) {
         this.peer = peer
@@ -34,6 +35,9 @@ export class ComponentBase {
     }
     public applyAttributesFinish(): void {
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
+        if (this.isFirstRender) {
+            this.isFirstRender = false;
+        }
     }
     public applyAttributes(attrs: Object): void {
         this.applyAttributesFinish()

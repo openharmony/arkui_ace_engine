@@ -19,7 +19,9 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
+#include "arkoala_api_generated.h"
 #include "converter.h"
 #include "converter2.h"
 #include "reverse_converter.h"
@@ -300,6 +302,7 @@ void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
         case ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
         case ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
         case ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::BOTTOM_END; break;
+        case ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
         default: LOGE("Unexpected enum value in Ark_ImageFit: %{public}d", src);
     }
 }
@@ -569,11 +572,47 @@ template<>
 void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src)
 {
     switch (src) {
-        case ARK_DRAG_PREVIEW_MODE_AUTO: dst = DragPreviewMode::AUTO; break;
-        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE: dst = DragPreviewMode::DISABLE_SCALE; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW: dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS: dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS; break;
-        default: LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
+        case ARK_DRAG_PREVIEW_MODE_AUTO:
+            dst = DragPreviewMode::AUTO;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE:
+            dst = DragPreviewMode::DISABLE_SCALE;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW:
+            dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS:
+            dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DRAG_ITEM_GRAY_EFFECT:
+            dst = DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_MULTI_TILE_EFFECT:
+            dst = DragPreviewMode::ENABLE_MULTI_TILE_EFFECT;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
+            dst = DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src)
+{
+    switch (src) {
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_DEFAULT:
+            dst = DraggingSizeChangeEffect::DEFAULT;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_TRANSITION;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_CONTENT_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DraggingSizeChangeEffect: %{public}d", src);
     }
 }
 
@@ -740,6 +779,16 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
         case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CancelButtonStyle::INVISIBLE; break;
         case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CancelButtonStyle::INPUT; break;
         default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = Ace::CanvasUnit::DEFAULT ; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = Ace::CanvasUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
     }
 }
 
@@ -1064,15 +1113,15 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
     }
 }
 
-// template<>
-// void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
-// {
-//     switch (src) {
-//         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
-//         case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
-//         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
-//     }
-// }
+template<>
+void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
+{
+    switch (src) {
+        case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
+        case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
+        default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
+    }
+}
 
 template<>
 void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
@@ -1478,6 +1527,16 @@ void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& sr
 }
 
 template<>
+void AssignCast(std::optional<BlurOnKeyboardHideMode>& dst, const Ark_BlurOnKeyboardHideMode& src)
+{
+    switch (src) {
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_SILENT: dst = BlurOnKeyboardHideMode::SILENT; break;
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_BLUR: dst = BlurOnKeyboardHideMode::BLUR; break;
+        default: LOGE("Unexpected enum value in Ark_BlurOnKeyboardHideMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
 {
     switch (src) {
@@ -1663,6 +1722,7 @@ template<>
 void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 {
     switch (src) {
+        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
         case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
         case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
         case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;
@@ -2180,7 +2240,7 @@ void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& value)
     switch (value) {
         case ARK_LAUNCH_MODE_STANDARD: dst = LaunchMode::STANDARD; break;
         case ARK_LAUNCH_MODE_MOVE_TO_TOP_SINGLETON: dst = LaunchMode::MOVE_TO_TOP_SINGLETON; break;
-        // case ARK_LAUNCH_MODE_POP_TO_SINGLETON: dst = LaunchMode::POP_TO_SINGLETON; break;
+        case ARK_LAUNCH_MODE_POP_TO_SINGLETON: dst = LaunchMode::POP_TO_SINGLETON; break;
         case ARK_LAUNCH_MODE_NEW_INSTANCE: dst = LaunchMode::NEW_INSTANCE; break;
         default: {
             LOGE("Unexpected enum value in Ark_LaunchMode: %{public}d", value);
@@ -2195,6 +2255,8 @@ void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
         case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
         case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
         case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        case ARK_SOURCE_TYPE_KEYBOARD: dst = SourceType::KEYBOARD; break;
+        case ARK_SOURCE_TYPE_JOYSTICK: dst = SourceType::JOYSTICK; break;
         default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
     }
 }
@@ -2227,6 +2289,122 @@ void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedback
             LOGE("Unexpected enum value in Ark_HapticFeedbackMode: %{public}d", src);
             dst = std::nullopt;
         }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
+{
+    switch (src) {
+        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU: dst = DividerMode::FLOATING_ABOVE_MENU; break;
+        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU: dst = DividerMode::EMBEDDED_IN_MENU; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DividerMode: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
+{
+    switch (src) {
+        case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
+        case ARK_LEVEL_MODE_EMBEDDED: dst = LevelMode::EMBEDDED; break;
+        default: LOGE("Unexpected enum value in Ark_LevelMode: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
+{
+    switch (src) {
+        case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
+        case ARK_IMMERSIVE_MODE_EXTEND: dst = ImmersiveMode::EXTEND; break;
+        default: LOGE("Unexpected enum value in Ark_ImmersiveMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_TYPE_POINT: dst = ParticleType::POINT; break;
+        case ARK_PARTICLE_TYPE_IMAGE: dst = ParticleType::IMAGE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleEmitterShape>& dst, const Ark_ParticleEmitterShape& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_EMITTER_SHAPE_RECTANGLE: dst = ParticleEmitterShape::RECTANGLE; break;
+        case ARK_PARTICLE_EMITTER_SHAPE_CIRCLE: dst = ParticleEmitterShape::CIRCLE; break;
+        case ARK_PARTICLE_EMITTER_SHAPE_ELLIPSE: dst = ParticleEmitterShape::ELLIPSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleEmitterShape: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DistributionType>& dst, const Ark_DistributionType& src)
+{
+    switch (src) {
+        case ARK_DISTRIBUTION_TYPE_UNIFORM: dst = DistributionType::UNIFORM; break;
+        case ARK_DISTRIBUTION_TYPE_GAUSSIAN: dst = DistributionType::GAUSSIAN; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DistributionType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_UPDATER_NONE: dst = UpdaterType::NONE_UPDATER; break;
+        case ARK_PARTICLE_UPDATER_RANDOM: dst = UpdaterType::RANDOM; break;
+        case ARK_PARTICLE_UPDATER_CURVE: dst = UpdaterType::CURVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleUpdater: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src)
+{
+    switch (src) {
+        case ARK_DISTURBANCE_FIELD_SHAPE_RECT: dst = ParticleDisturbanceShapeType::RECT; break;
+        case ARK_DISTURBANCE_FIELD_SHAPE_CIRCLE: dst = ParticleDisturbanceShapeType::CIRCLE; break;
+        case ARK_DISTURBANCE_FIELD_SHAPE_ELLIPSE: dst = ParticleDisturbanceShapeType::ELLIPSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DisturbanceFieldShape: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+{
+    switch (src) {
+        case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;
+        case ARK_DATE_PICKER_MODE_YEAR_AND_MONTH: dst = DatePickerMode::YEAR_AND_MONTH; break;
+        case ARK_DATE_PICKER_MODE_MONTH_AND_DAY: dst = DatePickerMode::MONTH_AND_DAY; break;
+        default: LOGE("Unexpected enum value in Ark_DatePickerMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src)
+{
+    switch (src) {
+        case ARK_EFFECT_TYPE_DEFAULT: dst = EffectType::DEFAULT; break;
+        case ARK_EFFECT_TYPE_WINDOW_EFFECT: dst = EffectType::WINDOW_EFFECT; break;
+        default: LOGE("Unexpected enum value in Ark_EffectType: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

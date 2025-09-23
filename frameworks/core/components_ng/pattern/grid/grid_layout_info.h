@@ -303,6 +303,7 @@ struct GridLayoutInfo {
      */
     float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
     void SkipStartIndexByOffset(const GridLayoutOptions& options, float mainGap);
+    void SkipRegularLines(bool forward, float mainGap, float averageHeight);
     float GetCurrentLineHeight() const;
 
     /**
@@ -448,6 +449,7 @@ private:
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
     void GetLineHeights(
         const GridLayoutOptions& options, float mainGap, float& regularHeight, float& irregularHeight) const;
+    void MakeLineHeightsAvailable(float& regularHeight, float& irregularHeight);
 
     /**
      * @brief Find the number of GridItems in range [startLine, endLine].

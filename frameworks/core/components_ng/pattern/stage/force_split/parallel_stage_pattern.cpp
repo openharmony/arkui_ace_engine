@@ -156,7 +156,7 @@ bool ParallelStagePattern::CalculateMode(double width)
     }
     mode_ = splitMode;
     TAG_LOGI(AceLogTag::ACE_ROUTER, "update router mode: %{public}d", mode_);
-    if (stageManager->GetDetectPrimaryPageEnable()) {
+    if (stageManager->IsForceSplitSupported()) {
         pipelineContext->SetIsCurrentInForceSplitMode(mode_ == PageMode::SPLIT);
     }
     if (mode_ == PageMode::SPLIT) {

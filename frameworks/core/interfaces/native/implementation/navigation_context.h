@@ -65,14 +65,14 @@ public:
     std::string name_;
     ParamType param_;
     OnPopCallback onPop_;
-    int index_;
-    bool needUpdate_;
-    bool needBuildNewInstance_;
+    int index_ = -1;
+    bool needUpdate_ = false;
+    bool needBuildNewInstance_ = false;
     std::optional<std::string> navDestinationId_;
-    bool isEntry_;
-    bool fromRecovery_;
-    int32_t mode_;
-    bool needDelete_;
+    bool isEntry_ = false;
+    bool fromRecovery_ = false;
+    int32_t mode_ = 0;
+    bool needDelete_ = false;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -85,6 +85,7 @@ struct PopInfo {
 };
 
 using PushDestinationResultType = int32_t;
+using ReplaceDestinationResultType = int32_t;
 
 class NavigationStack;
 
@@ -114,7 +115,7 @@ public:
     void PushPathByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
     std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<NavigationOptions>& param);
-    bool PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated);
+    bool PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode launchMode, bool animated);
     void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
@@ -122,6 +123,8 @@ public:
         const std::optional<NavigationOptions>& optionParam);
     void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     void ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated);
+    ReplaceDestinationResultType ReplaceDestination(PathInfo info,
+        const std::optional<NavigationOptions>& optionParam);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
     PathInfo Pop(bool isAnimated);
@@ -174,6 +177,8 @@ protected:
 class NavigationStack : public ::OHOS::Ace::NG::NavigationStack, public PathStack {
     DECLARE_ACE_TYPE(NavigationStack, ::OHOS::Ace::NG::NavigationStack);
 public:
+    NavigationStack() = default;
+    ~NavigationStack() override = default;
     void SetOnStateChangedCallback(std::function<void()> callback) override
     {
         PathStack::SetOnStateChangedCallback(callback);
@@ -241,6 +246,11 @@ public:
     void ClearNodeList()
     {
         nodes_.clear();
+    }
+
+    bool IsStaticStack() override
+    {
+        return true;
     }
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;

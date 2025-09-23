@@ -22,15 +22,15 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_Boolean_Void } from "./navigation"
+import { CheckboxOpsHandWritten, hookCheckboxContentModifier } from "./../handwritten"
 
 export class ArkCheckboxPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -283,7 +283,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._CheckboxAttribute_onChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier0Attribute(value: ContentModifier | undefined): void {
+    contentModifier0Attribute(value: ContentModifier<CheckBoxConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -295,7 +295,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._CheckboxAttribute_contentModifier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier1Attribute(value: ContentModifier | undefined): void {
+    contentModifier1Attribute(value: ContentModifier<CheckBoxConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -319,7 +319,7 @@ export interface CheckboxOptions {
     group?: string;
     indicatorBuilder?: CustomBuilder;
 }
-export interface CheckBoxConfiguration extends CommonConfiguration {
+export interface CheckBoxConfiguration extends CommonConfiguration<CheckBoxConfiguration> {
     name: string;
     selected: boolean;
     triggerChange: ((isVisible: boolean) => void);
@@ -328,13 +328,13 @@ export type CheckboxInterface = (options?: CheckboxOptions) => CheckboxAttribute
 export type OnCheckboxChangeCallback = (value: boolean) => void;
 export type Callback_Opt_Boolean_Void = (select: boolean | undefined) => void;
 export interface CheckboxAttribute extends CommonMethod {
-    select(value: boolean | undefined): this
+    select(value: boolean | Bindable<boolean> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     shape(value: CheckBoxShape | undefined): this
     unselectedColor(value: ResourceColor | undefined): this
     mark(value: MarkStyle | undefined): this
     onChange(value: OnCheckboxChangeCallback | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
+    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this
     _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
 }
 export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
@@ -344,8 +344,8 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
     unselectedColor_value?: ResourceColor | undefined
     mark_value?: MarkStyle | undefined
     onChange_value?: OnCheckboxChangeCallback | undefined
-    contentModifier_value?: ContentModifier | undefined
-    public select(value: boolean | undefined): this {
+    contentModifier_value?: ContentModifier<CheckBoxConfiguration> | undefined
+    public select(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
@@ -363,7 +363,7 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
     public onChange(value: OnCheckboxChangeCallback | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
         return this
     }
     public _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {
@@ -382,8 +382,8 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
         }
         return this
     }
-    public select(value: boolean | undefined): this {
-        if (this.checkPriority("select")) {
+    public select(value: boolean | Bindable<boolean> | undefined): this {
+        if (this.checkPriority("select") && (typeof value === "boolean" || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (boolean | undefined)
@@ -397,6 +397,7 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
             }
             throw new Error("Can not select appropriate overload")
         }
+        CheckboxOpsHandWritten.hookCheckboxAttributeSelectImpl(this.getPeer().peer.ptr, (value as Bindable<boolean>));
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
@@ -479,20 +480,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookCheckboxContentModifier(this, value)
         }
         return this
     }

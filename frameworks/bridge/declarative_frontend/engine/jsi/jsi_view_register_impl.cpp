@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -47,6 +48,7 @@
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
+#include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
@@ -621,6 +623,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
+    { "Picker", JSContainerPicker::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "TimePickerDialog", JSTimePickerDialog::JSBind },
@@ -1028,6 +1031,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            JAVASCRIPT_EXECUTION_SCOPE_STATIC;
             auto params = ConvertToJSValues(maxTimeInNs / 1e6);
             jsFunc->Call(globalObject, params.size(), params.data());
         };

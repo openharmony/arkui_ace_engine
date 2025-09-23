@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { VoidCallback } from "./units"
 import { XComponentType } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -50,11 +50,6 @@ export class XComponentController implements MaterializedBase {
     constructor() {
         const ctorPtr : KPointer = XComponentController.ctor_xcomponentcontroller()
         this.peer = new Finalizable(ctorPtr, XComponentController.getFinalizer())
-    }
-    public holdXComponentCallback() {
-        this.setOnSurfaceCreatedCallback(this.onSurfaceCreated);
-        this.setOnSurfaceChangedCallback(this.onSurfaceChanged);
-        this.setOnSurfaceDestroyedCallback(this.onSurfaceDestroyed);
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._XComponentController_getFinalizer()
@@ -108,21 +103,6 @@ export class XComponentController implements MaterializedBase {
     }
     public stopImageAnalyzer(): void {
         this.stopImageAnalyzer_serialize()
-        return
-    }
-    private setOnSurfaceCreatedCallback(onSurfaceCreatedCallback: ((breakpoints: string) => void)): void {
-        const onSurfaceCreatedCallback_casted = onSurfaceCreatedCallback as (((breakpoints: string) => void))
-        this.setOnSurfaceCreatedCallback_serialize(onSurfaceCreatedCallback_casted)
-        return
-    }
-    private setOnSurfaceChangedCallback(onSurfaceChangedCallback: ((surfaceId: string,rect: SurfaceRect) => void)): void {
-        const onSurfaceChangedCallback_casted = onSurfaceChangedCallback as (((surfaceId: string,rect: SurfaceRect) => void))
-        this.setOnSurfaceChangedCallback_serialize(onSurfaceChangedCallback_casted)
-        return
-    }
-    private setOnSurfaceDestroyedCallback(onSurfaceDestroyedCallback: ((breakpoints: string) => void)): void {
-        const onSurfaceDestroyedCallback_casted = onSurfaceDestroyedCallback as (((breakpoints: string) => void))
-        this.setOnSurfaceDestroyedCallback_serialize(onSurfaceDestroyedCallback_casted)
         return
     }
     private getXComponentSurfaceId_serialize(): string {
@@ -189,26 +169,9 @@ export class XComponentController implements MaterializedBase {
     private stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._XComponentController_stopImageAnalyzer(this.peer!.ptr)
     }
-    private setOnSurfaceCreatedCallback_serialize(onSurfaceCreatedCallback: ((breakpoints: string) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(onSurfaceCreatedCallback)
-        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceCreatedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setOnSurfaceChangedCallback_serialize(onSurfaceChangedCallback: ((surfaceId: string,rect: SurfaceRect) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(onSurfaceChangedCallback)
-        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceChangedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private setOnSurfaceDestroyedCallback_serialize(onSurfaceDestroyedCallback: ((breakpoints: string) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(onSurfaceDestroyedCallback)
-        ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceDestroyedCallback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export class ArkXComponentPeer extends ArkCommonMethodPeer {
+    _attributeSet?: XComponentModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -219,32 +182,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setXComponentOptions0Attribute(value: Type_XComponentInterface_callable0_value): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        const value_id  = value.id
-        thisSerializer.writeString(value_id)
-        const value_type  = value.type
-        thisSerializer.writeString(value_type)
-        const value_libraryname  = value.libraryname
-        let value_libraryname_type : int32 = RuntimeType.UNDEFINED
-        value_libraryname_type = runtimeType(value_libraryname)
-        thisSerializer.writeInt8(value_libraryname_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_libraryname_type)) {
-            const value_libraryname_value  = value_libraryname!
-            thisSerializer.writeString(value_libraryname_value)
-        }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        thisSerializer.writeInt8(value_controller_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
-            const value_controller_value  = value_controller!
-            thisSerializer.writeXComponentController(value_controller_value)
-        }
-        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setXComponentOptions1Attribute(value: Type_XComponentInterface_callable1_value): void {
+    setXComponentOptions0Attribute(value: Type_XComponentInterface_callable1_value): void {
         const thisSerializer : Serializer = Serializer.hold()
         const value_id  = value.id
         thisSerializer.writeString(value_id)
@@ -269,9 +207,8 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setXComponentOptions2Attribute(options: XComponentOptions): void {
+    setXComponentOptions1Attribute(options: XComponentOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
-        options.controller?.holdXComponentCallback();
         thisSerializer.writeXComponentOptions(options)
         ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -282,7 +219,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions3(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onLoadAttribute(value: OnNativeLoadCallback | undefined): void {
+    onLoadAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -372,7 +309,7 @@ export interface XComponentOptions {
     type: XComponentType;
     controller: XComponentController;
     imageAIOptions?: ImageAIOptions;
-    screenId?: number;
+    screenId?: int64;
 }
 export interface NativeXComponentParameters {
     type: XComponentType;
@@ -390,30 +327,32 @@ export interface Type_XComponentInterface_callable1_value {
     libraryname?: string;
     controller?: XComponentController;
 }
-export interface XComponentParameter {
+export type NativeXComponentPointer = int64;
+export interface XComponentParameters {
     id: string;
     type: XComponentType;
-    libraryname?: string;
+    nativeXComponentHandler: ((value0: NativeXComponentPointer) => void);
     controller?: XComponentController;
 }
 export type OnNativeLoadCallback = (event?: Object) => void;
 export type Callback_String_SurfaceRect_Void = (surfaceId: string, rect: SurfaceRect) => void;
 export interface XComponentAttribute extends CommonMethod {
-    onLoad(value: OnNativeLoadCallback | undefined): this
+    onLoad(value: VoidCallback | undefined): this
     onDestroy(value: VoidCallback | undefined): this
     enableAnalyzer(value: boolean | undefined): this
     enableSecure(value: boolean | undefined): this
     hdrBrightness(value: number | undefined): this
     enableTransparentLayer(value: boolean | undefined): this
+    attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod>| undefined): this {return this;}
 }
 export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
-    onLoad_value?: OnNativeLoadCallback | undefined
+    onLoad_value?: VoidCallback | undefined
     onDestroy_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
     enableSecure_value?: boolean | undefined
     hdrBrightness_value?: number | undefined
     enableTransparentLayer_value?: boolean | undefined
-    public onLoad(value: OnNativeLoadCallback | undefined): this {
+    public onLoad(value: VoidCallback | undefined): this {
         return this
     }
     public onDestroy(value: VoidCallback | undefined): this {
@@ -436,31 +375,15 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkXComponentPeer {
         return (this.peer as ArkXComponentPeer)
     }
-    public setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
+    public setXComponentOptions(value: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
-            const value_type = runtimeType(value)
-            if (TypeChecker.isXComponentOptions(value, true, true, true, false)) {
-                const options_casted = value as (XComponentOptions)
-                this.getPeer()?.setXComponentOptions2Attribute(options_casted)
-                return this
-            }
-            if (TypeChecker.isNativeXComponentParameters(value, true, true)) {
-                const params_casted = value as (NativeXComponentParameters)
-                this.getPeer()?.setXComponentOptions3Attribute(params_casted)
-                return this
-            }
-            if (RuntimeType.OBJECT == value_type) {
-                const value_casted = value as (Type_XComponentInterface_callable1_value)
-                this.getPeer()?.setXComponentOptions1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetXComponentOptions(this, value)
         }
         return this
     }
-    public onLoad(value: OnNativeLoadCallback | undefined): this {
+    public onLoad(value: VoidCallback | undefined): this {
         if (this.checkPriority("onLoad")) {
-            const value_casted = value as (OnNativeLoadCallback | undefined)
+            const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.onLoadAttribute(value_casted)
             return this
         }
@@ -511,12 +434,17 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+
+    public attributeModifier(modifier: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookXComponentAttributeModifier(this, modifier);
+        return this
+    }
 }
 /** @memo */
 export function XComponent(
     /** @memo */
     style: ((attributes: XComponentAttribute) => void) | undefined,
-    value: XComponentParameter | XComponentOptions | NativeXComponentParameters,
+    value: XComponentParameters | XComponentOptions | NativeXComponentParameters,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {

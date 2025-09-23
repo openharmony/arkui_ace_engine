@@ -12,42 +12,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { __memo_context_type , __memo_id_type  } from "arkui.stateManagement.runtime";
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
-import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
-import { PeerNode } from "../PeerNode";
-import { InternalListener } from "../DataChangeListener";
-import { setNeedCreate } from "../ArkComponentRoot";
-import { int32 } from "@koalaui/common";
-import { IDataSource } from "../component/lazyForEach";
-import { LazyForEachOps } from "../component";
-import { LazyItemNode } from "./LazyItemNode";
-import { CustomComponent } from "../component/customComponent";
 
-let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
+import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from '@koalaui/runtime'
+import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
+import { PeerNode } from '../PeerNode'
+import { InternalListener } from '../DataChangeListener'
+import { setNeedCreate } from '../ArkComponentRoot'
+import { int32 } from '@koalaui/common'
+import { IDataSource } from '../component/lazyForEach'
+import { LazyForEachOps } from '../component'
+import { LazyItemNode } from './LazyItemNode'
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { CustomComponent } from '@component_handwritten/customComponent'
+
+let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
+
 export function updateLazyItems() {
-    for (let node of globalLazyItems) {
-        node.value
+    let postponed = false
+    globalLazyItems.forEach((age, node, map) => {
+        if (age === 0) {
+            postponed = true
+            map.set(node, 1)
+        } else {
+            node.value
+        }
+    })
+    if (postponed) {
+        // requestFrame()
     }
 }
 
 /** @memo:intrinsic */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
-    itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
+    isRepeat: boolean = false
 ) {
-    const parent = contextNode<PeerNode>()
-    let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {
+    const node = createLazyNode(isRepeat)
+
+    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
-        let res = new InternalListener(parent.peer.ptr, changeCounter)
+        let res = new InternalListener(changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
-    const changeIndex = listener.flush(0) // first item index that's affected by DataChange
+    const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
             pool.pruneBy((index: int32) => index >= changeIndex)
@@ -65,7 +79,35 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
             return nullptr
         }
     }
-    LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+}
+
+class NodeHolder {
+    node?: PeerNode
+}
+
+/** @memo:intrinsic */
+function createLazyNode(isRepeat: boolean): PeerNode {
+    /**
+     *  We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
+     *  therefore LazyForEach implementation is outside NodeAttach, and LazyForEachNode is provided through a remembered NodeHolder.
+     */
+    let nodeHolder = remember(() => new NodeHolder())
+    NodeAttach(
+        () => {
+            const peerId = PeerNode.nextId()
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            if (!_peerPtr) {
+                throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
+            }
+            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? 'Repeat' : 'LazyForEach', 0)
+            return _peer
+        },
+        (node: PeerNode) => {
+            nodeHolder.node = node
+        }
+    )
+    return nodeHolder.node!
 }
 
 class LazyItemCompositionContext {
@@ -119,7 +161,8 @@ class LazyItemPool implements Disposable {
     getOrCreate<T>(
         index: int32,
         data: T,
-        itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
@@ -142,7 +185,7 @@ class LazyItemPool implements Disposable {
         )
 
         this._activeItems.set(index, node)
-        globalLazyItems.add(node)
+        globalLazyItems.set(node, 0)
         return node.value.getPeerPtr()
     }
 

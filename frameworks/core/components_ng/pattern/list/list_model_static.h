@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
+    static void ResetListChildrenMainSize(FrameNode* frameNode);
     static void SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign);
     static void SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis);
     static void SetListScrollBar(FrameNode* frameNode, const std::optional<int32_t>& barState);
@@ -40,13 +42,12 @@ public:
         const std::optional<NestedScrollMode>& backward);
     static void SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter);
     static void SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
-        FrameNode* frameNode, const std::optional<float>& defaultSize);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetCachedCount(
+        FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
@@ -63,9 +64,10 @@ public:
     static void SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
-    static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
+    static void SetChainAnimation(FrameNode* frameNode, const std::optional<bool>& chainAnimation);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
-    static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
+    static void SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& enableScrollInteraction);
+    static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, const std::optional<bool>& enabled);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
@@ -73,9 +75,14 @@ public:
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
-    static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
+    static void SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable);
+    static void SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& isStackFromEnd);
+    static void SetEdgeEffect(
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+        const std::optional<EffectEdge>& effectEdge);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
+    static void AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_STATIC_H

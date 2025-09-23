@@ -104,10 +104,10 @@ void DialogPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
     if (!onClick_) {
+        auto maskNode = extraMaskNode_ ? extraMaskNode_ : host;
+        auto gestureHub = maskNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
         InitClickEvent(gestureHub);
     }
     auto focusHub = host->GetOrCreateFocusHub();
@@ -615,6 +615,8 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
         extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
         extraMaskNodeContext->UpdateZIndex(-1);
         extraMaskNode->MountToParent(dialog);
+        extraMaskNode_ = extraMaskNode;
+        dialog->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     }
 }
 
@@ -1364,7 +1366,7 @@ bool DialogPattern::InvertShadowColor()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(contentRenderContext_, false);
-    CHECK_NULL_RETURN(dialogProperties_.hasCustomShadowColor, false);
+    CHECK_NULL_RETURN(dialogProperties_.hasInvertColor.hasShadowColor, false);
     if (SystemProperties::ConfigChangePerform() && dialogProperties_.shadow.has_value()) {
         auto shadow = dialogProperties_.shadow.value();
         Color shadowColor = shadow.GetColor();
@@ -2373,6 +2375,9 @@ void DialogPattern::OnAttachToMainTree()
 
 void DialogPattern::OnDetachFromMainTree()
 {
+    if (dialogProperties_.destroyCallback) {
+        dialogProperties_.destroyCallback(customNode_);
+    }
     RemoveFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

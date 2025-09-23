@@ -54,26 +54,20 @@ void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, std::function<Ref
     pattern->AddFooter(unitNode);
 }
 
-RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode, const std::optional<float>& defaultSize)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
-    if (defaultSize.has_value()) {
-        childrenMainSize->UpdateDefaultSize(defaultSize.value());
-    }
-    return childrenMainSize;
-}
-
-RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode)
+RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
+}
+
+void ListItemGroupModelStatic::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
 }
 
 void ListItemGroupModelStatic::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)

@@ -82,30 +82,9 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             int32_t size = data.ReadInt32();
             for (int32_t i = 0; i < size; i++) {
                 int32_t nodeId = data.ReadInt32();
-                sptr<Ashmem> ashMem = data.ReadAshmem();
-                if (ashMem == nullptr) {
-                    LOGI("Ashmem is nullptr");
-                    return -1;
-                }
-                if (!ashMem->MapReadOnlyAshmem()) {
-                    LOGI("MapReadOnlyAshmem failed");
-                    ClearAshmem(ashMem);
-                    return -1;
-                }
-                int32_t ashMemSize = ashMem->GetAshmemSize();
-                int32_t offset = 0;
-                const uint8_t* ashDataPtr =
-                    reinterpret_cast<const uint8_t*>(ashMem->ReadFromAshmem(ashMemSize, offset));
-                if (ashDataPtr == nullptr) {
-                    LOGI("ashDataPtr is nullptr");
-                    ClearAshmem(ashMem);
-                    return -1;
-                }
-                std::vector<uint8_t> mapData(ashDataPtr, ashDataPtr + ashMemSize);
-                auto data = std::shared_ptr<Media::PixelMap>(OHOS::Media::PixelMap::DecodeTlv(mapData));
-                std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, data };
+                auto pixelMap = std::shared_ptr<Media::PixelMap>(OHOS::Media::PixelMap::Unmarshalling(data));
+                std::pair<int32_t, std::shared_ptr<Media::PixelMap>> value = { nodeId, pixelMap };
                 result.push_back(value);
-                ClearAshmem(ashMem);
             }
             SendShowingImage(result);
             break;
@@ -285,14 +264,6 @@ void UiReportStub::SendShowingImage(std::vector<std::pair<int32_t, std::shared_p
 {
     if (getShowingImageCallback_) {
         getShowingImageCallback_(maps);
-    }
-}
-
-void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)
-{
-    if (optMem != nullptr) {
-        optMem->UnmapAshmem();
-        optMem->CloseAshmem();
     }
 }
 

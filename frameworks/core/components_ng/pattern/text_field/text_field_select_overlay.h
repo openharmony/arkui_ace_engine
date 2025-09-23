@@ -94,6 +94,7 @@ public:
     }
     std::optional<Color> GetHandleColor() override;
     void BeforeOnPrepareMenu() override;
+    void ProcessOverlayAfterLayout(const OverlayRequest& request);
 
 protected:
     bool AllowTranslate() override;
@@ -109,6 +110,7 @@ private:
     void CloseMagnifier();
     void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
     void UpdateMagnifier(const OffsetF& offset, bool updateOnScroll);
+    bool CheckIfInterruptProcessing(const OverlayRequest& request);
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };

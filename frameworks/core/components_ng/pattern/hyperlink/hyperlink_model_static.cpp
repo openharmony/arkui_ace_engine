@@ -46,12 +46,12 @@ void HyperlinkModelStatic::SetTextStyle(
     textLayoutProperty->UpdateContent((!content.has_value() || content.value().empty()) ? address : content.value());
     textLayoutProperty->UpdateAddress(address);
 
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto textStyle = textTheme->GetTextStyle();
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    auto theme = context->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
 
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -65,9 +65,7 @@ void HyperlinkModelStatic::SetTextStyle(
     frameNode->MarkModifyDone();
     frameNode->MarkDirtyNode();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
+    auto draggable = context->GetDraggable<HyperlinkTheme>();
     HyperlinkModelStatic::SetDraggable(frameNode, draggable);
 }
 

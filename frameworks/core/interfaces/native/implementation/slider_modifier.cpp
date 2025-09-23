@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct SliderOptions {
@@ -343,6 +343,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SliderModelNG::SetContentModifier(frameNode, convValue);
     LOGE("SliderModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SlideRangeImpl(Ark_NativePointer node,
@@ -356,6 +358,12 @@ void SlideRangeImpl(Ark_NativePointer node,
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
+// #ifdef SUPPORT_DIGITAL_CROWN
+//     auto frameNode = reinterpret_cast<FrameNode *>(node);
+//     CHECK_NULL_VOID(frameNode);
+//     auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+//     SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+// #endif
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)

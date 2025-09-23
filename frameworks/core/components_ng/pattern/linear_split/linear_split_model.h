@@ -31,7 +31,14 @@ enum class SplitType {
     ROW_SPLIT,
     COLUMN_SPLIT,
 };
-
+struct ItemDivider final {
+    Dimension startMargin = 0.0_vp;
+    Dimension endMargin = 0.0_vp;
+    bool operator==(const ItemDivider& itemDivider) const
+    {
+        return (startMargin == itemDivider.startMargin) && (endMargin == itemDivider.endMargin);
+    }
+};
 struct ColumnSplitDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;

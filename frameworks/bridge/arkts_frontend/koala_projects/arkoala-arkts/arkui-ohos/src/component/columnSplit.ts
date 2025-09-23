@@ -22,11 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Dimension } from "./units"
+import { ArkColumnSplitNode } from '../handwritten/modifiers/ArkColumnSplitNode';
+import { ArkColumnSplitAttributeSet, ColumnSplitModifier } from '../ColumnSplitModifier';
 
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -54,7 +56,7 @@ export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ColumnSplitAttribute_resizeable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: ColumnSplitDividerStyle | null | undefined): void {
+    dividerAttribute(value: ColumnSplitDividerStyle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -74,17 +76,17 @@ export interface ColumnSplitDividerStyle {
 }
 export interface ColumnSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
-    divider(value: ColumnSplitDividerStyle | null | undefined): this
+    divider(value: ColumnSplitDividerStyle | undefined): this
 }
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
-    divider_value?: ColumnSplitDividerStyle | null | undefined
+    divider_value?: ColumnSplitDividerStyle | undefined
     public resizeable(value: boolean | undefined): this {
         return this
     }
-    public divider(value: ColumnSplitDividerStyle | null | undefined): this {
+    public divider(value: ColumnSplitDividerStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
     getPeer(): ArkColumnSplitPeer {
@@ -105,9 +107,9 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public divider(value: ColumnSplitDividerStyle | null | undefined): this {
+    public divider(value: ColumnSplitDividerStyle | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (ColumnSplitDividerStyle | null | undefined)
+            const value_casted = value as (ColumnSplitDividerStyle | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }

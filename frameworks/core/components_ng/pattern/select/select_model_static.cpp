@@ -377,13 +377,13 @@ void SelectModelStatic::ResetDividerStyle(FrameNode* frameNode)
     pattern->SetDividerMode(std::nullopt);
 }
 
-// void SelectModelStatic::SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto pattern = frameNode->GetPattern<SelectPattern>();
-//     CHECK_NULL_VOID(pattern);
-//     pattern->SetAvoidance(avoidance.value_or(Avoidance()));
-// }
+void SelectModelStatic::SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(avoidance.value_or(Avoidance()).mode);
+}
 
 void SelectModelStatic::SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam)
 {

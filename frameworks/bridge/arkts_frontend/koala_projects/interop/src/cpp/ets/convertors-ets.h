@@ -213,7 +213,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
       ets_byteArray array = env->NewByteArray(value.length);
       KByte* data = (KByte*)env->PinByteArray(array);
       if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        INTEROP_FATAL("KInteropReturnBuffer Converter failed");
+        return array;
       }
       env->UnpinByteArray(array);
       value.dispose(value.data, value.length);

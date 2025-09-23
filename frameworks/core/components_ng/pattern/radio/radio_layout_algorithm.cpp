@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,11 +33,8 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RadioPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            host->GetGeometryNode()->ResetContent();
-        } else {
-            host->GetGeometryNode()->Reset();
-        }
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ? host->GetGeometryNode()->ResetContent()
+                                                                              : host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     InitializeParam(host);
@@ -46,12 +43,17 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
         realSize_ = LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
         return realSize_;
     }
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        return LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicy);
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        return LayoutPolicyIsWrapContent(contentConstraint, layoutPolicy);
+    }
 
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
-        auto height = contentConstraint.selfIdealSize.Height().value_or(0.0f);
-        auto width = contentConstraint.selfIdealSize.Width().value_or(0.0f);
-        auto length = std::min(width, height);
+        auto length = std::min(contentConstraint.selfIdealSize.Width().value_or(0.0f),
+            contentConstraint.selfIdealSize.Height().value_or(0.0f));
         return SizeF(length, length);
     }
     // Case 2: The front end only sets either width or height
@@ -68,9 +70,7 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
         return SizeF(height, height);
     }
     // Case 3: Width and height are not set in the front end, so return from the theme
-    auto width = defaultWidth_ - 2 * horizontalPadding_;
-    auto height = defaultHeight_ - 2 * verticalPadding_;
-    auto size = SizeF(width, height);
+    auto size = SizeF(defaultWidth_ - 2 * horizontalPadding_, defaultHeight_ - 2 * verticalPadding_);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -180,6 +180,62 @@ std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsMatchParent(const Layou
             realSize = height;
         }
         return SizeF(realSize, realSize);
+    }
+    return SizeF();
+}
+
+std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsFixAtIdelSize(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+    auto defaultLength = defaultWidth_ - 2 * horizontalPadding_;
+    auto defaultSize = SizeF(defaultLength, defaultLength);
+    if (layoutPolicy->IsWidthFix() && layoutPolicy->IsHeightFix()) {
+        return defaultSize;
+    } else if (layoutPolicy->IsWidthFix()) {
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            return defaultSize;
+        }
+        return SizeF(selfHeight, selfHeight);
+    } else if (layoutPolicy->IsHeightFix()) {
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            return defaultSize;
+        }
+        return SizeF(selfWidth, selfWidth);
+    }
+    return SizeF();
+}
+
+std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsWrapContent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    CHECK_NULL_RETURN(layoutPolicy, std::nullopt);
+    auto height = contentConstraint.parentIdealSize.Height().value_or(0.0f);
+    auto width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
+    auto selfHeight = contentConstraint.selfIdealSize.Height().value_or(0.0f);
+    auto selfWidth = contentConstraint.selfIdealSize.Width().value_or(0.0f);
+    auto defaultLength = defaultWidth_ - 2 * horizontalPadding_;
+    auto defaultSize = SizeF(defaultLength, defaultLength);
+    auto parentMinLength = std::min(width, height);
+    if (layoutPolicy->IsWidthWrap() && layoutPolicy->IsHeightWrap()) {
+        auto length = std::min(parentMinLength, defaultLength);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsWidthWrap()) {
+        if (!contentConstraint.selfIdealSize.Height().has_value()) {
+            auto length = std::min(parentMinLength, defaultLength);
+            return SizeF(length, length);
+        }
+        auto length = std::min(parentMinLength, selfHeight);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsHeightWrap()) {
+        if (!contentConstraint.selfIdealSize.Width().has_value()) {
+            auto length = std::min(parentMinLength, defaultLength);
+            return SizeF(length, length);
+        }
+        auto length = std::min(parentMinLength, selfWidth);
+        return SizeF(length, length);
     }
     return SizeF();
 }

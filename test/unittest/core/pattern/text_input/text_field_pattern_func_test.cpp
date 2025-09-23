@@ -2755,4 +2755,46 @@ HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifier, TestSize.Level1)
     pattern->selectOverlay_->UpdateMagnifier(OffsetF(), true);
     EXPECT_EQ(pattern->magnifierController_->localOffset_, OffsetF(50.0f, 50.0f));
 }
+
+/**
+ * @tc.name: CheckIfInterruptProcessing
+ * @tc.desc: test text_field_select_overlay.cpp CheckIfInterruptProcessing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, CheckIfInterruptProcessing, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateMagnifier and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    pattern->selectOverlay_->OnBind(manager);
+
+    auto ret = pattern->selectOverlay_->CheckIfInterruptProcessing({});
+    EXPECT_FALSE(ret);
+    pattern->selectOverlay_->SetUsingMouse(true);
+    shareOverlayInfo->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
+    shareOverlayInfo->selectText = "";
+    ret = pattern->selectOverlay_->CheckIfInterruptProcessing({ .requestCode = 1 << 2 });
+    EXPECT_TRUE(ret);
+    pattern->selectOverlay_->SetUsingMouse(false);
+    pattern->selectOverlay_->ProcessOverlayAfterLayout({});
+    EXPECT_TRUE(pattern->selectOverlay_->enableHandleLevel_);
+}
 } // namespace OHOS::Ace

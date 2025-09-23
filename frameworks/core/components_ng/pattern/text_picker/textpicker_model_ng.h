@@ -173,12 +173,12 @@ private:
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
-    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-        std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
-    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
-    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
-    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
-    static void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseResTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyleOpt,
+        const std::string& textStyleType, std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
+    static void ParseDefaultTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
     static void ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
     static void ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
 

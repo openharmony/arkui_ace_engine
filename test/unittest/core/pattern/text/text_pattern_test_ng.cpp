@@ -2350,6 +2350,8 @@ HWTEST_F(TextPatternTestNg, AddUdmfData001, TestSize.Level1)
     textPattern->isSpanStringMode_ = true;
     textPattern->AddUdmfData(event);
     EXPECT_EQ(textPattern->dragResultObjects_.empty(), true);
+    textPattern->isSpanStringMode_ = false;
+    textPattern->AddUdmfData(event);
 }
 
 /**

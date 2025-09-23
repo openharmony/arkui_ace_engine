@@ -36,6 +36,8 @@ template("ace_core_accessibility_ng_source_set") {
       "hidumper/accessibility_hidumper.cpp",
       # for frameNode property handle
       "node_utils/accessibility_frame_node_utils.cpp",
+      # utils
+      "utils/accessibility_property_utils.cpp",
     ]
 
     configs = [ "$ace_root:ace_config" ]

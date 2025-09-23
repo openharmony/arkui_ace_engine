@@ -16,11 +16,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -48,7 +49,7 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
     if (pickerFormat.has_value() && pickerFormat.value() == TimePickerFormat::HOUR_MINUTE_SECOND) {
         showSeconds = true;
     }
-    // TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
+    TimePickerModelStatic::SetHasSecond(frameNode, showSeconds);
 
     auto selected = options ?
         Converter::OptConvert<PickerTime>(options->value.selected) :
@@ -90,6 +91,8 @@ void UseMilitaryTime1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetUseMilitaryTime1(frameNode, convValue);
 }
 void Loop0Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
@@ -108,6 +111,8 @@ void Loop1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetLoop1(frameNode, convValue);
 }
 void DisappearTextStyle0Impl(Ark_NativePointer node,
                              const Opt_PickerTextStyle* value)
@@ -130,6 +135,8 @@ void DisappearTextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetDisappearTextStyle1(frameNode, convValue);
 }
 void TextStyle0Impl(Ark_NativePointer node,
                     const Opt_PickerTextStyle* value)
@@ -152,6 +159,8 @@ void TextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetTextStyle1(frameNode, convValue);
 }
 void SelectedTextStyle0Impl(Ark_NativePointer node,
                             const Opt_PickerTextStyle* value)
@@ -175,6 +184,8 @@ void SelectedTextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetSelectedTextStyle1(frameNode, convValue);
 }
 void DateTimeOptions0Impl(Ark_NativePointer node,
                           const Opt_DateTimeOptions* value)
@@ -223,6 +234,8 @@ void OnChange1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetOnChange1(frameNode, convValue);
 }
 void OnEnterSelectedAreaImpl(Ark_NativePointer node,
                              const Opt_Callback_TimePickerResult_Void* value)
@@ -261,14 +274,16 @@ void EnableHapticFeedback1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TimePickerModelNG::SetEnableHapticFeedback1(frameNode, convValue);
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
-    // TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
+    TimePickerModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -288,17 +303,17 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    // WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    // auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
-    //     CHECK_NULL_VOID(event);
-    //     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-    //     CHECK_NULL_VOID(eventInfo);
-    //     auto selectedStr = eventInfo->GetSelectedStr();
-    //     auto result = Converter::ArkValue<Ark_Date>(selectedStr);
-    //     PipelineContext::SetCallBackNode(weakNode);
-    //     arkCallback.Invoke(result);
-    // };
-    // TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(result);
+    };
+    TimePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

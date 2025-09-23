@@ -166,9 +166,7 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
         contentModifier_->SetRenderContext(renderContext);
         CHECK_NULL_VOID(paintMethod_);
         paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
-        auto canvasEventHub = GetEventHub<CanvasEventHub>();
-        CHECK_NULL_VOID(canvasEventHub);
-        canvasEventHub->FireReadyEvent();
+        FireReadyEvent();
     }
 }
 

@@ -19,7 +19,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_stub.h"
 #undef private
-#include "test/mock/interfaces/mock_form_renderer_dispatcher_stub.h"
+#include "test/unittest/interfaces/form_render/mock/mock_form_renderer_dispatcher_stub.h"
 
 using namespace testing;
 using namespace testing::ext;

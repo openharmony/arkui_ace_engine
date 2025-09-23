@@ -190,7 +190,7 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
     }
     public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
         return this
-        }
+    }
 }
 export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
 export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implements LinearIndicatorAttribute {

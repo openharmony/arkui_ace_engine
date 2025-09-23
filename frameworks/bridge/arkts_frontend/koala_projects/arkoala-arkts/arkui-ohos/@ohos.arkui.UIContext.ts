@@ -16,101 +16,127 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
-import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
-import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
-import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "arkui/component/arkui-custom"
+import { FrameNode } from "arkui/FrameNode"
 import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "arkui/component/units"
-import { ArkUIGeneratedNativeModule } from "#components"
-import { int32 } from "@koalaui/common"
-import { nullptr } from "@koalaui/interop"
-import { _animateTo } from "arkui/handwritten/ArkAnimation"
-import { AnimateParam } from 'arkui/component'
-import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
-import { Context } from "#external"
-import { ArkUIAniModule } from "arkui.ani"
-import { Serializer } from "arkui/component/peers/Serializer"
+import { AnimateParam } from "arkui/component"
+import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
+import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent } from "arkui/component/common"
-import { Nullable } from "arkui/component/enums"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions, ExpectedFrameRateRange } from "arkui/component/common"
+import { TextMenuOptions } from "arkui/component/textCommon"
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
+import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
+import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
+import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
+import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
-import promptAction from '@ohos/promptAction';
-import { ContextMenu } from 'arkui/component/contextMenu';
+import { ComponentContent } from 'arkui/ComponentContent'
+import overlayManager from '@ohos/overlayManager'
+import promptAction, { LevelOrder } from '@ohos/promptAction'
+import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
+import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
-import { ComputableState } from '@koalaui/runtime'
+import { ComponentContent } from "arkui/ComponentContent"
+import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
+import { ArkUIAniModule } from 'arkui.ani';
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
+import { int32 } from "@koalaui/common"
+import { KPointer } from "@koalaui/interop"
 
 export class UIInspector {
-    instanceId_: int32 = -1;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+        throw Error("createComponentObserver not implemented in UIInspector!")
     }
-    public createComponentObserver(id: string): inspector.ComponentObserver {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let componentObserver = inspector.createComponentObserver(id);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return componentObserver;
+}
+
+export interface TargetInfo {
+    id: string | number;
+    componentId?: number;
+}
+
+export class DynamicSyncScene {
+    private range: ExpectedFrameRateRange;
+    constructor(range: ExpectedFrameRateRange) {
+        this.range = range;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        this.range = range;
+    }
+
+    getFrameRateRange(): ExpectedFrameRateRange {
+        return this.range;
+    }
+}
+
+export const enum SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATION = 1,
+}
+
+export class SwiperDynamicSyncScene extends DynamicSyncScene {
+    readonly type: SwiperDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
     }
 }
 
 export class Font {
-    instanceId_: int32 = 10001;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
     public registerFont(options: FontOptions) : void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        GlobalScope_ohos_font.registerFont(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("registerFont not implemented in Font!")
     }
     public getSystemFontList() : Array<string> {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return arrayResult_;
+        throw Error("getSystemFontList not implemented in Font!")
     }
     public getFontByName(fontName : string) : FontInfo {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return fontInfo;
+        throw Error("getFontByName not implemented in Font!")
+    }
+}
+
+export class MediaQuery {
+    public matchMediaSync(condition: string): mediaquery.MediaQueryListener {
+        throw Error("matchMediaSync not implemented in MedaiQuery!")
     }
 }
 
 export class MeasureUtils {
-    instanceId_: int32 = 10001;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
     public measureText(options: MeasureOptions) : number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let width = GlobalScope_ohos_measure_utils.measureText(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return width;
+        throw Error("measureText not implemented in MeasureUtils!")
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return sizeOptions;
+        throw Error("measureTextSize not implemented in MeasureUtils!")
+    }
+}
+
+export class TextMenuController {
+    public setMenuOptions(options: TextMenuOptions) : void {
+        throw Error("setMenuOptions not implemented in TextMenuController!")
     }
 }
 
 export class Router {
-    instanceId_: int32 = 100000;
     router_: RouterExt | undefined = undefined;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
     public setRouter(router: RouterExt) {
         this.router_ = router;
     }
@@ -118,104 +144,54 @@ export class Router {
         return this.router_!;
     }
     public pushUrl(options: router.RouterOptions): Promise<void> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.push(options);
-        });
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("pushUrl not implemented in Router!");
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.replace(options);
-        });
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("replaceUrl not implemented in Router!");
     }
 
     public back(options?:router.RouterOptions): void {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.router_!.back(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("back not implemented in Router!");
     }
 
     public clear(): void {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.router_!.clear();
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("clear not implemented in Router!");
     }
     public getLength(): string {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getLength();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("getLength not implemented in Router!");
     }
 
     public getParams(): Object {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getParams();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("getParams not implemented in Router!");
     }
 
     public getState(): router.RouterState {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getState();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("getState not implemented in Router!");
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getStateByIndex(index);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("getStateByIndex not implemented in Router!");
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getStateByUrl(url);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): Array<ComputableState<PeerNode>> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = this.router_!.getEntryRootValue();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+    public getStateRoot(): ComputableState<IncrementalNode> {
+        throw Error("getStateRoot not implemented in Router!");
+    }
+
+    public getPreState(): ComputableState<IncrementalNode> | undefined {
+        throw Error("getPreState not implemented in Router!");
+    }
+
+    public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        throw Error("showAlertBeforeBackPage not implemented in Router!");
+    }
+
+    public hideAlertBeforeBackPage(): void {
+        throw Error("hideAlertBeforeBackPage not implemented in Router!");
     }
 }
 
@@ -223,310 +199,483 @@ export interface AtomicServiceBar {
     getBarRect(): Frame;
 }
 
-export class AtomicServiceBarInternal implements AtomicServiceBar {
-    instanceId_: int32;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
-    public getBarRect(): Frame {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let frame = UIContextAtomicServiceBar.getBarRect();
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return frame;
-    }
-}
 export class ComponentUtils {
-    instanceId_: int32
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
-
     public getRectangleById(id: string): componentUtils.ComponentInfo {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-       let componentInformation = componentUtils.getRectangleById(id);
-       ArkUIAniModule._Common_Restore_InstanceId();
-       return componentInformation;
+        throw Error("getRectangleById not implemented in ComponentUtils!")
     }
 }
 
 
 export class FocusController {
-    instanceId_: int32
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
-
     public clearFocus(): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        focusController.clearFocus();
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("clearFocus not implemented in FocusController!")
     }
 
     public requestFocus(key: string): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        focusController.requestFocus(key);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("requestFocus not implemented in FocusController!")
     }
 
     public activate(isActive: boolean, autoInactive?: boolean): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        focusController.activate(isActive, autoInactive);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("activate not implemented in FocusController!")
     }
 
     public setAutoFocusTransfer(isAutoFocusTransfer: boolean): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        focusController.setAutoFocusTransfer(isAutoFocusTransfer);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("setAutoFocusTransfer not implemented in FocusController!")
     }
     public setKeyProcessingMode(mode: KeyProcessingMode): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        focusController.setKeyProcessingMode(mode);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("setKeyProcessingMode not implemented in FocusController!")
     }
 }
 
-class ContextMenuController {
-    instanceId_: int32
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
+export class ComponentSnapshot {
+    //@ts-ignore
+    public get(id: string, callback: AsyncCallback<PixelMap>,
+               options?: componentSnapshot.SnapshotOptions): void {
+        throw Error("get with callback not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public get(id: string, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("get with promise not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
+                             delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): void {
+        throw Error("createFromBuilder with callback not implemented in ComponentSnapshot!")
+    }
+    //@ts-ignore
+    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+                             options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
+    }
+    public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        throw Error("getSync not implemented in ComponentSnapshot!")
+    }
+    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
+    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+}
+
+export class DragController {
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void {
+        throw Error("executeDrag with callback not implemented in DragController!")
+    }
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
+        Promise<dragController.DragEventParam> {
+        throw Error("executeDrag with promise not implemented in DragController!")
+    }
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        throw Error("createDragAction not implemented in DragController!")
+    }
+    public getDragPreview(): dragController.DragPreview {
+        throw Error("getDragPreview not implemented in DragController!")
+    }
+    public setDragEventStrictReportingEnabled(enable: boolean): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public cancelDataLoading(key: string): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+}
+
+export interface OverlayManagerOptions {
+    renderRootOverlay?: boolean;
+    enableBackPressedEvent?: boolean;
+}
+
+class OverlayManagerOptionsInner implements OverlayManagerOptions {
+    renderRootOverlay?: boolean = true;
+    enableBackPressedEvent?: boolean = false;
+}
+
+export class ContextMenuController {
     public close(): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        ContextMenu.close();
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("close not implemented in ContextMenuController!")
     }
 }
+
+export class OverlayManager {
+    setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        throw Error("setOverlayManagerOptions not implemented in OverlayManager!")
+    }
+
+    getOverlayManagerOptions(): OverlayManagerOptions {
+        throw Error("getOverlayManagerOptions not implemented in OverlayManager!")
+    }
+
+    addComponentContent(content: ComponentContent, index?: number): void {
+        throw Error("addComponentContent not implemented in OverlayManager!")
+    }
+
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: LevelOrder): void {
+        throw Error("addComponentContentWithOrder not implemented in OverlayManager!")
+    }
+
+    removeComponentContent(content: ComponentContent): void {
+        throw Error("removeComponentContent not implemented in OverlayManager!")
+    }
+
+    showComponentContent(content: ComponentContent): void {
+        throw Error("showComponentContent not implemented in OverlayManager!")
+    }
+
+    hideComponentContent(content: ComponentContent): void {
+        throw Error("hideComponentContent not implemented in OverlayManager!")
+    }
+
+    showAllComponentContents(): void {
+        throw Error("showAllComponentContents not implemented in OverlayManager!")
+    }
+
+    hideAllComponentContents(): void {
+        throw Error("hideAllComponentContents not implemented in OverlayManager!")
+    }
+}
+
+export type CustomBuilderWithId = (id: number) => void;
 
 export class PromptAction {
-    instanceId_: int32 = 100000;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
+    showToast(options: promptAction.ShowToastOptions): void {
+        throw Error("showToast not implemented in PromptAction!")
     }
 
-    showToast(options: promptAction.ShowToastOptions): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        promptAction.showToast(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
+    openToast(options: promptAction.ShowToastOptions): Promise<number> {
+        throw Error("openToast not implemented in PromptAction!")
+    }
+
+    closeToast(toastId: number): void {
+        throw Error("closeToast not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions,
+        callback: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
+        throw Error("showDialog1 not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
+        throw Error("showDialog not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions,
+        callback: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
+        throw Error("showActionMenu1 not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
+        throw Error("showActionMenu not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    openCustomDialog(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("openCustomDialog1 not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
+        throw Error("openCustomDialog not implemented in PromptAction!")
+    }
+
+    updateCustomDialog(content: ComponentContent, options: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("updateCustomDialog not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    closeCustomDialog(content: ComponentContent): Promise<void> {
+        throw Error("closeCustomDialog1 not implemented in PromptAction!")
+    }
+
+    //@ts-ignore
+    closeCustomDialog(dialogId: number): void {
+        throw Error("closeCustomDialog not implemented in PromptAction!")
+    }
+
+    openCustomDialogWithController(content: ComponentContent, controller: promptAction.DialogController,
+        options?: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("openCustomDialogWithController not implemented in PromptAction!")
+    }
+
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
+        options?: promptAction.DialogOptions): Promise<number> {
+        throw Error("presentCustomDialog not implemented in PromptAction!")
+    }
+
+    getTopOrder(): LevelOrder | undefined {
+        throw Error("getTopOrder not implemented in PromptAction!")
+    }
+
+    getBottomOrder(): LevelOrder | undefined {
+        throw Error("getBottomOrder not implemented in PromptAction!")
+    }
+
+    openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        throw Error("openPopup not implemented in PromptAction!")
+    }
+
+    updatePopup(content: ComponentContent, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updatePopup not implemented in PromptAction!")
+    }
+
+    closePopup(content: ComponentContent): Promise<void> {
+        throw Error("closePopup not implemented in PromptAction!")
+    }
+
+    openMenu(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        throw Error("openMenu not implemented in PromptAction!")
+    }
+
+    updateMenu(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateMenu not implemented in PromptAction!")
+    }
+
+    closeMenu(content: ComponentContent): Promise<void> {
+        throw Error("closeMenu not implemented in PromptAction!")
+    }
+}
+
+export class CursorController {
+    public restoreDefault(): void {
+        throw Error("restoreDefault not implemented in CursorController!")
+    }
+
+    public setCursor(value: PointerStyle): void {
+        throw Error("setCursor not implemented in CursorController!")
     }
 }
 
 export class UIContext {
-    instanceId_: int32 = 100000;
-    observer_ :UIObserver |null = null;
-    router_: Router;
-    focusController_: FocusController;
-    componentUtils_: ComponentUtils;
-    atomicServiceBar_: AtomicServiceBarInternal;
-    uiInspector_: UIInspector | null = null;
-    contextMenuController_: ContextMenuController;
-    promptAction_: PromptAction | null = null;
-
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-        this.focusController_ = new FocusController(instanceId);
-        this.componentUtils_ = new ComponentUtils(instanceId);
-        this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
-        this.contextMenuController_ = new ContextMenuController(instanceId);
-        this.router_ = new Router(instanceId);
+    constructor() {
+    }
+    static getFocusedUIContext(): UIContext | undefined {
+        const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
+        if (instanceId === -1) {
+            return undefined;
+        }
+        return UIContextUtil.getOrCreateUIContextById(instanceId);
     }
     public getFont() : Font {
-        let font : Font = new Font(this.instanceId_);
-        return font;
+        throw Error("getFont not implemented in UIContext!")
     }
+
+    public getMediaQuery(): MediaQuery {
+        throw Error("getMediaQuery not implemented in UIContext!")
+    }
+
     public getMeasureUtils() : MeasureUtils {
-        let measureUtils : MeasureUtils = new MeasureUtils(this.instanceId_);
-        return measureUtils;
+        throw Error("getMeasureUtils not implemented in UIContext!")
+    }
+    public getTextMenuController() : TextMenuController {
+        throw Error("getTextMenuController not implemented in UIContext!")
+    }
+    public isFollowingSystemFontScale() : boolean {
+        throw Error("isFollowingSystemFontScale not implemented in UIContext!")
+    }
+    public getMaxFontScale() : number {
+        throw Error("getMaxFontScale not implemented in UIContext!")
     }
     public getFrameNodeById(id: string): FrameNode | null {
-        const id_casted = id as (string);
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
-        if (retval === nullptr) {
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return null;
-        }
-        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (!node) {
-            node = FrameNodeUtils.createFrameNode(this, retval);
-        }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return node;
+        throw Error("getFrameNodeById not implemented in UIContext!")
+    }
+    public getSharedLocalStorage(): LocalStorage | undefined {
+        throw Error('getFrameNodeById not implemented in UIContext!');
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getAttachedFrameNodeById(id);
-        if (retval === nullptr) {
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return null;
-        }
-        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (!node) {
-            node = FrameNodeUtils.createFrameNode(this, retval);
-        }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return node;
+        throw Error("getAttachedFrameNodeById not implemented in UIContext!")
     }
     getFrameNodeByNodeId(id: number): FrameNode | null {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeById(id);
-        if (retval === nullptr) {
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return null;
-        }
-        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (!node) {
-            node = FrameNodeUtils.createFrameNode(this, retval);
-        }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return node;
+        throw Error("getFrameNodeByNodeId not implemented in UIContext!")
     }
     getFrameNodeByUniqueId(id: number): FrameNode | null {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByUniqueId(id);
-        if (retval === nullptr) {
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return null;
-        }
-        let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (!node) {
-            node = FrameNodeUtils.createFrameNode(this, retval);
-        }
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return node;
+        throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
     getHostContext(): Context | undefined {
-        return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
+        throw Error("getHostContext not implemented in UIContext!")
     }
-    
+
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
-        return this.atomicServiceBar_;
+        throw Error("getAtomicServiceBar not implemented in UIContext!")
     }
 
     public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = UIContextDispatchKeyEvent.dispatchKeyEvent(node, event);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+        throw Error("dispatchKeyEvent not implemented in UIContext!")
     }
 
     public getFocusController(): FocusController {
-        return this.focusController_;
+        throw Error("getFocusController not implemented in UIContext!")
     }
 
     public getContextMenuController(): ContextMenuController {
-        return this.contextMenuController_;
+        throw Error("getContextMenuController not implemented in UIContext!")
     }
 
     public getComponentUtils(): ComponentUtils {
-        return this.componentUtils_;
+        throw Error("getComponentUtils not implemented in UIContext!")
+    }
+
+    public getCursorController(): CursorController {
+        throw Error("getCursorController not implemented in UIContext!")
+    }
+    
+    public getComponentSnapshot(): ComponentSnapshot {
+        throw Error("getComponentSnapshot not implemented in UIContext!")
+    }
+
+    public getDragController(): DragController {
+        throw Error("getDragController not implemented in UIContext!")
     }
 
     public getRouter(): Router {
-        if (this.router_ === undefined) {
-            this.router_ = new Router(this.instanceId_);
-        }
-        return this.router_;
+        throw Error("getRouter not implemented in UIContext!")
     }
 
-    public setRouter(router: RouterExt): void {
-        this.router_.setRouter(router);
+    public keyframeAnimateTo(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        throw Error("animateTo not implemented in UIContext!")
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        _animateTo(param, event);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("animateTo not implemented in UIContext!")
     }
 
-    public createAnimator(options: AnimatorOptions): AnimatorResult {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        let animatorRet = Animator.create(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return animatorRet;
+    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+        throw Error("animateToImmediately not implemented in UIContext!")
+    }
+
+    public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
+        throw Error("createAnimator not implemented in UIContext!")
     }
     public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
                                               delayTime: number): void {
-        const onFrameCallback_casted = onFrameCallback as (((index: number) => void))
-        const onIdleCallback_casted = onIdleCallback as (((index: number) => void))
-        const delayTime_casted = delayTime as (number)
-        this.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
-        return
-    }
-    private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
-                                                         onIdleCallback: ((index: number) => void),
-                                                         delayTime: number): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(onFrameCallback)
-        thisSerializer.holdAndWriteCallback(onIdleCallback)
-        ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
-                                                               thisSerializer.length(), delayTime)
-        thisSerializer.release()
+        throw Error("setFrameCallback not implemented in UIContext!")
     }
     runScopedTask(callback: () => void): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        if (callback !== undefined) {
-            callback()
-        }
-        ArkUIAniModule._Common_Restore_InstanceId()
+        throw Error("runScopedTask not implemented in UIContext!")
     }
     clearResourceCache(): void {
-        ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
+        throw Error("clearResourceCache not implemented in UIContext!")
     }
     postFrameCallback(frameCallback: FrameCallback): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        const onFrameFunc = frameCallback.onFrame
-        const onIdleFunc = frameCallback.onIdle
-        this.setFrameCallback(onFrameFunc, onIdleFunc, 0)
-        ArkUIAniModule._Common_Restore_InstanceId()
+        throw Error("postFrameCallback not implemented in UIContext!")
     }
     postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        const onFrameFunc = frameCallback.onFrame
-        const onIdleFunc = frameCallback.onIdle
-        this.setFrameCallback(onFrameFunc, onIdleFunc, delayTime)
-        ArkUIAniModule._Common_Restore_InstanceId()
+        throw Error("postDelayedFrameCallback not implemented in UIContext!")
     }
     public getUIInspector(): UIInspector {
-        if (!this.uiInspector_) {
-            this.uiInspector_ = new UIInspector(this.instanceId_);
-        }
-        return this.uiInspector_ as UIInspector;
+        throw Error("getUIInspector not implemented in UIContext!")
     }
     public getUIObserver(): UIObserver {
-        if (!this.observer_) {
-            this.observer_ = new UIObserver(this.instanceId_);
-        }
-        return this.observer_ as UIObserver;
+        throw Error("getUIObserver not implemented in UIContext!")
+    }
+
+    public getOverlayManager(): OverlayManager {
+        throw Error("getOverlayManager not implemented in UIContext!")
+    }
+
+    public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        throw Error("setOverlayManagerOptions not implemented in UIContext!")
+    }
+
+    public getOverlayManagerOptions(): OverlayManagerOptions {
+        throw Error("getOverlayManagerOptions not implemented in UIContext!")
     }
 
     public getPromptAction(): PromptAction {
-        if (!this.promptAction_) {
-            this.promptAction_ = new PromptAction(this.instanceId_);
-        }
-        return this.promptAction_ as PromptAction;
+        throw Error("getPromptAction not implemented in UIContext!")
     }
 
     public showAlertDialog(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons |
         AlertDialogParamWithOptions): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        AlertDialog.show(options);
-        ArkUIAniModule._Common_Restore_InstanceId();
+        throw Error("showAlertDialog not implemented in UIContext!")
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        throw Error("showActionSheet not implemented in UIContext!")
+    }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        throw Error("showTimePickerDialog not implemented in UIContext!")
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        throw Error("showDatePickerDialog not implemented in UIContext!")
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        throw Error("showTextPickerDialog not implemented in UIContext!")
+    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode1(id, isFrozen ? 1 : 0);
-        ArkUIAniModule._Common_Restore_InstanceId()
+        throw Error("freezeUINode not implemented in UIContext!")
     }
 
     // @ts-ignore
     public freezeUINode(id: string, isFrozen: boolean): void {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        ArkUIGeneratedNativeModule._UIContextImp_freezeUINode0(id, isFrozen ? 1 : 0);
-        ArkUIAniModule._Common_Restore_InstanceId()
+        throw Error("freezeUINode not implemented in UIContext!")
+    }
+
+    public getWindowName(): string | undefined {
+        throw Error("getWindowName not implemented in UIContext!")
+    }
+    public getWindowWidthBreakpoint(): WidthBreakpoint {
+        throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
+    }
+    public getWindowHeightBreakpoint(): HeightBreakpoint {
+        throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
+    }
+    public vp2px(value: number): number {
+        throw Error("vp2px not implemented in UIContext!")
+    }
+    public px2vp(value: number): number {
+        throw Error("px2vp not implemented in UIContext!")
+    }
+    public fp2px(value: number): number {
+        throw Error("fp2px not implemented in UIContext!")
+    }
+    public px2fp(value: number): number {
+        throw Error("px2fp not implemented in UIContext!")
+    }
+    public lpx2px(value: number): number {
+        throw Error("lpx2px not implemented in UIContext!")
+    }
+    public px2lpx(value: number): number {
+        throw Error("px2lpx not implemented in UIContext!")
+    }
+
+    public getId() : int32 {
+        throw Error("getId not implemented in UIContext!")
+    }
+
+    public setUIStates(callback: () => void): void {
+        throw Error("setUIStates not implemented in UIContext!")
+    }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTree not implemented in UIContext!")
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    }
+
+    public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
+        throw Error("requireDynamicSyncScene not implemented in UIContext!");
     }
 }
 export abstract class FrameCallback {
@@ -534,7 +683,6 @@ export abstract class FrameCallback {
     onIdle(timeLeftInNano: number): void {}
 }
 
-export type Callback<T,V = void> = (data: T) => V
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;
@@ -549,15 +697,27 @@ export class UIObserver {
         return this.observerImpl;
     }
 
-    public on(type: string, callback:Callback<uiObserver.DensityInfo>): void {
-        if (type == 'densityUpdate') {
-            this.observerImpl!.on('densityUpdate', callback);
+    public on(type: string, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, callback);
         }
     }
 
-    public off(type: string, callback?: (() => void) | undefined): void {
+    public off(type: string, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, callback);
+        }
+    }
+    
+    public on(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, options, callback);
+        }
+    }
+
+    public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.off(type, options, callback);
         }
     }
 }

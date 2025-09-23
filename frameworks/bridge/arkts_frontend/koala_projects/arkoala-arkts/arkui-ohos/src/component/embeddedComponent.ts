@@ -90,7 +90,7 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
     }
     public onError(value: ErrorCallback | undefined): this {
         return this
-        }
+    }
 }
 export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
 export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {

@@ -32,6 +32,7 @@ public:
     void Layout(float width) override;
     void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
     float GetHeight() override;
+    bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest) override;
 
 private:
     float height_ = 0.0f;

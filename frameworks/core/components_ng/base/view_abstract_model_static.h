@@ -18,12 +18,14 @@
 
 #include <optional>
 #include <utility>
+#include "view_abstract.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
@@ -50,6 +52,8 @@ public:
     {
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
+        } else if (width.Unit() == DimensionUnit::NONE) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -59,6 +63,8 @@ public:
     {
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
+        } else if (height.Unit() == DimensionUnit::NONE) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
@@ -80,6 +86,21 @@ public:
         } else {
             ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight));
         }
+    }
+
+    static int32_t GetWindowWidthBreakpoint()
+    {
+        return ViewAbstract::GetWindowWidthBreakpoint();
+    }
+
+    static int32_t GetWindowHeightBreakpoint()
+    {
+        return ViewAbstract::GetWindowHeightBreakpoint();
+    }
+    
+    static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
+    {
+        ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
     }
     static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
@@ -113,7 +134,56 @@ public:
         CHECK_NULL_VOID(targetNode);
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
+
+    static void BindTips(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
+    }
+
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
+    }
+
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
+    static int32_t OpenMenu(NG::MenuParam param, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+    {
+        return ViewAbstract::OpenMenu(param, customNode, targetId);
+    }
+
+    static int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+
+    static void DisableOnAccessibilityHover(FrameNode* frameNode);
+    static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void BindMenu(FrameNode* frameNode,
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     static void BindMenuGesture(FrameNode* frameNode,
@@ -139,6 +209,35 @@ public:
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
+
+    static void SetForegroundBlurStyle(FrameNode* frameNode,
+        const std::optional<BlurStyleOption>& fgBlurStyle, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle.value_or(BlurStyleOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetBackgroundEffect(FrameNode* frameNode,
+        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+
+    static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
+
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+        bool followWithoutTransition, bool doRegisterSharedTransition);
+
+    static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
+        const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
+    {
+        Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
+        ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
@@ -203,20 +302,38 @@ public:
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
     static void SetFocusScopePriority(
         FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
+    static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
+    static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
+    static void SetUseEffect(
+        FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt);
+    static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
+    static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
+    static void SetClickEffectLevel(FrameNode* frameNode,
+        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetPixelStretchEffect(FrameNode* frameNode,
+        const std::optional<PixStretchEffectOption>& option);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOnGestureRecognizerJudgeBegin(
         FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool innerGestureFlag = false);
-    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
-    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
-    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
-    static void SetClickEffectLevel(FrameNode* frameNode,
-        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
     static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
     static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
+    static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
+    static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
+        .disableSystemAdaptation = false
+    };
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
@@ -226,8 +343,16 @@ private:
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-
 };
+
+
+// multi thread function start
+void SetBackgroundEffectMultiThread(FrameNode* frameNode,
+    const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);
+void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H

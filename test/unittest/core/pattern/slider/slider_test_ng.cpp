@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -514,7 +514,9 @@ HWTEST_F(SliderTestNg, SliderTestNg006, TestSize.Level1)
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
@@ -2213,7 +2215,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest001, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 1.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT.ConvertToPx());
@@ -2266,7 +2271,10 @@ HWTEST_F(SliderTestNg, PaintVerticalBubbleSuitableAgingTest002, TestSize.Level1)
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintVerticalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = OffsetF(), suitable aging level = 2.
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.bubbleSize_ = SizeF(BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH.ConvertToPx(),
         BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT.ConvertToPx());
@@ -2339,6 +2347,68 @@ HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0001, TestSize.Level1)
     layoutProperty->layoutPolicy_ = layoutPolicyProperty;
     auto ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
+}
+
+/**
+ * @tc.name: SliderTestNgMeasureContent0002
+ * @tc.desc: Test Slider MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    SliderModelNG sliderModelNG;
+    constexpr float stepValue = 10.0f;
+    constexpr float startValue = 70.0f;
+    sliderModelNG.Create(startValue, stepValue, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set sliderLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, BLOCK_SIZE_F_ZREO);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, BLOCK_SIZE_F_ZREO);
 }
 
 /**
@@ -2547,5 +2617,51 @@ HWTEST_F(SliderTestNg, CreateWithStringResourceObj, TestSize.Level1)
     ASSERT_NE(resMgr, nullptr);
     auto count = resMgr->resMap_.count(key);
     EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest
+ * @tc.desc: Test SliderContentModifier Constructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderContentModifierTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parameters.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    parameters.blockColor = std::nullopt;
+    parameters.blockGradientColor = SliderModelNG::CreateSolidGradient(TEST_COLOR);
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    std::vector<GradientColor> gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), TEST_COLOR);
+    }
+    parameters.blockColor = TEST_COLOR;
+    parameters.blockGradientColor = std::nullopt;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), TEST_COLOR);
+    }
+    parameters.blockGradientColor = std::nullopt;
+    parameters.blockColor = std::nullopt;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color themeColor = theme->GetBlockColor();
+    gradientColors = sliderPattern->sliderContentModifier_->GetBlockColor();
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        EXPECT_EQ(gradientColors[i].GetLinearColor().ToColor(), themeColor);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -114,7 +114,7 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
     }
     public enableInc(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkCounterComponent extends ArkCommonMethodComponent implements CounterAttribute {
     getPeer(): ArkCounterPeer {

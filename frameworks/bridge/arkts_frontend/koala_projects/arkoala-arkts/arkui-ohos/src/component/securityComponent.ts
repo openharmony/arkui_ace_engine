@@ -141,7 +141,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_fontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    fontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    fontWeightAttribute(value: int32 | FontWeight | string | Resource | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -150,15 +150,15 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_value)) {
+            if (TypeChecker.isFontWeight(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as int32
+                thisSerializer.writeNumber(value_value_0)
             }
             else if (RuntimeType.STRING == value_value_type) {
                 thisSerializer.writeInt8(2 as int32)
@@ -603,7 +603,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_maxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    maxLinesAttribute(value: number | undefined): void {
+    maxLinesAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -727,7 +727,7 @@ export interface SecurityComponentMethod {
     offset(value: Position | Edges | LocalizedEdges | undefined): this
     fontSize(value: Dimension | undefined): this
     fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
+    fontWeight(value: int32 | FontWeight | string | Resource | undefined): this
     fontFamily(value: string | Resource | undefined): this
     fontColor(value: ResourceColor | undefined): this
     iconColor(value: ResourceColor | undefined): this
@@ -735,7 +735,7 @@ export interface SecurityComponentMethod {
     borderStyle(value: BorderStyle | undefined): this
     borderWidth(value: Dimension | undefined): this
     borderColor(value: ResourceColor | undefined): this
-    borderRadius(value: Dimension | undefined | Dimension | BorderRadiuses | undefined): this
+    borderRadius(value: Dimension | BorderRadiuses | undefined): this
     padding(value: Padding | Dimension | undefined): this
     textIconSpace(value: Dimension | undefined): this
     key(value: string | undefined): this
@@ -748,7 +748,7 @@ export interface SecurityComponentMethod {
     id(value: string | undefined): this
     minFontScale(value: number | Resource | undefined): this
     maxFontScale(value: number | Resource | undefined): this
-    maxLines(value: number | undefined): this
+    maxLines(value: int32 | undefined): this
     minFontSize(value: number | string | Resource | undefined): this
     maxFontSize(value: number | string | Resource | undefined): this
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
@@ -763,7 +763,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     offset_value?: Position | Edges | LocalizedEdges | undefined
     fontSize_value?: Dimension | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | Resource | undefined
     fontFamily_value?: string | Resource | undefined
     fontColor_value?: ResourceColor | undefined
     iconColor_value?: ResourceColor | undefined
@@ -784,7 +784,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     id_value?: string | undefined
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
-    maxLines_value?: number | undefined
+    maxLines_value?: int32 | undefined
     minFontSize_value?: number | string | Resource | undefined
     maxFontSize_value?: number | string | Resource | undefined
     heightAdaptivePolicy_value?: TextHeightAdaptivePolicy | undefined
@@ -810,7 +810,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     public fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | Resource | undefined): this {
         return this
     }
     public fontFamily(value: string | Resource | undefined): this {
@@ -834,7 +834,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     public borderColor(value: ResourceColor | undefined): this {
         return this
     }
-    public borderRadius(value: Dimension | undefined | Dimension | BorderRadiuses | undefined): this {
+    public borderRadius(value: Dimension | BorderRadiuses | undefined): this {
         return this
     }
     public padding(value: Padding | Dimension | undefined): this {
@@ -873,7 +873,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     public maxFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         return this
     }
     public minFontSize(value: number | string | Resource | undefined): this {
@@ -890,7 +890,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {
@@ -952,9 +952,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | Resource | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | Resource | undefined)
             this.getPeer()?.fontWeightAttribute(value_casted)
             return this
         }
@@ -1016,14 +1016,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    public borderRadius(value: Dimension | undefined | Dimension | BorderRadiuses | undefined): this {
+    public borderRadius(value: Dimension | BorderRadiuses | undefined): this {
         if (this.checkPriority("borderRadius")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (Dimension | undefined)
-                this.getPeer()?.borderRadius0Attribute(value_casted)
-                return this
-            }
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (Dimension | BorderRadiuses | undefined)
                 this.getPeer()?.borderRadius1Attribute(value_casted)
@@ -1138,9 +1133,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    public maxLines(value: number | undefined): this {
+    public maxLines(value: int32 | undefined): this {
         if (this.checkPriority("maxLines")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.maxLinesAttribute(value_casted)
             return this
         }

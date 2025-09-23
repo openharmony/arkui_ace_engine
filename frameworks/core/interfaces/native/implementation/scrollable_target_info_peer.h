@@ -42,4 +42,11 @@ private:
 
 struct ScrollableTargetInfoPeer : public OHOS::Ace::NG::GeneratedModifier::ScrollableTargetInfoPeerImpl {
     DECLARE_ACE_TYPE(ScrollableTargetInfoPeer, OHOS::Ace::NG::GeneratedModifier::ScrollableTargetInfoPeerImpl);
+public:
+    static ScrollableTargetInfoPeer* Create()
+    {
+        auto peer = AceType::MakeRefPtr<ScrollableTargetInfoPeer>();
+        peer->IncRefCount();
+        return AceType::RawPtr(peer);
+    }
 };

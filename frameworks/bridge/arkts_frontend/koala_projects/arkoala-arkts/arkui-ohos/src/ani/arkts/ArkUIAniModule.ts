@@ -13,38 +13,254 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
+import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
+import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { DrawModifier } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from "arkui/component"
+import { ArkCustomComponent } from "arkui/ArkCustomComponent"
+import { WaterFlowOptions, WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
+import { HookDragInfo } from "arkui/handwritten"
+import { dragController } from "@ohos/arkui/dragController"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
+import { uiObserver }  from "@ohos/arkui/observer"
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 
 export class ArkUIAniModule {
     static {
-        loadLibrary("arkoala_native_ani")
+        loadLibrary('arkoala_native_ani')
     }
 
-    native static _Image_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
-
+    native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
+    native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
+    native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
-
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
-
-    native static _Common_GetHostContext(key: KInt): common.Context
-
+    native static _Common_GetHostContext(): common.Context
+    native static _Common_SetFrameRateRange(ptr: KPointer, value: ExpectedFrameRateRange, type: KInt): void
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
-
+    native static _Common_Get_Current_InstanceId(): KInt
+    native static _Common_GetFocused_InstanceId(): KInt
+    native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
+    native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
+    native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt
+    native static _CreateRenderNodePeerWithNodePtr(ptr: KPointer): KPointer
+    native static _ToColorLong(color: KInt): KLong
+    native static _ToColorInt(color: KLong): KInt
+    native static _Common_GetSharedLocalStorage(): LocalStorage
+    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_RequestFrame(): void
+    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
+    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
+    native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
-
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
-
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
-
-    native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
-
+    native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
+    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
+    native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
+
+    native static _TransferKeyEventPointer(input: KPointer): KPointer
+    native static _CreateKeyEventAccessorWithPointer(input: KPointer): KPointer
+    native static _CreateEventTargetInfoAccessor(): KPointer
+    native static _EventTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _CreateScrollableTargetInfoAccessor(): KPointer
+    native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
+    native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
+
+
+    // for Drag
+    native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
+    native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
+    native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
+    // native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string
+    native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
+    native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
+    native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
+    native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
+    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
+    native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+    native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
+
+    native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
+    native static _getDragEventPointer(input: KPointer): KPointer
+
+    // for componentSnapshot
+    native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
+        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): void
+    native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+    native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+
+    // for dragController
+    native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void
+    native static _DragController_executeDragWithPromise(custom: DragItemInfo, builder: KPointer,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo): Promise<dragController.DragEventParam>
+    native static _DragController_createDragAction(customArray: Array<DragItemInfo>, builderArray: Array<KPointer>,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo): dragController.DragAction
+    native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void>
+    native static _DragController_on(type: string, callback: Callback<dragController.DragAndDropInfo>,
+        dragActionPtr: KPointer): void
+    native static _DragController_off(type: string, callback: Callback<dragController.DragAndDropInfo> | undefined,
+        dragActionPtr: KPointer): void
+    native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
+    native static _DragController_cancelDataLoading(key: string): void
+    native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
+    native static _DragController_getDragPreview(): dragController.DragPreview
+    native static _DragController_setForegroundColor(
+        thisArray: KSerializerBuffer, thisLength: number, dragPreviewPtr: KPointer): void
+    native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
+        dragPreviewPtr: KPointer): void
+    native static _DragController_cleanDragAction(dragActionptr: KPointer): void
+    native static _DragController_cleanDragPreview(dragPreviewptr: KPointer): void
+
+    native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void
+    native static _Animation_CreatePageTransitionEnter(options: PageTransitionOptions): void
+    native static _Animation_CreatePageTransitionExit(options: PageTransitionOptions): void
+    native static _Animation_PageTransitionSetOnEnter(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetOnExit(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetSlide(value: SlideEffect): void
+    native static _Animation_PageTransitionSetTranslate(value: TranslateOptions): void
+    native static _Animation_PageTransitionSetScale(value: ScaleOptions): void
+    native static _Animation_PageTransitionSetOpacity(value: number): void
+
+    native static _CreateViewStackProcessor(): KPointer
+
+    native static _PopViewStackProcessor(): KPointer
+
+    native static _DeleteViewStackProcessor(ptr: KPointer): void
+
+    native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
+    // for StyledString
+    native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
+    // for search
+    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+
+    // for ImageSpan
+    native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
+    native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
+    native static _ImageSpan_Set_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
+
+    native static _SetCustomCallback(ptr: KPointer,
+        measureCallback: ((width1: number, height1: number, width2: number, height2: number, width3: number,
+        height3: number) => void), layoutCallback: ((x: number, y: number) => void)): void
+    native static _RequireArkoalaNodeId(capacity: KInt): KInt
+
+    // for Video
+    native static _Video_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+
+    // for Shape
+    native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+
+    // for RichEditor
+    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
+
+    // for  stateMgmt
+    native static _PersistentStorage_Get(key: string): string
+    native static _PersistentStorage_Set(key: string, value: string): void
+    native static _PersistentStorage_Has(key: string): boolean
+    native static _PersistentStorage_Clear(): void
+    native static _PersistentStorage_Delete(key: string): void
+    native static _Env_GetColorMode(): KInt
+    native static _Env_GetFontScale(): KFloat
+    native static _Env_GetFontWeightScale(): KFloat
+    native static _Env_GetAccessibilityEnabled(): boolean
+    native static _Env_GetLayoutDirection(): string
+    native static _Env_GetLanguageCode(): string
+
+    // for XComponent
+    native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    // for ComponentContent
+    native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
+    native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
+
+    native static _CheckIsUIThread(id: KInt): KBoolean
+    native static _IsDebugMode(id: KInt): KBoolean
+    native static _OnMeasure_InnerMeasure(ptr: KPointer): void
+    native static _OnLayout_InnerLayout(ptr: KPointer): void
+    native static _SetParallelScoped(parallel: boolean): void
+    native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
+        getCallback: (name: string) => string | undefined): void
+    native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
+    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+
+    native static _Common_vp2px(value:number, instanceId: KInt): number
+    native static _Common_px2vp(value:number, instanceId: KInt): number
+    native static _Common_fp2px(value:number, instanceId: KInt): number
+    native static _Common_px2fp(value:number, instanceId: KInt): number
+    native static _Common_lpx2px(value:number, instanceId: KInt): number
+    native static _Common_px2lpx(value:number, instanceId: KInt): number
+
+    // for transfer
+    native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createMouseEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createAxisEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createClickEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createHoverEventAccessorWithPointer(input: KPointer): KPointer
+    native static _getTouchEventPointer(peer: KPointer): KPointer
+    native static _getMouseEventPointer(peer: KPointer): KPointer
+    native static _getAxisEventPointer(peer: KPointer): KPointer
+    native static _getClickEventPointer(peer: KPointer): KPointer
+    native static _getHoverEventPointer(peer: KPointer): KPointer
+    // for Canvas
+    native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap
+    native static _CanvasRenderer_DrawPixelMap0(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number): void
+    native static _CanvasRenderer_DrawPixelMap1(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number, dw: number, dh: number): void
+    native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+    native static _ImageBitmap_Construct0(src: string, unit: KInt): KPointer
+    native static _ImageBitmap_Construct1(src: image.PixelMap, unit: KInt): KPointer
+    native static _CanvasRenderer_GetCanvasDensity(peerPtr: KPointer): number
+    native static _GetSystemDensity(): number
+    native static _CanvasRenderer_GetImageData(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): Uint8ClampedArray
+    native static _CanvasRenderer_PutImageData0(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt): void
+    native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
+        dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
+
+    native static _GetColorValue(color: number | string): KUInt
+    native static _GetStringColorValue(color: string): KUInt
+    native static _GetNumberColorValue(color: number): KUInt
+    native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
+    native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
+    native static _RemoveThemeInNative(withThemeId: number): void
+    native static _UpdateColorMode(colorMode: KInt): void
+    native static _RestoreColorMode(): void
+    native static _SetThemeScopeId(themeScopeId: number): void
+    native static _CreateAndBindTheme(
+        themeScopeId: KInt,
+        themeId: KInt,
+        thisArray: KSerializerBuffer, thisLength: number,
+        colorMode: KInt,
+        onThemeScopeDestroy: () => void
+    ): void;
+    native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+
+    native static _SyntaxItem_Construct(id: KInt): KPointer
+    native static _ForEachNode_Construct(id: KInt): KPointer
 }

@@ -37,6 +37,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/native_curve_helper.h"
@@ -45,6 +46,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -292,8 +294,10 @@ RosenRenderContext::~RosenRenderContext()
     StopRecordingIfNeeded();
     DetachModifiers();
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveExtraCustomProperty("RS_NODE");
+    if (host) {
+        host->RemoveExtraCustomProperty("RS_NODE");
+    }
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
 }
 
 void RosenRenderContext::DetachModifiers()
@@ -4458,9 +4462,11 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     CHECK_NULL_RETURN(rsNode, false);
     std::list <RefPtr<FrameNode>> childChildrenList;
     node->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
+    // A NodeContainer node exist mounted to multiple parent nodes.
+    // If NodeContainers are deleted in this scenario, compatibility issues may occur.
     if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
         || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
-        || node->GetTag() == V2::STAGE_ETS_TAG) {
+        || node->GetTag() == V2::STAGE_ETS_TAG || node->GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
         return false;
     }
     return true;

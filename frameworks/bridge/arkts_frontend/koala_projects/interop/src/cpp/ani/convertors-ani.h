@@ -15,7 +15,6 @@
 
 #ifdef KOALA_ANI
 
-#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -25,6 +24,16 @@
 
 #include "ani.h"
 #include "koala-types.h"
+#include "interop-logging.h"
+
+#define CHECK_ANI_FATAL(result)                                                            \
+do {                                                                                       \
+  ani_status res = (result);                                                               \
+  if (res != ANI_OK) {                                                                     \
+    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", res,  __LINE__); \
+  }                                                                                        \
+}                                                                                          \
+while (0)
 
 template<class T>
 struct InteropTypeConverter {
@@ -122,22 +131,23 @@ struct InteropTypeConverter<KVMObjectHandle> {
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
       if (value == nullptr) return KInteropBuffer();
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
       KByte* data = new KByte[length];
-      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
       KInteropBuffer result = { 0 };
       result.data = data;
-      result.length = length;
+      result.length = static_cast<KLong>(length);
       return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
-      ani_array_byte result;
-      env->Array_New_Byte(value.length, &result);
-      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      ani_fixedarray_byte result;
+      CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
+      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length,
+        reinterpret_cast<const ani_byte*>(value.data)));
       value.dispose(value.resourceId);
       return result;
     }
@@ -158,12 +168,13 @@ struct InteropTypeConverter<KSerializerBuffer> {
 
 template<>
 struct InteropTypeConverter<KInteropReturnBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
-      ani_array_byte result;
-      env->Array_New_Byte(value.length, &result);
-      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      ani_fixedarray_byte result;
+      CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
+      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length,
+        reinterpret_cast<const ani_byte*>(value.data)));
       value.dispose(value.data, value.length);
       return result;
     };
@@ -178,18 +189,23 @@ struct InteropTypeConverter<KStringPtr> {
         KStringPtr result;
         // Notice that we use UTF length for buffer size, but counter is expressed in number of Unicode chars.
         ani_size lengthUtf8 = 0;
-        env->String_GetUTF8Size(value, &lengthUtf8);
+        CHECK_ANI_FATAL(env->String_GetUTF8Size(value, &lengthUtf8));
         result.resize(lengthUtf8);
-        ani_size lengthUtf16 = 0;
-        env->String_GetUTF16Size(value, &lengthUtf16);
         ani_size count = 0;
-        env->String_GetUTF8SubString(value, 0, lengthUtf16, result.data(), lengthUtf8 + 1, &count);
-        result.data()[lengthUtf8] = 0;
+        CHECK_ANI_FATAL(env->String_GetUTF8SubString(value, 0, lengthUtf8, result.data(), lengthUtf8 + 1, &count));
+        if (result.data()) {
+          result.data()[lengthUtf8] = 0;
+        }
         return result;
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
-      env->String_NewUTF8(value.c_str(), value.length() - 1 /* drop zero terminator */, &result);
+      int length = value.length();
+      if (length > 0 && value.c_str()[length - 1] == 0) {
+          CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length - 1 /* drop zero terminator */, &result));
+      } else {
+          CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length, &result));
+      }
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}
@@ -212,19 +228,18 @@ struct InteropTypeConverter<KInt*> {
     using InteropType = ani_array_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
-      KInt* result = nullptr;
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KInt* data = new KInt[length];
-      env->Array_GetRegion_Int(value, 0, length, (ani_int*)data);
+      CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
       return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted);
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        CHECK_ANI_FATAL(env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted));
       }
       delete [] converted;
     }
@@ -236,17 +251,17 @@ struct InteropTypeConverter<KFloat*> {
     static KFloat* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KFloat* data = new KFloat[length];
-      env->Array_GetRegion_Float(value, 0, length, (ani_float*)data);
+      CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
       return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted);
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        CHECK_ANI_FATAL(env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted));
       }
       delete [] converted;
     }
@@ -258,17 +273,21 @@ struct InteropTypeConverter<KByte*> {
     static KByte* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KByte* data = new KByte[length];
-      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      if (length > 0) {
+          CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+      }
       return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted);
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        if (length > 0) {
+            CHECK_ANI_FATAL(env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted));
+        }
       }
       delete[] converted;
     }
@@ -295,40 +314,40 @@ struct InteropTypeConverter<KLength> {
     static ani_class string_class = nullptr;
     static ani_class resource_class = nullptr;
     if (!double_class) {
-      env->FindClass("Lstd/core/Double;", &double_class);
+      CHECK_ANI_FATAL(env->FindClass("Lstd/core/Double;", &double_class));
     }
     if (!int_class) {
-      env->FindClass("Lstd/core/Int;", &int_class);
+      CHECK_ANI_FATAL(env->FindClass("Lstd/core/Int;", &int_class));
     }
     if (!string_class) {
-      env->FindClass("Lstd/core/String;", &string_class);
+      CHECK_ANI_FATAL(env->FindClass("Lstd/core/String;", &string_class));
     }
     if (!resource_class) {
-      env->FindClass("L@koalaui/arkts-arkui/generated/ArkResourceInterfaces/Resource;", &resource_class);
+      CHECK_ANI_FATAL(env->FindClass("L@ohos/arkui/generated/resource/Resource;", &resource_class));
     }
 
     const ani_object valueObj = reinterpret_cast<ani_object>(value);
 
     ani_boolean isInstanceOf;
-    env->Object_InstanceOf(valueObj, double_class, &isInstanceOf);
+    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, double_class, &isInstanceOf));
     if (isInstanceOf) {
       static ani_method double_p = nullptr;
-      if (!double_p) env->Class_FindMethod(double_class, "unboxed", ":D", &double_p);
+      if (!double_p) CHECK_ANI_FATAL(env->Class_FindMethod(double_class, "unboxed", ":D", &double_p));
       ani_double result;
-      env->Object_CallMethod_Double(valueObj, double_p, &result);
+      CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, double_p, &result));
       return KLength{ 1, (KFloat) result, 1, 0 };
     }
 
-    env->Object_InstanceOf(valueObj, int_class, &isInstanceOf);
+    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, int_class, &isInstanceOf));
     if (isInstanceOf) {
       static ani_method int_p = nullptr;
-      if (!int_p) env->Class_FindMethod(int_class, "unboxed", ":I", &int_p);
+      if (!int_p) CHECK_ANI_FATAL(env->Class_FindMethod(int_class, "unboxed", ":I", &int_p));
       ani_int result;
-      env->Object_CallMethod_Int(valueObj, int_p, &result);
+      CHECK_ANI_FATAL(env->Object_CallMethod_Int(valueObj, int_p, &result));
       return KLength{ 1, (KFloat) result, 1, 0 };
     }
 
-    env->Object_InstanceOf(valueObj, string_class, &isInstanceOf);
+    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, string_class, &isInstanceOf));
     if (isInstanceOf) {
       KStringPtr ptr = InteropTypeConverter<KStringPtr>::convertFrom(env, reinterpret_cast<ani_string>(value));
       KLength length { 0 };
@@ -338,12 +357,12 @@ struct InteropTypeConverter<KLength> {
       return length;
     }
 
-    env->Object_InstanceOf(valueObj, resource_class, &isInstanceOf);
+    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, resource_class, &isInstanceOf));
     if (isInstanceOf) {
       static ani_method resource_p = nullptr;
-      if (!resource_p) env->Class_FindMethod(resource_class, "<get>id",":D", &resource_p);
+      if (!resource_p) CHECK_ANI_FATAL(env->Class_FindMethod(resource_class, "<get>id",":D", &resource_p));
       ani_double result;
-      env->Object_CallMethod_Double(valueObj, resource_p, &result);
+      CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, resource_p, &result));
       return KLength{ 3, 0, 1, (KInt) result };
     }
 
@@ -607,7 +626,7 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
 
 #define KOALA_INTEROP_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
-  InteropTypeConverter<Ret>::InteropType Ani_##name(ani_env *env, \
+  InteropTypeConverter<Ret>::InteropType Ani_##name(ani_env *env, ani_class clazz, \
     InteropTypeConverter<P0>::InteropType _p0, \
     InteropTypeConverter<P1>::InteropType _p1, \
     InteropTypeConverter<P2>::InteropType _p2, \
@@ -894,7 +913,7 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10 "|" #P11 "|" #P12 "|" #P13, 0)
 
 #define KOALA_INTEROP_V0(name) \
-  void Ani_##name(ani_env *env) { \
+  void Ani_##name(ani_env *env, ani_class clazz) { \
       KOALA_MAYBE_LOG(name)                   \
       impl_##name(); \
   } \
@@ -1867,49 +1886,55 @@ bool setKoalaANICallbackDispatcher(
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
 
 // TODO: maybe use CreateArrayBufferExternal here instead, no need for allocations.
-#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                \
-{                                                                                      \
-  ani_class clazz = nullptr;                                                           \
-  ani_static_method method = nullptr;                                                  \
-  getKoalaANICallbackDispatcher(&clazz, &method);                                      \
-  ani_env* env = reinterpret_cast<ani_env*>(venv);                                     \
-  ani_int result = 0;                                                                  \
-  long long args_casted = reinterpret_cast<long long>(args);                           \
-  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length);    \
+#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                                 \
+{                                                                                                       \
+  ani_class clazz = nullptr;                                                                            \
+  ani_static_method method = nullptr;                                                                   \
+  getKoalaANICallbackDispatcher(&clazz, &method);                                                       \
+  ani_env* env = reinterpret_cast<ani_env*>(venv);                                                      \
+  ani_int result = 0;                                                                                   \
+  long long args_casted = reinterpret_cast<long long>(args);                                            \
+  CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));    \
 }
 
-#define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                       \
-{                                                                                            \
-    ani_class clazz = nullptr;                                                               \
-    ani_static_method method = nullptr;                                                      \
-    getKoalaANICallbackDispatcher(&clazz, &method);                                          \
-    ani_env* env = reinterpret_cast<ani_env*>(venv);                                         \
-    ani_int result = 0;                                                                      \
-    long long args_casted = reinterpret_cast<long long>(args);                               \
-    env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length);        \
-    return result;                                                                           \
+#define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                                  \
+{                                                                                                       \
+    ani_class clazz = nullptr;                                                                          \
+    ani_static_method method = nullptr;                                                                 \
+    getKoalaANICallbackDispatcher(&clazz, &method);                                                     \
+    ani_env* env = reinterpret_cast<ani_env*>(venv);                                                    \
+    ani_int result = 0;                                                                                 \
+    long long args_casted = reinterpret_cast<long long>(args);                                          \
+    CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));  \
+    return result;                                                                                      \
 }
 
 #define KOALA_INTEROP_CALL_VOID_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_VOID(venv, id, (argc) * sizeof(int32_t), args)
 #define KOALA_INTEROP_CALL_INT_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_INT(venv, id, (argc) * sizeof(int32_t), args)
 
-#define KOALA_INTEROP_THROW(vmContext, object, ...) \
-   do { \
-     ani_env* env = reinterpret_cast<ani_env*>(vmContext); \
-     env->ThrowError(object); \
-     return __VA_ARGS__;  \
+#define KOALA_INTEROP_THROW(vmContext, object, ...)         \
+   do {                                                     \
+     ani_env* env = reinterpret_cast<ani_env*>(vmContext);  \
+     CHECK_ANI_FATAL(env->ThrowError(object));              \
+     return __VA_ARGS__;                                    \
    } while (0)
 
-#define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
-  do { \
-    ani_env* env = reinterpret_cast<ani_env*>(vmContext); \
-    ani_class errorClass = nullptr; \
-    env->FindClass("Lstd/core/Error;", &errorClass); \
-    ani_method errorCtor = nullptr; \
-    env->Class_FindMethod(errorClass, "<init>", "Lstd/core/Error;", &errorCtor); \
-    ani_error messageObject = nullptr; \
-    env->Object_New(errorClass, errorCtor, (ani_object*)&messageObject, message); \
-    env->ThrowError(messageObject); \
+#define KOALA_INTEROP_THROW_STRING(vmContext, message, ...)                                             \
+  do {                                                                                                  \
+    ani_env* env = reinterpret_cast<ani_env*>(vmContext);                                               \
+    ani_class errorClass {};                                                                            \
+    CHECK_ANI_FATAL(env->FindClass("Lescompat/Error;", &errorClass));                                   \
+    ani_method errorCtor {};                                                                            \
+    CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
+      "Lstd/core/String;Lescompat/ErrorOptions;:V", &errorCtor));                                       \
+    ani_string messageObject{};                                                                         \
+    CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
+    ani_ref undefined{};                                                                                \
+    CHECK_ANI_FATAL(env->GetUndefined(&undefined));                                                     \
+    ani_object throwObject{};                                                                           \
+    CHECK_ANI_FATAL(env->Object_New(errorClass, errorCtor, &throwObject, messageObject, undefined));    \
+    CHECK_ANI_FATAL(env->ThrowError(static_cast<ani_error>(throwObject)));                              \
+    return __VA_ARGS__;                                                                                 \
   } while (0)
 
 #endif // KOALA_ANI

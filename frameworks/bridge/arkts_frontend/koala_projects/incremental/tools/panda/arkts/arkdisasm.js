@@ -23,12 +23,15 @@ const { formatCommand,
     getUsage,
     checkForHelp } = require('./common')
 
+ark_disasm_path = process.env.ARKDISASM_PATH
+ark_disasm_path = ark_disasm_path ?? path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_disasm')
+
 const ARGS_SPEC = [
     {
         flag: '--arkdisasm-bin',
         help: 'Path to arkdisasm binary',
         domain: 'string',
-        default: path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_disasm')
+        default: ark_disasm_path
     },
     ...DEFAULT_DRIVER_FLAGS,
 ]

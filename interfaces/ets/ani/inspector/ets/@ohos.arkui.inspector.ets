@@ -12,19 +12,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ import { Callback, RecordData } from '@ohos.base';
+ import hilog from '@ohos.hilog';
+ 
+ const DOMAIN_ID = 0x0000;
+ const TAG = 'InspetorTreeSerializeTool';
+ 
  export default namespace inspector {
     loadLibrary("inspector_ani");
     
-    export native function createComponentObserver(id: string): ComponentObserver;
+    export function getInspectorTree(): RecordData {
+        let inspectorTree: string = getInspectorTreeNative();
+        return InspetorTreeSerializeTool.parseNoThrow(inspectorTree);
+    }
+    
+    export native function createComponentObserver(id: string): ComponentObserver | undefined;
     export native function getInspectorByKey(id: string): string;
-    export native function sendEventByKey(id: string, action: number, params: string): boolean;
-    export native function getInspectorTree(): Object;
+    export native function sendEventByKey(id: string, action: int, params: string): boolean;
+    native function getInspectorTreeNative(): string;
+    export native function getFilteredInspectorTree(filters?: Array<string>): string;
+    export native function getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string;
     
     export default interface ComponentObserver
     {
-        on(type: string, callback: ()=>void) : void;
+        on(type: string, callback: Callback<void>): void;
+ 
+        off(type: string, callback?: Callback<void>): void;
+        
+        onLayout(type: 'layout', callback: Callback<void>): void;
+        
+        offLayout(type: 'layout', callback?: Callback<void>): void;
+        
+        onDraw(type: 'draw', callback: Callback<void>): void;
+        
+        offDraw(type: 'draw', callback?: Callback<void>): void;
 
-        off(type: string, callback?: ()=>void) : void;
+        onDrawChildren(type: 'drawChildren', callback: Callback<void>): void;
+        
+        offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void;
     }
     
     class ComponentObserverImpl implements ComponentObserver
@@ -37,8 +62,86 @@
             }
         }
         
-        public native on(type: string, callback: ()=>void) : void;
+        public onLayout(type: 'layout', callback: Callback<void>): void {
+            this.on('layout', callback);
+        }
+        
+        public offLayout(type: 'layout', callback?: Callback<void>): void {
+            this.off('layout', callback);
+        }
+        
+        public onDraw(type: 'draw', callback: Callback<void>): void {
+            this.on('draw', callback);
+        }
+        
+        public offDraw(type: 'draw', callback?: Callback<void>): void {
+            this.off('draw', callback);
+        }
 
-        public native off(type: string, callback?: ()=>void) : void;
+        public onDrawChildren(type: 'drawChildren', callback: Callback<void>): void {
+            this.on('drawChildren', callback);
+        }
+        
+        public offDrawChildren(type: 'drawChildren', callback?: Callback<void>): void {
+            this.off('drawChildren', callback);
+        }
+        
+        public native on(type: string, callback: Callback<void>) : void;
+
+        public native off(type: string, callback?: Callback<void>) : void;
     }
  }
+ 
+ class InspetorTreeSerializeTool {
+    public static parseNoThrow(inspectorTree: string): RecordData {
+        try {
+            let jsonValue = JSONParser.parse(inspectorTree);
+            let res = InspetorTreeSerializeTool.jsonValue2Object(jsonValue);
+            if (!(res instanceof Record)) {
+                hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.parse not Record`);
+                return new Record<string, Object>();
+            }
+            return res as Record<string, RecordData>;
+        } catch (err) {
+            hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.parse error: ${err}`);
+            return new Record<string, Object>();
+        }
+    }
+
+    private static jsonValue2Object(value: JSONValue): RecordData {
+        if (value instanceof JSONString) {
+            return value.value;
+        } else if (value instanceof JSONNumber) {
+            return new Double(value.value);
+        } else if (value instanceof JSONTrue) {
+            return new Boolean(true);
+        } else if (value instanceof JSONFalse) {
+            return new Boolean(false);
+        } else if (value instanceof JSONNull) {
+            return null;
+        } else if (value instanceof JSONArray) {
+            let obj = value as JSONArray;
+            let values = obj.values;
+            let result: Array<RecordData> = new Array<RecordData>();
+            for (let i: int = 0; i < values.length; i++) {
+                result.push(InspetorTreeSerializeTool.jsonValue2Object(values[i]));
+            }
+            return result;
+        } else if (value instanceof JSONObject) {
+            let obj = value as JSONObject;
+            let keys: Array<JSONString> = obj.keys_;
+            let values: Array<JSONValue> = obj.values;
+            let result: Record<string, RecordData> = new Record<string, RecordData>();
+            for (let i: int = 0; i < keys.length; i++) {
+                result[keys[i].value] = InspetorTreeSerializeTool.jsonValue2Object(values[i]);
+            }
+            return result;
+        } else {
+            throw new TypeError('unknown JSONValue');
+        }
+    }
+ }
+ 
+ export const GETINSPECTORBYKEY = inspector.getInspectorByKey;
+ export const GETINSPECTORTREE = inspector.sendEventByKey;
+ export const SENDEVENTBYKEY = inspector.getInspectorTree;

@@ -31,7 +31,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "converter.h"
 #include "validators.h"
@@ -79,7 +79,7 @@ void ConvContext::Clear()
 
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
-    CHECK_NULL_VOID(src.empty());
+    CHECK_NULL_VOID(src.size());
     JsonValue jsonValue;
     for (const auto& it : src) {
         jsonValue.Put((it.first.c_str()), it.second);
@@ -135,12 +135,50 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+void AssignArkValue(Ark_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.language = Converter::ArkValue<Ark_String>(src.font, ctx);
+}
+
+void AssignArkValue(Ark_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx)
+{
+    dst.fontSetName = Converter::ArkValue<Ark_String>(src.groupName, ctx);
+    dst.fallback = Converter::ArkValue<Array_UIFontFallbackInfo>(src.fallbackInfoSet, ctx);
+}
+
+void AssignArkValue(Ark_UIFontAdjustInfo& dst, const AdjustInfo& src)
+{
+    dst.weight = Converter::ArkValue<Ark_Number>(src.origValue);
+    dst.to = Converter::ArkValue<Ark_Number>(src.newValue);
+}
+
+void AssignArkValue(Ark_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx)
+{
+    dst.name = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.weight = Converter::ArkValue<Ark_Number>(src.weight);
+}
+
+void AssignArkValue(Ark_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx)
+{
+    dst.family = Converter::ArkValue<Ark_String>(src.familyName, ctx);
+    dst.alias = Converter::ArkValue<Array_UIFontAliasInfo>(src.aliasSet, ctx);
+    dst.adjust = Converter::ArkValue<Array_UIFontAdjustInfo>(src.adjustSet, ctx);
+}
+
+void AssignArkValue(Ark_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx)
+{
+    dst.fontDir = Converter::ArkValue<Array_String>(src.fontDirSet, ctx);
+    dst.generic = Converter::ArkValue<Array_UIFontGenericInfo>(src.genericSet, ctx);
+    dst.fallbackGroups = Converter::ArkValue<Array_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
+}
+
 void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
         dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
     } else {
-        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr);
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
     }
     dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
@@ -234,9 +272,13 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src)
 {
     std::pair<const Dimension, const Dimension> pair = {src.size.Width(), src.size.Height()};
     dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair);
-    if (src.pixmap) {
-        dst.pixelMap = PixelMapPeer::Create(src.pixmap);
-    }
+    dst.pixelMap = PixelMapPeer::Create(src.pixmap);
+}
+
+void AssignArkValue(Ark_Number& dst, const LeadingMargin& src)
+{
+    auto leadingMargin = Dimension(src.size.Width()).ConvertToVp();
+    dst = ArkValue<Ark_Number>(leadingMargin);
 }
 
 void AssignArkValue(Ark_Length& dst, const double& src)
@@ -263,6 +305,15 @@ void AssignArkValue(Ark_Length& dst, const float& src)
 void AssignArkValue(Ark_Length& dst, const CalcLength& src)
 {
     dst = ArkValue<Ark_Length>(src.GetDimension());
+}
+
+void AssignArkValue(Ark_Int32& dst, const Ark_Number& src)
+{
+    if (src.tag == INTEROP_TAG_INT32) {
+        dst = src.i32;
+    } else {
+        dst = static_cast<Ark_Int32>(src.f32);
+    }
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
@@ -395,18 +446,23 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
 void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
 {
     Ark_Area area;
-    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
-    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth().ConvertToVp());
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight().ConvertToVp());
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
-    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX().ConvertToVp());
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY().ConvertToVp());
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX().ConvertToVp());
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
-    dst.id = Converter::ArkValue<Opt_String>(src.id);
+    if (!src.id.empty()) {
+        dst.id = Converter::ArkValue<Opt_String>(src.id);
+    } else {
+        Opt_String optId = { .tag = INTEROP_TAG_UNDEFINED, .value = {} };
+        dst.id = optId;
+    }
 }
 
 void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
@@ -431,6 +487,12 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
 {
     dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+}
+
+void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
+{
+    dst.value = Converter::ArkValue<Ark_Number>(static_cast<float>(src.Value()));
+    dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
 }
 
 void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
@@ -610,7 +672,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
     dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.id.i32 = static_cast<int32_t>(src.GetTouchDeviceId());
+    dst.id.i32 = static_cast<int32_t>(src.GetFingerId());
 
     dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.screenX.f32 = static_cast<float>(
@@ -636,14 +698,11 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     
     dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressedTime.value.f32 = static_cast<float>(
-        src.GetPressedTime().time_since_epoch().count());
+    dst.pressedTime.value = static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count());
 
     dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressure.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.pressure.value.f32 = static_cast<float>(src.GetForce());
 
     dst.width.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.width.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
@@ -654,6 +713,9 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.height.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     dst.height.value.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
+
+    dst.hand.tag = Ark_Tag::INTEROP_TAG_OBJECT;
+    dst.hand.value = static_cast<Ark_InteractionHand>(src.GetOperatingHand());
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
@@ -684,12 +746,26 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
     dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
 }
 
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
+void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
-    dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
-    dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    auto arkEffectStrategy = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
+    dst.effectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(arkEffectStrategy);
+    auto arkRenderingStrategy = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    dst.renderingStrategy = Converter::ArkValue<Opt_SymbolRenderingStrategy>(arkRenderingStrategy);
+    if (src.symbolColor.size()) {
+        std::vector<Ark_ResourceColor> colors;
+        std::stringstream symbolColors(src.symbolColor);
+        std::string color;
+        while (std::getline(symbolColors, color, ',')) {
+            colors.push_back(ArkUnion<Ark_ResourceColor, Ark_String>(Color::FromString(color), ctx));
+        }
+        auto fontColor = Converter::ArkValue<Array_ResourceColor>(colors, ctx);
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(fontColor, ctx);
+    } else {
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(Ark_Empty(), ctx);
+    }
 }
 
 void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
@@ -710,10 +786,75 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
+std::optional<OHOS::Ace::NG::MarginProperty> ParseMarginString(const std::string& ss)
+{
+    constexpr int32_t MARGIN_MIN_LENGTH = 2;
+    constexpr int32_t EXPECTED_MARGIN_VALUES = 4;
+    if (ss.size() < MARGIN_MIN_LENGTH || ss[0] != '[' || ss.back() != ']') {
+        LOGE("Unexpected MarginString:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    std::string content = ss.substr(1, ss.size() - 2);
+    std::vector<std::string> values;
+    StringUtils::SplitStr(content, ",", values);
+    std::vector<std::optional<CalcLength>> lengths;
+    for (const auto& value : values) {
+        if (value == "NA") {
+            lengths.push_back(std::nullopt);
+        } else {
+            lengths.push_back(CalcLength::FromString(value));
+        }
+    }
+    if (lengths.size() != EXPECTED_MARGIN_VALUES) {
+        LOGE("Unexpected MarginString:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    OHOS::Ace::NG::MarginProperty marginProp  = {
+        .left = lengths[0],
+        .right = lengths[1],
+        .top = lengths[2],
+        .bottom = lengths[3]
+    };
+    return marginProp;
+}
+
+std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const std::string& ss)
+{
+    CHECK_NULL_RETURN(!ss.empty(), std::nullopt);
+    OHOS::Ace::NG::BorderRadiusProperty borderRadius;
+    if (ss[0] >= '0' && ss[0] <= '9') {
+        borderRadius.SetRadius(Dimension::FromString(ss));
+        borderRadius.multiValued = false;
+    } else if (ss[0] == '{') {
+        auto json = JsonUtil::ParseJsonString(ss);
+        CHECK_NULL_RETURN(json && json->IsValid(), std::nullopt);
+        borderRadius.radiusTopLeft = Dimension::FromString(json->GetString("topLeft"));
+        borderRadius.radiusTopRight = Dimension::FromString(json->GetString("topRight"));
+        borderRadius.radiusBottomLeft = Dimension::FromString(json->GetString("bottomLeft"));
+        borderRadius.radiusBottomRight = Dimension::FromString(json->GetString("bottomRight"));
+    } else {
+        LOGE("Unexpected Border Radius String:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    return borderRadius;
+}
+
 void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Length>(src.margin);
-    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(src.borderRadius);
+    dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
+    if (auto marginProp = ParseMarginString(src.margin)) {
+        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value());
+        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin);
+    }
+    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
+    auto borderRadius = ParseBorderRadiusString(src.borderRadius);
+    CHECK_NULL_VOID(borderRadius.has_value());
+    if (borderRadius->multiValued) {
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value());
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+    } else {
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(borderRadius->radiusTopLeft);
+    }
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)

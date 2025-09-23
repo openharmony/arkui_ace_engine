@@ -50,7 +50,9 @@ enum class PlatformVersion {
     VERSION_SEVENTEEN,
     VERSION_EIGHTEEN,
     VERSION_NINETEEN,
-    VERSION_TWENTY
+    VERSION_TWENTY,
+    VERSION_TWENTY_ONE,
+    VERSION_TWENTY_TWO
 };
 struct AceBundleInfo {
     uint32_t versionCode = 0;
@@ -106,6 +108,15 @@ public:
     const std::string& GetDataFileDirPath() const
     {
         return dataDirFilePath_;
+    }
+
+    void SetDebugForParallel(bool isDebug)
+    {
+        isDebugForParallel_ = isDebug;
+    }
+    bool IsDebugForParallel() const
+    {
+        return isDebugForParallel_;
     }
 
     void SetApiTargetVersion(int32_t apiVersion)
@@ -331,6 +342,7 @@ protected:
 
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
+    bool isDebugForParallel_ = false;
     bool needDebugBreakpoint_ = false;
     std::optional<bool> useNewPipeline_;
 

@@ -16,25 +16,40 @@
 #include "arkts_entry_loader.h"
 
 #include "base/log/log_wrapper.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/container.h"
+#include "utils/ani_utils.h"
+
+#include <regex>
 
 namespace OHOS::Ace {
 
 static const std::string ENTRY_PREFIX = "/src/main/ets/";
 static const std::string ENTRY_SUFFIX = "/__EntryWrapper";
+static const std::string ENTRY_PREFIX_REGEX = R"(\w+/src/\w+/\w+/)";
 
 ani_object EntryLoader::GetPageEntryObj()
 {
     auto container = Container::Current();
     if (!container) {
-        LOGE("EntryLoader GetPageEntryObj failed, container is null");
+        LOGE("EntryLoader get container failed");
         return nullptr;
     }
-    const std::string moduleName = container->GetModuleName();
     std::string entryPointName;
-    entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
-    entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    auto srcEntrance = container->GetSrcEntrance();
+    if (srcEntrance.empty()) {
+        const auto moduleName = container->GetModuleName();
+        entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
+        entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    } else {
+        std::regex regex(ENTRY_PREFIX_REGEX);
+        std::smatch prefixMatch;
+        if (std::regex_search(srcEntrance, prefixMatch, regex)) {
+            auto prefix = prefixMatch[0].str();
+            entryPointName.reserve(prefix.size() + url_.size() + ENTRY_SUFFIX.size());
+            entryPointName.append(prefix).append(url_).append(ENTRY_SUFFIX);
+        }
+    }
+
     ani_string entryStr;
     env_->String_NewUTF8(entryPointName.c_str(), entryPointName.length(), &entryStr);
     ani_class entryClass = nullptr;
@@ -44,7 +59,7 @@ ani_object EntryLoader::GetPageEntryObj()
     ani_ref linkerRef;
 
     do {
-        if ((state = static_cast<ani_status>(ArktsAniUtils::GetNearestNonBootRuntimeLinker(env_, linkerRef))) !=
+        if ((state = static_cast<ani_status>(Ani::AniUtils::GetNearestNonBootRuntimeLinker(env_, linkerRef))) !=
             ANI_OK) {
             LOGE("EntryLoader Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
             break;
@@ -62,7 +77,7 @@ ani_object EntryLoader::GetPageEntryObj()
         }
 
         ani_object isInit;
-        if ((state = static_cast<ani_status>(ArktsAniUtils::CreateAniBoolean(env_, false, isInit))) != ANI_OK) {
+        if ((state = static_cast<ani_status>(Ani::AniUtils::CreateAniBoolean(env_, false, isInit))) != ANI_OK) {
             LOGE("EntryLoader Create Boolean object failed, %{public}d", state);
             break;
         }
@@ -106,15 +121,15 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ani_type stringCls;
     ANI_CALL(env, Object_GetType(abcModulePathStr, &stringCls), return);
 
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(stringCls, 1, abcModulePathStr, &refArray), return);
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/AbcRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
@@ -127,23 +142,20 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_array_byte byteArray;
-    ANI_CALL(env, Array_New_Byte(abcContent.size(), &byteArray), return);
-    ANI_CALL(env, Array_SetRegion_Byte(
-        byteArray, 0, abcContent.size(), reinterpret_cast<const ani_byte*>(abcContent.data())), return);
+    ani_fixedarray_byte byteArray;
+    ANI_CALL(env, FixedArray_New_Byte(abcContent.size(), &byteArray), return);
+    const auto *data = reinterpret_cast<const ani_byte *>(abcContent.data());
+    ANI_CALL(env, FixedArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
 
-    ani_type byteArrayCls;
-    ANI_CALL(env, Object_GetType(byteArray, &byteArrayCls), return);
-
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(byteArrayCls, 1, byteArray, &refArray), return);
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, byteArray, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/MemoryRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[[B:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
@@ -166,6 +178,11 @@ ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
     ANI_CALL(env_, Object_New(static_cast<ani_class>(entryClass), entryCtor, &entryObject), return {});
 
     return entryObject;
+}
+
+ani_object EntryLoader::GetLinkObj()
+{
+    return runtimeLinkerObj_;
 }
 }
 } // namespace OHOS::Ace

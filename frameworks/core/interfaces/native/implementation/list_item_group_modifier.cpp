@@ -18,7 +18,8 @@
 #include "core/components_ng/pattern/list/list_item_group_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "frameworks/core/components/list/list_theme.h"
 #include "children_main_size_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -36,6 +37,13 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+
+RefPtr<ListTheme> GetListTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<ListTheme>();
+}
 } // ListItemGroupModifier
 namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
@@ -52,20 +60,24 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelStatic::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
-        CallbackHelper(header.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        CallbackHelper(header.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            auto headerNode = weak.Upgrade();
+            CHECK_NULL_VOID(headerNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetHeader(frameNode, std::move(builder));
+            ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), std::move(builder));
             }, node);
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
-        CallbackHelper(footer.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        CallbackHelper(footer.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            auto footerNode = weak.Upgrade();
+            CHECK_NULL_VOID(footerNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetFooter(frameNode, std::move(builder));
+            ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), std::move(builder));
             }, node);
     }
 }
@@ -76,9 +88,26 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListItemGroupModelStatic::SetDivider(frameNode, divider);
+    auto options = value ? Converter::OptConvert<Ark_ListDividerOptions>(*value) : std::nullopt;
+    V2::ItemDivider dividerAns;
+    if (options.has_value()) {
+        auto widthOpt = Converter::OptConvert<Dimension>(options->strokeWidth);
+        dividerAns.strokeWidth = widthOpt.value_or(0.0_vp);
+        auto startMarginOpt = Converter::OptConvert<Dimension>(options->startMargin);
+        dividerAns.startMargin = startMarginOpt.value_or(0.0_vp);
+        auto endMarginOpt = Converter::OptConvert<Dimension>(options->endMargin);
+        dividerAns.endMargin = endMarginOpt.value_or(0.0_vp);
+        auto colorOpt = Converter::OptConvert<Color>(options->color);
+        if (colorOpt.has_value()) {
+            dividerAns.color = colorOpt.value();
+        } else {
+            auto listTheme = ListItemGroupModifier::GetListTheme();
+            if (listTheme) {
+                dividerAns.color = listTheme->GetDividerColor();
+            }
+        }
+    }
+    ListItemGroupModelStatic::SetDivider(frameNode, dividerAns);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)

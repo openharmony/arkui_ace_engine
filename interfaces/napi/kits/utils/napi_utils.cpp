@@ -22,6 +22,7 @@ using namespace OHOS::Ace;
 namespace {
 
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr char BUNDLE_NAME[] = "bundleName";
@@ -926,6 +927,128 @@ bool ParseNapiDimensionNG(
         return true;
     }
     return false;
+}
+
+bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+
+    int32_t resId = resObj->GetId();
+    bool hasDarkRes = false;
+    auto params = resObj->GetParams();
+    if (resId == -1 && !params.empty() && params.back().value.has_value()) {
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(params.back().value.value(), '.', splitter);
+        hasDarkRes = resourceAdapter->ExistDarkResByName(splitter.back(), std::to_string(resObj->GetType()));
+    } else {
+        hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    }
+    return hasDarkRes;
+}
+
+RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
+{
+    CompleteResourceParam(env, value);
+    napi_value idNApi = nullptr;
+    napi_value typeNApi = nullptr;
+    napi_value paramsNApi = nullptr;
+    napi_value bundleNameNApi = nullptr;
+    napi_value moduleNameNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_object || value == NULL) {
+        return nullptr;
+    }
+    napi_get_named_property(env, value, "id", &idNApi);
+    napi_get_named_property(env, value, "type", &typeNApi);
+    napi_get_named_property(env, value, "params", &paramsNApi);
+    napi_get_named_property(env, value, "bundleName", &bundleNameNApi);
+    napi_get_named_property(env, value, "moduleName", &moduleNameNApi);
+    bool isArray = false;
+    if (napi_is_array(env, paramsNApi, &isArray) != napi_ok || !isArray) {
+        return nullptr;
+    }
+    int32_t id;
+    napi_typeof(env, idNApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, idNApi, &id);
+    }
+    int32_t type;
+    napi_typeof(env, typeNApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, typeNApi, &type);
+    }
+    std::string bundleName;
+    napi_typeof(env, bundleNameNApi, &valueType);
+    if (valueType == napi_string) {
+        NapiStringToString(env, bundleNameNApi, bundleName);
+    }
+    std::string moduleName;
+    napi_typeof(env, moduleNameNApi, &valueType);
+    if (valueType == napi_string) {
+        NapiStringToString(env, moduleNameNApi, moduleName);
+    }
+    uint32_t arrayLength = 0;
+    napi_get_array_length(env, paramsNApi, &arrayLength);
+    std::vector<ResourceObjectParams> resObjParamsList;
+    for (uint32_t i = 0; i < arrayLength; i++) {
+        napi_value indexValue = nullptr;
+        napi_get_element(env, paramsNApi, i, &indexValue);
+        napi_typeof(env, indexValue, &valueType);
+        ResourceObjectParams resObjParams;
+        if (valueType == napi_string) {
+            std::string indexStr;
+            NapiStringToString(env, indexValue, indexStr);
+            resObjParams.value = indexStr;
+            resObjParams.type = ResourceObjectParamType::STRING;
+        } else if (valueType == napi_number) {
+            int32_t num;
+            napi_get_value_int32(env, indexValue, &num);
+            resObjParams.value = std::to_string(num);
+            resObjParams.type = std::regex_match(std::to_string(num), FLOAT_PATTERN) ? ResourceObjectParamType::FLOAT
+                                                                                     : ResourceObjectParamType::INT;
+            resObjParamsList.push_back(resObjParams);
+        }
+    }
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
+    return resourceObject;
+}
+
+bool ParseNapiColor(napi_env env, napi_value value, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
+        return false;
+    }
+    if (valueType == napi_number) {
+        int32_t colorId = 0;
+        napi_get_value_int32(env, value, &colorId);
+        constexpr uint32_t colorAlphaOffset = 24;
+        constexpr uint32_t colorAlphaDefaultValue = 0xFF000000;
+        auto origin = static_cast<uint32_t>(colorId);
+        uint32_t alphaResult = origin;
+        if ((origin >> colorAlphaOffset) == 0) {
+            alphaResult = origin | colorAlphaDefaultValue;
+        }
+        result = Color(alphaResult);
+        return true;
+    }
+    if (valueType == napi_string) {
+        std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
+        if (!colorString.has_value()) {
+            LOGE("Parse color from string failed");
+            return false;
+        }
+        return Color::ParseColorString(colorString.value(), result);
+    }
+
+    resObj = ParseResourceParamToObj(env, value);
+    return ParseColorFromResourceObject(env, value, result);
 }
 
 bool ParseNapiColor(napi_env env, napi_value value, Color& result)

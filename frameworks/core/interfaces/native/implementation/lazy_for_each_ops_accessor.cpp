@@ -18,11 +18,12 @@
 #include "arkoala_api_generated.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/components_ng/base/ui_node.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
@@ -35,29 +36,26 @@ void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
 void PrepareImpl(Ark_NativePointer node, Ark_Int32 totalCount, Ark_Int32 offset) {}
 void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (startIdx >= 0) {
-        frameNode->ChildrenUpdatedFrom(startIdx);
-    }
-    if (endIdx >= 0) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        pattern->NotifyDataChange(endIdx, changeCnt);
-    }
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    frameNode->ArkoalaRemoveItemsOnChange(startIdx);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_VOID(lazyNode);
+    lazyNode->OnDataChange(startIdx, changeCnt, UINode::NotificationType::START_CHANGE_POSITION);
 }
 
 void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,
     const Callback_RangeUpdate* updater)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode && creator && updater);
-    frameNode->ArkoalaSynchronize(
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode && creator && updater);
+    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_VOID(lazyNode);
+
+    lazyNode->SetTotalCount(totalCount);
+    lazyNode->SetCallbacks(
         [callback = CallbackHelper(*creator)](
-            int32_t index) { return AceType::DynamicCast<FrameNode>(callback.BuildSync(index)); },
-        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); }, totalCount);
+            int32_t index) { return AceType::DynamicCast<UINode>(callback.BuildSync(index)); },
+        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); });
 }
 } // namespace LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()

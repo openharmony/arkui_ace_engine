@@ -34,9 +34,10 @@ import { CopyOptions, NestedScrollMode } from "./enums"
 import { EditMenuOptions, MenuType } from "./textCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Position, ResourceStr } from "./units"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { PreviewMenuOptions } from "./richEditor"
 import { ArkUIAniModule } from "arkui.ani"
+import { Callback } from "./common"
 
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
@@ -66,18 +67,18 @@ export class WebKeyboardController implements MaterializedBase {
         this.insertText_serialize(text_casted)
         return
     }
-    public deleteForward(length: number): void {
-        const length_casted = length as (number)
+    public deleteForward(length: int32): void {
+        const length_casted = length as (int32)
         this.deleteForward_serialize(length_casted)
         return
     }
-    public deleteBackward(length: number): void {
-        const length_casted = length as (number)
+    public deleteBackward(length: int32): void {
+        const length_casted = length as (int32)
         this.deleteBackward_serialize(length_casted)
         return
     }
-    public sendFunctionKey(key: number): void {
-        const key_casted = key as (number)
+    public sendFunctionKey(key: int32): void {
+        const key_casted = key as (int32)
         this.sendFunctionKey_serialize(key_casted)
         return
     }
@@ -88,13 +89,13 @@ export class WebKeyboardController implements MaterializedBase {
     private insertText_serialize(text: string): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_insertText(this.peer!.ptr, text)
     }
-    private deleteForward_serialize(length: number): void {
+    private deleteForward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteForward(this.peer!.ptr, length)
     }
-    private deleteBackward_serialize(length: number): void {
+    private deleteBackward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteBackward(this.peer!.ptr, length)
     }
-    private sendFunctionKey_serialize(key: number): void {
+    private sendFunctionKey_serialize(key: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_sendFunctionKey(this.peer!.ptr, key)
     }
     private close_serialize(): void {
@@ -179,15 +180,8 @@ export class FileSelectorParam implements MaterializedBase {
         return TypeChecker.FileSelectorMode_FromNumeric(retval)
     }
     private getAcceptType_serialize(): Array<string> {
-        // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr) as FixedArray<byte>
-        // @ts-ignore
-        let exactRetValue: byte[] = new Array<byte>
-        for (let i = 0; i < retval.length; i++) {
-            // @ts-ignore
-            exactRetValue.push(new Byte(retval[i]))
-        }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -201,15 +195,8 @@ export class FileSelectorParam implements MaterializedBase {
         return retval
     }
     private getMimeTypes_serialize(): Array<string> {
-        // @ts-ignore
-        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr) as FixedArray<byte>
-        // @ts-ignore
-        let exactRetValue: byte[] = new Array<byte>
-        for (let i = 0; i < retval.length; i++) {
-            // @ts-ignore
-            exactRetValue.push(new Byte(retval[i]))
-        }
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -649,10 +636,10 @@ export class WebContextMenuParam implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._WebContextMenuParam_getFinalizer()
     }
-    public x(): number {
+    public x(): int32 {
         return this.x_serialize()
     }
-    public y(): number {
+    public y(): int32 {
         return this.y_serialize()
     }
     public getLinkUrl(): string {
@@ -682,20 +669,20 @@ export class WebContextMenuParam implements MaterializedBase {
     public isEditable(): boolean {
         return this.isEditable_serialize()
     }
-    public getEditStateFlags(): number {
+    public getEditStateFlags(): int32 {
         return this.getEditStateFlags_serialize()
     }
-    public getPreviewWidth(): number {
+    public getPreviewWidth(): int32 {
         return this.getPreviewWidth_serialize()
     }
-    public getPreviewHeight(): number {
+    public getPreviewHeight(): int32 {
         return this.getPreviewHeight_serialize()
     }
-    private x_serialize(): number {
+    private x_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_x(this.peer!.ptr)
         return retval
     }
-    private y_serialize(): number {
+    private y_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_y(this.peer!.ptr)
         return retval
     }
@@ -735,15 +722,15 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
         return retval
     }
-    private getEditStateFlags_serialize(): number {
+    private getEditStateFlags_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getEditStateFlags(this.peer!.ptr)
         return retval
     }
-    private getPreviewWidth_serialize(): number {
+    private getPreviewWidth_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewWidth(this.peer!.ptr)
         return retval
     }
-    private getPreviewHeight_serialize(): number {
+    private getPreviewHeight_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewHeight(this.peer!.ptr)
         return retval
     }
@@ -826,11 +813,11 @@ export class ConsoleMessage implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static ctor_consolemessage(message: string, sourceId: string, lineNumber: number, messageLevel: MessageLevel): KPointer {
+    static ctor_consolemessage(message: string, sourceId: string, lineNumber: int32, messageLevel: MessageLevel): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, TypeChecker.MessageLevel_ToNumeric(messageLevel))
         return retval
     }
-    constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
+    constructor(message?: string, sourceId?: string, lineNumber?: int32, messageLevel?: MessageLevel) {
         if (((message) !== (undefined)) || ((sourceId) !== (undefined)) || ((lineNumber) !== (undefined)) || ((messageLevel) !== (undefined)))
         {
             const ctorPtr : KPointer = ConsoleMessage.ctor_consolemessage((message)!, (sourceId)!, (lineNumber)!, (messageLevel)!)
@@ -846,7 +833,7 @@ export class ConsoleMessage implements MaterializedBase {
     public getSourceId(): string {
         return this.getSourceId_serialize()
     }
-    public getLineNumber(): number {
+    public getLineNumber(): int32 {
         return this.getLineNumber_serialize()
     }
     public getMessageLevel(): MessageLevel {
@@ -860,7 +847,7 @@ export class ConsoleMessage implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
         return retval
     }
-    private getLineNumber_serialize(): number {
+    private getLineNumber_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getLineNumber(this.peer!.ptr)
         return retval
     }
@@ -968,7 +955,7 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseData(): string {
         return this.getResponseData_serialize()
     }
-    public getResponseDataEx(): string | number | NativeBuffer | Resource | undefined {
+    public getResponseDataEx(): string | int32 | NativeBuffer | Resource | undefined {
         return this.getResponseDataEx_serialize()
     }
     public getResponseEncoding(): string {
@@ -983,11 +970,11 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseHeader(): Array<Header> {
         return this.getResponseHeader_serialize()
     }
-    public getResponseCode(): number {
+    public getResponseCode(): int32 {
         return this.getResponseCode_serialize()
     }
-    public setResponseData(data: string | number | Resource | NativeBuffer): void {
-        const data_casted = data as (string | number | Resource | NativeBuffer)
+    public setResponseData(data: string | int32 | Resource | NativeBuffer): void {
+        const data_casted = data as (string | int32 | Resource | NativeBuffer)
         this.setResponseData_serialize(data_casted)
         return
     }
@@ -1011,8 +998,8 @@ export class WebResourceResponse implements MaterializedBase {
         this.setResponseHeader_serialize(header_casted)
         return
     }
-    public setResponseCode(code: number): void {
-        const code_casted = code as (number)
+    public setResponseCode(code: int32): void {
+        const code_casted = code as (int32)
         this.setResponseCode_serialize(code_casted)
         return
     }
@@ -1028,7 +1015,7 @@ export class WebResourceResponse implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
         return retval
     }
-    private getResponseDataEx_serialize(): string | number | NativeBuffer | Resource | undefined {
+    private getResponseDataEx_serialize(): string | int32 | NativeBuffer | Resource | undefined {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseDataEx(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
@@ -1055,11 +1042,11 @@ export class WebResourceResponse implements MaterializedBase {
         const returnResult : Array<Header> = buffer
         return returnResult
     }
-    private getResponseCode_serialize(): number {
+    private getResponseCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseCode(this.peer!.ptr)
         return retval
     }
-    private setResponseData_serialize(data: string | number | Resource | NativeBuffer): void {
+    private setResponseData_serialize(data: string | int32 | Resource | NativeBuffer): void {
         const thisSerializer : Serializer = Serializer.hold()
         let data_type : int32 = RuntimeType.UNDEFINED
         data_type = runtimeType(data)
@@ -1070,8 +1057,8 @@ export class WebResourceResponse implements MaterializedBase {
         }
         else if (RuntimeType.NUMBER == data_type) {
             thisSerializer.writeInt8(1 as int32)
-            const data_1  = data as number
-            thisSerializer.writeNumber(data_1)
+            const data_1  = data as int32
+            thisSerializer.writeInt32(data_1)
         }
         else if (TypeChecker.isResource(data, false, false, false, false, false)) {
             thisSerializer.writeInt8(2 as int32)
@@ -1105,7 +1092,7 @@ export class WebResourceResponse implements MaterializedBase {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setResponseCode_serialize(code: number): void {
+    private setResponseCode_serialize(code: int32): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseCode(this.peer!.ptr, code)
     }
     private setResponseIsReady_serialize(IsReady: boolean): void {
@@ -1142,14 +1129,14 @@ export class WebResourceError implements MaterializedBase {
     public getErrorInfo(): string {
         return this.getErrorInfo_serialize()
     }
-    public getErrorCode(): number {
+    public getErrorCode(): int32 {
         return this.getErrorCode_serialize()
     }
     private getErrorInfo_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
         return retval
     }
-    private getErrorCode_serialize(): number {
+    private getErrorCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
         return retval
     }
@@ -1249,11 +1236,15 @@ export class EventResult implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._EventResult_getFinalizer()
     }
-    public setGestureEventResult(result: boolean, stopPropagation?: boolean): void {
-        const result_type = runtimeType(result)
-        const stopPropagation_type = runtimeType(stopPropagation)
-        const result_casted = result as (boolean)
+    public setGestureEventResult(result: boolean): void {
+        const result_casted = result.toBoolean()
         this.setGestureEventResult0_serialize(result_casted)
+        return
+    }
+    public setGestureEventResult(result: boolean, stopPropagation: boolean): void {
+        const result_casted = result.toBoolean()
+        const stopPropagation_casted = stopPropagation.toBoolean()
+        this.setGestureEventResult1_serialize(result_casted, stopPropagation_casted)
         return
     }
     private setGestureEventResult0_serialize(result: boolean): void {
@@ -1504,6 +1495,7 @@ export class WebController implements MaterializedBase {
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
+    private webviewController?: WebviewController
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1517,6 +1509,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         if (TypeChecker.isWebviewControllerAni(value.controller)) {
+            this.webviewController = new WebviewController()
             const value_casted = {
                 src: value.src,
                 renderMode: value.renderMode,
@@ -1769,14 +1762,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_textZoomAtio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    textZoomRatioAttribute(value: number | undefined): void {
+    textZoomRatioAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_textZoomRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1793,14 +1786,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_databaseAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    initialScaleAttribute(value: number | undefined): void {
+    initialScaleAttribute(value: double | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            const value_value  = value!.toFloat()
+            thisSerializer.writeFloat32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_initialScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2045,7 +2038,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_onSslErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onRenderExited0Attribute(value: ((parameter: OnRenderExitedEvent) => void) | undefined): void {
+    onRenderExitedAttribute(value: ((parameter: OnRenderExitedEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -2054,19 +2047,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
-        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onRenderExited1Attribute(value: ((event?: Literal_Object_detail) => boolean) | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onShowFileSelectorAttribute(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): void {
@@ -2405,50 +2386,50 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_webCursiveFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    defaultFixedFontSizeAttribute(value: number | undefined): void {
+    defaultFixedFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_defaultFixedFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    defaultFontSizeAttribute(value: number | undefined): void {
+    defaultFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_defaultFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    minFontSizeAttribute(value: number | undefined): void {
+    minFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_minFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    minLogicalFontSizeAttribute(value: number | undefined): void {
+    minLogicalFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_minLogicalFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -3128,18 +3109,6 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    forceEnableZoomAttribute(value: boolean | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_forceEnableZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
@@ -3162,12 +3131,12 @@ export interface AdsBlockedDetails {
 }
 export interface WebKeyboardOptions {
     useSystemKeyboard: boolean;
-    enterKeyType?: number;
+    enterKeyType?: int32;
     customKeyboard?: CustomBuilder;
 }
 export interface WebKeyboardCallbackInfo {
     controller: WebKeyboardController;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
@@ -3245,7 +3214,7 @@ export enum ThreatType {
     THREAT_WARNING = 3
 }
 export interface WebMediaOptions {
-    resumeInterval?: number;
+    resumeInterval?: int32;
     audioExclusive?: boolean;
 }
 export interface ScreenCaptureConfig {
@@ -3421,8 +3390,8 @@ export interface NativeEmbedInfo {
     type?: string;
     src?: string;
     position?: Position;
-    width?: number;
-    height?: number;
+    width?: int32;
+    height?: int32;
     url?: string;
     tag?: string;
     params?: Map<string, string>;
@@ -3443,20 +3412,20 @@ export interface NativeEmbedTouchInfo {
     result?: EventResult;
 }
 export interface FirstMeaningfulPaint {
-    navigationStartTime?: number;
-    firstMeaningfulPaintTime?: number;
+    navigationStartTime?: long;
+    firstMeaningfulPaintTime?: long;
 }
 export interface LargestContentfulPaint {
-    navigationStartTime?: number;
-    largestImagePaintTime?: number;
-    largestTextPaintTime?: number;
-    imageBPP?: number;
-    largestImageLoadStartTime?: number;
-    largestImageLoadEndTime?: number;
+    navigationStartTime?: long;
+    largestImagePaintTime?: long;
+    largestTextPaintTime?: long;
+    imageBPP?: double;
+    largestImageLoadStartTime?: long;
+    largestImageLoadEndTime?: long;
 }
 export interface RenderProcessNotRespondingData {
     jsStack: string;
-    pid: number;
+    pid: int32;
     reason: RenderProcessNotRespondingReason;
 }
 export interface OnPageEndEvent {
@@ -3466,7 +3435,7 @@ export interface OnPageBeginEvent {
     url: string;
 }
 export interface OnProgressChangeEvent {
-    newProgress: number;
+    newProgress: int32;
 }
 export interface OnTitleReceiveEvent {
     title: string;
@@ -3512,7 +3481,7 @@ export interface OnDownloadStartEvent {
     userAgent: string;
     contentDisposition: string;
     mimetype: string;
-    contentLength: number;
+    contentLength: long;
 }
 export interface OnRefreshAccessedHistoryEvent {
     url: string;
@@ -3529,8 +3498,8 @@ export interface OnResourceLoadEvent {
     url: string;
 }
 export interface OnScaleChangeEvent {
-    oldScale: number;
-    newScale: number;
+    oldScale: double;
+    newScale: double;
 }
 export interface OnHttpAuthRequestEvent {
     handler: HttpAuthHandler;
@@ -3551,13 +3520,13 @@ export interface OnContextMenuShowEvent {
     result: WebContextMenuResult;
 }
 export interface OnSearchResultReceiveEvent {
-    activeMatchOrdinal: number;
-    numberOfMatches: number;
+    activeMatchOrdinal: int32;
+    numberOfMatches: int32;
     isDoneCounting: boolean;
 }
 export interface OnScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface OnSslErrorEventReceiveEvent {
     handler: SslErrorHandler;
@@ -3567,7 +3536,7 @@ export interface OnSslErrorEventReceiveEvent {
 export interface OnClientAuthenticationEvent {
     handler: ClientAuthenticationHandler;
     host: string;
-    port: number;
+    port: int32;
     keyTypes: Array<string>;
     issuers: Array<string>;
 }
@@ -3594,15 +3563,15 @@ export interface OnAudioStateChangedEvent {
     playing: boolean;
 }
 export interface OnFirstContentfulPaintEvent {
-    navigationStartTick: number;
-    firstContentfulPaintMs: number;
+    navigationStartTick: long;
+    firstContentfulPaintMs: long;
 }
 export interface OnLoadInterceptEvent {
     data: WebResourceRequest;
 }
 export interface OnOverScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface JavaScriptProxy {
     object_: Object;
@@ -3624,8 +3593,8 @@ export enum WebResponseType {
     LONG_PRESS = 1
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: Callback<void>;
+    onDisappear?: Callback<void>;
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
@@ -3707,9 +3676,9 @@ export interface WebAttribute extends CommonMethod {
     overScrollMode(value: OverScrollMode | undefined): this
     blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this
     textZoomAtio(value: number | undefined): this
-    textZoomRatio(value: number | undefined): this
+    textZoomRatio(value: int32 | undefined): this
     databaseAccess(value: boolean | undefined): this
-    initialScale(value: number | undefined): this
+    initialScale(value: double | undefined): this
     userAgent(value: string | undefined): this
     metaViewport(value: boolean | undefined): this
     onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this
@@ -3730,7 +3699,7 @@ export interface WebAttribute extends CommonMethod {
     onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this
     onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this
     onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this
-    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this
+    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this
     onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this
     onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this
     onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this
@@ -3759,10 +3728,10 @@ export interface WebAttribute extends CommonMethod {
     webFixedFont(value: string | undefined): this
     webFantasyFont(value: string | undefined): this
     webCursiveFont(value: string | undefined): this
-    defaultFixedFontSize(value: number | undefined): this
-    defaultFontSize(value: number | undefined): this
-    minFontSize(value: number | undefined): this
-    minLogicalFontSize(value: number | undefined): this
+    defaultFixedFontSize(value: int32 | undefined): this
+    defaultFontSize(value: int32 | undefined): this
+    minFontSize(value: int32 | undefined): this
+    minLogicalFontSize(value: int32 | undefined): this
     defaultTextEncodingFormat(value: string | undefined): this
     forceDisplayScrollBar(value: boolean | undefined): this
     blockNetwork(value: boolean | undefined): this
@@ -3814,7 +3783,6 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
-    forceEnableZoom(value: boolean | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -3837,9 +3805,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     overScrollMode_value?: OverScrollMode | undefined
     blurOnKeyboardHideMode_value?: BlurOnKeyboardHideMode | undefined
     textZoomAtio_value?: number | undefined
-    textZoomRatio_value?: number | undefined
+    textZoomRatio_value?: int32 | undefined
     databaseAccess_value?: boolean | undefined
-    initialScale_value?: number | undefined
+    initialScale_value?: double | undefined
     userAgent_value?: string | undefined
     metaViewport_value?: boolean | undefined
     onPageEnd_value?: ((parameter: OnPageEndEvent) => void) | undefined
@@ -3889,10 +3857,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     webFixedFont_value?: string | undefined
     webFantasyFont_value?: string | undefined
     webCursiveFont_value?: string | undefined
-    defaultFixedFontSize_value?: number | undefined
-    defaultFontSize_value?: number | undefined
-    minFontSize_value?: number | undefined
-    minLogicalFontSize_value?: number | undefined
+    defaultFixedFontSize_value?: int32 | undefined
+    defaultFontSize_value?: int32 | undefined
+    minFontSize_value?: int32 | undefined
+    minLogicalFontSize_value?: int32 | undefined
     defaultTextEncodingFormat_value?: string | undefined
     forceDisplayScrollBar_value?: boolean | undefined
     blockNetwork_value?: boolean | undefined
@@ -3942,7 +3910,6 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions
-    forceEnableZoom_value?: boolean | undefined
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -4003,13 +3970,13 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public textZoomAtio(value: number | undefined): this {
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         return this
     }
     public databaseAccess(value: boolean | undefined): this {
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         return this
     }
     public userAgent(value: string | undefined): this {
@@ -4072,7 +4039,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this {
         return this
     }
-    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this {
         return this
     }
     public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this {
@@ -4159,16 +4126,16 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public webCursiveFont(value: string | undefined): this {
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         return this
     }
     public defaultTextEncodingFormat(value: string | undefined): this {
@@ -4323,10 +4290,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     }
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         return this
-    }
-    public forceEnableZoom(value: boolean | undefined): this {
-        return this
-    }
+        }
 }
 export interface SslErrorEvent {
     handler: SslErrorHandler;
@@ -4527,9 +4491,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         if (this.checkPriority("textZoomRatio")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.textZoomRatioAttribute(value_casted)
             return this
         }
@@ -4543,9 +4507,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         if (this.checkPriority("initialScale")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.initialScaleAttribute(value_casted)
             return this
         }
@@ -4711,20 +4675,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this {
         if (this.checkPriority("onRenderExited")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (((parameter: OnRenderExitedEvent) => void) | undefined)
-                this.getPeer()?.onRenderExited0Attribute(value_casted)
+                this.getPeer()?.onRenderExitedAttribute(value_casted)
                 return this
-            }
-            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (((event?: Literal_Object_detail) => boolean) | undefined)
-                this.getPeer()?.onRenderExited1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
         }
         return this
     }
@@ -4952,33 +4907,33 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFixedFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.defaultFixedFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.defaultFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.minFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minLogicalFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.minLogicalFontSizeAttribute(value_casted)
             return this
         }
@@ -5396,19 +5351,10 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
-    }
-
-    public forceEnableZoom(value: boolean | undefined): this {
-        if (this.checkPriority("forceEnableZoom")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.forceEnableZoomAttribute(value_casted)
-            return this
-        }
-        return this
     }
 }
 /** @memo */

@@ -16,29 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { StyledString, StyledStringInternal, DecorationStyleInterface } from "./styledString"
+import { StyledString, StyledStringInternal, DecorationStyleInterface, TextShadowStyleInternal } from "./styledString"
 import { LayoutManager, LayoutManagerInternal, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
+import { PeerNode, findPeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Font, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
 import { FontStyle, FontWeight, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, Color, TextOverflow } from "./enums"
 import { LengthMetrics } from "../Graphics"
-import { Callback_String_Void } from "./gridRow"
-import { Callback_Number_Number_Void } from "./grid"
 import { SelectionMenuOptions } from "./richEditor"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
-import { ArkTextAttributeSet, TextModifier } from "../handwritten/modifiers/ArkTextModifier"
-import { CommonModifier } from "../CommonModifier"
+import { InteropNativeModule } from "@koalaui/interop"
+import { TextModifier } from "../TextModifier"
+import { hookTextAttributeModifier } from "../handwritten"
+import { ArkThemeScopeManager } from '../handwritten/theme/ArkThemeScopeManager';
+import { __context, __id } from "@koalaui/runtime";
+import { ArkUIAniModule } from 'arkui.ani';
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         const obj : TextController = new TextController()
@@ -87,7 +86,8 @@ export class TextController implements MaterializedBase {
     }
 }
 export class ArkTextPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    _attributeSet?: TextModifier
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextPeer {
@@ -945,49 +945,50 @@ export interface TextOverflowOptions {
 export type TextInterface = (content?: string | Resource, value?: TextOptions) => TextAttribute;
 export type Callback_MarqueeState_Void = (parameter: MarqueeState) => void;
 export interface TextAttribute extends CommonMethod {
-    font(fontValue: Font | undefined, options?: FontSettingOptions): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: number | string | Resource | undefined): this
-    minFontSize(value: number | string | Resource | undefined): this
-    maxFontSize(value: number | string | Resource | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this
-    lineSpacing(value: LengthMetrics | undefined): this
-    textAlign(value: TextAlign | undefined): this
-    lineHeight(value: number | string | Resource | undefined): this
-    textOverflow(value: TextOverflowOptions | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    maxLines(value: number | undefined): this
-    decoration(value: DecorationStyleInterface | undefined): this
-    letterSpacing(value: number | string | undefined): this
-    textCase(value: TextCase | undefined): this
-    baselineOffset(value: number | string | undefined): this
-    copyOption(value: CopyOptions | undefined): this
-    draggable(value: boolean | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    textIndent(value: Length | undefined): this
-    wordBreak(value: WordBreak | undefined): this
-    lineBreakStrategy(value: LineBreakStrategy | undefined): this
-    onCopy(value: ((breakpoints: string) => void) | undefined): this
-    caretColor(value: ResourceColor | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    ellipsisMode(value: EllipsisMode | undefined): this
-    enableDataDetector(value: boolean | undefined): this
-    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
-    onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this
-    fontFeature(value: string | undefined): this
-    marqueeOptions(value: TextMarqueeOptions | undefined): this
-    onMarqueeStateChange(value: ((parameter: MarqueeState) => void) | undefined): this
-    privacySensitive(value: boolean | undefined): this
-    textSelectable(value: TextSelectableMode | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    halfLeading(value: boolean | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this
-    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
+    font(fontValue: Font | undefined, options?: FontSettingOptions): this { return this;}
+    fontColor(value: ResourceColor | undefined): this { return this;}
+    fontSize(value: number | string | Resource | undefined): this { return this;}
+    minFontSize(value: number | string | Resource | undefined): this { return this;}
+    maxFontSize(value: number | string | Resource | undefined): this { return this;}
+    minFontScale(value: number | Resource | undefined): this { return this;}
+    maxFontScale(value: number | Resource | undefined): this { return this;}
+    fontStyle(value: FontStyle | undefined): this { return this;}
+    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this { return this;}
+    lineSpacing(value: LengthMetrics | undefined): this { return this;}
+    textAlign(value: TextAlign | undefined): this { return this;}
+    lineHeight(value: number | string | Resource | undefined): this { return this;}
+    textOverflow(value: TextOverflowOptions | undefined): this { return this;}
+    fontFamily(value: string | Resource | undefined): this { return this;}
+    maxLines(value: number | undefined): this { return this;}
+    decoration(value: DecorationStyleInterface | undefined): this { return this;}
+    letterSpacing(value: number | string | undefined): this { return this;}
+    textCase(value: TextCase | undefined): this { return this;}
+    baselineOffset(value: number | string | undefined): this { return this;}
+    copyOption(value: CopyOptions | undefined): this { return this;}
+    draggable(value: boolean | undefined): this 
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this { return this;}
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this { return this;}
+    textIndent(value: Length | undefined): this { return this;}
+    wordBreak(value: WordBreak | undefined): this { return this;}
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this { return this;}
+    onCopy(value: ((breakpoints: string) => void) | undefined): this { return this;}
+    caretColor(value: ResourceColor | undefined): this { return this;}
+    selectedBackgroundColor(value: ResourceColor | undefined): this { return this;}
+    ellipsisMode(value: EllipsisMode | undefined): this { return this;}
+    enableDataDetector(value: boolean | undefined): this { return this;}
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this { return this;}
+    onTextSelectionChange(value: ((first: number,last: number) => void) | undefined): this { return this;}
+    fontFeature(value: string | undefined): this { return this;}
+    marqueeOptions(value: TextMarqueeOptions | undefined): this { return this;}
+    onMarqueeStateChange(value: ((parameter: MarqueeState) => void) | undefined): this { return this;}
+    privacySensitive(value: boolean | undefined): this { return this;}
+    textSelectable(value: TextSelectableMode | undefined): this { return this;}
+    editMenuOptions(value: EditMenuOptions | undefined): this { return this;}
+    halfLeading(value: boolean | undefined): this { return this;}
+    enableHapticFeedback(value: boolean | undefined): this { return this;}
+    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this { return this;}
+    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this { return this;}
+    attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute {
     font_value?: Font | undefined
@@ -1195,31 +1196,6 @@ export interface TextMarqueeOptions {
     marqueeStartPolicy?: MarqueeStartPolicy;
 }
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
-  
-    protected _modifierHost: ArkTextNode | undefined
-    setModifierHost(value: ArkTextNode): void {
-        this._modifierHost = value
-    }
-    getModifierHost(): ArkTextNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkTextNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
-    }
-    getAttributeSet(): ArkTextAttributeSet{
-        return this.getPeer()._attributeSet as ArkTextAttributeSet;
-    }
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isTextModifier: boolean = modifier instanceof TextModifier;
-        if (isTextModifier) {
-            let textModifier = modifier as object as TextModifier;
-            this.getPeer()._attributeSet = textModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkTextAttributeSet();
-        }
-    }
-
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }
@@ -1306,15 +1282,10 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     }
     public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("fontWeight")) {
-            const weight_type = runtimeType(weight)
-            const options_type = runtimeType(options)
-            if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
-                const weight_casted = weight as (number | FontWeight | string | undefined)
-                const options_casted = options as (FontSettingOptions | undefined)
-                this.getPeer()?.fontWeight1Attribute(weight_casted, options_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const weight_casted = weight as (number | FontWeight | string | undefined)
+            const options_casted = options as (FontSettingOptions | undefined)
+            this.getPeer()?.fontWeight1Attribute(weight_casted, options_casted)
+            return this
         }
         return this
     }
@@ -1594,11 +1565,15 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public attributeModifier(modifier: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookTextAttributeModifier(this, modifier);
+        return this
+    }
+
 }
 /** @memo */
 export function Text(
@@ -1612,8 +1587,12 @@ export function Text(
         return new ArkTextComponent()
     })
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
+        ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstRender)
+
         receiver.setTextOptions(content,value)
         style?.(receiver)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         content_?.()
         receiver.applyAttributesFinish()
     })

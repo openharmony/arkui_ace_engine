@@ -26,7 +26,7 @@
 #include "core/components/plugin/plugin_sub_container.h"
 namespace OHOS::Ace {
 
-class ACE_EXPORT PluginManager final : public Singleton<PluginManager> {
+class ACE_FORCE_EXPORT PluginManager final : public Singleton<PluginManager> {
     DECLARE_SINGLETON(PluginManager);
 
 public:

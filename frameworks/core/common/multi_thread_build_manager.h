@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_MULTI_THREAD_BUILD_MANAGER_H
 
 #include <functional>
-#include <mutex>
 #include <map>
+#include <mutex>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -34,15 +34,25 @@ public:
     static bool CheckNodeOnValidThread(NG::UINode* node);
     static void SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope);
     static bool IsThreadSafeNodeScope();
+    static bool IsParallelScope();
     bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
         std::function<void()>&& onFinishTask);
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
     bool PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask);
+
+    static void SetIsParallelizeUI(bool isParallelizeUI)
+    {
+        isParallelizeUI_ = isParallelizeUI;
+    }
+
+    static void CheckTag(const std::string& tag);
+
 private:
     MultiThreadBuildManager();
     void InitAsyncUITaskQueue();
     static thread_local bool isThreadSafeNodeScope_;
     static thread_local bool isUIThread_;
+    static thread_local bool isParallelizeUI_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);
 };
 } // namespace OHOS::Ace

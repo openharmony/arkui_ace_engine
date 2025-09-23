@@ -54,13 +54,13 @@ public:
     ANIPluginCallback(CallBackType eventType, ACECallbackInfo& cbInfo, ACEAsyncJSCallbackInfo* jsCallbackInfo);
     virtual ~ANIPluginCallback();
     void SetWant(const AAFwk::Want& want);
-    AAFwk::Want& GetWant();
+    const AAFwk::Want& GetWant() const;
     void SetRequestParam(const std::shared_ptr<AceJSPluginRequestParam>& param);
     bool OnEventStrictEquals(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo);
     bool RequestStrictEquals(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
         const std::shared_ptr<AceJSPluginRequestParam>& param);
 
-    size_t GetID(void);
+    size_t GetID(void) const;
     int32_t GetContainerId() override;
     void OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate, const std::string& data,
         const std::string& extraData) override;

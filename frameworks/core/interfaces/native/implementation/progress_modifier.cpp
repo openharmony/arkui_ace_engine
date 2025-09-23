@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr float PROGRESS_MAX_VALUE = 100.f;
+constexpr float PROGRESS_DEFAULT_STROKE_WIDTH = 4.0f;
 struct ProgressOptions {
     double value = 0;
     double total = PROGRESS_MAX_VALUE;
@@ -30,7 +31,7 @@ struct ProgressOptions {
 
 auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -46,7 +47,7 @@ auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& o
 
 auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -91,7 +92,7 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
 
 auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -103,6 +104,16 @@ auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOption
     auto scaleWidth = Converter::OptConvert<Dimension>(options.scaleWidth);
     Validator::ValidatePositive(scaleWidth);
     Validator::ValidateNonPercent(scaleWidth);
+    if (scaleWidth.has_value()) {
+        auto strokeWidthValue = PROGRESS_DEFAULT_STROKE_WIDTH;
+        auto scaleWidthValue = scaleWidth.value().Value();
+        if (strokeWidth.has_value()) {
+            strokeWidthValue = strokeWidth.value().Value();
+        }
+        if (GreatNotEqual(scaleWidthValue, strokeWidthValue)) {
+            scaleWidth.reset();
+        }
+    }
     ProgressModelStatic::SetScaleWidth(frameNode, scaleWidth);
     // enableSmoothEffect
     ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
@@ -188,8 +199,18 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto convValue = Converter::Convert<ProgressOptions>(*options);
-    ProgressModelNG::SetTotal(frameNode, convValue.total);
-    ProgressModelNG::SetValue(frameNode, convValue.value);
+    auto value = convValue.value;
+    auto total = convValue.total;
+    if (LessOrEqual(total, 0)) {
+        total = PROGRESS_MAX_VALUE;
+    }
+    if (GreatNotEqual(value, total)) {
+        value = total;
+    } else if (LessOrEqual(value, 0)) {
+        value = 0;
+    }
+    ProgressModelNG::SetTotal(frameNode, total);
+    ProgressModelNG::SetValue(frameNode, value);
     ProgressModelNG::SetType(frameNode, convValue.type);
 }
 } // ProgressInterfaceModifier
@@ -273,6 +294,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ProgressModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA ProgressInterfaceModifier::ContentModifierImpl -> Method is not implemented.");
 }
 } // ProgressAttributeModifier

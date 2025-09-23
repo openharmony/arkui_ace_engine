@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { LayoutPolicy, ArkCommonMethodPeer, CommonMethod, CustomBuilder, TextDecorationOptions, InputCounterOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { LayoutPolicy, ArkCommonMethodPeer, Bindable, CommonMethod, CustomBuilder, TextDecorationOptions, InputCounterOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { LocalizedBorderRadiuses, BorderRadiuses, LocalizedEdgeColors, EdgeColors, LocalizedEdgeWidths, EdgeWidths, EdgeStyles, BorderOptions, LocalizedPadding, Padding, ResourceColor, Dimension, Font, Length, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { BorderStyle, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode, Color } from "./enums"
 import { Callback_Boolean_Void } from "./navigation"
@@ -93,7 +93,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     }
 }
 export class ArkTextInputPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextInputPeer {
@@ -1357,7 +1357,7 @@ export interface UnderlineColor {
 }
 export interface TextInputOptions {
     placeholder?: ResourceStr;
-    text?: ResourceStr;
+    text?: ResourceStr | Bindable<ResourceStr>;
     controller?: TextInputController;
 }
 export enum TextInputStyle {
@@ -1744,10 +1744,90 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
     getPeer(): ArkTextInputPeer {
         return (this.peer as ArkTextInputPeer)
     }
+    public width(value: Length | undefined | Length | LayoutPolicy | undefined): this {
+        if (this.checkPriority("width")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (Length | LayoutPolicy | undefined)
+                TextFieldOpsHandWritten.hookTextFieldSetWidth(this.getPeer().peer.ptr,
+                    value_casted);
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public height(value: Length | undefined | Length | LayoutPolicy | undefined): this {
+        if (this.checkPriority("height")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (Length | LayoutPolicy | undefined)
+                TextFieldOpsHandWritten.hookTextFieldSetHeight(this.getPeer().peer.ptr,
+                    value_casted);
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public padding(value: Padding | Length | LocalizedPadding | undefined): this {
+        if (this.checkPriority("padding")) {
+            TextFieldOpsHandWritten.hookTextFieldSetPadding(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public margin(value: Padding | Length | LocalizedPadding | undefined): this {
+        if (this.checkPriority("margin")) {
+            TextFieldOpsHandWritten.hookTextFieldSetMargin(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public border(value: BorderOptions | undefined): this {
+        if (this.checkPriority("border")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBorder(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+        if (this.checkPriority("borderStyle")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBorderStyle(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
+        if (this.checkPriority("borderWidth")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBorderWidth(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        if (this.checkPriority("borderColor")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBorderColor(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+        if (this.checkPriority("borderRadius")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBorderRadius(this.getPeer().peer.ptr, value)
+            return this
+        }
+        return this
+    }
+    public backgroundColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("backgroundColor")) {
+            TextFieldOpsHandWritten.hookTextFieldSetBackgroundColor(this.getPeer().peer.ptr, value)
+        }
+        return this
+    }
     public setTextInputOptions(value?: TextInputOptions): this {
         if (this.checkPriority("setTextInputOptions")) {
-            const value_casted = value as (TextInputOptions | undefined)
-            this.getPeer()?.setTextInputOptionsAttribute(value_casted)
+            hookSetTextInputOptions(this, value)
             return this
         }
         return this

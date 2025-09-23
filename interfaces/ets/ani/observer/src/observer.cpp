@@ -26,6 +26,15 @@ namespace {
 // constexpr const char DENSITY_CHNAGE[] = "densityUpdate";
 const char ANI_OBSERVER_NS[] = "L@ohos/arkui/observer/uiObserver;";
 const char ANI_OBSERVER_CLS[] = "L@ohos/arkui/observer/uiObserver/UIObserverImpl;";
+constexpr char ANI_NAVDESTINATION_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/NavDestinationInfoImpl;";
+constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/NavDestinationState;";
+constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "Larkui/component/navDestination/NavDestinationMode;";
+constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
+constexpr char ROUTER_UPDATE[] = "routerPageUpdate";
+constexpr char ANI_ROUTER_INFO_CLS[] = "L@ohos/arkui/observer/uiObserver/RouterPageInfo;";
+constexpr char ANI_ROUTER_STATE_TYPE[] = "L@ohos/arkui/observer/uiObserver/RouterPageState;";
+constexpr char NAVDESTINATION_PARAM_WITHID[] =
+    "Lstd/core/String;L@ohos/arkui/observer/uiObserver/NavDestinationSwitchObserverOptions;Lstd/core/Object;:V";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -80,6 +89,335 @@ public:
             holder.end());
     }
 
+    void RegisterBeforePanStartCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            specifiedBeforePanStartCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterBeforePanStartCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterAfterPanStartCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            specifiedAfterPanStartCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterAfterPanStartCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanStartCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterBeforePanEndCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            specifiedBeforePanEndCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterBeforePanEndCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedBeforePanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterAfterPanEndCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            specifiedAfterPanEndCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterAfterPanEndCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedAfterPanEndCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void RegisterWillClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            specifiedWillClickCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterWillClickCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void RegisterDidClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            specifiedDidClickCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterDidClickCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidClickCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
+    // UIObserver.on(type: "navDestinationUpdate", callback)
+    void RegisterNavigationCallback(ani_ref& cb)
+    {
+        if (std::find(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(), cb) !=
+            unspecifiedNavigationListeners_.end()) {
+            return;
+        }
+        unspecifiedNavigationListeners_.emplace_back(cb);
+    }
+
+    // UIObserver.off(type: "navDestinationUpdate", callback)
+    void UnRegisterNavigationCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            unspecifiedNavigationListeners_.clear();
+            return;
+        }
+
+        unspecifiedNavigationListeners_.erase(
+            std::remove_if(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(),
+                [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            unspecifiedNavigationListeners_.end());
+    }
+
+    // UIObserver.on(type: "navDestinationUpdate", options, callback)
+    void RegisterNavigationCallback(std::string navigationId, ani_ref& cb)
+    {
+        auto iter = specifiedCNavigationListeners_.find(navigationId);
+        if (iter == specifiedCNavigationListeners_.end()) {
+            specifiedCNavigationListeners_.emplace(navigationId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    // UIObserver.off(type: "navDestinationUpdate", optisons, callback)
+    void UnRegisterNavigationCallback(ani_env* env, std::string navigationId, ani_ref& cb)
+    {
+        auto iter = specifiedCNavigationListeners_.find(navigationId);
+        if (iter == specifiedCNavigationListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
+    // UIObserver.on(type: "routerPageUpdate", UIContext, callback)
+    void RegisterRouterPageCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            specifiedRouterPageListeners_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    // UIObserver.off(type: "routerPageUpdate", UIContext, callback)
+    void UnRegisterRouterPageCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto iter = specifiedRouterPageListeners_.find(uiContextInstanceId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
     void HandleDensityChange(ani_env* env, double density)
     {
         auto currentId = Container::CurrentId();
@@ -101,6 +439,121 @@ public:
         }
     }
 
+    void HandleBeforePanStart(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedBeforePanStartCbMap_.find(currentId);
+        if (iter == specifiedBeforePanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleAfterPanStart(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedAfterPanStartCbMap_.find(currentId);
+        if (iter == specifiedAfterPanStartCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleBeforePanEnd(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedBeforePanEndCbMap_.find(currentId);
+        if (iter == specifiedBeforePanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleAfterPanEnd(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedAfterPanEndCbMap_.find(currentId);
+        if (iter == specifiedAfterPanEndCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleWillClick(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedWillClickCbMap_.find(currentId);
+        if (iter == specifiedWillClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+    void HandleDidClick(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedDidClickCbMap_.find(currentId);
+        if (iter == specifiedDidClickCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleNavigationStateChange(ani_env* env, const NG::NavDestinationInfo& info)
+    {
+        auto unspecifiedHolder = unspecifiedNavigationListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateNavigationInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+
+        auto iter = specifiedCNavigationListeners_.find(info.navigationId);
+        if (iter == specifiedCNavigationListeners_.end()) {
+            return;
+        }
+
+        auto holder = iter->second;
+        std::vector<ani_ref> cbParamsWithId;
+        ani_ref fnReturnValWithId;
+        ani_object resWithId;
+        CreateNavigationInfo(env, info, resWithId);
+        cbParamsWithId.emplace_back(resWithId);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParamsWithId.size(), cbParamsWithId.data(), &fnReturnValWithId);
+        }
+    }
+
+    void HandleRouterPageStateChange(ani_env* env, NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
+    {
+        auto currentId = Container::CurrentIdSafelyWithCheck();
+        auto iter = specifiedRouterPageListeners_.find(currentId);
+        if (iter == specifiedRouterPageListeners_.end()) {
+            return;
+        }
+        ani_object res;
+        CreateRouterPageInfo(env, pageInfo, res);
+        std::vector<ani_ref> cbParam;
+        cbParam.emplace_back(res);
+        ani_ref fnReturnVal;
+
+        auto holder = iter->second;
+        for (const auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnReturnVal);
+        }
+    }
+
     ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
     {
         ani_boolean isEquals = false;
@@ -119,9 +572,95 @@ public:
         env->Object_SetPropertyByName_Double(obj, "density", ani_double(density));
     }
 
+    void CreateNavigationInfo(ani_env* env, const NG::NavDestinationInfo& info, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_NAVDESTINATION_INFO_CLS, &cls);
+        ani_method navDestinationInfoCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &navDestinationInfoCtor);
+        env->Object_New(cls, navDestinationInfoCtor, &res);
+
+        env->Object_SetPropertyByName_Double(res, "uniqueId", static_cast<ani_double>(info.uniqueId));
+        env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(info.index));
+
+        ani_string navDesName {};
+        env->String_NewUTF8(info.name.c_str(), info.name.size(), &navDesName);
+        env->Object_SetPropertyByName_Ref(res, "name", navDesName);
+
+        ani_string navDesId {};
+        env->String_NewUTF8(info.navDestinationId.c_str(), info.navDestinationId.size(), &navDesId);
+        env->Object_SetPropertyByName_Ref(res, "navDestinationId", navDesId);
+
+        ani_string navigationId {};
+        env->String_NewUTF8(info.navigationId.c_str(), info.navigationId.size(), &navigationId);
+        env->Object_SetPropertyByName_Ref(res, "navigationId", navigationId);
+
+        ani_enum navDesState;
+        env->FindEnum(ANI_NAVDESTINATION_STATE_TYPE, &navDesState);
+        ani_enum_item navDesStateItem;
+        env->Enum_GetEnumItemByIndex(navDesState, static_cast<ani_size>(info.state), &navDesStateItem);
+        env->Object_SetPropertyByName_Ref(res, "state", navDesStateItem);
+
+        ani_enum navMode;
+        env->FindEnum(ANI_NAVDESTINATION_MODE_TYPE, &navMode);
+        ani_enum_item navModeItem;
+        env->Enum_GetEnumItemByIndex(navMode, static_cast<ani_size>(info.mode), &navModeItem);
+        env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    }
+
+    void CreateRouterPageInfo(ani_env* env, const NG::RouterPageInfoNG& pageInfo, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_ROUTER_INFO_CLS, &cls);
+        ani_method routerInfoCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+        env->Object_New(cls, routerInfoCtor, &res);
+
+        env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(pageInfo.index));
+
+        ani_string routerName {};
+        env->String_NewUTF8(pageInfo.name.c_str(), pageInfo.name.size(), &routerName);
+        env->Object_SetPropertyByName_Ref(res, "name", routerName);
+
+        ani_string routerPath {};
+        env->String_NewUTF8(pageInfo.path.c_str(), pageInfo.path.size(), &routerPath);
+        env->Object_SetPropertyByName_Ref(res, "path", routerPath);
+
+        ani_string routerPageId {};
+        env->String_NewUTF8(pageInfo.pageId.c_str(), pageInfo.pageId.size(), &routerPageId);
+        env->Object_SetPropertyByName_Ref(res, "pageId", routerPageId);
+
+        ani_enum routerState;
+        env->FindEnum(ANI_ROUTER_STATE_TYPE, &routerState);
+        ani_enum_item routerStateItem;
+        env->Enum_GetEnumItemByIndex(routerState, static_cast<ani_size>(pageInfo.state), &routerStateItem);
+        env->Object_SetPropertyByName_Ref(res, "state", routerStateItem);
+
+        ani_class uiContextUtil;
+        env->FindClass("Larkui/handwritten/UIContextUtil;", &uiContextUtil);
+        ani_static_method getUiContext;
+        env->Class_FindStaticMethod(
+            uiContextUtil, "getOrCreateUIContextById", "I:L@ohos/arkui/UIContext/UIContext;", &getUiContext);
+        ani_int instanceId = Container::CurrentIdSafelyWithCheck();
+        ani_ref uiContext;
+        env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);
+        env->Object_SetPropertyByName_Ref(res, "context", uiContext);
+    }
+
 private:
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
+
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedBeforePanStartCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedAfterPanStartCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedBeforePanEndCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedAfterPanEndCbMap_;
+
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillClickCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidClickCbMap_;
+    std::list<ani_ref> unspecifiedNavigationListeners_;
+    std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
 };
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
@@ -163,20 +702,108 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
     }
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
-    observer->RegisterDensityCallback(100000, fnObjGlobalRef);
+
+    const int idMs = 100000;
+    if (typeStr == "densityUpdate") {
+        observer->RegisterDensityCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanStart") {
+        observer->RegisterBeforePanStartCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanStart") {
+        observer->RegisterAfterPanStartCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanEnd") {
+        observer->RegisterBeforePanEndCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanEnd") {
+        observer->RegisterAfterPanEndCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "willClick") {
+        observer->RegisterWillClickCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "didClick") {
+        observer->RegisterDidClickCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == NAVDESTINATION_UPDATE) {
+        observer->RegisterNavigationCallback(fnObjGlobalRef);
+    } else if (typeStr == "willDraw") {
+        observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "didLayout") {
+        observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == ROUTER_UPDATE) {
+        observer->RegisterRouterPageCallback(idMs, fnObjGlobalRef);
+    }
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
 {
-    LOGE("lzr in off");
     auto* observer = Unwrapp(env, object);
     if (observer == nullptr) {
         LOGE("observer-ani context is null.");
         return;
     }
+    std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    const int idMs = 100000;
+    if (typeStr == "densityUpdate") {
+        observer->UnRegisterDensityCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanStart") {
+        observer->UnRegisterBeforePanStartCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanStart") {
+        observer->UnRegisterAfterPanStartCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "beforePanEnd") {
+        observer->UnRegisterBeforePanEndCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "afterPanEnd") {
+        observer->UnRegisterAfterPanEndCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "willClick") {
+        observer->UnRegisterWillClickCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "didClick") {
+        observer->UnRegisterDidClickCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == NAVDESTINATION_UPDATE) {
+        observer->UnRegisterNavigationCallback(env, fnObjGlobalRef);
+    } else if (typeStr == "willDraw") {
+        observer->UnRegisterWillDrawCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "didLayout") {
+        observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == ROUTER_UPDATE) {
+        observer->UnRegisterRouterPageCallback(env, idMs, fnObjGlobalRef);
+    }
+}
+
+static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_string type, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
-    observer->UnRegisterDensityCallback(env, 100000, fnObjGlobalRef);
+    observer->RegisterNavigationCallback(navigationId, fnObjGlobalRef);
+}
+
+static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_string type, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->UnRegisterNavigationCallback(env, navigationId, fnObjGlobalRef);
 }
 
 static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
@@ -198,10 +825,47 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleDensityChange(env, density);
     };
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFuncForAni(densityChangeCallback);
+
+    auto beforePanStartCallback = [observer, env]() {
+        observer->HandleBeforePanStart(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetBeforePanStartHandleFuncForAni(beforePanStartCallback);
+
+    auto afterPanStartCallback = [observer, env]() {
+        observer->HandleAfterPanStart(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetAfterPanStartHandleFuncForAni(afterPanStartCallback);
+
+    auto beforePanEndCallback = [observer, env]() {
+        observer->HandleBeforePanEnd(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetBeforePanEndHandleFuncForAni(beforePanEndCallback);
+
+    auto afterPanEndCallback = [observer, env]() {
+        observer->HandleAfterPanEnd(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetAfterPanEndHandleFuncForAni(afterPanEndCallback);
+
+    auto willClickCallback = [observer, env]() {
+        observer->HandleWillClick(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetWillClickHandleFuncForAni(willClickCallback);
+    auto didClickCallback = [observer, env]() {
+        observer->HandleDidClick(env);
+    };
+    NG::UIObserverHandler::GetInstance().SetDidClickHandleFuncForAni(didClickCallback);
+    auto navigationStateChangeCalback = [observer, env](const NG::NavDestinationInfo& info) {
+        observer->HandleNavigationStateChange(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+    auto routerPageInfoChangeCallback = [observer, env](
+                                            NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
+        observer->HandleRouterPageStateChange(env, context, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
-        delete observer;
         return nullptr;
     }
     return context_object;
@@ -230,8 +894,12 @@ bool ANI_ConstructorForAni(ani_env* env)
     }
 
     std::array methodsObserver = {
-        ani_native_function { "on", nullptr, reinterpret_cast<void*>(OHOS::Ace::On) },
-        ani_native_function { "off", nullptr, reinterpret_cast<void*>(OHOS::Ace::Off) },
+        ani_native_function { "on", "Lstd/core/String;Lstd/core/Object;:V", reinterpret_cast<void*>(OHOS::Ace::On) },
+        ani_native_function { "off", "Lstd/core/String;Lstd/core/Object;:V", reinterpret_cast<void*>(OHOS::Ace::Off) },
+        ani_native_function {
+            "on", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithId) },
+        ani_native_function {
+            "off", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationUpdateWithId) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;

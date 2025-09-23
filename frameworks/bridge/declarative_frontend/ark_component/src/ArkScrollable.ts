@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,6 +193,34 @@ class OnReachEndModifier extends ModifierWithKey<() => void> {
     }
 }
 
+class ContentStartOffsetModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentStartOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentStartOffset(node);
+    } else {
+      getUINativeModule().scrollable.setContentStartOffset(node, this.value);
+    }
+  }
+}
+
+class ContentEndOffsetModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentEndOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentEndOffset(node);
+    } else {
+      getUINativeModule().scrollable.setContentEndOffset(node, this.value);
+    }
+  }
+}
+
 /**
  * base class of Grid, Scroll, List, and WaterFlow.
  */
@@ -253,6 +281,14 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     onDidStopFling(callback: () => void) : this {
       modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, callback);
+      return this;
+    }
+    contentStartOffset(value: number | Resource): T {
+      modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
+      return this;
+    }
+    contentEndOffset(value: number | Resource): T {
+      modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
       return this;
     }
 }

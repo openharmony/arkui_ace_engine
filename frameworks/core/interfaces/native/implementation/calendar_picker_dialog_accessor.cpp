@@ -62,8 +62,10 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode.value_or(false));
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode.has_value()) {
+        dialogProps.enableHoverMode = enableHoverMode.value();
+    }
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -83,17 +85,20 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
     std::vector<ButtonInfo> buttonInfos;
     auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);
     if (acceptButtonInfo.has_value()) {
-        buttonInfos.push_back(acceptButtonInfo.value());
+        buttonInfos.emplace_back(acceptButtonInfo.value());
+        buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonInfo = Converter::OptConvert<ButtonInfo>(options.cancelButtonStyle);
     if (cancelButtonInfo.has_value()) {
-        buttonInfos.push_back(cancelButtonInfo.value());
+        buttonInfos.emplace_back(cancelButtonInfo.value());
     }
     return buttonInfos;
 }
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
-#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
     auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
@@ -130,8 +135,15 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
         dialogCancelEvent["cancelId"] = onCancelFunc;
     }
 
-    CalendarDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-#endif
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->ShowCalendarDialog(dialogProps, settingData, dialogEvent, dialogCancelEvent, {}, buttonInfos);
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()

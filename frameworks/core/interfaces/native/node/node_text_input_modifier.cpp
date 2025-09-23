@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/node_model.h"
@@ -65,17 +66,21 @@ constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color(color));
+    Color result = Color(color);
+    TextFieldModelNG::SetCaretColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (colorRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-            pattern->RegisterResource<Color>("caretColor", resObj, Color(color));
-        } else {
-            pattern->UnRegisterResource("caretColor");
+        if (resObj) {
+            pattern->RegisterResource<Color>("caretColor", resObj, result);
         }
     }
 }
@@ -129,17 +134,21 @@ void ResetTextInputMaxLines(ArkUINodeHandle node)
 
 void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
+    Color result = Color(color);
+    TextFieldModelNG::SetPlaceholderColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(colorRawPtr));
+        }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (colorRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-            pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
-        } else {
-            pattern->UnRegisterResource("placeholderColor");
+        if (resObj) {
+            pattern->RegisterResource<Color>("placeholderColor", resObj, result);
         }
     }
 }
@@ -716,17 +725,21 @@ void ResetTextInputMaxLength(ArkUINodeHandle node)
 
 void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+    Color result = Color(color);
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-            pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, Color(color));
-        } else {
-            pattern->UnRegisterResource("selectedBackgroundColor");
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedBackgroundColor", resObj, result);
         }
     }
 }
@@ -856,17 +869,21 @@ void ResetTextInputPlaceholderFont(ArkUINodeHandle node)
 
 void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextColor(frameNode, Color(color));
+    Color result = Color(color);
+    TextFieldModelNG::SetTextColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-            pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
-            pattern->UnRegisterResource("fontColor");
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("fontColor", resObj, result);
         }
     }
 }
@@ -1247,15 +1264,19 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
+    Color result = Color(color);
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        if (resObj) {
             pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
-        } else {
-            pattern->UnRegisterResource("backgroundColor");
         }
     }
 }
@@ -1572,60 +1593,56 @@ void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalC
     }
 }
 
-void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* values,
-    const ArkUI_Bool* hasValues, ArkUI_Int32 length, ArkUIUserUnderlineColorRes* underlineColorObj)
+void SetTextInputUserUnderlineColorRegister(FrameNode* frameNode, ArkUIUserUnderlineColorRes* colorObj,
+    void* subColorObj, Color& result, const std::string& key)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (colorObj && subColorObj) {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(subColorObj));
+        } else {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>(key, resObj, result);
+        }
+    }
+}
+
+void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* values, const ArkUI_Bool* hasValues,
+    ArkUI_Int32 length, ArkUIUserUnderlineColorRes* underlineColorObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     UserUnderlineColor userColor = UserUnderlineColor();
     if (length != DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT) {
         return;
     }
     if (hasValues[CALL_ARG_0]) {
-        userColor.typing = Color(values[CALL_ARG_0]);
-        if (SystemProperties::ConfigChangePerform()) {
-            if (underlineColorObj && underlineColorObj->typingColorObj) {
-                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->typingColorObj));
-                pattern->RegisterResource<Color>("underlineColorTyping", resObj, Color(values[CALL_ARG_0]));
-            } else {
-                pattern->UnRegisterResource("underlineColorTyping");
-            }
-        }
+        Color result = Color(values[CALL_ARG_0]);
+        userColor.typing = result;
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->typingColorObj, result,
+            "underlineColorTyping");
     }
     if (hasValues[CALL_ARG_1]) {
-        userColor.normal = Color(values[CALL_ARG_1]);
-        if (SystemProperties::ConfigChangePerform()) {
-            if (underlineColorObj && underlineColorObj->normalColorObj) {
-                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->normalColorObj));
-                pattern->RegisterResource<Color>("underlineColorNormal", resObj, Color(values[CALL_ARG_1]));
-            } else {
-                pattern->UnRegisterResource("underlineColorNormal");
-            }
-        }
+        Color result = Color(values[CALL_ARG_1]);
+        userColor.normal = result;
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->normalColorObj, result,
+            "underlineColorNormal");
     }
     if (hasValues[CALL_ARG_2]) {
-        userColor.error = Color(values[CALL_ARG_2]);
-        if (SystemProperties::ConfigChangePerform()) {
-            if (underlineColorObj && underlineColorObj->errorColorObj) {
-                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->errorColorObj));
-                pattern->RegisterResource<Color>("underlineColorError", resObj, Color(values[CALL_ARG_2]));
-            } else {
-                pattern->UnRegisterResource("underlineColorError");
-            }
-        }
+        Color result = Color(values[CALL_ARG_2]);
+        userColor.error = result;
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->errorColorObj, result,
+            "underlineColorError");
     }
     if (hasValues[CALL_ARG_3]) {
-        userColor.disable = Color(values[CALL_ARG_3]);
-        if (SystemProperties::ConfigChangePerform()) {
-            if (underlineColorObj && underlineColorObj->disableColorObj) {
-                auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(underlineColorObj->disableColorObj));
-                pattern->RegisterResource<Color>("underlineColorDisable", resObj, Color(values[CALL_ARG_3]));
-            } else {
-                pattern->UnRegisterResource("underlineColorDisable");
-            }
-        }
+        Color result = Color(values[CALL_ARG_3]);
+        userColor.disable = result;
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->disableColorObj, result,
+            "underlineColorDisable");
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }

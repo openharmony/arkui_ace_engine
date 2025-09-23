@@ -146,6 +146,22 @@ class ImageSpanColorFilterModifier extends ModifierWithKey<ColorFilter | Drawing
     return true;
   }
 }
+class ImageSpanSupportSvg2Modifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('supportSvg2');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetSupportSvg2(node);
+    } else {
+      getUINativeModule().imageSpan.setSupportSvg2(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 class ImageSpanSrcModifier extends ModifierWithKey<ResourceStr | PixelMap> {
   constructor(value: ResourceStr | PixelMap) {
     super(value);
@@ -191,6 +207,10 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   colorFilter(value: ColorFilter | DrawingColorFilter): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity,
       ImageSpanColorFilterModifier, value);
+    return this;
+  }
+  supportSvg2(value: boolean): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanSupportSvg2Modifier.identity, ImageSpanSupportSvg2Modifier, value);
     return this;
   }
   onComplete(

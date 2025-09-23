@@ -15,4 +15,6 @@
 
 export declare namespace drawing {
     export class Canvas { }
+    export class Lattice { }
+    export class ColorFilter { }
 }

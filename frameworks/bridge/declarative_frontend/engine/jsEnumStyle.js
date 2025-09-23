@@ -1340,7 +1340,8 @@ let SourceType;
   SourceType[SourceType.Unknown = 0] = 'Unknown';
   SourceType[SourceType.Mouse = 1] = 'Mouse';
   SourceType[SourceType.TouchScreen = 2] = 'TouchScreen';
-  SourceType[SourceType.Keyboard = 4] = 'Keyboard';
+  SourceType[SourceType.Key = 4] = 'Key';
+  SourceType[SourceType.JoyStick = 5] = 'JoyStick';
 })(SourceType || (SourceType = {}));
 
 let SourceTool;
@@ -3139,6 +3140,160 @@ class NavPathStack {
 
 globalThis.NavPathStack = NavPathStack;
 
+function registerNavStackOperation(pushPathCallback) {
+  InteropNavPathStackModule.pushPathStaticCallback = pushPathCallback;
+}
+
+class NavPathStackExtent extends NavPathStack {
+  constructor() {
+    super();
+    this.staticStack = undefined;
+  }
+
+  getPathStack() {
+    
+  }
+  setPathStack(pathStack, animated) {
+    
+  }
+  getJsIndexFromNativeIndex(index) {
+    
+  }
+  initNavPathIndex(pathName) {
+    
+  }
+  getAllPathIndex() {
+    
+  }
+  findInPopArray(name) {
+    
+  }
+  setNativeStack(stack) {
+    this.staticStack = stack;
+  }
+  getNativeStack() {
+    return this.nativeStack;
+  }
+  setParent(parent) {
+    
+  }
+  getParent() {
+    
+  }
+  pushName(name, param) {
+    
+  }
+  push(info, animated) {
+    this.pushPath(info, animated);
+  }
+  pushPathByName(name, param, onPop, animated) {
+    
+  }
+  pushDestinationByName(name, param, onPop, animated) {
+    
+  }
+  pushWithLaunchModeAndAnimated(info, launchMode, animated, createPromise) {
+    
+  }
+  pushPath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
+    if (InteropNavPathStackModule.pushPathStaticCallback && this.staticStack) {
+      InteropNavPathStackModule.pushPathStaticCallback(this.staticStack, info, animated);
+    }
+  }
+  pushDestination(info, optionParam) {
+    
+  }
+  doReplaceInner(info, optionParam, isReplaceDestination) {
+    
+  }
+  replacePath(info, optionParam) {
+    
+  }
+  replaceDestination(info, navigationOptions) {
+    
+  }
+  replacePathByName(name, param, animated) {
+    
+  }
+  setIsReplace(value) {
+    
+  }
+  setAnimated(value) {
+    
+  }
+  pop(result, animated) {
+    this.nativeStack?.pop(result, animated);
+  }
+  popTo(name, animated) {
+    
+  }
+  popToName(name, result, animated) {
+    
+  }
+  innerPopToIndex(index, result, animated, needFireOnResult) {
+    
+  }
+  popToIndex(index, result, animated) {
+    
+  }
+  moveToTop(name, animated) {
+    
+  }
+  moveIndexToTop(index, animated) {
+    
+  }
+  clear(animated) {
+    
+  }
+  removeByIndexes(indexes) {
+    
+  }
+  removeByName(name) {
+    
+  }
+  removeByNavDestinationId(navDestinationId) {
+    
+  }
+  removeIndex(index) {
+    
+  }
+  removeInvalidPage(index) {
+    
+  }
+  getAllPathName() {
+    
+  }
+  getParamByIndex(index) {
+    
+  }
+  getParamByName(name) {
+    
+  }
+  getIndexByName(name) {
+    
+  }
+  getNameByIndex(index) {
+    
+  }
+  getOnPopByIndex(index) {
+    
+  }
+  size() {
+    
+  }
+  disableAnimation(disableAnimation) {
+    
+  }
+  setInterception(interception) {
+    
+  }
+}
+
+globalThis.NavPathStackExtent = NavPathStackExtent;
+
 class WaterFlowSections {
   constructor() {
     this.sectionArray = [];
@@ -3480,6 +3635,14 @@ let ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle.CARD = 1] = 'CARD';
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
+let ListItemGroupArea;
+(function (ListItemGroupArea) {
+  ListItemGroupArea[ListItemGroupArea.NONE = 0] = 'NONE';
+  ListItemGroupArea[ListItemGroupArea.IN_LIST_ITEM_AREA = 1] = 'IN_LIST_ITEM_AREA';
+  ListItemGroupArea[ListItemGroupArea.IN_HEADER_AREA = 2] = 'IN_HEADER_AREA';
+  ListItemGroupArea[ListItemGroupArea.IN_FOOTER_AREA = 3] = 'IN_FOOTER_AREA';
+})(ListItemGroupArea || (ListItemGroupArea = {}));
+
 let DragResult;
 (function (DragResult) {
   DragResult[DragResult.DRAG_SUCCESSFUL = 0] = 'DRAG_SUCCESSFUL';
@@ -3792,9 +3955,24 @@ let DividerMode;
 function wrapBuilder(builder) {
   return new WrappedBuilder(builder);
 }
+
 class WrappedBuilder {
   constructor(builder) {
     this.builder = builder;
+  }
+}
+
+function mutableBuilder(builder) {
+  return new MutableBuilder(builder);
+}
+
+class MutableBuilder {
+  constructor(builder) {
+    this.builder = builder;
+  }
+  // Only for internal toolchain usage.
+  _dispatchBuilder(builder, ...args) {
+    this.mutableBuilderImpl.bind(this)(builder, ...args);
   }
 }
 
@@ -4240,6 +4418,13 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let AxisType;
+(function (AxisType) {
+  AxisType[AxisType.VERTICAL_AXIS = 0] = 'VERTICAL_AXIS';
+  AxisType[AxisType.HORIZONTAL_AXIS = 1] = 'HORIZONTAL_AXIS';
+  AxisType[AxisType.PINCH_AXIS = 2] = 'PINCH_AXIS';
+})(AxisType || (AxisType = {}));
+
 let WebBypassVsyncCondition;
 (function (WebBypassVsyncCondition) {
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
@@ -4319,12 +4504,6 @@ let GestureFocusMode;
   GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
 })(GestureFocusMode || (GestureFocusMode = {}));
 
-let WebRotateEffect;
-(function (WebRotateEffect) {
-  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
-  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
-})(WebRotateEffect || (WebRotateEffect = {}));
-
 let PdfLoadResult;
 (function (PdfLoadResult) {
   PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';
@@ -4341,8 +4520,27 @@ let ReplaceEffectType;
   ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
 })(ReplaceEffectType || (ReplaceEffectType = {}));
 
+let IndicatorType;
+(function (IndicatorType) {
+  IndicatorType[IndicatorType.DIVIDER = 0] = 'DIVIDER';
+  IndicatorType[IndicatorType.BACKGROUND = 1] = 'BACKGROUND';
+})(IndicatorType || (IndicatorType = {}));
+
 let ListItemSwipeActionDirection;
 (function (ListItemSwipeActionDirection) {
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
 })(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));
+
+let NativeEmbedParamStatus;
+(function (NativeEmbedParamStatus) {
+  NativeEmbedParamStatus.ADD = 0;
+  NativeEmbedParamStatus.UPDATE = 1;
+  NativeEmbedParamStatus.DELETE = 2;
+})(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
+
+let WebRotateEffect;
+(function (WebRotateEffect) {
+  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
+  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
+})(WebRotateEffect || (WebRotateEffect = {}));

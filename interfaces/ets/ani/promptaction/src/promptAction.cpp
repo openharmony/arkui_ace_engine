@@ -19,375 +19,690 @@
 #include <string>
 #include <vector>
 
+#include "prompt_action_params.h"
+#include "toast_params.h"
+#include "dialog_params.h"
+#include "prompt_action_utils.h"
+#include "prompt_action_controller.h"
+
+#include "base/subwindow/subwindow_manager.h"
+#include "frameworks/base/error/error_code.h"
 #include "frameworks/base/utils/utils.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/components_ng/pattern/toast/toast_layout_property.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/core/components/common/properties/shadow.h"
-#include "promptActionUtils.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/toast/toast_layout_property.h"
+#include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
+#include "frameworks/core/components_ng/pattern/overlay/overlay_manager.h"
+#include "frameworks/core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
-std::unordered_map<std::string, int> alignmentMap = {
-    {"TopStart", 0},
-    {"Top", 1},
-    {"TopEnd", 2},
-    {"Start", 3},
-    {"Center", 4},
-    {"End", 5},
-    {"BottomStart", 6},
-    {"Bottom", 7},
-    {"BottomEnd", 8}
-};
+namespace OHOS::Ace::NG {
+bool ContainerIsService()
+{
+    auto containerId = Container::CurrentIdSafely();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    // for pa service
+    return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
+}
 
-bool GetToastMessage(ani_env *env, ani_object options, std::string& messageString)
+bool ContainerIsScenceBoard()
 {
-    ani_ref message_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "message", &message_ref)) {
-        return false;
+    auto container = Container::CurrentSafely();
+    if (!container) {
+        container = Container::GetActive();
     }
-    if (GetIsStringObject(env, message_ref)) {
-        auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(message_ref));
-        messageString = stringContent;
-        return true;
-    }
-    if (GetIsResourceObject(env, message_ref)) {
-        ResourceInfo resourceInfo;
-        std::string messageStr;
-        if (!ParseResourceParam(env, static_cast<ani_object>(message_ref), resourceInfo)) {
-            return false;
-        }
-        if (!ParseString(resourceInfo, messageStr)) {
-            return false;
-        }
-        if (messageStr.size() == 0) {
-            return false;
-        }
-        messageString = messageStr;
-    }
-    return true;
+    return container && container->IsSceneBoardWindow();
 }
-bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
+} // OHOS::Ace::NG
+
+static void ShowToast(ani_env* env, ani_object options)
 {
-    ani_ref duration_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "duration", &duration_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, duration_ref)) {
-        return false;
-    }
-    ani_double duration;
-    if (ANI_OK !=env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(duration_ref), "doubleValue", nullptr, &duration)) {
-        return false;
-    }
-    durationInt = static_cast<int32_t>(duration);
-    return true;
-}
-bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
-{
-    ani_ref bottom_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "bottom", &bottom_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, bottom_ref)) {
-        return false;
-    }
-    if (GetIsStringObject(env, bottom_ref)) {
-        auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(bottom_ref));
-        bottomString = stringContent;
-        return true;
-    }
-    if (GetIsNumberObject(env, bottom_ref)) {
-        ani_double bottom;
-        if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(bottom_ref), "doubleValue", nullptr, &bottom)) {
-            return false;
-        }
-        double botm = static_cast<double>(bottom);
-        bottomString = std::to_string(botm);
-    }
-    return true;
-}
-bool GetToastShowMode(ani_env *env, ani_object options, OHOS::Ace::NG::ToastShowMode& showMode)
-{
-    ani_ref showMode_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "showMode", &showMode_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, showMode_ref)) {
-        return false;
-    }
-    if (!GetIsToastShowModeEnum(env, showMode_ref)) {
-        return false;
-    }
-    ani_int showMode_int;
-    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(showMode_ref), &showMode_int)) {
-        return false;
-    }
-    showMode = static_cast<OHOS::Ace::NG::ToastShowMode>(showMode_int);
-    return true;
-}
-bool GetToastAlignment(ani_env *env, ani_object options, int32_t& alignment)
-{
-    ani_ref alignment_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "alignment", &alignment_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, alignment_ref)) {
-        return false;
-    }
-    if (!GetIsAlignmentEnum(env, alignment_ref)) {
-        return false;
-    }
-    ani_string stringValue;
-    if (ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(alignment_ref), &stringValue)) {
-        return false;
-    }
-    auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringValue));
-    auto it = alignmentMap.find(stringContent);
-    if (it != alignmentMap.end()) {
-        alignment = static_cast<int32_t>(it->second);
-    } else {
-        alignment = -1;
-        return false;
-    }
-    return true;
-}
-bool GetToastBackgroundBlurStyle(ani_env *env, ani_object options, std::optional<int32_t>& backgroundBlurStyle)
-{
-    ani_ref blurStyle_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "backgroundBlurStyle", &blurStyle_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, blurStyle_ref)) {
-        return false;
-    }
-    if (!GetIsBlurStyleEnum(env, blurStyle_ref)) {
-        return false;
-    }
-    ani_int blueStyle_int;
-    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(blurStyle_ref), &blueStyle_int)) {
-        return false;
-    }
-    backgroundBlurStyle = static_cast<int32_t>(blueStyle_int);
-    std::cerr << "GetToastBackgroundBlurStyle blueStyle " << static_cast<int32_t>(blueStyle_int) << std::endl;
-    return true;
-}
-bool GetToastOffset(ani_env *env, ani_object options, std::optional<OHOS::Ace::DimensionOffset>& offset)
-{
-    ani_ref offset_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "offset", &offset_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, offset_ref)) {
-        return false;
-    }
-    ani_ref dx_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(offset_ref), "dx", &dx_ref)) {
-        return false;
-    }
-    ani_ref dy_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(offset_ref), "dy", &dy_ref)) {
-        return false;
-    }
-    OHOS::Ace::CalcDimension dx;
-    OHOS::Ace::CalcDimension dy;
-    if (!ParseLengthToDimension(env, dx_ref, OHOS::Ace::DimensionUnit::VP, dx)) {
-        return false;
-    }
-    if (!ParseLengthToDimension(env, dy_ref, OHOS::Ace::DimensionUnit::VP, dy)) {
-        return false;
-    }
-    offset = OHOS::Ace::DimensionOffset { dx, dy };
-    return true;
-}
-bool GetToastShadow(ani_env *env, ani_object options, std::optional<OHOS::Ace::Shadow>& shadow,
-                    bool& isTypeStyleShadow)
-{
-    ani_ref shadow_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "shadow", &shadow_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, shadow_ref)) {
-        return false;
-    }
-    OHOS::Ace::Shadow shadowProps;
-    if (GetIsShadowStyleEnum(env, shadow_ref)) {
-        ani_int shadow_int;
-        if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(shadow_ref), &shadow_int)) {
-            return false;
-        }
-        auto style = static_cast<OHOS::Ace::ShadowStyle>(shadow_int);
-        GetShadowFromTheme(style, shadowProps);
-        shadow = shadowProps;
-        return true;
-    }
-    if (GetIsShadowOptionsObject(env, shadow_ref)) {
-        bool ret = GetToastObjectShadow(env, static_cast<ani_object>(shadow_ref), shadowProps);
-        isTypeStyleShadow = false;
-        return ret;
-    }
-    return true;
-}
-bool GetToastBackgroundColor(ani_env* env, ani_object options, std::optional<OHOS::Ace::Color>& backgroundColor)
-{
-    ani_ref resourceColor_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "backgroundColor", &resourceColor_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, resourceColor_ref)) {
-        return false;
-    }
-    OHOS::Ace::Color resourceColor;
-    if (ParseAniColor(env, resourceColor_ref, resourceColor)) {
-        backgroundColor = resourceColor;
-        return true;
-    }
-    return false;
-}
-bool GetToastTextColor(ani_env* env, ani_object options, std::optional<OHOS::Ace::Color>& textColor)
-{
-    ani_ref resourceColor_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "textColor", &resourceColor_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, resourceColor_ref)) {
-        return false;
-    }
-    OHOS::Ace::Color resourceColor;
-    if (ParseAniColor(env, resourceColor_ref, resourceColor)) {
-        textColor = resourceColor;
-        return true;
-    }
-    return false;
-}
-bool GetToastEnableHoverMode(ani_env* env, ani_object options, bool& enableHoverMode)
-{
-    ani_ref mode_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "enableHoverMode", &mode_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, mode_ref)) {
-        return false;
-    }
-    ani_boolean modeValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(mode_ref), "unboxed", nullptr, &modeValue)) {
-        return false;
-    }
-    enableHoverMode = static_cast<bool>(modeValue);
-    return true;
-}
-bool GetToastHoverModeArea(ani_env* env, ani_object options, OHOS::Ace::HoverModeAreaType& hoverModeArea)
-{
-    ani_ref area_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "hoverModeArea", &area_ref)) {
-        return false;
-    }
-    if (GetIsUndefinedObject(env, area_ref)) {
-        return false;
-    }
-    if (!GetIsHoverModeAreaEnum(env, area_ref)) {
-        return false;
-    }
-    ani_int area_int;
-    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(area_ref), &area_int)) {
-        return false;
-    }
-    hoverModeArea = static_cast<OHOS::Ace::HoverModeAreaType>(area_int);
-    return true;
-}
-bool GetToastParams(ani_env* env, ani_object options, OHOS::Ace::NG::ToastInfo toastInfo)
-{
-    if (GetIsUndefinedObject(env, options)) {
-        return false;
-    }
-    if (!GetIsShowToastOptionsObject(env, options)) {
-        return false;
-    }
-    GetToastMessage(env, options, toastInfo.message);
-    std::cout << "GetToastMessage :" << toastInfo.message.c_str() << std::endl;
-    GetToastDuration(env, options, toastInfo.duration);
-    std::cout << "GetToastDuration :" << toastInfo.duration << std::endl;
-    GetToastBottom(env, options, toastInfo.bottom);
-    std::cout << "GetToastBottom :" << toastInfo.bottom.c_str() << std::endl;
-    GetToastShowMode(env, options, toastInfo.showMode);
-    std::cout << "GetToastShowMode :" << static_cast<int32_t>(toastInfo.showMode) << std::endl;
-    GetToastAlignment(env, options, toastInfo.alignment);
-    std::cout << "GetToastAlignment :" << static_cast<int32_t>(toastInfo.alignment) << std::endl;
-    GetToastBackgroundBlurStyle(env, options, toastInfo.backgroundBlurStyle);
-    GetToastBackgroundColor(env, options, toastInfo.backgroundColor);
-    std::cout << "GetToastBackgroundColor :" << toastInfo.backgroundColor->ToString().c_str() << std::endl;
-    GetToastTextColor(env, options, toastInfo.textColor);
-    std::cout << "GetToastTextColor :" << toastInfo.textColor->ToString().c_str() << std::endl;
-    GetToastOffset(env, options, toastInfo.offset);
-    GetToastShadow(env, options, toastInfo.shadow, toastInfo.isTypeStyleShadow);
-    GetToastEnableHoverMode(env, options, toastInfo.enableHoverMode);
-    std::cout << "GetToastEnableHoverModer :" << toastInfo.enableHoverMode << std::endl;
-    GetToastHoverModeArea(env, options, toastInfo.hoverModeArea);
-    std::cout << "GetToastHoverModeArea :" << (int)toastInfo.hoverModeArea << std::endl;
-    return true;
-}
-bool HandleShowToast(OHOS::Ace::NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
-{
-    #ifdef OHOS_STANDARD_SYSTEM
-    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
-        toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
-        auto delegate = OHOS::Ace::EngineHelper::GetCurrentDelegateSafely();
-        if (!delegate) {
-            return false;
-        }
-        delegate->ShowToast(toastInfo, std::move(toastCallback));
-    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-        OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
-    }
-#else
-    auto delegate = OHOS::Ace::EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        return false;
-    }
-    // if (toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
-    //     delegate->ShowToast(toastInfo, std::move(toastCallback));
-    // } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-    //     OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
-    // }
-#endif
-    return true;
-}
-static void showToast([[maybe_unused]] ani_env* env, ani_object options)
-{
-    std::cout << "ani showToast start" << std::endl;
-    auto toastInfo = OHOS::Ace::NG::ToastInfo { .duration = -1,
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showToast enter.");
+    auto toastInfo = OHOS::Ace::NG::ToastInfo {
+        .duration = -1,
         .showMode = OHOS::Ace::NG::ToastShowMode::DEFAULT,
-        .alignment = -1 };
-    if (!GetToastParams(env, options, toastInfo)) {
+        .alignment = -1
+    };
+    if (!GetShowToastOptions(env, options, toastInfo)) {
         return;
     }
+
     std::function<void(int32_t)> toastCallback = nullptr;
-    HandleShowToast(toastInfo, toastCallback);
-    std::cerr << "ShowToast end" << std::endl;
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard() && toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowToastStatic(toastInfo, nullptr, OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToastStatic(toastInfo, nullptr);
+    }
 }
+
+static ani_object OpenToast(ani_env* env, ani_object options)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openToast enter.");
+    auto toastInfo =
+        OHOS::Ace::NG::ToastInfo { .duration = -1, .showMode = OHOS::Ace::NG::ToastShowMode::DEFAULT, .alignment = -1 };
+    if (!GetShowToastOptions(env, options, toastInfo)) {
+        return nullptr;
+    }
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+    std::function<void(int32_t)> toastCallback = GetToastPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService()) &&
+        !OHOS::Ace::NG::ContainerIsScenceBoard() && toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowToastStatic(
+            toastInfo, std::move(toastCallback), OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToastStatic(toastInfo, std::move(toastCallback));
+    }
+    return result;
+}
+
+static void CloseToast(ani_env* env, ani_double toastId)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeToast enter.");
+    std::function<void(int32_t)> toastCloseCallback = nullptr;
+    toastCloseCallback = [env](int32_t errorCode) mutable {
+        if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+            OHOS::Ace::Ani::AniThrow(env, "The toastId is invalid.", errorCode);
+        };
+    };
+    if (!toastId) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (toastId < 0 || toastId > INT32_MAX) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(toastId) & 0b111);
+    int32_t id = static_cast<int32_t>(static_cast<uint32_t>(toastId) >> 3);
+    if (id < 0 || showModeVal < 0 ||
+        showModeVal > static_cast<int32_t>(OHOS::Ace::NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_TOAST_NOT_FOUND);
+        return;
+    }
+    auto showMode = static_cast<OHOS::Ace::NG::ToastShowMode>(showModeVal);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService()) &&
+        !OHOS::Ace::NG::ContainerIsScenceBoard() && showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+        OHOS::Ace::NG::DialogManagerStatic::CloseToastStatic(
+            id, std::move(toastCloseCallback), OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->CloseToastStatic(id, showMode, std::move(toastCloseCallback));
+    }
+}
+
+static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback, ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] ShowDialogWithCallback enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    if (!GetShowDialogOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_ref globalRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &globalRef);
+    asyncContext->callback = reinterpret_cast<ani_fn_object>(globalRef);
+
+    std::function<void(int32_t, int32_t)> finishCallback = GetShowDialogCallback(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowDialogStatic(dialogProps, std::move(finishCallback));
+    }
+}
+
+static ani_object ShowDialog(ani_env* env, ani_object options, ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowDialog enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    if (!GetShowDialogOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t, int32_t)> finishCallback = GetShowDialogPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_object callback)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenuWithCallback enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    if (!GetActionMenuOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_ref globalRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &globalRef);
+    asyncContext->callback = reinterpret_cast<ani_fn_object>(globalRef);
+
+    std::function<void(int32_t, int32_t)> finishCallback = GetShowActionMenuCallback(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowActionMenuStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowActionMenuStatic(dialogProps, std::move(finishCallback));
+    }
+}
+
+static ani_object ShowActionMenu(ani_env* env, ani_object options)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenu enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    if (!GetActionMenuOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t, int32_t)> finishCallback = GetShowActionMenuPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowActionMenuStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowActionMenuStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_object options,
+    ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogContent enter.");
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
+    frameNode->SetBuilderFunc(nullptr);
+
+    OHOS::Ace::DialogProperties dialogProps;
+    dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
+    GetBaseDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object OpenCustomDialog(ani_env* env, ani_object builderOptions, ani_object options,
+    ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialog enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
+    if (!builderResult || !destroyResult) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
+        return nullptr;
+    }
+
+    if (!GetCustomDialogOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.isUserCreatedDialog = true;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetOpenCustomDialogPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object options)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] UpdateCustomDialog enter.");
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
+    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
+
+    OHOS::Ace::DialogProperties dialogProps;
+    if (!GetBaseDialogOptions(env, options, dialogProps)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    dialogProps.isSysBlurStyle = false;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::UpdateCustomDialogStatic(
+            contentNode, dialogProps, std::move(finishCallback));
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::PromptDialogAttr dialogAttr = {
+            .autoCancel = dialogProps.autoCancel,
+            .alignment = dialogProps.alignment,
+            .offset = dialogProps.offset,
+            .maskColor = dialogProps.maskColor,
+        };
+        OHOS::Ace::SubwindowManager::GetInstance()->UpdateCustomDialogNG(
+            contentNode, dialogAttr, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialogContent enter.");
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
+    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::CloseCustomDialogStatic(contentNode, std::move(finishCallback));
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->CloseCustomDialogNG(contentNode, std::move(finishCallback));
+    }
+    return result;
+}
+
+static void CloseCustomDialog(ani_env* env, ani_double dialogId)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialog enter.");
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+
+    int32_t customDialogId = static_cast<int32_t>(static_cast<double>(dialogId));
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::CloseCustomDialogStatic(customDialogId, OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->CloseCustomDialogNG(customDialogId);
+    }
+}
+
+static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content, ani_object controller,
+    ani_object options, ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    if (!frameNode) {
+        OHOS::Ace::Ani::AniThrow(env, "The ComponentContent is incorrect.", OHOS::Ace::ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return nullptr;
+    }
+    frameNode->SetBuilderFunc(nullptr);
+
+    OHOS::Ace::DialogProperties dialogProps;
+    dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
+    if (!OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog controller fail.");
+        OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    GetBaseDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result;
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, ani_object controller,
+    ani_object options, ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder);
+    bool destroyResult = GetDestroyCallback(env, builderOptions, dialogProps.destroyCallback);
+    bool builderWithIdResult = GetCustomBuilderWithId(env, builderOptions, dialogProps.customBuilderWithId);
+    if ((!builderResult && !builderWithIdResult) || !destroyResult) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse dialog builder options fail.");
+        return nullptr;
+    }
+
+    OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);
+    GetDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.isUserCreatedDialog = true;
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result;
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetOpenCustomDialogPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_status CreateAniDouble(ani_env* env, double value, ani_object& result)
+{
+    ani_status state;
+    ani_class doubleClass;
+    if ((state = env->FindClass("Lstd/core/Double;", &doubleClass)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass std/core/doubleClass failed, %{public}d", state);
+        return state;
+    }
+    ani_method doubleClassCtor;
+    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleClassCtor)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Class_FindMethod Double ctor failed, %{public}d", state);
+        return state;
+    }
+    ani_double aniValue = value;
+    if ((state = env->Object_New(doubleClass, doubleClassCtor, &result, aniValue)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "New Double object failed, %{public}d", state);
+        return state;
+    }
+    return state;
+}
+
+static ani_object GetTopOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetTopOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetTopOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
+}
+
+static ani_object GetBottomOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetBottomOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetBottomOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
+}
+
+static ani_object GetDialogNode(ani_env* env, ani_long content)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] GetDialogNode enter.");
+    ani_ref undefinedRef = nullptr;
+    ani_status status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "GetUndefined failed, %{public}d", status);
+        return nullptr;
+    }
+    ani_object result = static_cast<ani_object>(undefinedRef);
+
+    auto* uiNode = reinterpret_cast<ArkUINodeHandle>(content);
+    CHECK_NULL_RETURN(uiNode, result);
+    auto contentNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(uiNode));
+    CHECK_NULL_RETURN(contentNode, result);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> dialogNode = contentNode->GetParentFrameNode();
+    while (dialogNode) {
+        if (dialogNode->GetTag() == OHOS::Ace::V2::DIALOG_ETS_TAG) {
+            break;
+        }
+        dialogNode = dialogNode->GetParentFrameNode();
+    }
+    CHECK_NULL_RETURN(dialogNode, result);
+
+    auto* node = OHOS::Ace::AceType::RawPtr(dialogNode);
+    CHECK_NULL_RETURN(node, result);
+    int64_t nodePtr = reinterpret_cast<int64_t>(node);
+    return CreateANILongObject(env, nodePtr);
+}
+
+static ani_boolean SetDialogController(ani_env* env, ani_long dialog, ani_object controller)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] SetDialogController enter.");
+    ani_boolean result = static_cast<ani_boolean>(false);
+    auto* uiNode = reinterpret_cast<ArkUINodeHandle>(dialog);
+    CHECK_NULL_RETURN(uiNode, result);
+    auto dialogNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::FrameNode *>(uiNode));
+    CHECK_NULL_RETURN(dialogNode, result);
+
+    if (IsUndefinedObject(env, controller)) {
+        return result;
+    }
+
+    ani_long nativePtr;
+    ani_status status = env->Object_GetFieldByName_Long(controller, "nativePtr", &nativePtr);
+    if (status != ANI_OK) {
+        return result;
+    }
+
+    auto dialogController = reinterpret_cast<OHOS::Ace::Ani::PromptActionDialogController *>(nativePtr);
+    CHECK_NULL_RETURN(dialogController, false);
+    dialogController->SetNode(dialogNode);
+    result = static_cast<ani_boolean>(true);
+    return result;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    std::cout << "ani ANI_Constructor start" << std::endl;
-
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction ANI_Constructor start.");
     ani_env *env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction GetEnv fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/promptAction/promptAction;", &ns)) {
+    status = env->FindNamespace("L@ohos/promptAction/promptAction;", &ns);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction FindNamespace fail. status: %{public}d", status);
         return ANI_ERROR;
     }
+
     std::array methods = {
-        ani_native_function {"showToast", nullptr, reinterpret_cast<void *>(showToast)},
+        ani_native_function {"showToast", nullptr, reinterpret_cast<void *>(ShowToast)},
+        ani_native_function {"openToast", nullptr, reinterpret_cast<void *>(OpenToast)},
+        ani_native_function {"closeToast", nullptr, reinterpret_cast<void *>(CloseToast)},
+        ani_native_function {"showDialog1", nullptr, reinterpret_cast<void *>(ShowDialogWithCallback)},
+        ani_native_function {"showDialog", nullptr, reinterpret_cast<void *>(ShowDialog)},
+        ani_native_function {"showActionMenu1", nullptr, reinterpret_cast<void *>(ShowActionMenuWithCallback)},
+        ani_native_function {"showActionMenu", nullptr, reinterpret_cast<void *>(ShowActionMenu)},
+        ani_native_function {"openCustomDialog1", nullptr, reinterpret_cast<void *>(OpenCustomDialogContent)},
+        ani_native_function {"openCustomDialog", nullptr, reinterpret_cast<void *>(OpenCustomDialog)},
+        ani_native_function {"updateCustomDialog", nullptr, reinterpret_cast<void *>(UpdateCustomDialog)},
+        ani_native_function {"closeCustomDialog1", nullptr, reinterpret_cast<void *>(CloseCustomDialogContent)},
+        ani_native_function {"closeCustomDialog", nullptr, reinterpret_cast<void *>(CloseCustomDialog)},
+        ani_native_function {"openCustomDialogWithController", nullptr,
+            reinterpret_cast<void *>(OpenCustomDialogWithController)},
+        ani_native_function {"presentCustomDialog", nullptr, reinterpret_cast<void *>(PresentCustomDialog)},
+        ani_native_function {"getTopOrder", nullptr, reinterpret_cast<void *>(GetTopOrder)},
+        ani_native_function {"getBottomOrder", nullptr, reinterpret_cast<void *>(GetBottomOrder)},
+        ani_native_function {"getDialogNode", nullptr, reinterpret_cast<void *>(GetDialogNode)},
+        ani_native_function {"setDialogController", nullptr, reinterpret_cast<void *>(SetDialogController)},
     };
-    if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
+    status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction BindFunctions fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    status = OHOS::Ace::Ani::BindCommonController(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindCommonController fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    status = OHOS::Ace::Ani::BindDialogController(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindDialogController fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    status = OHOS::Ace::Ani::BindDismissDialogAction(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindDismissDialogAction fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
     *result = ANI_VERSION_1;
-    std::cout << "ani ANI_Constructor end" << std::endl;
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction ANI_Constructor end.");
     return ANI_OK;
 }

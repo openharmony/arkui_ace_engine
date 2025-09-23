@@ -2008,6 +2008,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         FlushAnimationTasks();
         window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
+        if (asyncEventsHookListener_ != nullptr) {
+            ACE_SCOPED_TRACE("arkoala callbacks");
+            asyncEventsHookListener_(); // fire all arkoala callbacks
+        }
     } else {
         LOGW("the surface is not ready, waiting");
     }
@@ -2146,7 +2150,8 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea)
 {
     CHECK_RUN_ON(UI);
     if (width_ == width && height_ == height && type == WindowSizeChangeReason::CUSTOM_ANIMATION) {

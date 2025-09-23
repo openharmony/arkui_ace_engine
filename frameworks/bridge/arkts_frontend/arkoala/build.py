@@ -278,7 +278,7 @@ def run_build_arkoala(env, path: Paths):
             f.write("\n")
             f.write("build log: "+ e.stdout + "\n")
             f.write("error message: "+ e.stderr + "\n")
-            print(f"build log:\n {e.stdout}")
+            print(f"build log:\n {ret.stdout}")
             print(f"error message: {e.stderr}")
             f.close()
 
@@ -358,9 +358,6 @@ def pre_processing(path: Paths):
         path.project_path, "arkoala-arkts", "arkui-ohos")
     target_path = os.path.join(
         path.project_path, "arkoala-arkts", "arkui-ohos-preprocess")
-
-    if os.path.exists(target_path):
-        shutil.rmtree(target_path)
 
     def ignore_build_path(src, names):
         return ["build"] if "build" in names else []

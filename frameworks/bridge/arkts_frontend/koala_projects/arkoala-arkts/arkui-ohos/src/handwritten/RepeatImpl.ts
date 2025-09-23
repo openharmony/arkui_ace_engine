@@ -17,13 +17,14 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
-import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
+import { KPointer } from '@koalaui/interop';
+import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback, Repeat } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
-import { ArkColumnPeer } from '../component/column';
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
 
 /** @memo:intrinsic */
 export function RepeatImpl<T>(
@@ -38,15 +39,15 @@ export function RepeatImpl<T>(
     if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
-    if (repeat.isVirtualScroll_) {
+    if (repeat.disableVirtualScroll_) {
+        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+    } else {
         const repeatId = __id();
         const node = contextNode<PeerNode>();
         scheduleCallback(() => // postpone until node is attached
             repeat.templateCacheSize_.forEach((size: number, template: string) => node.setReusePoolSize(size, template + repeatId))
         );
         virtualRender<T>(arr, repeat, repeatId);
-    } else {
-        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
     }
 }
 
@@ -80,6 +81,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
     private listener_?: InternalListener;
     private total_: number;
+    private onLazyLoading_?: (index: number) => void;
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
@@ -90,6 +92,9 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     updateData(newArr: RepeatArray<T>, totalCount: number) {
+        if (this.total_ != totalCount) {
+            this.listener_?.update(Math.min(this.total_, totalCount), Number.POSITIVE_INFINITY, totalCount - this.total_);
+        }
         this.total_ = totalCount;
         // Compare array references first
         if (this.arr_ === newArr) {
@@ -97,14 +102,14 @@ class RepeatDataSource<T> implements IDataSource<T> {
         }
         // Shallow compare: check length and each element by reference
         if (this.arr_.length !== newArr.length) {
-            this.arr_ = newArr;
             this.listener_?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length);
+            this.arr_ = newArr;
             return;
         }
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
-                this.arr_ = newArr;
                 this.listener_?.update(i, Number.POSITIVE_INFINITY, 0);
+                this.arr_ = newArr;
                 return;
             }
         }
@@ -112,10 +117,21 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     getData(index: number): T {
-        if (index < 0 || index >= this.arr_.length) {
+        if (index < 0 || index >= this.total_) {
             throw new Error('index out of range. Application error!');
         }
-        return this.arr_[index];
+        if (index >= this.arr_.length && index < this.total_) {
+            try {
+                this.onLazyLoading_?.(index);
+            } catch (error) {
+                console.error(`onLazyLoading function execute error: ${error}`);
+            }
+        }
+        return this.arr_[index as int32];
+    }
+
+    setOnLazyLoading(onLazyLoading?: (index: number) => void): void {
+        this.onLazyLoading_ = onLazyLoading;
     }
 
     registerDataChangeListener(listener: DataChangeListener): void {
@@ -137,11 +153,14 @@ const RepeatEachFuncType: string = '';
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
-    userDefinedTotal_?: number;
-    templateCacheSize_: Map<string, number> = new Map<string, number>();
+    templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
     ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
-    reusable_: boolean = false;
-    isVirtualScroll_: boolean = false;
+
+    userDefinedTotal_?: number; // if totalCount is specified
+    onLazyLoading_?: (index: number) => void;
+
+    reusable_: boolean = true;
+    disableVirtualScroll_: boolean = false;
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
@@ -159,9 +178,10 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
         this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
-        this.reusable_ = options?.reusable !== false;
+        this.reusable_ = options?.reusable ?? true;
+        this.onLazyLoading_ = options?.onLazyLoading;
 
-        this.isVirtualScroll_ = true;
+        this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
         return this;
     }
 
@@ -184,6 +204,36 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
+export class SyntaxItemPeer extends PeerNode {
+    public static create(): SyntaxItemPeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._SyntaxItem_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`);
+        }
+        return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
+export class ForEachNodePeer extends PeerNode {
+    public static create(isRepeat: boolean = false): ForEachNodePeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
+        }
+        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
 /** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
@@ -191,7 +241,13 @@ function virtualRender<T>(
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    dataSource.updateData(arr, attributes.userDefinedTotal_ ?? arr.length);
+    const total = attributes.userDefinedTotal_ ?? arr.length.toDouble();
+    dataSource.updateData(arr, (Number.isInteger(total) && total >= 0) ? total : arr.length);
+    if (!attributes.onLazyLoading_ && dataSource.totalCount() > arr.length) {
+        console.error(`(${repeatId}) totalCount must not exceed the array length without onLazyLoading callback.`);
+    }
+    dataSource.setOnLazyLoading(attributes.onLazyLoading_);
+
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index);
@@ -206,14 +262,14 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
+            NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 itemBuilder(ri);
             }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
     };
-    // LazyForEachImpl<T>(dataSource, itemGen, attributes.keyGenFunc_);
+    LazyForEachImpl<T>(dataSource, itemGen, attributes.keyGenFunc_, true);
 }
 
 /** @memo */
@@ -227,8 +283,14 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     }
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
-    // RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
-    //     const ri = new RepeatItemImpl<T>(ele, (i as number));
-    //     itemGenerator(ri);
-    // });
+    /** @memo */
+    const action = (ele: T, i: int32): void => {
+        const ri = new RepeatItemImpl<T>(ele, (i as number));
+        NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
+            itemGenerator(ri);
+        });
+    };
+    NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
+        RepeatByArray<T>(arr, keyGen, action);
+    });
 }

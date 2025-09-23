@@ -19,6 +19,7 @@
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -444,6 +445,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
     // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
     auto renderContext = pageNode->GetRenderContext();
     renderContext->UpdateClipEdge(true);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 20.0f, 30.0f));
 
     pattern->HandleLongPress(info);
     EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
@@ -471,6 +473,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
     // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
     auto renderContext = pageNode->GetRenderContext();
     renderContext->UpdateClipEdge(true);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 20.0f, 30.0f));
 
     pattern->HandleLongPress(info);
     EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
@@ -1203,13 +1206,17 @@ HWTEST_F(TextTestNineNg, GetContainerModalRoot, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto holder = AceType::MakeRefPtr<TextSelectOverlay>(hostNode->GetPattern<TextBase>());
     manager->selectOverlayHolder_ = holder;
-
+    auto containerModalNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    auto rootNode = pipeline->rootNode_;
+    ASSERT_NE(rootNode, nullptr);
+    rootNode->AddChild(containerModalNode, 0);
     /**
-     * @tc.steps: step2: call GetContainerModalRoot when hostNode is nullptr
-     * @tc.expected: root is  pipeline->rootNode_
+     * @tc.steps: step2: call GetContainerModalRoot when hostNode parent not is toolbarItem
+     * @tc.expected: root is  rootNode
      */
-    auto root = manager->GetContainerModalRoot();
-    EXPECT_EQ(root, pipeline->rootNode_);
+    auto retNode = manager->GetContainerModalRoot();
+    EXPECT_EQ(retNode, rootNode);
 
     /**
      * @tc.steps: step3: call GetContainerModalRoot when hostNode parent is toolbarItem
@@ -1218,7 +1225,9 @@ HWTEST_F(TextTestNineNg, GetContainerModalRoot, TestSize.Level1)
     auto toolbarItem = FrameNode::GetOrCreateFrameNode(
         V2::TOOLBARITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), nullptr);
     toolbarItem->AddChild(hostNode);
-    root = manager->GetContainerModalRoot();
-    EXPECT_EQ(root, pipeline->GetContainerModalNode());
+    retNode = manager->GetContainerModalRoot();
+    EXPECT_EQ(retNode, containerModalNode);
+    pipeline->windowModal_ = WindowModal::NORMAL;
+    rootNode->RemoveChild(containerModalNode);
 }
 } // namespace OHOS::Ace::NG

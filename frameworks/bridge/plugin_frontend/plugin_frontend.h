@@ -36,7 +36,7 @@ namespace OHOS::Ace {
 // - Load pages of a JS app, and parse the manifest.json before loading main page.
 // - Maintain the page stack of JS app by PluginFrontendDelegate.
 // - Lifecycle of JS app (also AceActivity).
-class PluginFrontend : public Frontend {
+class ACE_FORCE_EXPORT PluginFrontend : public Frontend {
     DECLARE_ACE_TYPE(PluginFrontend, Frontend);
 
 public:

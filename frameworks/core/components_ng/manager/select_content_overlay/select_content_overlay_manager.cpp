@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -1334,10 +1335,13 @@ RefPtr<FrameNode> SelectContentOverlayManager::GetContainerModalRoot()
         CHECK_NULL_RETURN(context, nullptr);
         auto windowModal = context->GetWindowModal();
         if (windowModal == WindowModal::CONTAINER_MODAL) {
-            auto isOnDecor = context->CheckNodeOnContainerModalTitle(
-                selectOverlayHolder_ ? selectOverlayHolder_->GetOwner() : nullptr);
-            if (isOnDecor) {
-                return context->GetContainerModalNode();
+            auto containerModalNode = context->GetContainerModalNode();
+            CHECK_NULL_RETURN(containerModalNode, nullptr);
+            auto containerModalPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+            CHECK_NULL_RETURN(containerModalPattern, nullptr);
+            auto hostNode = selectOverlayHolder_ ? selectOverlayHolder_->GetOwner() : nullptr;
+            if (containerModalPattern->CheckNodeOnContainerModalTitle(hostNode)) {
+                return containerModalNode;
             }
             auto overlayManager = context->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, nullptr);

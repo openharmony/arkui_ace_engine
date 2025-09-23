@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
@@ -20,7 +21,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -55,6 +55,9 @@ namespace PasteButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+    if (MultiThreadBuildManager::IsParallelScope()) {
+        LOGF_ABORT("Unsupported UI components PasteButton used in ParallelizeUI");
+    }
     auto frameNode = PasteButtonModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
@@ -84,11 +87,7 @@ void OnClickImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
+    CHECK_NULL_VOID(value);
     auto onEvent = [arkCallback = CallbackHelper(value->value), frameNode](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
         std::string message;
@@ -107,15 +106,14 @@ void OnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
-        auto error = Opt_BusinessError{
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, Opt_BusinessError{
             .value = Ark_BusinessError{
-                .name = Converter::ArkValue<Ark_String>("", Converter::FC),
+                .name = Converter::ArkValue<Ark_String>("123", Converter::FC),
                 .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-                .stack = Converter::ArkValue<Opt_String>("", Converter::FC),
+                .stack = Converter::ArkValue<Opt_String>("asdf", Converter::FC),
                 .code = Converter::ArkValue<Ark_Number>(code)
             }
-        };
-        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
+        });
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }

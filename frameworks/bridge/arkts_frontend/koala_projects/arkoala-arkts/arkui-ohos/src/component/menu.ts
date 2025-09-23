@@ -204,7 +204,7 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     }
     public subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
         return this
-        }
+    }
 }
 export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAttribute {
     getPeer(): ArkMenuPeer {

@@ -59,7 +59,7 @@ class ObserveV2 {
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
-  public static readonly ADD_MONITOR_REFS = Symbol('___monitor_refs_');
+  public static readonly ADD_MONITOR_REFS = Symbol('___add_monitor_refs_');
   public static readonly COMPUTED_REFS = Symbol('___computed_refs_');
 
   public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
@@ -1029,6 +1029,14 @@ class ObserveV2 {
           // store a reference inside owningObject
           // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2
           // remember: id2others only has a WeakRef to MonitorV2 obj
+          const existingMonitor = refs[monitorFunc.name];
+          if (existingMonitor && existingMonitor instanceof MonitorV2) {
+            // current Monitor will be override, and will be GC soon
+            // to avoid the Monitor be triggered anymore, invalidate it
+            ObserveV2.getObserve().clearWatch(existingMonitor.getWatchId());
+            stateMgmtConsole.warn(`@Monitor ${monitorFunc.name} ${pathString} in ${owningObjectName} instance with same name already exists.
+              The new ${monitorFunc.name} will override the previous one, and the old one will no longer take effect.`);
+          }
           refs[monitorFunc.name] = monitor;
         }
         // FIXME Else handle error
@@ -1124,7 +1132,8 @@ class ObserveV2 {
           // current computed will be override, and will be GC soon
           // to avoid the Computed be triggered anymore, invalidate it
           this.clearBinding(existingComputed.getComputedId());
-          stateMgmtConsole.warn(`Check compatibility, ${owningObjectName} has @Computed ${computedPropertyName} and create ${owningObject?.constructor?.name} instance`);
+          stateMgmtConsole.warn(`@Computed ${computedPropertyName} in ${owningObjectName} instance with same name already exists.
+            The new ${computedPropertyName} will override the previous one, and the old one will no longer take effect.`);
         }
         refs[computedPropertyName] = computed;
       });
@@ -1132,10 +1141,12 @@ class ObserveV2 {
   }
 
   public clearWatch(id: number): void {
+    // @Monitor
     if (id < MonitorV2.MIN_WATCH_FROM_API_ID) {
       this.clearBinding(id);
       return;
     }
+    // addMonitor
     const monitor: MonitorV2 = this.id2Others_[id]?.deref();
     if (monitor instanceof MonitorV2) {
       monitor.getValues().forEach((monitorValueV2: MonitorValueV2<unknown>) => {

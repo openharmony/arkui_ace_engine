@@ -14,6 +14,9 @@
  */
 
 import { Resource } from "global.resource"
+import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
+
+export namespace font {
 
 export interface FontOptions {
     familyName: string | Resource;
@@ -32,3 +35,48 @@ export interface FontInfo {
     monoSpace: boolean;
     symbolic: boolean;
 }
+
+export interface UIFontFallbackInfo {
+    language: string;
+    family: string;
+}
+
+export interface UIFontAliasInfo {
+    name: string;
+    weight: number;
+}
+
+export interface UIFontAdjustInfo {
+    weight: number;
+    to: number;
+}
+
+export interface UIFontGenericInfo {
+    family: string;
+    alias: Array<UIFontAliasInfo>;
+    adjust: Array<UIFontAdjustInfo>;
+}
+
+export interface UIFontFallbackGroupInfo {
+    fontSetName: string;
+    fallback: Array<UIFontFallbackInfo>;
+}
+
+export interface UIFontConfig {
+    fontDir: Array<string>;
+    generic: Array<UIFontGenericInfo>;
+    fallbackGroups: Array<UIFontFallbackGroupInfo>;
+}
+
+function getUIFontConfig() : UIFontConfig {
+    return GlobalScope_ohos_font.getInternalUIFontConfig();
+}
+}
+export type FontOptions = font.FontOptions;
+export type FontInfo = font.FontInfo;
+export type UIFontFallbackInfo = font.UIFontFallbackInfo;
+export type UIFontAliasInfo = font.UIFontAliasInfo;
+export type UIFontAdjustInfo = font.UIFontAdjustInfo;
+export type UIFontGenericInfo = font.UIFontGenericInfo;
+export type UIFontFallbackGroupInfo = font.UIFontFallbackGroupInfo;
+export type UIFontConfig = font.UIFontConfig;

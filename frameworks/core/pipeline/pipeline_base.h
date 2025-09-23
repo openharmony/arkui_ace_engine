@@ -270,7 +270,8 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {}) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
@@ -1651,6 +1652,10 @@ public:
 
     void SetUiDVSyncCommandTime(uint64_t vsyncTime);
     void ForceUpdateDesignWidthScale(int32_t width);
+    void SetAsyncEventsHookListener(const std::function<void()>& asyncEventsExecution)
+    {
+        asyncEventsHookListener_ = asyncEventsExecution;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1815,6 +1820,8 @@ protected:
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;
     int32_t dvsyncTimeUseCount_ = 0;
+    // add for arkola frontend loops, called at the tail of vsync
+    std::function<void()> asyncEventsHookListener_;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

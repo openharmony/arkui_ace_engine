@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
@@ -64,11 +64,12 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
-        auto builder = [callback = CallbackHelper(arkBuilder.value()), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-        RadioModelStatic::SetBuilder(frameNode, std::move(builder));
+        CallbackHelper(arkBuilder.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            auto builder = [uiNode]() {
+                NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            RadioModelStatic::SetBuilder(frameNode, std::move(builder));
+            }, node);
     }
 }
 } // RadioInterfaceModifier
@@ -138,12 +139,16 @@ void ContentModifier0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RadioModelNG::SetContentModifier0(frameNode, convValue);
 }
 void ContentModifier1Impl(Ark_NativePointer node,
                           const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RadioModelNG::SetContentModifier1(frameNode, convValue);
 }
 void _onChangeEvent_checkedImpl(Ark_NativePointer node,
                                 const Callback_Opt_Boolean_Void* callback)

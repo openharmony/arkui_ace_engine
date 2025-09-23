@@ -145,6 +145,7 @@ public:
     }
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
+    void UpdateGridItemStyleMultiThread(GridItemStyle gridItemStyle);
 
     bool IsEnableChildrenMatchParent() override
     {

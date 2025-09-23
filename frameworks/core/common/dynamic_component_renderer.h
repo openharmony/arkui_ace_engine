@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_param.h"
 
 namespace OHOS::Ace::NG {
 struct RendererDumpInfo {
@@ -51,6 +52,9 @@ public:
 
     static RefPtr<DynamicComponentRenderer> Create(
         const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
+
+    static RefPtr<DynamicComponentRenderer> Create(
+        const RefPtr<FrameNode>& host, const DynamicParam& dynamicParam);
 
     virtual void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) = 0;
     virtual void SetBackgroundTransparent(bool backgroundTransparent) = 0;
@@ -87,6 +91,9 @@ public:
     virtual bool IsRestrictedWorkerThread() { return false; }
     virtual bool CheckDCMaxConstraintInWorker(void *worker) { return false; }
     virtual bool CheckWorkerMaxConstraint(void *worker) { return true; }
+    virtual bool HasWorkerUsingByWorkerId(int32_t workerId) { return false; }
+    virtual bool CheckDCMaxConstraintInWorker(int32_t workerId) { return false; }
+    virtual bool CheckWorkerMaxConstraint(int32_t workerId) { return false; }
     virtual void UpdateParentOffsetToWindow(const OffsetF& offset) = 0;
     virtual void OnAccessibilityParentRectInfoUpdate() {}
 

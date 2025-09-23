@@ -319,6 +319,7 @@ HWTEST_F(ParallelStageTestNg, ParallelStagePatternTest002, TestSize.Level1)
     auto mockPipelineContext = AceType::DynamicCast<MockPipelineContext>(pipeline);
     ASSERT_NE(mockPipelineContext, nullptr);
     auto stageManager = mockPipelineContext->stageManager_;
+    ASSERT_NE(stageManager, nullptr);
     stageManager->isForceSplit_ = false;
     isSplit.reset();
     stagePattern->OnWindowSizeChanged(ENABLE_SPLIT_MODE_WIDTH, 600, WindowSizeChangeReason::RESIZE);
@@ -1045,5 +1046,46 @@ HWTEST_F(ParallelStageTestNg, UpdateIsTopFullScreenPageTest001, TestSize.Level1)
     stageManager->UpdateIsTopFullScreenPage(false);
     ASSERT_TRUE(stageManager->IsTopFullScreenPageChanged());
     ASSERT_FALSE(stageManager->IsTopFullScreenPage());
+}
+
+/**
+ * @tc.name: IsForceSplitSupportedTest001
+ * @tc.desc: Testing UpdateIsTopFullScreenPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsForceSplitSupportedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopPageInSplitMode and ParallelStageManager.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    ASSERT_FALSE(stagePattern->GetIsSplit());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    /**
+     * @tc.steps: step2. Call SetForceSplitEnable and do asserts.
+     */
+    ASSERT_FALSE(stageManager->isForceSplitSupported_);
+    stageManager->SetForceSplitEnable(true, "", true);
+    ASSERT_TRUE(stageManager->isForceSplitSupported_);
+    
+    stageManager->isForceSplitSupported_ = false;
+    ASSERT_FALSE(stageManager->isForceSplitSupported_);
+    stageManager->SetForceSplitEnable(true, "", false);
+    ASSERT_TRUE(stageManager->isForceSplitSupported_);
+    
+    stageManager->isForceSplitSupported_ = false;
+    ASSERT_FALSE(stageManager->isForceSplitSupported_);
+    stageManager->SetForceSplitEnable(false, "", true);
+    ASSERT_TRUE(stageManager->isForceSplitSupported_);
+    
+    stageManager->isForceSplitSupported_ = false;
+    ASSERT_FALSE(stageManager->isForceSplitSupported_);
+    stageManager->SetForceSplitEnable(false, "", false);
+    ASSERT_TRUE(stageManager->isForceSplitSupported_);
 }
 } // namespace OHOS::Ace::NG

@@ -43,7 +43,7 @@ void InsertTextImpl(Ark_WebKeyboardController peer,
     );
 }
 void DeleteForwardImpl(Ark_WebKeyboardController peer,
-                       const Ark_Number* length)
+                       const Ark_Int32* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(length);
@@ -54,7 +54,7 @@ void DeleteForwardImpl(Ark_WebKeyboardController peer,
     }
 }
 void DeleteBackwardImpl(Ark_WebKeyboardController peer,
-                        const Ark_Number* length)
+                        const Ark_Int32* length)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(length);
@@ -65,7 +65,7 @@ void DeleteBackwardImpl(Ark_WebKeyboardController peer,
     }
 }
 void SendFunctionKeyImpl(Ark_WebKeyboardController peer,
-                         const Ark_Number* key)
+                         const Ark_Int32* key)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(key);

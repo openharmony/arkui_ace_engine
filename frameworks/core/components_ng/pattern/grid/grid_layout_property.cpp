@@ -137,4 +137,20 @@ void GridLayoutProperty::OnLayoutOptionsUpdate(const GridLayoutOptions& layoutOp
     UpdateIrregularFlag(layoutOptions);
     ResetGridLayoutInfoAndMeasure();
 }
+
+void GridLayoutProperty::OnContentStartOffsetUpdate(float /* contentStartOffset */) const
+{
+    ResetPositionFlags();
+    if (SystemProperties::GetGridIrregularLayoutEnabled() && HasLayoutOptions()) {
+        ResetGridLayoutInfoAndMeasure();
+    }
+}
+
+void GridLayoutProperty::OnContentEndOffsetUpdate(float /* contentEndOffset */) const
+{
+    ResetPositionFlags();
+    if (SystemProperties::GetGridIrregularLayoutEnabled() && HasLayoutOptions()) {
+        ResetGridLayoutInfoAndMeasure();
+    }
+}
 } // namespace OHOS::Ace::NG

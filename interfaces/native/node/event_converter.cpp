@@ -334,6 +334,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SCROLL_ZOOM_START;
         case NODE_SCROLL_EVENT_ON_ZOOM_STOP:
             return ON_SCROLL_ZOOM_STOP;
+        case NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING:
+            return ON_SCROLL_WILL_START_DRAGGING;
+        case NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING:
+            return ON_SCROLL_DID_STOP_DRAGGING;
+        case NODE_SCROLL_EVENT_ON_WILL_START_FLING:
+            return ON_SCROLL_WILL_START_FLING;
+        case NODE_SCROLL_EVENT_ON_DID_STOP_FLING:
+            return ON_SCROLL_DID_STOP_FLING;
         case NODE_WATER_FLOW_ON_DID_SCROLL:
             return ON_WATER_FLOW_DID_SCROLL;
         case NODE_LIST_ON_SCROLL_INDEX:
@@ -608,6 +616,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_ZOOM_START;
         case ON_SCROLL_ZOOM_STOP:
             return NODE_SCROLL_EVENT_ON_ZOOM_STOP;
+        case ON_SCROLL_WILL_START_DRAGGING:
+            return NODE_SCROLL_EVENT_ON_WILL_START_DRAGGING;
+        case ON_SCROLL_DID_STOP_DRAGGING:
+            return NODE_SCROLL_EVENT_ON_DID_STOP_DRAGGING;
+        case ON_SCROLL_WILL_START_FLING:
+            return NODE_SCROLL_EVENT_ON_WILL_START_FLING;
+        case ON_SCROLL_DID_STOP_FLING:
+            return NODE_SCROLL_EVENT_ON_DID_STOP_FLING;
         case ON_LIST_REACH_START:
             return NODE_SCROLL_EVENT_ON_REACH_START;
         case ON_DETECT_RESULT_UPDATE:

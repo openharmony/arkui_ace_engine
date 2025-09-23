@@ -982,7 +982,7 @@ public:
         shouldRerender_ = shouldRerender;
     }
 
-    bool GetRerenderable()
+    bool GetRerenderable() const
     {
         return shouldRerender_;
     }
@@ -992,7 +992,7 @@ public:
         isDarkMode_ = isDarkMode;
     }
 
-    bool CheckIsDarkMode()
+    bool CheckIsDarkMode() const
     {
         return isDarkMode_;
     }
@@ -1002,7 +1002,7 @@ public:
         measureAnyWay_  = measureAnyWay;
     }
 
-    bool CheckMeasureAnyway()
+    bool CheckMeasureAnyway() const
     {
         return measureAnyWay_;
     }
@@ -1012,14 +1012,14 @@ public:
         shouldClearCache_ = shouldClearCache;
     }
 
-    bool CheckShouldClearCache()
+    bool CheckShouldClearCache() const
     {
         return shouldClearCache_;
     }
 
     void AllowForceDark(bool forceDarkAllowed);
 
-    bool GetForceDarkAllowed()
+    bool GetForceDarkAllowed() const
     {
         return forceDarkAllowed_;
     }
@@ -1029,7 +1029,7 @@ public:
         forceDarkAllowedbyUser_ = forceDarkAllowedbyUser;
     }
 
-    bool GetForceDarkAllowedByUser()
+    bool GetForceDarkAllowedByUser() const
     {
         return forceDarkAllowedbyUser_;
     }

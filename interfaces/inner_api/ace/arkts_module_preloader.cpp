@@ -22,11 +22,14 @@
 namespace OHOS::Ace {
 
 using CreateFunc = void (*)(void*);
+using GetArkTSRuntimeFunc = void* (*)();
 constexpr char PRE_INIT_ACE_ARKTS_MODULE_FUNC[] = "OHOS_ACE_PreloadAceArkTSModule";
+constexpr char GET_ARKTS_RUNTIME_FUNC[] = "OHOS_ACE_GetArkTSRuntime";
+constexpr char ARKTS_FRONTEND_LIB[] = "libarkts_frontend.z.so";
 
 void InitAceArkTSModule(void* runtime)
 {
-    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    LIBHANDLE handle = LOADLIB(ARKTS_FRONTEND_LIB);
     if (handle == nullptr) {
         return;
     }
@@ -44,6 +47,22 @@ void ArkTSModulePreloader::Preload(void* aniEnv)
 {
     LOGI("ArkTSModulePreloader::PreloadSTS, aniEnv: %{public}i", aniEnv ? 1 : 0);
     InitAceArkTSModule(reinterpret_cast<void*>(aniEnv));
+}
+
+void* ArkTSModulePreloader::GetArkTSRuntime()
+{
+    LIBHANDLE handle = LOADLIB(ARKTS_FRONTEND_LIB);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<GetArkTSRuntimeFunc>(LOADSYM(handle, GET_ARKTS_RUNTIME_FUNC));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return nullptr;
+    }
+
+    return entry();
 }
 
 } // namespace OHOS::Ace

@@ -667,7 +667,7 @@ void WindowScene::OnConnect()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->session_);
-        auto surfaceNode = self->session_->GetSurfaceNode();
+        auto surfaceNode = self->session_->GetSurfaceNode(true);
         CHECK_NULL_VOID(surfaceNode);
 
         if (isAbilityHook) {

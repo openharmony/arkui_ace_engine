@@ -34,6 +34,7 @@ struct HostWindowInfo {
 
 struct DynamicInitialConfig {
     int32_t hostInstanceId;
+    int32_t workerId = -1;
     std::string hapPath;
     std::string abcPath;
     std::string entryPoint;

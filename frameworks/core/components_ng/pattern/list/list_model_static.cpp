@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -38,6 +39,22 @@ RefPtr<FrameNode> ListModelStatic::CreateFrameNode(int32_t nodeId, bool isCreate
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
     return frameNode;
+}
+
+RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
+
+void ListModelStatic::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
 }
 
 void ListModelStatic::SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign)
@@ -144,6 +161,21 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     }
 }
 
+void ListModelStatic::SetCachedCount(
+        FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
+{
+    if (count.has_value() && count.value() >= 0) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
+    }
+    if (show.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, frameNode);
+    }
+}
+
 void ListModelStatic::SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
     const std::optional<NestedScrollMode>& backward)
 {
@@ -189,28 +221,6 @@ void ListModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll
     eventHub->SetOnScroll(std::move(onScroll));
 }
 
-RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode, const std::optional<float>& defaultSize)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
-    if (defaultSize.has_value()) {
-        childrenMainSize->UpdateDefaultSize(defaultSize.value());
-    }
-    return childrenMainSize;
-}
-
-RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetOrCreateListChildrenMainSize();
-}
-
 void ListModelStatic::SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete)
 {
     CHECK_NULL_VOID(frameNode);
@@ -247,6 +257,7 @@ void ListModelStatic::SetContentEndOffset(FrameNode* frameNode, float endOffset)
 void ListModelStatic::AddDragFrameNodeToManager(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, AddDragFrameNodeToManager, frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -255,6 +266,19 @@ void ListModelStatic::AddDragFrameNodeToManager(FrameNode* frameNode)
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void ListModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddListDragFrameNode(node->GetId(), AceType::WeakClaim(AceType::RawPtr(node)));
+    });
+}
 void ListModelStatic::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
@@ -303,9 +327,13 @@ void ListModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameB
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
 
-void ListModelStatic::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
+void ListModelStatic::SetChainAnimation(FrameNode* frameNode, const std::optional<bool>& chainAnimation)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation, frameNode);
+    if (chainAnimation.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, frameNode);
+    }
 }
 
 void ListModelStatic::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
@@ -316,17 +344,22 @@ void ListModelStatic::SetChainAnimationOptions(FrameNode* frameNode, const Chain
     pattern->SetChainAnimationOptions(options);
 }
 
-void ListModelStatic::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
+void ListModelStatic::SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& enableScrollInteraction)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
+    if (enableScrollInteraction.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, frameNode);
+    }
 }
 
-void ListModelStatic::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
+void ListModelStatic::SetListMaintainVisibleContentPosition(FrameNode* frameNode, const std::optional<bool>& enabled)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMaintainVisibleContentPosition(enabled);
+    bool isEnabled = enabled.value_or(false);
+    pattern->SetMaintainVisibleContentPosition(isEnabled);
 }
 
 void ListModelStatic::SetOnScrollVisibleContentChange(
@@ -449,10 +482,35 @@ void ListModelStatic::SetEditMode(FrameNode* frameNode, bool editMode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
 }
 
-void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, bool selectable)
+void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMultiSelectable(selectable);
+    bool isSelectable = selectable.value_or(false);
+    pattern->SetMultiSelectable(isSelectable);
+}
+
+void ListModelStatic::SetEdgeEffect(
+    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+    const std::optional<EffectEdge>& effectEdge)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    ScrollableModelNG::SetEdgeEffect(frameNode,
+        edgeEffect.value_or(EdgeEffect::SPRING),
+        alwaysEnabled.value_or(false),
+        effectEdge.value_or(EffectEdge::ALL)
+    );
+}
+
+void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& isStackFromEnd)
+{
+    if (isStackFromEnd.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, isStackFromEnd.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

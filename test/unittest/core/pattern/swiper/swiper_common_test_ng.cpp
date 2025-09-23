@@ -563,7 +563,6 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
     CreateSwiperItems();
     CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
-    pattern_->isVisibleArea_ = false;
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
@@ -571,7 +570,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
+    EXPECT_EQ(pattern_->GetLoopIndex(pattern_->currentFocusIndex_), 3);
 
     /**
      * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_RIGHT
@@ -587,7 +586,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+    EXPECT_EQ(pattern_->currentFocusIndex_, 1);
 
     /**
      * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_LEFT
@@ -614,7 +613,6 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
     CreateSwiperItems();
     CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
-    pattern_->isVisibleArea_ = false;
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_UP
@@ -622,7 +620,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
+    EXPECT_EQ(pattern_->GetLoopIndex(pattern_->currentFocusIndex_), 3);
 
     /**
      * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_DOWN
@@ -638,7 +636,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+    EXPECT_EQ(pattern_->currentFocusIndex_, 1);
 
     /**
      * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_UP

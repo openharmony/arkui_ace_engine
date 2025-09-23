@@ -16,28 +16,29 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DecorationStyleAccessor {
 void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
-    RefPtr<DecorationSpan> span;
+    auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
     if (value) {
         auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
         auto aceColorOpt = Converter::OptConvert<Color>(value->color);
         auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-        span = AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }),
-            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>());
+        peer->span = AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({aceTypeOpt.value_or(TextDecoration::NONE)}),
+            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>(), nullptr);
     } else {
-        span = AceType::MakeRefPtr<DecorationSpan>();
+        peer->span = AceType::MakeRefPtr<DecorationSpan>();
     }
-    return new DecorationStylePeer{ .span = span };
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

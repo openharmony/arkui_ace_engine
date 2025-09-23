@@ -75,7 +75,9 @@ template("ace_base_source_set") {
       "ressched/ressched_report.cpp",
       "ressched/ressched_touch_optimizer.cpp",
       "subwindow/subwindow_manager.cpp",
+      "subwindow/subwindow_manager_static.cpp",
       "thread/background_task_executor.cpp",
+      "thread/task_dependency_manager.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
       "utils/lifecycle_checkable.cpp",
@@ -100,6 +102,7 @@ template("ace_base_source_set") {
     }
 
     if (is_arkui_x) {
+      sources -= [ "subwindow/subwindow_manager_static.cpp" ]
       deps += [
         "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static",
         "${ace_root}/interfaces/inner_api/drawable_descriptor:native_drawabledescriptor_static",
