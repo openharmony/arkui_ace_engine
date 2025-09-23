@@ -63,10 +63,11 @@ import { ConsumerDecoratedVariable } from '../decoratorImpl/decoratorConsumer';
 import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
+import { FactoryInternal } from './iFactoryInternal';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
-        return new MutableStateMeta('');
+        return FactoryInternal.mkMutableStateMeta('');
     }
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();

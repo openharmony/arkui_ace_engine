@@ -36,7 +36,7 @@ export function getTestStats(): ITestResults {
 
 export function tsuite(msg: string, testMe: () => void): () => void {
   return () => {
-    const log = (`\n\n +++++ Run test suite: '${msg}' +++++++ \n`);
+    const log = (`\nRun test suite: '${msg}'\n`);
     report += `\n${log}\n\n`;
     shortReport += `\n${log}\n`;
     console.log(log)
@@ -70,13 +70,14 @@ export function test(msg: string, assertion: boolean): void {
   }
 }
 
-// compare a anb are equal value and equal type
+// compare a and b are equal value and equal type
 // a - the expression
 // b - the correct value
 export function eq<T>(a : T, b : T) : boolean  {
   const ok : boolean = (a === b);
   if (!ok) {
     console.error(`WRONG actual value '${a}' expected equal to value '${b}'`);
+    console.error(`WRONG class value '${Type.of(a).getName()}' expected equal to value '${Type.of(b).getName()}'`);
   }
   return ok;
 }

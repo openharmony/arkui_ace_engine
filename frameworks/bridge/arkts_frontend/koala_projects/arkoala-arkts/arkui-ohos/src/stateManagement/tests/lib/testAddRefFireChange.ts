@@ -1,22 +1,21 @@
+import { IFactoryInternal } from '../../base/iFactoryInternal';
+import { IBackingValue } from '../../base/iBackingValue';
+import { IBackingValue } from '../../base/iBackingValue';
+import { IMutableStateMeta } from '../../decorator';
+import { IMutableKeyedStateMeta } from '../../decorator';
+import { DecoratorBackingValue } from '../../base/backingValue';
+import { MutableStateMeta, MutableKeyedStateMeta } from '../../base/mutableStateMeta'
+import { StateTracker } from "./stateTracker.ts";
+import { int32 } from '@koalaui/common';
 
-import { iFactoryInternal } from "stateManagement/base/iFactoryInternal";
-import { IBackingValue } from "stateManagement/base/iBackingValue";
-import { IMutableStateMeta, IMutableKeyedStateMeta } from "stateManagement/interface/iMutableStateMeta";
-import { InterfaceProxyHandler } from "stateManagement/base/observeInterfaceProxy.ets";
-import { DecoratorBackingValue } from "stateManagement/base/backingValue"
-import { MutableStateMeta, MutableKeyedStateMeta } from 'stateManagement/base/mutableStateMeta'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace'
-import { int32 } from 'stateManagement/mock/env_mock'
-import { StateTracker } from "./stateTracker.ets";
-
-export class TestFactory implements iFactoryInternal {
+export class TestFactory implements IFactoryInternal {
 
     public mkDecoratorValue<T>(info: string,
         initValue: T): IBackingValue<T> {
         return new TestDecoratorBackingValue<T>(info, initValue)
     }
 
-    makeMutableStateMeta(info: string): IMutableStateMeta {
+    mkMutableStateMeta(info: string): IMutableStateMeta {
         return new TestMutableStateMeta(info);
     }
 
@@ -26,12 +25,13 @@ export class TestFactory implements iFactoryInternal {
     }
 
     mkObservedInterfaceProxy<T extends Object>(x: T): T {
-        return Proxy.create(x, new InterfaceProxyHandler<T>()) as T;
+        console.log("mkObservedInterfaceProxy not supported by TestFactory");
+        return x;
     }
 }
 
-
 class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
+
     constructor(propertyName: string, initValue: T) {
         super(propertyName, initValue);
     }
@@ -43,14 +43,14 @@ class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
         super.addRef();
         this.__refsCount += 1;
         StateTracker.increaseRefCnt();
-        stateMgmtConsole.propertyAccess(`ADD REF ${this.propertyName_} ${this.__refsCount}`);
+        //StateMgmtConsole.propertyAccess(`ADD REF ${this.propertyName_} ${this.__refsCount}`);
     }
 
     public override fireChange(): void {
         super.fireChange();
         this.__fireChangeCount += 1;
         StateTracker.increaseFireChangeCnt();
-        stateMgmtConsole.propertyAccess(`Fire change ${this.propertyName_} ${this.__fireChangeCount}`);
+        //StateMgmtConsole.propertyAccess(`Fire change ${this.propertyName_} ${this.__fireChangeCount}`);
     }
 
     public getFireChangeCnt(): int32 {
@@ -68,7 +68,6 @@ class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
     }
 }
 
-
 class TestMutableStateMeta extends MutableStateMeta {
 
     constructor(info: string) {
@@ -81,12 +80,12 @@ class TestMutableStateMeta extends MutableStateMeta {
     public override addRef(): void {
         super.addRef();
         this.__refsCount += 1;
-        stateMgmtConsole.propertyAccess(`ADD REF ${this!.info_} ${this.__refsCount}`);
+        //stateMgmtConsole.propertyAccess(`ADD REF ${this!.info_} ${this.__refsCount}`);
     }
 
     public override fireChange(): void {
         super.fireChange();
-        stateMgmtConsole.propertyAccess(`Fire change ${this.info_} ${this.__fireChangeCount}`);
+        //stateMgmtConsole.propertyAccess(`Fire change ${this.info_} ${this.__fireChangeCount}`);
         this.__fireChangeCount += 1;
     }
 
@@ -104,15 +103,14 @@ class TestMutableStateMeta extends MutableStateMeta {
     }
 }
 
-
 export class TestMutableKeyedStateMeta extends MutableKeyedStateMeta {
 
     constructor(info: string) {
         super(info);
     }
 
-    private refsMap: Map<string, number> = new Map<string, number>();
-    private fireChangeMap: Map<string, int32> = new Map<string, number>();
+    private refsMap: Map<string, int> = new Map<string, int>();
+    private fireChangeMap: Map<string, int32> = new Map<string, int32>();
 
     public override addRef(key: string): void {
         if (this.refsMap.get(key) === undefined) {
@@ -122,7 +120,7 @@ export class TestMutableKeyedStateMeta extends MutableKeyedStateMeta {
 
         super.addRef(key);
 
-        stateMgmtConsole.propertyAccess(`MutableKeyedStateMeta addRef('${key}')`);
+        //stateMgmtConsole.propertyAccess(`MutableKeyedStateMeta addRef('${key}')`);
     }
 
 
@@ -135,7 +133,7 @@ export class TestMutableKeyedStateMeta extends MutableKeyedStateMeta {
         super.fireChange(key);
 
         if (this.__metaDependencies.get(key)) {
-            stateMgmtConsole.propertyAccess(`MutableKeyedStateMeta fireChange('${key}')`);
+            //stateMgmtConsole.propertyAccess(`MutableKeyedStateMeta fireChange('${key}')`);
         }
     }
 

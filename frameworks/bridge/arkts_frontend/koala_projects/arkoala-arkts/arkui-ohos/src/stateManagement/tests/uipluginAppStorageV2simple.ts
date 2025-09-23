@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-import { AppStorageV2 } from 'production-path/storage/v2_persistence.ts'
-import { ClassA } from 'stateManagement/utest/uiPlugin/uipluginObservedObject3.ets';
-import { tsuite, tcase, test, eq, not_eq } from 'stateManagement/utest/lib/testFramework'
+import { AppStorageV2 } from '../storage/appStorageV2'
+import { tsuite, tcase, test, eq, not_eq } from './lib/testFramework'
+
+class ClassA {
+    propA: string = "test";
+}
 
 class ClassB {
     propB: number = 500;
@@ -29,13 +32,13 @@ interface InfB {
     propB: number;
 }
 
-export function run_app_storage_v2(): Boolean {
+export function run_app_storage_v2_simple(): Boolean {
     const ClassATypeValue = Type.of(new ClassA());
     const ClassBTypeValue = Type.of(new ClassB());
     const ClassIBTypeValue = Type.of(new ClassIB());
     const InfBType = Type.of({ propB: 8 } as InfB)
 
-    const ttest = tsuite("AppStorageV2 API ") {
+    const ttest = tsuite("AppStorageV2 API - simple") {
         tcase("connect, delete different ttypes") {
             let valA1 = AppStorageV2.connect<ClassA>(
                 ClassATypeValue, "ca", () => { return new ClassA; })
@@ -49,6 +52,7 @@ export function run_app_storage_v2(): Boolean {
             test("ClassA type: not eq", not_eq(valA1, valA3));
 
             AppStorageV2.remove("ca");
+            AppStorageV2.remove("ca3");
 
             let detected = false;
             try {
@@ -80,6 +84,9 @@ export function run_app_storage_v2(): Boolean {
             test("ClassA propA: has check", eq(valB1?.propB, valB2?.propB));
             test("ClassA type: not eq", not_eq(valB1, valB3));
 
+            AppStorageV2.remove("keyb");
+            AppStorageV2.remove("keyb3");
+    
             // Check that we can get Class that implements interface
             // as an interface, not as a class
             let valCIB1 = AppStorageV2.connect<ClassIB>(
@@ -99,6 +106,13 @@ export function run_app_storage_v2(): Boolean {
             } finally {
                 test(`Access Access via interface - Exception detected`, detected);
             }
+
+            let valInfB = AppStorageV2.connect<InfB>(
+                InfBType, "keyinfb", () => {return { propB: 8 } as InfB;});
+            test(`Access Access via interface InfB`, not_eq(valInfB, undefined));
+
+            AppStorageV2.remove("keycib");
+            AppStorageV2.remove("keyinfb");
         }
     }
 

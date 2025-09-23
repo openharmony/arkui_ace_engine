@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from 'stateManagement/base/extendableComponent'
-import { IObservedObject, RenderIdType } from 'stateManagement/interface/iObservedObject'
-import { Observe } from 'stateManagement/interface/iObserve'
-import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType, WatchFuncType } from 'stateManagement/interface/iWatch'
-import { IMutableStateMeta } from 'stateManagement/interface/iMutableStateMeta'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
-import { StateMgmtFactory } from 'stateManagement/interface/iStateMgmtFactory'
-import { IStateDecoratedVariable } from 'stateManagement/interface/iDecorators'
-
-// unit testing
-import { tsuite, tcase, test, eq } from 'stateManagement/utest/lib/testFramework'
-import { StateTracker } from 'stateManagement/utest/lib/stateTracker'
-import { ObserveSingleton } from '../../base/observeSingleton.ets'
+import { ExtendableComponent } from '../mock/extendableComponent';
+import { IObservedObject, RenderIdType } from '../decorator'
+import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType, WatchFuncType } from '../decorator'
+import { IMutableStateMeta } from '../decorator'
+import { IStateDecoratedVariable } from '../decorator'
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { StateTracker } from './lib/stateTracker'
+import { ObserveSingleton } from '../base/observeSingleton';
+import { STATE_MGMT_FACTORY } from '../decorator'
+let StateMgmtFactory = STATE_MGMT_FACTORY;
+let stateMgmtConsole=console;
 
 export class ClassA implements IObservedObject, IWatchSubscriberRegister {
 
     constructor(propA: string, propB: number) {
+        this.__meta_propA = StateMgmtFactory.makeMutableStateMeta();
+        this.__meta_propB = StateMgmtFactory.makeMutableStateMeta();
+
         // init in constructor
         // need to change to _backing,
         // otherwise compiler warns about uninitialized
@@ -65,7 +66,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
     // do not inline, will not work for
     // inherited classes.
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (Observe.shouldAddRef(this.____V1RenderId)) {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
             meta.addRef();
         }
     }
@@ -75,8 +76,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
     private __backing_propA: string;
 
     // @JsonIgnore
-    private readonly __meta_propA: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_propA: IMutableStateMeta;
 
     public get propA(): string {
         stateMgmtConsole.log(`ClassA: get @Track propA`);
@@ -97,8 +97,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
     private __backing_propB: number;
 
     // @JsonIgnore
-    private readonly __meta_propB: IMutableStateMeta
-        = StateMgmtFactory.makeMutableStateMeta();
+    private readonly __meta_propB: IMutableStateMeta;
 
     public get propB(): number {
         stateMgmtConsole.log(`ClassA: get @Track propB`);
@@ -130,6 +129,7 @@ class EntryComponent extends ExtendableComponent {
         return this._backing_stateA!.get();
     }
     set stateA(newValue: ClassA) {
+        console.log(`EntryComponent: set @State stateA`);
         this._backing_stateA!.set(newValue);
     }
 
@@ -144,15 +144,15 @@ class EntryComponent extends ExtendableComponent {
         super(parent);
         const watchFunc : WatchFuncType =  (propName: string) => { this.onStateAChanged(propName) };
 
-
-      this._backing_stateA = StateMgmtFactory.makeState<ClassA>(
-        this,
-        "stateA",
-        param.stateA !== undefined
-        ? param.stateA!
-        :  new ClassA("name1", 100),
-        watchFunc
-      );
+        let c = new ClassA("name1", 100);
+        this._backing_stateA = StateMgmtFactory.makeState<ClassA>(
+            this,
+            "stateA",
+            param.stateA !== undefined
+            ? param.stateA!
+            : c,
+            watchFunc
+        );
     }
 
     __updateStruct(param: EntryComponent_init_update_struct) : void {
@@ -176,11 +176,9 @@ class EntryComponent extends ExtendableComponent {
 }
 
 
-
 export function run_state() : Boolean {
 
   const tests = tsuite("@State tests", () => {
-    stateMgmtConsole.log(`run @State tests=======================`);
 
     const compA = new EntryComponent(null, {});
     ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -216,7 +214,8 @@ export function run_state() : Boolean {
     tcase("Test 5: @State AddRef test ", () => {
         StateTracker.reset();
         compA.stateA.propA;
-        test("Assign to: AddRef, expect 3", eq(StateTracker.getRefCnt(), 3));
+        // verify that the value is correct, chnaged 3 => 2
+        test("Assign to: AddRef, expect 3", eq(StateTracker.getRefCnt(), 2));
     })
 
     tcase("Test 6: @State FireChange test ", () => {

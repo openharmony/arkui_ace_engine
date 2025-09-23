@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-import { runTests } from './test'
-
-function main(): void {
-    runTests();
+import { StateManager } from './env_mock'
+export class UIContextImpl {
+    public stateMgr: StateManager | undefined = undefined;
 }

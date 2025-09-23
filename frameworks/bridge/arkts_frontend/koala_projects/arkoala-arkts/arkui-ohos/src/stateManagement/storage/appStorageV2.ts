@@ -18,7 +18,7 @@ import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
 import { transferTypeName } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { InteropAppStorageV2 } from '../interop/interopStorageV2';
+import { InteropAppStorageV2 } from '@interopStorage/interopStorageV2';
 
 export class AppStorageV2 {
     public static connect<T extends object>(

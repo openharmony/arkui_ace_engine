@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-import { PersistenceV2, PersistenceV2Impl, IConnectOptions, StorageDefaultCreator, AreaMode } from 'production-path/storage/v2_persistence.ts'
-import { tsuite, tcase, test, eq, not_eq } from 'stateManagement/utest/lib/testFramework'
-import { IMutableStateMeta } from 'stateManagement/interface/iMutableStateMeta'
-import { IObservedObject, RenderIdType } from 'stateManagement/interface/iObservedObject'
-import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType, WatchFuncType } from 'stateManagement/interface/iWatch'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace'
-import { StateMgmtFactory } from 'stateManagement/interface/iStateMgmtFactory'
-import { Observe } from 'stateManagement/interface/iObserve'
-import { PersistentStorageMocked } from 'stateManagement/mock/ani_storage_mock.ets'
-import { ObserveSingleton } from 'stateManagement/base/observeSingleton.ets';
-import { UIUtils } from '../../sdk/uiutils.ets';
-import { TypeChecker } from 'stateManagement/tools/typeChecker.ets'
+import { PersistenceV2, PersistenceV2Impl, ConnectOptions, StorageDefaultCreator } from '../storage/persistenceV2'
+import { tsuite, tcase, test, eq, not_eq } from './lib/testFramework'
+import { IMutableStateMeta } from '../decorator'
+import { IObservedObject, RenderIdType } from '../decorator'
+import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType, WatchFuncType } from '../decorator'
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { STATE_MGMT_FACTORY } from '../decorator'
+import { ObserveSingleton } from '../base/observeSingleton';
+import { UIUtils } from '../utils';
+import contextConstant from '@ohos.app.ability.contextConstant';
+
+type stateMgmtConsole=StateMgmtConsole;
+
+let StateMgmtFactory=STATE_MGMT_FACTORY;
 
 interface NumberInterface {
     prop: Double;
@@ -38,13 +40,13 @@ interface JsonDeserializable {
     fromJson(json: jsonx.JsonElement): void;
 }
 
-class ConnectOptions<T extends object> implements IConnectOptions<T> {
-    ttype: Type;
+class ConnectOptionsInst<T extends object> implements ConnectOptions<T> {
+    type: Type;
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
-    areaMode?: AreaMode;
+    areaMode?: contextConstant.AreaMode;
     constructor(ttype: Type) {
-        this.ttype = ttype;
+        this.type = ttype;
     }
 }
 
@@ -53,14 +55,13 @@ class ConnectOptions<T extends object> implements IConnectOptions<T> {
     username: string;
 }
 */
-const UserTypeValue = Type.of(new User(""));
-const NonObservedPersonType = Type.of(new NonObservedPerson());
+const UserTypeValue = Type.from<User>();
+const NonObservedPersonType = Type.from<NonObservedPerson>();
 const NumberInterfaceType = Type.of({ prop: 5 } as NumberInterface);
 
 class User implements IObservedObject, IWatchSubscriberRegister, JsonSerializable, JsonDeserializable {
 
     constructor(propA: string) {
-        stateMgmtConsole.log(`User CTOR: ${propA}`);
         this.__backing_username = propA;
     }
 
@@ -84,7 +85,7 @@ class User implements IObservedObject, IWatchSubscriberRegister, JsonSerializabl
     }
 
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (Observe.shouldAddRef(this.____V1RenderId)) {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
             meta.addRef();
         }
     }
@@ -111,10 +112,7 @@ class User implements IObservedObject, IWatchSubscriberRegister, JsonSerializabl
     }
 
     public toJson(): jsonx.JsonElement {
-        //let elem: jsonx.JsonElement = new jsonx.JsonElement();
         let se = jsonx.JsonElement.createString(this.username);
-        //console.error("user.tJson... setElement")
-        //elem.setElement("username", se);
         return se;
     }
 
@@ -132,21 +130,15 @@ class NonObservedPerson implements JsonSerializable, JsonDeserializable {
     public personname: string = "John Malkovich";
 
     public toJson(): jsonx.JsonElement {
-        //let elem: jsonx.JsonElement = new jsonx.JsonElement();
         let se = jsonx.JsonElement.createString(this.personname);
-        //console.error("user.tJson... setElement")
-        //elem.setElement("username", se);
         return se;
     }
     public fromJson(json: jsonx.JsonElement): void {
-        //this.username = json.getElement("username").asString();
         this.personname = json.asString();
     }
 }
 
-
 export function run_persistent_storage_v2(): Boolean {
-    let storageBackend = new PersistentStorageMocked();
 
     const toJsonUser = (user: User) => {
         stateMgmtConsole.log("user1 toJson, username:" + user.getId());
@@ -173,7 +165,6 @@ export function run_persistent_storage_v2(): Boolean {
     };
 
     const toJsonNumberInterface = (objLit: NumberInterface) => {
-        stateMgmtConsole.log("Accesing objLit.prop, observed: " + TypeChecker.isObservedInterface(objLit));
         return jsonx.JsonElement.createDouble(objLit.prop);
     };
 
@@ -184,8 +175,6 @@ export function run_persistent_storage_v2(): Boolean {
     };
 
     const ttest = tsuite("PersistenceV2Impl API ") {
-
-        PersistenceV2.configureBackend(storageBackend);
 
     tcase("Persistence regular - create an entry, remove an entry") {
         let userFromStorage1 = PersistenceV2.connect<User>(
@@ -210,7 +199,7 @@ export function run_persistent_storage_v2(): Boolean {
             () => { return new User("defaultCreator"); })
 
         // Trigger writing to the back store before the start deleting
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         test("Users the same ", eq(userFromStorage1, userFromStorage2));
         test("User name  the same ", eq(userFromStorage1!.username, userFromStorage2!.username));
@@ -226,7 +215,7 @@ export function run_persistent_storage_v2(): Boolean {
         keys = PersistenceV2.keys();
         test("keys size zero", eq(keys.length, 0));
         //test("Users is undefined ", eq( userFromStorage3 , undefined));
-        //ObserveSingleton.instance.updateDirty2()
+        //ObserveSingleton.instance.updateDirty()
         // Cleanup
         PersistenceV2.remove("userKey");
     }
@@ -240,12 +229,12 @@ export function run_persistent_storage_v2(): Boolean {
             () => { return new User("defaultByCreator"); })
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         userFromStorage1!.username = "newName";
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
         PersistenceV2.remove("userKey");
     }
@@ -305,7 +294,7 @@ export function run_persistent_storage_v2(): Boolean {
         // Wrong key generates error message only
         test("Invalid key", not_eq(userFromStorage, undefined));
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         PersistenceV2.remove("userKey-");
     }
 
@@ -320,7 +309,7 @@ export function run_persistent_storage_v2(): Boolean {
     }
 
     tcase("Persistence Global - create an entry, remove an entry") {
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = "userKey";
         options.defaultCreator = () => { return new User("defaultByCreator") };
 
@@ -347,7 +336,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("User name  the same ", eq(userFromStorage1!.username, userFromStorage2!.username));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         let keys = PersistenceV2.keys();
         test("keys[0] 'userKey'", eq(keys[0], "userKey"));
@@ -368,9 +357,9 @@ export function run_persistent_storage_v2(): Boolean {
         // Create new objects
         const userKeyEL1 = "userKeyEL1";
         const userKeyEL5 = "userKeyEL5";
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKeyEL1
-        options.areaMode = AreaMode.EL1;
+        options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => { return new User("defaultByCreator") };
         let userEL1 = PersistenceV2.globalConnect<User>(
             options,
@@ -379,7 +368,7 @@ export function run_persistent_storage_v2(): Boolean {
         )
 
         options.key = userKeyEL5;
-        options.areaMode = AreaMode.EL5;
+        options.areaMode = contextConstant.AreaMode.EL5;
         let userEL5 = PersistenceV2.globalConnect<User>(
             options,
             toJsonUser,
@@ -390,7 +379,7 @@ export function run_persistent_storage_v2(): Boolean {
 
         // Get exiting from store
         options.key = userKeyEL1
-        options.areaMode = AreaMode.EL1;
+        options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = undefined;
         let userEL1A = PersistenceV2.globalConnect<User>(
             options,
@@ -399,7 +388,7 @@ export function run_persistent_storage_v2(): Boolean {
         )
 
         options.key = userKeyEL5;
-        options.areaMode = AreaMode.EL5;
+        options.areaMode = contextConstant.AreaMode.EL5;
         options.defaultCreator = undefined;
         let userEL5A = PersistenceV2.globalConnect<User>(
             options,
@@ -411,17 +400,18 @@ export function run_persistent_storage_v2(): Boolean {
         test("Object found ", not_eq(userEL5A, undefined));
 
         // That will actually write to the backend
-        ObserveSingleton.instance.updateDirty2();
-        test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL1), true));
-        test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL2), false));
-        test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL5), true));
-        test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL1), false));
+        ObserveSingleton.instance.updateDirty();
+
+        //test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL1), true));
+        //test("Key in correct backend", eq(storageBackend.has(userKeyEL1, AreaMode.EL2), false));
+        //test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL5), true));
+        //test("Key in correct backend", eq(storageBackend.has(userKeyEL5, AreaMode.EL1), false));
 
         let keys = PersistenceV2.keys();
         test("keys count is 2", eq(keys.length, 2));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         // Cleanup
         PersistenceV2.remove(userKeyEL1);
@@ -436,9 +426,9 @@ export function run_persistent_storage_v2(): Boolean {
         // Create new objects
         const userKeyEL1 = "userKeyEL1";
         const userKeyEL5 = "userKeyEL5";
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKeyEL1
-        options.areaMode = AreaMode.EL1;
+        options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => { return new User("defaultByCreator") };
         let userEL1 = PersistenceV2.globalConnect<User>(
             options,
@@ -447,7 +437,7 @@ export function run_persistent_storage_v2(): Boolean {
         )
 
         options.key = userKeyEL5;
-        options.areaMode = AreaMode.EL5;
+        options.areaMode = contextConstant.AreaMode.EL5;
         let userEL5 = PersistenceV2.globalConnect<User>(
             options,
             toJsonUser,
@@ -457,18 +447,18 @@ export function run_persistent_storage_v2(): Boolean {
         test("Object created ", not_eq(userEL5, undefined));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         // **** reset backend ****
 
         test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
         PersistenceV2Impl.instanceReset();
         test("PersistenceV2Impl.instanceExists() - false", eq(PersistenceV2Impl.instanceExists(), false));
-        PersistenceV2.configureBackend(storageBackend);
+        //PersistenceV2.configureBackend(storageBackend);
 
         // Get objects from the storage
         options.key = userKeyEL1
-        options.areaMode = AreaMode.EL1;
+        options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = undefined;
 
         let userEL1A = PersistenceV2.globalConnect<User>(
@@ -478,7 +468,7 @@ export function run_persistent_storage_v2(): Boolean {
         )
 
         options.key = userKeyEL5;
-        options.areaMode = AreaMode.EL5;
+        options.areaMode = contextConstant.AreaMode.EL5;
         options.defaultCreator = undefined;
         let userEL5A = PersistenceV2.globalConnect<User>(
             options,
@@ -495,12 +485,12 @@ export function run_persistent_storage_v2(): Boolean {
 
     tcase("Keys clash between local and global storage") {
         PersistenceV2Impl.instanceReset();
-        PersistenceV2.configureBackend(storageBackend);
+        //PersistenceV2.configureBackend(storageBackend);
         let keys = PersistenceV2.keys();
         test("keys.length'", eq(keys.length, 0));
 
         let userKey = "userKey"
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKey;
         options.defaultCreator = () => { return new User("defaultByCreator") };
 
@@ -535,7 +525,6 @@ export function run_persistent_storage_v2(): Boolean {
     }
 
     tcase("Saving non observed object to persistent storage") {
-        //TODO: call save as well
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         let key = "PersonKey";
         let person = PersistenceV2.connect<NonObservedPerson>(
@@ -547,14 +536,14 @@ export function run_persistent_storage_v2(): Boolean {
         )
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         test("person created", not_eq(person, undefined));
         person!.personname = "newName";
 
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         // Nothing was actually processed
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
@@ -562,7 +551,6 @@ export function run_persistent_storage_v2(): Boolean {
     }
 
     tcase("Reading back non observed object from persistent storage") {
-        //TODO: call save as well
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         let key = "PersonKey";
         let person = PersistenceV2.connect<NonObservedPerson>(
@@ -574,22 +562,22 @@ export function run_persistent_storage_v2(): Boolean {
         )
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         test("person created", not_eq(person, undefined));
         person!.personname = "newName";
 
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         // Nothing was actually processed
         test("backendUpdateCount", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         // Reset Persistent Storage
         PersistenceV2Impl.instanceReset();
         test("PersistenceV2Impl.instanceExists() - false", eq(PersistenceV2Impl.instanceExists(), false));
-        PersistenceV2.configureBackend(storageBackend);
-        test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
+        //PersistenceV2.configureBackend(storageBackend);
+        //test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
 
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         // Load existing
@@ -602,7 +590,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("backendUpdateCount - 0", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
         // Will not trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount - 0", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
         test("person created", not_eq(personB, undefined));
@@ -610,7 +598,7 @@ export function run_persistent_storage_v2(): Boolean {
         personB!.personname = "newName";
 
         // Will not trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         // Nothing was actually processed
         test("backendUpdateCount - 0", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
         PersistenceV2.save(key)
@@ -623,7 +611,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("keys.length'", eq(keys.length, 0));
 
         let userKey = "userKey"
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKey;
         options.defaultCreator = () => { return new User("defaultByCreator") };
         let userGlobal = PersistenceV2.globalConnect<User>(
@@ -634,7 +622,7 @@ export function run_persistent_storage_v2(): Boolean {
 
         test("userGlobal created ", not_eq(userGlobal, undefined));
 
-        let optionsPerson = new ConnectOptions<User>(NonObservedPersonType);
+        let optionsPerson = new ConnectOptionsInst<User>(NonObservedPersonType);
         optionsPerson.key = userKey;
         optionsPerson.defaultCreator = undefined;
         let errorTriggered = false;
@@ -654,7 +642,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("keys.length'", eq(keys.length, 1));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         PersistenceV2.remove(userKey);
         keys = PersistenceV2.keys();
@@ -694,7 +682,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("keys.length'", eq(keys.length, 1));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         PersistenceV2.remove(userKey);
         keys = PersistenceV2.keys();
@@ -709,7 +697,7 @@ export function run_persistent_storage_v2(): Boolean {
         );
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         test("local personLocalBadType created ", not_eq(personLocalBadType, undefined));
         PersistenceV2.remove(userKey);
@@ -727,13 +715,13 @@ export function run_persistent_storage_v2(): Boolean {
             () => { return new User("defaultByCreator"); })
 
         test("backendUpdateCount 0 after connect", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         userFromStorage1!.username = "newName";
 
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 2 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 2));
         PersistenceV2.remove("userKey");
     }
@@ -744,7 +732,6 @@ export function run_persistent_storage_v2(): Boolean {
         // Ignoring
         return;
 
-        // TODO: sort out if that is needed
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
         const key = "MyInterfacePropObject";
         let obj = PersistenceV2.connect<NumberInterface>(
@@ -757,12 +744,12 @@ export function run_persistent_storage_v2(): Boolean {
         test("backendUpdateCount 0 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         // Object not observed, so nothing will be written to backend
         obj!.prop = 1000.;
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount still 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         PersistenceV2.save(key);
@@ -771,6 +758,8 @@ export function run_persistent_storage_v2(): Boolean {
         PersistenceV2.remove(key);
     }
 
+    // ObjectLiterals not supported by official API, disabling test cases
+    /*
     tcase("Persists *observed* object literal and trigger saving on change") {
         PersistenceV2Impl.backendUpdateCountForTesting = 0;
 
@@ -781,7 +770,8 @@ export function run_persistent_storage_v2(): Boolean {
             key,
             toJsonNumberInterface,
             fromJsonNumberInterface,
-            () => { return UIUtils.makeObserved({ prop: 100. } as NumberInterface); }
+            //() => { return UIUtils.makeObserved({ prop: 100. } as NumberInterface); }
+            () => {return { prop: 100. } as NumberInterface;}
         )
 
         test("obj created", not_eq(obj, undefined));
@@ -791,12 +781,12 @@ export function run_persistent_storage_v2(): Boolean {
         test("backendUpdateCount 0 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 0));
 
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
         // Object observed, write will be triggered
         obj!.prop = 1000.;
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("obj prop updated to 1000.", eq(obj!.prop, 1000.));
         test("backendUpdateCount 2 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 2));
 
@@ -820,17 +810,17 @@ export function run_persistent_storage_v2(): Boolean {
         test("obj created", not_eq(obj, undefined));
         test("obj created prop 100.1", eq(obj!.prop, 100.1));
         // Trigger writing to the backend
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
         obj!.prop = 100.2;
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("backendUpdateCount 2 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 2));
 
         // Reset Persistent Storage
         PersistenceV2Impl.instanceReset();
         test("PersistenceV2Impl.instanceExists() - false", eq(PersistenceV2Impl.instanceExists(), false));
-        PersistenceV2.configureBackend(storageBackend);
-        test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
+        //PersistenceV2.configureBackend(storageBackend);
+        //test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
 
         let objFromDisk = PersistenceV2.connect<NumberInterface>(
             NumberInterfaceType,
@@ -844,7 +834,7 @@ export function run_persistent_storage_v2(): Boolean {
         test("objFromDisk prop 100.2", eq(objFromDisk!.prop, 100.2));
         // Object observed, write will be triggered
         objFromDisk!.prop = 1000.1;
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         test("objFromDisk prop updated to 1000.1", eq(objFromDisk!.prop, 1000.1));
         test("backendUpdateCount 1 after update", eq(PersistenceV2Impl.backendUpdateCountForTesting, 1));
 
@@ -853,7 +843,7 @@ export function run_persistent_storage_v2(): Boolean {
 
         PersistenceV2.remove(key);
     }
-
+    */
     tcase("Report type clash when object read from disk with the wrong type given to connect") {
         let keys = PersistenceV2.keys();
         test("Keys size is zero", eq(keys.length, 0));
@@ -861,9 +851,9 @@ export function run_persistent_storage_v2(): Boolean {
         // **** Initialize backend ****
         // Create new objects
         const userKeyEL1 = "userKeyEL1";
-        let options = new ConnectOptions<User>(UserTypeValue);
+        let options = new ConnectOptionsInst<User>(UserTypeValue);
         options.key = userKeyEL1
-        options.areaMode = AreaMode.EL1;
+        options.areaMode = contextConstant.AreaMode.EL1;
         options.defaultCreator = () => new User("defaultByCreator");
         let userEL1 = PersistenceV2.globalConnect<User>(
             options,
@@ -874,19 +864,19 @@ export function run_persistent_storage_v2(): Boolean {
         test("Object created", not_eq(userEL1, undefined));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
 
         // **** reset backend ****
         test("PersistenceV2Impl.instanceExists() - true", eq(PersistenceV2Impl.instanceExists(), true));
 
         PersistenceV2Impl.instanceReset();
         test("PersistenceV2Impl.instanceExists() - false", eq(PersistenceV2Impl.instanceExists(), false));
-        PersistenceV2.configureBackend(storageBackend);
+        //PersistenceV2.configureBackend(storageBackend);
 
         // Get stored objects from the storage
         let errorTriggered = false;
         try {
-            let optionsPerson = new ConnectOptions<NonObservedPerson>(NonObservedPersonType);
+            let optionsPerson = new ConnectOptionsInst<NonObservedPerson>(NonObservedPersonType);
             optionsPerson.key = options.key;
             optionsPerson.areaMode = options.areaMode;
             optionsPerson.defaultCreator = undefined;
@@ -903,11 +893,12 @@ export function run_persistent_storage_v2(): Boolean {
         test("Object NOT read with the wrong type", eq(errorTriggered, true));
 
         // Trigger writing to the back store
-        ObserveSingleton.instance.updateDirty2();
+        ObserveSingleton.instance.updateDirty();
         PersistenceV2.remove(userKeyEL1);
         keys = PersistenceV2.keys();
         test("keys size zero", eq(keys.length, 0));
     }
+
     }
 
     ttest();

@@ -29,10 +29,13 @@ import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
-import { UIContextUtil } from '../../../base/UIContextUtil';
-import { UIContextImpl } from '../../../base/UIContextImpl';
-import { StateMgmtConsole } from '../stateMgmtDFX';
+import { UIContextUtil } from '@uicontext/UIContextUtil';
+import { UIContextImpl } from '@uicontext/UIContextImpl';
+import { StateMgmtConsole } from '#StateMgmtConsole';
 import { int32 } from '@koalaui/common';
+
+export * from './observeInterfaceProxy';
+
 export class StateMgmtTool {
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
