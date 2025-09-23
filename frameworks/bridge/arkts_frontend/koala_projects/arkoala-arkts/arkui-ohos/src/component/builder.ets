@@ -31,3 +31,25 @@ export function ConditionBranch(
 ): void {
     conditionBranchImpl(content);
 }
+
+export function makeBuilderParameterProxy<T extends Object>(instance: T, source: Map<string, () => Any>, initializer?: (t: T) => void): T {
+    const proxiedInstance = proxy.Proxy.create(instance, new BuilderLiteralProxyHandler<T>(source));
+    if (initializer) {
+        initializer!(proxiedInstance);
+    }
+    return proxiedInstance;
+}
+
+class BuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
+    source: Map<string, () => Any>;
+    constructor(source: Map<string, () => Any>) {
+        this.source = source;
+    }
+    override get(target: T, name: string): Any {
+        const propertyGetter: (() => Any) | undefined = this.source.get(name);
+        if (propertyGetter) {
+            return (propertyGetter as () => Any)();
+        }
+        return super.get(target, name);
+    }
+}
