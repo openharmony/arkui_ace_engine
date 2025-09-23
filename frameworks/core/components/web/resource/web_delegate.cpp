@@ -116,6 +116,8 @@ constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
 
+constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
+
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
     "GBK",          "IBM866",       "ISO-2022-JP",  "ISO-8859-10",
@@ -3619,6 +3621,7 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
                 delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                delegate->RemoveSnapshotFrameNodeIfNeeded();
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebResize");
@@ -6248,18 +6251,8 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint3
 
 void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->RecordBlanklessFrameSize(width, height);
-}
-
-double WebDelegate::ResizeWidth() const
-{
-    return resizeWidth_;
-}
-
-double WebDelegate::ResizeHeight() const
-{
-    return resizeHeight_;
+    blanklessFrameWidth_ = width;
+    blanklessFrameHeight_ = height;
 }
 
 void WebDelegate::SetVisibility(bool isVisible)
@@ -6267,6 +6260,34 @@ void WebDelegate::SetVisibility(bool isVisible)
     isVisible_ = isVisible;
     CHECK_NULL_VOID(nweb_);
     nweb_->SetVisibility(isVisible);
+}
+
+bool WebDelegate::IsBlanklessFrameValid() const
+{
+    uint32_t resizeWidth = std::ceil(resizeWidth_);
+    uint32_t resizeHeight = std::ceil(resizeHeight_);
+    // A Blankless Frame is valid only if:
+    // 1. Web content dimensions and blankless frame dimensions are valid (non-zero)
+    // 2. Frame width exactly matches web content width
+    // 3. Frame height is at least the minimum allowed percentage of web content height
+    //    (As described, this should be at least 85%, defined by WEB_SNAPSHOT_SIZE_TOLERANCE)
+    bool valid = blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && resizeWidth != 0 && resizeHeight != 0 &&
+                 blanklessFrameWidth_ == resizeWidth &&
+                 blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
+    if (!valid) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "blankless IsBlanklessFrameValid False. "
+            "blankless frame size [%{public}u, %{public}u], while current size [%{public}u, %{public}u]",
+            blanklessFrameWidth_, blanklessFrameHeight_, resizeWidth, resizeHeight);
+    }
+    return valid;
+}
+
+void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
+{
+    if (blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && !IsBlanklessFrameValid()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
+        RemoveSnapshotFrameNode(0);
+    }
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
