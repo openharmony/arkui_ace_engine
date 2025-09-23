@@ -914,6 +914,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_NULL_VOID(rosenRenderContext->bgLoadingCtx_);
         rosenRenderContext->bgLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
     return task;
@@ -958,6 +959,7 @@ void RosenRenderContext::PaintBackground()
         }
         return;
     }
+    CHECK_NULL_VOID(bgLoadingCtx_);
     auto srcSize = bgLoadingCtx_->GetImageSize();
     SizeF renderSize = ImagePainter::CalculateBgImageSize(paintRect_.GetSize(), srcSize, GetBackgroundImageSize());
     OffsetF positionOffset =
