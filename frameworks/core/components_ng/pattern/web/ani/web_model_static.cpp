@@ -294,8 +294,8 @@ void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic  = AceType::DynamicCast<webPatternStatic >(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPatternStatic );
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value());
 }
 
@@ -324,7 +324,7 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<webPatternStatic>(frameNode->GetPattern());
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
 }
@@ -436,7 +436,7 @@ void WebModelStatic::SetAudioExclusive(FrameNode* frameNode, const std::optional
 void WebModelStatic::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPatternStatic = AceType::DynamicCast<webPatternStatic>(frameNode->GetPattern());
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
         webPatternStatic->UpdateBlurOnKeyboardHideMode(mode.value());
