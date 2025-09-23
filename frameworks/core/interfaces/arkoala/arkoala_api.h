@@ -3203,6 +3203,7 @@ struct ArkUIButtonModifier {
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_VoidPtr colorRawPtr);
     void (*setButtonMinFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr);
     void (*setButtonMaxFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale,  ArkUI_VoidPtr scaleRawPtr);
+    void (*setButtonBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
 };
 
 struct ArkUIImageModifier {

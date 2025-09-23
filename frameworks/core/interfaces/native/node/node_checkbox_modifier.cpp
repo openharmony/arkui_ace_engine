@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,14 +44,19 @@ void SetSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 void SetSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetSelectedColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::SELECTED_COLOR, resObj);
     }
+    SetSelectedColor(node, result.GetValue());
 }
 
 void SetUnSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -63,14 +69,19 @@ void SetUnSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 void SetUnSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     CHECK_NULL_VOID(node);
-    SetUnSelectedColor(node, color);
+    Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, colorResObj);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, resObj);
     }
+    SetUnSelectedColor(node, result.GetValue());
 }
 
 void SetCheckboxWidth(ArkUINodeHandle node, float value, int unit)
