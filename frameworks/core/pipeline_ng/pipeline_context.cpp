@@ -803,7 +803,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #endif
     ReloadNodesResource();
     ProcessDelayTasks();
-    DispatchDisplaySync(nanoTimestamp);
+    if (frameCount != UINT64_MAX) {
+        DispatchDisplaySync(nanoTimestamp);
+    }
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
