@@ -3996,7 +3996,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_disposeTree(peer: KPointer): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: KInt): void
+    native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: KInt): boolean
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCrossLanguageOptions(peer: KPointer): boolean
     @ani.unsafe.Direct
