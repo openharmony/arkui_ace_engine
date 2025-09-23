@@ -5885,6 +5885,7 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     CHECK_NULL_RETURN(overlayManager, false);
     NG::TimePickerSettingData settingData;
     settingData.isUseMilitaryTime = true;
+    settingData.dialogTitleDate = PickerDate::Current();
     DialogProperties properties = GetDialogProperties(theme);
     std::map<std::string, PickerTime> timePickerProperty;
     OHOS::NWeb::DateTime minimum = chooser->GetMinimum();
