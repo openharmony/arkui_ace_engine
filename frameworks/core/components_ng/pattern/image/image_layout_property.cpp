@@ -48,6 +48,8 @@ void ImageLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
         "VerticalAlign.BOTTOM", "VerticalAlign.BASELINE", "VerticalAlign.NONE" };
     json->PutExtAttr("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
+    json->PutExtAttr("altPlaceholder", propAltPlaceholder_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
+    json->PutExtAttr("altError", propAltError_.value_or(ImageSourceInfo("")).GetSrc().c_str(), filter);
     json->PutExtAttr(
         "objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))], filter);
     json->PutExtAttr("verticalAlign",

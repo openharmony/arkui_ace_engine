@@ -3329,6 +3329,15 @@ struct ArkUIImageModifier {
     void (*setContentTransition)(ArkUINodeHandle node, ArkUI_Int32 contentTransition);
     ArkUI_Int32 (*getContentTransition)(ArkUINodeHandle node);
     void (*resetContentTransition)(ArkUINodeHandle node);
+    void (*setAltErrorSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
+    void (*setAltPlaceholderSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
+    ArkUI_CharPtr (*getAltError)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAltPlaceholder)(ArkUINodeHandle node);
+    void (*resetAltError)(ArkUINodeHandle node);
+    void (*setAltPlaceholder)(
+        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName, void* srcRawPtr);
+    void (*setAltError)(
+        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName, void* srcRawPtr);
 };
 
 struct ArkUIColumnModifier {

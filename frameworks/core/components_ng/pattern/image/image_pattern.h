@@ -252,6 +252,7 @@ public:
     void ResetImage();
     void ResetAltImage();
     void ResetImageAndAlt();
+    void ResetAltImageError();
 
     void SetImageType(ImageType imageType)
     {
@@ -442,6 +443,10 @@ private:
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
+    DataReadyNotifyTask CreateDataReadyCallbackForAltError();
+    LoadSuccessNotifyTask CreateLoadSuccessCallbackForAltError();
+    LoadFailNotifyTask CreateLoadFailCallbackForAltError();
+
     void OnColorConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
@@ -463,6 +468,7 @@ private:
     void UpdateSvgSmoothEdgeValue();
     void OnKeyEvent(const KeyEvent& event);
     void InitFromThemeIfNeed();
+    void LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceInfo);
 
 private:
     RefPtr<DrawableDescriptor> drawable_;
@@ -485,6 +491,11 @@ private:
     std::unique_ptr<RectF> altDstRect_;
     std::unique_ptr<RectF> altSrcRect_;
 
+    RefPtr<ImageLoadingContext> altErrorCtx_;
+    RefPtr<CanvasImage> altErrorImage_;
+    std::unique_ptr<RectF> altErrorDstRect_;
+    std::unique_ptr<RectF> altErrorSrcRect_;
+
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -493,6 +504,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     ImageDfxConfig imageDfxConfig_;
     ImageDfxConfig altImageDfxConfig_;
+    ImageDfxConfig altErrorImageDfxConfig_;
     bool enableDrag_ = false;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
@@ -524,6 +536,8 @@ private:
     bool hasSetPixelMapMemoryName_ = false;
     bool previousVisibility_ = false;
     bool supportSvg2_ = false;
+    bool loadFailed_ = false;
+    bool isLoadAlt_ = false;
     ImageType imageType_ = ImageType::BASE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);

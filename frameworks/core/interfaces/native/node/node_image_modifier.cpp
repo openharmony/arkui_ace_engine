@@ -1278,6 +1278,89 @@ void ResetContentTransition(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetContentTransition(frameNode, ContentTransitionType::IDENTITY);
 }
+
+void SetAltErrorSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(sourceInfo);
+    if (sourceInfo->url) {
+        ImageModelNG::SetAltError(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
+        return;
+    }
+    if (sourceInfo->resource) {
+        ImageModelNG::SetAltErrorResource(frameNode, sourceInfo->resource);
+        return;
+    }
+    if (sourceInfo->pixelMap) {
+        ImageModelNG::SetAltErrorPixelMap(frameNode, sourceInfo->pixelMap);
+        return;
+    }
+}
+
+const char* GetAltError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ImageModelNG::GetAltError(frameNode).GetSrc();
+    return g_strValue.c_str();
+}
+
+void ResetAltError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageAltError(frameNode);
+}
+
+void SetAltPlaceholderSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(sourceInfo);
+    if (sourceInfo->url) {
+        if (ImageSourceInfo::ResolveURIType(sourceInfo->url) == SrcType::NETWORK) {
+            return;
+        }
+        ImageModelNG::SetAltPlaceholder(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
+        return;
+    }
+    if (sourceInfo->resource) {
+        ImageModelNG::SetAltPlaceholderResource(frameNode, sourceInfo->resource);
+        return;
+    }
+    if (sourceInfo->pixelMap) {
+        ImageModelNG::SetAltPlaceholderPixelMap(frameNode, sourceInfo->pixelMap);
+        return;
+    }
+}
+
+const char* GetAltPlaceholder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ImageModelNG::GetAltPlaceholder(frameNode).GetSrc();
+    return g_strValue.c_str();
+}
+
+void setAltPlaceholder(
+    ArkUINodeHandle node, const char* src, const char* bundleName, const char* moduleName, void* srcRawPtr)
+{
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
+        return;
+    }
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAltPlaceholder(frameNode, ImageSourceInfo { src, bundleName, moduleName });
+}
+void setAltError(ArkUINodeHandle node, const char* src, const char* bundleName, const char* moduleName, void* srcRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAltError(frameNode, ImageSourceInfo { src, bundleName, moduleName });
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -1398,6 +1481,13 @@ const ArkUIImageModifier* GetImageModifier()
         .setContentTransition = SetContentTransition,
         .getContentTransition = GetContentTransition,
         .resetContentTransition = ResetContentTransition,
+        .setAltErrorSourceInfo = SetAltErrorSourceInfo,
+        .setAltPlaceholderSourceInfo = SetAltPlaceholderSourceInfo,
+        .getAltError = GetAltError,
+        .getAltPlaceholder = GetAltPlaceholder,
+        .resetAltError = ResetAltError,
+        .setAltPlaceholder = setAltPlaceholder,
+        .setAltError = setAltError,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
