@@ -342,15 +342,15 @@ bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const cha
     return (bool)isInstance;
 }
 
-bool ParseStringAndNumberObject(
-    ani_env* env, ani_ref property_ref, OHOS::Ace::DimensionUnit defaultUnit, OHOS::Ace::CalcDimension& result)
+bool ParseStringNumberUndefinedObject(ani_env* env, ani_ref property_ref, OHOS::Ace::DimensionUnit defaultUnit,
+    std::optional<OHOS::Ace::CalcDimension>& result)
 {
     ani_boolean isUndefined;
     if (ANI_OK != env->Reference_IsUndefined(property_ref, &isUndefined)) {
         return false;
     }
     if (isUndefined) {
-        return false;
+        return true;
     }
     if (GetIsStringObject(env, property_ref)) {
         auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(property_ref));
@@ -359,18 +359,17 @@ bool ParseStringAndNumberObject(
     }
     if (GetIsNumberObject(env, property_ref)) {
         ani_double numberValue;
-        if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(property_ref),
-            "doubleValue", nullptr, &numberValue)) {
+        if (ANI_OK !=
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(property_ref), "unboxed", ":d", &numberValue)) {
             return false;
         }
-        result.SetUnit(defaultUnit);
-        result.SetValue(static_cast<double>(numberValue));
+        result = OHOS::Ace::CalcDimension(OHOS::Ace::Dimension(static_cast<double>(numberValue), defaultUnit));
         return true;
     }
     return false;
 }
 
-bool ParseStringAndNumberOption(ani_env* env, ani_object options, OHOS::Ace::CalcDimension& result,
+bool ParseStringNumberUndefinedOption(ani_env* env, ani_object options, std::optional<OHOS::Ace::CalcDimension>& result,
     const char* property, const char* className)
 {
     ani_class cls;
@@ -384,7 +383,7 @@ bool ParseStringAndNumberOption(ani_env* env, ani_object options, OHOS::Ace::Cal
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, property, &property_ref)) {
         return false;
     }
-    return ParseStringAndNumberObject(env, property_ref, OHOS::Ace::DimensionUnit::VP, result);
+    return ParseStringNumberUndefinedObject(env, property_ref, OHOS::Ace::DimensionUnit::VP, result);
 }
 
 void PreFixEmptyBundleName(ani_env *env, ani_object value)
@@ -464,8 +463,7 @@ bool ParseResourceParamType(ani_env *env, ani_object objects, ResourceInfo& info
         return false;
     }
     ani_double type;
-    if (ANI_OK !=env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(type_ref), "doubleValue", nullptr, &type)) {
+    if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(type_ref), "unboxed", ":d", &type)) {
         return false;
     }
     info.type = static_cast<int32_t>(type);
@@ -687,8 +685,8 @@ bool ParseLengthToDimension(ani_env *env, ani_ref source_ref, OHOS::Ace::Dimensi
     }
     if (GetIsNumberObject(env, source_ref)) {
         ani_double numberValue;
-        if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(source_ref), "doubleValue", nullptr, &numberValue)) {
+        if (ANI_OK !=
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(source_ref), "unboxed", ":d", &numberValue)) {
             return false;
         }
         result.SetUnit(defaultUnit);
@@ -810,8 +808,8 @@ bool ParseAniColor(ani_env *env, ani_ref resourceColor_ref, OHOS::Ace::Color& re
     }
     if (GetIsNumberObject(env, resourceColor_ref)) {
         ani_double resourceColorValue;
-        if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(resourceColor_ref), "doubleValue", nullptr, &resourceColorValue)) {
+        if (ANI_OK != env->Object_CallMethodByName_Double(
+            static_cast<ani_object>(resourceColor_ref), "unboxed", ":d", &resourceColorValue)) {
             return false;
         }
         resourceColor = static_cast<OHOS::Ace::Color>(resourceColorValue);
@@ -887,8 +885,8 @@ void ParseArray([[maybe_unused]] ani_env* env,
             result = OHOS::Ace::StringUtils::StringToCalcDimension(stringContent, false, OHOS::Ace::DimensionUnit::VP);
         } else if (GetIsNumberObject(env, pointRef)) {
             ani_double numberValue;
-            if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(pointRef),
-                "doubleValue", nullptr, &numberValue)) {
+            if (ANI_OK !=
+                env->Object_CallMethodByName_Double(static_cast<ani_object>(pointRef), "unboxed", ":d", &numberValue)) {
                 return;
             }
             result.SetUnit(OHOS::Ace::DimensionUnit::VP);
