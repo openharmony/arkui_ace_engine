@@ -20,19 +20,11 @@
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {
-thread_local ElementRegister* ElementRegister::instance_ = nullptr;
 std::atomic<ElementIdType> ElementRegister::nextUniqueElementId_ = 0;
-std::mutex ElementRegister::mutex_;
-
-ElementRegister* ElementRegister::GetInstance()
+std::shared_ptr<ElementRegister> ElementRegister::GetInstance()
 {
-    if (ElementRegister::instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!ElementRegister::instance_) {
-            ElementRegister::instance_ = new ElementRegister();
-        }
-    }
-    return (ElementRegister::instance_);
+    thread_local std::shared_ptr<ElementRegister> instance_ = std::shared_ptr<ElementRegister>(new ElementRegister());
+    return instance_;
 }
 
 ElementIdType ElementRegister::MakeUniqueId()
