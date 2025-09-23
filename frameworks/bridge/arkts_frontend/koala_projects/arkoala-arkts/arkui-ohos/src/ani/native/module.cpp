@@ -1003,11 +1003,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetPixelMap)
         },
         ani_native_function {
-            "_CanvasRenderer_GetPixelMap",
-            "ldddd:C{@ohos.multimedia.image.image.PixelMap}",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetPixelMap)
-        },
-        ani_native_function {
             "_CanvasRenderer_DrawPixelMap0",
             "lC{@ohos.multimedia.image.image.PixelMap}dd:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::DrawPixelMap0)
