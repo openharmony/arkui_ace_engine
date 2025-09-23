@@ -439,10 +439,11 @@ void ImagePattern::OnImageLoadSuccess()
     image_->SetImageDfxConfig(imageDfxConfig_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
+    bool isStaticImage = image_->IsStatic();
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
+        isStaticImage = true;
     }
-    bool isStaticImage = image_->IsStatic();
     PrepareAnimation(image_);
     if (enableDrag_) {
         EnableDrag();

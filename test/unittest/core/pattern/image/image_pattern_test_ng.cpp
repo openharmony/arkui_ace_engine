@@ -2585,4 +2585,51 @@ HWTEST_F(ImagePatternTestNg, GetContentTransitionParam003, TestSize.Level0)
     EXPECT_EQ(imagePattern->GetContentTransitionParam(), ContentTransitionType::OPACITY);
     EXPECT_EQ(imagePattern->contentMod_->GetContentTransitionParam(), ContentTransitionType::OPACITY);
 }
+
+/**
+ * @tc.name: TestImageOnLoadSuccess001
+ * @tc.desc: Test OnImageLoadSuccess for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImageOnLoadSuccess001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call AddImageLoadSuccessEvent.
+     * @tc.expected:
+     */
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    LoadImageSuccessEvent info(300, 200, 400, 500);
+    info.loadingStatus_ = 1;
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto completeEvent = [imagePattern](const LoadImageSuccessEvent& info) {
+        if (imagePattern) {
+            imagePattern->image_ = nullptr;
+        }
+    };
+    eventHub->SetOnComplete(completeEvent);
+    imagePattern->OnImageLoadSuccess();
+
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
 } // namespace OHOS::Ace::NG
