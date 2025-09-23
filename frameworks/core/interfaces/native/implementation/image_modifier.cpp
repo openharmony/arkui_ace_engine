@@ -103,8 +103,7 @@ void SetImageOptionsImpl(Ark_NativePointer node,
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
     if (info) {
-        std::string source = info->GetSrc();
-        ImageModelNG::InitImage(frameNode, source);
+        ImageModelStatic::SetSrc(frameNode, info);
     } else {
         ImageModelNG::ResetImageSrc(frameNode);
     }
