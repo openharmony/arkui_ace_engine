@@ -158,10 +158,10 @@ public:
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
-			   const std::string& sharedRenderProcessToken = "");
+               const std::string& sharedRenderProcessToken = "", bool emulateTouchFromMouseEvent = false);
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
-			   const std::string& sharedRenderProcessToken = "");
+               const std::string& sharedRenderProcessToken = "", bool emulateTouchFromMouseEvent = false);
 
     ~WebPattern() override;
 
@@ -410,6 +410,16 @@ public:
     const std::optional<std::string>& GetSharedRenderProcessToken() const
     {
         return sharedRenderProcessToken_;
+    }
+
+    void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent)
+    {
+        emulateTouchFromMouseEvent_ = emulateTouchFromMouseEvent;
+    }
+
+    bool GetEmulateTouchFromMouseEvent() const override
+    {
+        return emulateTouchFromMouseEvent_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -694,6 +704,12 @@ public:
     void OnRootLayerChanged(int width, int height);
     void ReleaseResizeHold();
     bool GetPendingSizeStatus();
+
+    void FilterMouseForTooltip(const MouseInfo& info);
+    bool ConvertMouseToTouchEvent(float touchHandleOffsetY, const MouseInfo& mouse, TouchEventInfo& touch);
+    bool HandleMouseToTouchEvent(float touchHandleOffsetY, bool fromOverlay, const MouseInfo& mouseInfo);
+    bool lastMouseTouchDown_ = false;
+
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -1435,6 +1451,7 @@ private:
     double lastKeyboardHeight_ = 0.0;
     bool inspectorAccessibilityEnable_ = false;
     std::optional<std::string> sharedRenderProcessToken_;
+    bool emulateTouchFromMouseEvent_ = false;
     bool textBlurAccessibilityEnable_ = false;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;

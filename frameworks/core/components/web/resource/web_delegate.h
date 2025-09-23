@@ -1723,6 +1723,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
     sptr<WebWindowFocusChangedListener> webWindowFocusChangedListener_ = nullptr;
     std::string sharedRenderProcessToken_;
+    bool emulateTouchFromMouseEvent_ = false;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;

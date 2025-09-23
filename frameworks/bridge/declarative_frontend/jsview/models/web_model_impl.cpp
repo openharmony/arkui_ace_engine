@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace::Framework {
 void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
-    RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken)
+    RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken,
+    bool emulateTouchFromMouseEvent)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -27,13 +28,15 @@ void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& w
     webComponent->SetWebController(webController);
     webComponent->SetIncognitoMode(incognitoMode);
     webComponent->SetSharedRenderProcessToken(sharedRenderProcessToken);
+    webComponent->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent);
 
     ViewStackProcessor::GetInstance()->Push(webComponent);
 }
 
 void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
     std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
-    RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken)
+    RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken,
+    bool emulateTouchFromMouseEvent)
 {
     RefPtr<WebComponent> webComponent;
     webComponent = AceType::MakeRefPtr<WebComponent>(src);
@@ -46,7 +49,7 @@ void WebModelImpl::Create(const std::string& src, std::function<void(int32_t)>&&
     webComponent->SetSetHapPathCallback(std::move(setHapPathCallback));
     webComponent->SetIncognitoMode(incognitoMode);
     webComponent->SetSharedRenderProcessToken(sharedRenderProcessToken);
-
+    webComponent->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent);
     ViewStackProcessor::GetInstance()->Push(webComponent);
 }
 

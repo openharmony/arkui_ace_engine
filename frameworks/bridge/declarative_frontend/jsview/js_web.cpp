@@ -3090,6 +3090,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
     std::string sharedRenderProcessToken = "";
     ParseJsString(paramObject->GetProperty("sharedRenderProcessToken"), sharedRenderProcessToken);
 
+    bool emulateTouchFromMouseEvent = false;
+    ParseJsBool(paramObject->GetProperty("emulateTouchFromMouseEvent"), emulateTouchFromMouseEvent);
+
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -3112,7 +3115,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
-            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken);
+            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken,
+            emulateTouchFromMouseEvent);
 
         JSWeb::SetCallbackFromController(controller);
 
@@ -3164,7 +3168,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
         auto* jsWebController = controller->Unwrap<JSWebController>();
         CHECK_NULL_VOID(jsWebController);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), jsWebController->GetController(), renderMode, incognitoMode, sharedRenderProcessToken);
+            dstSrc.value(), jsWebController->GetController(), renderMode, incognitoMode, sharedRenderProcessToken,
+            emulateTouchFromMouseEvent);
     }
 
     WebModel::GetInstance()->SetFocusable(true);

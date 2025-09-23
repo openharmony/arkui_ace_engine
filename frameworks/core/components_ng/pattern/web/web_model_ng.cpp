@@ -33,15 +33,16 @@
 
 namespace OHOS::Ace::NG {
 void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,
-    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    bool incognitoMode, const std::string& sharedRenderProcessToken, bool emulateTouchFromMouseEvent)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::WEB_ETS_TAG, nodeId, [src, webController, renderMode, incognitoMode, sharedRenderProcessToken]() {
+        V2::WEB_ETS_TAG, nodeId, [src, webController, renderMode,
+                                  incognitoMode, sharedRenderProcessToken, emulateTouchFromMouseEvent]() {
             return AceType::MakeRefPtr<WebPattern>(
-                src, webController, renderMode, incognitoMode, sharedRenderProcessToken);
+                src, webController, renderMode, incognitoMode, sharedRenderProcessToken, emulateTouchFromMouseEvent);
         });
     frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
@@ -59,18 +60,22 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
     webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken);
+    webPattern->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent);
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
     std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
-    RenderMode renderMode, bool incognitoMode, const std::string& sharedRenderProcessToken)
+    RenderMode renderMode, bool incognitoMode, const std::string& sharedRenderProcessToken,
+    bool emulateTouchFromMouseEvent)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::WEB_ETS_TAG, nodeId, [src, setWebIdCallback, renderMode, incognitoMode, sharedRenderProcessToken]() {
+        V2::WEB_ETS_TAG, nodeId, [src, setWebIdCallback, renderMode, incognitoMode,
+                                  sharedRenderProcessToken, emulateTouchFromMouseEvent]() {
             return AceType::MakeRefPtr<WebPattern>(
-                src, std::move(setWebIdCallback), renderMode, incognitoMode, sharedRenderProcessToken);
+                src, std::move(setWebIdCallback), renderMode, incognitoMode,
+                sharedRenderProcessToken, emulateTouchFromMouseEvent);
         });
     frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
@@ -90,6 +95,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
     webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken);
+    webPattern->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent);
 }
 
 void WebModelNG::SetCustomScheme(const std::string& cmdLine)
