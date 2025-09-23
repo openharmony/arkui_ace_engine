@@ -264,21 +264,39 @@ void WebModelStatic::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabl
 
 void WebModelStatic::SetOptimizeParserBudgetEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enable) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetOptimizeParserBudgetEnabled: %{public}d",
+            enable.value());
+        webPatternStatic->UpdateOptimizeParserBudgetEnabled(enable.value());
+    } else {
+        webPatternStatic->ResetOptimizeParserBudgetEnabled();
+    }
 }
 
 void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
     const std::optional<bool>& enableFollowSystemFontWeight)
 {
-    (void)frameNode;
-    (void)enableFollowSystemFontWeight;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enableFollowSystemFontWeight) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetEnableFollowSystemFontWeight: %{public}d",
+            enableFollowSystemFontWeight.value());
+        webPatternStatic->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight.value());
+    } else {
+        webPatternStatic->ResetEnableFollowSystemFontWeight();
+    }
 }
 
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic  = AceType::DynamicCast<webPatternStatic >(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic );
+    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value());
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
@@ -305,8 +323,10 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
 {
-    (void)frameNode;
-    (void)supportDefaultIntrinsicSize;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<webPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
 }
 
 void WebModelStatic::SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedContentMode)
@@ -415,8 +435,14 @@ void WebModelStatic::SetAudioExclusive(FrameNode* frameNode, const std::optional
 
 void WebModelStatic::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
 {
-    (void)frameNode;
-    (void)mode;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<webPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (mode) {
+        webPatternStatic->UpdateBlurOnKeyboardHideMode(mode.value());
+    } else {
+        webPatternStatic->ResetBlurOnKeyboardHideMode();
+    }
 }
 
 void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum)
@@ -424,6 +450,7 @@ void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRati
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetTextZoomRatio：%{public}d", textZoomRatioNum);
     webPatternStatic->UpdateTextZoomRatio(textZoomRatioNum);
 }
 
