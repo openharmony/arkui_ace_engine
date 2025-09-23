@@ -293,6 +293,11 @@ void ModelAdapterWrapper::SetPaintFinishCallback(PaintFinishCallback callback)
 bool ModelAdapterWrapper::HandleTouchEvent(const TouchEventInfo& info,
     const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+    // For new api: touching does not destory the fps setting
+    if (sceneAdapter_) {
+        return false;
+    }
+
     CHECK_NULL_RETURN(touchHandler_, false);
     CHECK_NULL_RETURN(textureLayer_, false);
     const auto& textureInfo = textureLayer_->GetTextureInfo();
