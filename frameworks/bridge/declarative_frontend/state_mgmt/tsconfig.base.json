@@ -116,6 +116,8 @@
 
     // interop
     "src/lib/interop/interop.ts",
+    "src/lib/interop/interop_storage.ts",
+    "src/lib/interop/interop_builder.ts",
     "src/lib/interop/v2_builder.ts",
 
     // init

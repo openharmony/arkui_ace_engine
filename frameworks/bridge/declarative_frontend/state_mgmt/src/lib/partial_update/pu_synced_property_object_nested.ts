@@ -26,7 +26,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
   private obsObject_: C = undefined;
 
-  private staticWatchId?: number;
+  public staticWatchFunc?: Object;
 
   /**
    * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
@@ -135,10 +135,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         // make sure the ObservedObject no longer has a read callback function
         // assigned to it
         ObservedObject.unregisterPropertyReadCb(this.obsObject_);
-      // for interop
-      } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.obsObject_ === 'object' &&
-        'removeWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.removeWatchSubscriber === 'function') {
-          this.obsObject_.removeWatchSubscriber(this.staticWatchId);
       }
     }
 
@@ -159,7 +155,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
             this.notifyPropertyHasChangedPU();
         };
         if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
-          this.staticWatchId = InteropExtractorModule.createWatchFunc(callback, this.obsObject_);
+          this.staticWatchFunc = InteropExtractorModule.createWatchFunc(callback, this.obsObject_);
         }
       } else {
         stateMgmtConsole.frequentApplicationError(`${this.debugInfoWithoutId()} set/init (method setValueInternal): assigned value is not

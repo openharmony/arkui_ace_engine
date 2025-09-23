@@ -36,3 +36,11 @@ class InteropConfigureStateMgmt {
         this.interopInUse_ = false;
     }
 }
+
+function openInterop(): void {
+    InteropConfigureStateMgmt.instance.openInterop();
+}
+
+function closeInterop(): void {
+    InteropConfigureStateMgmt.instance.closeInterop();
+}
