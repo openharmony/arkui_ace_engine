@@ -494,7 +494,7 @@ void SetButtonBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* col
         }
         ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::BACKGROUND_COLOR);
     }
-    ButtonModelNG::BackgroundColor(node, result, true);
+    SetButtonBackgroundColor(node, result.GetValue());
 }
 
 void SetButtonBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
