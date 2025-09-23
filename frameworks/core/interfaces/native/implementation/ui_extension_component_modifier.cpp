@@ -19,6 +19,7 @@
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
@@ -84,7 +85,7 @@ Ark_NativePointer UecConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
 #ifdef ACE_STATIC
-    auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
+    auto frameNode = NG::UIExtensionStatic::CreateFrameNode(id);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -160,7 +161,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
 #ifdef ACE_STATIC
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        UIExtensionModelNG::SetOnRemoteReady(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnRemoteReady(frameNode, nullptr);
         return;
     }
     auto onRemoteReady = [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
@@ -172,7 +173,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
         uiExtensionProxyPeerPtr->SetProxy(proxy);
         arkCallback.Invoke(peer);
     };
-    UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+    NG::UIExtensionStatic::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif
 #endif //WINDOW_SCENE_SUPPORTED
 }

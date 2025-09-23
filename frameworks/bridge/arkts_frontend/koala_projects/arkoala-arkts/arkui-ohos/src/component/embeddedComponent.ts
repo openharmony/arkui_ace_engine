@@ -17,23 +17,39 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { InteropNativeModule, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, TerminationInfo } from "./common"
 import { ErrorCallback } from "./ohos.base"
-import { BusinessError } from "#external"
+import { AbilityWant, BusinessError } from "#external"
 import { Want } from "./ohos.app.ability"
 import { EmbeddedType } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkUIAniUiextensionModal } from "arkui.ani"
+
+export class ArkUIEmbeddedCallbackHelp {
+    onError?: ((e: BusinessError) => void)
+    onTerminated?: ((parameter: TerminationInfo) => void)
+    constructor() {
+        this.onError = undefined;
+        this.onTerminated = undefined;
+    }
+}
 
 export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
+    _callbackHelp?: ArkUIEmbeddedCallbackHelp;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
+        this.InitArkUIEmbeddedCallbackHelp();
+    }
+    InitArkUIEmbeddedCallbackHelp(): void {
+        InteropNativeModule._NativeLog("[AceEmbeddedComponent] InitArkUIEmbeddedCallbackHelp entry");
+        this._callbackHelp = new ArkUIEmbeddedCallbackHelp();
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkEmbeddedComponentPeer {
         const peerId  = PeerNode.nextId()
@@ -42,42 +58,54 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setEmbeddedComponentOptionsAttribute(loader: Want, type: EmbeddedType): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeWant(loader)
-        ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.EmbeddedType_ToNumeric(type))
-        thisSerializer.release()
+    setEmbeddedComponentOptionsAttribute(loader: AbilityWant, type: EmbeddedType): void {
+        InteropNativeModule._NativeLog("[AceEmbeddedComponent] setEmbeddedComponentOptionsAttribute entry");
+        ArkUIAniUiextensionModal._Uiextension_Set_Want(this.peer.ptr, loader);
     }
     onTerminatedAttribute(value: ((parameter: TerminationInfo) => void) | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        InteropNativeModule._NativeLog("[AceEmbeddedComponent] onTerminatedAttribute entry");
+        if (value == undefined) {
+            ArkUIAniUiextensionModal._Uiextension_Set_OnTerminationCallback(this.peer.ptr, undefined);
+            return;
         }
-        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_onTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        const help = this._callbackHelp;
+        if (help != undefined && help != null) {
+            help.onTerminated = value;
+            ArkUIAniUiextensionModal._Uiextension_Set_OnTerminationCallback(this.peer.ptr, (code1: number, want1: AbilityWant) => {
+                const onTerminated = this._callbackHelp?.onTerminated;
+                if (onTerminated != undefined && onTerminated != null) {
+                    const param = {
+                        code: code1 as int,
+                        want: want1
+                    } as TerminationInfo
+                    onTerminated(param);
+                }
+            });
+        }
     }
     onErrorAttribute(value: ErrorCallback | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value == undefined) {
+            ArkUIAniUiextensionModal._Uiextension_Set_OnErrorCallback(this.peer.ptr, undefined);
+            return;
         }
-        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        const help = this._callbackHelp;
+        if (help != undefined && help != null) {
+            help.onError = value;
+            ArkUIAniUiextensionModal._Uiextension_Set_OnErrorCallback(this.peer.ptr, (code1: number, name1: string, message1: string) => {
+                const onError = this._callbackHelp?.onError;
+                if (onError != undefined && onError != null) {
+                    const param = {
+                        code: code1 as int,
+                        name: name1,
+                        message: message1
+                    } as BusinessError
+                    onError(param);
+                }
+            });
+        }
     }
 }
-export type EmbeddedComponentInterface = (loader: Want, type: EmbeddedType) => EmbeddedComponentAttribute;
-export interface TerminationInfo {
-    code: number;
-    want?: Want;
-}
+export type EmbeddedComponentInterface = (loader: AbilityWant, type: EmbeddedType) => EmbeddedComponentAttribute;
 export interface EmbeddedComponentAttribute extends CommonMethod {
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onError(value: ErrorCallback | undefined): this
@@ -97,9 +125,9 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
     getPeer(): ArkEmbeddedComponentPeer {
         return (this.peer as ArkEmbeddedComponentPeer)
     }
-    public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
+    public setEmbeddedComponentOptions(loader: AbilityWant, type: EmbeddedType): this {
         if (this.checkPriority("setEmbeddedComponentOptions")) {
-            const loader_casted = loader as (Want)
+            const loader_casted = loader as (AbilityWant)
             const type_casted = type as (EmbeddedType)
             this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
             return this
@@ -132,7 +160,7 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
 export function EmbeddedComponent(
     /** @memo */
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    loader: Want, type: EmbeddedType,
+    loader: AbilityWant, type: EmbeddedType,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
