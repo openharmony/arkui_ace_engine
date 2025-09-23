@@ -2160,8 +2160,9 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
-            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
+        std::vector<RefPtr<ResourceObject>> resObj;
+        fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(node->uiNodeHandle, colors[NUM_0],
+            colors[NUM_1], colors[NUM_2], colors[NUM_3], static_cast<void*>(&resObj));
     }
     return ERROR_CODE_NO_ERROR;
 }
