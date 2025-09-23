@@ -86,15 +86,11 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    static RenderContext::ContextParam cParam = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
-                                                  RenderContext::PatternType::DEFAULT };
-    columnRenderContext_->InitContext(false, cParam);
-    columnRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
 
     CHECK_NULL_VOID(controller_);
@@ -281,7 +277,6 @@ void MovingPhotoPattern::OnRebuildFrame()
     auto column = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetColumn(childCount - 1));
     CHECK_NULL_VOID(column);
     auto columnRenderContext = column->GetRenderContext();
-    columnRenderContext->AddChild(columnRenderContext_, 0);
     columnRenderContext->SetClipToBounds(true);
     auto video = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetVideo(childCount - 1));
     CHECK_NULL_VOID(video);
@@ -509,7 +504,7 @@ void MovingPhotoPattern::UpdateTempImageNode(const ImageSourceInfo& imageSourceI
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
-    RegisterImageEvent(image);
+    RegisterTransitionImageEvent(image);
 }
 
 void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
@@ -581,15 +576,39 @@ void MovingPhotoPattern::RegisterImageEvent(const RefPtr<FrameNode>& imageNode)
     imageHub->SetOnComplete(imageCompleteEventCallback);
 }
 
+void MovingPhotoPattern::RegisterTransitionImageEvent(const RefPtr<FrameNode>& imageNode)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto RegisterImageEvent Transition start.");
+    CHECK_NULL_VOID(imageNode);
+    auto imageHub = imageNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageHub);
+    auto imageCompleteEventCallback = [weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTransitionImageCompleteEvent(info);
+    };
+    imageHub->SetOnComplete(imageCompleteEventCallback);
+}
+
 void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& info)
 {
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
+    
+    if (loadingStatus == IMAGE_DECODE_COMPLETE) {
+       FireMediaPlayerImageComplete();
+    }
+}
+
+void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSuccessEvent& info)
+{
+    auto loadingStatus = info.GetLoadingStatus();
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent start:%{public}d.", loadingStatus);
+    
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
-            TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent EightyToHundredAnimation.");
-            notifyTransitionFlag_ = false;
+            TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent EightyToHundredAnimation.");
             EightyToHundredAnimation();
         }
     }
@@ -1501,12 +1520,19 @@ void MovingPhotoPattern::PreparedToPlay()
     if (!isVisible_) {
         return;
     }
+    if (isRepeatChangePlayMode_ && historyAutoAndRepeatLevel_ == PlaybackMode::NONE &&
+        autoAndRepeatLevel_ == PlaybackMode::NONE) {
+        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        isRepeatChangePlayMode_ = false;
+    }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
         SelectPlaybackMode(historyAutoAndRepeatLevel_);
     } else {
         SelectPlaybackMode(autoAndRepeatLevel_);
     }
+    isRepeatChangePlayMode_ = false;
 }
 
 void MovingPhotoPattern::SelectPlaybackMode(PlaybackMode mode)
@@ -1684,6 +1710,7 @@ void MovingPhotoPattern::ResetVideo()
 
 void MovingPhotoPattern::RestartVideo()
 {
+    isFastKeyUp_ = false;
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
@@ -1693,6 +1720,7 @@ void MovingPhotoPattern::RestartVideo()
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto restart video.");
     isPlayByController_ = true;
+    autoAndRepeatLevel_ = historyAutoAndRepeatLevel_;
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -1767,6 +1795,10 @@ void MovingPhotoPattern::RefreshMovingPhoto()
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
         return;
     }
+    if (notifyTransitionFlag_) {
+        refreshTransitionFlag_ = true;
+        DetachTempImageFromFrameNode();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
@@ -1809,6 +1841,7 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
+        isRepeatChangePlayMode_ = true;
         Pause();
         auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
         CHECK_NULL_VOID(movingPhoto);
@@ -1878,7 +1911,11 @@ void MovingPhotoPattern::EightyToHundredAnimation()
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto EightyToHundredAnimation finish.");
         auto movingPhoto = movingPhotoPattern.Upgrade();
         CHECK_NULL_VOID(movingPhoto);
-        movingPhoto->DetachFirstImageFromFrameNode();
+        movingPhoto->notifyTransitionFlag_ = false;
+        if (!movingPhoto->refreshTransitionFlag_) {
+            movingPhoto->DetachFirstImageFromFrameNode();
+        }
+        movingPhoto->refreshTransitionFlag_ = false;
     });
     AnimationUtils::Animate(option, [imageRsContext]() {
             imageRsContext->UpdateOpacity(1.0);
@@ -1909,12 +1946,23 @@ void MovingPhotoPattern::DetachFirstImageFromFrameNode()
     host->RemoveChild(image);
 }
 
+void MovingPhotoPattern::DetachTempImageFromFrameNode()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto DetachTempImageFromFrameNode.");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto image = GetTempNode();
+    CHECK_NULL_VOID(image);
+    host->RemoveChild(image);
+}
+
 RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_RETURN(movingPhoto, nullptr);
+    CHECK_NULL_RETURN(movingPhoto->GetTotalChildCount() > 2, nullptr);
     auto firstImage = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_RETURN(firstImage, nullptr);
     auto imageIndex = movingPhoto->GetChildIndex(firstImage);
@@ -2055,6 +2103,7 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
     }
     if (!isRepeatPlay && historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         isChangePlayMode_ = true;
+        autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
         StopAnimation();

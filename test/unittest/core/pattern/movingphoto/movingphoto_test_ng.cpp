@@ -158,7 +158,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest001, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoModelNgTest002
- * @tc.desc: Create movingPhotoNode, and set its properties
+ * @tc.desc: Create movingPhotoNode, and set its properties.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
