@@ -1828,7 +1828,7 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     }
 
     nodeInfo_->pageDepth = depth_;
-    nodeInfo_->childrenSize = children.size();
+    nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
     if (isBuildByJS_) {
         nodeMap.insert({ nodeId_, *(nodeInfo_) });
     }
