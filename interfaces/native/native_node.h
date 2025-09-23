@@ -4150,17 +4150,17 @@ typedef enum {
      *
      * @since 22
      */
-     NODE_TEXT_AREA_BAR_STATE = 8032,
+    NODE_TEXT_AREA_BAR_STATE = 8032,
 
     /**
      * @brief Defines the color of the scrollbar. This attribute can be set, reset, and obtained as required
      * through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .data[0].u32: The color of the scroll bar text area is represented in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      *
      * @since 22
      */
