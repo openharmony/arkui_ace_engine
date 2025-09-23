@@ -996,7 +996,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             jumpIndex_.reset();
             jumpIndexInGroup_.reset();
         } else {
-            if (jumpIndex_ && scrollAlign_ != ScrollAlign::AUTO) {
+            if (jumpIndex_ && scrollAlign_ != ScrollAlign::AUTO && !prevMeasureBreak_) {
                 ClearAllItemPosition(layoutWrapper);
             }
             jumpIndex_ = isStackFromEnd_ ? totalItemCount_ - jumpIndex_.value() - 1 : jumpIndex_.value();
@@ -1039,6 +1039,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         needLayoutBackward = needLayoutBackward || (draggingIndex_ >= 0 &&
             revertIndex(draggingIndex_) <= startIndex && NearEqual(prevContentMainSize_, contentMainSize_));
         OffScreenLayoutDirection(layoutWrapper);
+        prevItemPosCount_ = prevMeasureBreak_ ? itemPosition_.size() : 0;
         itemPosition_.clear();
     }
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO &&
@@ -1295,7 +1296,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if ((itemPosition_.size() > prevItemPosCount_) && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1384,7 +1385,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
-        if (!itemPosition_.empty() && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if ((itemPosition_.size() > prevItemPosCount_) && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             return;
         }
@@ -1993,7 +1994,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
         referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
     }
-    if (jumpIndex_) {
+    if (jumpIndex_ && !prevMeasureBreak_) {
         itemGroup->ClearItemPosition();
     }
     if (forwardLayout) {
