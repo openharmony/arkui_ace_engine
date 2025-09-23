@@ -2993,6 +2993,7 @@ frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
 frameworks/core/interfaces/native/utility/reverse_converter.cpp @huawei_g_five
 frameworks/core/interfaces/native/utility/reverse_converter_enums.cpp @arkui_architecture
+frameworks/core/interfaces/native/utility/converter_enums.cpp @arkui_architecture
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
@@ -3218,6 +3219,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/transfer/ @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/gesture.ets @ArkUI_Event
 frameworks/bridge/arkts_frontend/entry/ @arkui_framework_xnode
 
 frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui001

@@ -490,34 +490,12 @@ void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src
 }
 void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
 {
-    switch (src.type) {
-        case PanDirection::NONE:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_NONE;
-            break;
-        case PanDirection::LEFT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_LEFT;
-            break;
-        case PanDirection::RIGHT:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_RIGHT;
-            break;
-        case PanDirection::HORIZONTAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_HORIZONTAL;
-            break;
-        case PanDirection::UP:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_UP;
-            break;
-        case PanDirection::DOWN:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_DOWN;
-            break;
-        case PanDirection::VERTICAL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_VERTICAL;
-            break;
-        case PanDirection::ALL:
-            dst = Ark_PanDirection::ARK_PAN_DIRECTION_ALL;
-            break;
-        default:
-            dst = static_cast<Ark_PanDirection>(-1);
-            LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
+    if (src.type >= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_NONE) &&
+        src.type <= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_ALL)) {
+        dst = static_cast<Ark_PanDirection>(src.type);
+    } else {
+        dst = static_cast<Ark_PanDirection>(-1);
+        LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
     }
 }
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
