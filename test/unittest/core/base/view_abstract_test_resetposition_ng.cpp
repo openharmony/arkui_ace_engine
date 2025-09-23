@@ -16,6 +16,8 @@
 #include "core/components/select/select_theme.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -895,6 +897,36 @@ HWTEST_F(ViewAbstractTestNg, SetOverlayBuilder002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
     ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetOverlayBuilder003
+ * @tc.desc: Test SetOverlayBuilder of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetOverlayBuilder003, TestSize.Level1)
+{
+    std::optional<Alignment> align;
+    std::optional<Dimension> offsetX;
+    std::optional<Dimension> offsetY;
+    auto state = static_cast<VisualState>(INDEX);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    ASSERT_TRUE(result);
+    ifElseNode1 = AceType::MakeRefPtr<IfElseNode>(1);
+    ASSERT_NE(ifElseNode1, nullptr);
+    ifElseNode2 = AceType::MakeRefPtr<IfElseNode>(2);
+    ASSERT_NE(ifElseNode2, nullptr);
+    ifElseNode1->AddChild(ifElseNode2);
+    
+    auto frameNode = FrameNode::CreateFrameNode("test1", 3, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto builderNode = FrameNode::CreateFrameNode("test2", 4, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(builderNode, nullptr);
+    ifElseNode2->AddChild(builderNode);
+
+    ViewAbstract::SetOverlayBuilder(AceType::RawPtr(frameNode), ifElseNode1, align, offsetX, offsetY);
+    ASSERT_NE(frameNode->overlayNode_, nullptr);
 }
 
 /**
