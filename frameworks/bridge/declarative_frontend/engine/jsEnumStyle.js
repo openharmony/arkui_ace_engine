@@ -4531,3 +4531,10 @@ let ListItemSwipeActionDirection;
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
 })(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));
+
+let NativeEmbedParamStatus;
+(function (NativeEmbedParamStatus) {
+  NativeEmbedParamStatus.ADD = 0;
+  NativeEmbedParamStatus.UPDATE = 1;
+  NativeEmbedParamStatus.DELETE = 2;
+})(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
