@@ -15,6 +15,8 @@
 
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 
 namespace OHOS::Ace::NG {
 class ListControllerTestNg : public ListTestNg, public testing::WithParamInterface<bool> {};
@@ -1258,5 +1260,97 @@ HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollStop001, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-finalPosition / TICK));
     EXPECT_TRUE(TickPosition(-finalPosition));
     EXPECT_TRUE(isAtEnd);
+}
+
+/**
+ * @tc.name: CustomNodeHeaderFooterTest
+ * @tc.desc: Test IsHasHeader and IsHasFooter when header and footer is custom node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListControllerTestNg, CustomNodeHeaderFooterTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemGroup.
+     */
+    CreateList();
+    CreateListItemGroup();
+    CreateListItems(3);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Add header and footer.
+     */
+    auto headerCustomNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "header");
+    ColumnModelNG colModel;
+    colModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(GROUP_HEADER_LEN));
+    ViewAbstract::SetHeight(CalcLength(GROUP_HEADER_LEN));
+    auto column = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->Pop();
+    auto columnNode = AceType::DynamicCast<FrameNode>(column);
+    headerCustomNode->AddChild(columnNode);
+    itemGroupPatters_[0]->AddHeader(headerCustomNode);
+
+    auto footerCustomNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "footer");
+    itemGroupPatters_[0]->AddFooter(footerCustomNode);
+
+    /**
+     * @tc.steps: step3. FlushLayoutTasks.
+     * @tc.expected: Has header but not has footer. ListItemGroupArea is IN_HEADER_AREA.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(itemGroupPatters_[0]->IsHasHeader());
+    EXPECT_FALSE(itemGroupPatters_[0]->IsHasFooter());
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(GROUP_HEADER_LEN / 2.0f, GROUP_HEADER_LEN / 2.0f),
+        { 0, ListItemGroupArea::IN_HEADER_AREA, -1 }));
+}
+
+/**
+ * @tc.name: IfElseNodeHeaderFooterTest
+ * @tc.desc: Test IsHasHeader and IsHasFooter when header and footer is if or else node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListControllerTestNg, IfElseNodeHeaderFooterTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemGroup.
+     */
+    CreateList();
+    CreateListItemGroup();
+    CreateListItems(3);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Add header and footer.
+     */
+    IfElseModelNG headerIfElse;
+    headerIfElse.Create();
+    auto headerIfElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ViewStackProcessor::GetInstance()->Pop();
+    ColumnModelNG colModel;
+    colModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(GROUP_HEADER_LEN));
+    ViewAbstract::SetHeight(CalcLength(GROUP_HEADER_LEN));
+    auto column = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->Pop();
+    auto columnNode = AceType::DynamicCast<FrameNode>(column);
+    headerIfElseNode->AddChild(columnNode);
+    itemGroupPatters_[0]->AddHeader(headerIfElseNode);
+
+    IfElseModelNG footerIfElse;
+    footerIfElse.Create();
+    auto footerIfElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ViewStackProcessor::GetInstance()->Pop();
+    itemGroupPatters_[0]->AddFooter(footerIfElseNode);
+
+    /**
+     * @tc.steps: step3. FlushLayoutTasks.
+     * @tc.expected: Has header but not has footer. ListItemGroupArea is IN_HEADER_AREA.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(itemGroupPatters_[0]->IsHasHeader());
+    EXPECT_FALSE(itemGroupPatters_[0]->IsHasFooter());
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(GROUP_HEADER_LEN / 2.0f, GROUP_HEADER_LEN / 2.0f),
+        { 0, ListItemGroupArea::IN_HEADER_AREA, -1 }));
 }
 } // namespace OHOS::Ace::NG

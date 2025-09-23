@@ -3450,6 +3450,14 @@ let ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle.CARD = 1] = 'CARD';
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
+let ListItemGroupArea;
+(function (ListItemGroupArea) {
+  ListItemGroupArea[ListItemGroupArea.NONE = 0] = 'NONE';
+  ListItemGroupArea[ListItemGroupArea.IN_LIST_ITEM_AREA = 1] = 'IN_LIST_ITEM_AREA';
+  ListItemGroupArea[ListItemGroupArea.IN_HEADER_AREA = 2] = 'IN_HEADER_AREA';
+  ListItemGroupArea[ListItemGroupArea.IN_FOOTER_AREA = 3] = 'IN_FOOTER_AREA';
+})(ListItemGroupArea || (ListItemGroupArea = {}));
+
 let DragResult;
 (function (DragResult) {
   DragResult[DragResult.DRAG_SUCCESSFUL = 0] = 'DRAG_SUCCESSFUL';
