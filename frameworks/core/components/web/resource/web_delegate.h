@@ -1231,6 +1231,7 @@ public:
     void OnScrollState(bool scrollState);
     void OnScrollStart(const float x, const float y);
     void EnableSecurityLayer(bool isNeedSecurityLayer);
+    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();

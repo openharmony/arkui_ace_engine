@@ -1055,6 +1055,14 @@ void WebClientImpl::EnableSecurityLayer(bool isNeedSecurityLayer)
     delegate->EnableSecurityLayer(isNeedSecurityLayer);
 }
 
+void WebClientImpl::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->UpdateTextFieldStatus(isShowKeyboard, isAttachIME);
+}
+
 void WebClientImpl::OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     auto delegate = webDelegate_.Upgrade();

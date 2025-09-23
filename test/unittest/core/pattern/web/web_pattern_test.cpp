@@ -471,6 +471,22 @@ HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VirtualKeyBoard UpdateTextFieldStatus
+ * @tc.desc: Test UpdateTextFieldStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, UpdateTextFieldStatus, TestSize.Level1)
+{
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
+    g_webPattern->UpdateTextFieldStatus(true, true);
+    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_SHOW);
+
+    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->UpdateTextFieldStatus(false, false);
+    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_HIDE);
+}
+
+/**
  * @tc.name: UpdateScrollBarWithBorderRadius
  * @tc.desc: Test UpdateScrollBarWithBorderRadius.
  * @tc.type: FUNC
