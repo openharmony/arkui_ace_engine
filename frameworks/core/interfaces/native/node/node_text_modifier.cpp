@@ -78,6 +78,7 @@ constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
 constexpr int NUM_9 = 9;
 constexpr int NUM_10 = 10;
+constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
 
@@ -1642,6 +1643,84 @@ void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
+void ConvertResourceObjectVector(std::vector<RefPtr<ResourceObject>>& objs, void* colorRawPtr)
+{
+    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(colorRawPtr));
+    }
+}
+
+void ParseRadialGradientResourceObject(void* resRawPtr, RefPtr<ResourceObject>& centerXResObj,
+    RefPtr<ResourceObject>& centerYResObj, RefPtr<ResourceObject>& radiusResObj)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::vector<RefPtr<ResourceObject>> objs;
+    ConvertResourceObjectVector(objs, resRawPtr);
+    if (resRawPtr && objs.size() > NUM_2) {
+        centerXResObj = objs[NUM_0];
+        centerYResObj = objs[NUM_1];
+        radiusResObj = objs[NUM_2];
+    }
+}
+
+void ParseRadialGradientCenterXResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerXResObj)
+{
+    if (centerXResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerXValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+            gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.center.centerX", centerXResObj, std::move(updateFunc));
+    }
+}
+
+void ParseRadialGradientCenterYResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerYResObj)
+{
+    if (centerYResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerYValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+            gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.center.centerY", centerYResObj, std::move(updateFunc));
+    }
+}
+
+ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
+{
+    if (LessNotEqual(angle, 0.0f)) {
+        return 0.0f;
+    }
+    if (GreatNotEqual(angle, MAX_ANGLE)) {
+        return MAX_ANGLE;
+    }
+    return angle;
+}
+
+void ParseRadialGradientRadiusResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& radiusResObj)
+{
+    if (radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto value = CheckAngle(dimension.Value());
+            gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
+            gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.radius", radiusResObj, std::move(updateFunc));
+    }
+}
+
 /**
  * @param values value value
  * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
@@ -1650,7 +1729,8 @@ void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
  * values[9] : repeating
  * @param valuesLength values length
  */
-void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    void* colorRawPtr)
 {
     if ((values == nullptr) || (valuesLength != NUM_10)) {
         return;
@@ -1666,24 +1746,58 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
     auto radiusValue = values[NUM_7].f32;
     auto radiusUnit = values[NUM_8].i32;
     auto repeating = values[NUM_9].i32;
+    RefPtr<ResourceObject> centerXResObj;
+    RefPtr<ResourceObject> centerYResObj;
+    RefPtr<ResourceObject> radiusResObj;
+    ParseRadialGradientResourceObject(colorRawPtr, centerXResObj, centerYResObj, radiusResObj);
 
     if (static_cast<bool>(centerXHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerXUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
         gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerXResObj) {
+            ParseRadialGradientCenterXResObj(gradient, centerXResObj);
+        }
     }
     if (static_cast<bool>(centerYHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerYUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
         gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerYResObj) {
+            ParseRadialGradientCenterYResObj(gradient, centerYResObj);
+        }
     }
     if (static_cast<bool>(radiusHasValue)) {
         auto unit = static_cast<DimensionUnit>(radiusUnit);
         auto value = static_cast<float>(radiusValue);
         gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
         gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+            ParseRadialGradientRadiusResObj(gradient, radiusResObj);
+        }
     }
     gradient.SetRepeat(static_cast<bool>(repeating));
+}
+
+void CheckGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& gradientColor,
+    const RefPtr<ResourceObject> colorResObj, const int32_t index)
+{
+    auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t i = 0; i < colorLength; i++) {
+            NG::GradientColor gradColor = colorVector[i];
+            if (index == i) {
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                gradColor.SetColor(color);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "TextGradient.gradient.color" + std::to_string(index);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
 }
 
 /**
@@ -1693,25 +1807,91 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
  * ...
  * @param colorsLength colors length
  */
-void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
+    int32_t startPos = NUM_3;
+    std::vector<RefPtr<ResourceObject>> objs;
+    bool isNeedCompleteResObj = SystemProperties::ConfigChangePerform() && !colorRawPtr;
+    if (isNeedCompleteResObj) {
+        objs = {
+            nullptr,  // centerX
+            nullptr,  // centerY
+            nullptr   // radius
+        };
+    }
+    ConvertResourceObjectVector(objs, colorRawPtr);
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
         auto colorValue = colors[index].u32;
         auto colorHasDimension = colors[index + NUM_1].i32;
         auto colorDimension = colors[index + NUM_2].f32;
-        auto color = static_cast<uint32_t>(colorValue);
+        auto color = Color(static_cast<uint32_t>(colorValue));
+        if (isNeedCompleteResObj) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            objs.emplace_back(colorResObj);
+        }
         auto hasDimension = static_cast<bool>(colorHasDimension);
         auto dimension = colorDimension;
         NG::GradientColor gradientColor;
-        gradientColor.SetColor(Color(color));
+        gradientColor.SetColor(color);
         gradientColor.SetHasValue(hasDimension);
         if (hasDimension) {
             gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
         }
         gradient.AddColor(gradientColor);
+        auto idx = index / NUM_3 + startPos;
+        if (SystemProperties::ConfigChangePerform() &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
+            CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
+        }
+    }
+}
+
+/**
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetLinearGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    std::vector<RefPtr<ResourceObject>> objs;
+    ConvertResourceObjectVector(objs, colorRawPtr);
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
+        auto color = Color(static_cast<uint32_t>(colorValue));
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+
+        if (!colorRawPtr) {
+            RefPtr<ResourceObject> colorResObj;
+            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            objs.emplace_back(colorResObj);
+        }
+
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+        auto idx = index / NUM_3;
+        if (SystemProperties::ConfigChangePerform() &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
+            CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
+        }
     }
 }
 
@@ -1728,17 +1908,18 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
  * @param colorsLength colors length
  */
 void SetTextLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetLinearGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    SetLinearGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
     TextModelNG::SetGradientStyle(frameNode, gradient);
 }
 
@@ -1784,17 +1965,18 @@ ArkUI_Int32 GetTextLinearGradient(
  * @param colorsLength colors length
  */
 void SetTextRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-    SetRadialGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    SetRadialGradientValues(gradient, values, valuesLength, colorRawPtr);
+    SetRadialGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
     TextModelNG::SetGradientStyle(frameNode, gradient);
 }
 
@@ -1802,6 +1984,7 @@ void ResetTextGradient(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextGradient.gradient");
     TextModelNG::ResetTextGradient(frameNode);
 }
 

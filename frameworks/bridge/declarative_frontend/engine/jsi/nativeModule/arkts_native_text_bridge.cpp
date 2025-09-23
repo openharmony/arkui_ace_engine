@@ -1705,6 +1705,36 @@ ArkUINativeModuleValue TextBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SetShaderStyleSetLinear(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    std::vector<ArkUIInt32orFloat32> colors;
+    std::vector<ArkUIInt32orFloat32> values;
+
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(direction) });
+
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+    auto colorRawPtr = static_cast<void*>(&vectorResObj);
+    GetArkUINodeModifiers()->getTextModifier()->setLinearGradient(
+        nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1712,40 +1742,36 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (centerArg->BooleaValue(vm) && (radiusArg->IsNumber() || radiusArg->BooleaValue(vm))) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        std::vector<RefPtr<ResourceObject>> vectorResObj;
+        std::vector<ArkUIInt32orFloat32> colors;
         std::vector<ArkUIInt32orFloat32> values;
-        ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
+        ArkTSUtils::ParseGradientCenter(vm, centerArg, values, vectorResObj);
         CalcDimension radius;
-        auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, false);
+        RefPtr<ResourceObject> radiusResObj;
+        auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, radiusResObj, false);
+        if (radiusResObj) {
+            vectorResObj.push_back(radiusResObj);
+        } else {
+            vectorResObj.push_back(nullptr);
+        }
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(hasRadius) });
         values.push_back({ .f32 = static_cast<ArkUI_Float32>(radius.Value()) });
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(radius.Unit()) });
-        std::vector<ArkUIInt32orFloat32> colors;
-        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
         auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+        auto colorRawPtr = static_cast<void*>(&vectorResObj);
         GetArkUINodeModifiers()->getTextModifier()->setRadialGradient(
-            nativeNode, values.data(), values.size(), colors.data(), colors.size());
+            nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
     } else if (colorsArg->BooleaValue(vm)) {
-        std::vector<ArkUIInt32orFloat32> values;
-        ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
-        int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
-        ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
-        values.push_back({ .i32 = static_cast<ArkUI_Int32>(direction) });
-
-        std::vector<ArkUIInt32orFloat32> colors;
-        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors);
-        auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
-        values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
-        GetArkUINodeModifiers()->getTextModifier()->setLinearGradient(
-            nativeNode, values.data(), values.size(), colors.data(), colors.size());
+        SetShaderStyleSetLinear(runtimeCallInfo);
     } else if (colorArg->BooleaValue(vm)) {
         Color color;
         ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
