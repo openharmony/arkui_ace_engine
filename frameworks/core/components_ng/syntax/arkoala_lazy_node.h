@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/memory/referenced.h"
+#include "base/utils/macros.h"
 #include "base/utils/unique_valued_map.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
@@ -76,6 +78,15 @@ public:
         return totalCount_;
     }
 
+    /**
+     * GetChildren re-assembles children_ and cleanup the L1 cache
+     * active items remain in L1 cache and are added to RepeatVirtualScroll.children_
+     * inactive items are moved from L1 to L2 cache, not added to children_
+     * function returns children_
+     * function runs as part of idle task
+     */
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
+
     void RecycleItems(int32_t from, int32_t to) final
     {
         /* not implemented yet */
@@ -116,6 +127,17 @@ private:
     // revert converted-index to origin index.
     int32_t ConvertFromToIndexRevert(int32_t index) const;
 
+    void RequestSyncTree();
+    void PostIdleTask();
+
+    /**
+     * iterate over L1 items and call cbFunc for each
+     * cbFunction is NOT allowed to add to or remove items from L1
+     */
+    void ForEachL1Node(const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const;
+
+    std::string DumpUINode(const RefPtr<UINode>& node) const;
+
     bool isRepeat_ = false;
     // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
     bool isActive_ = false;
@@ -125,8 +147,14 @@ private:
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
 
+    // re-assembled by GetChildren called from idle task
+    mutable std::list<RefPtr<UINode>> children_;
+
     // for tracking reused/recycled nodes
     std::unordered_set<int32_t> recycleNodeIds_;
+
+    // true in the time from requesting idle / predict task until exec predict task.
+    bool postUpdateTaskHasBeenScheduled_;
 
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.

@@ -18,13 +18,14 @@
 
 #include <functional>
 #include <optional>
+#include <map>
 #include <unordered_map>
 
 namespace OHOS::Ace {
-template<typename Key, typename Value, typename VHash = std::hash<Value>>
+template<typename Key, typename Value, typename VHash = std::hash<Value>, typename KeyCompare = std::less<Key>>
 class UniqueValuedMap {
 private:
-    std::unordered_map<Key, Value> keyToValue;
+    std::map<Key, Value, KeyCompare> keyToValue;
     std::unordered_map<Value, Key, VHash> valueToKey;
 
 public:
