@@ -1055,7 +1055,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     get unchanged(): boolean {
         if (!this.parentScope) this.dependencies?.register(this.manager?.dependency)
-        if (this.recomputeNeeded) {
+        if (this.recomputeNeeded && !(this.node?.disabledStateUpdates ?? false)) {
             this.incremental = undefined
             this.nodeCount = 0
             const manager = this.manager
@@ -1128,6 +1128,9 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
+            if (scope.node?.disabledStateUpdates) {
+                break;
+            }
             const parent = scope.parent
             if (parent) {
                 // Improve:/DEBUG: investigate a case when invalid node has valid parent

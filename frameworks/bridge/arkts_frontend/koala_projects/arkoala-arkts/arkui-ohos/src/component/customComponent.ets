@@ -201,6 +201,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         if (this.isViewActive()) {
             StateUpdateLoop.consumeFreezeTasks(this.getUniqueId());
         }
+        const peer = this.getPeerNode() as PeerNode | undefined;
+        if (peer) {
+            peer.disabledStateUpdates = !this.isViewActive();
+        }
         this.instance.propagateToChild(active, isReuse);
     }
     pageTransition(): void {
