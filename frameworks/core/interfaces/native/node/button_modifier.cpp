@@ -494,7 +494,7 @@ void SetButtonBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* col
         }
         ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::BACKGROUND_COLOR);
     }
-    ButtonModelNG::BackgroundColor(frameNode, result, true);
+    ButtonModelNG::BackgroundColor(node, result, true);
 }
 
 void SetButtonBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
@@ -851,7 +851,6 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonLabelStyle = SetButtonLabelStyle,
         .resetButtonLabelStyle = ResetButtonLabelStyle,
         .setButtonBackgroundColor = SetButtonBackgroundColor,
-        .setButtonBackgroundColorPtr = SetButtonBackgroundColorPtr,
         .setButtonBackgroundColorWithColorSpace = SetButtonBackgroundColorWithColorSpace,
         .resetButtonBackgroundColor = ResetButtonBackgroundColor,
         .setButtonBorderRadius = SetButtonBorderRadius,
@@ -887,6 +886,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonBackgroundColorWithColorSpacePtr = SetButtonBackgroundColorWithColorSpacePtr,
         .setButtonMinFontScalePtr = SetButtonMinFontScalePtr,
         .setButtonMaxFontScalePtr = SetButtonMaxFontScalePtr,
+        .setButtonBackgroundColorPtr = SetButtonBackgroundColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
