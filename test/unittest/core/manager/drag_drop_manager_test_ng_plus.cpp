@@ -256,6 +256,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus006, TestSize.Level
     manager->lastDragPointerEvent_.pointerEventId = 13;
     manager->lastDragPointerEvent_.pullId = 1;
     manager->isFlushed_ = true;
+
     /**
      * @tc.steps: step2. test DispatchLastDragEventVoluntarily.
      */
