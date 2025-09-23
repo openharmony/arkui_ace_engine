@@ -145,6 +145,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
 
     auto formRenderer = formRenderer_.lock();
     if (!formRenderer) {
+        HILOG_WARN("formRenderer is nullptr");
         return;
     }
     formRenderer->OnSurfaceChange(width, height, borderWidth);

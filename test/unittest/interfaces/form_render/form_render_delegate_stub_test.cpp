@@ -16,6 +16,8 @@
 #define private public
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #undef private
+#include "appexecfwk_errors.h"
+#include "form_mgr_errors.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_stub.h"
 #include "test/mock/interfaces/mock_form_render_delegate_stub.h"
 #include "test/mock/interfaces/mock_i_remote_object_form.h"
@@ -70,17 +72,17 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_002, TestSize.Le
     MockFormRenderDelegateStub renderDelegate;
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_INVALID_VALUE);
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND);
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     ASSERT_NE(rsNode, nullptr);
     rsNode->Marshalling(data);
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
     data.WriteUint64(rsNode->GetId());
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
     GTEST_LOG_(INFO) << "FormRenderDelegateStubTest_002 end";
 }
 
@@ -106,12 +108,12 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_003, TestSize.Le
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
     data.WriteParcelable(&formJsInfo);
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceCreate(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
     data.WriteUint64(rsNode->GetId());
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
     data.WriteParcelable(&formJsInfo);
-    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_INVALID_VALUE);
+    EXPECT_EQ(renderDelegate.HandleOnSurfaceReuse(data, reply), ERR_APPEXECFWK_PARCEL_ERROR);
     GTEST_LOG_(INFO) << "FormRenderDelegateStubTest_003 end";
 }
 

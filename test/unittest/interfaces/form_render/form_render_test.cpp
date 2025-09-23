@@ -16,14 +16,15 @@
 #include <thread>
 #include <chrono>
 #include "gtest/gtest.h"
+#include "form_mgr_errors.h"
 #include "test/mock/interfaces/mock_uicontent.h"
+#include "test/mock/interfaces/mock_form_render_delegate_stub.h"
 #include "ui_content.h"
 
 #define private public
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
-#include "interfaces/inner_api/form_render/include/form_renderer_event_report.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -124,8 +125,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     EXPECT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).WillOnce(Return());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH)).Times(Exactly(2));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).Times(Exactly(2));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
 
@@ -135,7 +136,12 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
 
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2));
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode())
+        .Times(Exactly(3))
+        .WillOnce(Return(rsNode));
     // call AddForm manually
     formRenderer->AddForm(want, formJsInfo);
     EXPECT_EQ(formRenderer->allowUpdate_, true);
@@ -228,9 +234,12 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
      * @tc.steps: step2. register callback for rendererDelegate
      */
     std::string onSurfaceCreateKey;
-    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-                               const OHOS::AppExecFwk::FormJsInfo& /* info */,
-                               const AAFwk::Want& /* want */) { onSurfaceCreateKey = CHECK_KEY; };
+    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo & /* info */,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        onSurfaceCreateKey = CHECK_KEY;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
 
     std::string onActionEventKey;
@@ -265,10 +274,8 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode())
-        .WillOnce(Return(rsNode))
-        .WillOnce(Return(rsNode))
-        .WillOnce(Return(rsNode));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(5))
+        .WillRepeatedly(Return(rsNode));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Foreground()).WillOnce(Return());
     formRenderer->AddForm(want, formJsInfo);
     EXPECT_EQ(onSurfaceCreateKey, CHECK_KEY);
@@ -350,7 +357,7 @@ HWTEST_F(FormRenderTest, FormRenderTest004, TestSize.Level1)
     auto fun = [](const std::string&, const std::string&) {};
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     renderDelegate->SetErrorEventHandler(nullptr);
-    EXPECT_EQ(renderDelegate->OnError(code, msg), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnError(code, msg), ERR_APPEXECFWK_FORM_COMMON_CODE);
     renderDelegate->SetErrorEventHandler(fun);
     EXPECT_EQ(renderDelegate->OnError(code, msg), ERR_OK);
 }
@@ -387,7 +394,7 @@ HWTEST_F(FormRenderTest, FormRenderTest006, TestSize.Level1)
     auto fun = []() {};
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     renderDelegate->SetSurfaceDetachEventHandler(nullptr);
-    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_INVALID_DATA);
+    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_APPEXECFWK_FORM_COMMON_CODE);
     renderDelegate->SetSurfaceDetachEventHandler(fun);
     EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_OK);
 }
@@ -638,10 +645,15 @@ HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
     want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    std::string surfaceNodeName = "ArkTSCardNode";
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
-    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillOnce(Return(rsNode));
+    
+    std::string transparentColor = "#00000000";
+    std::string transparentColor1 = "#00FFFFFF";
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
+    formRenderer->backgroundColor_ = transparentColor1;
+    formRenderer->renderingMode_ = OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormBackgroundColor(transparentColor)).Times(1);
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormBackgroundColor(transparentColor1))
+        .Times(1);
     formRenderer->AttachUIContent(want, formJsInfo);
 }
 
@@ -676,8 +688,19 @@ HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2))
-        .WillOnce(Return(rsNode));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillOnce(Return(rsNode));
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    sptr<MockFormRenderDelegateStub> renderDelegateStub = new MockFormRenderDelegateStub();
+    formRenderer->formRendererDelegate_ = renderDelegateStub;
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillRepeatedly(Return(rsNode));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(0);
+    formRenderer->OnSurfaceReuse(formJsInfo);
+
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceReuse(_, _, _))
+        .WillOnce(Return(ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND));
+    EXPECT_CALL(*renderDelegateStub, OnSurfaceCreate(_, _, _)).Times(1);
     formRenderer->OnSurfaceReuse(formJsInfo);
 }
 
@@ -784,32 +807,6 @@ HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
     EXPECT_EQ(res, true);
 }
 
-HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
-{
-    int64_t formId = 100;
-    std::string bundleName = "testBundleName";
-    std::string formName = "testFormName";
-    FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(formId, bundleName, formName);
-    EXPECT_NE(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-
-    FormRenderEventReport::StopTimer(formId);
-    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-}
-
-HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
-{
-    int64_t formId = 100;
-    std::string bundleName = "testBundleName";
-    std::string formName = "testFormName";
-
-    FormRenderEventReport::waitSurfaceNodeTimerMap_[formId] = 100;
-    FormRenderEventReport::StopTimer(formId);
-    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-}
-
 HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
 {
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest033");
@@ -831,9 +828,12 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     EXPECT_TRUE(formRenderer->uiContent_);
 
     OHOS::AppExecFwk::FormJsInfo newFormJsInfo;
-    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-                               const OHOS::AppExecFwk::FormJsInfo& info,
-                               const AAFwk::Want& /* want */) { newFormJsInfo = info; };
+    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo &info,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        newFormJsInfo = info;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
 
     formJsInfo.uiSyntax = OHOS::AppExecFwk::FormType::ETS;
