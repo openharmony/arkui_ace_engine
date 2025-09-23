@@ -33,13 +33,18 @@ export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
     }
 
     initialize(options?: ColumnOptions | ColumnOptionsV2): this {
-        const options_type = runtimeType(options)
+        const options_type = runtimeType(options);
+        if ((RuntimeType.OBJECT === options_type) || (RuntimeType.UNDEFINED === options_type)) {
+            const options_casted = options as (ColumnOptions | undefined);
+            this.getPeer()?.setColumnOptions0Attribute(options_casted);
+            return this;
+        }
         if ((RuntimeType.OBJECT === options_type) || (RuntimeType.UNDEFINED === options_type)) {
             const options_casted = options as (ColumnOptions | ColumnOptionsV2 | undefined);
             this.getPeer()?.setColumnOptions1Attribute(options_casted);
             return this;
         }
-        throw new Error('Can not select appropriate overload');
+        throw new Error("Can not select appropriate overload");
     }
 
     getPeer() : ArkColumnPeer {
