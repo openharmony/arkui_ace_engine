@@ -28,6 +28,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
+    disabledStateUpdates: boolean = false
 
     /**
      * This callback is called when a child node is added to this parent.
