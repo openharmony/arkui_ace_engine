@@ -594,7 +594,6 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 {
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
-    
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
        FireMediaPlayerImageComplete();
     }
@@ -604,7 +603,6 @@ void MovingPhotoPattern::HandleTransitionImageCompleteEvent(const LoadImageSucce
 {
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTransitionImageCompleteEvent start:%{public}d.", loadingStatus);
-    
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
@@ -1524,7 +1522,6 @@ void MovingPhotoPattern::PreparedToPlay()
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
         autoAndRepeatLevel_ = PlaybackMode::REPEAT;
         historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        isRepeatChangePlayMode_ = false;
     }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
