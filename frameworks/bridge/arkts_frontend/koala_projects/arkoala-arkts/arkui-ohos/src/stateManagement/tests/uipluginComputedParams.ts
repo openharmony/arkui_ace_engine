@@ -13,24 +13,26 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from 'stateManagement/base/extendableComponent'
-import { WrappedArray } from 'stateManagement/base/observeWrappedArray'
-import { IObservedObject, RenderIdType } from 'stateManagement/interface/iObservedObject'
-import { WatchIdType } from 'stateManagement/interface/iWatch'
-import { IMutableStateMeta } from 'stateManagement/interface/iMutableStateMeta'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
-import { StateMgmtFactory } from 'stateManagement/interface/iStateMgmtFactory'
-import { IStateDecoratedVariable } from 'stateManagement/interface/iDecorators'
-import { ILocalDecoratedVariable } from 'stateManagement/interface/iDecorators'
-import { IParamV2DecoratedVariable } from 'stateManagement/interface/iDecorators'
-import { IComputedDecoratedVariable } from 'stateManagement/interface/iComputedDecorator.ets'
-import { ObserveSingleton } from 'stateManagement/base/observeSingleton.ets';
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { ExtendableComponent } from '../mock/extendableComponent';
 
-import { UIUtilsPlugin, UIUtils } from '../../sdk/uiutils.ets';
+import { IObservedObject, RenderIdType } from '../decorator'
+import { WatchIdType } from '../decorator'
 
-// unit testing
-import { tsuite, tcase, test, eq } from 'stateManagement/utest/lib/testFramework'
-import { int32 } from '../../mock/env_mock.ets'
+import { ILocalDecoratedVariable } from '../decorator'
+import { IMutableStateMeta } from '../decorator'
+import { IComputedDecoratedVariable } from '../decorator'
+import { STATE_MGMT_FACTORY } from '../decorator'
+
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { UIUtils } from '../utils';
+import { ObserveSingleton } from '../base/observeSingleton';
+import { WrappedArray } from '../base/observeWrappedArray'
+import { IParamDecoratedVariable }  from '../decorator'
+import { STATE_MGMT_FACTORY } from '../decorator'
+import { int32 } from '@koalaui/common';
+
+let StateMgmtFactory = STATE_MGMT_FACTORY;
 
 /*
 https://gitee.com/openharmony/docs/blob/master/en/application-dev/quick-start/arkts-new-Computed.md#computed-decorated-properties-initialize-param
@@ -46,7 +48,6 @@ class Article {
 }
 */
 
-
 export class Article implements IObservedObject {
     private ____V1RenderId: RenderIdType = 0;
     public setV1RenderId(renderId: RenderIdType): void {
@@ -60,27 +61,26 @@ export class Article implements IObservedObject {
 
     private readonly __meta: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
-    unitPrice: number = 0;
-    private __backing_quantity:  number;
+    unitPrice: int32 = 0;
+    private __backing_quantity:  int32;
 
-    public get quantity(): number {
+    public get quantity(): int32 {
         this.__meta.addRef();
         return this.__backing_quantity;
     }
 
-    public set quantity(newValue: number) {
+    public set quantity(newValue: int32) {
         if (this.__backing_quantity !== newValue) {
             this.__backing_quantity = newValue;
             this.__meta.fireChange();
         }
     }
 
-    constructor(quantity: number, unitPrice: number) {
+    constructor(quantity: int32, unitPrice: int32) {
         this.quantity = quantity;
         this.unitPrice = unitPrice;
       }
 }
-
 
 /*
 @Entry
@@ -145,12 +145,12 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
     // @JsonIgnore
 
     //@Local shoppingBasket: Article[] = [new Article(1, 20), new Article(5, 2)];
-    private _backing_shoppingBasket: ILocalDecoratedVariable<WrappedArray<Article>>;
+    private _backing_shoppingBasket: ILocalDecoratedVariable<Array<Article>>;
     get shoppingBasket(): Array<Article> {
         return this._backing_shoppingBasket!.get();
     }
     set shoppingBasket(newValue: Array<Article>) {
-        this._backing_shoppingBasket!.set(UIUtilsPlugin.makeObservedArray(newValue)! as WrappedArray<Article>);
+        this._backing_shoppingBasket!.set(UIUtils.makeObserved(newValue)! as WrappedArray<Article>);
     }
 
     /**
@@ -163,8 +163,8 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
     }
     */
 
-    private _computed_total : IComputedDecoratedVariable<number>;
-    get total(): number {
+    private _computed_total : IComputedDecoratedVariable<int32>;
+    get total(): int32 {
         return this._computed_total.get()
     }
 
@@ -185,25 +185,25 @@ export class IndexComputedParamsComponent extends ExtendableComponent {
         /**
          * First step: we initialize state variables
          */
-        this._backing_shoppingBasket = StateMgmtFactory.makeLocal<WrappedArray<Article>>(
+        this._backing_shoppingBasket = StateMgmtFactory.makeLocal<Array<Article>>(
             this,
             "shoppingBasket",
-            UIUtilsPlugin.makeObservedArray(
-              new Array<Article>(new Article(1, 20), new Article(5, 2))) as WrappedArray<Article>
+            UIUtils.makeObserved(
+              new Array<Article>(new Article(1, 20), new Article(5, 2))) as Array<Article>
         );
 
         /**
          * Second step: we initialize computed
          */
-        this._computed_total = StateMgmtFactory.makeComputedVariable<number>(
-            () : number => {
-                return this.shoppingBasket.reduce((acc: number, item: Article) => {
+        this._computed_total = StateMgmtFactory.makeComputed<int32>(
+            () : int32 => {
+                return this.shoppingBasket.reduce((acc: int32, item: Article) => {
                     return acc + (item.quantity * item.unitPrice)
                 }, 0);
             },
             "total"
         )
-        this._computed_qualifiesForDiscount = StateMgmtFactory.makeComputedVariable<boolean>(
+        this._computed_qualifiesForDiscount = StateMgmtFactory.makeComputed<boolean>(
             () : boolean => {
                 return this.total >= 100;
             },
@@ -235,15 +235,15 @@ struct Child {
 
 
 interface ChildComponent_init_update_struct {
-    total: number
+    total: int32
     qualifiesForDiscount: boolean
 }
 
 // @Component struct ChildComponent
 class ChildComponent extends ExtendableComponent{
 
-    private _backing_total: IParamV2DecoratedVariable<number>;
-    private _backing_qualifiesForDiscount: IParamV2DecoratedVariable<boolean>;
+    private _backing_total: IParamDecoratedVariable<int32>;
+    private _backing_qualifiesForDiscount: IParamDecoratedVariable<boolean>;
 
     get total(): int32 {
         return this._backing_total!.get();
@@ -256,13 +256,13 @@ class ChildComponent extends ExtendableComponent{
     constructor(parent : ExtendableComponent | null, param: ChildComponent_init_update_struct) {
         super(parent);
         // @Param can init from parent, can have local value;
-        this._backing_total = StateMgmtFactory.makeParamV2<number>(
+        this._backing_total = StateMgmtFactory.makeParam<int32>(
             this,
             "total",
             param.total
         );
 
-        this._backing_qualifiesForDiscount = StateMgmtFactory.makeParamV2<boolean>(
+        this._backing_qualifiesForDiscount = StateMgmtFactory.makeParam<boolean>(
             this,
             "qualifiesForDiscount",
             param.qualifiesForDiscount
@@ -285,11 +285,11 @@ export function run_computed_params() : Boolean {
         test(`total = ${indexComponent.total} `, indexComponent.total === 30);
         test(`total = ${indexComponent.qualifiesForDiscount} `, indexComponent.qualifiesForDiscount === false);
         indexComponent.shoppingBasket[0].quantity = 2
-        ObserveSingleton.instance.updateDirty2()
+        ObserveSingleton.instance.updateDirty()
         test(`total = ${indexComponent.total} `, indexComponent.total === 50);
         test(`total = ${indexComponent.qualifiesForDiscount} `, indexComponent.qualifiesForDiscount === false);
         indexComponent.shoppingBasket[1].quantity = 70
-        ObserveSingleton.instance.updateDirty2()
+        ObserveSingleton.instance.updateDirty()
         test(`total = ${indexComponent.total} `, indexComponent.total === 180);
         test(`total = ${indexComponent.qualifiesForDiscount} `, indexComponent.qualifiesForDiscount === true);
     })

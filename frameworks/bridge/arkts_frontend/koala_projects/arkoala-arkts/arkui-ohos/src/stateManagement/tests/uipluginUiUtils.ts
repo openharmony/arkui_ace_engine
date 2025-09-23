@@ -1,29 +1,35 @@
-import { UIUtilsInternal, UIUtils } from 'stateManagement/sdk/uiutils'
-import { IObservedObject } from 'stateManagement/interface/iObservedObject'
-import { __StateMgmtFactoryImpl } from 'stateManagement/base/stateMgmtFactory.ets'
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import { IObservedObject } from 'stateManagement/interface/iObservedObject'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
+import { UIUtilsImpl } from '../base/uiUtilsImpl'
+import { UIUtils } from '../utils'
+import { IObservedObject } from '../decorator'
 
-// unit testing
-import { tsuite, tcase, test, eq, not_eq } from 'stateManagement/utest/lib/testFramework'
-import { UIUtilsPlugin, UIUtils } from '../../sdk/uiutils.ets';
-
-
+import { tsuite, tcase, test, eq, not_eq } from './lib/testFramework'
+let stateMgmtConsole=console;
 
 class ObservedData implements IObservedObject {
-    setV1RenderId(renderId: double): void {}
-    addWatchSubscriber(watchId: double): void {}
-    removeWatchSubscriber(watchId: double): boolean {return false}
+    setV1RenderId(renderId: Int): void {}
+    addWatchSubscriber(watchId: Int): void {}
+    removeWatchSubscriber(watchId: Int): boolean {return false}
 }
-
-type CustomObservedData = ObservedData
 
 interface testInt {
     propA: Double;
     propB: string;
 }
-
 
 /*
 UIPlugin
@@ -42,8 +48,6 @@ type MyTypeSimple = number
 type MyTypeClass  = NonObservedClass
 */
 
-
-
 export function run_makeobserved() : Boolean {
 
     const tests = tsuite("UIUtils tests", () => {
@@ -51,8 +55,8 @@ export function run_makeobserved() : Boolean {
   
     tcase("Test 1: makeObserved for Array ", () => {
         const arrPure : Array<number> = [ 1, 2, 3]
-        let arrWrapped1 = UIUtilsPlugin.makeObservedArray(arrPure)
-        let arrWrapped2 = UIUtilsPlugin.makeObservedArray(arrPure)
+        let arrWrapped1 = UIUtilsImpl.makeObservedArray(arrPure, false, true)
+        let arrWrapped2 = UIUtilsImpl.makeObservedArray(arrPure, false, true)
         test("Compare wrapped arrays", eq(arrWrapped1, arrWrapped2));
         test("Compare un-wrapped array1", eq(UIUtils.getTarget(arrWrapped1), arrPure));
         test("Compare un-wrapped array2", eq(UIUtils.getTarget(arrWrapped2), arrPure));
@@ -64,8 +68,8 @@ export function run_makeobserved() : Boolean {
     tcase("Test 2: makeObserved for Map", () => {
         const mapPure : Map<string,boolean> =
             new Map<string, boolean>([["James", false], ["Jane", true], ["Doe", false]])
-        let mapWrapped1 = UIUtilsPlugin.makeObservedMap(mapPure)
-        let mapWrapped2 = UIUtilsPlugin.makeObservedMap(mapPure)
+        let mapWrapped1 = UIUtilsImpl.makeObservedMap(mapPure, false, true)
+        let mapWrapped2 = UIUtilsImpl.makeObservedMap(mapPure, false, true)
     
         test("Compare wrapped maps", eq(mapWrapped1, mapWrapped2));
         test("Compare un-wrapped map1", eq(UIUtils.getTarget(mapWrapped1), mapPure));
@@ -78,8 +82,8 @@ export function run_makeobserved() : Boolean {
     tcase("Test 3: makeObserved for Set", () => {
         const setPure : Set<string> =
             new Set<string>(["James", "Jane", "Doe"]);
-        let setWrapped1 = UIUtilsPlugin.makeObservedSet(setPure)
-        let setWrapped2 = UIUtilsPlugin.makeObservedSet(setPure)
+        let setWrapped1 = UIUtilsImpl.makeObservedSet(setPure, false, true)
+        let setWrapped2 = UIUtilsImpl.makeObservedSet(setPure, false, true)
 
         test("Compare wrapped maps", eq(setWrapped1, setWrapped2));
         test("Compare un-wrapped map1", eq(UIUtils.getTarget(setWrapped1), setPure));
@@ -88,11 +92,11 @@ export function run_makeobserved() : Boolean {
         test("Compare un-wrapped and wrapped maps1 ", not_eq(UIUtils.getTarget(setWrapped1), setWrapped1));
         test("Compare un-wrapped and wrapped maps2", not_eq(UIUtils.getTarget(setWrapped2), setWrapped2));
     })
- 
+
     tcase("Test 4: makeObserved for Date", () => {
         const datePure : Date = new Date()
-        let dateWrapped1 = UIUtilsPlugin.makeObservedDate(datePure)
-        let dateWrapped2 = UIUtilsPlugin.makeObservedDate(datePure)
+        let dateWrapped1 = UIUtilsImpl.makeObservedDate(datePure, true, true)
+        let dateWrapped2 = UIUtilsImpl.makeObservedDate(datePure, true, true)
 
         test("Compare wrapped dates", eq(dateWrapped1, dateWrapped2));
         test("Compare un-wrapped date1", eq(UIUtils.getTarget(dateWrapped1), datePure));
@@ -132,17 +136,12 @@ export function run_makeobserved() : Boolean {
         test("Compare wrapped arrays", eq(UIUtils.getTarget(arrWrapped1), UIUtils.getTarget(arrWrapped2)));
         test("Compare un-wrapped and wrapped array1 ", not_eq(UIUtils.getTarget(arrWrapped1), arrWrapped1));
         test("Compare un-wrapped and wrapped array2", not_eq(UIUtils.getTarget(arrWrapped2), arrWrapped2));
-        console.log("Wrapped Element 0 " + arrWrapped1[0])
-        console.log("Wrapped Element 1 " + arrWrapped1[1])
-        console.log("Wrapped Element 2 " + arrWrapped1[2])
     })
 
     tcase("Test 7: UIUtils.makeObserved public  for Map", () => {
         const mapPure : Map<string,boolean> =
             new Map<string, boolean>([["James", false], ["Jane", true], ["Doe", false]])
-        console.log("=============== UIUtils.makeObservedVersatile(mapPure)")
         let mapWrapped1 = UIUtils.makeObserved(mapPure)
-        console.log("=============== UIUtils.makeObservedVersatile(mapPure)")
         let mapWrapped2 = UIUtils.makeObserved(mapPure)
         test("Compare wrapped maps", eq(mapWrapped1, mapWrapped2));
         test("Compare un-wrapped map1", eq(UIUtils.getTarget(mapWrapped1), mapPure));
@@ -151,7 +150,6 @@ export function run_makeobserved() : Boolean {
         test("Compare un-wrapped and wrapped maps1 ", not_eq(UIUtils.getTarget(mapWrapped1), mapWrapped1));
         test("Compare un-wrapped and wrapped maps2", not_eq(UIUtils.getTarget(mapWrapped2), mapWrapped2));
     })
-
     });
  
     tests();
@@ -163,7 +161,6 @@ export function run_makeobserved() : Boolean {
 export function run_makeobserved_short() : Boolean {
 
         const tests = tsuite("UIUtils tests", () => {
-          stateMgmtConsole.log(`run make observed mix =======================`);
       
           tcase("Test 5: makeObserved for Interface ObjectLiterals", () => {
             const ifObjectLiteral: testInt = {propA: 111, propB: "hello"} as testInt;
@@ -174,8 +171,8 @@ export function run_makeobserved_short() : Boolean {
             test("Compare proxied Interface ObjectLiterals 2-3", eq(ifObjectLiteralWrapped2, ifObjectLiteralWrapped3));
             test("Compare proxied Interface ObjectLiterals 1-3", eq(ifObjectLiteralWrapped1, ifObjectLiteralWrapped3));
             test("Compare proxied Interface ObjectLiterals orig-wrapped1", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteralWrapped1)));
-            test("Compare proxied Interface ObjectLiterals orig-wrapped1", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteralWrapped2)));
-            test("Compare proxied Interface ObjectLiterals orig-wrapped1", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteralWrapped3)));
+            test("Compare proxied Interface ObjectLiterals orig-wrapped2", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteralWrapped2)));
+            test("Compare proxied Interface ObjectLiterals orig-wrapped3", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteralWrapped3)));
             test("Compare proxied Interface ObjectLiterals orig-orig", eq(ifObjectLiteral, UIUtils.getTarget(ifObjectLiteral)));
             const ifObjectLiteralB: testInt = {propA: 111., propB: "hello"} as testInt;
             let ifObjectLiteralWrappedB1 = UIUtils.makeObserved(ifObjectLiteralB)
@@ -184,7 +181,7 @@ export function run_makeobserved_short() : Boolean {
             test("Compare original value 111", eq(ifObjectLiteralB.propA, 111.));
             test("Compare proxied value 111", eq(ifObjectLiteralWrappedB1.propA, 111.));
         })
-    
+
 
     });
  

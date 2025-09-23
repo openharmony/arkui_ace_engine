@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-import { WrappedArray } from 'stateManagement/base/observeWrappedArray.ets'
-import { ILocalDecoratedVariable } from 'stateManagement/interface/iDecorators'
-import { StateMgmtFactory } from 'stateManagement/interface/iStateMgmtFactory'
-import { ExtendableComponent } from 'stateManagement/base/extendableComponent'
-import { IMutableStateMeta } from 'stateManagement/interface/iMutableStateMeta'
-import { Observe } from 'stateManagement/interface/iObserve'
+import { WrappedArray } from '../base/observeWrappedArray'
+import { ILocalDecoratedVariable } from '../decorator'
+import { ExtendableComponent } from '../mock/extendableComponent';
+import { IMutableStateMeta } from '../decorator'
 
 // unit testing
-import { ObserveSingleton } from '../../base/observeSingleton.ets';
-import { FactoryInternal } from 'stateManagement//base/iFactoryInternal'
-import { TestMSM } from 'stateManagement/utest/lib/testAddRefFireChange'
-import { StateTracker } from 'stateManagement/utest/lib/stateTracker'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
-import { tsuite, tcase, test, eq } from 'stateManagement/utest/lib/testFramework'
+import { ObserveSingleton } from '../base/observeSingleton';
+import { TestMSM } from './lib/testAddRefFireChange'
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { STATE_MGMT_FACTORY } from '../decorator'
+let StateMgmtFactory = STATE_MGMT_FACTORY;
+let stateMgmtConsole=console;
+
 
 /* ETS
 @ObservedV2
@@ -77,8 +76,7 @@ export class MyArray<T> extends WrappedArray<T> {
     private __backing_arrProp: string;
 
     // @JsonIgnore
-    public readonly __meta_arrProp: IMutableStateMeta = FactoryInternal.makeMutableStateMeta("arrProp");
-        //= StateMgmtFactory.makeMutableStateMeta();
+    public readonly __meta_arrProp: IMutableStateMeta = StateMgmtFactory.makeMutableStateMeta();
 
     public get arrProp(): string {
         stateMgmtConsole.log(`MyArray: get @Trace arrProp`);
@@ -97,7 +95,7 @@ export class MyArray<T> extends WrappedArray<T> {
     // helper
     // do not inline, will not work for inherited classes.
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (Observe.shouldAddRef(this.____V1RenderId)) {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
             meta.addRef();
         }
     }
@@ -131,9 +129,11 @@ class ParentComponent extends ExtendableComponent {
 
     // For testing
     public getFireChangeCnt(key:string): number {
+        // meta_ not visible
         return TestMSM.getFireChangeCnt(this._backing_state_arr.get().meta_, key);
     }
     public getRefCnt(key:string) {
+        // meta_ not visible
         return TestMSM.getRefCnt(this._backing_state_arr.get().meta_, key);
     }
 
@@ -154,7 +154,6 @@ export function run_custom_arrays(): boolean {
     const ttest = tsuite("Custom arrays") {
 
         const comp = new ParentComponent(null, {});
-        stateMgmtConsole.log(`=== construct done ===\n`);
 
         tcase("Read custom array properties while rendering") {
             // rendering
@@ -173,7 +172,7 @@ export function run_custom_arrays(): boolean {
             test("arr.toString() OB_ANY_INDEX refCnt", eq(comp.getRefCnt('__OB_ANY_INDEX'), 1));
 
             // stop rendering
-            ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingNoComponent;
+            ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
             ObserveSingleton.instance.renderingId = ObserveSingleton.InvalidRenderId;
         }
 

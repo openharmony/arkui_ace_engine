@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-import { IObservedObject, RenderIdType } from 'stateManagement/interface/iObservedObject'
-import { Observe } from 'stateManagement/interface/iObserve'
-import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType } from 'stateManagement/interface/iWatch'
-import { IMutableStateMeta } from 'stateManagement/interface/iMutableStateMeta'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
-import { StateMgmtFactory } from '../../interface/iStateMgmtFactory.ets'
+import { IObservedObject, RenderIdType } from '../decorator'
+import { IWatchSubscriberRegister, ISubscribedWatches, WatchIdType } from '../decorator'
+import { IMutableStateMeta } from '../decorator'
 
 // unit testing
-import { StateTracker } from 'stateManagement/utest/lib/stateTracker'
-import { tsuite, tcase, test, eq } from 'stateManagement/utest/lib/testFramework'
-import { ObserveSingleton } from '../../base/observeSingleton.ets'
+import { StateTracker } from './lib/stateTracker'
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { ObserveSingleton } from '../base/observeSingleton';
+import { STATE_MGMT_FACTORY } from '../decorator'
+let StateMgmtFactory = STATE_MGMT_FACTORY;
+let stateMgmtConsole=console;
+
 
 /*
     @Observed class ClassA  {
@@ -89,7 +90,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
     // do not inline, will not work for
     // inherited classes.
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        if (Observe.shouldAddRef(this.____V1RenderId)) {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
             meta.addRef();
         }
     }
@@ -172,7 +173,7 @@ export class ClassB implements IObservedObject, IWatchSubscriberRegister {
     // do not inline, will not work for
     // inherited classes.
     protected conditionalAddRef(): void {
-        if (Observe.shouldAddRef(this.____V1RenderId)) {
+        if (ObserveSingleton.instance.shouldAddRef(this.____V1RenderId)) {
             this.__meta.addRef();
         }
     }
@@ -193,9 +194,7 @@ export class ClassB implements IObservedObject, IWatchSubscriberRegister {
         stateMgmtConsole.log(`ClassB (@Observe compat): set propB1`);
         if (this.__backing_propB1 !== newValue) {
             this.__backing_propB1 = newValue;
-            stateMgmtConsole.log(`ClassB (@Observe compat): set propB1 - fireChange`);
             this.__meta.fireChange();
-            stateMgmtConsole.log(`ClassB (@Observe compat): set propB1 - fireChange done `);
             this.executeOnSubscribingWatches("propB1");
         }
     }
@@ -237,13 +236,11 @@ export function run_observed_object3(): Boolean {
             test("read classA.classB.propB2 - expect false", eq(classA.classB.propB2, false))
             test("read classA.classC.propC - expect 888", eq(classA.classC.propC, 888))
 
-            console.log("set classA.propA +=1")
             classA.propA += 1;
 
-            console.log("set classA.classB.propB1 = '****'")
             classA.classB.propB1 = "****";
 
-            ObserveSingleton.instance.updateDirty2();
+            ObserveSingleton.instance.updateDirty();
 
             test("read classA.propA - expect 9", eq(classA.propA, 9))
             test("read classA.classB.propB1 - expect ****", eq(classA.classB.propB1, "****"))

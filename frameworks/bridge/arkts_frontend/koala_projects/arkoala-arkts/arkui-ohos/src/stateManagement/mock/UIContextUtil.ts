@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import { runTests } from './test'
+import { UIContextImpl } from './UIContextImpl'
 
-function main(): void {
-    runTests();
+export class UIContextUtil {
+    public static getOrCreateCurrentUIContext(): UIContextImpl | undefined {
+        return undefined;
+    }
 }

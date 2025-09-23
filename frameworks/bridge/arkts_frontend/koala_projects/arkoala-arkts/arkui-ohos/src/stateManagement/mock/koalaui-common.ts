@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { runTests } from './test'
+export type int32 = int;
 
-function main(): void {
-    runTests();
+export function propDeepCopy<T>(value: T): T {
+  console.log("Mock variant of propDeepCopy not supported");
+  return value;
 }

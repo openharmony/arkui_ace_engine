@@ -4,9 +4,8 @@
   },
 
   "scripts": {
-    "clean": "make clean",
-    "build": "make framework",
-    "compile": "make framework",
-    "test": "make test"
+    "clean": "make -f tests/Makefile clean",
+    "build": "make -f tests/Makefile framework",
+    "test": "make -f tests/Makefile"
   }
 }

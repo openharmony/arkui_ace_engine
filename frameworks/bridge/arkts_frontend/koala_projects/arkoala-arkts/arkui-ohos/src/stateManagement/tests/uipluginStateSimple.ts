@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from 'stateManagement/base/extendableComponent'
-import { stateMgmtConsole } from 'stateManagement/tools/stateMgmtConsoleTrace';
-import { StateMgmtFactory } from 'stateManagement/interface/iStateMgmtFactory'
-import { IStateDecoratedVariable } from 'stateManagement/interface/iDecorators'
-import { WatchFuncType } from 'stateManagement/interface/iWatch'
-
-// unit testing
-import { tsuite, tcase, test, eq } from 'stateManagement/utest/lib/testFramework'
-import { ObserveSingleton } from '../../base/observeSingleton.ets'
-
+import { ExtendableComponent } from '../mock/extendableComponent';
+import { IStateDecoratedVariable } from '../decorator'
+import { WatchFuncType } from '../decorator'
+import { tsuite, tcase, test, eq } from './lib/testFramework'
+import { ObserveSingleton } from '../base/observeSingleton';
+import { STATE_MGMT_FACTORY } from '../decorator'
+let StateMgmtFactory = STATE_MGMT_FACTORY;
+let stateMgmtConsole=console;
 
 interface EntryComponent_init_update_struct {
     stateA?: number
@@ -33,7 +31,6 @@ class EntryComponent extends ExtendableComponent {
     private _backing_stateA: IStateDecoratedVariable<number>;
 
     get stateA(): number {
-        console.log(`EntryComponent: get @State stateA`);
         return this._backing_stateA!.get();
     }
     set stateA(newValue: number) {
@@ -44,7 +41,6 @@ class EntryComponent extends ExtendableComponent {
 
     onStateAChanged(propertyName : string) : void {
         this.watchFuncRunCtr++;
-        stateMgmtConsole.error(`### @State onStateAChanged stateA @Watch exec: propertyName='${propertyName}', newValue propA: ${this.stateA}  RUN CNT='${this.watchFuncRunCtr}'`)
     };
 
     constructor(parent : ExtendableComponent | null, param : EntryComponent_init_update_struct) {
@@ -69,9 +65,7 @@ class EntryComponent extends ExtendableComponent {
     }
 
     assignA200() {
-        stateMgmtConsole.error(`### @State assignA200 start`)
         this.stateA = 200;
-        stateMgmtConsole.error(`### @State assignA200 end`)
     }
 
     build() {
@@ -80,7 +74,6 @@ class EntryComponent extends ExtendableComponent {
 
 export function run_stateNumber() : Boolean {
   const tests = tsuite("@State tests", () => {
-    stateMgmtConsole.log(`run @State tests=======================`);
 
     const compA = new EntryComponent(null, {});
     ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
