@@ -514,11 +514,10 @@ void GridLayoutInfo::SkipRegularLines(bool forward, float mainGap, float average
         auto childrenCount = GetChildrenCount();
         // keep offset and startIndex if startIndex is in the last line
         newIndex = newIndex >= childrenCount ? childrenCount - 1 : newIndex;
-        if (newIndex > startIndex_) {
-            estimatedLines = (newIndex - startIndex_) / crossCount_;
-            currentOffset_ += lineHeight * estimatedLines;
-            startIndex_ = newIndex;
-        }
+
+        estimatedLines = (newIndex - startIndex_) / crossCount_;
+        currentOffset_ += lineHeight * estimatedLines;
+        startIndex_ = newIndex;
     }
 }
 
