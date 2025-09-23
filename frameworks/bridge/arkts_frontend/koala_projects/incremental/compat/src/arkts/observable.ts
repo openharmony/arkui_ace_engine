@@ -366,15 +366,6 @@ class ObservableArray<T> extends Array<T> {
         return super.pushArray(...items)
     }
 
-    override pushECMA(...items: T[]): int {
-        const handler = this.handler
-        if (handler) {
-            handler.onModify()
-            proxyChildrenOnly(items, handler)
-        }
-        return super.pushECMA(...items)
-    }
-
     override reverse(): this {
         this.handler?.onModify()
         super.reverse()
