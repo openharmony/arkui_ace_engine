@@ -82,6 +82,7 @@ enum class WebKeyboardAvoidMode : int32_t {
     RESIZE_VISUAL = 0,
     RESIZE_CONTENT,
     OVERLAYS_CONTENT,
+    RETURN_TO_UICONTEXT,
     DEFAULT
 };
 

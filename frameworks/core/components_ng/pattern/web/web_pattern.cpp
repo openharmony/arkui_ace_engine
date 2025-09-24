@@ -4323,7 +4323,7 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 {
     isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
-    if (safeAreaEnabled) {
+    if (safeAreaEnabled || keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         return false;
     }
@@ -4369,6 +4369,31 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     return true;
 }
 
+bool WebPattern::JudgeWebKeyBoardAvoidMode(bool safeAreaEnabled)
+{
+    if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JudgeWebKeyBoardAvoidMode, web avoid mode is return uicontext.");
+        if (safeAreaEnabled) {
+            return false;
+        }
+        auto host = GetHost();
+        auto context = PipelineContext::GetCurrentContext();
+        if (host && context) {
+            auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+            auto safeAreaManager = context->GetSafeAreaManager();
+            if (textFieldManager && safeAreaManager) {
+                auto offset = GetCoordinatePoint();
+                textFieldManager->SetClickPosition({offset->GetX() + GetCaretRect().GetX(),
+                                                    offset->GetY() + GetCaretRect().GetY()});
+                textFieldManager->SetHeight(GetCaretRect().Height());
+                textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -4385,11 +4410,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
-    if (height - GetCoordinatePoint()->GetY() < keyboard) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
-        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
-        return true;
-    }
+
     if (!delegate_->NeedSoftKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not NeedSoftKeyboard");
         return false;
@@ -4400,6 +4421,17 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return true;
     }
+    if (!JudgeWebKeyBoardAvoidMode(safeAreaEnabled)) {
+        isKeyboardInSafeArea_ = true;
+        lastKeyboardHeight_ = keyboard;
+        return false;
+    }
+    if (height - GetCoordinatePoint()->GetY() < keyboard) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        return true;
+    }
+
     if (safeAreaEnabled) {
         isKeyboardInSafeArea_ = true;
         lastKeyboardHeight_ = keyboard;
