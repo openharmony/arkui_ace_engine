@@ -2437,6 +2437,65 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, boo
     falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(falsifyEvent, sendOnTouch);
 }
+
+void EventManager::FalsifyCancelEventWithDifferentDeviceId(
+    const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch)
+{
+    if (axisTouchTestResults_.empty()) {
+        return;
+    }
+    AxisEvent falsifyEvent = axisEvent;
+    falsifyEvent.action = AxisAction::CANCEL;
+    falsifyEvent.deviceId = deviceId;
+    falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    DispatchTouchEvent(falsifyEvent, sendOnTouch);
+    DispatchAxisEventNG(falsifyEvent);
+}
+
+bool EventManager::HandleAxisEventWithDifferentDeviceId(
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    switch (event.action) {
+        case AxisAction::BEGIN: {
+            if (deviceIdChecker_.find(event.id) == deviceIdChecker_.end()) {
+                deviceIdChecker_[event.id] = event.deviceId;
+                return false;
+            }
+            if (deviceIdChecker_[event.id] != event.deviceId) {
+                AxisTest(event, frameNode);
+                FalsifyCancelEventWithDifferentDeviceId(event, deviceIdChecker_[event.id]);
+                deviceIdChecker_[event.id] = event.deviceId;
+                return false;
+            }
+            return false;
+        }
+        case AxisAction::UPDATE: {
+            auto iter = deviceIdChecker_.find(event.id);
+            if (iter == deviceIdChecker_.end()) {
+                return true;
+            }
+            if (iter->second != event.deviceId) {
+                return true;
+            }
+            return false;
+        }
+        case AxisAction::END:
+        case AxisAction::CANCEL: {
+            if (deviceIdChecker_.find(event.id) == deviceIdChecker_.end()) {
+                return true;
+            }
+            if (deviceIdChecker_[event.id] != event.deviceId) {
+                return true;
+            }
+            deviceIdChecker_.erase(event.id);
+            return false;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,

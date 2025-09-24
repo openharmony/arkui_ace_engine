@@ -4440,6 +4440,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
     }
+    if (eventManager_->HandleAxisEventWithDifferentDeviceId(scaleEvent, node)) {
+        return;
+    }
     auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
     if (event.action != AxisAction::BEGIN && formEventMgr) {
