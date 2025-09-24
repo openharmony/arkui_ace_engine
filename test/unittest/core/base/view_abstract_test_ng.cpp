@@ -525,7 +525,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);
     ViewAbstract::SetHoverEffect(hoverEffect);
     ViewAbstract::SetHoverEffect(AceType::RawPtr(FRAME_NODE_REGISTER), hoverEffect);
-
     ViewAbstract::SetFocusable(false);
     ViewAbstract::SetFocusable(AceType::RawPtr(FRAME_NODE_REGISTER), false);
     ViewAbstract::SetEnabled(false);
