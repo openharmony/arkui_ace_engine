@@ -2146,6 +2146,8 @@ struct CJUIWebModifier {
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
     void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGestureFocusMode)(ArkUINodeHandle node);
+    void (*setRotateRenderEffect)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetRotateRenderEffect)(ArkUINodeHandle node);
     void (*setEnableDataDetector)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDataDetector)(ArkUINodeHandle node);
     void (*setDataDetectorConfigWithEvent)(

@@ -2444,6 +2444,21 @@ void WebModelNG::SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode
     webPattern->UpdateGestureFocusMode(mode);
 }
 
+void WebModelNG::SetRotateRenderEffect(WebRotateEffect effect)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateRotateRenderEffect(effect);
+}
+
+void WebModelNG::SetRotateRenderEffect(FrameNode* frameNode, WebRotateEffect effect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateRotateRenderEffect(effect);
+}
+
 void WebModelNG::SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     CHECK_NULL_VOID(frameNode);

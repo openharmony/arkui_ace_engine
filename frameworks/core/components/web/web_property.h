@@ -109,6 +109,11 @@ enum class GestureFocusMode : int32_t {
     GESTURE_TAP_AND_LONG_PRESS = 1
 };
 
+enum class WebRotateEffect : int32_t {
+    TOPLEFT_EFFECT = 0,
+    RESIZE_COVER_EFFECT = 1
+};
+
 struct WebPreviewSelectionMenuParam {
     WebElementType type = WebElementType::NONE;
     ResponseType responseType = ResponseType::LONG_PRESS;

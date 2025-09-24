@@ -2303,6 +2303,28 @@ HWTEST_F(WebPatternTestNg, OnGestureFocusModeUpdate_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRotateRenderEffectUpdate_001
+ * @tc.desc: OnRotateRenderEffectUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnRotateRenderEffectUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->OnRotateRenderEffectUpdate(WebRotateEffect::RESIZE_COVER_EFFECT);
+    ASSERT_NE(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
  * @tc.name: IsCurrentFocus_001
  * @tc.desc: IsCurrentFocus.
  * @tc.type: FUNC

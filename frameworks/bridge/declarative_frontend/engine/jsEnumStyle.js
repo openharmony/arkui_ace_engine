@@ -4538,3 +4538,9 @@ let NativeEmbedParamStatus;
   NativeEmbedParamStatus.UPDATE = 1;
   NativeEmbedParamStatus.DELETE = 2;
 })(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
+
+let WebRotateEffect;
+(function (WebRotateEffect) {
+  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
+  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
+})(WebRotateEffect || (WebRotateEffect = {}));

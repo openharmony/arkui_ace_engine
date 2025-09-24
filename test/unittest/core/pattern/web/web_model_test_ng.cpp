@@ -4584,6 +4584,28 @@ HWTEST_F(WebModelTestNg, SetGestureFocusMode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRotateRenderEffect001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetRotateRenderEffect001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    WebModelNG webModelNG;
+    webModelNG.SetRotateRenderEffect(WebRotateEffect::TOPLEFT_EFFECT);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckRotateRenderEffect(WebRotateEffect::TOPLEFT_EFFECT), true);
+#endif
+}
+
+/**
  * @tc.name: SetWebDetachFunction001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

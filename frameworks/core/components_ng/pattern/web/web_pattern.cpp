@@ -6317,6 +6317,43 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
+void WebPattern::WebRotateRenderEffect(WindowSizeChangeReason type)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect , type: %{public}d renderFit_: %{public}d",
+             type, renderFit_);
+    if (type != WindowSizeChangeReason::ROTATION ||
+        renderFit_ == RenderFit::TOP_LEFT) {
+        return;
+    }
+
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(renderFit_);
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::string taskName = "ArkUIWebRotateRenderEffectDelayTask_" + std::to_string(GetWebId());
+    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), taskName]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebRotateRenderEffect DelayedTask, task: %{public}s",
+            taskName.c_str());
+        if (webPattern->renderContextForSurface_) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect reset");
+            webPattern->renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+        }
+        }, TaskExecutor::TaskType::UI, MAXIMUM_ROTATION_DELAY_TIME, taskName);
+}
+
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (contextSelectOverlay_ && contextSelectOverlay_->SelectOverlayIsOn()) {
@@ -6329,6 +6366,7 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         return;
     }
     AdjustRotationRenderFit(type);
+    WebRotateRenderEffect(type);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
         return;
@@ -8609,7 +8647,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         return;
     }
 
-    if (delegate_ &&
+    if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         delegate_->MaximizeResize();
     }
@@ -9101,6 +9139,23 @@ void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
     if (delegate_) {
         delegate_->UpdateGestureFocusMode(mode);
     }
+}
+
+void WebPattern::OnRotateRenderEffectUpdate(WebRotateEffect effect)
+{
+    switch (effect) {
+        case WebRotateEffect::TOPLEFT_EFFECT:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+        case WebRotateEffect::RESIZE_COVER_EFFECT:
+            renderFit_ = RenderFit::RESIZE_COVER;
+            break;
+        default:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Update rotate effect, effect: %{public}d renderFit_: %{public}d",
+             effect, renderFit_);
 }
 
 void WebPattern::UpdateSingleHandleVisible(bool isVisible)
