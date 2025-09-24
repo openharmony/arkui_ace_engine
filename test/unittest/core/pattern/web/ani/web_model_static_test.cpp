@@ -2489,6 +2489,32 @@ HWTEST_F(WebModelStaticTest, SetAdsBlockedEventId001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGestureFocusMode001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetGestureFocusMode001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode),
+        GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(
+        GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS), true);
+    WebModelStatic::SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode),
+        GestureFocusMode::DEFAULT);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckGestureFocusMode(GestureFocusMode::DEFAULT), true);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC

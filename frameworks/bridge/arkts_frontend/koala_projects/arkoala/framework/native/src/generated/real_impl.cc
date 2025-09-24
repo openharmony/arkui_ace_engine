@@ -8834,6 +8834,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_SelectionMenuOptionsExt* options)
     {
     }
+    void GestureFocusModeImpl(Ark_NativePointer node,
+                              const Opt_GestureFocusMode* value)
+    {
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -11696,6 +11700,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::NativeEmbedOptionsImpl,
             WebAttributeModifier::RegisterNativeEmbedRuleImpl,
             WebAttributeModifier::BindSelectionMenuImpl,
+            WebAttributeModifier::GestureFocusModeImpl,
         };
         return &ArkUIWebModifierImpl;
     }

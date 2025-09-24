@@ -264,6 +264,20 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
+void AssignCast(std::optional<GestureFocusMode>& dst, const Ark_GestureFocusMode& src)
+{
+    switch (src) {
+        case ARK_GESTURE_FOCUS_MODE_DEFAULT:
+            dst = GestureFocusMode::DEFAULT;
+            break;
+        case ARK_GESTURE_FOCUS_MODE_GESTURE_TAP_AND_LONG_PRESS:
+            dst = GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS;
+            break;
+        default: LOGE("Unexpected enum value in Ark_GestureFocusMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
 {
     switch (src) {
@@ -1247,6 +1261,8 @@ void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& sr
 {
     switch (src) {
         case ARK_WEB_ELEMENT_TYPE_IMAGE: dst = WebElementType::IMAGE; break;
+        case ARK_WEB_ELEMENT_TYPE_LINK: dst = WebElementType::LINK; break;
+        case ARK_WEB_ELEMENT_TYPE_TEXT: dst = WebElementType::TEXT; break;
         default: LOGE("Unexpected enum value in Ark_WebElementType: %{public}d", src);
     }
 }
@@ -1864,6 +1880,7 @@ void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src
 {
     switch (src) {
         case ARK_WEB_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
+        case ARK_WEB_RESPONSE_TYPE_RIGHT_CLICK: dst = ResponseType::RIGHT_CLICK; break;
         default: LOGE("Unexpected enum value in Ark_WebResponseType: %{public}d", src);
     }
 }
