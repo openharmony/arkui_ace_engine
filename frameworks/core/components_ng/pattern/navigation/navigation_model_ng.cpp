@@ -890,9 +890,15 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
         backButtonWidth = theme->GetIconBackgroundWidth();
         backButtonHeight = theme->GetIconBackgroundHeight();
         backButtonRadiusSize = theme->GetCornerRadius();
-        backButtonPadding = MENU_BUTTON_PADDING;
+        backButtonPadding = theme->GetMenuButtonPadding();
         backButtonColor = theme->GetCompBackgroundColor();
     }
+    BorderWidthProperty borderWidthProperty;
+    borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
+    backButtonLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+    BorderColorProperty borderColorProperty;
+    borderColorProperty.SetColor(theme->GetIconBorderColor());
+    renderContext->UpdateBorderColor(borderColorProperty);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));

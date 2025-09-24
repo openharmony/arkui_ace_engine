@@ -1163,6 +1163,34 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
 }
 
 /**
+ * @tc.name: TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest004
+ * @tc.desc: test GetFullModeTitleOffsetY function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest004, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float titleHeight = 100.0f;
+    float subtitleHeight = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_ = 2.0f;
+    auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(titleBarGeometryNode, nullptr);
+    titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
+    ui.titleBarLayoutAlgorithm->navTitleSpaceVertical_ = 1.0f;
+    float offsetY = -4.0f;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    EXPECT_NE(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(titleHeight, subtitleHeight, titleBarGeometryNode),
+        offsetY);
+}
+
+/**
  * @tc.name: SetHideBackButton001
  * @tc.desc: Test SetHideBackButton function.
  * @tc.type: FUNC
@@ -1909,6 +1937,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest015, TestSize.Level1)
 
     UIComponents ui;
     InitChildrenComponent(ui);
+    ui.titleBarLayoutAlgorithm->menuButtonPadding_ = 8.0_vp;
     ui.titleBarLayoutAlgorithm->LayoutBackButton(
         AccessibilityManager::RawPtr(ui.titleBarLayoutWrapper), ui.titleBarNode, ui.titleBarLayoutProperty);
 
@@ -2322,5 +2351,89 @@ HWTEST_F(NavdestinationTestNg, UpdateTitleHeight001, TestSize.Level1)
     CalcDimension height;
     ResourceParseUtils::ParseResDimensionVpNG(resObj, height);
     EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(titleKey), height.ToString());
+}
+
+/**
+ * @tc.name: GetFullTitleWidth001
+ * @tc.desc: Test GetFullTitleWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetFullTitleWidth001, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float occupiedWidth = 0.0f;
+    float paddingRight = 10.0f;
+    float menuOccupiedWidth = 10.0f;
+    Dimension menuCompPadding = 0.0_vp;
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = true;
+    ui.titleBarLayoutAlgorithm->paddingRight_ = paddingRight;
+    ui.titleBarLayoutAlgorithm->menuOccupiedWidth_ = menuOccupiedWidth;
+    ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
+    ui.titleBarLayoutAlgorithm->GetFullTitleWidth(false, occupiedWidth);
+    EXPECT_EQ(occupiedWidth, paddingRight + menuOccupiedWidth + menuCompPadding.ConvertToPx());
+}
+
+/**
+ * @tc.name: GetFullTitleWidth002
+ * @tc.desc: Test GetFullTitleWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetFullTitleWidth002, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float occupiedWidth = 0.0f;
+    float paddingRight = 10.0f;
+    float menuOccupiedWidth = 10.0f;
+    Dimension menuCompPadding = 0.0_vp;
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = false;
+    ui.titleBarLayoutAlgorithm->paddingRight_ = paddingRight;
+    ui.titleBarLayoutAlgorithm->menuOccupiedWidth_ = menuOccupiedWidth;
+    ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
+    ui.titleBarLayoutAlgorithm->GetFullTitleWidth(false, occupiedWidth);
+    EXPECT_EQ(occupiedWidth, paddingRight);
+}
+
+/**
+ * @tc.name: GetFullTitleWidth003
+ * @tc.desc: Test GetFullTitleWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetFullTitleWidth003, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float occupiedWidth = 0.0f;
+    float paddingRight = 10.0f;
+    float menuOccupiedWidth = 0.0f;
+    Dimension menuCompPadding = 0.0_vp;
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = true;
+    ui.titleBarLayoutAlgorithm->paddingRight_ = paddingRight;
+    ui.titleBarLayoutAlgorithm->menuOccupiedWidth_ = menuOccupiedWidth;
+    ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
+    ui.titleBarLayoutAlgorithm->GetFullTitleWidth(false, occupiedWidth);
+    EXPECT_EQ(occupiedWidth, paddingRight);
+}
+
+/**
+ * @tc.name: GetFullTitleWidth004
+ * @tc.desc: Test GetFullTitleWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetFullTitleWidth004, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float occupiedWidth = 0.0f;
+    float paddingRight = 10.0f;
+    float menuOccupiedWidth = 0.0f;
+    Dimension menuCompPadding = 0.0_vp;
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = false;
+    ui.titleBarLayoutAlgorithm->paddingRight_ = paddingRight;
+    ui.titleBarLayoutAlgorithm->menuOccupiedWidth_ = menuOccupiedWidth;
+    ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
+    ui.titleBarLayoutAlgorithm->GetFullTitleWidth(false, occupiedWidth);
+    EXPECT_EQ(occupiedWidth, paddingRight);
 }
 } // namespace OHOS::Ace::NG

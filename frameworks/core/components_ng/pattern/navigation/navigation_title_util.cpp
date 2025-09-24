@@ -249,6 +249,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetNavMenuItemNeedFocus(SystemProperties::GetDeviceType() == DeviceType::TV);
+        buttonPattern->SetNavigationFocusBlendBgColor(theme->GetNavigationFocusBlendBgColor());
         buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
         buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
     } else {
@@ -274,12 +276,19 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
         renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
         PaddingProperty padding;
-        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        padding.SetEdges(CalcLength(theme->GetMenuButtonPadding()));
         menuItemLayoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
         margin.end = CalcLength(theme->GetCompPadding());
         menuItemLayoutProperty->UpdateMargin(margin);
+        BorderWidthProperty borderWidthProperty;
+        borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
+        menuItemLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(theme->GetIconBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+        focusHub->SetFocusPadding(theme->GetMenuItemFocusPadding());
     } else {
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));

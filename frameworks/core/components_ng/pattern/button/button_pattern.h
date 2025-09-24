@@ -225,6 +225,10 @@ public:
 
     std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
 
+    void SetNavigationFocusBlendBgColor(const Color& navigationFocusBgColor);
+
+    void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus);
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -280,6 +284,8 @@ private:
 
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
+    Color navigationFocusBlendBgColor_;
+    bool navMenuItemNeedFocus_ = false;
 
     bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
@@ -308,6 +314,7 @@ private:
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
     void HandleFocusActiveStyle();
     void SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void SetNavBarMenuFocusStyle(RefPtr<RenderContext>& renderContext, bool isFocus);
 };
 } // namespace OHOS::Ace::NG
 
