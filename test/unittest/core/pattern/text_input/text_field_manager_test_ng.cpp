@@ -907,4 +907,20 @@ HWTEST_F(TextFieldManagerTestNG, RemoveFillContentMap001, TestSize.Level0)
     text_field_manager.RemoveFillContentMap(10);
     EXPECT_EQ(map.size(), 1);
 }
+
+/**
+ * @tc.name: CheckInRichEditor001
+ * @tc.desc: test CheckInRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, CheckInRichEditor001, TestSize.Level0)
+{
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    EXPECT_FALSE(textFieldManager->CheckInRichEditor());
+    auto textFieldPattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, textFieldPattern);
+    textFieldPattern->AttachToFrameNode(frameNode);
+    textFieldManager->SetOnFocusTextField(textFieldPattern);
+    EXPECT_TRUE(textFieldManager->CheckInRichEditor());
+}
 } // namespace OHOS::Ace::NG
