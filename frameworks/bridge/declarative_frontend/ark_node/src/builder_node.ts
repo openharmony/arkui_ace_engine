@@ -219,12 +219,23 @@ class JSBuilderNode extends BaseNode implements IDisposable {
         this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
+  public clearChildBuilderNodeWeakMap(): void {
+    this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild?.deref();
+      if (child instanceof JSBuilderNode) {
+        child.__parentViewOfBuildNode = undefined;
+        this.removeChildBuilderNode(child.id__());
+      }
+    });
+    this.clearChildBuilderNode();
+  }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this.clearChildBuilderNodeWeakMap();
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
-    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false;
+    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
     this.params_ = params;
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
