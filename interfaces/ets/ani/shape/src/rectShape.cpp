@@ -72,7 +72,7 @@ void ANICreateRectShapeWithParam(
         if (ANI_OK != env->Object_GetPropertyByName_Ref(aniOption, "radius", &params_ref)) {
             return;
         }
-        if (GetIsArrayObject(env, params_ref)) {
+        if (!GetIsUndefinedObject(env, params_ref) && GetIsArrayObject(env, params_ref)) {
             OHOS::Ace::CalcDimension radius;
             ParseArray(env, rect, static_cast<ani_object>(params_ref));
         } else {
@@ -80,7 +80,7 @@ void ANICreateRectShapeWithParam(
             if (ParseStringNumberUndefinedObject(env, params_ref, OHOS::Ace::DimensionUnit::VP, radiusOpt) &&
                 radiusOpt.has_value()) {
                 rect->SetRadiusWidth(radiusOpt.value());
-                rect->SetRadiusWidth(radiusOpt.value());
+                rect->SetRadiusHeight(radiusOpt.value());
             }
         }
     } else if (IsInstanceOfCls(env, aniOption, "@ohos.arkui.shape.RoundRectShapeOptions")) {
@@ -297,7 +297,7 @@ ani_object ANIRectShapeRadius(ani_env* env, ani_object object, [[maybe_unused]] 
         ParseStringNumberUndefinedObject(env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal);
         auto radius = radiusVal.value_or(OHOS::Ace::CalcDimension());
         rectObj->rectShape->SetRadiusWidth(radius);
-        rectObj->rectShape->SetRadiusWidth(radius);
+        rectObj->rectShape->SetRadiusHeight(radius);
     }
     return object;
 }
