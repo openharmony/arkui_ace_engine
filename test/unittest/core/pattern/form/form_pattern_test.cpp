@@ -104,7 +104,7 @@ RefPtr<FormNode> FormPatternTest::CreateFromNode()
  * @tc.desc: OnAttachToFrameNode
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -142,7 +142,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
  * @tc.desc: OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -199,7 +199,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
  * @tc.desc: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_003, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_003, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -232,7 +232,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_003, TestSize.Level1)
  * @tc.desc: HandleTouchUpEvent
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -282,7 +282,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level1)
  * @tc.desc: HandleUnTrustForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_005, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_005, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -303,7 +303,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_005, TestSize.Level1)
  * @tc.desc: HandleSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -342,7 +342,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
  * @tc.desc: HandleStaticFormEvent
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_008, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_008, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -379,7 +379,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_008, TestSize.Level1)
  * @tc.desc: HandleEnableForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -427,7 +427,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
  * @tc.desc: TakeSurfaceCaptureForUI
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_010, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_010, TestSize.Level0)
 {
     RefPtr<FrameNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();

@@ -71,7 +71,7 @@ RefPtr<FormNode> FormNodeTest::CreateFromNode()
  * @tc.desc: TouchTest
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level0)
 {
     PointF globalPoint;
     PointF parentLocalPoint;
@@ -135,7 +135,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level1)
  * @tc.desc: OnAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_002, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_002, TestSize.Level0)
 {
     RefPtr<FrameNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -155,7 +155,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_002, TestSize.Level1)
  * @tc.desc: GetFormOffset
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level0)
 {
     auto formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -177,7 +177,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level1)
  * @tc.desc: OnAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -206,7 +206,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level1)
  * @tc.desc: OnDetachFromMainTree
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_005, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_005, TestSize.Level0)
 {
     auto formNode = CreateFromNode();
     auto formNode1 = CreateFromNode();
@@ -227,7 +227,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_005, TestSize.Level1)
  * @tc.desc: OnSetAccessibilityChildTree
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_006, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_006, TestSize.Level0)
 {
     auto formNode = CreateFromNode();
     int32_t childWindowId = 1;
@@ -244,7 +244,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_006, TestSize.Level1)
  * @tc.desc: OnAccessibilityDumpChildInfo
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_007, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_007, TestSize.Level0)
 {
     RefPtr<FrameNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -261,7 +261,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_007, TestSize.Level1)
  * @tc.desc: DispatchPointerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_008, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_008, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
@@ -284,7 +284,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_008, TestSize.Level1)
  * @tc.desc: InitializeFormAccessibility
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_009, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_009, TestSize.Level0)
 {
     ContainerScope scope(-1);
     auto formNode = CreateFromNode();
@@ -308,7 +308,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_009, TestSize.Level1)
  * @tc.desc: NotifyAccessibilityChildTreeRegister
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level0)
 {
     ContainerScope scope(-1);
     auto formNode = CreateFromNode();
@@ -331,7 +331,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level1)
  * @tc.desc: OnAccessibilityChildTreeDeregister
  * @tc.type: FUNC
  */
-HWTEST_F(FormNodeTest, FormNodeTest_011, TestSize.Level1)
+HWTEST_F(FormNodeTest, FormNodeTest_011, TestSize.Level0)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();

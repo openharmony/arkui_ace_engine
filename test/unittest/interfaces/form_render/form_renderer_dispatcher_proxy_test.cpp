@@ -36,7 +36,7 @@ public:
   * @tc.name: DispatchPointerEvent_001
   * @tc.desc: Verify the DispatchPointerEvent function when remoteObject is not nullptr.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -51,7 +51,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_001, TestSize.Lev
   * @tc.name: DispatchPointerEvent_002
   * @tc.desc: Verify the DispatchPointerEvent function when remoteObject is nullptr.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_002, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_002, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -66,7 +66,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_002, TestSize.Lev
   * @tc.name: SetAllowUpdate_001
   * @tc.desc: Verify the SetAllowUpdate function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, SetAllowUpdate_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, SetAllowUpdate_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -80,7 +80,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, SetAllowUpdate_001, TestSize.Level1)
   * @tc.name: DispatchSurfaceChangeEvent_001
   * @tc.desc: Verify the DispatchSurfaceChangeEvent function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -97,7 +97,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSi
   * @tc.name: SetObscured_001
   * @tc.desc: Verify the SetObscured function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, SetObscured_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, SetObscured_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -111,7 +111,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, SetObscured_001, TestSize.Level1)
   * @tc.name: OnAccessibilityChildTreeRegister_001
   * @tc.desc: Verify the OnAccessibilityChildTreeRegister function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeRegister_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeRegister_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -127,7 +127,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeRegister_001, 
   * @tc.name: OnAccessibilityChildTreeDeregister_001
   * @tc.desc: Verify the OnAccessibilityChildTreeDeregister function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeDeregister_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeDeregister_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);
@@ -140,7 +140,7 @@ HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeDeregister_001
   * @tc.name: OnAccessibilityDumpChildInfo_001
   * @tc.desc: Verify the OnAccessibilityDumpChildInfo function when it send request.
 */
-HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityDumpChildInfo_001, TestSize.Level1)
+HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityDumpChildInfo_001, TestSize.Level0)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
     auto proxy = std::make_shared<FormRendererDispatcherProxy>(mockStub);

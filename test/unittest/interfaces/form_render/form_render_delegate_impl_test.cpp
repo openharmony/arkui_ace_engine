@@ -62,7 +62,7 @@ public:
  * @tc.desc: Test OnSurfaceCreate() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_001, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_001, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_001 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -98,7 +98,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_001, TestSize.Le
  * @tc.desc: Test OnActionEvent() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_002, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_002, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_002 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -116,7 +116,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_002, TestSize.Le
  * @tc.desc: Test OnError() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_003, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_003, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_003 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -135,7 +135,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_003, TestSize.Le
  * @tc.desc: Test OnSurfaceChange() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_004, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_004, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_004 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -154,7 +154,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_004, TestSize.Le
  * @tc.desc: Test OnSurfaceDetach() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_005, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_005, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_005 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -173,7 +173,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_005, TestSize.Le
  * @tc.desc: Test OnFormLinkInfoUpdate() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_006, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_006, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_006 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -193,7 +193,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_006, TestSize.Le
  * @tc.desc: Test OnGetRectRelativeToWindow() function.
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_007, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_007, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_007 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
@@ -215,7 +215,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_007, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_008, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_008, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 1;
@@ -239,7 +239,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_008, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_009, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_009, TestSize.Level0)
 {
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
@@ -257,7 +257,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_009, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_010, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_010, TestSize.Level0)
 {
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
@@ -279,7 +279,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_010, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_011, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_011, TestSize.Level0)
 {
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
@@ -303,7 +303,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_011, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_012, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_012, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 2;
@@ -327,7 +327,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_012, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_013, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_013, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 1;
@@ -347,7 +347,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_013, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_014, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_014, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 2;
@@ -369,7 +369,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_014, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_015, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_015, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 2;
@@ -391,7 +391,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_015, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_016, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_016, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 1;
@@ -411,7 +411,7 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_016, TestSize.Le
  * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_017, TestSize.Level1)
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_017, TestSize.Level0)
 {
     auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
     uint64_t surfaceId = 1;
