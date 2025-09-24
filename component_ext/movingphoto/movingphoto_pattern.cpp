@@ -57,6 +57,7 @@ constexpr int32_t AVERAGE_VALUE = 2;
 constexpr int32_t US_CONVERT = 1000;
 constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 constexpr int32_t EIGHTY_TO_HUNDRED_TIME = 3000;
+constexpr int32_t NODE_COUNT = 2;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -595,7 +596,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
     if (loadingStatus == IMAGE_DECODE_COMPLETE) {
-       FireMediaPlayerImageComplete();
+        FireMediaPlayerImageComplete();
     }
 }
 
@@ -1959,7 +1960,7 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_RETURN(movingPhoto, nullptr);
-    CHECK_NULL_RETURN(movingPhoto->GetTotalChildCount() > 2, nullptr);
+    CHECK_NULL_RETURN(movingPhoto->GetTotalChildCount() > NODE_COUNT, nullptr);
     auto firstImage = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_RETURN(firstImage, nullptr);
     auto imageIndex = movingPhoto->GetChildIndex(firstImage);
