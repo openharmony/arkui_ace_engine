@@ -3596,7 +3596,8 @@ export interface JavaScriptProxy {
 export enum WebKeyboardAvoidMode {
     RESIZE_VISUAL = 0,
     RESIZE_CONTENT = 1,
-    OVERLAYS_CONTENT = 2
+    OVERLAYS_CONTENT = 2,
+    RETURN_TO_UICONTEXT = 3
 }
 export enum WebElementType {
     IMAGE = 1,
