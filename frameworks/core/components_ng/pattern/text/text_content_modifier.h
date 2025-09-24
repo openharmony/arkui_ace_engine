@@ -196,6 +196,7 @@ private:
     }
     bool IsMarqueeVisible() const;
     void UpdateTextDecorationColorAlpha();
+    void SetTextContentAlingOffsetY(float& paintOffsetY);
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;
