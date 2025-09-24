@@ -1499,6 +1499,20 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
+  constructor(value: (client: IMEClient) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputOnWillAttachIME');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().textInput.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1966,6 +1980,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   onSecurityStateChange(callback: Callback<boolean>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnSecurityStateChangeModifier.identity,
       TextInputOnSecurityStateChangeModifier, callback);
+    return this;
+  }
+  onWillAttachIME(callback: Callback<IMEClient>): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillAttachIMEModifier.identity,
+      TextInputOnWillAttachIMEModifier, callback);
     return this;
   }
 }

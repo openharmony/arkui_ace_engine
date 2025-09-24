@@ -2879,4 +2879,42 @@ HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
     EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
 }
 
+/**
+ * @tc.name: SetExtraConfig
+ * @tc.desc: test pass extra config to ime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetExtraConfig, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 Create Text filed node
+     */
+    struct ExtraConfig {
+        std::string key;
+        std::string value;
+    };
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        IMEAttachCallback attach = [](IMEClient& client) {
+            ExtraConfig* extraConfig = new ExtraConfig();
+            extraConfig->key = "name";
+            extraConfig->value = "test";
+            client.extraInfo = AceType::MakeRefPtr<IMEExtraInfo>(extraConfig, [extraConfig]() {
+                delete extraConfig;
+            });
+        };
+        model.SetOnWillAttachIME(std::move(attach));
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.step: step2. Call FireOnWillAttachIME
+     */
+    auto clientInfo = pattern_->GetIMEClientInfo();
+    pattern_->FireOnWillAttachIME(clientInfo);
+    ASSERT_NE(clientInfo.extraInfo, nullptr);
+    ASSERT_NE(clientInfo.extraInfo->GetExtraInfo(), nullptr);
+    auto parsedConfig = *reinterpret_cast<ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    EXPECT_EQ(parsedConfig.key, "name");
+    EXPECT_EQ(parsedConfig.value, "test");
+}
 } // namespace OHOS::Ace::NG

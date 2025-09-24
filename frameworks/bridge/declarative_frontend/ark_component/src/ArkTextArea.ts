@@ -1461,6 +1461,20 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) => void> {
+  constructor(value: (client: IMEClient) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillAttachIME');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().textArea.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1843,6 +1857,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   scrollBarColor(value: ColorMetrics): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
+    return this;
+  }
+  onWillAttachIME(callback: Callback<IMEClient>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillAttachIMEModifier.identity,
+      TextAreaOnWillAttachIMEModifier, callback);
     return this;
   }
 }

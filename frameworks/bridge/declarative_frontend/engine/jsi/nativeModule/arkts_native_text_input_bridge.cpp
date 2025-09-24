@@ -3015,4 +3015,55 @@ bool TextInputBridge::ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> valu
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
     return false;
 }
+
+IMEAttachCallback TextInputBridge::ParseAndCreateIMEAttachCallback(
+    EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode)
+{
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    IMEAttachCallback callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](IMEClient& imeClient) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto imeClientObj = panda::ObjectRef::New(vm);
+        imeClientObj->SetNativePointerFieldCount(vm, 1);
+        imeClientObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeId"), panda::NumberRef::New(vm, imeClient.nodeId));
+        imeClientObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setExtraConfig"),
+            panda::FunctionRef::New(vm, Framework::JSTextField::JsSetIMEExtraInfo));
+        imeClientObj->SetNativePointerField(vm, 0, static_cast<void*>(&imeClient));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { imeClientObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    return callback;
+}
+
+ArkUINativeModuleValue TextInputBridge::SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnWillAttachIME(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    IMEAttachCallback callback = ParseAndCreateIMEAttachCallback(vm, callbackArg, frameNode);
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnWillAttachIME(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnWillAttachIME(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
