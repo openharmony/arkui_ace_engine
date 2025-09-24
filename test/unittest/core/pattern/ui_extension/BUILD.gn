@@ -482,6 +482,7 @@ ace_unittest("security_ui_extension_pattern_test") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_security_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
     "security_ui_extension_component_test.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp"
   ]
   if (is_ohos_standard_system) {
     defines = [
@@ -714,6 +715,7 @@ ace_unittest("security_session_wrapper_impl_test_ng") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_extension_session.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "security_session_wrapper_impl_test_ng.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp"
   ]
   if (is_ohos_standard_system) {
     defines = [
@@ -794,6 +796,7 @@ ace_unittest("preview_session_wrapper_impl_test_ng") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_extension_session.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "preview_session_wrapper_impl_test_ng.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp"
   ]
   if (is_ohos_standard_system) {
     defines = [
@@ -874,6 +877,7 @@ ace_unittest("preview_ui_extension_compontent_test") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_preview_session_wrapper_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
     "preview_ui_extension_compontent_test.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp"
   ]
   if (is_ohos_standard_system) {
     defines = [

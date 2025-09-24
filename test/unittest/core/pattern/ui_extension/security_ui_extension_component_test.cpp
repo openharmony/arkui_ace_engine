@@ -273,7 +273,8 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionCallbackTest, Te
     /**
      * @tc.steps: step2. check sessionWrapper
      */
-    auto sessionWrapper = AceType::DynamicCast<SecuritySessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<SecuritySessionWrapperImpl>(pattern->sessionWrapper_);
     ASSERT_NE(sessionWrapper, nullptr);
     EXPECT_EQ(pattern->instanceId_, Container::CurrentId());
     EXPECT_EQ(pattern->instanceId_, sessionWrapper->instanceId_);
