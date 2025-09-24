@@ -47,7 +47,7 @@ void ShapeModelStatic::SetFill(FrameNode* frameNode, const std::optional<Color>&
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, Color::BLACK, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
     }
