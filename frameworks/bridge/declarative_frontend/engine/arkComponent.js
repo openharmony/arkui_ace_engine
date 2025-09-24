@@ -5886,9 +5886,11 @@ class UIGestureEvent {
         let gestureGroup = gesture;
         let groupPtr = getUINativeModule().common.addGestureGroup(this._nodePtr,
           gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode);
-        gestureGroup.gestures.forEach((item) => {
-          addGestureToGroup(this._nodePtr, item, groupPtr);
-        });
+        if (gestureGroup.gestures !== null && gestureGroup.gestures !== undefined) {
+          gestureGroup.gestures.forEach((item) => {
+            addGestureToGroup(this._nodePtr, item, groupPtr);
+          });
+        }
         getUINativeModule().common.attachGestureGroup(this._nodePtr, priority, mask, groupPtr);
         break;
       }
