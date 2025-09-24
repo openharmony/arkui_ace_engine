@@ -449,12 +449,14 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
         if (ret != 0) {
             LOGE("AceDrag, udmf set data failed, return value is %{public}d", ret);
         } else {
-#ifdef ACE_STATIC
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+            DragSummaryInfo dragSummaryInfo;
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
             if (ret != 0) {
                 LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
+            } else {
+                summary = dragSummaryInfo.summary;
+                detailedSummary = dragSummaryInfo.detailedSummary;
             }
-#endif
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
