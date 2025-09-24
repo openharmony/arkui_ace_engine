@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Size, ColorMetrics, DrawContext, Frame, LengthMetrics } from "arkui.Graphics"
+import { Size, ColorMetrics, DrawContext, Frame, LengthMetrics, LengthUnit } from "arkui.Graphics"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
@@ -85,11 +85,16 @@ export class Frame_serializer {
 export class LengthMetrics_serializer {
     public static write(buffer: SerializerBase, value: LengthMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toLengthMetricsPtr(value))
+        const valueHolderForUnit  = value.unit
+        valueSerializer.writeInt32(valueHolderForUnit.valueOf())
+        const valueHolderForValue  = value.value
+        valueSerializer.writeNumber(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): LengthMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromLengthMetricsPtr(ptr)
+        const unitTmpResult : LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
+        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : LengthMetrics = new LengthMetrics(valueTmpResult, unitTmpResult)
+        return value
     }
 }

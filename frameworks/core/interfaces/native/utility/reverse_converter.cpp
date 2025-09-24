@@ -158,7 +158,11 @@ void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
 
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
-    dst = LengthMetricsPeer::Create(src);
+    auto value = static_cast<float>(src.Value());
+    auto unit = static_cast<int32_t>(src.Unit());
+    
+    dst.unit = static_cast<Ark_LengthUnit>(unit);
+    dst.value = Converter::ArkValue<Ark_Number>(value);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -467,7 +471,11 @@ template<>
 Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
-    return LengthMetricsPeer::Create(Dimension(value, du));
+    auto duUnit = static_cast<int32_t>(du);
+    return {
+        .unit = static_cast<Ark_LengthUnit>(duUnit),
+        .value = ArkValue<Ark_Number>(value),
+    };
 }
 
 void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
@@ -880,4 +888,9 @@ void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, Co
     dst.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, ctx);
 }
 
+void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
+{
+    dst.value = Converter::ArkValue<Ark_Number>(static_cast<float>(src.Value()));
+    dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
+}
 } // namespace OHOS::Ace::NG::Converter

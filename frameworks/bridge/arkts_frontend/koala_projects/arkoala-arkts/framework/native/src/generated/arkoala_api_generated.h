@@ -1927,8 +1927,7 @@ typedef struct Ark_LargestContentfulPaint Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint Opt_LargestContentfulPaint;
 typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
 typedef struct Opt_LayoutConstraint Opt_LayoutConstraint;
-typedef struct LengthMetricsPeer LengthMetricsPeer;
-typedef struct LengthMetricsPeer* Ark_LengthMetrics;
+typedef struct Ark_LengthMetrics Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics Opt_LengthMetrics;
 typedef struct Ark_LengthMetricsCustom Ark_LengthMetricsCustom;
 typedef struct Opt_LengthMetricsCustom Opt_LengthMetricsCustom;
@@ -13250,6 +13249,11 @@ typedef struct Opt_LayoutConstraint {
     Ark_Tag tag;
     Ark_LayoutConstraint value;
 } Opt_LayoutConstraint;
+typedef struct Ark_LengthMetrics {
+    /* kind: Interface */
+    Ark_LengthUnit unit;
+    Ark_Number value;
+} Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics {
     Ark_Tag tag;
     Ark_LengthMetrics value;
@@ -23550,7 +23554,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIBaselineOffsetStyleAccessor {
     void (*destroyPeer)(Ark_BaselineOffsetStyle peer);
-    Ark_BaselineOffsetStyle (*construct)(Ark_LengthMetrics value);
+    Ark_BaselineOffsetStyle (*construct)(const Ark_LengthMetrics* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getBaselineOffset)(Ark_BaselineOffsetStyle peer);
 } GENERATED_ArkUIBaselineOffsetStyleAccessor;
@@ -24737,7 +24741,7 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
 
 typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {
     void (*destroyPeer)(Ark_LetterSpacingStyle peer);
-    Ark_LetterSpacingStyle (*construct)(Ark_LengthMetrics value);
+    Ark_LetterSpacingStyle (*construct)(const Ark_LengthMetrics* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getLetterSpacing)(Ark_LetterSpacingStyle peer);
 } GENERATED_ArkUILetterSpacingStyleAccessor;
@@ -24773,7 +24777,7 @@ typedef struct GENERATED_ArkUILinearIndicatorControllerAccessor {
 
 typedef struct GENERATED_ArkUILineHeightStyleAccessor {
     void (*destroyPeer)(Ark_LineHeightStyle peer);
-    Ark_LineHeightStyle (*construct)(Ark_LengthMetrics lineHeight);
+    Ark_LineHeightStyle (*construct)(const Ark_LengthMetrics* lineHeight);
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getLineHeight)(Ark_LineHeightStyle peer);
 } GENERATED_ArkUILineHeightStyleAccessor;
@@ -25872,7 +25876,9 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
                              const Callback_Number_Void* onIdleCallback,
                              const Ark_Number* delayTime);
     Array_Number (*colorMetricsResourceColor)(const Ark_Resource* color);
-    Ark_LengthMetricsCustom (*resoureToLengthMetrics)(const Ark_Resource* res);
+    Array_Number (*blendColorByColorMetrics)(const Ark_Number* color,
+                                             const Ark_Number* overlayColor);
+    Ark_LengthMetricsCustom (*resourceToLengthMetrics)(const Ark_Resource* res);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUITabBarSymbolAccessor {

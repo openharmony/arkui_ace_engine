@@ -25,13 +25,13 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
 {
     auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
     std::optional<Dimension> offset;
     Dimension defaultOffset = Dimension(0, DimensionUnit::VP);
     if (value) {
-        offset = Converter::OptConvert<Dimension>(value);
+        offset = Converter::OptConvert<Dimension>(*value);
         Validator::ValidateNonPercent(offset);
     }
     peer->span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));

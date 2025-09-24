@@ -2173,8 +2173,11 @@ Dimension Convert(const Ark_Float64& src)
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
-    CHECK_NULL_RETURN(src, {});
-    return src->value;
+    auto value = Converter::Convert<float>(src.value);
+    auto unit = static_cast<int32_t>(src.unit);
+
+    auto dimensionUnit = static_cast<DimensionUnit>(unit);
+    return Dimension(value, dimensionUnit);
 }
 
 template<>
