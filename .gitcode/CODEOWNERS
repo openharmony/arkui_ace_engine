@@ -3198,6 +3198,7 @@ frameworks/core/interfaces/native/ani/common_ani_modifier.cpp @arkui_framework_x
 frameworks/core/interfaces/native/ani/custom_node_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkui_framework_xnode
+frameworks/core/interfaces/native/ani/ani_theme_module.cpp @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkui_framework_xnode
