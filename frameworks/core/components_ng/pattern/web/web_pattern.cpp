@@ -3077,8 +3077,6 @@ void WebPattern::KeyboardReDispatch(
 void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
 {
     CHECK_NULL_VOID(event);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -3091,9 +3089,9 @@ void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& ev
     }
     taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
         event = tabKeyEvent_] () {
-        auto pipelineContext = context.Upgrade();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+            auto pipelineContext = context.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
         },
         TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
 }
