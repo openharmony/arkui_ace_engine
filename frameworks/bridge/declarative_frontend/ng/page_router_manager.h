@@ -271,6 +271,9 @@ protected:
         return static_cast<int32_t>(pageRouterStack_.size()) - 1;
     }
 
+    virtual void NotifyForceFullScreenChangeIfNeeded(
+        const std::string& curTopPageName, const RefPtr<PipelineContext>& context) {}
+
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStackByRouteName(
         const std::string& name, bool needIgnoreBegin = false);

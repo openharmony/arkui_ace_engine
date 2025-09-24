@@ -541,6 +541,23 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController010, TestSize.Level
 }
 
 /**
+ * @tc.name: StyledStringController011
+ * @tc.desc: Test SetStyledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController011, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->CreateStyledString();
+    ASSERT_NE(richEditorPattern->styledString_, nullptr);
+    richEditorPattern->RecreateUndoManager();
+    EXPECT_TRUE(richEditorPattern->undoManager_->IsUndoManagerEnabled());
+}
+
+/**
  * @tc.name: StyledStringInsertValue001
  * @tc.desc: Test insert value in styledString mode.
  * @tc.type: FUNC
@@ -1420,7 +1437,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
     auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
-        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr);
     decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
     buffer.clear();
     buffer = decorationSpan->ToString();

@@ -65,7 +65,7 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
     // change Test by search MakeRefPtr<DecorationSpan>
     spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
-        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
 
     // Add paragraph style span
     auto spanParagraphStyle = GetDefaultParagraphStyle();
@@ -697,7 +697,7 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert014, TestSize.Level1)
     spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
-        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
 
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
@@ -728,16 +728,16 @@ HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest001, TestSize.Level1)
     // change Test by search MakeRefPtr<DecorationSpan>
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
-        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
-        TextDecorationStyle::WAVY, 5.0f, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::WAVY, 5.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
-        TextDecorationStyle::DASHED, -5.0f, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::DASHED, -5.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
-        TextDecorationStyle::DOTTED, 0, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::DOTTED, 0, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
 
     // Add paragraph style span
     auto spanParagraphStyle = GetDefaultParagraphStyle();
@@ -786,13 +786,13 @@ HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest002, TestSize.Level1)
      */
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
-        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
-        TextDecorationStyle::SOLID, 5.0f, std::optional<TextDecorationOptions>(), 2, 6));
+        TextDecorationStyle::SOLID, 5.0f, std::optional<TextDecorationOptions>(), 2, 6, nullptr));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::BLACK,
-        TextDecorationStyle::SOLID, -1.0f, std::optional<TextDecorationOptions>(), 7, 9));
+        TextDecorationStyle::SOLID, -1.0f, std::optional<TextDecorationOptions>(), 7, 9, nullptr));
     /**
      * @tc.steps3: Create a SpanString with multiple spans, including font styles, etc.
      */

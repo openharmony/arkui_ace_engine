@@ -13,45 +13,45 @@
  * limitations under the License.
  */
 
-import { Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from "../../Graphics"
+import { Rect, RoundRect, CornerRadius, Vector2, Circle, CommandPath } from '../../Graphics'
 
 export class ShapeBaseTransfer {
     static transferRectStatic(rectValue: ESValue): Rect {
-        const left = rectValue.getProperty("left").toNumber();
-        const top = rectValue.getProperty("top").toNumber();
-        const right = rectValue.getProperty("right").toNumber();
-        const bottom = rectValue.getProperty("bottom").toNumber();
+        const left = rectValue.getProperty('left').toNumber();
+        const top = rectValue.getProperty('top').toNumber();
+        const right = rectValue.getProperty('right').toNumber();
+        const bottom = rectValue.getProperty('bottom').toNumber();
         let rect: Rect = { left: left, top: top, right: right, bottom: bottom };
         return rect
     }
 
     static transferRoundRectStatic(roundRectValue: ESValue): RoundRect {
         // let rect: Rect = {left: 0, top: 0, right: 0, bottom: 0};
-        const innerRectValue = roundRectValue.getProperty("rect");
+        const innerRectValue = roundRectValue.getProperty('rect');
         let rect: Rect = ShapeBaseTransfer.transferRectStatic(innerRectValue);
         let topLeftVector: Vector2 = { x: 0, y: 0 };
         let topRightVector: Vector2 = { x: 0, y: 0 };
         let bottomLeftVector: Vector2 = { x: 0, y: 0 };
         let bottomRightVector: Vector2 = { x: 0, y: 0 };
-        const innerCorners = roundRectValue.getProperty("corners");
-        const topLeft = innerCorners.getProperty("topLeft");
-        const topLeftXValue = topLeft.getProperty("x").toNumber();
-        const topLeftYValue = topLeft.getProperty("y").toNumber();
+        const innerCorners = roundRectValue.getProperty('corners');
+        const topLeft = innerCorners.getProperty('topLeft');
+        const topLeftXValue = topLeft.getProperty('x').toNumber();
+        const topLeftYValue = topLeft.getProperty('y').toNumber();
         topLeftVector.x = topLeftXValue;
         topLeftVector.y = topLeftYValue;
-        const topRight = innerCorners.getProperty("topRight");
-        const topRightXValue = topRight.getProperty("x").toNumber();
-        const topRightYValue = topRight.getProperty("y").toNumber();
+        const topRight = innerCorners.getProperty('topRight');
+        const topRightXValue = topRight.getProperty('x').toNumber();
+        const topRightYValue = topRight.getProperty('y').toNumber();
         topRightVector.x = topRightXValue;
         topRightVector.y = topRightYValue;
-        const bottomLeft = innerCorners.getProperty("bottomLeft");
-        const bottomLeftXValue = bottomLeft.getProperty("x").toNumber();
-        const bottomLeftYValue = bottomLeft.getProperty("y").toNumber();
+        const bottomLeft = innerCorners.getProperty('bottomLeft');
+        const bottomLeftXValue = bottomLeft.getProperty('x').toNumber();
+        const bottomLeftYValue = bottomLeft.getProperty('y').toNumber();
         bottomLeftVector.x = bottomLeftXValue;
         bottomLeftVector.y = bottomLeftYValue;
-        const bottomRight = innerCorners.getProperty("bottomRight");
-        const bottomRightXValue = bottomRight.getProperty("x").toNumber();
-        const bottomRightYValue = bottomRight.getProperty("y").toNumber();
+        const bottomRight = innerCorners.getProperty('bottomRight');
+        const bottomRightXValue = bottomRight.getProperty('x').toNumber();
+        const bottomRightYValue = bottomRight.getProperty('y').toNumber();
         bottomRightVector.x = bottomRightXValue;
         bottomRightVector.y = bottomRightYValue;
 
@@ -61,15 +61,15 @@ export class ShapeBaseTransfer {
     }
 
     static transferPathStatic(pathValue: ESValue): CommandPath {
-        const commandString = pathValue.getProperty("commands").toString();
+        const commandString = pathValue.getProperty('commands').toString();
         let path: CommandPath = { commands: commandString };
         return path;
     }
 
     static transferCircleStatic(circleValue: ESValue): Circle {
-        const centerX = circleValue.getProperty("centerX").toNumber();
-        const centerY = circleValue.getProperty("centerY").toNumber();
-        const radius = circleValue.getProperty("radius").toNumber();
+        const centerX = circleValue.getProperty('centerX').toNumber();
+        const centerY = circleValue.getProperty('centerY').toNumber();
+        const radius = circleValue.getProperty('radius').toNumber();
         let circle: Circle = { centerX: centerX, centerY: centerY, radius: radius };
         return circle
     }

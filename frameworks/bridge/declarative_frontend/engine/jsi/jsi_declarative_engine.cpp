@@ -1456,10 +1456,10 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
     NG::UIContextHelper::RegisterRemoveUIContextFunc();
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
-    if (hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+    if (hybridType == JsEngineHybridType::STATIC_HYBRID_DYNAMIC) {
         runtime_ = g_declarativeRuntime;
     }
-    if (!g_declarativeRuntime && hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+    if (!g_declarativeRuntime && hybridType == JsEngineHybridType::STATIC_HYBRID_DYNAMIC) {
         LOGE("JsiDeclarativeEngine::Initialize, g_declarativeRuntime is null");
     }
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);

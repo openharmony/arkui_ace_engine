@@ -16,15 +16,35 @@
 #include "shape.h"
 
 namespace OHOS::Ace {
-struct RectPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect> rectShape;
-};
+namespace {
+const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.RectShape";
+void ParseWidthAndHeight(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect>& rectShape)
+{
+    std::optional<OHOS::Ace::CalcDimension> widthOpt;
+    std::optional<OHOS::Ace::CalcDimension> heightOpt;
+    ani_ref width_ref;
+    ani_ref height_ref;
+    if (env->Object_GetPropertyByName_Ref(object, "width", &width_ref) != ANI_OK) {
+        return;
+    }
+    ParseStringNumberUndefinedObject(env, width_ref, OHOS::Ace::DimensionUnit::VP, widthOpt);
+    if (widthOpt.has_value() && widthOpt->IsValid()) {
+        rectShape->SetWidth(widthOpt.value());
+    }
+    if (env->Object_GetPropertyByName_Ref(object, "height", &height_ref) != ANI_OK) {
+        return;
+    }
+    ParseStringNumberUndefinedObject(env, height_ref, OHOS::Ace::DimensionUnit::VP, heightOpt);
+    if (heightOpt.has_value() && heightOpt->IsValid()) {
+        rectShape->SetHeight(heightOpt.value());
+    }
+}
+}
 
 void ANICreateRectShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return;
     }
     RectPeer* shapePeer = new RectPeer();
@@ -52,25 +72,32 @@ void ANICreateRectShapeWithParam(
         if (ANI_OK != env->Object_GetPropertyByName_Ref(aniOption, "radius", &params_ref)) {
             return;
         }
-        if (GetIsArrayObject(env, params_ref)) {
+        if (!GetIsUndefinedObject(env, params_ref) && GetIsArrayObject(env, params_ref)) {
             OHOS::Ace::CalcDimension radius;
             ParseArray(env, rect, static_cast<ani_object>(params_ref));
         } else {
-            OHOS::Ace::CalcDimension radiusVal;
-            ParseStringAndNumberObject(env, params_ref, OHOS::Ace::DimensionUnit::VP, radiusVal);
-            rect->SetRadiusWidth(radiusVal);
-            rect->SetRadiusWidth(radiusVal);
+            std::optional<OHOS::Ace::CalcDimension> radiusOpt;
+            if (ParseStringNumberUndefinedObject(env, params_ref, OHOS::Ace::DimensionUnit::VP, radiusOpt) &&
+                radiusOpt.has_value()) {
+                rect->SetRadiusWidth(radiusOpt.value());
+                rect->SetRadiusHeight(radiusOpt.value());
+            }
         }
     } else if (IsInstanceOfCls(env, aniOption, "L@ohos/arkui/shape/RoundRectShapeOptions;")) {
-        OHOS::Ace::CalcDimension radiusWidthVal;
-        ParseStringAndNumberOption(env, aniOption, radiusWidthVal, "radiusWidth",
-            "L@ohos/arkui/shape/RoundRectShapeOptions;");
-        OHOS::Ace::CalcDimension radiusHeightVal;
-        ParseStringAndNumberOption(env, aniOption, radiusHeightVal, "radiusHeight",
-            "L@ohos/arkui/shape/RoundRectShapeOptions;");
-        rect->SetRadiusWidth(radiusWidthVal);
-        rect->SetRadiusHeight(radiusHeightVal);
+        std::optional<OHOS::Ace::CalcDimension> radiusWidthOpt;
+        if (ParseStringNumberUndefinedOption(
+            env, aniOption, radiusWidthOpt, "radiusWidth", "@ohos.arkui.shape.RoundRectShapeOptions") &&
+            radiusWidthOpt.has_value()) {
+            rect->SetRadiusWidth(radiusWidthOpt.value());
+        }
+        std::optional<OHOS::Ace::CalcDimension> radiusHeightOpt;
+        if (ParseStringNumberUndefinedOption(
+            env, aniOption, radiusHeightOpt, "radiusHeight", "@ohos.arkui.shape.RoundRectShapeOptions") &&
+            radiusHeightOpt.has_value()) {
+            rect->SetRadiusHeight(radiusHeightOpt.value());
+        }
     }
+    ParseWidthAndHeight(env, aniOption, rect);
     shapePeer->rectShape = rect;
     if (ANI_OK !=
         env->Object_SetPropertyByName_Long(object, "rectShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
@@ -94,9 +121,8 @@ ani_object ANIRectShapeWidth(ani_env* env, [[maybe_unused]] ani_object object, [
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     RectPeer* rectObj = GetRectShape(env, object);
@@ -115,9 +141,8 @@ ani_object ANIRectShapeHeight(ani_env* env, [[maybe_unused]] ani_object object, 
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return nullptr;
     }
     RectPeer* rectObj = GetRectShape(env, object);
@@ -221,12 +246,13 @@ ani_object ANIRectShapeRadiusWidth(ani_env* env, ani_object object, [[maybe_unus
     if (!rectObj) {
         return object;
     }
-    OHOS::Ace::CalcDimension radiusVal;
-    if (!ParseStringAndNumberObject(env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal)) {
+    std::optional<OHOS::Ace::CalcDimension> radiusVal;
+    if (!ParseStringNumberUndefinedObject(
+        env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal)) {
         return object;
     }
     if (rectObj->rectShape) {
-        rectObj->rectShape->SetRadiusWidth(radiusVal);
+        rectObj->rectShape->SetRadiusWidth(radiusVal.value_or(OHOS::Ace::CalcDimension()));
     }
     return object;
 }
@@ -240,12 +266,13 @@ ani_object ANIRectShapeRadiusHeight(ani_env* env, ani_object object, [[maybe_unu
     if (!rectObj) {
         return object;
     }
-    OHOS::Ace::CalcDimension radiusVal;
-    if (!ParseStringAndNumberObject(env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal)) {
+    std::optional<OHOS::Ace::CalcDimension> radiusVal;
+    if (!ParseStringNumberUndefinedObject(
+        env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal)) {
         return object;
     }
     if (rectObj->rectShape) {
-        rectObj->rectShape->SetRadiusHeight(radiusVal);
+        rectObj->rectShape->SetRadiusHeight(radiusVal.value_or(OHOS::Ace::CalcDimension()));
     }
     return object;
 }
@@ -266,25 +293,27 @@ ani_object ANIRectShapeRadius(ani_env* env, ani_object object, [[maybe_unused]] 
         OHOS::Ace::CalcDimension radius;
         ParseArray(env, rectObj->rectShape, aniOption);
     } else {
-        OHOS::Ace::CalcDimension radiusVal;
-        ParseStringAndNumberObject(env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal);
-        rectObj->rectShape->SetRadiusWidth(radiusVal);
-        rectObj->rectShape->SetRadiusWidth(radiusVal);
+        std::optional<OHOS::Ace::CalcDimension> radiusVal;
+        ParseStringNumberUndefinedObject(env, static_cast<ani_ref>(aniOption), OHOS::Ace::DimensionUnit::VP, radiusVal);
+        auto radius = radiusVal.value_or(OHOS::Ace::CalcDimension());
+        rectObj->rectShape->SetRadiusWidth(radius);
+        rectObj->rectShape->SetRadiusHeight(radius);
     }
     return object;
 }
 
 ani_status RectShape::BindRectShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
         return ANI_ERROR;
     }
 
     std::array methods = {
         ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreateRectShape) },
-        ani_native_function { "<ctor>", "Lstd/core/Object;:V", reinterpret_cast<void*>(ANICreateRectShapeWithParam) },
+        ani_native_function { "<ctor>",
+            "X{C{@ohos.arkui.shape.RectShapeOptions}C{@ohos.arkui.shape.RoundRectShapeOptions}}:",
+            reinterpret_cast<void*>(ANICreateRectShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANIRectShapeWidth) },
         ani_native_function { "radiusWidth", nullptr, reinterpret_cast<void*>(ANIRectShapeRadiusWidth) },
         ani_native_function { "radiusHeight", nullptr, reinterpret_cast<void*>(ANIRectShapeRadiusHeight) },
@@ -297,8 +326,9 @@ ani_status RectShape::BindRectShape(ani_env* env)
     };
     ani_status tmp = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
     if (ANI_OK != tmp) {
+        LOGW("bind Rect methods error, status:%{public}d", tmp);
         return ANI_ERROR;
-    };
+    }
     return ANI_OK;
 }
 } // namespace OHOS::Ace

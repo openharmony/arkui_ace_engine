@@ -112,6 +112,7 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
 
     bool syncLoad = false;
+    bool supportSvg2 = false;
     std::optional<std::vector<float>> colorFilterMatrix;
     std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
 

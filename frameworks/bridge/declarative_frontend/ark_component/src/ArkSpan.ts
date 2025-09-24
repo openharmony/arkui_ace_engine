@@ -785,7 +785,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  allowDrop(value: Array<UniformDataType>): this {
+  allowDrop(value: Array<UniformDataType> | Array<string>): this {
     throw new Error('Method not implemented.');
   }
 

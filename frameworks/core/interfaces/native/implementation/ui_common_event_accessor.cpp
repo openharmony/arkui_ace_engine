@@ -80,7 +80,7 @@ void SetOnAppearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callback_)
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnAppear) {
-        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() { arkCallback.Invoke(); };
+        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value())]() { arkCallback.InvokeSync(); };
         ViewAbstract::SetFrameNodeCommonOnAppear(rawPtr, std::move(onAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnAppear(rawPtr);
@@ -95,7 +95,7 @@ void SetOnDisappearImpl(Ark_UICommonEvent peer, const Opt_Callback_Void* callbac
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnDisAppear = Converter::OptConvert<Callback_Void>(*callback_);
     if (arkOnDisAppear) {
-        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() { arkCallback.Invoke(); };
+        auto onDisAppear = [arkCallback = CallbackHelper(arkOnDisAppear.value())]() { arkCallback.InvokeSync(); };
         ViewAbstract::SetFrameNodeCommonOnDisappear(rawPtr, std::move(onDisAppear));
     } else {
         ViewAbstract::ClearJSFrameNodeOnDisappear(rawPtr);

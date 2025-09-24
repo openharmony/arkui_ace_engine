@@ -1841,4 +1841,89 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxLines002, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetMaxLines(), 999);
     EXPECT_EQ(TextFieldModelNG::GetMaxLines(AceType::RawPtr(frameNode_)), 999);
 }
+
+/**
+ * @tc.name: TextAreaScrollBarColorTest001
+ * @tc.desc: Test the enable or disable the TextAreaScrollBarColor attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    TextFieldModelNG model;
+    Color colorValue = Color(0xffc0c0c0);
+    model.SetTextAreaScrollBarColor(colorValue);
+    model.SetTextAreaScrollBarColor(AceType::RawPtr(frameNode_), colorValue);
+    /**
+     * @tc.expected: Get TextAreaScrollBarColor Value
+     */
+    Color defaultColor = Color::BLACK;
+    auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
+    EXPECT_EQ(TextFieldModelNG::GetTextAreaScrollBarColor(AceType::RawPtr(frameNode_)), colorValue);
+    EXPECT_EQ(result, colorValue);
+}
+
+/**
+ * @tc.name: TextAreaScrollBarColorTest002
+ * @tc.desc: Test the enable or disable the TextAreaScrollBarColor attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    TextFieldModelNG model;
+    Color colorValue = Color(0xffc0c0c0);
+    model.SetTextAreaScrollBarColor(colorValue);
+    model.ResetTextAreaScrollBarColor();
+    model.SetTextAreaScrollBarColor(AceType::RawPtr(frameNode_), colorValue);
+    model.ResetTextAreaScrollBarColor(AceType::RawPtr(frameNode_));
+    /**
+     * @tc.expected: Get TextAreaScrollBarColor Value
+     */
+    Color defaultColor = Color::BLACK;
+    auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
+    EXPECT_EQ(TextFieldModelNG::GetTextAreaScrollBarColor(AceType::RawPtr(frameNode_)), defaultColor);
+    EXPECT_EQ(result, defaultColor);
+}
+
+/**
+ * @tc.name: TextAreaScrollBarColorTest003
+ * @tc.desc: Test the enable or disable the TextAreaScrollBarColor attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
+    ASSERT_NE(valueBase, nullptr);
+
+    Color colorValue = Color(0xffc0c0c0);
+    valueBase->SetValue(colorValue);
+    pattern_->UpdatePropertyImpl("scrollBarColor", valueBase);
+    /**
+     * @tc.expected: Get TextAreaScrollBarColor Value
+     */
+    Color defaultColor = Color::BLACK;
+    auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
+    EXPECT_EQ(result, colorValue);
+}
 } // namespace OHOS::Ace::NG

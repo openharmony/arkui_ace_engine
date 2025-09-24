@@ -167,6 +167,8 @@ public:
     static ArkUINativeModuleValue SetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetController(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextAreaScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextAreaScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
      static void SetControllerInternal(FrameNode* frameNode, Local<JSValueRef> controllerVal, EcmaVM* vm);
 };

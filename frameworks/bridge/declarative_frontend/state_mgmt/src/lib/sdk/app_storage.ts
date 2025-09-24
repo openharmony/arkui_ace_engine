@@ -507,6 +507,10 @@ class AppStorage extends LocalStorage {
     protected constructor(initializingProperties: Object) {
         super(initializingProperties);
     }
+    
+    public static _getOrCreateByInterop_(): AppStorage {
+        return AppStorage.getOrCreate();
+    }
 }
 
 

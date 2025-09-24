@@ -5391,10 +5391,11 @@ void TextPattern::UpdateStyledStringByColorMode()
         if (!item) {
             continue;
         }
-        item->fontStyle->UpdateColorByResourceId();
-        if (item->backgroundStyle) {
-            item->backgroundStyle->UpdateColorByResourceId();
+        auto resourceMgr = item->GetResourceMgr();
+        if (!resourceMgr) {
+            continue;
         }
+        resourceMgr->ReloadResources();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -5997,6 +5998,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);
     spans_ = styledString_->GetSpanItems();
+    StyledStringRegisterResource();
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE(
             "TextPattern::SetStyledString[id:%d][size:%d]", host->GetId(), static_cast<int32_t>(spans_.size()));
@@ -6006,6 +6008,26 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextPattern::StyledStringRegisterResource()
+{
+    for (const auto& item : spans_) {
+        if (!item) {
+            continue;
+        }
+        for (const auto& [key, resourceUpdater] : item->GetResMap()) {
+            auto&& spanUpdateFunc = [func = resourceUpdater.updateFunc, weakSpan = WeakClaim(Referenced::RawPtr(item))](
+                                        const RefPtr<ResourceObject>& resObj) {
+                auto spanItem = weakSpan.Upgrade();
+                CHECK_NULL_VOID(spanItem);
+                auto updateValue = func;
+                CHECK_NULL_VOID(updateValue);
+                updateValue(spanItem, resObj);
+            };
+            item->AddResObj(key, resourceUpdater.obj, std::move(spanUpdateFunc));
+        }
+    }
 }
 
 void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
@@ -6021,9 +6043,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
-        auto imagePattern = imageNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
-        imagePattern->SetSyncLoad(imgAttr.syncLoad);
+        SetImageNodePattern(imageNode, imgAttr);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -6065,6 +6085,15 @@ void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     gesture->SetHitTestMode(HitTestMode::HTMNONE);
+}
+
+void TextPattern::SetImageNodePattern(RefPtr<ImageSpanNode> imageNode, const ImageSpanAttribute& imageSpanAttr)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(imageSpanAttr.syncLoad);
+    imagePattern->SetSupportSvg2(imageSpanAttr.supportSvg2);
 }
 
 void TextPattern::ProcessSpanString()

@@ -294,15 +294,16 @@ struct ArkUIAniDragModifier {
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
+    void (*setFrameRateRange)(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type);
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
-    void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
+    void (*setDrawCallback)(ani_env* env, ani_long ptr, void* fnDrawCallbackFun);
     ArkUI_Int32 (*getCurrentInstanceId)();
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
-    void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    void (*setCustomCallback)(ani_long ptr, void* fnMeasure, void* fnLayout);
     ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
     ani_long (*getNodePtrWithPeerPtr)(ani_long ptr);
     ani_int (*getNodeIdWithNodePtr)(ani_long ptr);
@@ -310,11 +311,11 @@ struct ArkUIAniCommonModifier {
     ani_long (*createRenderNodePeerWithNodePtr)(ani_long ptr);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
-    void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
-    void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
+    void (*onMeasureInnerMeasure)(ani_long ptr);
+    void (*onLayoutInnerLayout)(ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
     void (*setCustomPropertyCallBack)(
-        ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+        ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc);
     std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
@@ -327,9 +328,9 @@ struct ArkUIAniCommonModifier {
     void* (*transferKeyEventPointer)(ani_long nativePtr);
     void* (*createKeyEventAccessorWithPointer)(ani_long nativePtr);
     void* (*createEventTargetInfoAccessor)();
-    void (*eventTargetInfoAccessorWithId)(ani_env* env, ani_long input, ani_string id);
+    void (*eventTargetInfoAccessorWithId)(ani_env* env, ani_long input, const std::string& id);
     void* (*createScrollableTargetInfoAccessor)();
-    void (*scrollableTargetInfoAccessorWithId)(ani_env* env, ani_long input, ani_string id);
+    void (*scrollableTargetInfoAccessorWithId)(ani_env* env, ani_long input, const std::string& id);
     void (*scrollableTargetInfoAccessorWithPointer)(ani_long input, ani_long nativePtr);
     void* (*transferScrollableTargetInfoPointer)(ani_long nativePtr);
     ani_long (*transferDragEventPointer)(ani_long ptr);
@@ -353,9 +354,10 @@ struct ArkUIAniCommonModifier {
     void (*restoreColorMode)();
     void (*setThemeScopeId)(ani_env* env, ani_int themeScopeId);
     void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId,
-        const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
+        const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, void* func);
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
     void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
+    float (*getPx2VpWithCurrentDensity)(float px);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -374,7 +376,8 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
+    void (*setDrawModifier)(ani_long ptr, ani_int flag,
+        void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {

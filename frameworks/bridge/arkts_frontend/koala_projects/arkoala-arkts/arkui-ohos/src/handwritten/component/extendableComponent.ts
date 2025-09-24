@@ -27,6 +27,7 @@ import {
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
 import { Theme } from "@ohos/arkui/theme";
+import promptAction from '@ohos/promptAction'
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -44,6 +45,7 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
+    getDialogController(): promptAction.DialogController | undefined;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -120,6 +122,10 @@ export abstract class ExtendableComponent implements LifeCycle {
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo();
+    }
+
+    getDialogController(): promptAction.DialogController | undefined {
+        return this.delegate_!.getDialogController();
     }
 
     public get localStorage_(): LocalStorage {

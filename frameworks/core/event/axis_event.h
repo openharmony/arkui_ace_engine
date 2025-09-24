@@ -88,6 +88,7 @@ struct AxisEvent final : public PointerEvent {
     uint64_t modifierKeyState = 0;
 
     int32_t scrollStep = 0;
+    uint32_t axes = 0;
 
     AxisEvent()
     {
@@ -97,13 +98,13 @@ struct AxisEvent final : public PointerEvent {
         double verticalAxis, double horizontalAxis, double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent,
         AxisAction action, TimeStamp timestamp, int64_t deviceId, SourceType sourceType, SourceTool sourceTool,
         std::shared_ptr<const MMI::PointerEvent> pointerEvent, std::vector<KeyCode> pressedCodes,
-        int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep)
+        int32_t targetDisplayId, int32_t originalId, bool isInjected, int32_t scrollStep, uint32_t axes)
         : PointerEvent(x, y, screenX, screenY, globalDisplayX, globalDisplayY, timestamp), id(id),
           verticalAxis(verticalAxis), horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale),
           rotateAxisAngle(rotateAxisAngle), isRotationEvent(isRotationEvent), action(action), deviceId(deviceId),
           sourceType(sourceType), sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)),
           pressedCodes(pressedCodes), targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected),
-          scrollStep(scrollStep)
+          scrollStep(scrollStep), axes(axes)
     {
         eventType = UIInputEventType::AXIS;
     }
@@ -138,6 +139,8 @@ public:
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);
     bool GetIsRotationEvent() const;
+    bool HasAxis(AxisType axis);
+    uint32_t GetAxes() const;
     AxisInfo& SetGlobalLocation(const Offset& globalLocation);
     AxisInfo& SetLocalLocation(const Offset& localLocation);
     AxisInfo& SetScreenLocation(const Offset& screenLocation);
@@ -151,6 +154,7 @@ public:
 private:
     AxisAction action_ = AxisAction::NONE;
     int32_t scrollStep_ = 0;
+    uint32_t axes_ = 0;
     float rotateAxisAngle_ = 0.0;
     bool isRotationEvent_ = false;
     // global position at which the touch point contacts the screen.

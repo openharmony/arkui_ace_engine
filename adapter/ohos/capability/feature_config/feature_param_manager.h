@@ -38,19 +38,26 @@ public:
     void SetUINodeGcEnabled(bool enabled);
     bool IsUINodeGcEnabled() const;
 
+    bool IsPageOverflowEnabled() const;
+    bool IsDialogCorrectionEnabled() const;
+    void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
 private:
     void FeatureParamParseEntry(const std::string& bundleName);
+    void UICorrectionParamParseEntry(const std::string& bundleName);
     static const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> featureParamMap_;
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
     std::shared_ptr<ConfigXMLParserBase> featureParser_;
+    std::shared_ptr<ConfigXMLParserBase> uiCorrectionParser_;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
     // UINodeGcParamParser
     bool uiNodeGcEnabled_ = false;
+    bool pageOverflowEnabled_ = false;
+    bool dialogCorrectionEnabled_ = false;
 
     friend class ConfigXMLParserBase;
     friend class SyncLoadParser;

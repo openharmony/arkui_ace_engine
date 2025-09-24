@@ -350,7 +350,10 @@ HWTEST_F(SliderExTestNg, SliderTipModifierTest001, TestSize.Level1)
     EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), false);
     EXPECT_EQ(sliderTipModifier.bubbleSize_, BLOCK_SIZE_F_ZREO);
 
-    sliderPattern->direction_ = Axis::VERTICAL;
+    SliderModelNG sliderModelNG;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.onDraw(context);
     EXPECT_EQ(sliderTipModifier.vertex_.GetX(), offset);
@@ -1550,7 +1553,7 @@ HWTEST_F(SliderExTestNg, SliderValidRangeTest005, TestSize.Level1)
     event.action = KeyAction::UP;
     EXPECT_FALSE(sliderPattern->OnKeyEvent(event));
     /**
-     * @tc.cases: case2. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT, MoveStep(-1).
+     * @tc.cases: case2. direction == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT, MoveStep(-1).
      */
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_LEFT;
@@ -1559,7 +1562,7 @@ HWTEST_F(SliderExTestNg, SliderValidRangeTest005, TestSize.Level1)
     EXPECT_EQ(sliderPattern->value_, MIN_RANGE);
 
     /**
-     * @tc.cases: case3. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
+     * @tc.cases: case3. direction == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
     sliderPattern->value_ = MIN_RANGE;
@@ -1567,15 +1570,17 @@ HWTEST_F(SliderExTestNg, SliderValidRangeTest005, TestSize.Level1)
     EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_EQ(sliderPattern->value_, MIN_RANGE + STEP);
     /**
-     * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
+     * @tc.cases: case4. direction == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
-    sliderPattern->direction_ = Axis::VERTICAL;
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetDirection(node, Axis::VERTICAL);
     sliderPattern->value_ = MAX_RANGE;
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_TRUE(sliderPattern->OnKeyEvent(event));
     EXPECT_EQ(sliderPattern->value_, MAX_RANGE - STEP);
     /**
-     * @tc.cases: case5. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
+     * @tc.cases: case5. direction == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_DOWN;
     sliderPattern->value_ = MAX_RANGE;

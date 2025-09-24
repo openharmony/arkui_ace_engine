@@ -975,6 +975,40 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckIfNeedAvoidOnCaretChange001
+ * @tc.desc: test rich_editor_pattern.cpp CheckIfNeedAvoidOnCaretChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CheckIfNeedAvoidOnCaretChange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardInset_ = { .start = 1000, .end = 2000 };
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    float caretPos = 1000;
+    auto result = pattern_->CheckIfNeedAvoidOnCaretChange(caretPos);
+#if defined(ENABLE_STANDARD_INPUT)
+    EXPECT_TRUE(result);
+#else
+    EXPECT_TRUE(result);
+#endif
+    auto offset = 24.0_vp;
+    caretPos -= offset.ConvertToPx();
+    result = pattern_->CheckIfNeedAvoidOnCaretChange(caretPos);
+#if defined(ENABLE_STANDARD_INPUT)
+    EXPECT_FALSE(result);
+#else
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
  * @tc.name: GetCaretOffset001
  * @tc.desc: test get caret offset
  * @tc.type: FUNC

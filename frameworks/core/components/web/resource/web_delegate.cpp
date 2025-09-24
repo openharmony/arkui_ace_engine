@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
@@ -114,6 +115,8 @@ constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
+
+constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -607,6 +610,14 @@ int ContextMenuParamOhos::GetMediaTypeV2() const
     return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
 }
 
+int ContextMenuParamOhos::GetContextMenuMediaType() const
+{
+    if (param_) {
+        return param_->GetContextMenuMediaType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuDataMediaType::CMD_MT_NONE;
+}
+
 int ContextMenuParamOhos::GetInputFieldType() const
 {
     if (param_) {
@@ -971,6 +982,8 @@ WebDelegate::~WebDelegate()
     UnregisterAvoidAreaChangeListener(instanceId_);
     UnRegisterConfigObserver();
     UnregisterFreeMultiWindowListener();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(surfaceRsNode_);
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -3566,10 +3579,9 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
 
 void WebDelegate::SetSurfaceDensity(const double& density)
 {
-    if (density_ == density || density == 0.0) {
+    if (NearZero(density)) {
         return;
     }
-    density_ = density;
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3609,6 +3621,7 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
                 delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                delegate->RemoveSnapshotFrameNodeIfNeeded();
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebResize");
@@ -3651,7 +3664,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
         return false;
     }
     bool isBrowserUsage = nweb_->IsNWebEx();
-    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
+    if ((OHOS::system::GetDeviceType() != "2in1" && !IsPcMode()) || !isBrowserUsage) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
         return false;
     }
@@ -6199,19 +6212,19 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), isAnimate]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
-            webPattern->RemoveSnapshotFrameNode();
+            webPattern->RemoveSnapshotFrameNode(isAnimate);
         },
         TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }
@@ -6238,18 +6251,8 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint3
 
 void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->RecordBlanklessFrameSize(width, height);
-}
-
-double WebDelegate::ResizeWidth() const
-{
-    return resizeWidth_;
-}
-
-double WebDelegate::ResizeHeight() const
-{
-    return resizeHeight_;
+    blanklessFrameWidth_ = width;
+    blanklessFrameHeight_ = height;
 }
 
 void WebDelegate::SetVisibility(bool isVisible)
@@ -6257,6 +6260,34 @@ void WebDelegate::SetVisibility(bool isVisible)
     isVisible_ = isVisible;
     CHECK_NULL_VOID(nweb_);
     nweb_->SetVisibility(isVisible);
+}
+
+bool WebDelegate::IsBlanklessFrameValid() const
+{
+    uint32_t resizeWidth = std::ceil(resizeWidth_);
+    uint32_t resizeHeight = std::ceil(resizeHeight_);
+    // A Blankless Frame is valid only if:
+    // 1. Web content dimensions and blankless frame dimensions are valid (non-zero)
+    // 2. Frame width exactly matches web content width
+    // 3. Frame height is at least the minimum allowed percentage of web content height
+    //    (As described, this should be at least 85%, defined by WEB_SNAPSHOT_SIZE_TOLERANCE)
+    bool valid = blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && resizeWidth != 0 && resizeHeight != 0 &&
+                 blanklessFrameWidth_ == resizeWidth &&
+                 blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
+    if (!valid) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "blankless IsBlanklessFrameValid False. "
+            "blankless frame size [%{public}u, %{public}u], while current size [%{public}u, %{public}u]",
+            blanklessFrameWidth_, blanklessFrameHeight_, resizeWidth, resizeHeight);
+    }
+    return valid;
+}
+
+void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
+{
+    if (blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && !IsBlanklessFrameValid()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
+        RemoveSnapshotFrameNode(0);
+    }
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
@@ -6377,6 +6408,7 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
 
 bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData)
 {
+    CHECK_NULL_RETURN(dragData, false);
     const void* data = nullptr;
     size_t len = 0;
     int width = 0;
@@ -6397,7 +6429,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
     }
-
+    allowed_op_ = dragData->GetAllowedDragOperation();
     if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
@@ -6971,9 +7003,12 @@ void WebDelegate::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupM
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
     if (nweb_) {
-        std::shared_ptr<NWebDragEventImpl> dragEvent =
-	    std::make_shared<NWebDragEventImpl>(x, y, static_cast<OHOS::NWeb::DragAction>(dragAction));
+        std::shared_ptr<NWebDragEventImpl> dragEvent = std::make_shared<NWebDragEventImpl>(
+            x, y, static_cast<OHOS::NWeb::DragAction>(dragAction), op_, allowed_op_);
         nweb_->SendDragEvent(dragEvent);
+    }
+    if (dragAction == DragAction::DRAG_END || dragAction == DragAction::DRAG_CANCEL) {
+        allowed_op_ = OHOS::NWeb::NWebDragData::DragOperationsMask::DRAG_ALLOW_EVERY;
     }
 }
 
@@ -9268,12 +9303,7 @@ void WebDelegate::OnSafeBrowsingCheckFinish(int threat_type)
 
 bool WebDelegate::IsPcMode()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_RETURN(container, false);
-    int32_t instanceId = container->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    return window->IsPcWindow();
+    return SystemProperties::IsPCMode();
 }
 
 class WebFreeMultiWindowListener : public OHOS::Rosen::ISwitchFreeMultiWindowListener {

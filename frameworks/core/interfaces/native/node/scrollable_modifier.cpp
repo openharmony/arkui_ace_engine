@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
+constexpr bool DEFAULT_OFFSET = 0.0f;
+constexpr int32_t ERROR_INT_CODE = -1;
 
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
@@ -391,6 +393,70 @@ void ResetOnDidStopFling(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetOnDidStopFling(frameNode, nullptr);
 }
+
+void SetContentStartOffset(ArkUINodeHandle node, ArkUI_Float32 startOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetContentStartOffset(frameNode, startOffset);
+}
+
+void ResetContentStartOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetContentStartOffset(frameNode, DEFAULT_OFFSET);
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollableModelNG::CreateWithResourceObjContentStartOffset(frameNode, nullptr);
+    }
+}
+
+ArkUI_Float32 GetContentStartOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollableModelNG::GetContentStartOffset(frameNode);
+}
+
+void SetContentEndOffset(ArkUINodeHandle node, ArkUI_Float32 endOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetContentEndOffset(frameNode, endOffset);
+}
+
+void ResetContentEndOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollableModelNG::CreateWithResourceObjContentEndOffset(frameNode, nullptr);
+    }
+}
+
+ArkUI_Float32 GetContentEndOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollableModelNG::GetContentEndOffset(frameNode);
+}
+
+void CreateWithResourceObjContentStartOffset(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ScrollableModelNG::CreateWithResourceObjContentStartOffset(frameNode, AceType::Claim(resourceObj));
+}
+
+void CreateWithResourceObjContentEndOffset(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ScrollableModelNG::CreateWithResourceObjContentEndOffset(frameNode, AceType::Claim(resourceObj));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -440,6 +506,14 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnWillStartFling = ResetOnWillStartFling,
         .setOnDidStopFling = SetOnDidStopFling,
         .resetOnDidStopFling = ResetOnDidStopFling,
+        .setContentStartOffset = SetContentStartOffset,
+        .resetContentStartOffset = ResetContentStartOffset,
+        .getContentStartOffset = GetContentStartOffset,
+        .setContentEndOffset = SetContentEndOffset,
+        .resetContentEndOffset = ResetContentEndOffset,
+        .getContentEndOffset = GetContentEndOffset,
+        .createWithResourceObjContentStartOffset = CreateWithResourceObjContentStartOffset,
+        .createWithResourceObjContentEndOffset = CreateWithResourceObjContentEndOffset,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

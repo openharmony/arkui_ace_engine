@@ -54,4 +54,16 @@ float RichEditorParagraph::GetHeight()
     return height_;
 }
 
+bool RichEditorParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest)
+{
+    bool ret = TxtParagraph::HandleCaretWhenEmpty(result, needLineHighest);
+    CHECK_NULL_RETURN(ret, false);
+    bool needHandleRtlLeadingMargin = paraStyle_.direction == TextDirection::RTL
+        && paraStyle_.align == TextAlign::START
+        && paraStyle_.leadingMargin;
+    CHECK_NULL_RETURN(needHandleRtlLeadingMargin, true);
+    result.offset.SetX(GetMaxWidth() - paraStyle_.leadingMargin->size.Width().ConvertToPx());
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

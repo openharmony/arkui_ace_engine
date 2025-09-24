@@ -607,9 +607,9 @@ void DialogLayoutAlgorithm::ClipCustomMaskNode(const RefPtr<FrameNode>& dialog, 
 void DialogLayoutAlgorithm::ProcessMaskRect(
     std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask)
 {
+    CHECK_NULL_VOID(dialog);
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_VOID(dialogContext);
-    auto hub = dialog->GetEventHub<DialogEventHub>();
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();
@@ -634,7 +634,12 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
             dialogContext->UpdateClipEdge(true);
         }
     }
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto extraMaskNode = dialogPattern->GetExtraMaskNode();
+    auto maskNode = extraMaskNode ? extraMaskNode : dialog;
+    auto gestureHub = maskNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(width, height, offset);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);

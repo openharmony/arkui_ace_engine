@@ -2232,9 +2232,9 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 
 }
 
 ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
-    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool (*boolArray)[2])
 {
-    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, boolArray);
 }
 
 const ArkUIDialogAPI* GetDialogAPI()

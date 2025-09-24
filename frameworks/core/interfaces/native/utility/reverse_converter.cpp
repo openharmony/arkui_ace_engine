@@ -698,9 +698,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     
     dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.pressedTime.value.i32 = static_cast<int32_t>(
-        src.GetPressedTime().time_since_epoch().count());
+    dst.pressedTime.value = static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count());
 
     dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;

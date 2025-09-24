@@ -1025,6 +1025,31 @@ HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateScrollAlignment007
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(4.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER
+     */
+    Alignment scrollAlignment = Alignment::CENTER;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER);
+}
+
+/**
  * @tc.name: OnSurfaceChanged001
  * @tc.desc: Test ScrollLayoutAlgorithm OnSurfaceChanged
  * @tc.type: FUNC
@@ -1350,13 +1375,14 @@ HWTEST_F(ScrollLayoutTestNg, AdjustCurrentOffset_001, TestSize.Level1)
 HWTEST_F(ScrollLayoutTestNg, ContentOffset001, TestSize.Level1)
 {
     CreateScroll();
-    ScrollableModelNG::SetContentStartOffset(20);
-    ScrollableModelNG::SetContentEndOffset(20);
+    float contentOffset = 20.f;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), 20);
-    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), 20);
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset);
 }
 
 /**
@@ -1367,14 +1393,15 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset001, TestSize.Level1)
 HWTEST_F(ScrollLayoutTestNg, ContentOffset002, TestSize.Level1)
 {
     CreateScroll();
-    ScrollableModelNG::SetContentStartOffset(20);
-    ScrollableModelNG::SetContentEndOffset(20);
+    float contentOffset = 20.f;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), 20);
-    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), 20);
-    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT + 20 + 20);
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset);
+    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT + contentOffset);
 }
 
 /**
@@ -1409,14 +1436,14 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset004, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
 
-    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -20.f);
+    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -contentOffset);
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
 
     pattern_->ScrollBy(0, -640, false);
     FlushUITasks();
-    EXPECT_EQ(pattern_->currentOffset_, -640.f);
+    EXPECT_EQ(pattern_->currentOffset_, -620.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
@@ -1470,8 +1497,8 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
     EXPECT_EQ(isReachStart, 1);
     EXPECT_EQ(isReachEnd, 0);
     EXPECT_EQ(isToEdge, 0);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
-    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -contentOffset);
+    EXPECT_EQ(pattern_->currentOffset_, contentOffset);
     EXPECT_EQ(isReachStart, 1);
 
     /**
@@ -1480,7 +1507,7 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
      */
     ScrollTo(0);
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
     EXPECT_EQ(pattern_->currentOffset_, 0.0f);
 
     /**

@@ -225,6 +225,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     }
     ignoreSafeArea_ = value;
     TAG_LOGI(ACE_SAFE_AREA, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
+    ACE_SCOPED_TRACE("SafeAreaManager::SetIgnoreSafeArea %d", ignoreSafeArea_);
     return true;
 }
 

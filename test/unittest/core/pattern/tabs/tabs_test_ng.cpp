@@ -51,6 +51,7 @@ RefPtr<Theme> GetTheme(ThemeType type)
         tabTheme->bottomTabSymbolOn_ = Color::BLUE;
         tabTheme->bottomTabIconOff_ = Color::BLACK;
         tabTheme->tabBarFocusedColor_ = Color::GRAY;
+        tabTheme->activeIndicatorColor_ = Color::RED;
         return tabTheme;
     } else {
         return AceType::MakeRefPtr<DialogTheme>();

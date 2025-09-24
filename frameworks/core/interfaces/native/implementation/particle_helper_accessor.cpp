@@ -382,10 +382,8 @@ bool ParseParticleConfig(const ParticleType& type, const Ark_ParticleConfigs& ar
         auto size = std::pair<Dimension, Dimension>(Dimension(0.0), Dimension(0.0));
         ParseSize(size, imageConfig.size);
         imageParameter.SetSize(size);
-#ifdef ACE_STATIC
         std::optional<ImageFit> imageFitOpt = Converter::OptConvert<ImageFit>(imageConfig.objectFit);
         imageParameter.SetImageFit(imageFitOpt.value_or(ImageFit::COVER));
-#endif
         result.SetImageParticleParameter(imageParameter);
     } else {
         CalcDimension radius;
@@ -444,7 +442,6 @@ bool ParseEmitterOption(const Ark_EmitterOptionsInner& src, EmitterOption& resul
     result.SetParticle(particle);
     auto emitRate = ParseEmitRate(src.emitRate);
     result.SetEmitterRate(emitRate);
-#ifdef ACE_STATIC
     auto shapeOpt = Converter::OptConvert<ParticleEmitterShape>(src.shape);
     result.SetShape(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto positionValue = Converter::OptConvert<std::pair<Dimension, Dimension>>(src.position);
@@ -453,7 +450,6 @@ bool ParseEmitterOption(const Ark_EmitterOptionsInner& src, EmitterOption& resul
     } else {
         result.SetPosition(std::pair<Dimension, Dimension>(Dimension(0.0f), Dimension(0.0f)));
     }
-#endif
     auto width = Dimension(1.0, DimensionUnit::PERCENT);
     auto height = Dimension(1.0, DimensionUnit::PERCENT);
     auto sizeValue = std::pair<Dimension, Dimension>(width, height);
@@ -502,12 +498,10 @@ void ParseColorCurveUpdater(const Opt_Union_ParticleColorOptions_Array_ParticleP
         for (int32_t i = 0; i < arkArray.length; ++i) {
             ParticlePropertyAnimation<Color> colorPropertyAnimation;
             const auto& animationItem = arkArray.array[i];
-#ifdef ACE_STATIC
             std::optional<Color> from = Converter::OptConvert<Color>(animationItem.from);
             colorPropertyAnimation.SetFrom(from.value_or(DEFAULT_COLOR));
             std::optional<Color> to = Converter::OptConvert<Color>(animationItem.to);
             colorPropertyAnimation.SetTo(to.value_or(DEFAULT_COLOR));
-#endif
             int32_t startMillis = Converter::Convert<int32_t>(animationItem.startMillis);
             if (startMillis < 0) {
                 startMillis = 0;

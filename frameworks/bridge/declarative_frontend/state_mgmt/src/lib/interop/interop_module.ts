@@ -24,7 +24,7 @@ class InteropExtractorModule {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
             };
             if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
-                owningProperty.staticWatchId = InteropExtractorModule.createWatchFunc(callback, newValue);
+                owningProperty.staticWatchFunc = InteropExtractorModule.createWatchFunc(callback, newValue);
             }
         }
         return newValue;
@@ -39,4 +39,36 @@ class InteropExtractorModule {
 
     static createWatchFunc?: (watchFuncCallback: WatchFuncType, newValue: Object) => any;
     static makeObserved?: (value: Object) => Object;
+    static compatibleStaticComponent?: (
+        factory: () => Object,
+        options?: () => Object,
+        content?: () => void
+    ) => [() => void, number];
+    static makeBuilderParameterStaticProxy?: (name: string, value: Object, sourceGetter: Object) => Object;
+}
+
+class StaticInteropHook {
+    addRef?: () => void;
+}
+
+function registerCallbackForCreateWatchID(callback: () => any): void {
+    InteropExtractorModule.createWatchFunc = callback;
+}
+
+function registerCallbackForMakeObserved(callback: (value: Object) => Object): void {
+    InteropExtractorModule.makeObserved = callback;
+}
+
+function registerCompatibleStaticComponentCallback(
+    callback: (
+        factory: () => Object,
+        options?: () => Object,
+        content?: () => void
+    ) => [() => void, number]
+): void {
+    InteropExtractorModule.compatibleStaticComponent = callback;
+}
+
+function registerMakeBuilderParameterStaticProxy(callback: (name: string, value: Object, sourceGetter: Object) => Object) {
+    InteropExtractorModule.makeBuilderParameterStaticProxy = callback;
 }

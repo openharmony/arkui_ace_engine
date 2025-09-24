@@ -769,6 +769,7 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
         pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
         pattern->SetContainerModalTitleHeight(CONTAINER_TITLE_HEIGHT.ConvertToPx());
         ResetExpandStackNode();
+        hasNavOrSideBarNodes_ = false;
         return;
     }
 

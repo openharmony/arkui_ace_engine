@@ -175,6 +175,21 @@ public:
     }
 };
 
+struct HasInvertColor {
+    bool hasMaskColor = false;
+    bool hasShadowColor = false;
+    bool hasBackgroundColor = false;
+    bool hasBorderTopColor = false;
+    bool hasBorderBottomColor = false;
+    bool hasBorderLeftColor = false;
+    bool hasBorderRightColor = false;
+    bool hasBorderStartColor = false;
+    bool hasBorderEndColor = false;
+    bool hasBlurStyleOptionInactiveColor = false;
+    bool hasEffectOptionColor = false;
+    bool hasEffectOptionInactiveColor = false;
+};
+
 // Information of ActionSheet
 struct ActionSheetInfo {
     std::string title;             // title of ActionSheet, necessary.
@@ -264,10 +279,7 @@ struct DialogProperties {
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<int32_t> controllerId;
-    bool hasCustomMaskColor = false;
-    bool hasCustomShadowColor = false;
-    bool hasCustomBackgroundColor = false;
-    bool hasCustomBorderColor = false;
+    HasInvertColor hasInvertColor;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -308,6 +320,7 @@ struct DialogProperties {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+    std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
 };
 
 struct PromptDialogAttr {
@@ -338,6 +351,7 @@ struct PromptDialogAttr {
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
+    HasInvertColor hasInvertColor;
 
     WeakPtr<NG::UINode> contentNode;
     bool customStyle = false;

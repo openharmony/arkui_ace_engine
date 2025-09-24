@@ -20,7 +20,23 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-class GridLayoutInfoTest : public testing::Test {};
+class GridLayoutInfoTest : public testing::Test {
+public:
+    void InitLayoutInfoForBoundaryCheck(GridLayoutInfo& info);
+};
+
+void GridLayoutInfoTest::InitLayoutInfoForBoundaryCheck(GridLayoutInfo& info)
+{
+    info.reachStart_ = false;
+    info.currentOffset_ = 0.0f;
+    info.contentStartOffset_ = 0.0f;
+    info.totalHeightOfItemsInView_ = 0.0f;
+    info.contentEndOffset_ = 0.0f;
+    info.endIndex_ = 0;
+    info.childrenCount_ = 0;
+    info.lastMainSize_ = 0.0f;
+    info.contentEndPadding_ = 0.0f;
+}
 
 /**
  * @tc.name: GridLayoutInfo::GetContentHeight001
@@ -893,6 +909,30 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset004, TestSize.Level1)
     EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
 }
 
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffsetWithEmptyCacheAndWithoutLastSize, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.lineHeightMap_ = {};
+    info.crossCount_ = 2;
+    info.childrenCount_ = 30;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -200.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 100.f;
+    info.startIndex_ = 10;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 29);
+    EXPECT_EQ(info.currentOffset_, -20.f);
+}
+
 HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
 {
     GridLayoutInfo info;
@@ -1124,5 +1164,136 @@ HWTEST_F(GridLayoutInfoTest, AllConditionsMet_ReturnsTrue, TestSize.Level1) {
     info.gridMatrix_[1] = {{0, 5}};
     info.childrenCount_ = 6;
     EXPECT_TRUE(info.IsAllItemsMeasured());
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateEndIndexWhenLastLineHeightIsZero
+ * @tc.desc: test UpdateEndIndex when last line height is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateEndIndexWhenLastLineHeightIsZero, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_[0] = { { 0, 0 } };
+    info.gridMatrix_[1] = { { 0, 1 } };
+    info.gridMatrix_[2] = { { 0, 2 } };
+    info.endMainLineIndex_ = 2;
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f }, { 2, 0.0f } };
+    info.UpdateEndIndex(0.0f, 200.0f, 0.0f);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 2);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::IsOutOfEndWithContentOffset
+ * @tc.desc: test IsOutOfEnd with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, IsOutOfEndWithContentOffset, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.currentOffset_ = 0;
+    info.reachStart_ = false;
+    info.totalHeightOfItemsInView_ = 100;
+    info.contentStartOffset_ = 20;
+    info.contentEndOffset_ = 30;
+    info.lastMainSize_ = 120;
+    EXPECT_FALSE(info.IsOutOfEnd(0, false));
+}
+
+/**
+ * @tc.name: GridLayoutInfo::IsOutOfEndTest
+ * @tc.desc: test IsOutOfEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, IsOutOfEndTest, TestSize.Level1)
+{
+    // init gridLayoutInfo
+    GridLayoutInfo info;
+    InitLayoutInfoForBoundaryCheck(info);
+    const float mainGap = 5.0f;
+    // is at or out of start
+    info.reachStart_ = true;
+    info.currentOffset_ = 5.0f;
+    info.contentStartOffset_ = 5.0f;
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false));
+
+    // end index(5) is not the last index(9)
+    InitLayoutInfoForBoundaryCheck(info);
+    info.childrenCount_ = 10;
+    info.endIndex_ = 5;
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false));
+
+    // endPos = 100+50+10=160 < 170-0-0.01? 160>169.99 -> out of end
+    InitLayoutInfoForBoundaryCheck(info);
+    info.endIndex_ = 9;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = 100.0f;
+    info.totalHeightOfItemsInView_ = 50.0f;
+    info.contentEndOffset_ = 10.0f;
+    info.lastMainSize_ = 170.0f;
+    info.contentEndPadding_ = 0.0f;
+    EXPECT_TRUE(info.IsOutOfEnd(mainGap, false));
+
+    // endPos=160 > 160.01-0-0.01? 160 = 160 -> not out of end
+    InitLayoutInfoForBoundaryCheck(info);
+    info.endIndex_ = 9;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = 100.0f;
+    info.totalHeightOfItemsInView_ = 50.0f;
+    info.contentEndOffset_ = 10.0f;
+    info.lastMainSize_ = 160.01f;
+    info.contentEndPadding_ = 0.0f;
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false));
+}
+
+/**
+ * @tc.name: GridLayoutInfo::IsOutOfEndTest
+ * @tc.desc: test IsOutOfEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, IsOutOfEndTest002, TestSize.Level1)
+{
+    // init gridLayoutInfo
+    GridLayoutInfo info;
+    InitLayoutInfoForBoundaryCheck(info);
+    const float mainGap = 5.0f;
+
+    // 测试5: 边界情况，endPos恰好等于临界值（考虑精度）
+    info.endIndex_ = 9;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = 100.0f;
+    info.totalHeightOfItemsInView_ = 50.0f;
+    info.contentEndOffset_ = 10.0f;
+    info.lastMainSize_ = 160.0f; // endPos=160, 比较160 < (160-0-0.01)=159.99 -> false
+    info.contentEndPadding_ = 0.0f;
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false));
+
+    // 测试6: 测试contentEndPadding的影响
+    InitLayoutInfoForBoundaryCheck(info);
+    info.endIndex_ = 9;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = 100.0f;
+    info.totalHeightOfItemsInView_ = 50.0f;
+    info.contentEndOffset_ = 10.0f;
+    info.lastMainSize_ = 170.0f;
+    info.contentEndPadding_ = 10.0f; // 临界值变为170-10=160
+
+    // endPos=160 < 160-0.01? 160<159.99 -> false
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false));
+
+    info.lastMainSize_ = 159.98f;                  // 160 < (159.98-10-0.01)=149.97? 160>149.97 -> 不满足条件
+    EXPECT_FALSE(info.IsOutOfEnd(mainGap, false)); // 注意：此时endPos未超出，返回false
+
+    // 测试7: 负偏移量情况
+    InitLayoutInfoForBoundaryCheck(info);
+    info.endIndex_ = 9;
+    info.childrenCount_ = 10;
+    info.currentOffset_ = -50.0f;
+    info.totalHeightOfItemsInView_ = 100.0f;
+    info.contentEndOffset_ = 20.0f;
+    info.lastMainSize_ = 80.0f; // endPos=-50+100+20=70 < 80-0-0.01=79.99 -> true
+    info.contentEndPadding_ = 0.0f;
+    EXPECT_TRUE(info.IsOutOfEnd(mainGap, false));
 }
 } // namespace OHOS::Ace::NG

@@ -525,7 +525,11 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
 
         auto backgroundColorValue = obj->GetProperty("backgroundColor");
         Color backgroundColor;
-        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        RefPtr<ResourceObject> backgroundColorResObj;
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor, backgroundColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !JSViewAbstract::CheckDarkResource(backgroundColorResObj)) {
+                properties.hasInvertColor.hasBackgroundColor = true;
+            }
             properties.backgroundColor = backgroundColor;
         }
         auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");

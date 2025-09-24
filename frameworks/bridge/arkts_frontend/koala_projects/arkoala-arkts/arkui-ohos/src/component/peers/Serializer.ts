@@ -558,9 +558,9 @@ export class Serializer extends SerializerBase {
     writeOnSearchResultReceiveEvent(value: OnSearchResultReceiveEvent): void {
         let valueSerializer : Serializer = this
         const value_activeMatchOrdinal  = value.activeMatchOrdinal
-        valueSerializer.writeNumber(value_activeMatchOrdinal)
+        valueSerializer.writeInt32(value_activeMatchOrdinal)
         const value_numberOfMatches  = value.numberOfMatches
-        valueSerializer.writeNumber(value_numberOfMatches)
+        valueSerializer.writeInt32(value_numberOfMatches)
         const value_isDoneCounting  = value.isDoneCounting
         valueSerializer.writeBoolean(value_isDoneCounting)
     }
@@ -4808,7 +4808,7 @@ export class Serializer extends SerializerBase {
         const value_host  = value.host
         valueSerializer.writeString(value_host)
         const value_port  = value.port
-        valueSerializer.writeNumber(value_port)
+        valueSerializer.writeInt32(value_port)
         const value_keyTypes  = value.keyTypes
         valueSerializer.writeInt32(value_keyTypes.length as int32)
         for (let i = 0; i < value_keyTypes.length; i++) {
@@ -4849,7 +4849,7 @@ export class Serializer extends SerializerBase {
         const value_mimetype  = value.mimetype
         valueSerializer.writeString(value_mimetype)
         const value_contentLength  = value.contentLength
-        valueSerializer.writeNumber(value_contentLength)
+        valueSerializer.writeInt64(value_contentLength)
     }
     writeOnErrorReceiveEvent(value: OnErrorReceiveEvent): void {
         let valueSerializer : Serializer = this
@@ -25140,10 +25140,9 @@ export class Serializer extends SerializerBase {
                 const value__content_value_1  = value__content_value as Resource
                 valueSerializer.writeResource(value__content_value_1)
             }
-            else if (TypeChecker.isComponentContent(value__content_value)) {
-                valueSerializer.writeInt8(2 as int32)
-                const value__content_value_2  = value__content_value as ComponentContent
-                valueSerializer.writeComponentContent(value__content_value_2)
+            else {
+                console.warn("not support ComponentContent now");
+                throw new Error("not support ComponentContent now");
             }
         }
         const value__indicator  = value._indicator

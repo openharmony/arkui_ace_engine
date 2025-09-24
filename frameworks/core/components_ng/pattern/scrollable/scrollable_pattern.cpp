@@ -1515,6 +1515,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         if (!userFlingBeforeDrag && isWillFling && scrollable->GetOnWillStartFlingCallback()) {
             scrollable->HandleScrollBarOnWillStartFling();
         }
+        scrollable->SetIsDragOuterScrollBarStopAnimation(false);
     };
     auto scrollBarOnDidStopFlingCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -1526,10 +1527,21 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         }
         scrollable->SetIsScrollBarDragging(false);
     };
+
+    auto preDragStartCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto scrollable = pattern->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        if (scrollable->GetIsUserFling()) {
+            scrollable->SetIsDragOuterScrollBarStopAnimation(true);
+        }
+    };
+
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
         std::move(scrollEndCallback), std::move(startSnapAnimationCallback), std::move(scrollbarFRcallback),
         std::move(scrollPageCallback), std::move(scrollBarOnDidStopDraggingCallback),
-        std::move(scrollBarOnDidStopFlingCallback) };
+        std::move(scrollBarOnDidStopFlingCallback), std::move(preDragStartCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
@@ -1885,8 +1897,11 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isBackToTopRunning_) {
             source = SCROLL_FROM_STATUSBAR;
         }
-        if ((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) ||
-            (pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta))) {
+        auto totalOffset = pattern->GetTotalOffset();
+        if (((pattern->scrollToDirection_ == ScrollToDirection::FORWARD && Positive(delta)) &&
+                !GreatNotEqual(totalOffset, pattern->finalPosition_)) ||
+            ((pattern->scrollToDirection_ == ScrollToDirection::BACKWARD && Negative(delta)) &&
+                !LessNotEqual(totalOffset, pattern->finalPosition_))) {
             delta = 0;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation || pattern->isAnimateOverScroll_) {

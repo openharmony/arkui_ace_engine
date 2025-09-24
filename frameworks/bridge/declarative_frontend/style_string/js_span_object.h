@@ -46,8 +46,8 @@ public:
     static void ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
-    static void GetStrokeColorFallback(const JSRef<JSObject>& obj,
-        const RefPtr<TextTheme>& theme, Color& color);
+    static void GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
+        RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
     void GetFontFamily(const JSCallbackInfo& info);
@@ -220,7 +220,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextShadowSpan* textShadowSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<TextShadowSpan> ParseJSTextShadowSpan(const JSRef<JSObject>& obj);
+    static RefPtr<TextShadowSpan> ParseJSTextShadowSpan(const JSRef<JSObject>& obj, bool needResObj = false);
     void GetTextShadow(const JSCallbackInfo& info);
     void SetTextShadow(const JSCallbackInfo& info);
 
@@ -296,6 +296,8 @@ public:
     void SetImageLayoutStyle(const JSCallbackInfo& info) {}
     void GetImageColorFilter(const JSCallbackInfo& info);
     void SetImageColorFilter(const JSCallbackInfo& info) {}
+    void GetSupportSvg2(const JSCallbackInfo& info);
+    void SetSupportSvg2(const JSCallbackInfo& info) {}
 
     const RefPtr<ImageSpan>& GetImageSpan();
     void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);

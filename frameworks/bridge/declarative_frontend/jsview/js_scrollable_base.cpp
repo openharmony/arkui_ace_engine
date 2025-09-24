@@ -132,6 +132,8 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onDidStopDragging", &JSScrollableBase::JSOnDidStopDragging, opt);
     JSClass<JSScrollableBase>::StaticMethod("onWillStartFling", &JSScrollableBase::JSOnWillStartFling, opt);
     JSClass<JSScrollableBase>::StaticMethod("onDidStopFling", &JSScrollableBase::JSOnDidStopFling, opt);
+    JSClass<JSScrollableBase>::StaticMethod("contentStartOffset", &JSScrollableBase::JSContentStartOffset, opt);
+    JSClass<JSScrollableBase>::StaticMethod("contentEndOffset", &JSScrollableBase::JSContentEndOffset, opt);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -269,7 +271,7 @@ void JSScrollableBase::JSOnDidStopFling(const JSCallbackInfo& args)
     }
 }
 
-void JSScrollableBase::SetContentStartOffset(const JSCallbackInfo& info)
+void JSScrollableBase::JSContentStartOffset(const JSCallbackInfo& info)
 {
     double offset = 0.0;
     RefPtr<ResourceObject> resObj;
@@ -283,7 +285,7 @@ void JSScrollableBase::SetContentStartOffset(const JSCallbackInfo& info)
     }
 }
 
-void JSScrollableBase::SetContentEndOffset(const JSCallbackInfo& info)
+void JSScrollableBase::JSContentEndOffset(const JSCallbackInfo& info)
 {
     double offset = 0.0;
     RefPtr<ResourceObject> resObj;

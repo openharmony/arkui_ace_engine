@@ -382,12 +382,12 @@ export class PointParticleParameters_serializer {
         value_radius_type = runtimeType(value_radius)
         if (RuntimeType.STRING == value_radius_type) {
             valueSerializer.writeInt8(0)
-            const value_radius_0 = unsafeCast<string>(value_radius)
+            const value_radius_0 = value_radius as string
             valueSerializer.writeString(value_radius_0)
         }
         else if (RuntimeType.NUMBER == value_radius_type) {
             valueSerializer.writeInt8(1)
-            const value_radius_1 = unsafeCast<number>(value_radius)
+            const value_radius_1 = value_radius as number
             valueSerializer.writeNumber(value_radius_1)
         }
     }
@@ -462,12 +462,12 @@ export class ImageParticleParameters_serializer {
         value_src_type = runtimeType(value_src)
         if (RuntimeType.STRING == value_src_type) {
             valueSerializer.writeInt8(0)
-            const value_src_0 = unsafeCast<string>(value_src)
+            const value_src_0 = value_src as string
             valueSerializer.writeString(value_src_0)
         }
         else if (RuntimeType.OBJECT == value_src_type) {
             valueSerializer.writeInt8(1)
-            const value_src_1 = unsafeCast<Resource>(value_src)
+            const value_src_1 = value_src as Resource
             valueSerializer.writeResource(value_src_1)
         }
         const value_size = value.size
@@ -600,12 +600,12 @@ export class EmitterParticleOptions_serializer {
         value_config_type = runtimeType(value_config)
         if (((RuntimeType.OBJECT) == (value_config_type)) && ((value_config!.hasOwnProperty("radius")))) {
             valueSerializer.writeInt8(0)
-            const value_config_0 = unsafeCast<PointParticleParameters>(value_config)
+            const value_config_0 = value_config as PointParticleParameters
             PointParticleParameters_serializer.write(valueSerializer, value_config_0)
         }
         else if (((RuntimeType.OBJECT) == (value_config_type)) && ((value_config!.hasOwnProperty("src")))) {
             valueSerializer.writeInt8(1)
-            const value_config_1 = unsafeCast<ImageParticleParameters>(value_config)
+            const value_config_1 = value_config as ImageParticleParameters
             ImageParticleParameters_serializer.write(valueSerializer, value_config_1)
         }
         const value_count = value.count

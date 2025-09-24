@@ -14,12 +14,12 @@
  */
 
 import { UIContextImpl } from '../UIContextImpl';
-import { int32 } from "@koalaui/common"
+import { int32 } from '@koalaui/common'
 
 export class UIContextTransfer {
 
     static transferStatic(input: Any): Object {
-        const instanceId = ESValue.wrap(input).getProperty("instanceId_").toNumber();
+        const instanceId = ESValue.wrap(input).getProperty('instanceId_').toNumber();
         let uiContext = new UIContextImpl(instanceId as int32);
         return uiContext;
     }

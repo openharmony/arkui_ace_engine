@@ -41,6 +41,10 @@ struct WaterFlowMainPage {
     new TextList(7, 'WaterFlowNodeFooterContent', 'pages/waterflow/demo01/WaterFlowNodeFooterContent'),
     new TextList(8, 'lazyVGrid-ori', 'pages/waterflow/lazyVGrid/lazyVGrid-ori'),
     new TextList(9, 'lazyVGrid-seg', 'pages/waterflow/lazyVGrid/lazyVGrid-seg'),
+    new TextList(10, 'waterFlowFriction', 'pages/waterflow/demo01/waterFlowFriction'),
+    new TextList(11, 'waterFlowFrictionModifier', 'pages/waterflow/waterFlowModifier/waterFlowFrictionModifier'),
+    new TextList(12, 'waterFlowModifierIndex', 'pages/waterflow/waterFlowModifier/waterFlowModifierIndex'),
+    new TextList(13, 'waterFlowIndex', 'pages/waterflow/waterFlowIndex')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

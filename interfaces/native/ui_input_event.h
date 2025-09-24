@@ -120,6 +120,18 @@ enum {
     UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE = 1,
     /** Touchscreen. */
     UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN = 2,
+    /**
+     * @brief The key type.
+     *
+     * @since 21
+     */
+    UI_INPUT_EVENT_SOURCE_TYPE_KEY = 4,
+    /**
+     * @brief The joystick type.
+     *
+     * @since 21
+     */
+    UI_INPUT_EVENT_SOURCE_TYPE_JOYSTICK = 5,
 };
 
 /**
@@ -238,6 +250,20 @@ enum {
     UI_FOCUS_AXIS_EVENT_ABS_HAT0X = 6,
     /** ABS_HAT0Y. */
     UI_FOCUS_AXIS_EVENT_ABS_HAT0Y = 7,
+};
+
+/**
+ * @brief Defines an enum for the axis types for axis events.
+ *
+ * @since 21
+ */
+enum {
+    /** Vertical scroll axis. */
+    UI_AXIS_TYPE_VERTICAL_AXIS = 0,
+    /** Horizontal scroll axis. */
+    UI_AXIS_TYPE_HORIZONTAL_AXIS = 1,
+    /** Pinch axis. */
+    UI_AXIS_TYPE_PINCH_AXIS = 2,
 };
 
 /**
@@ -894,6 +920,16 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  * @since 15
  */
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Checks whether this event contains a specified axis type.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param axis Axis type of the axis event.
+ * @return Returns <b>true</b> if the event contains the specified axis type; returns <b>false</b> otherwise.
+ * @since 21
+ */
+int32_t OH_ArkUI_AxisEvent_HasAxis(const ArkUI_UIInputEvent* event, int32_t axis);
 
 /**
  * @brief Sets how the component behaves during hit testing.

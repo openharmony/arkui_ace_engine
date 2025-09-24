@@ -554,7 +554,8 @@ public:
     {
         caretChangeListener_ = listener;
     }
-
+    void RecreateUndoManager();
+    void CreateStyledString();
     void SetStyledString(const RefPtr<SpanString>& value);
 
     RefPtr<MutableSpanString> GetStyledString() const
@@ -854,6 +855,7 @@ public:
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
     void ReportAfterContentChangeEvent();
+    void ReportTextChange();
     void DeleteToMaxLength(std::optional<int32_t> length);
     void DeleteContent(int32_t length);
 
@@ -902,6 +904,9 @@ public:
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
+    void AdjustHandleByLineMetrics(int32_t index, bool isFirst, OffsetF& handleOffset, float& handleHeight);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false) override;
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
@@ -1261,6 +1266,8 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = false;
     }
 
+    bool CheckIfNeedAvoidOnCaretChange(float caretPos);
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool IsTriggerAvoidOnCaretAvoidMode()
@@ -1467,7 +1474,7 @@ private:
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
-    void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    bool HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
     bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
@@ -1918,6 +1925,7 @@ private:
     RefPtr<RichEditorContentPattern> contentPattern_;
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
+    // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)

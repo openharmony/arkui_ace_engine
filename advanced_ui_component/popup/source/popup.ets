@@ -538,7 +538,6 @@ export struct PopupComponent {
     if (this.currentScreenStatus !== this.beforeScreenStatus) {
       this.applySizeOptions = this.getApplyMaxSize();
       this.beforeScreenStatus = this.currentScreenStatus
-      return scrollMaxHeight;
     }
     scrollMaxHeight = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height)
     scrollMaxHeight -= this.titleHeight

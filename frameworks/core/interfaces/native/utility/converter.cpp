@@ -334,10 +334,10 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
 std::optional<std::string> ResourceConverter::GetPluralResource()
 {
     std::optional<std::string> result;
-    if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
+    if (id_ != -1 && params_.size() >= 2) {  // 2 means quantity and count in params_
         result = resWrapper_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
         ReplaceHolder(result.value(), params_, 1);
-    } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
+    } else if (params_.size() >= 3) {  // 3 means resName, quantity and count in params_
         result = resWrapper_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
         ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
     } else {
@@ -3029,7 +3029,7 @@ TouchLocationInfo Convert(const Ark_TouchObject& src)
         PipelineBase::Vp2PxWithCurrentDensity(y)));
     dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
         PipelineBase::Vp2PxWithCurrentDensity(displayY)));
-    auto pressedTimeOpt = Converter::OptConvert<int32_t>(src.pressedTime);
+    auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeOpt.value_or(0)));
     TimeStamp time(nanoseconds);
     dst.SetPressedTime(time);

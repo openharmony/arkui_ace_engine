@@ -107,4 +107,25 @@ HWTEST_F(ContainerPickerTest, ContainerPickerLayoutPropertyTest002, TestSize.Lev
     EXPECT_EQ(layoutProperty->GetEnableHapticFeedbackValue(), false);
 }
 
+/**
+ * @tc.name: ContainerPickerCreateAnimation001
+ * @tc.desc: Test ContainerPicker CreateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerTest, ContainerPickerCreateAnimation001, TestSize.Level0)
+{
+    /**
+    * @tc.steps: step1. create picker and get frameNode.
+    * @tc.expected: step2. When creating the node，animationCreated_ will be set to true.
+    */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->animationCreated_, true);
+}
+
 }

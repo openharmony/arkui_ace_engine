@@ -861,7 +861,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     // Test the size set by codes.
     EXPECT_EQ(size, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
     /**
-     * Only set width
+     * Only set width.
      */
     LayoutConstraintF layoutConstraintSize2;
     layoutConstraintSize2.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
@@ -870,7 +870,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     auto size2 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize2, &layoutWrapper);
     EXPECT_EQ(size2->Width(), WIDTH.ConvertToPx());
     /**
-     * Only set height
+     * Only set height.
      */
     LayoutConstraintF layoutConstraintSize3;
     layoutConstraintSize3.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
@@ -879,7 +879,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     auto size3 = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize3, &layoutWrapper);
     EXPECT_EQ(size3->Height(), HEIGHT.ConvertToPx());
     /**
-     * Do not set width and height
+     * Do not set width and height.
      */
     LayoutConstraintF layoutConstraintSize4;
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize4);
@@ -887,7 +887,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize4, &layoutWrapper);
 
     /**
-     *  Set Border
+     *  Set Border.
      */
     LayoutConstraintF layoutConstraintSize5;
     layoutConstraintSize5.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -927,6 +927,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     layoutProperty->UpdateMargin(margin); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
@@ -940,6 +943,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     layoutProperty->UpdateMargin(margin1); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
+    pipeline->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
@@ -2791,6 +2795,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0128, TestSize.Level1)
      * @tc.expected: test GetFirstChild is not null
      */
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->UpdateIndicator();
     auto host = pattern->GetHost();
     ASSERT_NE(host->GetFirstChild(), nullptr);
@@ -2819,6 +2826,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0129, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->StartCustomNodeAnimation(true);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
@@ -2850,6 +2860,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     pattern->StartCustomNodeAnimation(false);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());

@@ -260,6 +260,7 @@ public:
         const std::string& extraInfo,
         const std::unordered_map<int, DragPointerEvent>& idToPoints,
         const RefPtr<FrameNode>& node);
+    void FlushDragEventVoluntarily();
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -355,7 +356,8 @@ public:
 
     void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {}) override;
 
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
@@ -387,6 +389,9 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
     void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+
+    bool FlushSafeArea(
+        int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas);
 
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
 
@@ -1122,7 +1127,7 @@ public:
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
 
-    void AddNeedReloadNodes(const WeakPtr<UINode>& node);
+    void AddNeedReloadNodes(UINode* node);
     void ReloadNodesResource();
 
     void NeedReloadResource(bool needReloadResource)
@@ -1194,10 +1199,7 @@ public:
         uiTranslateManager_->RemoveTranslateListener(nodeId);
     }
 
-    void SetEnableSwipeBack(bool isEnable) override
-    {
-        enableSwipeBack_ = isEnable;
-    }
+    void SetEnableSwipeBack(bool isEnable) override;
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1293,15 +1295,20 @@ public:
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void StartWindowMaximizeAnimation(
-        int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
+    void StartWindowMaximizeAnimation(int32_t width, int32_t height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
     void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets>& safeAvoidArea = {});
 
     void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -1597,7 +1604,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
-    bool enableSwipeBack_ = true;
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();

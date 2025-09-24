@@ -14,8 +14,8 @@
  */
 
 #include <cstddef>
-#include <optional>
 #include <memory>
+#include <optional>
 
 #include "gtest/gtest.h"
 
@@ -23,8 +23,8 @@
 #define private public
 
 #include "mock/mock_form_utils.h"
+#include "mock/mock_pixel_map.h"
 #include "mock/mock_sub_container.h"
-#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -33,13 +33,13 @@
 
 #include "base/utils/utils.h"
 #include "base/want/want_wrap.h"
+#include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/common/form_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,12 +53,13 @@ RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
-}
+} // namespace
 class FormPatternTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
+
 protected:
     static RefPtr<FormNode> CreateFromNode();
 };
@@ -110,7 +111,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
 
     EXPECT_EQ(pattern->scopeId_, 0);
-    auto  host = pattern->GetHost();
+    auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
     pattern->frameNode_ = nullptr;
     pattern->OnAttachToFrameNode();
@@ -128,7 +129,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
     pattern->OnAttachToFrameNode();
     EXPECT_EQ(pattern->scopeId_, 0);
     pattern->frameNode_ = host;
-
 
     RefPtr<SubContainer> subContainer = pattern->subContainer_;
     pattern->subContainer_ = nullptr;
@@ -170,7 +170,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
     EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_ = layoutProperty;
 
-    auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
+    auto&& layoutConstraint = layoutProperty->calcLayoutConstraint_;
     std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
     CalcSize idealSize = { CalcLength(ZERO), CalcLength(ZERO) };
     calcLayoutConstraint->minSize = idealSize;
@@ -247,8 +247,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level1)
     pattern->shouldResponseClick_ = true;
     TouchEventInfo event("onTouchUp");
     TimeStamp timeStamp = event.timeStamp_;
-    std::chrono::duration<long, std::ratio<1, 1000>> millisecondDuration(MAX_CLICK_DURATION/1000000 + 10);
-    event.timeStamp_ = pattern->touchDownTime_ +  millisecondDuration;
+    std::chrono::duration<long, std::ratio<1, 1000>> millisecondDuration(MAX_CLICK_DURATION / 1000000 + 10);
+    event.timeStamp_ = pattern->touchDownTime_ + millisecondDuration;
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::UP);
     event.AddTouchLocationInfo(std::move(touchLocationInfo));
@@ -398,8 +398,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
     pattern->SetFormLinkInfos(infos);
     pattern->HandleEnableForm(true);
 
-    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     EXPECT_NE(textNode, nullptr);
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
@@ -410,8 +410,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
     pattern->HandleEnableForm(true);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
 
-    RefPtr<FrameNode> textNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    RefPtr<FrameNode> textNode2 = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     EXPECT_NE(textNode2, nullptr);
     RefPtr<FrameNode> columnNode2 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
@@ -497,8 +497,19 @@ HWTEST_F(FormPatternTest, FormPatternTest_012, TestSize.Level1)
     pattern->OnSnapshot(pixelMap);
     EXPECT_EQ(pattern->isSnapshot_, false);
     weak.refCounter_ = refBak;
-}
 
+    pattern->isDynamic_ = false;
+    std::shared_ptr<Media::MockPixelMap> mockPixelMap = std::make_shared<Media::MockPixelMap>();
+    EXPECT_CALL(*mockPixelMap, GetWidth()).WillRepeatedly(Return(-200));
+    pattern->OnSnapshot(mockPixelMap);
+    EXPECT_EQ(pattern->needSnapshotAgain_, true);
+
+    EXPECT_CALL(*mockPixelMap, GetWidth()).WillRepeatedly(Return(200));
+    EXPECT_CALL(*mockPixelMap, GetHeight()).WillRepeatedly(Return(200));
+    pattern->needSnapshotAgain_ = false;
+    pattern->OnSnapshot(mockPixelMap);
+    EXPECT_EQ(pattern->needSnapshotAgain_, true);
+}
 
 /**
  * @tc.name: FormPatternTest_014
@@ -577,7 +588,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_016, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->formManagerBridge_ = nullptr;
-    pattern->DeleteImageNodeAfterRecover(true);;
+    pattern->DeleteImageNodeAfterRecover(true);
+    ;
     EXPECT_EQ(formNode->GetTotalChildCount(), 0);
     EXPECT_FALSE(childNode->isPropertyDiffMarked_);
 
@@ -609,7 +621,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_017, TestSize.Level1)
 
     pattern->frameNode_ = nullptr;
     RefPtr<FrameNode> result = pattern->CreateImageNode();
-    EXPECT_EQ(result, nullptr);result = pattern->CreateImageNode();
+    EXPECT_EQ(result, nullptr);
+    result = pattern->CreateImageNode();
     EXPECT_EQ(result, nullptr);
     pattern->AttachToFrameNode(formNode);
 
@@ -734,7 +747,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
 
     auto host = pattern->GetHost();
     auto layoutProperty = host->layoutProperty_;
-    auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
+    auto&& layoutConstraint = layoutProperty->calcLayoutConstraint_;
     layoutConstraint = std::make_unique<MeasureProperty>();
     auto size = layoutConstraint->selfIdealSize;
     auto sizeHeight = size->Height();
@@ -749,7 +762,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_->dimension_.unit_ = DimensionUnit::PX;
 
     host->layoutProperty_->borderWidth_ = std::make_unique<BorderWidthProperty>();
-    std::unique_ptr<BorderWidthProperty>  &&borderWidthProperty = std::move(host->layoutProperty_->borderWidth_);
+    std::unique_ptr<BorderWidthProperty>&& borderWidthProperty = std::move(host->layoutProperty_->borderWidth_);
     EXPECT_NE(borderWidthProperty, nullptr);
     std::optional<Dimension> topDimen = borderWidthProperty->topDimen;
     borderWidthProperty->topDimen->Reset();
@@ -800,7 +813,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_013, TestSize.Level1)
     EXPECT_EQ(isSwap, false);
     host->layoutProperty_ = layoutProperty;
 
-    auto borderWidthProperty = std::make_unique<BorderWidthProperty>();;
+    auto borderWidthProperty = std::make_unique<BorderWidthProperty>();
+    ;
     EXPECT_NE(borderWidthProperty, nullptr);
     borderWidthProperty->topDimen->SetValue(1.0);
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -842,7 +856,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_022, TestSize.Level1)
     EXPECT_TRUE(pattern->isJsCard_);
     EXPECT_EQ(pattern->cardInfo_.allowUpdate, info.allowUpdate);
 }
-
 
 /**
  * @tc.name: FormPatternTest_023
@@ -948,8 +961,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_024, TestSize.Level1)
     pattern->UpdateFormComponent(info);
     EXPECT_NE(pattern->GetSubContainer()->allowUpdate_, pattern->cardInfo_.allowUpdate);
 
-
-    EXPECT_NE(pattern-> formManagerBridge_, nullptr);
+    EXPECT_NE(pattern->formManagerBridge_, nullptr);
     pattern->InitFormManagerDelegate();
     pattern->UpdateFormComponent(info);
     EXPECT_NE(pattern->subContainer_->allowUpdate_, pattern->cardInfo_.allowUpdate);
@@ -958,7 +970,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_024, TestSize.Level1)
     pattern->UpdateFormComponent(info);
     EXPECT_EQ(pattern->cardInfo_.width, info.width);
 
-    info.obscuredMode  = !pattern->cardInfo_.obscuredMode;
+    info.obscuredMode = !pattern->cardInfo_.obscuredMode;
     pattern->UpdateFormComponent(info);
     EXPECT_EQ(pattern->cardInfo_.obscuredMode, info.obscuredMode);
 
@@ -966,7 +978,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_024, TestSize.Level1)
     pattern->UpdateFormComponent(info);
     EXPECT_EQ(pattern->cardInfo_.obscuredMode, info.obscuredMode);
 }
-
 
 /**
  * @tc.name: FormPatternTest_025
@@ -1066,8 +1077,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_026, TestSize.Level1)
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 
-    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     textNode->layoutProperty_ = nullptr;
@@ -1113,8 +1124,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_027, TestSize.Level1)
     EXPECT_EQ(num, 0);
 
     info.shape = -1;
-    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_NE(columnNode, nullptr);
@@ -1159,8 +1170,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_028, TestSize.Level1)
     pattern->frameNode_ = formNode;
     EXPECT_NE(pattern, nullptr);
 
-    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     RequestFormInfo info;
     auto host = pattern->GetHost();
@@ -1181,7 +1192,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_028, TestSize.Level1)
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 }
-
 
 /**
  * @tc.name: FormPatternTest_029
@@ -1334,7 +1344,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_033, TestSize.Level1)
     int32_t dimensionHeight = pattern->GetFormDimensionHeight(dimension);
     EXPECT_GT(dimensionHeight, 0);
 
-
     pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     auto columnNode = pattern->CreateColumnNode(FormChildNodeType::FORM_SKELETON_NODE);
     EXPECT_NE(columnNode, nullptr);
@@ -1343,8 +1352,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_033, TestSize.Level1)
     double cardHeight = pattern->cardInfo_.height.Value();
     auto colorMode = MockContainer::GetMockColorMode();
     bool isDarkMode = colorMode == ColorMode::DARK;
-    std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
-        cardHeight, dimension, dimensionHeight, isDarkMode);
+    std::shared_ptr<FormSkeletonParams> params =
+        std::make_shared<FormSkeletonParams>(cardWidth, cardHeight, dimension, dimensionHeight, isDarkMode);
     pattern->CreateSkeletonView(columnNode, params, dimensionHeight);
     int32_t num = formNode->GetTotalChildCount();
     EXPECT_GT(num, 0);
@@ -1567,7 +1576,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_039, TestSize.Level1)
     num1 = host->GetTotalChildCount();
     EXPECT_EQ(num, num1);
 }
-
 
 /**
  * @tc.name: FormPatternTest_040
@@ -1965,7 +1973,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_053, TestSize.Level1)
     EXPECT_FALSE(pattern->isSnapshot_);
 }
 
-
 /**
  * @tc.name: FormPatternTest_054
  * @tc.desc: CreateColumnNode
@@ -2074,4 +2081,5 @@ HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level1)
 
     EXPECT_TRUE(pattern->updateFormComponentTimestamp_ >= nowTime);
 }
+
 } // namespace OHOS::Ace::NG

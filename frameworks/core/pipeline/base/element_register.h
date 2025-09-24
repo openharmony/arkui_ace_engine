@@ -46,7 +46,7 @@ class ACE_EXPORT ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
-    ACE_FORCE_EXPORT static ElementRegister* GetInstance();
+    ACE_FORCE_EXPORT static std::shared_ptr<ElementRegister> GetInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
@@ -162,10 +162,6 @@ private:
     ElementRegister() = default;
 
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
-
-    //  Singleton instance
-    static thread_local ElementRegister* instance_;
-    static std::mutex mutex_;
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element

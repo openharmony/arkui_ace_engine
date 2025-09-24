@@ -1180,4 +1180,19 @@ namespace OHOS::Ace::NG {
             }
         }
     }
+
+    std::string LazyForEachBuilder::DumpHashKey()
+    {
+        std::string cachedItemInfo;
+        std::string expiringItemInfo;
+        std::hash<std::string> keyToHash;
+        for (auto& [index, node] : cachedItems_) {
+            if (node.second) {
+                cachedItemInfo += std::to_string(index) + "-" + std::to_string(keyToHash(node.first)) + ",";
+            } else {
+                expiringItemInfo += std::to_string(index) + "-" + std::to_string(keyToHash(node.first)) + ",";
+            }
+        }
+        return cachedItemInfo + "|" + expiringItemInfo;
+    }
 }

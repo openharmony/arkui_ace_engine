@@ -240,7 +240,11 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Parse maskColor.
         auto maskColorValue = constructorArg->GetProperty("maskColor");
         Color maskColor;
-        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+        RefPtr<ResourceObject> maskColorResObj;
+        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor, maskColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !JSViewAbstract::CheckDarkResource(maskColorResObj)) {
+                instance->dialogProperties_.hasInvertColor.hasMaskColor = true;
+            }
             instance->dialogProperties_.maskColor = maskColor;
         }
 
@@ -254,7 +258,11 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Parse backgroundColor.
         auto backgroundColorValue = constructorArg->GetProperty("backgroundColor");
         Color backgroundColor;
-        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        RefPtr<ResourceObject> backgroundColorResObj;
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor, backgroundColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !JSViewAbstract::CheckDarkResource(backgroundColorResObj)) {
+                instance->dialogProperties_.hasInvertColor.hasBackgroundColor = true;
+            }
             instance->dialogProperties_.backgroundColor = backgroundColor;
         }
 

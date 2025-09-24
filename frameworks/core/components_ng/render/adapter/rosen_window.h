@@ -34,7 +34,9 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/time_util.h"
 #include "core/common/window.h"
+#include <functional>
 
 namespace OHOS::Ace::NG {
 
@@ -154,6 +156,53 @@ public:
     void ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
 
 private:
+    class RecoverExecutor : public std::enable_shared_from_this<RecoverExecutor> {
+    public:
+        RecoverExecutor(std::function<void()> &&recoverTask, const RefPtr<TaskExecutor> &taskExecutor,
+            uint64_t timeout, uint32_t count = 4) : taskExecutor_(taskExecutor), // post at most 4 times
+            recoverTask_(recoverTask), timeout_(timeout), count_(count) {}
+        void Start(const std::string& taskName, uint64_t delayTime)
+        {
+            taskName_ = taskName;
+            delayTime_ = delayTime;
+            auto thisExecutor = shared_from_this();
+            auto task = [thisExecutor] {
+                thisExecutor->Execute();
+            };
+            timestamp_ = static_cast<uint64_t>(GetSysTimestamp());
+            taskExecutor_->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::UI,
+                delayTime_, taskName_);
+        }
+    private:
+        void Execute()
+        {
+            uint64_t timestamp = static_cast<uint64_t>(GetSysTimestamp());
+            if (timestamp < timestamp_) {
+                LOGW("Recover timestamp invalid.");
+                return;
+            }
+            if (timestamp - timestamp_ < timeout_ || count_ == 0) {
+                recoverTask_();
+                return;
+            }
+            auto thisExecutor = shared_from_this();
+            auto task = [thisExecutor] {
+                thisExecutor->Execute();
+            };
+            timestamp_ = timestamp;
+            taskExecutor_->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::UI,
+                delayTime_, taskName_);
+            --count_;
+        }
+
+        const RefPtr<TaskExecutor> taskExecutor_;
+        std::function<void()> recoverTask_;
+        uint64_t timeout_ = UINT64_MAX;
+        uint64_t timestamp_ = 0;
+        std::string taskName_;
+        uint64_t delayTime_ = 0;
+        uint32_t count_;
+    };
     void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
     void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
 

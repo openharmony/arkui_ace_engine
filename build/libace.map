@@ -285,7 +285,6 @@
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::PipelineBase::CurrentThemeManager*;
       OHOS::Ace::PipelineBase::GetCurrentContext*;
-      OHOS::Ace::ArktsAniUtils::*;
       OHOS::Ace::PluginManager::*;
 
       OHOS::Ace::NG::ViewAbstract::*;
@@ -452,6 +451,7 @@
       OHOS::Ace::V2::ROOT_ETS_TAG;
       OHOS::Ace::V2::STAGE_ETS_TAG;
       OHOS::Ace::V2::PAGE_ETS_TAG;
+      OHOS::Ace::V2::DIALOG_ETS_TAG;
       OHOS::Ace::NG::AccessibilityProperty::*;
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::EventHub::*;
@@ -469,6 +469,7 @@
       OHOS::Ace::NG::RenderSurface::*;
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::ViewStackProcessor::*;
+      OHOS::Ace::ColorInverter::*;
       OHOS::Ace::DataAbilityHelperStandard::*;
       OHOS::Ace::DataProviderManagerStandard::*;
       OHOS::Ace::ShadowTheme::*;

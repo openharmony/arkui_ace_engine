@@ -697,8 +697,7 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
             asyncCtx.touchPoint = SharedPointerWrapper(dimensionPtr);
         }
     } else {
-        dimensionPtr = std::make_shared<DimensionOffset>(OHOS::Ace::NG::OffsetF(0.0f, 0.0f));
-        asyncCtx.touchPoint = SharedPointerWrapper(dimensionPtr);
+        asyncCtx.touchPoint = SharedPointerWrapper(nullptr);
     }
     
     if (!ParsePreviewOptions(env, asyncCtx, static_cast<ani_object>(previewOptionsAni))) {

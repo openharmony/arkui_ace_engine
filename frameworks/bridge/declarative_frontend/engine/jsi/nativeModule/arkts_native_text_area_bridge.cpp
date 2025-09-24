@@ -2159,30 +2159,36 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderColor(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto isLocalized = (isLocalizedArg->IsBoolean()) ? isLocalizedArg->ToBoolean(vm)->Value() : false;
+    std::vector<RefPtr<ResourceObject>> resObj;
 
     Color leftColor;
     Color rightColor;
     Color topColor;
     Color bottomColor;
 
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor, resObj, nodeInfo)) {
         topColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor, resObj, nodeInfo)) {
         rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor, resObj, nodeInfo)) {
         bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor, resObj, nodeInfo)) {
         leftColor.SetValue(COLOR_ALPHA_VALUE);
     }
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (SystemProperties::ConfigChangePerform() && isRightToLeft && isLocalized) {
+        std::swap(resObj[1], resObj[3]);
+    }
+    auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(nativeNode,
         topColor.GetValue(),
         (isRightToLeft && isLocalized) ? leftColor.GetValue() : rightColor.GetValue(),
         bottomColor.GetValue(),
-        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue());
+        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue(), rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2974,5 +2980,36 @@ void TextAreaBridge::SetControllerInternal(FrameNode* frameNode, Local<JSValueRe
         }
         TextFieldModelNG::SetJSTextEditableController(frameNode, nullptr);
     }
+}
+
+ArkUINativeModuleValue TextAreaBridge::SetTextAreaScrollBarColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaScrollBarColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaScrollBarColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetTextAreaScrollBarColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaScrollBarColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

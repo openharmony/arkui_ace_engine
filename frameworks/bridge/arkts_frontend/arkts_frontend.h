@@ -254,6 +254,23 @@ public:
         );
     }
 
+    void OnDrawChildrenCompleted(const std::string& componentId) override
+    {
+        auto iter = drawChildrenCallbacks_.find(componentId);
+        if (iter == drawChildrenCallbacks_.end()) {
+            return;
+        }
+        if (taskExecutor_ == nullptr) {
+            return;
+        }
+        auto&& observer = iter->second;
+        taskExecutor_->PostTask(
+            [observer] {
+                (*observer)();
+            }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
+        );
+    }
+
     void DumpFrontend() const override {}
     std::string GetPagePath() const override
     {
@@ -319,6 +336,12 @@ public:
         drawCallbacks_[componentId] = drawFunc;
     }
     
+    void RegisterDrawChildrenInspectorCallback(const RefPtr<InspectorEvent>& drawChildrenFunc,
+        const std::string& componentId)
+    {
+        drawChildrenCallbacks_[componentId] = drawChildrenFunc;
+    }
+
     void UnregisterLayoutInspectorCallback(const std::string& componentId)
     {
         layoutCallbacks_.erase(componentId);
@@ -328,8 +351,16 @@ public:
     {
         drawCallbacks_.erase(componentId);
     }
-    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
-    void OnDrawChildrenCompleted(const std::string& componentId) override {}
+
+    void UnregisterDrawChildrenInspectorCallback(const std::string& componentId)
+    {
+        drawChildrenCallbacks_.erase(componentId);
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return drawChildrenCallbacks_.find(componentId) != drawChildrenCallbacks_.end();
+    }
 
     virtual void CallbackMediaQuery(const std::string& callbackId, const std::string& args)
     {
@@ -382,6 +413,7 @@ protected:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
+    std::map<std::string, RefPtr<InspectorEvent>> drawChildrenCallbacks_;
     MediaQueryCallback mediaQueryCallbacks_;
     RefPtr<Framework::MediaQueryInfo> mediaQueryInfo_ = AceType::MakeRefPtr<Framework::MediaQueryInfo>();
     std::function<void(ArktsFrontend*)> mediaUpdateCallback_;

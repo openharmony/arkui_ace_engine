@@ -88,8 +88,8 @@ bool ParseResourceParamModuleName(ani_env* env, ani_object objects, ResourceInfo
 bool ParseResourceParamType(ani_env* env, ani_object objects, ResourceInfo& info);
 bool ParseResourceParamName(ani_env* env, ani_object objects, ResourceInfo& info);
 bool ParseResourceParam(ani_env* env, ani_object options, ResourceInfo& info);
-bool ParseStringAndNumberOption(ani_env* env, ani_object options,
-    OHOS::Ace::CalcDimension& result, const char* property, const char* className);
+bool ParseStringNumberUndefinedOption(ani_env* env, ani_object options,
+    std::optional<OHOS::Ace::CalcDimension>& result, const char* property, const char* className);
 bool IsInstanceOfCls(ani_env* env, [[maybe_unused]] ani_object object, const char* className);
 bool ParseLengthToDimension(
     ani_env* env, ani_ref source_ref, OHOS::Ace::DimensionUnit defaultUnit, OHOS::Ace::CalcDimension& result);
@@ -124,6 +124,6 @@ void ParseArray([[maybe_unused]] ani_env* env,
     const OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect>& shapeRect, ani_object options);
 void SetRadiusValue(const OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect>& shapeRect,
     const OHOS::Ace::CalcDimension& radius, int32_t index);
-bool ParseStringAndNumberObject(ani_env* env, ani_ref property_ref,
-    OHOS::Ace::DimensionUnit defaultUnit, OHOS::Ace::CalcDimension& result);
+bool ParseStringNumberUndefinedObject(ani_env* env, ani_ref property_ref, OHOS::Ace::DimensionUnit defaultUnit,
+    std::optional<OHOS::Ace::CalcDimension>& result);
 #endif

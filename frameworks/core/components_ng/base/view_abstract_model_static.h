@@ -52,6 +52,8 @@ public:
     {
         if (width.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.CalcValue()));
+        } else if (width.Unit() == DimensionUnit::NONE) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         } else {
             ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
         }
@@ -61,6 +63,8 @@ public:
     {
         if (height.Unit() == DimensionUnit::CALC) {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.CalcValue()));
+        } else if (height.Unit() == DimensionUnit::NONE) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         } else {
             ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
         }
@@ -216,8 +220,6 @@ public:
     static void SetBackgroundEffect(FrameNode* frameNode,
         const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 
-    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
-
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
 
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
@@ -303,7 +305,9 @@ public:
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
-    static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetUseEffect(
+        FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt);
+    static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt);
     static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
     static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
     static void SetClickEffectLevel(FrameNode* frameNode,
@@ -343,7 +347,6 @@ private:
 
 
 // multi thread function start
-void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
 void SetBackgroundEffectMultiThread(FrameNode* frameNode,
     const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);

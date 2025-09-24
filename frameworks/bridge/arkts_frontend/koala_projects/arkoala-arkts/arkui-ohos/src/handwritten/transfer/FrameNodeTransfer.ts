@@ -14,10 +14,10 @@
  */
 
 import { FrameNode, LayoutConstraint } from '../../FrameNode';
-import { KPointer } from "@koalaui/interop"
+import { KPointer } from '@koalaui/interop'
 import { UIContextImpl } from '../UIContextImpl';
 import { int32 } from '@koalaui/compat';
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule } from '#components'
 import { UIContextTransfer } from './UIContextTransfer'
 import { UIContext } from '@ohos.arkui.UIContext';
 import { RenderNode } from '../../RenderNode';
@@ -25,37 +25,43 @@ import { BusinessError } from '#external';
 import { CustomProperty, CommonMethod, UICommonEvent, UIGestureEvent } from '../../component/common';
 import { DrawContext, Position, Size } from '../../Graphics';
 import { ComponentContent } from '../../ComponentContent';
-import { ArkUIAniModule } from "arkui.ani"
+import { ArkUIAniModule } from 'arkui.ani'
 export class FrameNodeTransfer {
 
     static transferStatic(input: Any): Object {
         if (typeof (input) !== 'object') {
-            throw Error("The FrameNode is not object convert fail.");
+            throw Error('The FrameNode is not object convert fail.');
         }
         if (input === null) {
-            throw Error("The FrameNode is null convert fail.");
+            throw Error('The FrameNode is null convert fail.');
         }
-        const instanceId = ESValue.wrap(input).getProperty("instanceId_").toNumber();
+        const instanceId = ESValue.wrap(input).getProperty('instanceId_').toNumber();
         let nodeType: string | undefined = undefined;
-        let nodeTypeESValue = ESValue.wrap(input).getProperty("type_");
+        let nodeTypeESValue = ESValue.wrap(input).getProperty('type_');
         if (nodeTypeESValue.isString()) {
             nodeType = nodeTypeESValue.toString();
         }
         let uiContext = new UIContextImpl(instanceId as int32);
-        const pointStr = ESValue.wrap(input).getProperty("rawPtr_").toNumber();
+        let arkUINode = ESValue.load('@ohos.arkui.node');
+        let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
+        let point = frameNodeTrans.invoke(input! as Object);
+        if (point.isUndefined()) {
+            throw Error("The FrameNode point is undefined object convert fail.");
+        }
+        const pointStr = point.toNumber();
         let frameNodePeerPont = ArkUIGeneratedNativeModule._FrameNode_createByRawPtr(pointStr as KPointer);
         let node: FrameNode = new TransFrameNode(uiContext, nodeType, frameNodePeerPont);
         return node;
     }
     static transferDynamic(input: Object): Any {
-        if (input == null) {
-            throw Error("The FrameNode is null convert fail.");
+        if (input === null) {
+            throw Error('The FrameNode is null convert fail.');
         }
         let frameNodeStatic = input as FrameNode;
         const instanceId = frameNodeStatic!.uiContext!.instanceId_;
         const point = frameNodeStatic.nodePtr_;
-        if (point == null) {
-            throw Error("The FrameNode is not object convert fail.");
+        if (point === null) {
+            throw Error('The FrameNode is not object convert fail.');
         }
         let frameNodeRaw = ArkUIGeneratedNativeModule._FrameNode_unWrapRawPtr(point!);
         let nodeType: string | undefined = frameNodeStatic.nodeType_;

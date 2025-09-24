@@ -19,13 +19,31 @@
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace::NG {
+
+struct FrameNodeHandleParam {
+    std::vector<WeakPtr<NG::FrameNode>> pageNodes;
+    bool isReduceMode = false;
+    bool checkEmbedNode = false;
+};
 
 class AccessibilityFrameNodeUtils {
 public:
     static void UpdateAccessibilityVisibleToRoot(const RefPtr<UINode>& uiNode);
     static RefPtr<FrameNode> GetFramenodeByAccessibilityId(const RefPtr<FrameNode>& root, int64_t id);
+    static bool IsValidEmbedTarget(
+        const RefPtr<FrameNode>& node,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
+    static void GetChildrenFromFrameNode(
+        const RefPtr<FrameNode>& node,
+        std::vector<RefPtr<FrameNode>>& children,
+        const FrameNodeHandleParam& handleParam,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
+    static void GetLastestPageNodes(
+        const RefPtr<FrameNode>& node,
+        std::vector<WeakPtr<FrameNode>>& pageNodes);
 };
 } // namespace OHOS::Ace::NG
 

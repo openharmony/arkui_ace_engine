@@ -178,6 +178,19 @@ void CheckBoxPattern::OnModifyDone()
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitDefaultMargin();
+    auto callback = [weak = WeakClaim(this)]() {
+        auto checkbox = weak.Upgrade();
+        if (checkbox) {
+            checkbox->InitEvent();
+        }
+    };
+    pipeline->AddBuildFinishCallBack(callback);
+}
+
+void CheckBoxPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();

@@ -136,61 +136,36 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
     bool parseOk = false;
     CalcDimension dimension;
     Color color;
-    if (swiperArrowParameters.isSidebarMiddle.value()) {
-        dimension = StringUtils::StringToCalcDimension(backgroundSizeValue, false, DimensionUnit::VP);
-        swiperArrowParameters.backgroundSize =
-            GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
-                ? dimension
-                : swiperIndicatorTheme->GetBigArrowBackgroundSize();
-        parseOk = Color::ParseColorString(backgroundColorValue, color) &&
-            arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1";
-        color = backgroundColorValue != "" ? Color(std::stoul(backgroundColorValue)) : color;
-        swiperArrowParameters.backgroundColor = parseOk || color == Color(0x00000000)
-            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
-            : swiperIndicatorTheme->GetBigArrowBackgroundColor();
-        if (swiperArrowParameters.isShowBackground.value()) {
-            swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
-        } else {
-            parseOk = StringUtils::StringToCalcDimensionNG(arrowSizeValue, dimension, false, DimensionUnit::VP);
-            swiperArrowParameters.arrowSize =
-                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
-                    ? dimension
-                    : swiperIndicatorTheme->GetBigArrowSize();
-            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
-        }
-        parseOk = Color::ParseColorString(arrowColorValue, color) && arrowInfo[ARROW_ISSET_COLOR] == "1";
-        color = backgroundColorValue != "" ? Color(std::stoul(arrowColorValue)) : color;
-        swiperArrowParameters.arrowColor = parseOk || color == Color(0x00000000)
-            ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
-            : swiperIndicatorTheme->GetBigArrowColor();
+    auto arrowBackgroundSize = swiperArrowParameters.isSidebarMiddle.value()
+        ? swiperIndicatorTheme->GetBigArrowBackgroundSize() : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
+    auto arrowBackgroundColor = swiperArrowParameters.isSidebarMiddle.value()
+        ? swiperIndicatorTheme->GetBigArrowBackgroundColor() : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+    auto arrowSize = swiperArrowParameters.isSidebarMiddle.value()
+        ? swiperIndicatorTheme->GetBigArrowSize() : swiperIndicatorTheme->GetSmallArrowSize();
+    auto arrowColor = swiperArrowParameters.isSidebarMiddle.value()
+        ? swiperIndicatorTheme->GetBigArrowColor() : swiperIndicatorTheme->GetSmallArrowColor();
+    dimension = StringUtils::StringToCalcDimension(backgroundSizeValue, false, DimensionUnit::VP);
+    swiperArrowParameters.backgroundSize =
+        GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+            ? dimension : arrowBackgroundSize;
+    parseOk = Color::ParseColorString(backgroundColorValue, color) &&
+        arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1";
+    color = backgroundColorValue != "" ? Color(std::stoul(backgroundColorValue)) : color;
+    swiperArrowParameters.backgroundColor = parseOk || color == Color(0x00000000)
+        ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color) : arrowBackgroundColor;
+    if (swiperArrowParameters.isShowBackground.value()) {
+        swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
     } else {
-        dimension = StringUtils::StringToCalcDimension(backgroundSizeValue, false, DimensionUnit::VP);
-        swiperArrowParameters.backgroundSize =
-            GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
-                ? dimension
-                : swiperIndicatorTheme->GetSmallArrowBackgroundSize();
-        parseOk = Color::ParseColorString(backgroundColorValue, color) &&
-            arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1";
-        color = backgroundColorValue != "" ? Color(std::stoul(backgroundColorValue)) : color;
-        swiperArrowParameters.backgroundColor = parseOk || color == Color(0x00000000)
-            ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color)
-            : swiperIndicatorTheme->GetSmallArrowBackgroundColor();
-        if (swiperArrowParameters.isShowBackground.value()) {
-            swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
-        } else {
-            parseOk = StringUtils::StringToCalcDimensionNG(arrowSizeValue, dimension, false, DimensionUnit::VP);
-            swiperArrowParameters.arrowSize =
-                parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
-                    ? dimension
-                    : swiperIndicatorTheme->GetSmallArrowSize();
-            swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
-        }
-        parseOk = Color::ParseColorString(arrowColorValue, color) && arrowInfo[ARROW_ISSET_COLOR] == "1";
-        color = backgroundColorValue != "" ? Color(std::stoul(arrowColorValue)) : color;
-        swiperArrowParameters.arrowColor = parseOk || color == Color(0x00000000)
-        ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color)
-        : swiperIndicatorTheme->GetSmallArrowColor();
+        parseOk = StringUtils::StringToCalcDimensionNG(arrowSizeValue, dimension, false, DimensionUnit::VP);
+        swiperArrowParameters.arrowSize =
+            parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
+                ? dimension : arrowSize;
+        swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
     }
+    parseOk = Color::ParseColorString(arrowColorValue, color) && arrowInfo[ARROW_ISSET_COLOR] == "1";
+    color = arrowColorValue != "" ? Color(std::stoul(arrowColorValue)) : color;
+    swiperArrowParameters.arrowColor = parseOk || color == Color(0x00000000)
+        ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color) : arrowColor;
 }
 
 bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParameters& swiperArrowParameters,
@@ -458,10 +433,12 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, true);
     }
     swiperParameters.maskValue = indicator->maskValue.value == 1 ? true : false;
-    swiperParameters.colorVal =
-        indicator->colorValue.isSet == 1 ? Color(indicator->colorValue.value) : swiperIndicatorTheme->GetColor();
-    swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1 ?
-        Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.colorVal = indicator->colorValue.isSet == 1
+        ? (swiperParameters.parametersByUser.insert("colorVal"), Color(indicator->colorValue.value))
+        : swiperIndicatorTheme->GetColor();
+    swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1
+        ? (swiperParameters.parametersByUser.insert("selectedColorVal"), Color(indicator->selectedColorValue.value))
+        : swiperIndicatorTheme->GetSelectedColor();
     swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
         indicator->maxDisplayCount.value : NUM_0;
     swiperParameters.ignoreSizeValue = indicator->ignoreSizeValue.value == 1 ? true : false;
@@ -519,11 +496,12 @@ SwiperDigitalParameters GetDigitIndicatorProps(FrameNode* frameNode, ArkUISwiper
     swiperDigitalParameters.dimBottom = ParseIndicatorCommonDimension(indicator->dimBottom, unit);
 
     swiperDigitalParameters.fontColor = indicator->fontColor.isSet == 1
-                                            ? Color(indicator->fontColor.value)
-                                            : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
-    swiperDigitalParameters.selectedFontColor =
-        indicator->selectedFontColor.isSet == 1 ? Color(indicator->selectedFontColor.value)
-                                                : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        ? (swiperDigitalParameters.parametersByUser.insert("fontColor"), Color(indicator->fontColor.value))
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    swiperDigitalParameters.selectedFontColor = indicator->selectedFontColor.isSet == 1
+        ? (swiperDigitalParameters.parametersByUser.insert("selectedFontColor"),
+            Color(indicator->selectedFontColor.value))
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     auto digitFontSize = ParseIndicatorCommonDimension(indicator->fontSize, unit);
     swiperDigitalParameters.fontSize = indicator->fontSize.isSet == 1 && (digitFontSize > 0.0_vp)
                                            ? digitFontSize

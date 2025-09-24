@@ -35,6 +35,7 @@ struct ScrollableNodeInfo {
     std::function<void(bool, bool smooth)> scrollPageCallback;
     std::function<void(bool isWillFling)> scrollBarOnDidStopDraggingCallback;
     std::function<void()> scrollBarOnDidStopFlingCallback;
+    std::function<void()> preDragStartCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -102,6 +103,8 @@ public:
     void NotifyScrollBarOnDidStopDragging(bool isWillFling) const;
 
     void NotifyScrollBarOnDidStopFling() const;
+
+    void NotifyPreDragStart() const;
 
     void SetScrollBarOnDidStopDraggingCallback(const OnDidStopDraggingEvent& onDidStopDraggingCallback);
 

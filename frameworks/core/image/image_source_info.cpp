@@ -406,11 +406,18 @@ bool ImageSourceInfo::SupportObjCache() const
 
 std::string ImageSourceInfo::GetKey() const
 {
-    // only svg sets fillColor
-    if (isSvg_ && fillColor_.has_value()) {
-        return cacheKey_ + fillColor_.value().ColorToString();
+    std::string key = cacheKey_;
+    if (!isSvg_) {
+        return key;
     }
-    return cacheKey_;
+    // only svg sets fillColor
+    if (fillColor_.has_value()) {
+        key += fillColor_.value().ColorToString();
+    }
+    if (IsSupportSvg2()) {
+        key += "supportSvg2";
+    }
+    return key;
 }
 
 void ImageSourceInfo::SetContainerId(int32_t containerId)

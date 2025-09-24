@@ -446,13 +446,13 @@ void CustomPaintPaintMethod::InitImagePaint(RSPen* pen, RSBrush* brush, RSSampli
 {
     RSFilter filter;
     if (smoothingEnabled_) {
-        if (smoothingQuality_ == "low") {
+        if (smoothingQuality_ == SmoothingQuality::LOW) {
             options = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE);
             filter.SetFilterQuality(RSFilter::FilterQuality::LOW);
-        } else if (smoothingQuality_ == "medium") {
+        } else if (smoothingQuality_ == SmoothingQuality::MEDIUM) {
             options = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::LINEAR);
             filter.SetFilterQuality(RSFilter::FilterQuality::MEDIUM);
-        } else if (smoothingQuality_ == "high") {
+        } else if (smoothingQuality_ == SmoothingQuality::HIGH) {
             options = RSSamplingOptions(RSCubicResampler::Mitchell());
             filter.SetFilterQuality(RSFilter::FilterQuality::HIGH);
         }
@@ -2040,7 +2040,7 @@ void CustomPaintPaintMethod::RestoreLayer()
 void CustomPaintPaintMethod::ResetStates()
 {
     smoothingEnabled_ = true;
-    smoothingQuality_ = "low";
+    smoothingQuality_ = SmoothingQuality::LOW;
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();

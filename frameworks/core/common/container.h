@@ -791,6 +791,16 @@ public:
 
     virtual bool IsArkTsFrontEnd() const { return false; }
 
+    void SetSrcEntrance(const std::string& srcEntrance)
+    {
+        srcEntrance_ = srcEntrance;
+    }
+
+    const std::string& GetSrcEntrance() const
+    {
+        return srcEntrance_;
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);
@@ -818,6 +828,7 @@ private:
     std::string bundlePath_;
     std::string filesDataPath_;
     std::string tempDir_;
+    std::string srcEntrance_;
     bool usePartialUpdate_ = false;
     DisplayOrientation displayOrientation_ = DisplayOrientation::PORTRAIT;
     Settings settings_;

@@ -2427,10 +2427,10 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
 
     /**
      * @tc.steps: step9. excute ComputeSheetOffset function.
-     * @tc.expected: sheetHeight_ is ((pageHeight_ + sheetSize.height) / 2).
+     * @tc.expected: sheetHeightForTranslate_ is ((pageHeight_ + sheetSize.height) / 2).
      */
     overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_, 750);
+    EXPECT_EQ(sheetPattern->sheetHeightForTranslate_, 750);
 
     /**
      * @tc.steps: step10. set SheetType to SHEET_BOTTOMLANDSPACE.
@@ -2441,10 +2441,10 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
     sheetPattern->pageHeight_ = 1200.0f;
     /**
      * @tc.steps: step11. excute ComputeSheetOffset function.
-     * @tc.expected: sheetHeight_ is pageHeight_.
+     * @tc.expected: sheetHeightForTranslate_ is pageHeight_.
      */
     overlayManager->ComputeSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_, 1200);
+    EXPECT_EQ(sheetPattern->sheetHeightForTranslate_, 1200);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -2567,11 +2567,11 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeDetentsSheetOffset001, TestSize.Leve
 
     /**
      * @tc.steps: step6. excute ComputeDetentsSheetOffset function.
-     * @tc.expected: sheetHeight_ is (pageHeight_ * MEDIUM_SIZE_PRE)
+     * @tc.expected: sheetHeightForTranslate_ is (pageHeight_ * MEDIUM_SIZE_PRE)
      */
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_, 800 * MEDIUM_SIZE_PRE);
+    EXPECT_EQ(sheetPattern->sheetHeightForTranslate_, 800 * MEDIUM_SIZE_PRE);
 
     /**
      * @tc.steps: step7. set API12.
@@ -2580,20 +2580,20 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeDetentsSheetOffset001, TestSize.Leve
 
     /**
      * @tc.steps: step8. set detent.sheetMode is AUTO and pageHeight_ is 1000.
-     * @tc.expected: sheetHeight_ is builder height because fit_content
+     * @tc.expected: sheetHeightForTranslate_ is builder height because fit_content
      */
     detent.sheetMode = SheetMode::AUTO;
     sheetStyle.detents.clear();
     sheetStyle.detents.emplace_back(detent);
     sheetPattern->pageHeight_ = 1000.0f;
-    overlayManager->sheetHeight_ = 0.0f;
+    sheetPattern->sheetHeightForTranslate_ = 0.0f;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_, 500);
+    EXPECT_EQ(sheetPattern->sheetHeightForTranslate_, 500);
 
     /**
      * @tc.steps: step9. set detent.sheetMode is AUTO and pageHeight_ is 500.
-     * @tc.expected: sheetHeight_ is (pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() -
+     * @tc.expected: sheetHeightForTranslate_ is (pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() -
      * sheetPattern->GetSheetTopSafeArea())
      */
     detent.sheetMode = SheetMode::AUTO;
@@ -2602,7 +2602,7 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeDetentsSheetOffset001, TestSize.Leve
     sheetPattern->pageHeight_ = 500.0f;
     layoutProperty->UpdateSheetStyle(sheetStyle);
     overlayManager->ComputeDetentsSheetOffset(sheetStyle, sheetNode);
-    EXPECT_EQ(overlayManager->sheetHeight_,
+    EXPECT_EQ(sheetPattern->sheetHeightForTranslate_,
         500 - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetPattern->GetSheetTopSafeArea());
     SheetPresentationTestTwoNg::TearDownTestCase();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);

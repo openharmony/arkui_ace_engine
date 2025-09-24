@@ -2332,4 +2332,44 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder037, TestSize.Level1)
     AceApplicationInfo::GetInstance().language_ = oldLanguage_;
 }
 
+/**
+ * @tc.name: DatePickerOrder038
+ * @tc.desc: Test DatePicker GetFormatString
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerOrderTest, DatePickerOrder038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: steps2. Set the initial language and city.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    const std::string language = "ar";
+    AceApplicationInfo::GetInstance().SetLocale(language, "Egypt", "Arabic", "");
+
+    auto date = PickerDateF::CreateMonthDay(4, 16, false, false);
+    EXPECT_EQ(datePickerPattern->solarDays_[15] + " " + datePickerPattern->solarMonths_[3],
+        datePickerPattern->GetFormatString(date));
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     */
+    const std::string newLanguage = "en";
+    AceApplicationInfo::GetInstance().SetLocale(newLanguage, "US", "Latn", "");
+
+    EXPECT_EQ(datePickerPattern->solarMonths_[3] + " " + datePickerPattern->solarDays_[15],
+        datePickerPattern->GetFormatString(date));
+}
+
 } // namespace OHOS::Ace::NG

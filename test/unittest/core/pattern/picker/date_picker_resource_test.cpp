@@ -37,6 +37,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double TEST_FONT_SIZE = 10.0;
+const Dimension FONT_SIZE_VALUE_DIMENSION = Dimension(20.1, DimensionUnit::PX);
+const std::vector<std::string> FONT_FAMILY_CURSIVE = { "cursive" };
+const std::vector<std::string> FONT_FAMILY_ARIAL = { "arial" };
 }
 
 class DatePickerResourceTest : public testing::Test {
@@ -158,6 +161,99 @@ HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDisappearTextStyle002
+ * @tc.desc: Test DatePickerPattern UpdateDisappearTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    datePickerPattern->UpdateDisappearTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetDisappearFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateDisappearTextStyle003
+ * @tc.desc: Test DatePickerPattern UpdateDisappearTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has value, the LayoutProperty value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->disappearOptionStyle_.SetTextColor(Color::GREEN);
+    theme->disappearOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->disappearOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetDisappearTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateDisappearTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of LayoutProperty will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    datePickerPattern->UpdateDisappearTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetDisappearFontFamily().value(), FONT_FAMILY_ARIAL);  
+}
+
+/**
  * @tc.name: UpdateNormalTextStyle001
  * @tc.desc: Test DatePickerPattern UpdateNormalTextStyle.
  * @tc.type: FUNC
@@ -193,6 +289,99 @@ HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNormalTextStyle002
+ * @tc.desc: Test DatePickerPattern UpdateNormalTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->normalOptionStyle_.SetTextColor(Color::GREEN);
+    theme->normalOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->normalOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateNormalTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    datePickerPattern->UpdateNormalTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateNormalTextStyle003
+ * @tc.desc: Test DatePickerPattern UpdateNormalTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has value, the LayoutProperty value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->normalOptionStyle_.SetTextColor(Color::GREEN);
+    theme->normalOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->normalOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetNormalTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateNormalTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of LayoutProperty will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    datePickerPattern->UpdateNormalTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetFontFamily().value(), FONT_FAMILY_ARIAL);  
+}
+
+/**
  * @tc.name: UpdateSelectedTextStyle001
  * @tc.desc: Test DatePickerPattern UpdateSelectedTextStyle.
  * @tc.type: FUNC
@@ -225,6 +414,99 @@ HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
 
     EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle002
+ * @tc.desc: Test DatePickerPattern UpdateSelectedTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has no value, the theme value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->selectedOptionStyle_.SetTextColor(Color::GREEN);
+    theme->selectedOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->selectedOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. Call UpdateSelectedTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of PickerTheme will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle textStyle;
+    datePickerPattern->UpdateSelectedTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), FONT_SIZE_VALUE_DIMENSION);
+    EXPECT_EQ(pickerProperty->GetSelectedFontFamily().value(), FONT_FAMILY_CURSIVE);  
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle003
+ * @tc.desc: Test DatePickerPattern UpdateSelectedTextStyle, when the input parameter is invalid
+ *           and the LayoutProperty has value, the LayoutProperty value will be used for setting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Set the default value for the PickerTheme.
+     */
+    theme->selectedOptionStyle_.SetTextColor(Color::GREEN);
+    theme->selectedOptionStyle_.SetFontSize(FONT_SIZE_VALUE_DIMENSION);
+    theme->selectedOptionStyle_.SetFontFamilies(FONT_FAMILY_CURSIVE);
+
+    /**
+     * @tc.steps: step3. SetSelectedTextStyle to ensure the LayoutProperty has value.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE, DimensionUnit::VP);
+    textStyle.fontFamily = FONT_FAMILY_ARIAL;
+    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    /**
+     * @tc.steps: step4. Call UpdateSelectedTextStyle with the parameter textStyle having no valid value.
+     * @tc.expected: The value of LayoutProperty will be used for setting.
+     */
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    PickerTextStyle newTextStyle;
+    datePickerPattern->UpdateSelectedTextStyle(newTextStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE, DimensionUnit::VP));
+    EXPECT_EQ(pickerProperty->GetSelectedFontFamily().value(), FONT_FAMILY_ARIAL);  
 }
 
 } // namespace OHOS::Ace::NG

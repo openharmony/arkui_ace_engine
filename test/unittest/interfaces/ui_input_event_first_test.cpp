@@ -1498,4 +1498,79 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex008, TestSize.Level1)
     EXPECT_EQ(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: AxisEventHasAxis001
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_HasAxis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventHasAxis001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    ASSERT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<OHOS::Ace::AxisEvent>();
+    ASSERT_NE(event, nullptr);
+
+    event->axes = 7;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+
+    auto result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 0);
+    EXPECT_TRUE(result);
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), -1);
+    EXPECT_FALSE(result);
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 3);
+    EXPECT_FALSE(result);
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AxisEventHasAxis002
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_HasAxis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventHasAxis002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    ASSERT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    ASSERT_NE(event, nullptr);
+
+    event->axes = 7;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+
+    auto result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 0);
+    EXPECT_TRUE(result);
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), -1);
+    EXPECT_FALSE(result);
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 3);
+    EXPECT_FALSE(result);
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 3);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AxisEventHasAxis002
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_HasAxis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventHasAxis003, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    ASSERT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    ASSERT_NE(event, nullptr);
+
+    event->axes = 7;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_KEY_EVENT_ID;
+    auto result = OH_ArkUI_AxisEvent_HasAxis(uiInputEvent.get(), 0);
+    EXPECT_FALSE(result);
+    result = OH_ArkUI_AxisEvent_HasAxis(nullptr, 0);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace

@@ -20,7 +20,8 @@
 
 namespace OHOS::Ace::Framework {
 
-void JSViewAbstractBridge::GetBackgroundBlurStyleOption(napi_value napiVal, BlurStyleOption& styleOption)
+void JSViewAbstractBridge::GetBackgroundBlurStyleOption(
+    napi_value napiVal, BlurStyleOption& styleOption, bool& hasBlurStyleOptionInactiveColor)
 {
     JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(napiVal);
     if (value.IsEmpty() || !value->IsObject()) {
@@ -28,9 +29,18 @@ void JSViewAbstractBridge::GetBackgroundBlurStyleOption(napi_value napiVal, Blur
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(value);
     JSViewAbstract::ParseBlurStyleOption(object, styleOption);
+
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    Color inactiveColor;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty("inactiveColor"), inactiveColor, inactiveColorResObj) &&
+        !JSViewAbstract::CheckDarkResource(inactiveColorResObj)) {
+        hasBlurStyleOptionInactiveColor = true;
+    }
 }
 
-void JSViewAbstractBridge::GetBackgroundEffect(napi_value napiVal, EffectOption& styleOption)
+void JSViewAbstractBridge::GetBackgroundEffect(
+    napi_value napiVal, EffectOption& styleOption, bool& hasEffectOptionColor, bool& hasEffectOptionInactiveColor)
 {
     JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(napiVal);
     if (value.IsEmpty() || !value->IsObject()) {
@@ -38,5 +48,19 @@ void JSViewAbstractBridge::GetBackgroundEffect(napi_value napiVal, EffectOption&
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(value);
     JSViewAbstract::ParseEffectOption(object, styleOption);
+
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty("color"), color, colorResObj) &&
+        !JSViewAbstract::CheckDarkResource(colorResObj)) {
+        hasEffectOptionColor = true;
+    }
+    Color inactiveColor;
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (JSViewAbstract::ParseJsColor(object->GetProperty("inactiveColor"), inactiveColor, inactiveColorResObj) &&
+        !JSViewAbstract::CheckDarkResource(inactiveColorResObj)) {
+        hasEffectOptionInactiveColor = true;
+    }
 }
 } // namespace OHOS::Ace::Framework

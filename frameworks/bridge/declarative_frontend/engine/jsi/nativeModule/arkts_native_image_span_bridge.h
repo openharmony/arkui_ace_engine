@@ -40,6 +40,8 @@ public:
     static ArkUINativeModuleValue SetColorFilter(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetColorFilter(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetImageSpanSrc(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetSupportSvg2(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSupportSvg2(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

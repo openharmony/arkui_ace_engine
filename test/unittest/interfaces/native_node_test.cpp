@@ -2387,6 +2387,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SRC, &item);
     value[0].f32 = 10.0f;
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET, &item);
+    ArkUI_NumberValue value20[] = { { .f32 = 0.239f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 0.0f },
+        { .f32 = 0.0f }, { .f32 = 0.0f }, { .f32 = 1.0f }, { .f32 = 0.0f } };
+
+    ArkUI_AttributeItem item20 = { value20, sizeof(value20) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER, &item20), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_NumberValue svg[] = { { .i32 = 1 } };
+    ArkUI_AttributeItem svg2 = { svg, sizeof(svg) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2, &svg2), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2), nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_COLOR_FILTER), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SUPPORT_SVG2), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
@@ -4725,6 +4739,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest039, TestSize.Level1)
         textarea, NODE_TEXT_AREA_SELECTION_MENU_HIDDEN, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(
         textarea, NODE_TEXT_AREA_SELECTION_MENU_HIDDEN, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NumberValue scrollBar[] = {{.i32 = ArkUI_BarState::ARKUI_BAR_STATE_OFF}};
+    ArkUI_AttributeItem scrollBarItem = {scrollBar, sizeof(scrollBar) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
+    EXPECT_EQ(nodeAPI->setAttribute(
+        textarea, NODE_TEXT_AREA_BAR_STATE, &scrollBarItem), ARKUI_ERROR_CODE_NO_ERROR);
+    scrollBarItem = {scrollBar, 0, nullptr, nullptr};
+    EXPECT_EQ(nodeAPI->setAttribute(
+        textarea, NODE_TEXT_AREA_BAR_STATE, &scrollBarItem), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(textinput);
     nodeAPI->disposeNode(textarea);
 }
@@ -9310,6 +9331,742 @@ HWTEST_F(NativeNodeTest, NativeNodeSetClipShapeTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BorderColorInvertTest001
+ * @tc.desc: Test NODE_BORDER_COLOR function in invert color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, BorderColorInvertTest001, TestSize.Level1)
+{
+    bool store = g_isConfigChangePerform;
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the border.
+     */
+    uint32_t topColor = 0xFF254FF7;
+    uint32_t rightColor = 0xFFF1F3F5;
+    uint32_t bottomColor = 0xFF0A59F7;
+    uint32_t leftColor = 0xff007dff;
+
+    /**
+     * @tc.steps: step4. Test "NODE_BORDER_COLOR", when only a single color is set.
+     */
+    ArkUI_NumberValue singleValue[] = {{.u32 = leftColor}};
+    ArkUI_AttributeItem singleItem = {singleValue, sizeof(singleValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_BORDER_COLOR, &singleItem);
+    auto singleBorderColor = nodeAPI->getAttribute(rootNode, NODE_BORDER_COLOR);
+    /**
+     * @tc.expected: singleBorderColor should not be nullptr.
+     */
+    ASSERT_NE(singleBorderColor, nullptr);
+    EXPECT_EQ(singleBorderColor->value[0].u32, leftColor);
+
+    /**
+     * @tc.steps: step5. Test "NODE_BORDER_COLOR", when the four sides are set to different colors.
+     */
+    ArkUI_NumberValue multiValue[] = {{.u32 = topColor}, {.u32 = rightColor}, {.u32 = bottomColor}, {.u32 = leftColor}};
+    ArkUI_AttributeItem multiItem = {multiValue, sizeof(multiValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_BORDER_COLOR, &multiItem);
+    auto multiBorderColorVal = nodeAPI->getAttribute(rootNode, NODE_BORDER_COLOR);
+    EXPECT_EQ(multiBorderColorVal->value[0].u32, topColor);
+    EXPECT_EQ(multiBorderColorVal->value[1].u32, rightColor);
+    EXPECT_EQ(multiBorderColorVal->value[2].u32, bottomColor);
+    EXPECT_EQ(multiBorderColorVal->value[3].u32, leftColor);
+    nodeAPI->disposeNode(rootNode);
+    g_isConfigChangePerform = store;
+}
+
+/**
+ * @tc.name: OutlineColorTest001
+ * @tc.desc: Test NODE_OUTLINE_COLOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OutlineColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the outerline.
+     */
+    uint32_t leftColor = 0xff007dff;
+    uint32_t rightColor = 0xFFF1F3F5;
+    uint32_t topColor = 0xFF254FF7;
+    uint32_t bottomColor = 0xFF0A59F7;
+
+    /**
+     * @tc.steps: step4. Test "NODE_OUTLINE_COLOR", when only a single color is set.
+     */
+    ArkUI_NumberValue singleValue[] = {{.u32 = leftColor}};
+    ArkUI_AttributeItem singleItem = {singleValue, sizeof(singleValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &singleItem);
+    auto singleOutlineColor = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    ASSERT_NE(singleOutlineColor, nullptr);
+    EXPECT_EQ(singleOutlineColor->value[0].u32, leftColor);
+
+    /**
+     * @tc.steps: step5. Test "NODE_OUTLINE_COLOR", when the four sides are set to different colors.
+     */
+    ArkUI_NumberValue multiValue[] = {{.u32 = leftColor}, {.u32 = rightColor}, {.u32 = topColor}, {.u32 = bottomColor}};
+    ArkUI_AttributeItem multiItem = {multiValue, sizeof(multiValue) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &multiItem);
+    auto multiOutlineColorVal = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    EXPECT_EQ(multiOutlineColorVal->value[0].u32, leftColor);
+    EXPECT_EQ(multiOutlineColorVal->value[1].u32, rightColor);
+    EXPECT_EQ(multiOutlineColorVal->value[2].u32, topColor);
+    EXPECT_EQ(multiOutlineColorVal->value[3].u32, bottomColor);
+    nodeAPI->disposeNode(rootNode);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: CustomShadowTest001
+ * @tc.desc: Test NODE_CUSTOM_SHADOW function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, CustomShadowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto columnNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the custom shadow.
+     */
+    float radius = 18.0f;
+    int32_t enableStrategy = 0;
+    float offset = 0.0f;
+    uint32_t shadowColor = 0x0c182431;
+    uint32_t isFilled = 0;
+    ArkUI_NumberValue customShadowValue[] = {{.f32 = radius}, {.i32 = enableStrategy}, {.f32 = offset}, {.f32 = offset},
+        {.i32 = ARKUI_SHADOW_TYPE_COLOR}, {.u32 = shadowColor}, {.u32 = isFilled}};
+    ArkUI_AttributeItem customShadowItem = {customShadowValue, sizeof(customShadowValue) / sizeof(ArkUI_NumberValue)};
+
+    /**
+     * @tc.steps: step4. Test setAttribute: NODE_CUSTOM_SHADOW.
+     */
+    auto setResult = nodeAPI->setAttribute(columnNode, NODE_CUSTOM_SHADOW, &customShadowItem);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step5. Test getAttribute: NODE_CUSTOM_SHADOW.
+     */
+    auto customShadow = nodeAPI->getAttribute(columnNode, NODE_CUSTOM_SHADOW);
+    ASSERT_NE(customShadow, nullptr);
+    EXPECT_EQ(customShadow->value[0].f32, radius);
+    EXPECT_EQ(customShadow->value[1].i32, enableStrategy);
+    EXPECT_EQ(customShadow->value[2].f32, offset);
+    EXPECT_EQ(customShadow->value[3].f32, offset);
+    EXPECT_EQ(customShadow->value[4].i32, ARKUI_SHADOW_TYPE_COLOR);
+    EXPECT_EQ(customShadow->value[5].u32, shadowColor);
+    EXPECT_EQ(customShadow->value[6].u32, isFilled);
+    nodeAPI->disposeNode(columnNode);
+}
+
+/**
+ * @tc.name: ColorBlendTest001
+ * @tc.desc: Test NODE_COLOR_BLEND function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ColorBlendTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto columnNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the color blend, and test "NODE_COLOR_BLEND".
+     */
+    uint32_t color = 0x5d6d3c;
+    ArkUI_NumberValue value[] = {{.u32 = color}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(columnNode, NODE_COLOR_BLEND, &item);
+    auto colorBlend = nodeAPI->getAttribute(columnNode, NODE_COLOR_BLEND);
+    ASSERT_NE(colorBlend, nullptr);
+    EXPECT_EQ(colorBlend->value[0].u32, color);
+    nodeAPI->disposeNode(columnNode);
+}
+
+/**
+ * @tc.name: SweepGradientTest001
+ * @tc.desc: Test NODE_SWEEP_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SweepGradientTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto scrollNode = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the sweep gradient, and test "NODE_SWEEP_GRADIENT".
+     */
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    float start = 0;
+    float end = 360;
+    float angle = 60;
+    int32_t isRepeatedColoring = 0;
+    ArkUI_NumberValue sweepGradient[] = {{.f32 = offsetX}, {.f32 = offsetY}, {.f32 = start},
+        {.f32 = end}, {.f32 = angle}, {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFFFF0000;
+    uint32_t colors[] = {color, color};
+    float stopOne = 0.1f;
+    float stopTwo = 0.5f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+
+    ArkUI_AttributeItem sweepGradientItem = {sweepGradient,
+        sizeof(sweepGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(scrollNode, NODE_SWEEP_GRADIENT, &sweepGradientItem);
+
+    auto sweepGradientVal = nodeAPI->getAttribute(scrollNode, NODE_SWEEP_GRADIENT);
+    ASSERT_NE(sweepGradientVal, nullptr);
+    EXPECT_EQ(sweepGradientVal->value[0].f32, offsetX);
+    EXPECT_EQ(sweepGradientVal->value[1].f32, offsetY);
+    EXPECT_EQ(sweepGradientVal->value[2].f32, start);
+    EXPECT_EQ(sweepGradientVal->value[3].f32, end);
+    EXPECT_EQ(sweepGradientVal->value[4].f32, angle);
+    EXPECT_EQ(sweepGradientVal->value[5].i32, isRepeatedColoring);
+
+    nodeAPI->disposeNode(scrollNode);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: SweepGradientTest002
+ * @tc.desc: Test NODE_SWEEP_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SweepGradientTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the sweep gradient, and test "NODE_SWEEP_GRADIENT".
+     */
+    float offsetX = 1.1f;
+    float offsetY = 0.0f;
+    float start = 0;
+    float end = 175;
+    float angle = 45;
+    int32_t isRepeatedColoring = 1;
+    ArkUI_NumberValue sweepGradient[] = {{.f32 = offsetX}, {.f32 = offsetY}, {.f32 = start},
+        {.f32 = end}, {.f32 = angle}, {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFF182431;
+    uint32_t colors[] = {color, color};
+    float stopOne = 3.2f;
+    float stopTwo = 4.8f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+
+    ArkUI_AttributeItem sweepGradientItem = {sweepGradient,
+        sizeof(sweepGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(swiperNode, NODE_SWEEP_GRADIENT, &sweepGradientItem);
+
+    auto sweepGradientValue = nodeAPI->getAttribute(swiperNode, NODE_SWEEP_GRADIENT);
+    ASSERT_NE(sweepGradientValue, nullptr);
+    EXPECT_EQ(sweepGradientValue->value[0].f32, offsetX);
+    EXPECT_EQ(sweepGradientValue->value[1].f32, offsetY);
+    EXPECT_EQ(sweepGradientValue->value[2].f32, start);
+    EXPECT_EQ(sweepGradientValue->value[3].f32, end);
+    EXPECT_EQ(sweepGradientValue->value[4].f32, angle);
+    EXPECT_EQ(sweepGradientValue->value[5].i32, isRepeatedColoring);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: RadialGradientTest001
+ * @tc.desc: Test NODE_RADIAL_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, RadialGradientTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto scrollNode = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the radial gradient, and test "NODE_RADIAL_GRADIENT".
+    */
+    float offsetX = 5.1f;
+    float offsetY = 0.0f;
+    float radius = 10;
+    int32_t isRepeatedColoring = 1;
+    ArkUI_NumberValue radialGradient[] = {{.f32 = offsetX}, {.f32 = offsetY}, {.f32 = radius},
+        {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFF182431;
+    uint32_t colors[] = {color, color};
+    float stopOne = 0.0f;
+    float stopTwo = 6.9f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+    ArkUI_AttributeItem radialGradientItem = {radialGradient,
+        sizeof(radialGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(scrollNode, NODE_RADIAL_GRADIENT, &radialGradientItem);
+    auto radialGradientValue = nodeAPI->getAttribute(scrollNode, NODE_RADIAL_GRADIENT);
+    ASSERT_NE(radialGradientValue, nullptr);
+    EXPECT_EQ(radialGradientValue->value[0].f32, offsetX);
+    EXPECT_EQ(radialGradientValue->value[1].f32, offsetY);
+    EXPECT_EQ(radialGradientValue->value[2].f32, radius);
+    EXPECT_EQ(radialGradientValue->value[3].i32, isRepeatedColoring);
+
+    nodeAPI->disposeNode(scrollNode);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: RadialGradientTest002
+ * @tc.desc: Test NODE_RADIAL_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, RadialGradientTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the radial gradient, and test "NODE_RADIAL_GRADIENT".
+    */
+    float offsetX = 0.7f;
+    float offsetY = 1.3f;
+    float radius = 23;
+    int32_t isRepeatedColoring = 0;
+    ArkUI_NumberValue radialGradient[] = {{.f32 = offsetX}, {.f32 = offsetY}, {.f32 = radius},
+        {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFF182431;
+    uint32_t colors[] = {color, color};
+    float stopOne = 1.1f;
+    float stopTwo = 7.8f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+    ArkUI_AttributeItem radialGradientItem = {radialGradient,
+        sizeof(radialGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(swiperNode, NODE_RADIAL_GRADIENT, &radialGradientItem);
+    auto radialGradientVal = nodeAPI->getAttribute(swiperNode, NODE_RADIAL_GRADIENT);
+    ASSERT_NE(radialGradientVal, nullptr);
+    EXPECT_EQ(radialGradientVal->value[0].f32, offsetX);
+    EXPECT_EQ(radialGradientVal->value[1].f32, offsetY);
+    EXPECT_EQ(radialGradientVal->value[2].f32, radius);
+    EXPECT_EQ(radialGradientVal->value[3].i32, isRepeatedColoring);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: LinearGradientTest001
+ * @tc.desc: Test NODE_LINEAR_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, LinearGradientTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto scrollNode = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the linear gradient, and test "NODE_LINEAR_GRADIENT".
+    */
+    float offsetX = 4.7f;
+    float offsetY = 0.4f;
+    float radius = 21;
+    int32_t isRepeatedColoring = 0;
+    ArkUI_NumberValue linearGradient[] = {{.f32 = offsetX}, {.f32 = offsetY}, {.f32 = radius},
+        {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFF185531;
+    uint32_t colors[] = {color, color};
+    float stopOne = 0.1f;
+    float stopTwo = 7.7f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+    ArkUI_AttributeItem linearGradientItem = {linearGradient,
+        sizeof(linearGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(scrollNode, NODE_LINEAR_GRADIENT, &linearGradientItem);
+    auto linearGradientValue = nodeAPI->getAttribute(scrollNode, NODE_LINEAR_GRADIENT);
+    ASSERT_NE(linearGradientValue, nullptr);
+
+    nodeAPI->disposeNode(scrollNode);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: LinearGradientTest002
+ * @tc.desc: Test NODE_LINEAR_GRADIENT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, LinearGradientTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the linear gradient, and test "NODE_LINEAR_GRADIENT".
+    */
+    float offset = 0.3f;
+    float radius = 13;
+    int32_t isRepeatedColoring = 1;
+    ArkUI_NumberValue linearGradient[] = {{.f32 = offset}, {.f32 = offset}, {.f32 = radius},
+        {.i32 = isRepeatedColoring}};
+    uint32_t color = 0xFF225531;
+    uint32_t colors[] = {color, color};
+    float stopOne = 0.6f;
+    float stopTwo = 3.8f;
+    float stops[] = {stopOne, stopTwo};
+    ArkUI_ColorStop colorStop[] = {{colors, stops, 2}};
+    ArkUI_AttributeItem linearGradientItem = {linearGradient,
+        sizeof(linearGradient) / sizeof(ArkUI_NumberValue), nullptr, colorStop};
+    nodeAPI->setAttribute(swiperNode, NODE_LINEAR_GRADIENT, &linearGradientItem);
+    auto linearGradientVal = nodeAPI->getAttribute(swiperNode, NODE_LINEAR_GRADIENT);
+    ASSERT_NE(linearGradientVal, nullptr);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: ForegroundColorTest001
+ * @tc.desc: Test NODE_FOREGROUND_COLOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ForegroundColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto scrollNode = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the foreground color, and test "NODE_FOREGROUND_COLOR".
+     */
+    uint32_t foregroundColor = 0xFF182431;
+    ArkUI_NumberValue value[] = {{.u32 = foregroundColor}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(scrollNode, NODE_FOREGROUND_COLOR, &item);
+    auto foregroundColorVal = nodeAPI->getAttribute(scrollNode, NODE_FOREGROUND_COLOR);
+    ASSERT_NE(foregroundColorVal, nullptr);
+    EXPECT_EQ(foregroundColorVal->value[0].u32, foregroundColor);
+    nodeAPI->disposeNode(scrollNode);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+}
+
+/**
+ * @tc.name: ForegroundColorTest002
+ * @tc.desc: Test NODE_FOREGROUND_COLOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ForegroundColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+     * @tc.steps: step3. Initialize the value of the foreground color, and test "NODE_FOREGROUND_COLOR".
+     */
+    uint32_t color = 0x337F7F7F;
+    ArkUI_NumberValue value[] = {{.u32 = color}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(swiperNode, NODE_FOREGROUND_COLOR, &item);
+    auto foregroundColorVal = nodeAPI->getAttribute(swiperNode, NODE_FOREGROUND_COLOR);
+    ASSERT_NE(foregroundColorVal, nullptr);
+    EXPECT_EQ(foregroundColorVal->value[0].u32, color);
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: MaskTest001
+ * @tc.desc: Test NODE_MASK_ARKUI_MASK_TYPE_RECTANGLE function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, RadialGradiMaskTest001entTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the ARKUI_MASK_TYPE_RECTANGLE type mask,
+    * and test "NODE_MASK".
+    */
+    uint32_t color = 0xFF182431;
+    uint32_t borderColor = 0xFF185531;
+    float borderWidth = 3;
+    int32_t type = ARKUI_MASK_TYPE_RECTANGLE;
+    float rectWidth = 20;
+    float rectHeight = 20;
+    float rectRadiusWidth = 5;
+    float rectRadiusHeight = 6;
+    float leftTopRadius = 20;
+    float leftBottomRadius = 20;
+    float rightTopRadius = 5;
+    float rightBottomRadius = 6;
+    ArkUI_NumberValue rectMask[] = {{.u32 = color}, {.u32 = borderColor}, {.f32 = borderWidth}, {.i32 = type},
+        {.f32 = rectWidth}, {.f32 = rectHeight}, {.f32 = rectRadiusWidth},
+        {.f32 = rectRadiusHeight}, {.f32 = leftTopRadius}, {.f32 = leftBottomRadius},
+        {.f32 = rightTopRadius}, {.f32 = rightBottomRadius}};
+    ArkUI_AttributeItem rectMaskItem = {rectMask,
+        sizeof(rectMask) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(swiperNode, NODE_MASK, &rectMaskItem);
+    auto rectMaskVal = nodeAPI->getAttribute(swiperNode, NODE_MASK);
+    ASSERT_NE(rectMaskVal, nullptr);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: MaskTest002
+ * @tc.desc: Test NODE_MASK_ARKUI_MASK_TYPE_CIRCLE function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, MaskTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the ARKUI_MASK_TYPE_CIRCLE type mask,
+    * and test "NODE_MASK".
+    */
+    uint32_t color = 0xFF182432;
+    uint32_t borderColor = 0xFF185549;
+    float borderWidth = 4;
+    int32_t type = ARKUI_MASK_TYPE_CIRCLE;
+    float circleWidth = 23;
+    float circleHeight = 23;
+    ArkUI_NumberValue circleMask[] = {{.u32 = color}, {.u32 = borderColor}, {.f32 = borderWidth}, {.i32 = type},
+        {.f32 = circleWidth}, {.f32 = circleHeight}};
+    ArkUI_AttributeItem circleMaskItem = {circleMask,
+        sizeof(circleMask) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(swiperNode, NODE_MASK, &circleMaskItem);
+    auto circleMaskVal = nodeAPI->getAttribute(swiperNode, NODE_MASK);
+    ASSERT_NE(circleMaskVal, nullptr);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: MaskTest003
+ * @tc.desc: Test NODE_MASK_ARKUI_MASK_TYPE_ELLIPSE function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, MaskTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the ARKUI_MASK_TYPE_ELLIPSE type mask,
+    * and test "NODE_MASK".
+    */
+    uint32_t color = 0xFF182432;
+    uint32_t borderColor = 0xFF185549;
+    float borderWidth = 4;
+    int32_t type = ARKUI_MASK_TYPE_ELLIPSE;
+    float ellipseWidth = 23;
+    float ellipseHeight = 23;
+    ArkUI_NumberValue ellipseMask[] = {{.u32 = color}, {.u32 = borderColor}, {.f32 = borderWidth},
+        {.i32 = type}, {.f32 = ellipseWidth}, {.f32 = ellipseHeight}};
+    ArkUI_AttributeItem ellipseMaskItem = {ellipseMask,
+        sizeof(ellipseMask) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(swiperNode, NODE_MASK, &ellipseMaskItem);
+    auto ellipseMaskVal = nodeAPI->getAttribute(swiperNode, NODE_MASK);
+    ASSERT_NE(ellipseMaskVal, nullptr);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: MaskTest004
+ * @tc.desc: Test NODE_MASK_ARKUI_MASK_TYPE_PROGRESS function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, MaskTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+
+    /**
+     * @tc.steps: step2. Create node
+     */
+    auto swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+
+    /**
+    * @tc.steps: step3. Initialize the value of the ARKUI_MASK_TYPE_PROGRESS type mask,
+    * and test "NODE_MASK".
+    */
+    int32_t type = ARKUI_MASK_TYPE_PROGRESS;
+    float currProgress = 0;
+    float maxProgress = 50;
+    uint32_t color = 0xFF199432;
+    ArkUI_NumberValue progressMask[] = {{.i32 = type}, {.f32 = currProgress}, {.f32 = maxProgress},
+        {.u32 = color}};
+    ArkUI_AttributeItem progressMaskItem = {progressMask,
+        sizeof(progressMask) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(swiperNode, NODE_MASK, &progressMaskItem);
+    auto progressMaskVal = nodeAPI->getAttribute(swiperNode, NODE_MASK);
+    ASSERT_NE(progressMaskVal, nullptr);
+    EXPECT_EQ(progressMaskVal->value[0].i32, type);
+    EXPECT_EQ(progressMaskVal->value[1].f32, currProgress);
+    EXPECT_EQ(progressMaskVal->value[2].f32, maxProgress);
+    EXPECT_EQ(progressMaskVal->value[3].u32, color);
+
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
  * @tc.name: SwiperArrowStyleTest001
  * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
  * @tc.type: FUNC
@@ -9748,6 +10505,114 @@ HWTEST_F(NativeNodeTest, SwiperIndicatorTest004, TestSize.Level1)
      */
     EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(swiperIndicator), 0xffde6355);
     EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(swiperIndicator), 0xfff5f5f5);
+    OH_ArkUI_SwiperIndicator_Dispose(swiperIndicator);
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest005
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 6;
+    const char* arr[size] = {"a", "b", "c", "d", "e", "f"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(text, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 300;
+        nodeAPI->setAttribute(text, NODE_WIDTH, &item);
+        value[0].f32 = 150;
+        nodeAPI->setAttribute(text, NODE_HEIGHT, &item);
+        nodeAPI->addChild(swiperNode, text);
+    }
+
+    /**
+     * @tc.steps: step3. Create an indicator and configure the properties,
+     *            then set the indicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(indicator, 20);
+    OH_ArkUI_SwiperDigitIndicator_SetFontSize(indicator, 25);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DIGIT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = indicator};
+    auto setResult = nodeAPI->setAttribute(swiperNode, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontColor(indicator), 0xFF000000);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(indicator), 0xFF000000);
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+    nodeAPI->disposeNode(swiperNode);
+}
+
+/**
+ * @tc.name: SwiperIndicatorTest006
+ * @tc.desc: Test NODE_SWIPER_INDICATOR function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch and initialize.
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiperNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 7;
+    const char* arr[size] = {"a", "b", "c", "d", "e", "f", "g"};
+
+    /**
+     * @tc.steps: step2. Initialize the text component and mount it to the swiper.
+     */
+    for (int i = 0; i < size; i++) {
+        ArkUI_NodeHandle text = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[i] };
+        nodeAPI->setAttribute(text, NODE_TEXT_CONTENT, &content);
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 430;
+        nodeAPI->setAttribute(text, NODE_WIDTH, &item);
+        value[0].f32 = 170;
+        nodeAPI->setAttribute(text, NODE_HEIGHT, &item);
+        nodeAPI->addChild(swiperNode, text);
+    }
+
+    /**
+     * @tc.steps: step3. Create an swiperIndicator and configure the properties,
+     *            then set the swiperIndicator to the NODE_SWIPER_INDICATOR.
+     */
+    auto swiperIndicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    ArkUI_NumberValue valueTemp[] = {{.i32 = ARKUI_SWIPER_INDICATOR_TYPE_DOT}};
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = swiperIndicator};
+    auto setResult = nodeAPI->setAttribute(swiperNode, NODE_SWIPER_INDICATOR, &itemTemp);
+    EXPECT_EQ(setResult, ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Test attribute acquisition,
+     */
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(swiperIndicator), 0xFF000000);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(swiperIndicator), 0xFF000000);
     OH_ArkUI_SwiperIndicator_Dispose(swiperIndicator);
     nodeAPI->disposeNode(swiperNode);
 }

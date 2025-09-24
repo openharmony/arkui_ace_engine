@@ -1325,13 +1325,13 @@ HWTEST_F(LayoutWrapperTestTwoNg, GetAccumulatedSafeAreaExpandCacheHitTest002, Te
     childLayoutProperty2->UpdateIgnoreLayoutSafeAreaOpts(opts);
     FlushUITasks(StackNode);
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(200.0f, 200.0f))
-        << child1->GetGeometryNode()->GetFrameRect().ToString();
+        << child1->GetGeometryNode()->GetFrameSize().ToString();
     EXPECT_EQ(child2->GetGeometryNode()->GetFrameSize(), SizeF(200.0f, 200.0f))
         << child2->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameOffset(), OffsetF(-50.0f, -50.0f))
-        << child1->GetGeometryNode()->GetFrameRect().ToString();
+        << child1->GetGeometryNode()->GetFrameOffset().ToString();
     EXPECT_EQ(child2->GetGeometryNode()->GetFrameOffset(), OffsetF(250.0f, 250.0f))
-        << child2->GetGeometryNode()->GetFrameRect().ToString();
+        << child2->GetGeometryNode()->GetFrameOffset().ToString();
     ExpandEdges expectedRes;
     expectedRes = { .left = std::make_optional<float>(50.0f),
         .right = std::make_optional<float>(50.0f),

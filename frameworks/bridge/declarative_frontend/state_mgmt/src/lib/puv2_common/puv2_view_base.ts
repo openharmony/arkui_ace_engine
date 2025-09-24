@@ -38,6 +38,11 @@ enum PrebuildPhase {
 //API Version 18
 const API_VERSION_ISOLATION_FOR_5_1: number = 18;
 
+// Declare MutableBuilder class to make it available for type-checking. See jsEnumStyle.js and
+// build-tools\ets-loader\declarations\common.d.ts
+declare class MutableBuilder<Args extends Object[]> {
+  builder(): (...args: Args) => void;
+}
 // NativeView
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
@@ -55,6 +60,11 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   static readonly compareNumber = (a: number, b: number): number => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
   };
+
+  // A map to associate builder objects with unique numeric IDs, used in ConditionalBuilder.
+  protected builderIdMap_: WeakMap<Object, number> = new WeakMap();
+  // The next available builder ID to be assigned, starting from 1000000 to avoid conflict.
+  protected nextBuilderId_: number = 1000000;
 
   // indicates the currently rendered or rendered UINode's elmtIds
   // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering

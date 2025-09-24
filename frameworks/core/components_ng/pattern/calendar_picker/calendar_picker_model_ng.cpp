@@ -300,9 +300,8 @@ void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(textStyle);
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ParseNormalTextStyleResObj(frameNode, textStyle);
 
     if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, textStyle.fontSize.value());
@@ -355,9 +354,7 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(textStyle);
-    }
+    ParseNormalTextStyleResObj(frameNode, textStyle);
 
     if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, textStyle.fontSize.value(), frameNode);
@@ -872,15 +869,13 @@ std::string CalendarPickerModelNG::GetDisabledDateRange(FrameNode* frameNode)
     return pickerPattern->GetDisabledDateRange();
 }
 
-void CalendarPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void CalendarPickerModelNG::ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 

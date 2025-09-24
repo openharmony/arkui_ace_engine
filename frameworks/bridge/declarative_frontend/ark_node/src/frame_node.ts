@@ -50,6 +50,10 @@ declare enum EventQueryType {
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
+function getFrameNodeRawPtr(frameNode) {
+    return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+}
+
 class FrameNode extends Disposable {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;

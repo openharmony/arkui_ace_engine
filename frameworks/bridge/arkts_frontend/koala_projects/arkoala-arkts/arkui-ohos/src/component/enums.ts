@@ -159,6 +159,8 @@ export enum PlayMode {
     AlternateReverse = 3
 }
 export enum KeyType {
+    UNKNOWN = -1,
+    Unknown = -1,
     DOWN = 0,
     Down = 0,
     UP = 1,

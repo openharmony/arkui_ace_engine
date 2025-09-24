@@ -70,38 +70,6 @@ void ViewContextModelNG::openAnimation(const AnimationOption& option)
     }
 }
 
-void ViewContextModelNG::openAnimationInternal(const AnimationOption& option)
-{
-    NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-    NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->OpenFrontendAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
-    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
-    bool isDirtyPropertyNodesEmpty = pipelineContext->IsDirtyPropertyNodesEmpty();
-    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE && !pipelineContext->IsLayouting()
-        && (!isDirtyLayoutNodesEmpty || !isDirtyPropertyNodesEmpty)) {
-        TAG_LOGW(AceLogTag::ACE_ANIMATION, "openAnimation: option:%{public}s,"
-            "dirtyLayoutNodes is empty:%{public}d, dirtyPropertyNodes is empty:%{public}d",
-            option.ToString().c_str(), isDirtyLayoutNodesEmpty, isDirtyPropertyNodesEmpty);
-    }
-}
-
-void ViewContextModelNG::closeAnimationInternal(const AnimationOption& option, bool needFlush)
-{
-    NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
-    if (needFlush) {
-        NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
-    }
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->CloseFrontendAnimation();
-}
 int32_t ViewContextModelNG::OpenBindSheet(
     const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,

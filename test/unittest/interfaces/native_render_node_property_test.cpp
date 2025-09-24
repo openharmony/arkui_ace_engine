@@ -407,4 +407,25 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest017, TestSize
     auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
     ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: NativeRenderNodePropertyTest018
+ * @tc.desc: Test renderNode transform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest018, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+
+    // test martix length = 17
+    float matrix[] = {0.866, 0.433, -0.25, 0, 0, 0.866, 0.5, 0, 0.5, -0.25, 0.866, 0, 30, 30, 0, 1, 0};
+    auto result = OH_ArkUI_RenderNodeUtils_SetTransform(rootRenderNode, matrix);
+    ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
+}
+
 } // namespace OHOS::Ace

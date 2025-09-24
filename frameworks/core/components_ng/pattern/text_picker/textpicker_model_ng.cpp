@@ -352,7 +352,7 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDisappearTextStyleResObj(value);
+        ParseDisappearTextStyleResObj(frameNode, value);
     }
 
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
@@ -399,7 +399,7 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(value);
+        ParseNormalTextStyleResObj(frameNode, value);
     }
 
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
@@ -446,7 +446,7 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseSelectedTextStyleResObj(value);
+        ParseSelectedTextStyleResObj(frameNode, value);
     }
 
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
@@ -491,7 +491,9 @@ void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, 
 {
     CHECK_NULL_VOID(textTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDefaultTextStyleResObj(value);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        ParseDefaultTextStyleResObj(frameNode, value);
     }
     auto textStyle = textTheme->GetTextStyle();
 
@@ -1040,7 +1042,7 @@ void TextPickerModelNG::SetNormalTextStyle(
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseNormalTextStyleResObj(value);
+        ParseNormalTextStyleResObj(frameNode, value);
     }
 
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
@@ -1084,7 +1086,7 @@ void TextPickerModelNG::SetSelectedTextStyle(
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseSelectedTextStyleResObj(value);
+        ParseSelectedTextStyleResObj(frameNode, value);
     }
 
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
@@ -1134,7 +1136,7 @@ void TextPickerModelNG::SetDisappearTextStyle(
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDisappearTextStyleResObj(value);
+        ParseDisappearTextStyleResObj(frameNode, value);
     }
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -1398,7 +1400,7 @@ void TextPickerModelNG::SetDefaultTextStyle(
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(textTheme);
     if (SystemProperties::ConfigChangePerform()) {
-        ParseDefaultTextStyleResObj(value);
+        ParseDefaultTextStyleResObj(frameNode, value);
     }
 
     auto textStyle = textTheme->GetTextStyle();
@@ -1781,12 +1783,10 @@ void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemD
     textPickerPattern->AddResObj("textPicker.divider", resObj, std::move(updateFunc));
 }
 
-void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
-    std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
+void TextPickerModelNG::ParseResTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyleOpt,
+    const std::string& textStyleType, std::function<void(const PickerTextStyle&)> updateTextStyleFunc)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
@@ -1835,64 +1835,56 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
     pickerPattern->AddResObj(textStyleType, resObj, std::move(updateFunc));
 }
 
-void TextPickerModelNG::ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TextPickerModelNG::ParseDisappearTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TextPickerDisappearTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDisappearTextStyle(textStyle); }
     );
 }
 
-void TextPickerModelNG::ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TextPickerModelNG::ParseSelectedTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TextPickerSelectedTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateSelectedTextStyle(textStyle); }
     );
 }
 
-void TextPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TextPickerModelNG::ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TextPickerNormalTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateNormalTextStyle(textStyle); }
     );
 }
 
-void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt)
+void TextPickerModelNG::ParseDefaultTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
     ParseResTextStyle(
+        frameNode,
         textStyleOpt,
         "TextPickerDefaultTextStyle",
         [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDefaultTextStyle(textStyle); }

@@ -364,6 +364,11 @@ public:
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
 
+    RefPtr<FrameNode> GetExtraMaskNode()
+    {
+        return extraMaskNode_;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -475,6 +480,7 @@ private:
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
     RefPtr<FrameNode> contentColumn_;
+    RefPtr<FrameNode> extraMaskNode_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
     bool isPickerDialog_ = false;

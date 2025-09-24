@@ -177,7 +177,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions?: DropOptions): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
     onPreDrag(event: (preDragStatus: PreDragStatus) => void): this;
-    allowDrop(value: Array<UniformDataType>): this;
+    allowDrop(value: Array<UniformDataType> | Array<string>): this;
     draggable(value: boolean): this;
     dragPreview(preview: CustomBuilder | DragItemInfo | string): this;
     overlay(value: string | CustomBuilder, options?: {
@@ -633,7 +633,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
-    allowDrop(value: Array<UniformDataType>): this;
+    allowDrop(value: Array<UniformDataType> | Array<string>): this;
     draggable(value: boolean): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;
@@ -1738,7 +1738,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this;
     onDrop(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this;
-    allowDrop(value: Array<UniformDataType>): this;
+    allowDrop(value: Array<UniformDataType> | Array<string>): this;
     draggable(value: boolean): this;
     overlay(value: string | CustomBuilder, options?: {
         align?: Alignment;

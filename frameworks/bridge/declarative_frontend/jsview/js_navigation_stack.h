@@ -109,6 +109,9 @@ public:
     std::vector<std::string> DumpStackInfo() const override;
     void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
+    void FireNavigationInterceptionBeforeLifeCycle(const RefPtr<NavigationStack>& navigationStack,
+        const RefPtr<NG::NavDestinationContext>& from, const int32_t index, NG::NavigationOperation operation,
+        bool isAnimated) override;
     void FireNavigationModeChange(NG::NavigationMode mode) override;
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
     int32_t GetJsIndexFromNativeIndex(int32_t index) override;
@@ -145,6 +148,11 @@ public:
         homePathInfo_ = std::move(pathInfo);
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+
+    bool IsStaticStack() override
+    {
+        return false;
+    }
 
 protected:
     JSRef<JSObject> dataSourceObj_;

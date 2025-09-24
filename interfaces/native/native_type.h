@@ -775,6 +775,20 @@ typedef enum {
 } ArkUI_EdgeEffect;
 
 /**
+ * @brief Enumerates the status of the scroll bar.
+ *
+ * @since 22
+ */
+typedef enum {
+    /** Not displayed. */
+    ARKUI_BAR_STATE_OFF = 0,
+    /** On-demand display. */
+    ARKUI_BAR_STATE_AUTO = 1,
+    /** Resident display. */
+    ARKUI_BAR_STATE_ON = 2,
+} ArkUI_BarState;
+
+/**
  * @brief Enumerates the edges for which the effect takes effect when the boundary of the scrollable content is reached.
  *
  * @since 18

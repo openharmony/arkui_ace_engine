@@ -47,7 +47,13 @@ struct IndexPage {
     new TextList(13, 'friction', 'pages/Scroll/friction'),
     new TextList(14, 'initialOffsetXOffset', 'pages/Scroll/initialOffsetXOffset'),
     new TextList(15, 'initialOffsetYOffset', 'pages/Scroll/initialOffsetYOffset'),
-    new TextList(16, 'scrollSnap', 'pages/Scroll/scrollSnap')
+    new TextList(16, 'scrollSnap', 'pages/Scroll/scrollSnap'),
+    new TextList(17, 'friction(ScrollModifier)', 'pages/Scroll/ScrollModifier/friction'),
+    new TextList(18, 'initialOffsetXOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetXOffset'),
+    new TextList(19, 'initialOffsetYOffset(ScrollModifier)', 'pages/Scroll/ScrollModifier/initialOffsetYOffset'),
+    new TextList(20, 'scrollSnap(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollSnap'),
+    new TextList(21, 'ScrollIndex', 'pages/Scroll/ScrollIndex'),
+    new TextList(22, 'ScrollModifierIndex', 'pages/Scroll/ScrollModifier/ScrollModifierIndex')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

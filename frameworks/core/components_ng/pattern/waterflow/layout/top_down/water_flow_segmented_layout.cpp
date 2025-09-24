@@ -405,10 +405,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     }
     if (info_->jumpIndex_ == LAST_ITEM) {
         auto maxHeight = info_->GetMaxMainHeight() - info_->margins_.back().bottom.value_or(0.0f);
-        info_->currentOffset_ =
-            SolveJumpOffset({ 0, maxHeight, 0 }) + postJumpOffset_.value_or(0.0f) - info_->contentEndOffset_;
-    } else if (info_->jumpIndex_ == 0) {
-        info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f) + info_->contentStartOffset_;
+        info_->currentOffset_ = SolveJumpOffset({ 0, maxHeight, 0 }) + postJumpOffset_.value_or(0.0f);
     } else {
         info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f);
     }
@@ -453,7 +450,7 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
     float offset = info_->currentOffset_;
     switch (info_->align_) {
         case ScrollAlign::START:
-            offset = -item.mainOffset;
+            offset = -item.mainOffset + info_->contentStartOffset_;
             break;
 
         case ScrollAlign::CENTER:
@@ -461,12 +458,12 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
             break;
 
         case ScrollAlign::END:
-            offset = -(item.mainOffset + item.mainSize) + mainSize_;
+            offset = -(item.mainOffset + item.mainSize) + mainSize_ - info_->contentEndOffset_;
             break;
         default:
             break;
     }
-    offset = std::min(0.0f, offset);
+    offset = std::min(-info_->contentStartOffset_, offset);
     return offset;
 }
 

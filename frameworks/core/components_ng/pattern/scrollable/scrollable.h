@@ -598,6 +598,7 @@ public:
     void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
     void StopAxisAnimation();
+    void CheckStopFlingInTouchUp();
 
     void AttachAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
@@ -661,6 +662,11 @@ public:
     bool GetIsUserFling() const
     {
         return isUserFling_;
+    }
+
+    void SetIsDragOuterScrollBarStopAnimation(bool isDragOuterScrollBarStopAnimation)
+    {
+        isDragOuterScrollBarStopAnimation_ = isDragOuterScrollBarStopAnimation;
     }
 
     /**
@@ -748,6 +754,7 @@ private:
     bool isWillFling_ = false;
     bool isNeedFireDidStopFling_ = false;
     bool isTouchStopAnimation_ = false;
+    bool isDragOuterScrollBarStopAnimation_ = false;
     bool isUserFling_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;

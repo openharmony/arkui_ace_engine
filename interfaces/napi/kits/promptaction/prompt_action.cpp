@@ -700,6 +700,7 @@ struct PromptAsyncContext {
     napi_value dialogLevelUniqueId = nullptr;
     napi_value dialogImmersiveModeApi = nullptr;
     napi_value focusableApi = nullptr;
+    HasInvertColor hasInvertColor;
 };
 
 void DeleteContextAndThrowError(
@@ -927,7 +928,8 @@ void GetBackgroundBlurStyleOption(napi_env env, const std::shared_ptr<PromptAsyn
         BlurStyleOption styleOption;
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
-            delegate->GetBackgroundBlurStyleOption(asyncContext->blurStyleOptionApi, styleOption);
+            delegate->GetBackgroundBlurStyleOption(asyncContext->blurStyleOptionApi, styleOption,
+                asyncContext->hasInvertColor.hasBlurStyleOptionInactiveColor);
         }
         if (!blurStyleOption.has_value()) {
             blurStyleOption.emplace();
@@ -945,7 +947,9 @@ void GetBackgroundEffect(
         EffectOption styleOption;
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
-            delegate->GetBackgroundEffect(asyncContext->effectOptionApi, styleOption);
+            delegate->GetBackgroundEffect(asyncContext->effectOptionApi, styleOption,
+                asyncContext->hasInvertColor.hasEffectOptionColor,
+                asyncContext->hasInvertColor.hasEffectOptionInactiveColor);
         }
         if (!effectOption.has_value()) {
             effectOption.emplace();
@@ -961,6 +965,59 @@ void CheckNapiDimension(CalcDimension value)
     }
 }
 
+bool ParseBorderColorProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, NG::BorderColorProperty& colorProperty)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->borderColorApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value leftApi = nullptr;
+        napi_value rightApi = nullptr;
+        napi_value topApi = nullptr;
+        napi_value bottomApi = nullptr;
+        napi_get_named_property(env, asyncContext->borderColorApi, "left", &leftApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "right", &rightApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "top", &topApi);
+        napi_get_named_property(env, asyncContext->borderColorApi, "bottom", &bottomApi);
+        Color leftColor;
+        RefPtr<ResourceObject> leftColorResObj;
+        Color rightColor;
+        RefPtr<ResourceObject> rightColorResObj;
+        Color topColor;
+        RefPtr<ResourceObject> topColorResObj;
+        Color bottomColor;
+        RefPtr<ResourceObject> bottomColorResObj;
+        if (ParseNapiColor(env, leftApi, leftColor, leftColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(leftColorResObj)) {
+                asyncContext->hasInvertColor.hasBorderLeftColor = true;
+            }
+            colorProperty.leftColor = leftColor;
+        }
+        if (ParseNapiColor(env, rightApi, rightColor, rightColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(rightColorResObj)) {
+                asyncContext->hasInvertColor.hasBorderRightColor = true;
+            }
+            colorProperty.rightColor = rightColor;
+        }
+        if (ParseNapiColor(env, topApi, topColor, topColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(topColorResObj)) {
+                asyncContext->hasInvertColor.hasBorderTopColor = true;
+            }
+            colorProperty.topColor = topColor;
+        }
+        if (ParseNapiColor(env, bottomApi, bottomColor, bottomColorResObj)) {
+            if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(bottomColorResObj)) {
+                asyncContext->hasInvertColor.hasBorderBottomColor = true;
+            }
+            colorProperty.bottomColor = bottomColor;
+        }
+        colorProperty.multiValued = true;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 std::optional<NG::BorderColorProperty> GetBorderColorProps(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
@@ -971,35 +1028,17 @@ std::optional<NG::BorderColorProperty> GetBorderColorProps(
         return std::nullopt;
     }
     Color borderColor;
-    if (ParseNapiColor(env, asyncContext->borderColorApi, borderColor)) {
+    RefPtr<ResourceObject> borderColorResObj;
+    if (ParseNapiColor(env, asyncContext->borderColorApi, borderColor, borderColorResObj)) {
+        if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(borderColorResObj)) {
+            asyncContext->hasInvertColor.hasBorderTopColor = true;
+            asyncContext->hasInvertColor.hasBorderBottomColor = true;
+            asyncContext->hasInvertColor.hasBorderLeftColor = true;
+            asyncContext->hasInvertColor.hasBorderRightColor = true;
+        }
         colorProperty.SetColor(borderColor);
         return colorProperty;
-    } else if (valueType == napi_object) {
-        napi_value leftApi = nullptr;
-        napi_value rightApi = nullptr;
-        napi_value topApi = nullptr;
-        napi_value bottomApi = nullptr;
-        napi_get_named_property(env, asyncContext->borderColorApi, "left", &leftApi);
-        napi_get_named_property(env, asyncContext->borderColorApi, "right", &rightApi);
-        napi_get_named_property(env, asyncContext->borderColorApi, "top", &topApi);
-        napi_get_named_property(env, asyncContext->borderColorApi, "bottom", &bottomApi);
-        Color leftColor;
-        Color rightColor;
-        Color topColor;
-        Color bottomColor;
-        if (ParseNapiColor(env, leftApi, leftColor)) {
-            colorProperty.leftColor = leftColor;
-        }
-        if (ParseNapiColor(env, rightApi, rightColor)) {
-            colorProperty.rightColor = rightColor;
-        }
-        if (ParseNapiColor(env, topApi, topColor)) {
-            colorProperty.topColor = topColor;
-        }
-        if (ParseNapiColor(env, bottomApi, bottomColor)) {
-            colorProperty.bottomColor = bottomColor;
-        }
-        colorProperty.multiValued = true;
+    } else if (ParseBorderColorProps(env, asyncContext, colorProperty)) {
         return colorProperty;
     }
     return std::nullopt;
@@ -1102,6 +1141,15 @@ std::optional<NG::BorderRadiusProperty> GetBorderRadiusProps(
     return std::nullopt;
 }
 
+std::optional<Color> GetColorProps(napi_env env, napi_value value, RefPtr<ResourceObject>& resObj)
+{
+    Color color;
+    if (ParseNapiColor(env, value, color, resObj)) {
+        return color;
+    }
+    return std::nullopt;
+}
+
 std::optional<Color> GetColorProps(napi_env env, napi_value value)
 {
     Color color;
@@ -1173,9 +1221,13 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     shadow.SetBlurRadius(radius);
     Color color;
     ShadowColorStrategy shadowColorStrategy;
+    RefPtr<ResourceObject> colorResObj;
     if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
         shadow.SetShadowColorStrategy(shadowColorStrategy);
-    } else if (ParseNapiColor(env, colorApi, color)) {
+    } else if (ParseNapiColor(env, colorApi, color, colorResObj)) {
+        if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(colorResObj)) {
+            asyncContext->hasInvertColor.hasShadowColor = true;
+        }
         shadow.SetColor(color);
     }
     napi_valuetype valueType = GetValueType(env, typeApi);
@@ -1677,7 +1729,12 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+            RefPtr<ResourceObject> backgroundColorResObj;
             backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
+            if (backgroundColor && SystemProperties::ConfigChangePerform() &&
+                !CheckDarkResource(backgroundColorResObj)) {
+                asyncContext->hasInvertColor.hasBackgroundColor = true;
+            }
             shadowProps = GetShadowProps(env, asyncContext);
             GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea, enableHoverMode);
             GetBackgroundBlurStyleOption(env, asyncContext, blurStyleOption);
@@ -1851,6 +1908,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .effectOption = effectOption,
         .shadow = shadowProps,
         .hoverModeArea = hoverModeArea,
+        .hasInvertColor = asyncContext->hasInvertColor,
         .onLanguageChange = onLanguageChange,
         .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext),
         .onDidAppear = lifeCycleAttr.onDidAppear,
@@ -2462,10 +2520,18 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     std::optional<NG::BorderColorProperty> borderColorProps;
     std::optional<NG::BorderStyleProperty> borderStyleProps;
     ParseBorderColorAndStyle(env, asyncContext, borderWidthProps, borderColorProps, borderStyleProps);
-    auto backgroundColorProps = GetColorProps(env, asyncContext->backgroundColorApi);
+    RefPtr<ResourceObject> backgroundColorResObj;
+    auto backgroundColorProps = GetColorProps(env, asyncContext->backgroundColorApi, backgroundColorResObj);
+    if (backgroundColorProps && SystemProperties::ConfigChangePerform() && !CheckDarkResource(backgroundColorResObj)) {
+        asyncContext->hasInvertColor.hasBackgroundColor = true;
+    }
     auto builder = GetCustomBuilder(env, asyncContext);
     auto* nodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(asyncContext->nativePtr);
-    auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi);
+    RefPtr<ResourceObject> maskColorResObj;
+    auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi, maskColorResObj);
+    if (maskColorProps && SystemProperties::ConfigChangePerform() && !CheckDarkResource(maskColorResObj)) {
+        asyncContext->hasInvertColor.hasMaskColor = true;
+    }
     auto transitionEffectProps = GetTransitionProps(env, asyncContext);
     auto dialogTransitionEffectProps = GetDialogTransitionProps(env, asyncContext);
     auto maskTransitionEffectProps = GetMaskTransitionProps(env, asyncContext);
@@ -2498,6 +2564,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .hoverModeArea = hoverModeArea,
         .contentNode = AceType::WeakClaim(nodePtr),
         .maskColor = maskColorProps,
+        .hasInvertColor = asyncContext->hasInvertColor,
         .transitionEffect = transitionEffectProps,
         .dialogTransitionEffect = dialogTransitionEffectProps,
         .maskTransitionEffect = maskTransitionEffectProps,

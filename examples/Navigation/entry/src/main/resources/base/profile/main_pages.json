@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/removePageById/Index",
+    "pages/titleStyle/Index",
+    "pages/titleStyle/Test3",
+    "pages/titleStyle/Test4"
+  ]
+}

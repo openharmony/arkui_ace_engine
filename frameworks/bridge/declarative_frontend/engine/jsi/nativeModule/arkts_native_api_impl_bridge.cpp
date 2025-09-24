@@ -1943,6 +1943,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetBorderRadius));
     imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageSpanSrc"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetImageSpanSrc));
+    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportSvg2"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::SetSupportSvg2));
+    imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSupportSvg2"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageSpanBridge::ResetSupportSvg2));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageSpan"), imageSpan);
 
     auto blank = panda::ObjectRef::New(vm);
@@ -2542,6 +2546,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableAutoSpacing));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setController"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetController));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextAreaScrollBarColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextAreaScrollBarColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
@@ -4459,6 +4467,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MoveTo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getIdByNodePtr"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetIdByNodePtr));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeRawPtr"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFrameNodeRawPtr));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToParent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToParent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToScreen"),
@@ -5590,6 +5600,14 @@ void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetOnDidStopFling));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidStopFling"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetOnDidStopFling));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetContentStartOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetContentStartOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetContentEndOffset));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetContentEndOffset));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scrollable"), scrollable);
 }
 
@@ -6145,14 +6163,6 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapAlign));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapAlign));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentStartOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentStartOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentStartOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentStartOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentEndOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentEndOffset));
-    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentEndOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentEndOffset));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetDivider));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),

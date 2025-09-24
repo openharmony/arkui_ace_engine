@@ -1680,6 +1680,8 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getMediaType", &JSContextMenuParam::GetMediaType);
         JSClass<JSContextMenuParam>::CustomMethod("getPreviewWidth", &JSContextMenuParam::GetPreviewWidth);
         JSClass<JSContextMenuParam>::CustomMethod("getPreviewHeight", &JSContextMenuParam::GetPreviewHeight);
+        JSClass<JSContextMenuParam>::CustomMethod(
+            "getContextMenuMediaType", &JSContextMenuParam::GetContextMenuMediaType);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
     }
 
@@ -1845,6 +1847,18 @@ public:
         }
         if (type > 1) {
             RETURN_IF_CALLING_FROM_M114();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetContextMenuMediaType(const JSCallbackInfo& args)
+    {
+        RETURN_IF_CALLING_FROM_M114();
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetContextMenuMediaType();
         }
         auto jsType = JSVal(ToJSValue(type));
         auto descriptionRef = JSRef<JSVal>::Make(jsType);

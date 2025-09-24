@@ -76,7 +76,10 @@ struct IndexPage {
     new TextList(42, 'dividerStrokeWidth(ListModifier)', 'pages/List/ListModifier/dividerStrokeWidth'),
     new TextList(43, 'friction(ListModifier)', 'pages/List/ListModifier/friction'),
     new TextList(44, 'lanesMaxLength(ListModifier)', 'pages/List/ListModifier/lanesMaxLength'),
-    new TextList(45, 'lanesMinLength(ListModifier)', 'pages/List/ListModifier/lanesMinLength')
+    new TextList(45, 'lanesMinLength(ListModifier)', 'pages/List/ListModifier/lanesMinLength'),
+    new TextList(46, 'ListItemGroupModifierIndex', 'pages/List/ListItemGroupModifier/ListItemGroupModifierIndex'),
+    new TextList(47, 'ListItemGroupIndex', 'pages/List/ListItemGroup/ListItemGroupIndex'),
+    new TextList(48, 'ListIndex', 'pages/List/ListIndex')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

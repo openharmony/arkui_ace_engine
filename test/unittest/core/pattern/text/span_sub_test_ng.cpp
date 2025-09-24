@@ -64,6 +64,7 @@ HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest002, TestSize.Level1)
      * @tc.steps: step1. create span node
      */
     SpanModelNG spanModelNG;
+
     spanModelNG.Create(CREATE_VALUE_W);
 
     /**

@@ -146,6 +146,15 @@ struct DragPointerEvent final : public PointerEvent {
     {
         return targetWindowId;
     }
+
+    void reset()
+    {
+        sourceTool = SourceTool::UNKNOWN;
+        action = PointerAction::UNKNOWN;
+        rawPointerEvent = nullptr;
+        pressedKeyCodes.clear();
+        history.clear();
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_POINTER_EVENT_H

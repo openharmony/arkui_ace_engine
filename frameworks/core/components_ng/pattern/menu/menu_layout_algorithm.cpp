@@ -751,7 +751,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     bool isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
     if ((menuPattern->IsContextMenu() || (isSubMenu && Container::CurrentId() >= MIN_SUBCONTAINER_ID) ||
             canExpandCurrentWindow_) &&
-        (targetTag_ != V2::SELECT_ETS_TAG)) {
+        (!menuPattern->IsSelectMenu())) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
@@ -2939,7 +2939,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(hostNode);
     auto pipelineContext = DialogManager::GetMainPipelineContext(hostNode);
     CHECK_NULL_VOID(pipelineContext);
-    if (canExpandCurrentWindow_ && targetTag_ != V2::SELECT_ETS_TAG) {
+    if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
             ModifyTargetOffset();
             menuPattern->SetTargetOffset(targetOffset_);

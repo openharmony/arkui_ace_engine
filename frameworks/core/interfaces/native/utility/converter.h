@@ -860,6 +860,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

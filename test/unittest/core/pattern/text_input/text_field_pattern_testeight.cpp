@@ -537,10 +537,10 @@ HWTEST_F(TextFieldPatternTestEight, HandleOnEscape001, TestSize.Level0)
     GetFocus();
 
     auto ret = pattern_->HandleOnEscape();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     pattern_->hasPreviewText_ = true;
     ret = pattern_->HandleOnEscape();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**

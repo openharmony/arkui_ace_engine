@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -746,6 +746,75 @@ ArkUINativeModuleValue ScrollableBridge::ResetOnDidStopFling(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetOnDidStopFling(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::SetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> startOffsetArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    double startOffset = 0.0;
+    RefPtr<ResourceObject> resObj;
+
+    if (startOffsetArg->IsUndefined() || startOffsetArg->IsNull() ||
+        !ArkTSUtils::ParseJsDouble(vm, startOffsetArg, startOffset, resObj)) {
+        startOffset = 0.0;
+    }
+
+    GetArkUINodeModifiers()->getScrollableModifier()->setContentStartOffset(nativeNode, startOffset);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollableModifier()->createWithResourceObjContentStartOffset(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::ResetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollableModifier()->resetContentStartOffset(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::SetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> endOffsetArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    double endOffset = 0.0;
+    RefPtr<ResourceObject> resObj;
+
+    if (endOffsetArg->IsUndefined() || endOffsetArg->IsNull() ||
+        !ArkTSUtils::ParseJsDouble(vm, endOffsetArg, endOffset, resObj)) {
+        endOffset = 0.0;
+    }
+
+    GetArkUINodeModifiers()->getScrollableModifier()->setContentEndOffset(nativeNode, endOffset);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollableModifier()->createWithResourceObjContentEndOffset(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+
+ArkUINativeModuleValue ScrollableBridge::ResetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollableModifier()->resetContentEndOffset(nativeNode);
+
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -670,58 +670,6 @@ ArkUINativeModuleValue ListBridge::ResetScrollSnapAlign(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAlign(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::SetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> startOffsetArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    double startOffset = 0.0;
-    ArkTSUtils::ParseJsDouble(vm, startOffsetArg, startOffset);
-
-    GetArkUINodeModifiers()->getListModifier()->setContentStartOffset(nativeNode, startOffset);
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::ResetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetContentStartOffset(nativeNode);
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::SetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> endOffsetArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    double endOffset = 0.0;
-    ArkTSUtils::ParseJsDouble(vm, endOffsetArg, endOffset);
-
-    GetArkUINodeModifiers()->getListModifier()->setContentEndOffset(nativeNode, endOffset);
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::ResetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetContentEndOffset(nativeNode);
-
     return panda::JSValueRef::Undefined(vm);
 }
 

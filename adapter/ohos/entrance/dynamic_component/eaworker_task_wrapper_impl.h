@@ -27,8 +27,10 @@ public:
     explicit EaWorkerTaskWrapperImpl(int32_t hostInstanceId, int32_t workerId);
     ~EaWorkerTaskWrapperImpl() override;
     bool WillRunOnCurrentThread() override;
-    void Call(const TaskExecutor::Task& task) override;
-    void Call(const TaskExecutor::Task& task, uint32_t delayTime) override;
+    void Call(const TaskExecutor::Task& task,
+        PriorityType priorityType = PriorityType::LOW) override;
+    void Call(const TaskExecutor::Task& task, uint32_t delayTime,
+        PriorityType priorityType = PriorityType::LOW) override;
 
     void SetCurrentPthread(const pthread_t& threadId);
 

@@ -24,8 +24,10 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "pixel_map_impl.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/common/color_inverter.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -3396,5 +3398,68 @@ RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId)
     }
 
     return pixMapOhos;
+}
+
+bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+
+    int32_t resId = resObj->GetId();
+    bool hasDarkRes = false;
+    auto params = resObj->GetParams();
+    if (resId == -1 && !params.empty() && params.back().value.has_value()) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params.back().value.value(),
+            std::to_string(resObj->GetType()));
+    } else {
+        hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    }
+    return hasDarkRes;
+}
+
+void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj, Color& color, bool state)
+{
+    if (!state || !SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto node = OHOS::Ace::NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = node->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto localColorMode = node->GetLocalColorMode();
+    if (localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if (localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes) {
+            color = Color(invertFunc(color.GetValue()));
+        }
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+        color = Color(invertFunc(color.GetValue()));
+    }
+    if (!resObj) {
+        resObj = AceType::MakeRefPtr<ResourceObject>();
+        resObj->SetIsResource(false);
+        resObj->SetInstanceId(instanceId);
+    }
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
+    resObj->SetColor(curColor);
 }
 } // namespace OHOS::Ace

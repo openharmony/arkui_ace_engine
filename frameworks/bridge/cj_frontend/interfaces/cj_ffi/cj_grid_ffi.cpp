@@ -566,8 +566,7 @@ void FfiOHOSAceFrameworkGridOnScrollFrameBegin(CJOffsetRemain (*callback)(double
                              const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
         PipelineContext::SetCallBackNode(node);
         auto result = lambda(offset.Value(), static_cast<int32_t>(state));
-        ScrollFrameResult scrollRes { .offset = offset };
-        scrollRes.offset = Dimension(result.offsetRemain, DimensionUnit::VP);
+        ScrollFrameResult scrollRes { .offset = Dimension(result.offsetRemain, DimensionUnit::VP) };
         return scrollRes;
     };
     if (GridModel::GetInstance()) {

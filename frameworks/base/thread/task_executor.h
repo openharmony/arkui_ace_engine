@@ -328,8 +328,10 @@ private:
 class TaskWrapper {
 public:
     virtual bool WillRunOnCurrentThread() = 0;
-    virtual void Call(const TaskExecutor::Task& task) = 0;
-    virtual void Call(const TaskExecutor::Task& task, uint32_t delayTime) {};
+    virtual void Call(const TaskExecutor::Task& task,
+        PriorityType priorityType = PriorityType::LOW) = 0;
+    virtual void Call(const TaskExecutor::Task& task, uint32_t delayTime,
+        PriorityType priorityType = PriorityType::LOW) {};
 
     virtual ~TaskWrapper() = default;
 };

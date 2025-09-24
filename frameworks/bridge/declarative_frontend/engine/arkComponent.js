@@ -209,7 +209,7 @@ class AllowForceDarkModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    getUINativeModule().common.allowForceDark(node);
+    getUINativeModule().common.allowForceDark(node, this.value);
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -7142,6 +7142,36 @@ class OnDidStopFlingModifier extends ModifierWithKey {
 }
 OnDidStopFlingModifier.identity = Symbol('onDidStopFling');
 
+class ContentStartOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentStartOffset(node);
+    }
+    else {
+      getUINativeModule().scrollable.setContentStartOffset(node, this.value);
+    }
+  }
+}
+ContentStartOffsetModifier.identity = Symbol('contentStartOffset');
+
+class ContentEndOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentEndOffset(node);
+    }
+    else {
+      getUINativeModule().scrollable.setContentEndOffset(node, this.value);
+    }
+  }
+}
+ContentEndOffsetModifier.identity = Symbol('contentEndOffset');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7204,6 +7234,14 @@ class ArkScrollable extends ArkComponent {
   }
   onDidStopFling(value) {
     modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, value);
+    return this;
+  }
+  contentStartOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
+    return this;
+  }
+  contentEndOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
     return this;
   }
 }
@@ -9481,6 +9519,23 @@ class ImageSpanColorFilterModifier extends ModifierWithKey {
   }
 }
 ImageSpanColorFilterModifier.identity = Symbol('ImageSpanColorFilter');
+class ImageSpanSupportSvg2Modifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetSupportSvg2(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setSupportSvg2(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageSpanSupportSvg2Modifier.identity = Symbol('supportSvg2');
 class ImageSpanBorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9570,6 +9625,10 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   colorFilter(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity, ImageSpanColorFilterModifier, value);
+    return this;
+  }
+  supportSvg2(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanSupportSvg2Modifier.identity, ImageSpanSupportSvg2Modifier, value);
     return this;
   }
   borderRadius(value) {
@@ -16034,6 +16093,24 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextAreaEnableAutoSpacingModifier.identity = Symbol('textAreaEnableAutoSpacing');
 
+class TextAreaScrollBarColorModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textArea.resetScrollBarColor(node);
+        }
+        else {
+            getUINativeModule().textArea.setScrollBarColor(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextAreaScrollBarColorModifier.identity = Symbol('textAreaBarColor');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -16411,6 +16488,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  scrollBarColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaScrollBarColorModifier.identity, TextAreaScrollBarColorModifier, value);
     return this;
   }
 }
@@ -34250,34 +34331,6 @@ class ListScrollSnapAlignModifier extends ModifierWithKey {
   }
 }
 ListScrollSnapAlignModifier.identity = Symbol('listScrollSnapAlign');
-class ContentStartOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetContentStartOffset(node);
-    }
-    else {
-      getUINativeModule().list.setContentStartOffset(node, this.value);
-    }
-  }
-}
-ContentStartOffsetModifier.identity = Symbol('contentStartOffset');
-class ContentEndOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetContentEndOffset(node);
-    }
-    else {
-      getUINativeModule().list.setContentEndOffset(node, this.value);
-    }
-  }
-}
-ContentEndOffsetModifier.identity = Symbol('contentEndOffset');
 class ListDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -34872,14 +34925,6 @@ class ArkListComponent extends ArkScrollable {
   }
   scrollBarColor(value) {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarColorModifier.identity, ListScrollBarColorModifier, value);
-    return this;
-  }
-  contentStartOffset(value) {
-    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
-    return this;
-  }
-  contentEndOffset(value) {
-    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
     return this;
   }
   divider(value) {

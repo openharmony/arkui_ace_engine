@@ -1817,6 +1817,51 @@ HWTEST_F(ListPatternTestNg, AnimateTo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AnimateTo001
+ * @tc.desc: Test ListPattern AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, AnimateTo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a list with items of varying heights at the bottom
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(9);
+    model.SetCachedCount(0);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+        ListItemModelNG itemModel;
+        itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+        Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
+        if (idx == 9) {
+            SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE * 5));
+        } else {
+            SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE));
+        }
+        
+    });
+    CreateDone();
+    FlushUITasks(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, 4500);
+    
+    /**
+     * @tc.steps: step2. AnimateTo the 100
+     * @tc.expected: AnimateTo the 100
+     */
+    MockAnimationManager::GetInstance().SetTicks(4);
+    pattern_->AnimateTo(100, -1, nullptr, true);
+    FlushUITasks(frameNode_);
+    for (int i = 0; i < 4; ++i) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks(frameNode_);
+    }
+    
+    EXPECT_FLOAT_EQ(pattern_->currentOffset_, 100);
+}
+
+/**
  * @tc.name: CustomizeSafeAreaPadding001
  * @tc.desc: Test ListPattern CustomizeSafeAreaPadding
  * @tc.type: FUNC

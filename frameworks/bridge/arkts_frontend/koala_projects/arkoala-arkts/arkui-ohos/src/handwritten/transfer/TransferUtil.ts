@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../../Graphics"
-import { KPointer } from "@koalaui/interop"
-import { BorderStyle } from "../../component/enums"
-import { ArkUIAniModule } from "arkui.ani"
-import { ShapeClipTransfer } from "./ShapeClipTransfer"
-import { ShapeMaskTransfer } from "./ShapeMaskTransfer"
+import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
+import { KPointer } from '@koalaui/interop'
+import { BorderStyle } from '../../component/enums'
+import { ArkUIAniModule } from 'arkui.ani'
+import { ShapeClipTransfer } from './ShapeClipTransfer'
+import { ShapeMaskTransfer } from './ShapeMaskTransfer'
 
 export class TransferUtil {
     /*******************************************************************************
@@ -28,7 +28,7 @@ export class TransferUtil {
     static getPropNumber(inVal: ESValue, name: string): number {
         let nameVal = inVal.getProperty(name);
         if (nameVal.isUndefined() || nameVal.isNull()) {
-            throw Error("prop number is null, convert fail.");
+            throw Error('prop number is null, convert fail.');
         }
         let num = nameVal.toNumber();
         return num;
@@ -85,7 +85,7 @@ export class TransferUtil {
     static getPropNativeRef(inVal: ESValue, name: string): Object {
         const refVal = inVal.getProperty(name);
         if (refVal.isNull() || refVal.isUndefined()) {
-            throw new Error("nativeRef is null, transfer error.");
+            throw new Error('nativeRef is null, transfer error.');
         }
         return refVal.unwrap() as Object;
     }
@@ -106,7 +106,7 @@ export class TransferUtil {
         if (peerVal.isNull() || peerVal.isUndefined()) {
             return 0;
         }
-        let ptrVal = peerVal.getProperty("ptr");
+        let ptrVal = peerVal.getProperty('ptr');
         if (!ptrVal.isNumber()) {
             return 0
         }
@@ -117,7 +117,7 @@ export class TransferUtil {
     static getPropBool(inVal: ESValue, name: string): boolean {
         let bVal = inVal.getProperty(name);
         if (bVal.isUndefined() || bVal.isNull()) {
-            throw Error("prop boolen is null, convert fail.");
+            throw Error('prop boolen is null, convert fail.');
         }
         return bVal.toBoolean();
     }
@@ -125,7 +125,7 @@ export class TransferUtil {
     static getPropString(inVal: ESValue, name: string): string {
         let sVal = inVal.getProperty(name);
         if (sVal.isUndefined() || sVal.isNull()) {
-            throw Error("prop string is null, convert fail.");
+            throw Error('prop string is null, convert fail.');
         }
         return sVal.toString();
     }
@@ -141,28 +141,28 @@ export class TransferUtil {
     static getPropVector2(inVal: ESValue, name: string): Vector2 {
         let vctVal = inVal.getProperty(name);
         if (vctVal.isUndefined() || vctVal.isNull()) {
-            throw Error("prop vector2 is null, convert fail.");
+            throw Error('prop vector2 is null, convert fail.');
         }
-        let x = vctVal.getProperty("x").toNumber();
-        let y = vctVal.getProperty("y").toNumber();
+        let x = vctVal.getProperty('x').toNumber();
+        let y = vctVal.getProperty('y').toNumber();
         return {x: x, y: y} as Vector2;
     }
 
     static getPropVector3(inVal: ESValue, name: string): Vector3 {
         let v3Val = inVal.getProperty(name);
         if (v3Val.isUndefined() || v3Val.isNull()) {
-            throw Error("prop vector3 is null, convert fail.");
+            throw Error('prop vector3 is null, convert fail.');
         }
-        let x = v3Val.getProperty("x").toNumber();
-        let y = v3Val.getProperty("y").toNumber();
-        let z = v3Val.getProperty("z").toNumber();
+        let x = v3Val.getProperty('x').toNumber();
+        let y = v3Val.getProperty('y').toNumber();
+        let z = v3Val.getProperty('z').toNumber();
         return {x: x, y: y, z: z} as Vector3;
     }
 
-    static getPropBorderStyle(inVal: ESValue, name: string): Edges<BorderStyle> {
+    static getPropBorderStyle(inVal: ESValue, name: string): Edges<BorderStyle> | undefined {
         const borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return { left: undefined, top: undefined, right: undefined, bottom: undefined } as Edges<BorderStyle>;
+            return undefined;
         }
     
         const getStyle = (property: string): BorderStyle | undefined => {
@@ -179,62 +179,62 @@ export class TransferUtil {
     }
 
     // borderWidthValue: 1.1 -> 1.2(int)
-    static getPropBorderNoExcept(inVal: ESValue, name: string): Edges<number> {
+    static getPropBorderNoExcept(inVal: ESValue, name: string): Edges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<number>;
+            return undefined;
         }
-        let left = TransferUtil.getPropNumberNoExcept(borderVal, "left");
-        let top = TransferUtil.getPropNumberNoExcept(borderVal, "top");
-        let right = TransferUtil.getPropNumberNoExcept(borderVal, "right");
-        let bottom = TransferUtil.getPropNumberNoExcept(borderVal, "bottom");
+        let left = TransferUtil.getPropNumberNoExcept(borderVal, 'left');
+        let top = TransferUtil.getPropNumberNoExcept(borderVal, 'top');
+        let right = TransferUtil.getPropNumberNoExcept(borderVal, 'right');
+        let bottom = TransferUtil.getPropNumberNoExcept(borderVal, 'bottom');
         let egVal = {left: left, top: top, right: right, bottom: bottom} as Edges<number>;
         return egVal;
     }
 
     // number color: 1.1(long) -> 1.2(int)
-    static getPropEdgesColor(inVal: ESValue, name: string): Edges<number> {
+    static getPropEdgesColor(inVal: ESValue, name: string): Edges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<number>;
+            return undefined;
         }
-        let left = TransferUtil.getPropColorInt(borderVal, "left");
-        let top = TransferUtil.getPropColorInt(borderVal, "top");
-        let right = TransferUtil.getPropColorInt(borderVal, "right");
-        let bottom = TransferUtil.getPropColorInt(borderVal, "bottom");
+        let left = TransferUtil.getPropColorInt(borderVal, 'left');
+        let top = TransferUtil.getPropColorInt(borderVal, 'top');
+        let right = TransferUtil.getPropColorInt(borderVal, 'right');
+        let bottom = TransferUtil.getPropColorInt(borderVal, 'bottom');
         let egVal = {left: left, top: top, right: right, bottom: bottom} as Edges<number>;
         return egVal;
     }
 
-    static getPropCornersNoExcept(inVal: ESValue, name: string): Corners<number> {
+    static getPropCornersNoExcept(inVal: ESValue, name: string): Corners<number> | undefined {
         let corVal = inVal.getProperty(name);
         if (corVal.isUndefined() || corVal.isNull()) {
-            return {topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0} as Corners<number>;
+            return undefined;
         }
-        let r1 = corVal.getProperty("topLeft").toNumber();
-        let r2 = corVal.getProperty("topRight").toNumber();
-        let r3 = corVal.getProperty("bottomLeft").toNumber();
-        let r4 = corVal.getProperty("bottomRight").toNumber();
+        let r1 = corVal.getProperty('topLeft').toNumber();
+        let r2 = corVal.getProperty('topRight').toNumber();
+        let r3 = corVal.getProperty('bottomLeft').toNumber();
+        let r4 = corVal.getProperty('bottomRight').toNumber();
         return {topLeft: r1, topRight: r2, bottomLeft: r3, bottomRight: r4} as Corners<number>;
     }
 
     static getPropFrame(inVal: ESValue, name: string): Frame {
         let frameVal = inVal.getProperty(name);
         if (frameVal.isUndefined() || frameVal.isNull()) {
-            throw Error("prop frame is null, convert fail.");
+            throw Error('prop frame is null, convert fail.');
         }
-        // "frameValue"
-        let x = frameVal.getProperty("x").toNumber();
-        let y = frameVal.getProperty("y").toNumber();
-        let w = frameVal.getProperty("width").toNumber();
-        let h = frameVal.getProperty("height").toNumber();
+        // 'frameValue'
+        let x = frameVal.getProperty('x').toNumber();
+        let y = frameVal.getProperty('y').toNumber();
+        let w = frameVal.getProperty('width').toNumber();
+        let h = frameVal.getProperty('height').toNumber();
         return {x: x, y: y, width: w, height: h} as Frame;
     }
 
     static getPropMatrix4(inVal: ESValue, name: string): Matrix4 {
         let mxVal = inVal.getProperty(name);
         if (mxVal.isUndefined() || mxVal.isNull()) {
-            throw Error("prop matrix4 is null, convert fail.");
+            throw Error('prop matrix4 is null, convert fail.');
         }
         let mx4: Matrix4 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         mx4[0] = mxVal.getProperty(0).toNumber();
@@ -302,20 +302,20 @@ export class TransferUtil {
 
     static setPropEdges(name: string, inVal: Edges<number>, outJs: ESValue) {
         let propVal: ESValue = ESValue.instantiateEmptyObject();
-        propVal.setProperty("left", inVal.left);
-        propVal.setProperty("top", inVal.top);
-        propVal.setProperty("right", inVal.right);
-        propVal.setProperty("bottom", inVal.bottom);
+        propVal.setProperty('left', inVal.left);
+        propVal.setProperty('top', inVal.top);
+        propVal.setProperty('right', inVal.right);
+        propVal.setProperty('bottom', inVal.bottom);
         outJs.setProperty(name, propVal);
     }
 
     // number color: int(1.2) -> long(1.1)
     static setPropEdgesColor(name: string, inVal: Edges<number>, outJs: ESValue) {
         let propVal: ESValue = ESValue.instantiateEmptyObject();
-        TransferUtil.setPropColorLong("left", inVal.left, propVal);
-        TransferUtil.setPropColorLong("top", inVal.top, propVal);
-        TransferUtil.setPropColorLong("right", inVal.right, propVal);
-        TransferUtil.setPropColorLong("bottom", inVal.bottom, propVal);
+        TransferUtil.setPropColorLong('left', inVal.left, propVal);
+        TransferUtil.setPropColorLong('top', inVal.top, propVal);
+        TransferUtil.setPropColorLong('right', inVal.right, propVal);
+        TransferUtil.setPropColorLong('bottom', inVal.bottom, propVal);
         outJs.setProperty(name, propVal);
     }
 
@@ -337,34 +337,34 @@ export class TransferUtil {
 
     static setPropCorners(name: string, inVal: Corners<number>, outJs: ESValue) {
        let propVal: ESValue = ESValue.instantiateEmptyObject();
-       propVal.setProperty("topLeft", inVal.topLeft);
-       propVal.setProperty("topRight", inVal.topRight);
-       propVal.setProperty("bottomLeft", inVal.bottomLeft);
-       propVal.setProperty("bottomRight", inVal.bottomRight);
+       propVal.setProperty('topLeft', inVal.topLeft);
+       propVal.setProperty('topRight', inVal.topRight);
+       propVal.setProperty('bottomLeft', inVal.bottomLeft);
+       propVal.setProperty('bottomRight', inVal.bottomRight);
        outJs.setProperty(name, propVal);
     }
 
     static setPropFrame(name: string, inVal: Frame, outJs: ESValue) {
        let propVal: ESValue = ESValue.instantiateEmptyObject();
-       propVal.setProperty("x", inVal.x);
-       propVal.setProperty("y", inVal.y);
-       propVal.setProperty("width", inVal.width);
-       propVal.setProperty("height", inVal.height);
+       propVal.setProperty('x', inVal.x);
+       propVal.setProperty('y', inVal.y);
+       propVal.setProperty('width', inVal.width);
+       propVal.setProperty('height', inVal.height);
        outJs.setProperty(name, propVal);
     }
 
     static setPropVector2(name: string, inVal: Vector2, outJs: ESValue) {
        let propVal: ESValue = ESValue.instantiateEmptyObject();
-       propVal.setProperty("x", inVal.x);
-       propVal.setProperty("y", inVal.y);
+       propVal.setProperty('x', inVal.x);
+       propVal.setProperty('y', inVal.y);
        outJs.setProperty(name, propVal);
     }
 
     static setPropVector3(name: string, inVal: Vector3, outJs: ESValue) {
        let propVal: ESValue = ESValue.instantiateEmptyObject();
-       propVal.setProperty("x", inVal.x);
-       propVal.setProperty("y", inVal.y);
-       propVal.setProperty("z", inVal.z);
+       propVal.setProperty('x', inVal.x);
+       propVal.setProperty('y', inVal.y);
+       propVal.setProperty('z', inVal.z);
        outJs.setProperty(name, propVal);
     }
 

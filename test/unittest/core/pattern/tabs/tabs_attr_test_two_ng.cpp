@@ -387,4 +387,22 @@ HWTEST_F(TabsAttrTestNg, TabContentCreateMoreWithResourceObj010, TestSize.Level1
     tabContentModel.Pop();
     g_isConfigChangePerform = false;
 }
+
+HWTEST_F(TabsAttrTestNg, TabContentPatternOnColorModeChange001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    ASSERT_NE(tabContentNode, nullptr);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    tabContentPattern->OnColorModeChange(colorMode);
+    auto currentIndicator = tabContentPattern->GetIndicatorStyle();
+    EXPECT_EQ(currentIndicator.color, Color::RED);
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG

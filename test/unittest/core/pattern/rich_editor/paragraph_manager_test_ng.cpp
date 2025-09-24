@@ -1384,4 +1384,57 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphLength001, TestSize.Level
     ASSERT_EQ(ret, 0);
 }
 
+/**
+ * @tc.name: CalcCaretMetricsByPosition001
+ * @tc.desc: test RichEditorPattern CalcCaretMetricsByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretMetricsF caretMetrics;
+    richEditorPattern->CalcCaretMetricsByPosition(0, caretMetrics, TextAffinity::UPSTREAM);
+    EXPECT_EQ(caretMetrics.height, 0.0f);
+    richEditorPattern->CalcCaretMetricsByPosition(0, caretMetrics, TextAffinity::DOWNSTREAM);
+    EXPECT_EQ(caretMetrics.height, 0.0f);
+}
+
+/**
+ * @tc.name: AdjustHandleByLineMetrics001
+ * @tc.desc: test RichEditorPattern AdjustHandleByLineMetrics
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    OffsetF handleOffset;
+    float handleHeight = 0.0f;
+    richEditorPattern->AdjustHandleByLineMetrics(0, true, handleOffset, handleHeight);
+    EXPECT_EQ(handleHeight, 0.0f);
+    richEditorPattern->AdjustHandleByLineMetrics(0, false, handleOffset, handleHeight);
+    EXPECT_EQ(handleHeight, 0.0f);
+}
+
+/**
+ * @tc.name: AdjustHandleByLineMetrics002
+ * @tc.desc: test RichEditorPattern AdjustHandleByLineMetrics
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    OffsetF handleOffset;
+    float handleHeight = 1.0f;;
+    richEditorPattern->AdjustHandleByLineMetrics(0, true, handleOffset, handleHeight);
+    EXPECT_EQ(handleHeight, 1.0f);
+    richEditorPattern->AdjustHandleByLineMetrics(0, false, handleOffset, handleHeight);
+    EXPECT_EQ(handleHeight, 1.0f);
+}
+
 } // namespace OHOS::Ace::NG

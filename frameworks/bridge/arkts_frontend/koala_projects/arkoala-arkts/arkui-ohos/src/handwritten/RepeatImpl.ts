@@ -159,7 +159,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     userDefinedTotal_?: number; // if totalCount is specified
     onLazyLoading_?: (index: number) => void;
 
-    reusable_: boolean = false;
+    reusable_: boolean = true;
     disableVirtualScroll_: boolean = false;
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
@@ -178,7 +178,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
         this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
-        this.reusable_ = options?.reusable !== false;
+        this.reusable_ = options?.reusable ?? true;
         this.onLazyLoading_ = options?.onLazyLoading;
 
         this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
@@ -284,7 +284,7 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
     /** @memo */
-    const action = (ele: T, i: int32) => {
+    const action = (ele: T, i: int32): void => {
         const ri = new RepeatItemImpl<T>(ele, (i as number));
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);

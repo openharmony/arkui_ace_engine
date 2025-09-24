@@ -378,18 +378,6 @@ void SpanItem::SpanDumpInfoAdvance()
         }                                                                                       \
     }
 
-#define DEFINE_CONTAINER_SPAN_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                 \
-    {                                                                                           \
-        #KEY_TYPE, [](int32_t nodeId, RefPtr<PropertyValueBase> value) {                        \
-            auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById                 \
-                <ContainerSpanNode>(nodeId);                                                    \
-            CHECK_NULL_VOID(spanNode);                                                          \
-            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {               \
-                spanNode->UPDATE_METHOD(castedVal->value);                                      \
-            }                                                                                   \
-        }                                                                                       \
-    }
-
 template<typename T>
 void ContainerSpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
 {
@@ -490,6 +478,43 @@ void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceO
     }
 }
 
+void SpanItem::AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
+    std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
+{
+    if (resourceMgr_ == nullptr) {
+        resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+    }
+    resourceMgr_->AddResource(key, resObj, std::move(updateFunc));
+}
+
+void SpanItem::RemoveResObj(const std::string& key)
+{
+    if (resourceMgr_) {
+        resourceMgr_->RemoveResource(key);
+        if (resourceMgr_->Empty()) {
+            resourceMgr_ = nullptr;
+        }
+    }
+}
+
+void SpanItem::AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater)
+{
+    resMap_[key] = resourceUpdater;
+}
+
+void SpanItem::RemoveResourceObj(const std::string& key)
+{
+    auto iter = resMap_.find(key);
+    if (iter != resMap_.end()) {
+        resMap_.erase(iter);
+    }
+}
+
+const std::unordered_map<std::string, SpanItem::SpanResourceUpdater>& SpanItem::GetResMap() const
+{
+    return resMap_;
+}
+
 void BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
 {
     if (valueBase->GetValueType() == ValueType::STRING) {
@@ -527,11 +552,11 @@ void BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<Pro
 void SpanNode::UnregisterResource(const std::string& key)
 {
     if (key == "symbolColor") {
-        for (auto index : symbolFontColorResObjIndexArr) {
+        for (auto index : symbolFontColorResObjIndexArr_) {
             auto storeKey = key + "_" + std::to_string(index);
             RemoveResObj(storeKey);
         }
-        symbolFontColorResObjIndexArr.clear();
+        symbolFontColorResObjIndexArr_.clear();
         return;
     }
     BaseSpan::UnregisterResource(key);
@@ -544,7 +569,7 @@ void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
         auto resObjIndex = resObjArr[i].first;
         auto resObj = resObjArr[i].second;
         auto storeKey = key + "_" + std::to_string(resObjIndex);
-        symbolFontColorResObjIndexArr.emplace_back(resObjIndex);
+        symbolFontColorResObjIndexArr_.emplace_back(resObjIndex);
         auto&& updateFunc = [weakptr = AceType::WeakClaim(this), storeKey, resObjIndex]
             (const RefPtr<ResourceObject>& resObj) {
             auto spanNode = weakptr.Upgrade();
@@ -1104,6 +1129,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     }
     sameSpan->urlAddress = urlAddress;
     CopySpanItemEvents(sameSpan);
+    sameSpan->resMap_ = resMap_;
     return sameSpan;
 }
 
