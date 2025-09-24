@@ -87,6 +87,7 @@ public:
     void CreateWithResourceObjLaneConstrain(const RefPtr<ResourceObject>& resObjMinLengthValue,
         const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -199,6 +200,8 @@ public:
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
+    static void SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed);
+    static ScrollSnapAnimationSpeed GetScrollSnapAnimationSpeed(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

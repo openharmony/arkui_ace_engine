@@ -1825,4 +1825,33 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition008, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 75);
 }
+
+/**
+ * @tc.name: SetScrollSnapAnimationSpeed001
+ * @tc.desc: Test SetScrollSnapAnimationSpeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, SetScrollSnapAnimationSpeed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     * @tc.expected: Created successful.
+     */
+    ListModelNG model = CreateList();
+    EXPECT_EQ(model.GetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_)), ScrollSnapAnimationSpeed::NORMAL);
+    pattern_->scrollable_ = AceType::MakeRefPtr<Scrollable>();
+    /**
+     * @tc.steps: step2. Set speed slow.
+     * @tc.expected: Current scroll snap animation speed is slow.
+     */
+    model.SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed::SLOW);
+    EXPECT_EQ(model.GetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_)), ScrollSnapAnimationSpeed::SLOW);
+
+    /**
+     * @tc.steps: step3. Set speed normal.
+     * @tc.expected: Current scroll snap animation speed is normal.
+     */
+    model.SetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_), ScrollSnapAnimationSpeed::NORMAL);
+    EXPECT_EQ(model.GetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_)), ScrollSnapAnimationSpeed::NORMAL);
+}
 } // namespace OHOS::Ace::NG

@@ -108,6 +108,7 @@ public:
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif
     virtual void ResetListChildrenMainSize() {}
+    virtual void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

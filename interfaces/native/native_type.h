@@ -836,6 +836,18 @@ typedef enum {
 } ArkUI_ScrollSnapAlign;
 
 /**
+ * @brief Enumerates the scroll snap animation speeds for lists.
+ *
+ * @since 22
+ */
+typedef enum {
+    /** Fast scroll snap animation speed. */
+    ARKUI_SCROLL_SNAP_ANIMATION_NORMAL = 0,
+    /** Slow scroll snap animation speed. */
+    ARKUI_SCROLL_SNAP_ANIMATION_SLOW = 1,
+} ArkUI_ScrollSnapAnimationSpeed;
+
+/**
  * @brief Enumerates the scrollbar display modes.
  *
  * @since 12

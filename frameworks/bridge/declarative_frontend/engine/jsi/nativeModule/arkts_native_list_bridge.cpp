@@ -1471,6 +1471,38 @@ ArkUINativeModuleValue ListBridge::ResetOnScrollIndex(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetScrollSnapAnimationSpeed(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> speedArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!speedArg->IsNumber()) {
+        GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAnimationSpeed(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t speed = static_cast<int32_t>(speedArg->ToNumber(vm)->Value());
+    if (speed < static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL) ||
+        speed > static_cast<int32_t>(ScrollSnapAnimationSpeed::SLOW)) {
+        GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAnimationSpeed(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    GetArkUINodeModifiers()->getListModifier()->setScrollSnapAnimationSpeed(nativeNode, speed);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::resetScrollSnapAnimationSpeed(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAnimationSpeed(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::ResetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -4532,6 +4532,12 @@ let ListItemSwipeActionDirection;
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
 })(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));
 
+let ScrollSnapAnimationSpeed;
+(function (ScrollSnapAnimationSpeed) {
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.NORMAL = 0] = 'NORMAL';
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
+})(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
+
 let NativeEmbedParamStatus;
 (function (NativeEmbedParamStatus) {
   NativeEmbedParamStatus.ADD = 0;
