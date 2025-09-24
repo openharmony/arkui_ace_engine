@@ -329,6 +329,7 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
     JSClass<JSSaveButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSSaveButton>::StaticMethod("userCancelEvent", &JSSaveButton::SetUserCancelEvent);
+    JSClass<JSSaveButton>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
