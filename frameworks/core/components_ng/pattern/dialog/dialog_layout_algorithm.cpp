@@ -154,6 +154,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
     }
+    // remove the height of the floating button
+    auto childMaxSize = childLayoutConstraint.maxSize;
+    auto maxHeightWithoutFloatButton = layoutConstraint->maxSize.Height() - floatButtonsHeight_;
+    childMaxSize.SetHeight(std::min(childMaxSize.Height(), maxHeightWithoutFloatButton));
+    childLayoutConstraint.UpdateMaxSizeWithCheck(childMaxSize);
+    childLayoutConstraint.percentReference = childMaxSize;
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
