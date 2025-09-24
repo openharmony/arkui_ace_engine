@@ -841,7 +841,7 @@ typedef enum {
  * @since 22
  */
 typedef enum {
-    /** Fast scroll snap animation speed. */
+    /** Normal scroll snap animation speed. */
     ARKUI_SCROLL_SNAP_ANIMATION_NORMAL = 0,
     /** Slow scroll snap animation speed. */
     ARKUI_SCROLL_SNAP_ANIMATION_SLOW = 1,
