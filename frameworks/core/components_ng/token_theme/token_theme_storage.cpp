@@ -175,10 +175,13 @@ void TokenThemeStorage::CacheRemove(int32_t themeId)
     themeCache_.erase(themeId);
 }
 
-RefPtr<TokenTheme> TokenThemeStorage::ObtainSystemTheme()
+RefPtr<TokenTheme> TokenThemeStorage::ObtainSystemTheme(ColorMode themeColorMode)
 {
     RefPtr<TokenTheme> theme = nullptr;
     auto colorMode = CheckLocalAndSystemColorMode();
+    if (themeColorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = themeColorMode;
+    }
     systemTokenThemeCreated_[static_cast<uint32_t>(colorMode)] = false;
     if (colorMode == ColorMode::DARK) {
         theme = CacheGet(TokenThemeStorage::SYSTEM_THEME_DARK_ID);
