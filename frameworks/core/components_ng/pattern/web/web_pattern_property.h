@@ -90,6 +90,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlankScreenDetectionConfig, BlankScreenDetectionConfig);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);

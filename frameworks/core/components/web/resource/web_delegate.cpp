@@ -9169,6 +9169,43 @@ void WebDelegate::SetViewportScaleState()
     nweb_->SetViewportScaleState();
 }
 
+void WebDelegate::OnDetectedBlankScreen(
+    const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url, blankScreenReason, detectedContentfulNodesCount]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnDetectedBlankScreen, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnDetectedBlankScreenEvent(
+                std::make_shared<DetectedBlankScreenEvent>(url, blankScreenReason, detectedContentfulNodesCount));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebDetectedBlankScreen");
+}
+
+void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
+    const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetBlankScreenDetectionConfig(
+                    enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateBlankScreenDetectionConfig");
+}
+
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
 {
     CHECK_NULL_VOID(taskExecutor_);

@@ -2522,6 +2522,27 @@ void WebModelNG::SetOnBeforeUnload(
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
+void WebModelNG::SetOnDetectedBlankScreen(std::function<void(const BaseEventInfo *info)> &&jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetBlankScreenDetectionConfig(bool enable, const std::vector<double> &detectionTiming,
+    const std::vector<int32_t> &detectionMethods, int32_t contentfulNodesCountThreshold)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    BlankScreenDetectionConfig config{enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold};
+    webPattern->UpdateBlankScreenDetectionConfig(config);
+}
+
 void WebModelNG::SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
