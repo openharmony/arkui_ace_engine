@@ -16,11 +16,12 @@
 import { memo } from "@koalaui/runtime/annotations"
 import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
 import { int32, int64 } from "@koalaui/common"
-import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback } from "@koalaui/interop"
+import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
-import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
+import { UserView, UserViewBuilder } from "./UserView"
+import { EntryPoint } from './component/customComponent';
 import { ClickEvent, ClickEventInternal } from "#generated"
 import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
@@ -497,6 +498,15 @@ export class Application {
             Application.firstRegisterArkuiApiHandler = false
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+    }
+    static registerNativeModulePreloader(): void {
+        registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUINativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkUIGeneratedNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('TestNativeModule', 'ArkoalaNative_ark.z');
+        registerNativeModuleLibraryName('ArkNativeAni', 'arkoala_native_ani');
+        wrapSystemApiHandlerCallback();
+        loadNativeModuleLibrary('ArkNativeAni');
     }
 }
 

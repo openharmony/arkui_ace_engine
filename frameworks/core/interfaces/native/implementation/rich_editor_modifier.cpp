@@ -268,6 +268,11 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
 void SetRichEditorOptionsImpl(Ark_NativePointer node,
                               const Ark_Union_RichEditorOptions_RichEditorStyledStringOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    options->selector == 0 ? SetRichEditorOptions0Impl(node, &(options->value0))
+        : SetRichEditorOptions1Impl(node, &(options->value1));
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {

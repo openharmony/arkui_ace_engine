@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/draw_context_peer.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -52,19 +54,43 @@ void InvalidateImpl(Ark_DrawModifier peer)
 }
 Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
 {
-    return {};
+    auto handler = [peer](Ark_DrawContext drawContext) {
+        CHECK_NULL_VOID(peer && peer->drawModifier && peer->drawModifier->drawBehindFunc && drawContext);
+        peer->drawModifier->drawBehindFunc(*drawContext);
+    };
+    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_DrawContext_Void,
+        std::function<void(Ark_DrawContext)>>(handler);
+    return callback;
 }
 void SetDrawBehind_callbackImpl(Ark_DrawModifier peer,
                                 const Callback_DrawContext_Void* drawBehind_callback)
 {
+    CHECK_NULL_VOID(peer && peer->drawModifier && drawBehind_callback);
+    peer->drawModifier->drawBehindFunc = [arkCallback = CallbackHelper(*drawBehind_callback)](
+        NG::DrawingContext& context) -> void {
+        auto drawingContext = reinterpret_cast<Ark_DrawContext>(&context);
+        arkCallback.InvokeSync(drawingContext);
+    };
 }
 Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
 {
-    return {};
+    auto handler = [peer](Ark_DrawContext drawContext) {
+        CHECK_NULL_VOID(peer && peer->drawModifier && peer->drawModifier->drawContentFunc && drawContext);
+        peer->drawModifier->drawContentFunc(*drawContext);
+    };
+    auto callback = CallbackKeeper::RegisterReverseCallback<Callback_DrawContext_Void,
+        std::function<void(Ark_DrawContext)>>(handler);
+    return callback;
 }
 void SetDrawContent_callbackImpl(Ark_DrawModifier peer,
                                  const Callback_DrawContext_Void* drawContent_callback)
 {
+    CHECK_NULL_VOID(peer && peer->drawModifier && drawContent_callback);
+    peer->drawModifier->drawContentFunc = [arkCallback = CallbackHelper(*drawContent_callback)](
+        NG::DrawingContext& context) -> void {
+        auto drawingContext = reinterpret_cast<Ark_DrawContext>(&context);
+        arkCallback.InvokeSync(drawingContext);
+    };
 }
 } // DrawModifierAccessor
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()

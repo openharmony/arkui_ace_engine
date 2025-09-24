@@ -591,7 +591,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         {
             switch (this._menuAlign_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined));
+                    peer.setMenuAlignAttribute((this._menuAlign_0_0value as MenuAlignType | undefined), (this._menuAlign_0_1value as Offset | undefined | undefined));
                     this._menuAlign_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

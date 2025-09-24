@@ -582,7 +582,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._displayArrow_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDisplayArrowAttribute((this._displayArrow_0_0value as ArrowStyle | boolean | undefined), (this._displayArrow_0_1value as boolean | undefined));
+                    peer.setDisplayArrowAttribute((this._displayArrow_0_0value as ArrowStyle | boolean | undefined), (this._displayArrow_0_1value as boolean | undefined | undefined));
                     this._displayArrow_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -618,7 +618,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._displayCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDisplayCountAttribute((this._displayCount_0_0value as number | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined));
+                    peer.setDisplayCountAttribute((this._displayCount_0_0value as number | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
                     this._displayCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -636,7 +636,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._prevMargin_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPrevMarginAttribute((this._prevMargin_0_0value as Length | undefined), (this._prevMargin_0_1value as boolean | undefined));
+                    peer.setPrevMarginAttribute((this._prevMargin_0_0value as Length | undefined), (this._prevMargin_0_1value as boolean | undefined | undefined));
                     this._prevMargin_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -654,7 +654,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._nextMargin_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setNextMarginAttribute((this._nextMargin_0_0value as Length | undefined), (this._nextMargin_0_1value as boolean | undefined));
+                    peer.setNextMarginAttribute((this._nextMargin_0_0value as Length | undefined), (this._nextMargin_0_1value as boolean | undefined | undefined));
                     this._nextMargin_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

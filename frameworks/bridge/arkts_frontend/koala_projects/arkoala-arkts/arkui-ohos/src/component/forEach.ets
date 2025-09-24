@@ -21,6 +21,7 @@ import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
 import { SyntaxItemPeer, ForEachNodePeer } from '../base/RepeatImpl'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
 import { NodeHolder } from '../base/LazyForEachImpl'
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 
 export interface ForEachAttribute<T> extends DynamicNode {
     arr: () => Array<T>;
@@ -121,4 +122,6 @@ export function ForEachImpl<T>(
         onMoveFromTo,
         receiver.onMoveEvent,
         receiver.itemDragEvent);
+
+    ArkUIAniModule._ForEach_FinishRender(nodeHolder.node!.getPeerPtr());
 }

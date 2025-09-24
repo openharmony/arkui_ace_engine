@@ -547,7 +547,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._alignStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignStyleAttribute((this._alignStyle_0_0value as IndexerAlign | undefined), (this._alignStyle_0_1value as Length | undefined));
+                    peer.setAlignStyleAttribute((this._alignStyle_0_0value as IndexerAlign | undefined), (this._alignStyle_0_1value as Length | undefined | undefined));
                     this._alignStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
