@@ -2430,7 +2430,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             switch (this._bindSelectionMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
                     this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

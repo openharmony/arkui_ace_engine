@@ -16,19 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod } from "./component/common"
+import { BarState, Color, CrownSensitivity, EdgeEffect, ScrollSource, Edge } from "./component/enums"
+import { Resource } from "global.resource"
+import { extractors, AttributeModifier } from "#handwritten"
+import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
 import { int32 } from "@koalaui/common"
-import { ScrollableCommonMethod, NestedScrollOptions, CommonMethod, EdgeEffectOptions } from "./component/common"
 import { ScrollState } from "./component/list"
-import { ScrollSource, Edge, BarState, Color, EdgeEffect } from "./component/enums"
 import { VoidCallback } from "./component/units"
-import { Resource } from "global.resource"
-export class ScrollModifier extends ScrollableCommonMethodModifier implements ScrollAttribute,AttributeModifier<ScrollAttribute> {
+export class ScrollModifier extends CommonMethodModifier implements ScrollAttribute,AttributeModifier<ScrollAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -74,6 +75,21 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _edgeEffect_0_1value?: EdgeEffectOptions | undefined
+    _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onReachStart_0_0value?: (() => void) | undefined
+    _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onReachEnd_0_0value?: (() => void) | undefined
+    _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _flingSpeedLimit_0_0value?: number | undefined
+    _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _clipContent_0_0value?: ContentClipMode | RectShape | undefined
+    _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    _backToTop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backToTop_0_0value?: boolean | undefined
+    _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fadingEdge_0_0value?: boolean | undefined
+    _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
         super.applyModifierPatch(node)
         const peer = node as ArkScrollPeer;
@@ -369,7 +385,7 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
         {
             switch (this._edgeEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined | undefined));
                     this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -380,6 +396,132 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
                 default: {
                     this._edgeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onReachStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
+                    this._onReachStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onReachStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onReachStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onReachEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onReachEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
+                    this._onReachEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onReachEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onReachEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._flingSpeedLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._flingSpeedLimit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._clipContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._clipContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
+                    this._clipContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._clipContent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._clipContent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
+                }
+            }
+        }
+        if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._digitalCrownSensitivity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
+                }
+            }
+        }
+        if (this._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backToTop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
+                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backToTop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fadingEdge_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined | undefined));
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fadingEdge_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined | undefined));
                 }
             }
         }
@@ -607,6 +749,97 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
                 }
             }
         }
+        if (modifier._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onReachStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onReachStart(modifier._onReachStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onReachStart((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onReachEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onReachEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onReachEnd(modifier._onReachEnd_0_0value);
+                    break;
+                }
+                default: {
+                    this.onReachEnd((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._flingSpeedLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._flingSpeedLimit_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.flingSpeedLimit(modifier._flingSpeedLimit_0_0value);
+                    break;
+                }
+                default: {
+                    this.flingSpeedLimit((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._clipContent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._clipContent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.clipContent(modifier._clipContent_0_0value);
+                    break;
+                }
+                default: {
+                    this.clipContent((undefined as ContentClipMode | RectShape | undefined));
+                }
+            }
+        }
+        if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._digitalCrownSensitivity_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.digitalCrownSensitivity(modifier._digitalCrownSensitivity_0_0value);
+                    break;
+                }
+                default: {
+                    this.digitalCrownSensitivity((undefined as CrownSensitivity | undefined));
+                }
+            }
+        }
+        if (modifier._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backToTop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backToTop(modifier._backToTop_0_0value);
+                    break;
+                }
+                default: {
+                    this.backToTop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fadingEdge_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fadingEdge(modifier._fadingEdge_0_0value, modifier._fadingEdge_0_1value);
+                    break;
+                }
+                default: {
+                    this.fadingEdge((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined | undefined));
+                }
+            }
+        }
     }
     scrollable(value: ScrollDirection | undefined): this {
         if (((this._scrollable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -793,6 +1026,84 @@ export class ScrollModifier extends ScrollableCommonMethodModifier implements Sc
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onReachStart(value: (() => void) | undefined): this {
+        if (((this._onReachStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onReachStart_0_0value = value
+        } else
+        {
+            this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onReachEnd(value: (() => void) | undefined): this {
+        if (((this._onReachEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onReachEnd_0_0value = value
+        } else
+        {
+            this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    flingSpeedLimit(value: number | undefined): this {
+        if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
+        {
+            this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flingSpeedLimit_0_0value = value
+        } else
+        {
+            this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
+        if (((this._clipContent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._clipContent_0_0value = value
+        } else
+        {
+            this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        if (((this._digitalCrownSensitivity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._digitalCrownSensitivity_0_0value = value
+        } else
+        {
+            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    backToTop(value: boolean | undefined): this {
+        if (((this._backToTop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._backToTop_0_0value) !== (value)))
+        {
+            this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backToTop_0_0value = value
+        } else
+        {
+            this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        if (((this._fadingEdge_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true))
+        {
+            this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fadingEdge_0_0value = enabled
+            this._fadingEdge_0_1value = options
+        } else
+        {
+            this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
