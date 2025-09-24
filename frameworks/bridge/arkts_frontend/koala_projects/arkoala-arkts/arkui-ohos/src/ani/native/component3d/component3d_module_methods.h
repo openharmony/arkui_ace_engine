@@ -23,6 +23,8 @@ void Component3DSetScene(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_object sceneObj, ani_int modelType);
 void Component3DSetWidget(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_string scenePath, ani_int modelType);
+
+ani_long ExtractorsToScenePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object sceneObj);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_COMPONENT3D_MODULE_METHODS_H

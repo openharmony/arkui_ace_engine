@@ -59,6 +59,7 @@ ohos_shared_library("arkoala_native_ani") {
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
     "common/common_module.cpp",
+    "component3d/component3d_module_methods.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
     "content_slot/content_slot_module.cpp",
     "custom_node/custom_node_module.cpp",
@@ -92,10 +93,6 @@ ohos_shared_library("arkoala_native_ani") {
       "canvas/canvas_module.cpp",
       "module.cpp",
     ]
-  }
-
-  if (defined(model_component_support) && model_component_support) {
-    sources += [ "component3d/component3d_module_methods.cpp" ]
   }
 
   external_deps = [

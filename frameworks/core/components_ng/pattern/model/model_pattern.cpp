@@ -45,6 +45,9 @@ ModelPattern::ModelPattern(uint32_t key) : key_(key)
 
 void ModelPattern::SetModelViewContext(const ModelViewContext& context)
 {
+    if (modelAdapter_) {
+        return;
+    }
     modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, context);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();

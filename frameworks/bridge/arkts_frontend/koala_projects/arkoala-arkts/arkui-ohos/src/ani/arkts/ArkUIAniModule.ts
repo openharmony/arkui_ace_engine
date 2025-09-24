@@ -363,6 +363,7 @@ export class ArkUIAniModule {
     // for Component3D
     native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
     native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
+    native static _Extractors_ToScenePtr(scene: Scene): KPointer;
     // for AppBar
     native static _XBar_Set_ComponentCreateFunc(value: (isTitlebar: KInt, instanceID: KInt) => KLong): void;
     native static _XBar_Set_JsFunc(ptr: KLong, component: Any): void
