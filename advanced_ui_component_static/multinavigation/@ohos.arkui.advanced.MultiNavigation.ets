@@ -297,7 +297,7 @@ export struct SubNavigation {
         })
       }
       .mode(this.getMode())
-      .onNavigationModeChange(this?.onNavigationModeChange)
+      .onNavigationModeChange(this.onNavigationModeChange)
       .hideBackButton(true)
       .hideTitleBar(true, true)
       .navDestination(this.SubNavDestination)
@@ -569,7 +569,7 @@ export struct MultiNavigation {
         secondaryStack: (param as SubNavigationStack).secondaryStack,
         needRenderLeftClickCount: this.multiStack.needRenderLeftClickCount,
         navWidthRangeModifier: this.multiStack.navWidthRangeModifier,
-        onNavigationModeChange: this?.callback,
+        onNavigationModeChange: this.callback,
         needRenderDisplayMode: this.multiStack.needRenderDisplayMode,
       });
     } else {
