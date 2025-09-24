@@ -356,6 +356,8 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level1)
     layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->useCustom_ = true;
     layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    showInSubwindow = true;
+    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->isTips_ = true;
     layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
     auto childProp = childNode->GetLayoutProperty();
