@@ -182,6 +182,7 @@ public:
     static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
     static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
     static bool GetMaintainVisibleContentPosition(FrameNode* frameNode);
+    static void SetSwiperFinishAnimation(FrameNode* frameNode);
     static void ProcessDotPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
         const RefPtr<ResourceObject>& resObj);
     static void ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,

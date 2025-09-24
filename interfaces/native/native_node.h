@@ -10571,6 +10571,17 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
  */
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
 
+/** 
+ * @brief Stop the animation being executed by the Swiper node.
+ * 
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 22
+ */
+int32_t OH_ArkUI_Swiper_FinishAnimation(ArkUI_NodeHandle node);
+
 #ifdef __cplusplus
 }
 #endif

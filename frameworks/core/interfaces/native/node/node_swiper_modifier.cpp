@@ -1889,6 +1889,13 @@ void ResetSwiperOnScrollStateChanged(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
 }
+
+void SetSwiperFinishAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwiperFinishAnimation(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2006,6 +2013,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .getMaintainVisibleContentPosition = GetMaintainVisibleContentPosition,
         .setSwiperOnScrollStateChanged = SetSwiperOnScrollStateChanged,
         .resetSwiperOnScrollStateChanged = ResetSwiperOnScrollStateChanged,
+        .setSwiperFinishAnimation = SetSwiperFinishAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
