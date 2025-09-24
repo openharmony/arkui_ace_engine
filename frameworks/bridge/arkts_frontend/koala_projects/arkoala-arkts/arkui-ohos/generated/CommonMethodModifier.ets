@@ -36,7 +36,7 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, G
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
-export class CommonMethodModifier implements CommonMethod,AttributeModifier<CommonMethod> {
+export class CommonMethodModifier implements CommonMethod {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
@@ -3304,7 +3304,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._expandSafeArea_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setExpandSafeAreaAttribute((this._expandSafeArea_0_0value as Array<SafeAreaType> | undefined), (this._expandSafeArea_0_1value as Array<SafeAreaEdge> | undefined));
+                    peer.setExpandSafeAreaAttribute((this._expandSafeArea_0_0value as Array<SafeAreaType> | undefined | undefined), (this._expandSafeArea_0_1value as Array<SafeAreaEdge> | undefined | undefined));
                     this._expandSafeArea_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3322,7 +3322,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._background_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | undefined), (this._background_0_1value as BackgroundOptions | undefined));
+                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | undefined), (this._background_0_1value as BackgroundOptions | undefined | undefined));
                     this._background_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3340,7 +3340,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._backgroundImage_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_0_1value as ImageRepeat | undefined));
+                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_0_1value as ImageRepeat | undefined | undefined));
                     this._backgroundImage_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3358,7 +3358,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._backgroundImage_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundImage1Attribute((this._backgroundImage_1_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_1_1value as BackgroundImageOptions | undefined));
+                    peer.setBackgroundImage1Attribute((this._backgroundImage_1_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_1_1value as BackgroundImageOptions | undefined | undefined));
                     this._backgroundImage_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3376,7 +3376,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._backgroundBlurStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundBlurStyleAttribute((this._backgroundBlurStyle_0_0value as BlurStyle | undefined), (this._backgroundBlurStyle_0_1value as BackgroundBlurStyleOptions | undefined), (this._backgroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setBackgroundBlurStyleAttribute((this._backgroundBlurStyle_0_0value as BlurStyle | undefined), (this._backgroundBlurStyle_0_1value as BackgroundBlurStyleOptions | undefined | undefined), (this._backgroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._backgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3394,7 +3394,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._backgroundEffect_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundEffect1Attribute((this._backgroundEffect_1_0value as BackgroundEffectOptions | undefined), (this._backgroundEffect_1_1value as SystemAdaptiveOptions | undefined));
+                    peer.setBackgroundEffect1Attribute((this._backgroundEffect_1_0value as BackgroundEffectOptions | undefined), (this._backgroundEffect_1_1value as SystemAdaptiveOptions | undefined | undefined));
                     this._backgroundEffect_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3412,7 +3412,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._foregroundBlurStyle_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setForegroundBlurStyleAttribute((this._foregroundBlurStyle_0_0value as BlurStyle | undefined), (this._foregroundBlurStyle_0_1value as ForegroundBlurStyleOptions | undefined), (this._foregroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setForegroundBlurStyleAttribute((this._foregroundBlurStyle_0_0value as BlurStyle | undefined), (this._foregroundBlurStyle_0_1value as ForegroundBlurStyleOptions | undefined | undefined), (this._foregroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3448,7 +3448,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._focusScopeId_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFocusScopeIdAttribute((this._focusScopeId_0_0value as string | undefined), (this._focusScopeId_0_1value as boolean | undefined), (this._focusScopeId_0_2value as boolean | undefined));
+                    peer.setFocusScopeIdAttribute((this._focusScopeId_0_0value as string | undefined), (this._focusScopeId_0_1value as boolean | undefined | undefined), (this._focusScopeId_0_2value as boolean | undefined | undefined));
                     this._focusScopeId_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3466,7 +3466,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._focusScopePriority_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFocusScopePriorityAttribute((this._focusScopePriority_0_0value as string | undefined), (this._focusScopePriority_0_1value as FocusPriority | undefined));
+                    peer.setFocusScopePriorityAttribute((this._focusScopePriority_0_0value as string | undefined), (this._focusScopePriority_0_1value as FocusPriority | undefined | undefined));
                     this._focusScopePriority_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3502,7 +3502,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._gesture_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGestureAttribute((this._gesture_0_0value as GestureType | undefined), (this._gesture_0_1value as GestureMask | undefined));
+                    peer.setGestureAttribute((this._gesture_0_0value as GestureType | undefined), (this._gesture_0_1value as GestureMask | undefined | undefined));
                     this._gesture_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3520,7 +3520,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._priorityGesture_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPriorityGestureAttribute((this._priorityGesture_0_0value as GestureType | undefined), (this._priorityGesture_0_1value as GestureMask | undefined));
+                    peer.setPriorityGestureAttribute((this._priorityGesture_0_0value as GestureType | undefined), (this._priorityGesture_0_1value as GestureMask | undefined | undefined));
                     this._priorityGesture_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3538,7 +3538,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._parallelGesture_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setParallelGestureAttribute((this._parallelGesture_0_0value as GestureType | undefined), (this._parallelGesture_0_1value as GestureMask | undefined));
+                    peer.setParallelGestureAttribute((this._parallelGesture_0_0value as GestureType | undefined), (this._parallelGesture_0_1value as GestureMask | undefined | undefined));
                     this._parallelGesture_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3556,7 +3556,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._blur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBlurAttribute((this._blur_0_0value as number | undefined), (this._blur_0_1value as BlurOptions | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setBlurAttribute((this._blur_0_0value as number | undefined), (this._blur_0_1value as BlurOptions | undefined | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._blur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3628,7 +3628,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._backdropBlur_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as number | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as number | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined | undefined));
                     this._backdropBlur_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3646,7 +3646,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._sharedTransition_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSharedTransitionAttribute((this._sharedTransition_0_0value as string | undefined), (this._sharedTransition_0_1value as sharedTransitionOptions | undefined));
+                    peer.setSharedTransitionAttribute((this._sharedTransition_0_0value as string | undefined), (this._sharedTransition_0_1value as sharedTransitionOptions | undefined | undefined));
                     this._sharedTransition_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3682,7 +3682,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._onDrop_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDrop1Attribute((this._onDrop_1_0value as OnDragEventCallback | undefined), (this._onDrop_1_1value as DropOptions | undefined));
+                    peer.setOnDrop1Attribute((this._onDrop_1_0value as OnDragEventCallback | undefined), (this._onDrop_1_1value as DropOptions | undefined | undefined));
                     this._onDrop_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3700,7 +3700,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._dragPreview_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDragPreview1Attribute((this._dragPreview_1_0value as CustomBuilder | DragItemInfo | string | undefined), (this._dragPreview_1_1value as PreviewConfiguration | undefined));
+                    peer.setDragPreview1Attribute((this._dragPreview_1_0value as CustomBuilder | DragItemInfo | string | undefined), (this._dragPreview_1_1value as PreviewConfiguration | undefined | undefined));
                     this._dragPreview_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3718,7 +3718,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._dragPreviewOptions_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDragPreviewOptionsAttribute((this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined));
+                    peer.setDragPreviewOptionsAttribute((this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined | undefined));
                     this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3736,7 +3736,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._overlay_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOverlayAttribute((this._overlay_0_0value as string | CustomBuilder | ComponentContent | undefined), (this._overlay_0_1value as OverlayOptions | undefined));
+                    peer.setOverlayAttribute((this._overlay_0_0value as string | CustomBuilder | ComponentContent | undefined), (this._overlay_0_1value as OverlayOptions | undefined | undefined));
                     this._overlay_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3754,7 +3754,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._blendMode_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBlendModeAttribute((this._blendMode_0_0value as BlendMode | undefined), (this._blendMode_0_1value as BlendApplyType | undefined));
+                    peer.setBlendModeAttribute((this._blendMode_0_0value as BlendMode | undefined), (this._blendMode_0_1value as BlendApplyType | undefined | undefined));
                     this._blendMode_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3772,7 +3772,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._geometryTransition_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setGeometryTransition1Attribute((this._geometryTransition_1_0value as string | undefined), (this._geometryTransition_1_1value as GeometryTransitionOptions | undefined));
+                    peer.setGeometryTransition1Attribute((this._geometryTransition_1_0value as string | undefined), (this._geometryTransition_1_1value as GeometryTransitionOptions | undefined | undefined));
                     this._geometryTransition_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3790,7 +3790,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindTips_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindTipsAttribute((this._bindTips_0_0value as TipsMessageType | undefined), (this._bindTips_0_1value as TipsOptions | undefined));
+                    peer.setBindTipsAttribute((this._bindTips_0_0value as TipsMessageType | undefined), (this._bindTips_0_1value as TipsOptions | undefined | undefined));
                     this._bindTips_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3826,7 +3826,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindMenu0Attribute((this._bindMenu_0_0value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_0_1value as MenuOptions | undefined));
+                    peer.setBindMenu0Attribute((this._bindMenu_0_0value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_0_1value as MenuOptions | undefined | undefined));
                     this._bindMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3844,7 +3844,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindMenu_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined));
+                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined | undefined));
                     this._bindMenu_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3862,7 +3862,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindContextMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindContextMenu0Attribute((this._bindContextMenu_0_0value as CustomBuilder | undefined), (this._bindContextMenu_0_1value as ResponseType | undefined), (this._bindContextMenu_0_2value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenu0Attribute((this._bindContextMenu_0_0value as CustomBuilder | undefined), (this._bindContextMenu_0_1value as ResponseType | undefined), (this._bindContextMenu_0_2value as ContextMenuOptions | undefined | undefined));
                     this._bindContextMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3880,7 +3880,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindContextMenu_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
                     this._bindContextMenu_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3898,7 +3898,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindContentCover_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined));
+                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined | undefined));
                     this._bindContentCover_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3916,7 +3916,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindContentCover_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined));
+                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined | undefined));
                     this._bindContentCover_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3934,7 +3934,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._bindSheet_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined));
+                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined | undefined));
                     this._bindSheet_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3988,7 +3988,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._keyboardShortcut_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined));
+                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined | undefined));
                     this._keyboardShortcut_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

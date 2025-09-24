@@ -658,7 +658,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._bindSelectionMenu_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as RichEditorSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as ResponseType | RichEditorResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as RichEditorSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as ResponseType | RichEditorResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
                     this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -676,7 +676,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -694,7 +694,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             switch (this._placeholder_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPlaceholderAttribute((this._placeholder_0_0value as ResourceStr | undefined), (this._placeholder_0_1value as PlaceholderStyle | undefined));
+                    peer.setPlaceholderAttribute((this._placeholder_0_0value as ResourceStr | undefined), (this._placeholder_0_1value as PlaceholderStyle | undefined | undefined));
                     this._placeholder_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

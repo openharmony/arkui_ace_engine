@@ -1417,7 +1417,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._inputFilter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined));
+                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined | undefined));
                     this._inputFilter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1435,7 +1435,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1453,7 +1453,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._showCounter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined));
+                    peer.setShowCounterAttribute((this._showCounter_0_0value as boolean | undefined), (this._showCounter_0_1value as InputCounterOptions | undefined | undefined));
                     this._showCounter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

@@ -191,7 +191,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         {
             switch (this._symbolEffect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | int32 | undefined));
+                    peer.setSymbolEffectAttribute((this._symbolEffect_0_0value as SymbolEffect | undefined), (this._symbolEffect_0_1value as boolean | int32 | undefined | undefined));
                     this._symbolEffect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

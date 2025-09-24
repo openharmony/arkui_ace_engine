@@ -938,7 +938,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._searchButton_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined));
+                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined | undefined));
                     this._searchButton_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -956,7 +956,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._inputFilter_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined));
+                    peer.setInputFilterAttribute((this._inputFilter_0_0value as ResourceStr | undefined), (this._inputFilter_0_1value as ((value0: string) => void) | undefined | undefined));
                     this._inputFilter_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -974,7 +974,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

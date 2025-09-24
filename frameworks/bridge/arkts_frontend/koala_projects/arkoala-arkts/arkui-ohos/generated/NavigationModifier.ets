@@ -488,7 +488,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._backButtonIcon_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackButtonIcon1Attribute((this._backButtonIcon_1_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_1_1value as ResourceStr | undefined));
+                    peer.setBackButtonIcon1Attribute((this._backButtonIcon_1_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_1_1value as ResourceStr | undefined | undefined));
                     this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -506,7 +506,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._title_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTitleAttribute((this._title_0_0value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title_0_1value as NavigationTitleOptions | undefined));
+                    peer.setTitleAttribute((this._title_0_0value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title_0_1value as NavigationTitleOptions | undefined | undefined));
                     this._title_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -542,7 +542,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._menus_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMenus1Attribute((this._menus_1_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_1_1value as NavigationMenuOptions | undefined));
+                    peer.setMenus1Attribute((this._menus_1_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_1_1value as NavigationMenuOptions | undefined | undefined));
                     this._menus_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -560,7 +560,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._toolbarConfiguration_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setToolbarConfigurationAttribute((this._toolbarConfiguration_0_0value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration_0_1value as NavigationToolbarOptions | undefined));
+                    peer.setToolbarConfigurationAttribute((this._toolbarConfiguration_0_0value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration_0_1value as NavigationToolbarOptions | undefined | undefined));
                     this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -596,7 +596,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             switch (this._ignoreLayoutSafeArea_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined));
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
                     this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

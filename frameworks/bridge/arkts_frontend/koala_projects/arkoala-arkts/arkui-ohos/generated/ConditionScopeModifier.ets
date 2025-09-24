@@ -18,6 +18,7 @@
 
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkConditionScopePeer, ConditionScope } from "./component/idlize"
 import { int32 } from "@koalaui/common"
 export class ConditionScopeModifier implements ConditionScope,AttributeModifier<ConditionScope> {
@@ -31,7 +32,8 @@ export class ConditionScopeModifier implements ConditionScope,AttributeModifier<
     applyFocusedAttribute(instance: ConditionScope): void { }
     applyDisabledAttribute(instance: ConditionScope): void { }
     applySelectedAttribute(instance: ConditionScope): void { }
-    applyModifierPatch(peer: ArkConditionScopePeer): void {
+    applyModifierPatch(node: PeerNode): void {
+        const peer = node as ArkConditionScopePeer;
     }
     mergeModifier(modifier: ConditionScopeModifier): void {
     }

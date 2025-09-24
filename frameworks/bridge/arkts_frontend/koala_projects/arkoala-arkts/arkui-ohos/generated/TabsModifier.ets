@@ -553,7 +553,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._barMode_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined));
+                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined | undefined));
                     this._barMode_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }

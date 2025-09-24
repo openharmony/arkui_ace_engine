@@ -105,7 +105,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             switch (this._edgeAlign_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined));
+                    peer.setEdgeAlignAttribute((this._edgeAlign_0_0value as CalendarAlign | undefined), (this._edgeAlign_0_1value as Offset | undefined | undefined));
                     this._edgeAlign_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
