@@ -72,7 +72,6 @@ ohos_source_set("preview_entrance_source") {
 
     deps = [
       "$ace_napi:ace_napi",
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     ]
     external_deps = []

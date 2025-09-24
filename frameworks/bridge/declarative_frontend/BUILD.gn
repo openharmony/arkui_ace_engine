@@ -59,7 +59,7 @@ template("declarative_frontend") {
       ]
     }
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = []
     if (is_arkui_x) {
       deps += [
         "//arkcompiler/ets_runtime:libark_jsruntime_static",
