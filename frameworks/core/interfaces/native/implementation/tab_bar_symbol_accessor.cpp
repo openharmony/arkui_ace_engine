@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+#include "tab_bar_symbol_peer_impl.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabBarSymbolAccessor {
 void DestroyPeerImpl(Ark_TabBarSymbol peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TabBarSymbol ConstructImpl()
 {
-    return {};
+    return PeerUtils::CreatePeer<TabBarSymbolPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,19 +35,33 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_SymbolGlyphModifier GetNormalImpl(Ark_TabBarSymbol peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto glyphModifier = peer->GetNormal().Upgrade();
+    CHECK_NULL_RETURN(glyphModifier, nullptr);
+    return static_cast<SymbolGlyphModifierPeer *>(Referenced::RawPtr(glyphModifier));
 }
 void SetNormalImpl(Ark_TabBarSymbol peer,
                    Ark_SymbolGlyphModifier normal)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(normal);
+    peer->SetNormal(AceType::WeakClaim(normal));
 }
 Opt_SymbolGlyphModifier GetSelectedImpl(Ark_TabBarSymbol peer)
 {
-    return {};
+    auto optModifier = Converter::ArkValue<Opt_SymbolGlyphModifier>();
+    CHECK_NULL_RETURN(peer, optModifier);
+    auto glyphModifier = peer->GetSelected().Upgrade();
+    CHECK_NULL_RETURN(glyphModifier, optModifier);
+    auto glyphModifierValue = static_cast<SymbolGlyphModifierPeer*>(Referenced::RawPtr(glyphModifier));
+    return Converter::ArkValue<Opt_SymbolGlyphModifier>(glyphModifierValue);
 }
 void SetSelectedImpl(Ark_TabBarSymbol peer,
                      const Opt_SymbolGlyphModifier* selected)
 {
+    CHECK_NULL_VOID(peer);
+    auto glyphModifierOpt = Converter::GetOptPtr(selected);
+    peer->SetSelected(glyphModifierOpt ? AceType::WeakClaim(glyphModifierOpt.value()) : nullptr);
 }
 } // TabBarSymbolAccessor
 const GENERATED_ArkUITabBarSymbolAccessor* GetTabBarSymbolAccessor()

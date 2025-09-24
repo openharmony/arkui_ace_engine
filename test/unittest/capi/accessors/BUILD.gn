@@ -126,6 +126,7 @@ ace_unittest("capi_all_accessors_test") {
     "swiper_content_transition_proxy_accessor_test.cpp",
     "swiper_controller_accessor_test.cpp",
     "symbol_effect_accessor_test.cpp",
+    "tab_bar_symbol_accessor_test.cpp",
     "tab_content_transition_proxy_accessor_test.cpp",
     "tabs_controller_accessor_test.cpp",
     "tap_recognizer_accessor_test.cpp",
