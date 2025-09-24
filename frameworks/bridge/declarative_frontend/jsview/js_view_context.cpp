@@ -1391,6 +1391,62 @@ void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     }
 }
 
+void JSViewContext::JSSetImageCacheCount(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber() || !info[1]->IsNumber()) {
+        return;
+    }
+    int32_t size = info[0]->ToNumber<int32_t>();
+    if (size < 0) {
+        return;
+    }
+    auto id = info[1]->ToNumber<int32_t>();
+    ContainerScope scope(id);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
+    taskExecutor->PostTask(
+        [pipelineContextWeak, size]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                auto imageCache = pipelineContext->GetImageCache();
+                if (imageCache) {
+                    imageCache->SetCapacity(size);
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetImageCacheCount");
+}
+
+void JSViewContext::JSSetImageRawDataCacheSize(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber() || !info[1]->IsNumber()) {
+        return;
+    }
+    int32_t cacheSize = info[0]->ToNumber<int32_t>();
+    if (cacheSize < 0) {
+        return;
+    }
+    auto id = info[1]->ToNumber<int32_t>();
+    ContainerScope scope(id);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
+    taskExecutor->PostTask(
+        [pipelineContextWeak, cacheSize]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                auto imageCache = pipelineContext->GetImageCache();
+                imageCache->SetDataCacheLimit(cacheSize);
+            }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::UI, "ArkUISetImageDataCacheSize");
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1417,6 +1473,8 @@ void JSViewContext::JSBind(BindingTarget globalObj)
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
     JSClass<JSViewContext>::StaticMethod("setKeyboardAppearanceConfig", JSViewContext::JSSetKeyboardAppearanceConfig);
+    JSClass<JSViewContext>::StaticMethod("setImageCacheCount",  JSViewContext::JSSetImageCacheCount);
+    JSClass<JSViewContext>::StaticMethod("setImageRawDataCacheSize",  JSViewContext::JSSetImageRawDataCacheSize);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 
