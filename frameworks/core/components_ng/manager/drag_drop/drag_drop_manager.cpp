@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "drag_drop_func_wrapper.h"
 
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
@@ -68,6 +69,7 @@ constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr uint64_t MOVE_TIME_LIMIT = 6L;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
+constexpr float MIN_SPRING_RESPONSE_FOR_SCENE_BOARD = 0.001f;
 constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
 constexpr float MIN_UI_EXTENSION_BOUNDARY_DISTANCE = 5.0f;
@@ -2272,6 +2274,7 @@ void DragDropManager::CopyPreparedInfoForDrag(DragPreviewInfo& dragPreviewInfo, 
     dragPreviewInfo.stackNode = data.stackNode;
     dragPreviewInfo.sizeChangeEffect = data.sizeChangeEffect;
     dragPreviewInfo.menuNode = data.menuNode;
+    dragPreviewInfo.isSceneBoardTouchDrag = data.isSceneBoardTouchDrag;
 }
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
@@ -2450,8 +2453,10 @@ void DragDropManager::DragMoveAnimation(
     auto containerId = Container::CurrentId();
     bool isMenuShow = overlayManager->IsMenuShow();
     AnimationOption option;
+    auto minResponse = info_.isSceneBoardTouchDrag ?
+        MIN_SPRING_RESPONSE_FOR_SCENE_BOARD : MIN_SPRING_RESPONSE;
     auto springResponse =
-        std::max(DEFAULT_SPRING_RESPONSE - DEL_SPRING_RESPONSE * allAnimationCnt_, MIN_SPRING_RESPONSE);
+        std::max(DEFAULT_SPRING_RESPONSE - DEL_SPRING_RESPONSE * allAnimationCnt_, minResponse);
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse, 0.99f, 0.0f);
     constexpr int32_t animateDuration = 30;
     option.SetCurve(curve);
@@ -2625,6 +2630,16 @@ void DragDropManager::DragStartAnimation(
     } else if (info_.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
                info_.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) {
         StartDragTransitionAnimation(newOffset, option, overlayManager, animateProperty, point);
+    }
+    if (info_.isSceneBoardTouchDrag) {
+        renderContext->UpdateOpacity(0.0f);
+        auto overlayManager = GetDragAnimationOverlayManager(containerId);
+        CHECK_NULL_VOID(overlayManager);
+        auto gatherNode = overlayManager->GetGatherNode();
+        CHECK_NULL_VOID(gatherNode);
+        auto gatherNodeRender = gatherNode->GetRenderContext();
+        CHECK_NULL_VOID(gatherNodeRender);
+        gatherNodeRender->UpdateOpacity(0.0f);
     }
 }
 

@@ -320,19 +320,6 @@ float GestureEventHub::GetDefaultPixelMapScale(
     return defaultPixelMapScale;
 }
 
-bool CheckInSceneBoardWindow()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    if (!container->IsSubContainer()) {
-        return container->IsSceneBoardWindow();
-    }
-    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-    container = Container::GetContainer(parentContainerId);
-    CHECK_NULL_RETURN(container, false);
-    return container->IsSceneBoardWindow();
-}
-
 void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)
 {
     if (result.GetX() >= 0.0f) {
@@ -352,7 +339,7 @@ void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)
 RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
 {
     auto innerRect = RectF();
-    if (!CheckInSceneBoardWindow() || extraInfo.empty()) {
+    if (!DragDropFuncWrapper::CheckInSceneBoardWindow() || extraInfo.empty()) {
         return innerRect;
     }
     auto extraJson = JsonUtil::ParseJsonString(extraInfo);
@@ -393,7 +380,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         if (dragInfoData.isNeedCreateTiled) {
             result.SetX(-size.Width() / HALF_PIXELMAP);
             result.SetY(-size.Height() / HALF_PIXELMAP);
-        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable) {
+        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable ||
+            dragInfoData.isSceneBoardTouchDrag) {
             auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
             auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
             coordinateX = centerX - dragInfoData.dragPreviewRect.Width() / HALF_PIXELMAP;
@@ -420,7 +408,7 @@ void GestureEventHub::ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode,
     auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureEventHub);
     if (!IsPixelMapNeedScale()) {
-        if (CheckInSceneBoardWindow()) {
+        if (DragDropFuncWrapper::CheckInSceneBoardWindow()) {
             imageGestureEventHub->SetMenuPreviewScale(defaultMenuPreviewScale);
         } else {
             //if not in sceneboard,use default drag scale
@@ -937,6 +925,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         DragDropFuncWrapper::IsNeedCreateTiledPixelMap(frameNode, dragEventActuator_, info.GetSourceDevice());
     PreparedInfoForDrag data = { isMenuShow, recordsSize, defaultPixelMapScale, isNeedCreateTiled, OffsetF(), OffsetF(),
         pixelMap, nullptr, dragPreviewOptions.sizeChangeEffect };
+    data.isSceneBoardTouchDrag = DragDropFuncWrapper::CheckInSceneBoardWindow() &&
+        info.GetInputEventType() != InputEventType::MOUSE_BUTTON;
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     data.dragPreviewRect = RectF(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
@@ -1065,6 +1055,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
+    if (data.isSceneBoardTouchDrag) {
+        pipeline->AddAfterRenderTask([]() {
+            ACE_SCOPED_TRACE("drag: set drag window visible, touch");
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        });
+    }
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && needChangeFwkForLeaveWindow) {
         overlayManager->RemovePixelMap();
         overlayManager->RemovePreviewBadgeNode();
@@ -1126,6 +1122,8 @@ void GestureEventHub::StartVibratorByDrag(const RefPtr<FrameNode>& frameNode)
 void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
     float scale, const PreparedInfoForDrag& dragInfoData)
 {
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    arkExtraInfoJson->Put("enable_animation", dragInfoData.isSceneBoardTouchDrag);
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);

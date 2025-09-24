@@ -1577,4 +1577,17 @@ RefPtr<UINode> DragDropFuncWrapper::FindWindowScene(RefPtr<FrameNode>& targetNod
     }
     return parent;
 }
+
+bool DragDropFuncWrapper::CheckInSceneBoardWindow()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (!container->IsSubContainer()) {
+        return container->IsSceneBoardWindow();
+    }
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    container = Container::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsSceneBoardWindow();
+}
 } // namespace OHOS::Ace::NG
