@@ -16,7 +16,17 @@
 #pragma once
 
 #include "core/components_ng/gestures/swipe_gesture.h"
+#include "gesture_peer.h"
 
-struct SwipeGesturePeer final {
+struct SwipeGesturePeer final : public GesturePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SwipeGesture> gesture;
+
+    inline OHOS::Ace::RefPtr<OHOS::Ace::NG::Gesture> GetGesture() override
+    {
+        return gesture;
+    }
+protected:
+    SwipeGesturePeer() = default;
+    ~SwipeGesturePeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

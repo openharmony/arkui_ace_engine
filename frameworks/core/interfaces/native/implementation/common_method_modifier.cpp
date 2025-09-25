@@ -65,7 +65,7 @@
 #include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
-#include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_peer.h"
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
@@ -4586,16 +4586,15 @@ void GestureImplInternal(Ark_NativePointer node, const Opt_GestureType* gesture,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<RefPtr<Gesture>> aceGestureOpt;
-#ifdef WRONG_GEN1
     Converter::VisitUnionPtr(gesture,
-        [&aceGestureOpt](const auto& gestureType) {
-            aceGestureOpt = gestureType->GetGesture();
+        [&aceGestureOpt](const Ark_Gesture& arkGesture) {
+            aceGestureOpt = arkGesture->GetGesture();
         },
-        [](const Ark_CustomObject& src) {
+        [](const Ark_GestureGroup& arkGestureGroup) {
+            LOGE("GestureImplInternal: GestureGroup processing is not implemented yet");
         },
         []() {}
     );
-#endif
     CHECK_NULL_VOID(aceGestureOpt);
     auto aceGesture = aceGestureOpt.value();
     auto gestureMask = (Converter::OptConvertPtr<GestureMask>(mask)).value_or(GestureMask::Normal);
