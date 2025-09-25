@@ -32,6 +32,7 @@ import { WithThemeModifier } from "./../WithThemeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
 import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
+import { GlobalStateManager } from '@koalaui/runtime';
 export class ArkWithThemePeer extends PeerNode {
     attributeSet?: WithThemeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -107,13 +108,23 @@ export function WithThemeImpl(
         return new ArkWithThemeComponent()
     })
     NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (peer: ArkWithThemePeer): void => {
+        const withThemeId = receiver.getPeer()?.getId() ?? 0;
+
         ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstRender)
         receiver.setPeer(peer)
         style?.(receiver)
         ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         receiver.setPeer(undefined)
+
+        GlobalStateManager.instance.namedState<int32>("themeScopeId", () => withThemeId);
+        const themeOptions = ArkThemeScopeManager.getInstance().getThemeOptionsById(withThemeId);
+        ArkThemeScopeManager.getInstance().updateColorMode(themeOptions?.colorMode ?? ThemeColorMode.SYSTEM);
+
         content_?.()
+
+        ArkThemeScopeManager.getInstance().restoreColorMode();
         ArkThemeScopeManager.getInstance().onScopeExit();
+
         receiver.isFirstRender = false;
     })
 }

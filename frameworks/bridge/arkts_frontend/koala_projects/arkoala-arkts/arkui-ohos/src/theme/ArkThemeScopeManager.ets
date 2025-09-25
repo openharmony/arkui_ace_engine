@@ -85,6 +85,10 @@ export class ArkThemeScopeManager {
 
     private componentsThemeScope: Map<int32, ArkThemeScope | undefined> = new Map<int32, ArkThemeScope | undefined>();
 
+    private colorModeStack: Array<ThemeColorMode> = new Array<ThemeColorMode>();
+
+    private themeOptionsMap: Map<int32, WithThemeOptions> = new Map<int32, WithThemeOptions>();
+
     /**
      * Obtain System Colors
      *
@@ -233,6 +237,7 @@ export class ArkThemeScopeManager {
      * @param withThemeOptions WithTheme container`s options
      */
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ArkThemeBase) {
+        this.themeOptionsMap.set(withThemeId as int32, withThemeOptions);
         // save theme scope id on scope enter
         this.lastThemeScopeId = withThemeId;
         if (this.handledIsFirstRender === true) {
@@ -446,8 +451,8 @@ export class ArkThemeScopeManager {
 
         if (scope.isColorModeChanged()) {
             const stateManager = GlobalStateManager.instance as StateManagerImpl;
-            const memoScope = stateManager.current;
-            // memoScope?.forceCompleteRerender();
+            const memoScope = stateManager.current?.parent;
+            memoScope?.forceCompleteRerender();
         }
     }
 
@@ -493,5 +498,24 @@ export class ArkThemeScopeManager {
         if (parentPeer && parentPeer.peer && component.getPeer()) {
             ArkUIAniModule._ApplyParentThemeScopeId(component.getPeer().getPeerPtr(), parentPeer.getPeerPtr());
         }
+    }
+
+    public updateColorMode(colorMode: ThemeColorMode) {
+        this.colorModeStack.push(colorMode);
+        ArkUIAniModule._UpdateColorMode(colorMode);
+    }
+
+    public restoreColorMode() {
+        this.colorModeStack.pop();
+        if (this.colorModeStack.length > 0) {
+            const prevColorMode = this.colorModeStack[this.colorModeStack.length - 1];
+            ArkUIAniModule._UpdateColorMode(prevColorMode);
+            return;
+        }
+        this.onExitLocalColorMode();
+    }
+
+    public getThemeOptionsById(withThemeId: int32): WithThemeOptions | undefined {
+        return this.themeOptionsMap.get(withThemeId);
     }
 }

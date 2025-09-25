@@ -24,6 +24,7 @@ import { int32 } from "@koalaui/common"
 // import { Serializer } from 'arkui/component';
 import { ArkColorsImpl } from './ArkColorsImpl';
 import { ThemeOps } from 'arkui/component/idlize';
+import { GlobalStateManager } from '@koalaui/runtime';
 
 export class ArkThemeNativeHelper {
     static sendThemeToNative(theme: Theme, elmtId: int32): void {
@@ -136,5 +137,10 @@ export class ArkThemeNativeHelper {
             colorArray.push(value);
         }
         return colorArray;
+    }
+
+    public static currentThemeScopeId(): int32 {
+        const stateManager = GlobalStateManager.instance;
+        return stateManager.stateBy<int32>("themeScopeId")?.value ?? 0;
     }
 }
