@@ -149,6 +149,25 @@ auto g_bindMenuOptionsParamCallbacks = [](
     }
 };
 
+auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    if (layoutRegionMargin->left.has_value() && !layoutRegionMargin->left.value().IsValid()) {
+        layoutRegionMargin->left = std::nullopt;
+    }
+    if (layoutRegionMargin->right.has_value() && !layoutRegionMargin->right.value().IsValid()) {
+        layoutRegionMargin->right = std::nullopt;
+    }
+    if (layoutRegionMargin->top.has_value() && !layoutRegionMargin->top.value().IsValid()) {
+        layoutRegionMargin->top = std::nullopt;
+    }
+    if (layoutRegionMargin->bottom.has_value() && !layoutRegionMargin->bottom.value().IsValid()) {
+        layoutRegionMargin->bottom = std::nullopt;
+    }
+    layoutRegionMargin->start = layoutRegionMargin->left;
+    layoutRegionMargin->end = layoutRegionMargin->right;
+    menuParam.layoutRegionMargin = layoutRegionMargin;
+};
+
 auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
     auto offsetVal =
         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
@@ -174,11 +193,24 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    auto borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    if (borderRadius.has_value() && (borderRadius.value().radiusTopLeft.has_value()
+        || borderRadius.value().radiusTopRight.has_value()
+        || borderRadius.value().radiusBottomLeft.has_value()
+        || borderRadius.value().radiusBottomRight.has_value())) {
+        menuParam.borderRadius = borderRadius;
+    }
+    Converter::VisitUnion(
+        menuOptions.preview,
+        [&menuParam](const Ark_MenuPreviewMode& value) {
+            auto mode = Converter::OptConvert<MenuPreviewMode>(value);
+            if (mode && mode.value() == MenuPreviewMode::IMAGE) {
+                menuParam.previewMode = MenuPreviewMode::IMAGE;
+            }
+        },
+        [](const CustomNodeBuilder& value) {}, []() {});
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
-    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
-    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
-    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    g_parseLayoutRegionMargin(menuOptions, menuParam);
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
@@ -495,20 +527,34 @@ void OpenMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
     g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
     auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
+    if (!theme) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     menuParam.isShowInSubWindow =
         Converter::OptConvert<bool>(options->value.showInSubWindow).value_or(theme->GetExpandDisplay());
     int targetId = INVALID_ID;
     auto result = ParseTargetInfo(targetInfo, targetId);
     if (result == ERROR_CODE_NO_ERROR) {
+        frameNode->MarkModifyDone();
         result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
     }
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void UpdateMenuImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -520,17 +566,29 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     MenuParam menuParam;
     auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
-    if (isPartialUpdate) {
+    if (!isPartialUpdate.has_value()) {
+        ReturnPromise(promiseValue, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (isPartialUpdate.value()) {
         auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
         if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(promiseValue, result);
             return;
         }
     }
     g_bindMenuOptionsParam(*options, menuParam);
-    ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    auto result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void CloseMenuImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -540,8 +598,15 @@ void CloseMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 } // PromptActionAccessor
 
