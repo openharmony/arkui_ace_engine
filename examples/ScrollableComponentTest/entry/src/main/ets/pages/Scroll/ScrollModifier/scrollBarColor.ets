@@ -17,8 +17,8 @@ import { LengthMetrics, ScrollModifier } from '@kit.ArkUI';
 import { common, ConfigurationConstant } from '@kit.AbilityKit';
 
 class CustomModifier1 implements AttributeModifier<ScrollAttribute> {
-  changeIndex: number = 0;
-  changeList: (Color | number | string | undefined | null)[] = [
+  public changeIndex: number = 0;
+  public changeList: (Color | number | string | undefined | null)[] = [
     Color.Blue, 0xFFFF00FF, 'rgb(255, 100, 255)', '#FFFF00FF', undefined, null
   ];
 
