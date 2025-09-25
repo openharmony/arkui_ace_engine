@@ -18,6 +18,9 @@
 #include <unistd.h>
 #include <vector>
 
+#include "base/log/log_wrapper.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/render_context.h"
@@ -258,10 +261,14 @@ void GetSpanInspector(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHOS::Ace::JsonValue> &jsonNode)
+void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHOS::Ace::JsonValue> &jsonNode,
+    const RefPtr<NG::UINode> &customNodeParent)
 {
     // custom node rect follows parent size
     auto hostNode = customNode->GetParent();
+    if (customNodeParent) {
+        hostNode = customNodeParent;
+    }
     while (hostNode != nullptr) {
         if (AceType::InstanceOf<NG::FrameNode>(hostNode)) {
             break;
@@ -327,6 +334,19 @@ bool IsInternalNode(const RefPtr<NG::UINode>& uiNode)
     return false;
 }
 
+std::unique_ptr<OHOS::Ace::JsonValue> GetNavCustomNodeInfo(const RefPtr<UINode>& navCustomNode,
+    const RefPtr<NG::UINode>& parent, const InspectorFilter& filter)
+{
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(INSPECTOR_TYPE, navCustomNode->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, navCustomNode->GetId());
+    GetCustomNodeInfo(navCustomNode, jsonNode, parent);
+    auto jsonObject = JsonUtil::Create(true);
+    navCustomNode->ToJsonValue(jsonObject, filter);
+    jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
+    return jsonNode;
+}
+
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
     InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
@@ -343,7 +363,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
-        GetCustomNodeInfo(parent, jsonNode);
+        GetCustomNodeInfo(parent, jsonNode, nullptr);
     } else {
         jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
     }
@@ -381,6 +401,24 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         for (auto uiNode : children) {
             if (IsInternalNode(uiNode)) {
                 continue;
+            }
+            if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node is %{public}d", uiNode->GetId());
+                auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
+                if (navDestinationNode != nullptr) {
+                    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node: %{public}d", uiNode->GetId());
+                    auto navCustomNode = navDestinationNode->GetPattern<NavDestinationPattern>()->GetCustomNode();
+                    if (navCustomNode != nullptr) {
+                        auto navCustomNodeJsonNode = GetNavCustomNodeInfo(navCustomNode, parent, filter);
+                        auto navCustomNodeChildrenArray = JsonUtil::CreateArray(true);
+                        GetInspectorChildren(uinode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
+                        if (navCustomNodeChildrenArray->GetArraySize()) {
+                            navCustomNodeJsonNode->PutRef(INSPECTOR_CHILDREN, std::move(navCustomNodeChildrenArray));
+                        }
+                        jsonChildrenArray->PutRef(std::move(navCustomNodeJsonNode));
+                        continue;
+                    }
+                }
             }
             GetInspectorChildren(uiNode, jsonChildrenArray, inspectorParameters, filter, depth - 1);
         }
