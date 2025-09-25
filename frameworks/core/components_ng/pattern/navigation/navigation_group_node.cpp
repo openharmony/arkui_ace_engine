@@ -1419,6 +1419,9 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         if (navDestination->IsOnAnimation()) {
             return false;
         }
+        if (navigationPattern->IsTopFullScreenChanged() && IsHomeNodeAndShouldShow(navDestination)) {
+            return false;
+        }
         if (!pattern || !pattern->GetIsOnShow()) {
             // push more than one standard navDestination, need to set invisible below newTopDestination
             auto navDestinationLayoutProperty = navDestination->GetLayoutProperty();
@@ -2573,5 +2576,21 @@ void NavigationGroupNode::CreateHomeDestinationIfNeeded()
     eventHub->FireOnWillAppear();
     AddChild(destNode, 0);
     customHomeDestination_ = destNode;
+}
+
+bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGroupNode>& navDestination) const
+{
+    CHECK_NULL_RETURN(navDestination, false);
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
+    if (navDestination != navigationPattern->GetHomeNode()) {
+        return false;
+    }
+    auto context = GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, false);
+    return navigationManager->IsForceSplitEnable() && navigationPattern->CanForceSplitLayout() &&
+        !navigationPattern->IsTopFullScreenPage();
 }
 } // namespace OHOS::Ace::NG

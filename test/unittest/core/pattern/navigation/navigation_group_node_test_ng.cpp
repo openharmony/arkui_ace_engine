@@ -1088,4 +1088,31 @@ HWTEST_F(NavigationGroupNodeTestNg, UpdateNavdestinationVisiblity001, TestSize.L
     EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
+
+/*
+ * @tc.name: IsHomeNodeAndShouldShowTest001
+ * @tc.desc: Branch: if arg == nullptr
+ *                   if arg == simple navDestination
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, IsHomeNodeAndShouldShowTest001, TestSize.Level1)
+{
+    /*
+     *@tc.steps create navNode
+     */
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create(true);
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    /*
+    *@tc.steps mock and call function
+    */
+    ASSERT_FALSE(navigationNode->IsHomeNodeAndShouldShow(nullptr));
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_FALSE(navigationNode->IsHomeNodeAndShouldShow(navDestination));
+}
 } // namespace OHOS::Ace::NG
