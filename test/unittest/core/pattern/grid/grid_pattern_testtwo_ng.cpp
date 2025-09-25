@@ -867,6 +867,27 @@ HWTEST_F(GridTestNg, SkipRegularLines001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SkipRegularLinesForward
+ * @tc.desc: Test GridScrollLayoutAlgorithm SkipRegularLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, SkipRegularLinesForward, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    gridLayoutInfo.lineHeightMap_[0] = 60.0f;
+    gridLayoutInfo.lineHeightMap_[0] = 60.0f;
+    gridLayoutInfo.startIndex_ = 30;
+    gridLayoutInfo.currentOffset_ = 240.0f;
+    gridLayoutInfo.childrenCount_ = 100;
+    gridLayoutInfo.crossCount_ = 3;
+    RefPtr<GridScrollLayoutAlgorithm> layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo, 0, 0);
+    ASSERT_NE(layout, nullptr);
+    layout->mainGap_ = 0;
+    layout->crossCount_ = 3;
+    layout->SkipRegularLines(true);
+    EXPECT_EQ(layout->info_.currentOffset_, 0.0f);
+}
+/**
  * @tc.name: SkipIrregularLines001
  * @tc.desc: Test GridScrollLayoutAlgorithm SkipIrregularLines
  * @tc.type: FUNC
