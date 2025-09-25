@@ -247,3 +247,11 @@ CLIPBOARD_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in clipboard }
   BUNDLE_NAME: {type: STRING, desc: package name}
   ERROR_TYPE: {type: STRING, desc: error type}
+
+GENERAL_INTERACTION_ERROR:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in input event sequence}
+  BUNDLE_NAME: {type: STRING, desc: application package name}
+  ERROR_TYPE: {type: INT32, desc: error type}
+  TOUCHEVENT_ID: {type: INT32, desc: touchEvent id}
+  FINGER_ID: {type: INT32, desc: finger id}
+  TAG: {type: STRING, desc: frame tag}

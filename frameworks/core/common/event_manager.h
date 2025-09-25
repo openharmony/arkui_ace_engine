@@ -480,6 +480,9 @@ private:
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
     std::unordered_map<int32_t, int32_t> downFingerIds_;
+    std::unordered_map<int32_t, int32_t> downTargetDisplayIds_;
+    int32_t downEventErrorCnt_ = 0;
+    int32_t upEventErrorCnt_ = 0;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;

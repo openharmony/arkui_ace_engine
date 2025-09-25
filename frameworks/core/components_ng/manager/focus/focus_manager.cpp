@@ -19,6 +19,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -121,7 +122,7 @@ void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 
 void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView, bool isDetachFromTree)
 {
-    if (!IsAutoFocusTransfer() && !isDetachFromTree)  {
+    if (!IsAutoFocusTransfer() && !isDetachFromTree) {
         return;
     }
     CHECK_NULL_VOID(focusView);
@@ -143,6 +144,9 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView, bool isDet
     if (focusViewStack_.empty()) {
         lastFocusView_ = nullptr;
         TAG_LOGW(AceLogTag::ACE_FOCUS, "viewStack empty");
+        GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::FOCUS_VIEW_STACK_EMPTY_ERROR, -1, -1,
+            "empty" };
+        NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, Container::CurrentId());
         return;
     }
     if (focusViewStack_.back() != lastFocusView_) {
@@ -156,6 +160,9 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView, bool isDet
                 "unfocusable view:%{public}s enable:%{public}d show:%{public}d focusable:%{public}d",
                 lastFocusViewHub->GetFrameName().c_str(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow(),
                 lastFocusViewHub->focusable_);
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::FOCUS_VIEW_STACK_TOP_UNFOCUSABLE_ERROR,
+                -1, -1, lastFocusViewHub->GetFrameName() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, Container::CurrentId());
         }
     }
 }

@@ -35,6 +35,7 @@ build_component_ng("event_ng") {
     "state_style_manager.cpp",
     "target_component.cpp",
     "touch_event.cpp",
+    "error_reporter/general_interaction_error_reporter.cpp",
   ]
 
   standard_input_deps = [ "imf:inputmethod_client" ]

@@ -130,6 +130,10 @@ constexpr char EVENT_KEY_FORM_ID[] = "FORM_ID";
 constexpr char EVENT_KEY_ERROR_NAME[] = "ERROR_NAME";
 constexpr char EVENT_KEY_ERROR_CODE[] = "ERROR_CODE";
 constexpr char FORM_NODE_ERROR[] = "FORM_NODE_ERROR";
+constexpr char EVENT_KEY_GENERAL_INTERACTION_ERROR[] = "GENERAL_INTERACTION_ERROR";
+constexpr char EVENT_KEY_TOUCHEVENT_ID[] = "TOUCHEVENT_ID";
+constexpr char EVENT_KEY_FINGER_ID[] = "FINGER_ID";
+constexpr char EVENT_KEY_TAG[] = "TAG";
 constexpr int32_t WAIT_MODIFY_TIMEOUT = 10;
 constexpr int32_t WAIT_MODIFY_FAILED = 1;
 
@@ -701,4 +705,17 @@ void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
     EventReport::formEventTimerMap_.erase(iter);
 }
 
+void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInfo& generalEventErrorInfo)
+{
+    auto packageName = Container::CurrentBundleName();
+    StrTrim(packageName);
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_GENERAL_INTERACTION_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(generalEventErrorInfo.errorType),
+        EVENT_KEY_TOUCHEVENT_ID, generalEventErrorInfo.touchEventId,
+        EVENT_KEY_FINGER_ID, generalEventErrorInfo.fingerId,
+        EVENT_KEY_TAG, generalEventErrorInfo.tag);
+}
 } // namespace OHOS::Ace

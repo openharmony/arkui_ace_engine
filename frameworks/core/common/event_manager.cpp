@@ -20,6 +20,7 @@
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -783,19 +784,39 @@ void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
 void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
-    if (touchEvent.type == TouchType::DOWN) {
-        if (touchEventFindResult != downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-                "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
-                " touchEvent id is %{public}d",
-                touchEvent.touchEventId, touchEvent.id);
-            FalsifyCancelEventAndDispatch(touchEvent);
-            refereeNG_->ForceCleanGestureReferee();
-            touchTestResults_.clear();
-            downFingerIds_.clear();
+    if (touchEvent.type != TouchType::DOWN)
+        return;
+    if (touchEventFindResult != downFingerIds_.end()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
+            " touchEvent id is %{public}d",
+            touchEvent.touchEventId, touchEvent.id);
+        if (downEventErrorCnt_) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", receive DOWN event twice";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::DOWN_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+            downEventErrorCnt_ = 0;
         }
-        downFingerIds_[touchEvent.id] = touchEvent.originalId;
+        ++downEventErrorCnt_;
+        FalsifyCancelEventAndDispatch(touchEvent);
+        refereeNG_->ForceCleanGestureReferee();
+        touchTestResults_.clear();
+        downFingerIds_.clear();
     }
+    for (const auto& [id, originalId] : downFingerIds_) {
+        if (originalId == touchEvent.originalId && id != touchEvent.id &&
+            downTargetDisplayIds_[id] == touchEvent.targetDisplayId) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", targetDisplayId not equal";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::INJECT_DOWN_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+        }
+    }
+    downTargetDisplayIds_[touchEvent.id] = touchEvent.targetDisplayId;
+    downFingerIds_[touchEvent.id] = touchEvent.originalId;
 }
 
 void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
@@ -804,18 +825,27 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
         return;
     }
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
-    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
-        if (touchEventFindResult == downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-                "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
-                "without receive DOWN event, touchEvent id is %{public}d",
-                touchEvent.touchEventId, touchEvent.id);
-            FalsifyCancelEventAndDispatch(touchEvent);
-            refereeNG_->ForceCleanGestureReferee();
-            downFingerIds_.clear();
-        } else {
-            downFingerIds_.erase(touchEvent.id);
+    if (touchEvent.type != TouchType::UP && touchEvent.type != TouchType::CANCEL)
+        return;
+    if (touchEventFindResult == downFingerIds_.end()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
+            "without receive DOWN event, touchEvent id is %{public}d",
+            touchEvent.touchEventId, touchEvent.id);
+        if (upEventErrorCnt_) {
+            std::stringstream oss;
+            oss << "id: " << touchEvent.id << ", receive UP/CANCEL event without receive DOWN event";
+            GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::UP_OR_CANCEL_EVENT_ERROR,
+                touchEvent.touchEventId, touchEvent.id, oss.str() };
+            NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId_);
+            upEventErrorCnt_ = 0;
         }
+        ++upEventErrorCnt_;
+        FalsifyCancelEventAndDispatch(touchEvent);
+        refereeNG_->ForceCleanGestureReferee();
+        downFingerIds_.clear();
+    } else {
+        downFingerIds_.erase(touchEvent.id);
     }
 }
 
