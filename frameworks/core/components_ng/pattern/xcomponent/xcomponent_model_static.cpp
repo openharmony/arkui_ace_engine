@@ -33,7 +33,7 @@ class XComponentStaticPattern : public XComponentPatternV2 {
     DECLARE_ACE_TYPE(XComponentStaticPattern, XComponentPatternV2);
 public:
     XComponentStaticPattern() = default;
-    explicit XComponentStaticPattern(bool isTypeNode);
+    explicit XComponentStaticPattern(bool isTypedNode);
     ~XComponentStaticPattern() override = default;
     void InitParams();
     bool IsBindNative() override;

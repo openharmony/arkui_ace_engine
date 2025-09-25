@@ -23,8 +23,6 @@ class CanvasModule {
 public:
     static void SetPixelMap(
         ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_object pixelMapObj);
-    static ani_object GetPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_double sx,
-        ani_double sy, ani_double sw, ani_double sh);
     static void DrawPixelMap0(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,
         ani_object pixelMapObj, ani_double dx, ani_double dy);
     static void DrawPixelMap1(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,

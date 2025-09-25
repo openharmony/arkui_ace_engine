@@ -302,7 +302,6 @@ export class ArkUIAniModule {
     native static _getHoverEventPointer(peer: KPointer): KPointer
     // for Canvas
     native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
-    native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap
     native static _CanvasRenderer_DrawPixelMap0(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number): void
     native static _CanvasRenderer_DrawPixelMap1(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number, dw: number, dh: number): void
     native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
