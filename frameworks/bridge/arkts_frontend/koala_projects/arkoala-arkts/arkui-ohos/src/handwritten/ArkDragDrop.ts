@@ -151,10 +151,8 @@ export function hookOnDrop(node: ArkCommonMethodComponent, eventCallback: ((even
 }
 
 export function hookDragEventStartDataLoading(node: KPointer, options: DataSyncOptions): string {
-    // const options_casted = options as (DataSyncOptions)
-    // return ArkUIAniModule._DragEvent_Start_Data_Loading(node, options_casted)
-    throw new Error("Udmf not merged");
-    
+    const options_casted = options as (DataSyncOptions)
+    return ArkUIAniModule._DragEvent_Start_Data_Loading(node, options_casted)
 }
 
 export function hookDragPreviewOptions(node: ArkCommonMethodComponent, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {

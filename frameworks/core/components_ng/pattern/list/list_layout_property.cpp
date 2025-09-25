@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,15 +30,13 @@ V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json, filter);
+    ScrollableLayoutProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         ScrollSnapPropToJsonValue(json, filter);
         return;
     }
     json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-    json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
-    json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
     json->PutExtAttr("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str(), filter);
     json->PutExtAttr("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
                                    ? "Axis.Vertical" : "Axis.Horizontal", filter);
@@ -112,24 +110,51 @@ void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     LayoutProperty::FromJson(json);
 }
 
-void ListLayoutProperty::UpdateLayoutProperty(const ListLayoutProperty* layoutProperty)
+void ListLayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 {
-    CHECK_NULL_VOID(layoutProperty);
-    propSpace_ = layoutProperty->CloneSpace();
-    propInitialIndex_ = layoutProperty->CloneInitialIndex();
-    propListDirection_ = layoutProperty->CloneListDirection();
-    propDivider_ = layoutProperty->CloneDivider();
-    propLanes_ = layoutProperty->CloneLanes();
-    propLaneMinLength_ = layoutProperty->CloneLaneMinLength();
-    propLaneMaxLength_ = layoutProperty->CloneLaneMaxLength();
-    propLaneGutter_ = layoutProperty->CloneLaneGutter();
-    propListItemAlign_ = layoutProperty->CloneListItemAlign();
-    propCachedCount_ = layoutProperty->CloneCachedCount();
-    propStickyStyle_ = layoutProperty->CloneStickyStyle();
-    propContentStartOffset_ = layoutProperty->CloneContentStartOffset();
-    propContentEndOffset_ = layoutProperty->CloneContentEndOffset();
-    propScrollSnapAlign_ = layoutProperty->CloneScrollSnapAlign();
-    propEditMode_ = layoutProperty->CloneEditMode();
-    propScrollEnabled_ = layoutProperty->CloneScrollEnabled();
+    auto value = DynamicCast<ListLayoutProperty>(layoutProperty);
+    ScrollableLayoutProperty::Clone(value);
+    value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+    value->propSpace_ = CloneSpace();
+    value->propInitialIndex_ = CloneInitialIndex();
+    value->propListDirection_ = CloneListDirection();
+    value->propDivider_ = CloneDivider();
+    value->propLanes_ = CloneLanes();
+    value->propLaneMinLength_ = CloneLaneMinLength();
+    value->propLaneMaxLength_ = CloneLaneMaxLength();
+    value->propLaneGutter_ = CloneLaneGutter();
+    value->propListItemAlign_ = CloneListItemAlign();
+    value->propCachedCount_ = CloneCachedCount();
+    value->propShowCachedItems_ = CloneShowCachedItems();
+    value->propStickyStyle_ = CloneStickyStyle();
+    value->propScrollSnapAlign_ = CloneScrollSnapAlign();
+    value->propEditMode_ = CloneEditMode();
+    value->propScrollEnabled_ = CloneScrollEnabled();
+    value->propStackFromEnd_ = CloneStackFromEnd();
+    value->propSyncLoad_ = CloneSyncLoad();
+    value->propCacheRange_ = CloneCacheRange();
 }
+
+void ListLayoutProperty::Reset()
+{
+    ScrollableLayoutProperty::Reset();
+    ResetSpace();
+    ResetInitialIndex();
+    ResetListDirection();
+    ResetDivider();
+    ResetLanes();
+    ResetLaneMinLength();
+    ResetLaneMaxLength();
+    ResetLaneGutter();
+    ResetListItemAlign();
+    ResetCachedCount();
+    ResetShowCachedItems();
+    ResetStickyStyle();
+    ResetScrollSnapAlign();
+    ResetEditMode();
+    ResetScrollEnabled();
+    ResetStackFromEnd();
+    ResetSyncLoad();
+    ResetCacheRange();
 }
+} // namespace OHOS::Ace::NG

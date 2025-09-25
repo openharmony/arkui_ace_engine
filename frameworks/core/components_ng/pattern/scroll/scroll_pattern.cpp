@@ -369,11 +369,11 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     float overScrollPastEnd = 0.0f;
     float overScrollPast = 0.0f;
     // not consider rowReverse or colReverse
-    overScrollPastStart = std::max(currentOffset_, 0.0 + contentStartOffset_);
+    overScrollPastStart = std::max(currentOffset_ - contentStartOffset_, 0.0);
     if (Positive(scrollableDistance_)) {
         overScrollPastEnd = std::max(-scrollableDistance_ + contentStartOffset_ - currentOffset_, 0.0);
     } else {
-        overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0));
+        overScrollPastEnd = std::abs(std::min(currentOffset_ - contentStartOffset_, 0.0));
     }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {

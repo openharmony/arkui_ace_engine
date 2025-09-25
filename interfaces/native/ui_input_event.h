@@ -253,6 +253,20 @@ enum {
 };
 
 /**
+ * @brief Defines an enum for the axis types for axis events.
+ *
+ * @since 21
+ */
+enum {
+    /** Vertical scroll axis. */
+    UI_AXIS_TYPE_VERTICAL_AXIS = 0,
+    /** Horizontal scroll axis. */
+    UI_AXIS_TYPE_HORIZONTAL_AXIS = 1,
+    /** Pinch axis. */
+    UI_AXIS_TYPE_PINCH_AXIS = 2,
+};
+
+/**
  * @brief Enumerates the action types for axis events.
  *
  * @since 15
@@ -906,6 +920,16 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  * @since 15
  */
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Checks whether this event contains a specified axis type.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param axis Axis type of the axis event.
+ * @return Returns <b>true</b> if the event contains the specified axis type; returns <b>false</b> otherwise.
+ * @since 21
+ */
+int32_t OH_ArkUI_AxisEvent_HasAxis(const ArkUI_UIInputEvent* event, int32_t axis);
 
 /**
  * @brief Sets how the component behaves during hit testing.

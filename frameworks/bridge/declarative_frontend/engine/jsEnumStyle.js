@@ -1552,6 +1552,7 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RETURN_TO_UICONTEXT = 3] = 'RETURN_TO_UICONTEXT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 let KeyboardAppearance;
@@ -4418,6 +4419,13 @@ let AxisAction;
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
 
+let AxisType;
+(function (AxisType) {
+  AxisType[AxisType.VERTICAL_AXIS = 0] = 'VERTICAL_AXIS';
+  AxisType[AxisType.HORIZONTAL_AXIS = 1] = 'HORIZONTAL_AXIS';
+  AxisType[AxisType.PINCH_AXIS = 2] = 'PINCH_AXIS';
+})(AxisType || (AxisType = {}));
+
 let WebBypassVsyncCondition;
 (function (WebBypassVsyncCondition) {
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
@@ -4524,3 +4532,22 @@ let ListItemSwipeActionDirection;
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.START = 0] = 'START';
   ListItemSwipeActionDirection[ListItemSwipeActionDirection.END = 1] = 'END';
 })(ListItemSwipeActionDirection || (ListItemSwipeActionDirection = {}));
+
+let ScrollSnapAnimationSpeed;
+(function (ScrollSnapAnimationSpeed) {
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.NORMAL = 0] = 'NORMAL';
+  ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
+})(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
+
+let NativeEmbedParamStatus;
+(function (NativeEmbedParamStatus) {
+  NativeEmbedParamStatus.ADD = 0;
+  NativeEmbedParamStatus.UPDATE = 1;
+  NativeEmbedParamStatus.DELETE = 2;
+})(NativeEmbedParamStatus || (NativeEmbedParamStatus = {}));
+
+let WebRotateEffect;
+(function (WebRotateEffect) {
+  WebRotateEffect[WebRotateEffect.TOPLEFT_EFFECT = 0] = 'TOPLEFT_EFFECT';
+  WebRotateEffect[WebRotateEffect.RESIZE_COVER_EFFECT = 1] = 'RESIZE_COVER_EFFECT';
+})(WebRotateEffect || (WebRotateEffect = {}));

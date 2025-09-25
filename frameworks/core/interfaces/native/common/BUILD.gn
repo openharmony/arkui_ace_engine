@@ -76,7 +76,7 @@ template("ace_core_interfaces_native") {
     if (!ace_engine_feature_wearable) {
       sources += rebased_wearable_sources
     }
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = []
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {

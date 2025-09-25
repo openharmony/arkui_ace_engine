@@ -44,6 +44,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   protected shouldInstallTrackedObjectReadCb : boolean = false;
   private dependentElmtIdsByProperty_ = new PropertyDependencies();
 
+  // for interop
+  public staticWatchFunc?: Object;
+  public _setInteropValueForStaticState?: setValue<T>;
+  public _notifyInteropFireChange?: () => void;
+
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
     Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false, value: undefined});
@@ -326,6 +331,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     });
     stateMgmtProfiler.end();
+    if (InteropConfigureStateMgmt.instance.needsInterop() && this._notifyInteropFireChange) {
+      this._notifyInteropFireChange();
+    }
   }
 
 

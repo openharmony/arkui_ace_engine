@@ -65,8 +65,9 @@ RefPtr<MutableSpanString> RichEditorStyledStringCommonTestNg::CreateTextStyledSt
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
     styledString->AddSpan(AceType::MakeRefPtr<FontSpan>(TEST_FONT, 0, length));
-    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({TEXT_DECORATION_VALUE}),
-        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, length));
+    styledString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ TEXT_DECORATION_VALUE }),
+        TEXT_DECORATION_COLOR_VALUE, TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, length,
+        nullptr));
     styledString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(TEST_BASELINE_OFFSET, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(LETTER_SPACING, 0, length));
     styledString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(SHADOWS, 0, length));

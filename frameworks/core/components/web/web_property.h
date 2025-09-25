@@ -82,6 +82,7 @@ enum class WebKeyboardAvoidMode : int32_t {
     RESIZE_VISUAL = 0,
     RESIZE_CONTENT,
     OVERLAYS_CONTENT,
+    RETURN_TO_UICONTEXT,
     DEFAULT
 };
 
@@ -107,6 +108,11 @@ enum class WebBypassVsyncCondition : int32_t {
 enum class GestureFocusMode : int32_t {
     DEFAULT = 0,
     GESTURE_TAP_AND_LONG_PRESS = 1
+};
+
+enum class WebRotateEffect : int32_t {
+    TOPLEFT_EFFECT = 0,
+    RESIZE_COVER_EFFECT = 1
 };
 
 struct WebPreviewSelectionMenuParam {

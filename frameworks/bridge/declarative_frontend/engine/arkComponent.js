@@ -7142,6 +7142,36 @@ class OnDidStopFlingModifier extends ModifierWithKey {
 }
 OnDidStopFlingModifier.identity = Symbol('onDidStopFling');
 
+class ContentStartOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentStartOffset(node);
+    }
+    else {
+      getUINativeModule().scrollable.setContentStartOffset(node, this.value);
+    }
+  }
+}
+ContentStartOffsetModifier.identity = Symbol('contentStartOffset');
+
+class ContentEndOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetContentEndOffset(node);
+    }
+    else {
+      getUINativeModule().scrollable.setContentEndOffset(node, this.value);
+    }
+  }
+}
+ContentEndOffsetModifier.identity = Symbol('contentEndOffset');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7204,6 +7234,14 @@ class ArkScrollable extends ArkComponent {
   }
   onDidStopFling(value) {
     modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, value);
+    return this;
+  }
+  contentStartOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
+    return this;
+  }
+  contentEndOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
     return this;
   }
 }
@@ -31632,6 +31670,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, enabled);
     return this;
   }
+  rotateRenderEffect(effect) {
+    modifierWithKey(this._modifiersWithKeys, WebRotateRenderEffectModifier.identity, WebRotateRenderEffectModifier, effect);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -33012,6 +33054,20 @@ class WebGestureFocusModeModifier extends ModifierWithKey {
 }
 WebGestureFocusModeModifier.identity = Symbol('webGestureFocusModeModifier');
 
+class WebRotateRenderEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetRotateRenderEffect(node);
+    }
+    else {
+      getUINativeModule().web.setRotateRenderEffect(node, this.value);
+    }
+  }
+}
+WebRotateRenderEffectModifier.identity = Symbol('webRotateRenderEffectModifier');
 
 class WebOnSslErrorEventReceiveModifier extends ModifierWithKey {
   constructor(value) {
@@ -34293,34 +34349,6 @@ class ListScrollSnapAlignModifier extends ModifierWithKey {
   }
 }
 ListScrollSnapAlignModifier.identity = Symbol('listScrollSnapAlign');
-class ContentStartOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetContentStartOffset(node);
-    }
-    else {
-      getUINativeModule().list.setContentStartOffset(node, this.value);
-    }
-  }
-}
-ContentStartOffsetModifier.identity = Symbol('contentStartOffset');
-class ContentEndOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetContentEndOffset(node);
-    }
-    else {
-      getUINativeModule().list.setContentEndOffset(node, this.value);
-    }
-  }
-}
-ContentEndOffsetModifier.identity = Symbol('contentEndOffset');
 class ListDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -34599,6 +34627,19 @@ class ListClipModifier extends ModifierWithKey {
   }
 }
 ListClipModifier.identity = Symbol('listClip');
+class ListScrollSnapAnimationSpeedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetScrollSnapAnimationSpeed(node);
+    } else {
+      getUINativeModule().list.setScrollSnapAnimationSpeed(node, this.value);
+    }
+  }
+}
+ListScrollSnapAnimationSpeedModifier.identity = Symbol('listScrollSnapAnimationSpeed');
 class ListOnScrollIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -34917,14 +34958,6 @@ class ArkListComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarColorModifier.identity, ListScrollBarColorModifier, value);
     return this;
   }
-  contentStartOffset(value) {
-    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
-    return this;
-  }
-  contentEndOffset(value) {
-    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
-    return this;
-  }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ListDividerModifier.identity, ListDividerModifier, value);
     return this;
@@ -34990,6 +35023,11 @@ class ArkListComponent extends ArkScrollable {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
+    return this;
+  }
+  scrollSnapAnimationSpeed(value) {
+    modifierWithKey(this._modifiersWithKeys,
+      ListScrollSnapAnimationSpeedModifier.identity, ListScrollSnapAnimationSpeedModifier, value);
     return this;
   }
   onScroll(event) {

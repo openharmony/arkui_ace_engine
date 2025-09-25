@@ -64,8 +64,8 @@ ohos_shared_library("arkoala_native_ani") {
     "content_slot/content_slot_module.cpp",
     "custom_node/custom_node_module.cpp",
 
-    #"dragController/drag_controller_module.cpp",
-    #"drag_and_drop/native_drag_drop_global.cpp",
+    "dragController/drag_controller_module.cpp",
+    "drag_and_drop/native_drag_drop_global.cpp",
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
     "interop/interop_module.cpp",
@@ -99,8 +99,7 @@ ohos_shared_library("arkoala_native_ani") {
     "runtime_core:ani_helpers",
     "udmf:libudmf",
     "udmf:udmf_client",
-
-    #"udmf:udmf_taihe_native",
+    "udmf:udmf_taihe_native",
   ]
 
   configs = [ "$ace_root:ace_config" ]

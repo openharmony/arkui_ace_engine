@@ -306,6 +306,15 @@ public:
         attachInputId_ = attachInputId;
     }
 
+    bool CheckInRichEditor()
+    {
+        auto pattern = onFocusTextField_.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::RICH_EDITOR_ETS_TAG;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);

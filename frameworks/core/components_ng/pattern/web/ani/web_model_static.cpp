@@ -1280,6 +1280,14 @@ void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllow
     webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }
 
+void WebModelStatic::SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateGestureFocusMode(mode);
+}
+
 void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);

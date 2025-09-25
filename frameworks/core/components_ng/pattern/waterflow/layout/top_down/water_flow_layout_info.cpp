@@ -559,9 +559,9 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
             targetPosition = lastMainSize_ - (item.first + item.second) - contentEndOffset_;
             break;
         case ScrollAlign::AUTO:
-            if (currentOffset_ + item.first < 0) {
+            if (currentOffset_ + item.first < contentStartOffset_) {
                 targetPosition = -item.first + contentStartOffset_;
-            } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
+            } else if (currentOffset_ + item.first + item.second > lastMainSize_ + contentEndOffset_) {
                 targetPosition = lastMainSize_ - (item.first + item.second) - contentEndOffset_;
             } else {
                 targetPosition = currentOffset_;

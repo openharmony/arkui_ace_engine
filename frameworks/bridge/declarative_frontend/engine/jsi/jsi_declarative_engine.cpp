@@ -1971,7 +1971,14 @@ void JsiDeclarativeEngine::LoadJsWithModule(
     runtime->SetAssetPath(assetPath);
     runtime->SetModuleName(moduleName);
     if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+#ifdef CROSS_PLATFORM
+        std::string moduleNamePath = (moduleName.find_last_of('.') != std::string::npos)
+                                         ? moduleName.substr(moduleName.find_last_of('.') + 1)
+                                         : moduleName;
+        urlName = moduleNamePath + "/ets/" + urlName;
+#else
         urlName = container->GetModuleName() + "/ets/" + urlName;
+#endif
     }
     runtime->ExecuteJsBin(urlName, errorCallback);
 }
@@ -2143,6 +2150,11 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrU
                 bundleName.c_str(), moduleName.c_str(), url.c_str());
             return false;
         }
+#ifdef CROSS_PLATFORM
+        moduleName = (moduleName.find_last_of('.') != std::string::npos)
+                         ? moduleName.substr(moduleName.find_last_of('.') + 1)
+                         : moduleName;
+#endif
         iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&

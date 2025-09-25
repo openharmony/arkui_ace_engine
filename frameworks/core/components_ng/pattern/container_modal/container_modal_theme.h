@@ -25,7 +25,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
 namespace OHOS::Ace::NG {

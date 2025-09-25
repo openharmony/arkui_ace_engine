@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,34 +69,6 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
       getUINativeModule().list.resetScrollSnapAlign(node);
     } else {
       getUINativeModule().list.setScrollSnapAlign(node, this.value!);
-    }
-  }
-}
-
-class ContentStartOffsetModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('contentStartOffset');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetContentStartOffset(node);
-    } else {
-      getUINativeModule().list.setContentStartOffset(node, this.value);
-    }
-  }
-}
-
-class ContentEndOffsetModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('contentEndOffset');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetContentEndOffset(node);
-    } else {
-      getUINativeModule().list.setContentEndOffset(node, this.value);
     }
   }
 }
@@ -376,6 +348,20 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
   checkObjectDiff(): boolean {
     return true;
+  }
+}
+
+class ListScrollSnapAnimationSpeedModifier extends ModifierWithKey<ScrollSnapAnimationSpeed> {
+  constructor(value: ScrollSnapAnimationSpeed) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listScrollSnapAnimationSpeed');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetScrollSnapAnimationSpeed(node);
+    } else {
+      getUINativeModule().list.setScrollSnapAnimationSpeed(node, this.value);
+    }
   }
 }
 
@@ -732,14 +718,6 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
     return this;
   }
-  contentStartOffset(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
-    return this;
-  }
-  contentEndOffset(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
-    return this;
-  }
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListDividerModifier.identity, ListDividerModifier, value);
     return this;
@@ -796,6 +774,11 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
+    return this;
+  }
+  scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed): this {
+    modifierWithKey(this._modifiersWithKeys,
+      ListScrollSnapAnimationSpeedModifier.identity, ListScrollSnapAnimationSpeedModifier, value);
     return this;
   }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {

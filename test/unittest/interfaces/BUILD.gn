@@ -103,7 +103,6 @@ ohos_unittest("ui_event_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
   deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

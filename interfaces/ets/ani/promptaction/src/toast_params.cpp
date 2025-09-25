@@ -66,18 +66,11 @@ bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowM
 
 bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result)
 {
-    std::string resultStr;
-    if (!GetEnumString(env, object, "alignment", "Larkui/component/enums/Alignment;", resultStr)) {
+    result = -1;
+    if (!GetEnumInt(env, object, "alignment", "Larkui/component/enums/Alignment;", result)) {
         return false;
     }
-
-    auto iter = alignmentMap.find(resultStr);
-    if (iter != alignmentMap.end()) {
-        result = static_cast<int32_t>(iter->second);
-        return true;
-    }
-    result = -1;
-    return false;
+    return true;
 }
 
 bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Shadow>& result, bool& isTypeStyleShadow)

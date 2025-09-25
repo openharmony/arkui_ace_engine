@@ -190,6 +190,18 @@ RichEditorPattern::~RichEditorPattern()
 #endif
 }
 
+void RichEditorPattern::RecreateUndoManager()
+{
+    undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
+}
+
+void RichEditorPattern::CreateStyledString()
+{
+    CHECK_NULL_VOID(isSpanStringMode_);
+    styledString_ = MakeRefPtr<MutableSpanString>(u"");
+    styledString_->SetSpanWatcher(WeakClaim(this));
+}
+
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetStyledString, len=%{public}d", value->GetLength());
@@ -2815,8 +2827,8 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
     std::optional<float> lineThicknessScale;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, start, end);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ type }), colorOption,
+        styleOption, lineThicknessScale, options, start, end, nullptr);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
         if (type == TextDecoration::NONE) {

@@ -5,7 +5,14 @@
 
 #include "arkoala_api_generated.h"
 
-const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI();
+const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result = nullptr);
+
+static const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI()
+{
+    return reinterpret_cast<const GENERATED_ArkUIExtendedNodeAPI*>(
+        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_EXTENDED),
+            GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
+}
 
 // TODO: map if multiple pipeline contexts.
 static KVMDeferred* currentVsyncDeferred = nullptr;

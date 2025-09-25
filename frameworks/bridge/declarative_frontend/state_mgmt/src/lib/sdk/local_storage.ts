@@ -29,6 +29,15 @@
 class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
+  
+  public _getOriginStorageByInterop_(): Map<string, ObservedPropertyAbstract<any>> {
+    return this.storage_;
+  }
+
+  public _setOriginStorageByInterop_(value: Map<string, ObservedPropertyAbstract<any>>): void {
+    this.storage_ = value;
+  }
+  
   /*
     get access to provded LocalStorage instance thru Stake model
     @StageModelOnly

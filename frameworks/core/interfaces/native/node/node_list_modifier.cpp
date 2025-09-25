@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -505,42 +505,28 @@ void SetContentStartOffset(ArkUINodeHandle node, ArkUI_Float32 startOffset)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetContentStartOffset(frameNode, startOffset);
+    ScrollableModelNG::SetContentStartOffset(frameNode, startOffset);
 }
 
 void ResetContentStartOffset(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetContentStartOffset(frameNode, DEFAULT_OFFSET);
-}
-
-ArkUI_Float32 GetContentStartOffset(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return ListModelNG::GetContentStartOffset(frameNode);
+    ScrollableModelNG::SetContentStartOffset(frameNode, DEFAULT_OFFSET);
 }
 
 void SetContentEndOffset(ArkUINodeHandle node, ArkUI_Float32 endOffset)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetContentEndOffset(frameNode, endOffset);
+    ScrollableModelNG::SetContentEndOffset(frameNode, endOffset);
 }
 
 void ResetContentEndOffset(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
-}
-
-ArkUI_Float32 GetContentEndOffset(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return ListModelNG::GetContentEndOffset(frameNode);
+    ScrollableModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
 }
 
 void ListSetDivider(
@@ -903,6 +889,27 @@ ArkUI_Bool GetShowCached(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return ListModelNG::GetShowCached(frameNode);
 }
+
+void SetScrollSnapAnimationSpeed(ArkUINodeHandle node, ArkUI_Int32 speed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollSnapAnimationSpeed(frameNode, static_cast<ScrollSnapAnimationSpeed>(speed));
+}
+
+void ResetScrollSnapAnimationSpeed(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollSnapAnimationSpeed(frameNode, ScrollSnapAnimationSpeed::NORMAL);
+}
+
+ArkUI_Int32 GetScrollSnapAnimationSpeed(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(ListModelNG::GetScrollSnapAnimationSpeed(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -966,12 +973,6 @@ const ArkUIListModifier* GetListModifier()
         .setScrollSnapAlign = SetScrollSnapAlign,
         .resetScrollSnapAlign = ResetScrollSnapAlign,
         .getScrollSnapAlign = GetScrollSnapAlign,
-        .setContentStartOffset = SetContentStartOffset,
-        .resetContentStartOffset = ResetContentStartOffset,
-        .getContentStartOffset = GetContentStartOffset,
-        .setContentEndOffset = SetContentEndOffset,
-        .resetContentEndOffset = ResetContentEndOffset,
-        .getContentEndOffset = GetContentEndOffset,
         .listSetDivider = ListSetDivider,
         .listResetDivider = ListResetDivider,
         .setChainAnimationOptions = SetChainAnimationOptions,
@@ -1009,6 +1010,9 @@ const ArkUIListModifier* GetListModifier()
         .setShowCached = SetShowCached,
         .resetShowCached = ResetShowCached,
         .getShowCached = GetShowCached,
+        .setScrollSnapAnimationSpeed = SetScrollSnapAnimationSpeed,
+        .resetScrollSnapAnimationSpeed = ResetScrollSnapAnimationSpeed,
+        .getScrollSnapAnimationSpeed = GetScrollSnapAnimationSpeed,
         .setOnListScrollIndexCallBack = SetOnListScrollIndexCallBack,
         .setOnScrollVisibleContentChange = SetOnScrollVisibleContentChange,
         .setOnItemMove = SetOnItemMove,

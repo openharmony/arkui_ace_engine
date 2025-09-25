@@ -439,8 +439,10 @@ void ImagePattern::OnImageLoadSuccess()
     image_->SetImageDfxConfig(imageDfxConfig_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
+    bool isStaticImage = image_->IsStatic();
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
+        isStaticImage = true;
     }
     PrepareAnimation(image_);
     if (enableDrag_) {
@@ -477,6 +479,11 @@ void ImagePattern::OnImageLoadSuccess()
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
+    /*
+     * Only mark dirty for static images.
+     * Animated images maintain their own dirty marking logic, so no need to trigger here.
+     */
+    CHECK_NULL_VOID(isStaticImage);
     host->MarkNeedRenderOnly();
 }
 

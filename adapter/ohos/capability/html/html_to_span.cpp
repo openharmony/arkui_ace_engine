@@ -1217,7 +1217,7 @@ RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue
         options->enableMultiType = true;
         return AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({style->decorationType}), style->color,
-            style->decorationSytle, 1.0f, options, info.start, info.end);
+            style->decorationSytle, 1.0f, options, info.start, info.end, nullptr);
     }
 
     return nullptr;

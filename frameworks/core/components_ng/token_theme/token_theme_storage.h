@@ -48,7 +48,7 @@ public:
     const RefPtr<TokenTheme>& CacheGet(int32_t themeId);
     void CacheRemove(int32_t themeId);
 
-    RefPtr<TokenTheme> ObtainSystemTheme();
+    RefPtr<TokenTheme> ObtainSystemTheme(ColorMode themeColorMode = ColorMode::COLOR_MODE_UNDEFINED);
     
     void SetIsThemeColorAvailable(bool isDark, int32_t index, bool isColorAvailable);
 

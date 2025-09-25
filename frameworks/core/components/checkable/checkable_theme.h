@@ -20,7 +20,6 @@
 #include "core/common/container.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 constexpr Color DEFAULT_UNCHECK_BORDER_COLOR = Color(0x4B181819);

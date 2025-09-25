@@ -43,6 +43,10 @@ config("ace_napi_config") {
   if (is_mac) {
     cflags_cc = [ "-O0" ]
   }
+
+  if (enable_ace_instance_log) {
+    defines += [ "ACE_INSTANCE_LOG" ]
+  }
 }
 
 common_targets = []

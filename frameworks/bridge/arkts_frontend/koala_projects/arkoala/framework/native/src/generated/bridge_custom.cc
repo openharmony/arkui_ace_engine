@@ -29,16 +29,18 @@
 
 const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result = nullptr);
 
-const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI() {
+static const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI()
+{
     return reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI*>(
         GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
-        GENERATED_ARKUI_BASIC_NODE_API_VERSION, nullptr));
+            GENERATED_ARKUI_BASIC_NODE_API_VERSION, nullptr));
 }
 
-const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
+static const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI()
+{
     return reinterpret_cast<const GENERATED_ArkUIExtendedNodeAPI*>(
         GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_EXTENDED),
-        GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
+            GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
 }
 
 CustomDeserializer* DeserializerBase::customDeserializers = nullptr;

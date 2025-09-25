@@ -61,7 +61,7 @@ template("ace_core_pipeline_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = []
     external_deps = []
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

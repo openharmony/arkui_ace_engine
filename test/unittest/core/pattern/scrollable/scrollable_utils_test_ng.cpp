@@ -208,4 +208,21 @@ AssertionResult ScrollableUtilsTestNG::TickPosition(float velocity, float expect
 {
     return TickPosition(frameNode_, velocity, expectOffset);
 }
+
+void ScrollableUtilsTestNG::TickToFinish()
+{
+    while (!MockAnimationManager::GetInstance().AllFinished()) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
+    }
+}
+
+void ScrollableUtilsTestNG::AnimateToIndexWithTicks(
+    int32_t index, ScrollAlign align, int32_t times, std::optional<float> extraOffset)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(times);
+    ScrollToIndex(index, true, align, extraOffset);
+    TickToFinish();
+}
 } // namespace OHOS::Ace::NG

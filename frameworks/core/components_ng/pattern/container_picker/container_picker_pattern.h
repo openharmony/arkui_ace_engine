@@ -23,8 +23,23 @@
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/event/pan_event.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
+class ContainerPickerEventParam : public virtual AceType {
+    DECLARE_ACE_TYPE(ContainerPickerEventParam, AceType);
+
+public:
+    int32_t itemIndex = 0;
+    int32_t itemNodeId = 0;
+};
+
+enum class ContainerPickerDirection {
+    UP = 0,
+    DOWN,
+};
 
 class ACE_EXPORT ContainerPickerPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ContainerPickerPattern, NestableScrollContainer);
@@ -50,6 +65,9 @@ public:
         contentMainSize_ = contentMainSize;
     }
 
+    void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -67,7 +85,70 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerPickerPattern);
 
-    float contentMainSize_ = 0.0f;
+    void GetLayoutProperties(const RefPtr<ContainerPickerLayoutAlgorithm>& pickerAlgorithm);
+    void OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param);
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param);
+    void InitMouseAndPressEvent();
+    void UpdatePanEvent();
+    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
+        GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel);
+    GestureEventFunc ActionStartTask();
+    GestureEventFunc ActionUpdateTask();
+    GestureEventFunc ActionEndTask();
+    GestureEventNoParameter ActionCancelTask();
+    void HandleDragStart(const GestureEvent& info);
+    void ProcessDelta(float& delta, float mainSize, float deltaSum);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
+    void CalcEndOffset(float& endOffset, double velocity);
+    bool Play(double dragVelocity);
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    void UpdateCurrentOffset(float offset);
+    bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
+    void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
+    double GetDragDeltaLessThanJumpInterval(
+        double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
+    void UpdateColumnChildPosition(double offsetY);
+    bool IsLoop()
+    {
+        return true;
+    }
+    void CreateAnimation();
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
+    void CreateSnapProperty();
+    void CreateAnimation(double from, double to);
+    void PickerMarkDirty(PropertyChangeFlag extraFlag);
+
+    int32_t containerPickerId_ = -1;
+    bool isDragging_ = false;
+    bool isItemClickEventCreated_ = false;
+    RefPtr<PanEvent> panEvent_;
+    PanDirection panDirection_;
+    bool isFirstAxisAction_ = true;
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    int32_t currentIndex_ = 0;
+    bool crossMatchChild_ = false;
+    float currentDelta_ = 0.0f;
+    float currentIndexOffset_ = 0.0f;
+    float totalOffset_ = 0.0f; // indicates the offset of the actual layout
+    float contentMainSize_ = 650.0f;
+    float mainDeltaSum_ = 0.0f;
+
+    ContainerPickerLayoutAlgorithm::PositionMap itemPosition_;
+
+    bool animationCreated_ = false;
+    double timeStart_ = 0.0;
+    double timeEnd = 0.0;
+    double scrollDelta_ = 0.0;
+    double yLast_ = 0.0;
+    double yOffset_ = 0.0;
+    float lastAnimationScroll_ = 0.0f;
+    int32_t showCount_= 7;
+
+    RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
 };
 } // namespace OHOS::Ace::NG
 

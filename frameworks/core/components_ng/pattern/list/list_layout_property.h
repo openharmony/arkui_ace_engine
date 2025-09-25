@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/list/list_component.h"
 
@@ -37,8 +38,8 @@ struct CacheRange {
     }
 };
 
-class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(ListLayoutProperty, LayoutProperty);
+class ACE_EXPORT ListLayoutProperty : public ScrollableLayoutProperty {
+    DECLARE_ACE_TYPE(ListLayoutProperty, ScrollableLayoutProperty);
 
 public:
     ListLayoutProperty() = default;
@@ -48,54 +49,11 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<ListLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propSpace_ = CloneSpace();
-        value->propInitialIndex_ = CloneInitialIndex();
-        value->propListDirection_ = CloneListDirection();
-        value->propDivider_ = CloneDivider();
-        value->propLanes_ = CloneLanes();
-        value->propLaneMinLength_ = CloneLaneMinLength();
-        value->propLaneMaxLength_ = CloneLaneMaxLength();
-        value->propLaneGutter_ = CloneLaneGutter();
-        value->propListItemAlign_ = CloneListItemAlign();
-        value->propCachedCount_ = CloneCachedCount();
-        value->propShowCachedItems_ = CloneShowCachedItems();
-        value->propStickyStyle_ = CloneStickyStyle();
-        value->propContentStartOffset_ = CloneContentStartOffset();
-        value->propContentEndOffset_ = CloneContentEndOffset();
-        value->propScrollSnapAlign_ = CloneScrollSnapAlign();
-        value->propEditMode_ = CloneEditMode();
-        value->propScrollEnabled_ = CloneScrollEnabled();
-        value->propStackFromEnd_ = CloneStackFromEnd();
-        value->propSyncLoad_ = CloneSyncLoad();
-        value->propCacheRange_ = CloneCacheRange();
+        Clone(value);
         return value;
     }
 
-    void Reset() override
-    {
-        LayoutProperty::Reset();
-        ResetSpace();
-        ResetInitialIndex();
-        ResetListDirection();
-        ResetDivider();
-        ResetLanes();
-        ResetLaneMinLength();
-        ResetLaneMaxLength();
-        ResetLaneGutter();
-        ResetListItemAlign();
-        ResetCachedCount();
-        ResetShowCachedItems();
-        ResetStickyStyle();
-        ResetContentStartOffset();
-        ResetContentEndOffset();
-        ResetScrollSnapAlign();
-        ResetEditMode();
-        ResetScrollEnabled();
-        ResetStackFromEnd();
-        ResetSyncLoad();
-        ResetCacheRange();
-    }
+    void Reset() override;
 
     void SetDefaultCachedCount(const int32_t cachedCount)
     {
@@ -139,8 +97,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StackFromEnd, bool, PROPERTY_UPDATE_MEASURE);
@@ -150,7 +106,7 @@ public:
 
     int32_t defCachedCount_ = 1;
 protected:
-    void UpdateLayoutProperty(const ListLayoutProperty* layoutProperty);
+    void Clone(RefPtr<LayoutProperty> layoutProperty) const override;
 };
 } // namespace OHOS::Ace::NG
 

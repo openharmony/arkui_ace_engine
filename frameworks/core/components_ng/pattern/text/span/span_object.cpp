@@ -85,10 +85,7 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (!spanItem || !spanItem->fontStyle) {
         return;
     }
-    if (font_.fontColor.has_value()) {
-        spanItem->fontStyle->UpdateTextColor(font_.fontColor.value());
-    }
-
+    AddColorResourceObj(spanItem);
     if (font_.fontFamiliesNG.has_value()) {
         spanItem->fontStyle->UpdateFontFamily(font_.fontFamiliesNG.value());
     }
@@ -109,17 +106,52 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
         spanItem->fontStyle->UpdateStrokeWidth(font_.strokeWidth.value());
     }
 
-    if (font_.strokeColor.has_value()) {
-        spanItem->fontStyle->UpdateStrokeColor(font_.strokeColor.value());
-    }
-
     if (font_.superscript.has_value()) {
         spanItem->fontStyle->UpdateSuperscript(font_.superscript.value());
     }
 }
 
+void FontSpan::AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (font_.fontColor.has_value()) {
+        spanItem->fontStyle->UpdateTextColor(font_.fontColor.value());
+        if (font_.fontColorResObj) {
+            NG::SpanItem::SpanResourceUpdater resourceUpdater;
+            resourceUpdater.obj = font_.fontColorResObj;
+            auto&& updateFunc = [](const RefPtr<NG::SpanItem>& spanItem, const RefPtr<ResourceObject>& resObj) {
+                CHECK_NULL_VOID(spanItem);
+                CHECK_NULL_VOID(spanItem->fontStyle);
+                Color fontColor;
+                ResourceParseUtils::ParseResColor(resObj, fontColor);
+                spanItem->fontStyle->UpdateTextColor(fontColor);
+            };
+            resourceUpdater.updateFunc = updateFunc;
+            spanItem->AddResourceObj("fontColor", resourceUpdater);
+        }
+    }
+
+    if (font_.strokeColor.has_value()) {
+        spanItem->fontStyle->UpdateStrokeColor(font_.strokeColor.value());
+        if (font_.strokeColorResObj) {
+            NG::SpanItem::SpanResourceUpdater resourceUpdater;
+            resourceUpdater.obj = font_.strokeColorResObj;
+            auto&& updateFunc = [](const RefPtr<NG::SpanItem>& spanItem, const RefPtr<ResourceObject>& resObj) {
+                CHECK_NULL_VOID(spanItem);
+                CHECK_NULL_VOID(spanItem->fontStyle);
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                spanItem->fontStyle->UpdateStrokeColor(color);
+            };
+            resourceUpdater.updateFunc = updateFunc;
+            spanItem->AddResourceObj("strokeColor", resourceUpdater);
+        }
+    }
+}
+
 void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    spanItem->RemoveResourceObj("fontColor");
+    spanItem->RemoveResourceObj("strokeColor");
     spanItem->fontStyle->ResetTextColor();
     spanItem->fontStyle->ResetFontFamily();
     spanItem->fontStyle->ResetFontSize();
@@ -191,29 +223,29 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 
 // DecorationSpan
 DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options)
-    : SpanBase(0, 0), types_(types), color_(color), style_(style), options_(options)
-{}
-
-DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
     std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
-    int32_t start, int32_t end)
-    : SpanBase(start, end), types_(types), color_(color), style_(style), options_(options)
+    const RefPtr<ResourceObject>& colorResObj)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style), options_(options), colorResObj_(colorResObj)
 {}
 
-DecorationSpan::DecorationSpan(
-    const std::vector<TextDecoration>& types, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
-    std::optional<TextDecorationOptions> options)
-    : SpanBase(0, 0), types_(types), color_(color), style_(style),
-    lineThicknessScale_(lineThicknessScale), options_(options)
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options, int32_t start, int32_t end,
+    const RefPtr<ResourceObject>& colorResObj)
+    : SpanBase(start, end), types_(types), color_(color), style_(style), options_(options), colorResObj_(colorResObj)
 {}
 
 DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
     std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
-    std::optional<TextDecorationOptions> options, int32_t start, int32_t end)
-    : SpanBase(start, end), types_(types), color_(color), style_(style),
-    lineThicknessScale_(lineThicknessScale), options_(options)
+    std::optional<TextDecorationOptions> options, const RefPtr<ResourceObject>& colorResObj)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style), lineThicknessScale_(lineThicknessScale),
+      options_(options), colorResObj_(colorResObj)
+{}
+
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+    std::optional<TextDecorationOptions> options, int32_t start, int32_t end, const RefPtr<ResourceObject>& colorResObj)
+    : SpanBase(start, end), types_(types), color_(color), style_(style), lineThicknessScale_(lineThicknessScale),
+      options_(options), colorResObj_(colorResObj)
 {}
 
 TextDecoration DecorationSpan::GetTextDecorationFirst() const
@@ -295,10 +327,15 @@ std::optional<float> DecorationSpan::GetLineThicknessScale() const
     return lineThicknessScale_;
 }
 
+const RefPtr<ResourceObject>& DecorationSpan::GetColorResObj() const
+{
+    return colorResObj_;
+}
+
 RefPtr<SpanBase> DecorationSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(
-        types_, color_, style_, lineThicknessScale_, options_, start, end);
+        types_, color_, style_, lineThicknessScale_, options_, start, end, colorResObj_);
     return spanBase;
 }
 
@@ -307,6 +344,19 @@ void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) co
     spanItem->fontStyle->UpdateTextDecoration(types_);
     if (color_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationColor(color_.value());
+        if (colorResObj_) {
+            NG::SpanItem::SpanResourceUpdater resourceUpdater;
+            resourceUpdater.obj = colorResObj_;
+            auto&& updateFunc = [](const RefPtr<NG::SpanItem>& spanItem, const RefPtr<ResourceObject>& resObj) {
+                CHECK_NULL_VOID(spanItem);
+                CHECK_NULL_VOID(spanItem->fontStyle);
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                spanItem->fontStyle->UpdateTextDecorationColor(color);
+            };
+            resourceUpdater.updateFunc = updateFunc;
+            spanItem->AddResourceObj("decorationColor", resourceUpdater);
+        }
     }
     if (style_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationStyle(style_.value());
@@ -321,6 +371,7 @@ void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) co
 
 void DecorationSpan::RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    spanItem->RemoveResourceObj("decorationColor");
     spanItem->fontStyle->ResetTextDecoration();
     spanItem->fontStyle->ResetTextDecorationColor();
     spanItem->fontStyle->ResetTextDecorationStyle();
@@ -634,11 +685,48 @@ void TextShadowSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     if (textShadow_.has_value()) {
         spanItem->fontStyle->UpdateTextShadow(textShadow_.value());
+        auto index = -1;
+        for (auto& shadow : textShadow_.value()) {
+            index++;
+            if (!shadow.HasKey("shadow.colorValue")) {
+                continue;
+            }
+            auto key = "shadow_" + std::to_string(index);
+            NG::SpanItem::SpanResourceUpdater resourceUpdater;
+            resourceUpdater.obj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            auto&& updateFunc = [shadow, index](
+                                    const RefPtr<NG::SpanItem>& spanItem, const RefPtr<ResourceObject>& resObj) {
+                CHECK_NULL_VOID(spanItem);
+                CHECK_NULL_VOID(spanItem->fontStyle);
+                Shadow& shadowValue = const_cast<Shadow&>(shadow);
+                shadowValue.ReloadResourcesByKey("shadow.colorValue");
+                auto origArr = spanItem->fontStyle->GetTextShadow();
+                if (origArr.has_value() && GreatNotEqual(origArr.value().size(), index)) {
+                    auto origArrVal = origArr.value();
+                    origArrVal[index] = shadowValue;
+                    spanItem->fontStyle->UpdateTextShadow(origArrVal);
+                }
+            };
+            resourceUpdater.updateFunc = updateFunc;
+            spanItem->AddResourceObj(key, resourceUpdater);
+        }
     }
 }
 
 void TextShadowSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    if (spanItem && spanItem->fontStyle && spanItem->fontStyle->propTextShadow.has_value()) {
+        auto textShadow = spanItem->fontStyle->propTextShadow.value();
+        auto index = -1;
+        for (auto& shadow : textShadow) {
+            index++;
+            if (!shadow.HasKey("shadow.colorValue")) {
+                continue;
+            }
+            auto key = "shadow_" + std::to_string(index);
+            spanItem->RemoveResourceObj(key);
+        }
+    }
     spanItem->fontStyle->ResetTextShadow();
 }
 
@@ -1139,12 +1227,27 @@ void BackgroundColorSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) con
     if (textBackgroundStyle_.has_value()) {
         TextBackgroundStyle tempVal = GetBackgroundColor();
         spanItem->backgroundStyle = tempVal;
+        if (tempVal.HasKey("textBackgroundStyle.color")) {
+            NG::SpanItem::SpanResourceUpdater resourceUpdater;
+            resourceUpdater.obj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            auto&& updateFunc = [tempVal](const RefPtr<NG::SpanItem>& spanItem, const RefPtr<ResourceObject>& resObj) {
+                CHECK_NULL_VOID(spanItem);
+                TextBackgroundStyle& styleValue = const_cast<TextBackgroundStyle&>(tempVal);
+                styleValue.ReloadResourcesByKey("textBackgroundStyle.color");
+                spanItem->backgroundStyle = styleValue;
+            };
+            resourceUpdater.updateFunc = updateFunc;
+            spanItem->AddResourceObj("textbackgroundStyle", resourceUpdater);
+        }
     }
 }
 
 void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
     if (spanItem->backgroundStyle.has_value()) {
+        if (spanItem->backgroundStyle.value().HasKey("textBackgroundStyle.color")) {
+            spanItem->RemoveResourceObj("textbackgroundStyle");
+        }
         spanItem->backgroundStyle.reset();
     }
 }

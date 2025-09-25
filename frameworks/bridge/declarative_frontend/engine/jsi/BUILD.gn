@@ -332,10 +332,7 @@ template("declarative_js_engine_ark") {
       sources += [ "nativeModule/arkts_native_qrcode_bridge.cpp" ]
     }
 
-    deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
-      "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform",
-    ]
+    deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     if (is_arkui_x) {
       deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
     }
@@ -443,7 +440,7 @@ template("declarative_js_engine_ark") {
         "jsi_animator_model_ng_impl.cpp",
         "jsi_view_register_impl.cpp",
       ]
-      deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+      deps += []
     }
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported

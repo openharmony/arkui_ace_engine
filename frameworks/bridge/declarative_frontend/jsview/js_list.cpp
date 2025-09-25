@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,20 +411,6 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
-void JSList::SetContentStartOffset(const JSCallbackInfo& info)
-{
-    double value = 0.0;
-    ParseJsDouble(info[0], value);
-    ListModel::GetInstance()->SetContentStartOffset(value);
-}
-
-void JSList::SetContentEndOffset(const JSCallbackInfo& info)
-{
-    double value = 0.0;
-    ParseJsDouble(info[0], value);
-    ListModel::GetInstance()->SetContentEndOffset(value);
-}
-
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 {
     ScrollSnapAlign param;
@@ -591,6 +577,19 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
         enabled = arg0->ToBoolean();
     }
     ListModel::GetInstance()->SetSyncLoad(enabled);
+}
+
+void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
+{
+    ScrollSnapAnimationSpeed speed = ScrollSnapAnimationSpeed::NORMAL;
+    if (args.Length() == 1 && args[0]->IsNumber()) {
+        int32_t num = args[0]->ToNumber<int32_t>();
+        if (num >= static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL) &&
+            num <= static_cast<int32_t>(ScrollSnapAnimationSpeed::SLOW)) {
+            speed = static_cast<ScrollSnapAnimationSpeed>(num);
+        }
+    }
+    ListModel::GetInstance()->SetScrollSnapAnimationSpeed(speed);
 }
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
@@ -937,8 +936,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
-    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
-    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
@@ -947,6 +944,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
+    JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);

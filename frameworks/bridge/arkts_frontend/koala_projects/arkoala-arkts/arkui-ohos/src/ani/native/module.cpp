@@ -239,7 +239,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLarkui/component/common/ChildrenMainSize;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
         },
-#ifdef ACE_STATIC
         ani_native_function {
             "_DragEvent_Set_Data",
             "JL@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;:V",
@@ -295,7 +294,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreviewOptions)
         },
-#endif
         ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
             nullptr,
@@ -381,7 +379,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetBackgroundImagePixelMap)
         },
-    #ifdef ACE_STATIC
         ani_native_function {
             "_DragController_executeDragWithCallback",
             nullptr,
@@ -452,7 +449,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionNotifyDragStartReques)
         },
-    #endif
         ani_native_function {
             "_StyledString_SetPixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",

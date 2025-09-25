@@ -263,6 +263,18 @@ HWTEST_F(WithThemeTestNg, WithThemeTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ObtainSystemTheme002
+ * @tc.desc: Obtain System Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, ObtainSystemTheme002, TestSize.Level1)
+{
+    // container is not inited, can not obtain system theme
+    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme(ColorMode::DARK);
+    EXPECT_FALSE(basisTheme);
+}
+
+/**
  * @tc.name: WithThemeTestNg007
  * @tc.desc: Set Default Theme
  * @tc.type: FUNC

@@ -1050,7 +1050,24 @@ bool GridScrollLayoutAlgorithm::IsScrollToEndLine() const
 bool GridScrollLayoutAlgorithm::IsEndLineInScreenWithGap(
     int32_t targetLine, float totalViewHeight, float mainSize) const
 {
-    return targetLine == info_.endMainLineIndex_ && LessOrEqual(totalViewHeight + info_.currentOffset_, mainSize);
+    return targetLine == info_.endMainLineIndex_ &&
+           LessOrEqual(totalViewHeight + info_.currentOffset_, mainSize - info_.contentEndOffset_);
+}
+
+void GridScrollLayoutAlgorithm::CalcScrollToIndexAutoWithContentOffset(int32_t startLine, float mainSize)
+{
+    auto height = info_.GetHeightInRange(info_.startMainLineIndex_, startLine, mainGap_);
+    if (height + info_.currentOffset_ < info_.contentStartOffset_) {
+        info_.currentOffset_ -= (height + info_.currentOffset_ - info_.contentStartOffset_);
+        return;
+    }
+
+    if (!info_.hasMultiLineItem_) {
+        height = info_.GetHeightInRange(info_.startMainLineIndex_, startLine + 1, mainGap_) - mainGap_;
+        if (height + info_.currentOffset_ + info_.contentEndOffset_ > mainSize) {
+            info_.currentOffset_ += (height + info_.contentEndOffset_ - mainSize);
+        }
+    }
 }
 
 void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
@@ -1063,6 +1080,10 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
             return;
         }
         if (startLine < info_.endMainLineIndex_ && startLine > info_.startMainLineIndex_) {
+            if (NearZero(info_.contentStartOffset_)) {
+                return;
+            }
+            CalcScrollToIndexAutoWithContentOffset(startLine, mainSize);
             return;
         }
 
@@ -1163,9 +1184,11 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     }
     if (info_.scrollAlign_ == ScrollAlign::END) {
         info_.currentOffset_ -= info_.contentEndOffset_;
+        info_.prevOffset_ = info_.currentOffset_;
     }
     if (info_.scrollAlign_ == ScrollAlign::START) {
         info_.currentOffset_ += info_.contentStartOffset_;
+        info_.prevOffset_ = info_.currentOffset_;
     }
     if (info_.extraOffset_.has_value() && !info_.targetIndex_.has_value()) {
         info_.currentOffset_ += info_.extraOffset_.value();

@@ -473,7 +473,8 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
-    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false);
+    static bool ParseShadowProps(
+        const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false, bool needResObj = false);
     static void ParseDialogShadowProps(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHasBorderColor(NG::BorderColorProperty& borderColor, std::optional<Color>& color,
         bool& hasBorderColor, const std::string& key);

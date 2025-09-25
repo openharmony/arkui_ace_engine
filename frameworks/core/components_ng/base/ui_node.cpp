@@ -906,12 +906,12 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
 bool UINode::CheckThreadSafeNodeTree(bool needCheck)
 {
     bool needCheckChild = needCheck;
-    if (needCheck && !isThreadSafeNode_) {
+    if (needCheck && !isThreadSafeNode_ && IsReusableNode()) {
         // Remind developers that it is unsafe to operate node trees containing unsafe nodes on non UI threads.
         TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
             "CheckIsThreadSafeNodeTree failed. thread safe node tree contains unsafe node: %{public}d", GetId());
         needCheckChild = false;
-    } else if (isThreadSafeNode_) {
+    } else if (isThreadSafeNode_ || !IsReusableNode()) {
         needCheckChild = true;
     }
     return needCheckChild;
@@ -1828,7 +1828,7 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     }
 
     nodeInfo_->pageDepth = depth_;
-    nodeInfo_->childrenSize = children.size();
+    nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
     if (isBuildByJS_) {
         nodeMap.insert({ nodeId_, *(nodeInfo_) });
     }

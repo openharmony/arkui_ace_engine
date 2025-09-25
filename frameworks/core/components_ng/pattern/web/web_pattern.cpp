@@ -109,6 +109,7 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t SNAPSHOT_DURATION_TIME = 300;
@@ -881,14 +882,12 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
         return;
     }
 
-    if (delegate_ && (width != 0) && (height != 0)) {
-        uint32_t resizeWidth = static_cast<uint32_t>(std::ceil(delegate_->ResizeWidth()));
-        uint32_t resizeHeight = static_cast<uint32_t>(std::ceil(delegate_->ResizeHeight()));
-        if ((width != resizeWidth) || (height != resizeHeight)) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is invalid", width, height);
+    if (delegate_) {
+        delegate_->RecordBlanklessFrameSize(width, height);
+        if (!delegate_->IsBlanklessFrameValid()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size is invalid!");
             return;
         }
-        delegate_->RecordBlanklessFrameSize(width, height);
     }
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
@@ -909,9 +908,14 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
     auto imageLayoutProperty = snapshotNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageRenderProperty = snapshotNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    CHECK_NULL_VOID(imageRenderProperty);
     ImageSourceInfo sourceInfo = ImageSourceInfo("file://" + snapshotPath);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    imageLayoutProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
+    imageRenderProperty->UpdateImageMatrix(WEB_SNAPSHOT_IMAGE_SCALE_MATRIX);
     snapshotNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     snapshotNode->MarkModifyDone();
 }
@@ -3073,8 +3077,6 @@ void WebPattern::KeyboardReDispatch(
 void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
 {
     CHECK_NULL_VOID(event);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -3087,9 +3089,9 @@ void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& ev
     }
     taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
         event = tabKeyEvent_] () {
-        auto pipelineContext = context.Upgrade();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+            auto pipelineContext = context.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
         },
         TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
 }
@@ -4321,7 +4323,7 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 {
     isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
-    if (safeAreaEnabled) {
+    if (safeAreaEnabled || keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         return false;
     }
@@ -4367,6 +4369,31 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     return true;
 }
 
+bool WebPattern::JudgeWebKeyBoardAvoidMode(bool safeAreaEnabled)
+{
+    if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::RETURN_TO_UICONTEXT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JudgeWebKeyBoardAvoidMode, web avoid mode is return uicontext.");
+        if (safeAreaEnabled) {
+            return false;
+        }
+        auto host = GetHost();
+        auto context = PipelineContext::GetCurrentContext();
+        if (host && context) {
+            auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+            auto safeAreaManager = context->GetSafeAreaManager();
+            if (textFieldManager && safeAreaManager) {
+                auto offset = GetCoordinatePoint();
+                textFieldManager->SetClickPosition({offset->GetX() + GetCaretRect().GetX(),
+                                                    offset->GetY() + GetCaretRect().GetY()});
+                textFieldManager->SetHeight(GetCaretRect().Height());
+                textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -4383,11 +4410,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
-    if (height - GetCoordinatePoint()->GetY() < keyboard) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
-        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
-        return true;
-    }
+
     if (!delegate_->NeedSoftKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not NeedSoftKeyboard");
         return false;
@@ -4398,6 +4421,17 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return true;
     }
+    if (!JudgeWebKeyBoardAvoidMode(safeAreaEnabled)) {
+        isKeyboardInSafeArea_ = true;
+        lastKeyboardHeight_ = keyboard;
+        return false;
+    }
+    if (height - GetCoordinatePoint()->GetY() < keyboard) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        return true;
+    }
+
     if (safeAreaEnabled) {
         isKeyboardInSafeArea_ = true;
         lastKeyboardHeight_ = keyboard;
@@ -6313,6 +6347,43 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
+void WebPattern::WebRotateRenderEffect(WindowSizeChangeReason type)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect , type: %{public}d renderFit_: %{public}d",
+             type, renderFit_);
+    if (type != WindowSizeChangeReason::ROTATION ||
+        renderFit_ == RenderFit::TOP_LEFT) {
+        return;
+    }
+
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(renderFit_);
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::string taskName = "ArkUIWebRotateRenderEffectDelayTask_" + std::to_string(GetWebId());
+    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), taskName]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WebRotateRenderEffect DelayedTask, task: %{public}s",
+            taskName.c_str());
+        if (webPattern->renderContextForSurface_) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "WebRotateRenderEffect reset");
+            webPattern->renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+        }
+        }, TaskExecutor::TaskType::UI, MAXIMUM_ROTATION_DELAY_TIME, taskName);
+}
+
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (contextSelectOverlay_ && contextSelectOverlay_->SelectOverlayIsOn()) {
@@ -6325,6 +6396,7 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         return;
     }
     AdjustRotationRenderFit(type);
+    WebRotateRenderEffect(type);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
         return;
@@ -8615,7 +8687,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         return;
     }
 
-    if (delegate_ &&
+    if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         delegate_->MaximizeResize();
     }
@@ -9107,6 +9179,23 @@ void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
     if (delegate_) {
         delegate_->UpdateGestureFocusMode(mode);
     }
+}
+
+void WebPattern::OnRotateRenderEffectUpdate(WebRotateEffect effect)
+{
+    switch (effect) {
+        case WebRotateEffect::TOPLEFT_EFFECT:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+        case WebRotateEffect::RESIZE_COVER_EFFECT:
+            renderFit_ = RenderFit::RESIZE_COVER;
+            break;
+        default:
+            renderFit_ = RenderFit::TOP_LEFT;
+            break;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Update rotate effect, effect: %{public}d renderFit_: %{public}d",
+             effect, renderFit_);
 }
 
 void WebPattern::UpdateSingleHandleVisible(bool isVisible)

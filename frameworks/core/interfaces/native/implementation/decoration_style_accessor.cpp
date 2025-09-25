@@ -34,7 +34,7 @@ Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
         auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
         peer->span = AceType::MakeRefPtr<DecorationSpan>(
             std::vector<TextDecoration>({aceTypeOpt.value_or(TextDecoration::NONE)}),
-            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>());
+            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>(), nullptr);
     } else {
         peer->span = AceType::MakeRefPtr<DecorationSpan>();
     }

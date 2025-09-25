@@ -57,6 +57,8 @@ constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
+constexpr float SLOW_SPRING_RESPONSE = 0.5f;
+constexpr float SLOW_SPRING_DAMP = 2.5f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
 constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
@@ -510,6 +512,17 @@ void Scrollable::HandleTouchDown(bool fromcrown)
     }
 }
 
+void Scrollable::CheckStopFlingInTouchUp()
+{
+    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
+        isUserFling_ = false;
+        if (onDidStopFlingCallback_) {
+            onDidStopFlingCallback_();
+        }
+    }
+    isTouchStopAnimation_ = false;
+}
+
 void Scrollable::HandleTouchUp()
 {
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
@@ -521,16 +534,11 @@ void Scrollable::HandleTouchUp()
     }
     isTouching_ = false;
     if (nestedScrolling_) {
+        CheckStopFlingInTouchUp();
         return;
     }
     if (CanStayOverScroll()) {
-        if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
-            isUserFling_ = false;
-            if (onDidStopFlingCallback_) {
-                onDidStopFlingCallback_();
-            }
-        }
-        isTouchStopAnimation_ = false;
+        CheckStopFlingInTouchUp();
         return;
     }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
@@ -551,13 +559,7 @@ void Scrollable::HandleTouchUp()
             return;
         }
     }
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
-        isUserFling_ = false;
-        if (onDidStopFlingCallback_) {
-            onDidStopFlingCallback_();
-        }
-    }
-    isTouchStopAnimation_ = false;
+    CheckStopFlingInTouchUp();
 }
 
 void Scrollable::HandleTouchCancel()
@@ -1196,7 +1198,9 @@ void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSna
     snapAnimationFromScrollBar_ = fromScrollBar;
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
-    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+        listSnapSpeed_ == ScrollSnapAnimationSpeed::NORMAL ? DEFAULT_SPRING_RESPONSE : SLOW_SPRING_RESPONSE,
+        listSnapSpeed_ == ScrollSnapAnimationSpeed::NORMAL ? DEFAULT_SPRING_DAMP : SLOW_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     if (!snapOffsetProperty_) {
         GetSnapProperty();
@@ -1957,8 +1961,9 @@ void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)
     if (onDidStopDraggingCallback_) {
         onDidStopDraggingCallback_(isWillFling);
     }
-    if (isUserFling_ && !isWillFling) {
-        if (onDidStopFlingCallback_) {
+    if (!isWillFling) {
+        isScrollBarDragging_ = false;
+        if (isUserFling_ && onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
         }
     }

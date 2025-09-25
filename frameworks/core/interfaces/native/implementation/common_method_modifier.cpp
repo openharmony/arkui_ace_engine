@@ -66,6 +66,7 @@
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "base/log/log_wrapper.h"
 
 using namespace OHOS::Ace::NG::Converter;
@@ -351,6 +352,7 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
     auto popupTransitionEffectsOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
+        popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
 };
@@ -5450,8 +5452,14 @@ void BindTipsImpl(Ark_NativePointer node,
             }
             ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
         },
-        [] (const Ark_StyledString& value) {
-            return;
+        [frameNode, popupParam] (const Ark_StyledString& value) {
+            if (!value->spanString) {
+                LOGE("BindTipsImpl can not get the spanString.");
+                return;
+            }
+            auto message = value->spanString->GetString();
+            popupParam->SetMessage(message);
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, value->spanString);
         },
         [] () {
             return;

@@ -143,6 +143,7 @@ ace_unittest("ui_extension_pattern_test_ng") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_session_wrapper_impl.cpp",
     "ui_extension_component_test.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp"
   ]
   if (is_ohos_standard_system) {
     defines = [

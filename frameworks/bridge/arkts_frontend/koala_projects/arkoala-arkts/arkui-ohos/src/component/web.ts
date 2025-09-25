@@ -3109,6 +3109,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    gestureFocusModeAttribute(value: GestureFocusMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as GestureFocusMode)
+            thisSerializer.writeInt32(TypeChecker.GestureFocusMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_gestureFocusMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type OnNavigationEntryCommittedCallback = (loadCommittedDetails: LoadCommittedDetails) => void;
 export type OnSslErrorEventCallback = (sslErrorEvent: SslErrorEvent) => void;
@@ -3587,10 +3599,13 @@ export enum WebKeyboardAvoidMode {
     OVERLAYS_CONTENT = 2
 }
 export enum WebElementType {
-    IMAGE = 1
+    IMAGE = 1,
+    LINK = 2,
+    TEXT = 3
 }
 export enum WebResponseType {
-    LONG_PRESS = 1
+    LONG_PRESS = 1,
+    RIGHT_CLICK = 2
 }
 export interface SelectionMenuOptionsExt {
     onAppear?: Callback<void>;
@@ -3598,6 +3613,12 @@ export interface SelectionMenuOptionsExt {
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
+    onMenuShow?: Callback<void>;
+    onMenuHide?: Callback<void>;
+}
+export enum GestureFocusMode {
+    DEFAULT = 0,
+    GESTURE_TAP_AND_LONG_PRESS = 1
 }
 export type Callback_OnPageEndEvent_Void = (parameter: OnPageEndEvent) => void;
 export type Callback_OnPageBeginEvent_Void = (parameter: OnPageBeginEvent) => void;
@@ -3783,6 +3804,7 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
+    gestureFocusMode(value: GestureFocusMode | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -3910,6 +3932,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions
+    gestureFocusMode_value?: GestureFocusMode | undefined
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -4290,7 +4313,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     }
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         return this
-        }
+    }
+    public gestureFocusMode(value: GestureFocusMode | undefined): this {
+        return this
+    }
 }
 export interface SslErrorEvent {
     handler: SslErrorHandler;
@@ -5351,7 +5377,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-
+    public gestureFocusMode(value: GestureFocusMode | undefined): this {
+        if (this.checkPriority("gestureFocusMode")) {
+            const value_casted = value as (GestureFocusMode | undefined)
+            this.getPeer()?.gestureFocusModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

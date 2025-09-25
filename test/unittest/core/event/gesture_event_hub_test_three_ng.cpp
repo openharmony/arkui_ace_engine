@@ -435,7 +435,6 @@ HWTEST_F(GestureEventHubTestNg, GenerateMousePixelMap_001, TestSize.Level1)
     guestureEventHub->SetTextDraggable(true);
     guestureEventHub->GenerateMousePixelMap(info);
     EXPECT_TRUE(guestureEventHub->GetTextDraggable());
-
     guestureEventHub->SetTextDraggable(false);
     guestureEventHub->GenerateMousePixelMap(info);
     EXPECT_FALSE(guestureEventHub->GetTextDraggable());
