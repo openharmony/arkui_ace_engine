@@ -396,6 +396,8 @@ public:
     {
         return passThroughResult_;
     }
+    void FalsifyCancelEventWithDifferentDeviceId(const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch = true);
+    bool HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -494,6 +496,7 @@ private:
     MouseEvent lastMouseEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::unordered_map<int32_t, int32_t> deviceIdChecker_;
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
