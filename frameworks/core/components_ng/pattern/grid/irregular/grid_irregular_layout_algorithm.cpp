@@ -280,9 +280,6 @@ inline float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
     float heightToFill = mainSize - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
-    if (info_.startMainLineIndex_ == 0) {
-        heightToFill += info_.contentStartOffset_;
-    }
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&info_, wrapper_);
         filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info_.endMainLineIndex_);
@@ -296,6 +293,9 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     info_.endIndex_ = endIdx;
 
     if (info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_)) {
+        if (!canOverScrollStart_) {
+            info_.currentOffset_ = info_.contentStartOffset_;
+        }
         return;
     }
     // adjust offset
@@ -401,11 +401,11 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize, bool considerContentOffs
     info_.endMainLineIndex_ = res.endRow;
     info_.endIndex_ = res.endIdx;
     info_.jumpIndex_ = EMPTY_JUMP_INDEX;
-    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset) {
+    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset && !NearZero(info_.contentStartOffset_)) {
         info_.currentOffset_ += info_.contentStartOffset_;
         MeasureOnOffset(mainSize);
     }
-    if (info_.scrollAlign_ == ScrollAlign::END) {
+    if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
         info_.currentOffset_ -= info_.contentEndOffset_;
         MeasureOnOffset(mainSize);
     }

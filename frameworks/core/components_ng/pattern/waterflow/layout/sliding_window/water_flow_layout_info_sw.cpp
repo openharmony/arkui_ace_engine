@@ -325,9 +325,9 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
             pos = pos - lastMainSize_ + itemSize + contentEndOffset_;
             break;
         case ScrollAlign::AUTO:
-            if (LessNotEqual(pos, -contentStartOffset_)) {
+            if (LessNotEqual(pos, contentStartOffset_)) {
                 pos -= contentStartOffset_;
-            } else if (GreatNotEqual(pos + itemSize, lastMainSize_)) {
+            } else if (GreatNotEqual(pos + itemSize, lastMainSize_ - contentEndOffset_)) {
                 pos = pos - lastMainSize_ + itemSize + contentEndOffset_;
             } else {
                 pos = 0.0f; // already in viewport, no movement needed
@@ -523,12 +523,13 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>&
 
 float WaterFlowLayoutInfoSW::TopFinalPos() const
 {
-    return -(StartPosWithMargin() + delta_) + contentStartOffset_;
+    return -(StartPosWithMargin() + delta_);
 };
 
 float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
 {
-    return -(EndPosWithMargin() + delta_ + footerHeight_ + contentEndOffset_) + std::min(maxHeight_, viewHeight);
+    return -(EndPosWithMargin() + delta_ + footerHeight_ + contentEndOffset_) +
+           std::min(maxHeight_ + contentStartOffset_, viewHeight);
 };
 
 bool WaterFlowLayoutInfoSW::IsMisaligned() const

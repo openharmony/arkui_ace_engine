@@ -331,8 +331,10 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
     }
     auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
     if (!NearZero(finalOffset)) {
-        bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, 0.0) && LessOrEqual(info_.currentHeight_, 0.0);
-        bool scrollDownToStart = LessNotEqual(info_.prevHeight_, 0.0) && GreatOrEqual(info_.currentHeight_, 0.0);
+        bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, info_.contentStartOffset_) &&
+                               LessOrEqual(info_.currentHeight_, info_.contentStartOffset_);
+        bool scrollDownToStart = LessNotEqual(info_.prevHeight_, info_.contentStartOffset_) &&
+                                 GreatOrEqual(info_.currentHeight_, info_.contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
@@ -422,7 +424,7 @@ bool GridPattern::IsFadingBottom() const
     float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
     if (info_.startIndex_ == 0 && (info_.endIndex_ == info_.childrenCount_ - 1) &&
         LessNotEqual(info_.totalHeightOfItemsInView_, mainSize)) {
-        return Positive(info_.currentOffset_);
+        return GreatNotEqual(info_.currentOffset_, info_.contentStartOffset_);
     } else {
         return !info_.offsetEnd_;
     }
@@ -1081,10 +1083,9 @@ float GridPattern::GetEndOffset()
     if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
-            return info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) + info_.contentStartOffset_ +
-                   info_.contentEndOffset_;
+            return info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) + info_.contentStartOffset_;
         }
-        return totalHeight - heightInView - info_.contentStartOffset_ - info_.contentEndOffset_;
+        return totalHeight - heightInView - info_.contentEndOffset_;
     }
 
     if (!irregular) {

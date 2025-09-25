@@ -117,7 +117,7 @@ public:
     float BottomFinalPos(float viewHeight) const override
     {
         float endOffset = viewHeight - GetContentHeight();
-        return Negative(endOffset) ? endOffset : 0.0f;
+        return Negative(endOffset) ? endOffset : contentStartOffset_;
     };
 
     float JumpToTargetAlign(const std::pair<float, float>& item) const;
