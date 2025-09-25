@@ -3117,13 +3117,13 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    AceType::Claim(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto node = AceType::Claim(frameNode);
+    auto layoutProperty = node->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
     }
 
-    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub = node->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -7280,13 +7280,13 @@ void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& va
 void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
 {
     CHECK_NULL_VOID(frameNode);
-    AceType::Claim(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto node = AceType::Claim(frameNode);
+    auto layoutProperty = node->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(visible, true, true);
     }
 
-    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub = node->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }

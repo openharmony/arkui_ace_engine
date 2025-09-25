@@ -53,7 +53,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest031, TestSize.Level1)
     auto visible = static_cast<VisibleType>(INDEX);
     ViewAbstract::SetVisibility(std::move(visible));
     ViewAbstract::SetOpacity(OPACITYS);
-
     /**
      * @tc.expected: Return expected results.
      */
