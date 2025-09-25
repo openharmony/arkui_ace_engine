@@ -46,6 +46,7 @@ constexpr int8_t MD_COLUMN_NUM = 8;
 constexpr int8_t LG_COLUMN_NUM = 12;
 constexpr int8_t TWO = 2;
 constexpr int8_t FOCUS_BOARD = 2;
+constexpr int8_t IMAGE_INDICATOR_COUNT = 1;
 } // namespace
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -74,7 +75,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(constraint.value(), axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
 
-    childCount_ = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    childCount_ = layoutWrapper->GetTotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
     if (childCount_ <= 0) {
         return;
     }
@@ -167,6 +168,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CheckBorderAndPadding(frameSize, padding);
     geometryNode->SetFrameSize(frameSize);
     MeasureMask(layoutWrapper);
+    MeasureSubTabBarImageIndicator(layoutWrapper);
 }
 
 float TabBarLayoutAlgorithm::GetContentMainSize(LayoutWrapper* layoutWrapper, const SizeF& contentSize)
@@ -1076,7 +1078,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         (axis_ == Axis::HORIZONTAL && NearZero(geometryNode->GetFrameSize().Height()))) {
         return;
     }
-    childCount_ = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    childCount_ = layoutWrapper->GetTotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
     if (childCount_ <= 0) {
         return;
     }
@@ -1125,6 +1127,7 @@ void TabBarLayoutAlgorithm::LayoutChildren(LayoutWrapper* layoutWrapper, const S
         }
     }
     LayoutMask(layoutWrapper, childOffsetDelta);
+    LayoutSubTabBarImageIndicator(layoutWrapper);
 }
 
 void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper,
@@ -1189,5 +1192,71 @@ float TabBarLayoutAlgorithm::GetGridWidth(
         return gridColumnInfo->GetMaxWidth();
     }
     return gridColumnInfo->GetWidth(columns);
+}
+
+void TabBarLayoutAlgorithm::MeasureSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto tabBarPattern = host->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto indicatorIndex = layoutWrapper->GetTotalChildCount() - 1;
+    auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(indicatorIndex);
+    CHECK_NULL_VOID(indicatorWrapper);
+    auto index = tabBarPattern->GetIndicator();
+    auto indicatorStyle = tabBarPattern->GetIndicatorStyleByIndex(index);
+    auto indicatorProp = indicatorWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(indicatorProp);
+    if (tabBarPattern->NeedShowImageIndicator(index)) {
+        auto subTabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(subTabBarWrapper);
+        auto indicatorWidth = indicatorStyle.width.ConvertToPx();
+        if (NearZero(indicatorWidth)) {
+            auto textWrapper = subTabBarWrapper->GetOrCreateChildByIndex(1);
+            CHECK_NULL_VOID(textWrapper);
+            auto textGeometryNode = textWrapper->GetGeometryNode();
+            CHECK_NULL_VOID(textGeometryNode);
+            auto textFrameSize = textGeometryNode->GetFrameSize();
+            indicatorWidth = textFrameSize.Width();
+        }
+        indicatorProp->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(indicatorWidth, DimensionUnit::PX), NG::CalcLength(indicatorStyle.height)));
+    } else {
+        indicatorProp->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(0), NG::CalcLength(0)));
+    }
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    indicatorWrapper->Measure(childLayoutConstraint);
+}
+
+void TabBarLayoutAlgorithm::LayoutSubTabBarImageIndicator(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto tabBarPattern = host->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto indicatorIndex = layoutWrapper->GetTotalChildCount() - 1;
+    auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(indicatorIndex);
+    CHECK_NULL_VOID(indicatorWrapper);
+    auto indicatorGeometryNode = indicatorWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(indicatorGeometryNode);
+    auto index = tabBarPattern->GetIndicator();
+    auto subTabBarStyle = tabBarPattern->GetIndicatorStyleByIndex(index);
+    if (tabBarPattern->NeedShowImageIndicator(index)) {
+        OffsetF indicatorOffset;
+        auto rect = layoutProperty->GetIndicatorRect(index);
+        auto indicatorFrameSize = indicatorGeometryNode->GetFrameSize();
+        indicatorOffset.SetX(rect.GetX() + rect.Width() / TWO - indicatorFrameSize.Width() / TWO);
+        indicatorOffset.SetY(rect.GetY() + subTabBarStyle.marginTop.ConvertToPx());
+        indicatorGeometryNode->SetMarginFrameOffset(indicatorOffset);
+    } else {
+        indicatorGeometryNode->SetMarginFrameOffset(OffsetF());
+    }
+    indicatorWrapper->Layout();
 }
 } // namespace OHOS::Ace::NG

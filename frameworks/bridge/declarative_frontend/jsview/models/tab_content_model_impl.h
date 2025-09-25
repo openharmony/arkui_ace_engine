@@ -32,6 +32,8 @@ public:
     void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override {}
     void SetTabBarStyle(TabBarStyle tabBarStyle) override {}
     void SetIndicator(const IndicatorStyle& indicator) override {}
+    void SetDrawableIndicatorConfig(const ImageInfoConfig& config) override {};
+    void SetDrawableIndicatorFlag(bool isDrawableIndicator) override {};
     void SetIndicatorColorByUser(bool isByUser) override {};
     void SetBoard(const BoardStyle& board) override {}
     void SetSelectedMode(SelectedMode selectedMode) override {}

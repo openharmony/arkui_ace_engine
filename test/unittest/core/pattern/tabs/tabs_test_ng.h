@@ -63,6 +63,7 @@ constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr int8_t MASK_COUNT = 2;
+constexpr int8_t IMAGE_INDICATOR_COUNT = 1;
 constexpr float DRAG_DELTA = TABS_WIDTH;
 
 class TabsTestNg : public TestNG {

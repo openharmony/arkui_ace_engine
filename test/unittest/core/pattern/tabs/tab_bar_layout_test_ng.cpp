@@ -15,6 +15,8 @@
 
 #include "tabs_test_ng.h"
 
+#include "test/mock/base/mock_system_properties.h"
+
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1359,5 +1361,200 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode003, TestSize.
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 56.0f);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator001
+ * @tc.desc: Test the MeasureSubTabBarImageIndicator function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create Tabs component.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to fixed and axis to horizontal, init child item size.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern_->SetIndicator(0);
+    auto itemWidth = 800.0f;
+    IndicatorStyle indicatorStyle;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(100.0f));
+        tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, index, true);
+        tabBarPattern_->SetDrawableIndicatorFlag(true, index, true);
+
+        indicatorStyle.width = Dimension(20.0f);
+        indicatorStyle.height = Dimension(5.0f);
+        indicatorStyle.borderRadius = Dimension(2.0f);
+        indicatorStyle.marginTop = Dimension(10.0f);
+        tabBarPattern_->SetIndicatorStyle(indicatorStyle, index, true);
+
+        auto textLayoutWrapper = child->GetOrCreateChildByIndex(1);
+        ASSERT_NE(textLayoutWrapper, nullptr);
+        auto textGeometryNode = textLayoutWrapper->GetGeometryNode();
+        ASSERT_NE(textGeometryNode, nullptr);
+        textGeometryNode->SetFrameSize(SizeF(50.0f, 10.0f));
+    }
+
+    /**
+     * @tc.steps: steps3. Set size properties to image indicator then start measure and layout.
+     * @tc.expected: steps3. Verify width, height and offset of image indicator.
+     */
+    auto indicatorIndex = tabBarNode_->GetTotalChildCount() - 1;
+    auto indicatorNode = tabBarNode_->GetChildByIndex(indicatorIndex);
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorProp = indicatorNode->GetLayoutProperty();
+    ASSERT_NE(indicatorProp, nullptr);
+    indicatorProp->UpdateUserDefinedIdealSize(
+        CalcSize(NG::CalcLength(indicatorStyle.width), NG::CalcLength(indicatorStyle.height)));
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
+    ASSERT_NE(indicatorGeometryNode, nullptr);
+    EXPECT_EQ(indicatorGeometryNode->GetFrameSize().Width(), indicatorStyle.width.ConvertToPx());
+    EXPECT_EQ(indicatorGeometryNode->GetFrameSize().Height(), indicatorStyle.height.ConvertToPx());
+    EXPECT_NE(indicatorGeometryNode->GetMarginFrameOffset().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator002
+ * @tc.desc: Test the MeasureSubTabBarImageIndicator function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create Tabs component.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to fixed and axis to horizontal, init child item size.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern_->SetIndicator(1);
+    auto itemWidth = 800.0f;
+    IndicatorStyle indicatorStyle;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(100.0f));
+        if (index == 1) {
+            tabBarPattern_->SetTabBarStyle(TabBarStyle::NOSTYLE, index, true);
+            tabBarPattern_->SetDrawableIndicatorFlag(false, index, true);
+        } else {
+            tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, index, true);
+            tabBarPattern_->SetDrawableIndicatorFlag(true, index, true);
+        }
+
+        indicatorStyle.width = Dimension(20.0f);
+        indicatorStyle.height = Dimension(5.0f);
+        indicatorStyle.borderRadius = Dimension(2.0f);
+        indicatorStyle.marginTop = Dimension(10.0f);
+        tabBarPattern_->SetIndicatorStyle(indicatorStyle, index, true);
+
+        auto textLayoutWrapper = child->GetOrCreateChildByIndex(1);
+        ASSERT_NE(textLayoutWrapper, nullptr);
+        auto textGeometryNode = textLayoutWrapper->GetGeometryNode();
+        ASSERT_NE(textGeometryNode, nullptr);
+        textGeometryNode->SetFrameSize(SizeF(50.0f, 10.0f));
+    }
+
+    /**
+     * @tc.steps: steps3. Switch to other tab which is not TabBarStyle::SUBTABBATSTYLE.
+     * @tc.expected: steps3. Verify width, height and offset of image indicator.
+     */
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    auto indicatorIndex = tabBarNode_->GetTotalChildCount() - 1;
+    auto indicatorNode = tabBarNode_->GetChildByIndex(indicatorIndex);
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
+    ASSERT_NE(indicatorGeometryNode, nullptr);
+    EXPECT_EQ(indicatorGeometryNode->GetFrameSize().Width(), 0);
+    EXPECT_EQ(indicatorGeometryNode->GetFrameSize().Height(), 0);
+    EXPECT_EQ(indicatorGeometryNode->GetMarginFrameOffset().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator003
+ * @tc.desc: Test the MeasureSubTabBarImageIndicator function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator003, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: steps1. Create Tabs component.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to fixed and axis to horizontal, init child item size.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern_->SetIndicator(2);
+    auto itemWidth = 800.0f;
+    IndicatorStyle indicatorStyle;
+    ImageInfoConfig indicatorConfig;
+    indicatorConfig.type = ImageType::ANIMATED_DRAWABLE;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(100.0f));
+        tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, index, true);
+        tabBarPattern_->SetDrawableIndicatorFlag(true, index, true);
+        tabBarPattern_->SetDrawableIndicatorConfig(indicatorConfig, index, true);
+
+        indicatorStyle.width = Dimension(20.0f);
+        indicatorStyle.height = Dimension(5.0f);
+        indicatorStyle.borderRadius = Dimension(2.0f);
+        indicatorStyle.marginTop = Dimension(10.0f);
+        if (index == 2) {
+            indicatorStyle.width = Dimension(0.0f);
+        }
+        tabBarPattern_->SetIndicatorStyle(indicatorStyle, index, true);
+
+        auto textLayoutWrapper = child->GetOrCreateChildByIndex(1);
+        ASSERT_NE(textLayoutWrapper, nullptr);
+        auto textGeometryNode = textLayoutWrapper->GetGeometryNode();
+        ASSERT_NE(textGeometryNode, nullptr);
+        textGeometryNode->SetFrameSize(SizeF(50.0f, 10.0f));
+    }
+
+    /**
+     * @tc.steps: steps3. Switch to other tab which is TabBarStyle::SUBTABBATSTYLE and indicatorStyle.width is 0.
+     * @tc.expected: steps3. Verify image indicator is not 0.
+     */
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    auto indicatorIndex = tabBarNode_->GetTotalChildCount() - 1;
+    auto indicatorNode = tabBarNode_->GetChildByIndex(indicatorIndex);
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
+    ASSERT_NE(indicatorGeometryNode, nullptr);
+    EXPECT_NE(indicatorGeometryNode->GetFrameSize().Width(), 0);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

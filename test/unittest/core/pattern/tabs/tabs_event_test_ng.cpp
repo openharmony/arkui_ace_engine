@@ -941,7 +941,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 4);
 }
 
 /**
@@ -963,7 +963,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->HandleTouchEvent(TouchType::DOWN, 0);
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 4);
 }
 
 /**

@@ -152,6 +152,7 @@ HWTEST_F(TabBarPatternTestNg, GetOriginalPaintRect004, TestSize.Level1)
     frameNode->children_.emplace_back(frameNode);
     frameNode->children_.emplace_back(frameNode);
     frameNode->children_.emplace_back(frameNode);
+    frameNode->children_.emplace_back(frameNode);
     RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
     frameNode->context_ = AceType::RawPtr(pipe);
     GeometryProperty geometryProperty;
@@ -185,6 +186,7 @@ HWTEST_F(TabBarPatternTestNg, GetOriginalPaintRect005, TestSize.Level1)
     RefPtr<FrameNode> frameNode = AceType::MakeRefPtr<FrameNode>(V2::TABS_ETS_TAG, 2, tabBarPattern, true);
     ASSERT_NE(frameNode, nullptr);
     frameNode->children_.clear();
+    frameNode->children_.emplace_back(frameNode);
     frameNode->children_.emplace_back(frameNode);
     frameNode->children_.emplace_back(frameNode);
     frameNode->children_.emplace_back(frameNode);
@@ -315,5 +317,107 @@ HWTEST_F(TabBarPatternTestNg, GetDefaultFontSize001, TestSize.Level1)
     tabContentNode->tabBarItemId_.reset();
     auto result = tabContentNode->GetDefaultFontSize();
     EXPECT_EQ(result.value_, 0);
+}
+
+/**
+ * @tc.name: TabBarPatternGetIndicatorStyleByIndex001
+ * @tc.desc: test GetIndicatorStyleByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternGetIndicatorStyleByIndex001, TestSize.Level1)
+{
+    RefPtr<TabBarPattern> tabBarPattern = AceType::MakeRefPtr<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    IndicatorStyle styleResult;
+    for (int32_t i = 0; i < TABCONTENT_NUMBER; i++) {
+        IndicatorStyle style;
+        style.width = Dimension(i + 1, DimensionUnit::PX);
+        tabBarPattern->SetIndicatorStyle(style, i, true);
+        styleResult = tabBarPattern->GetIndicatorStyleByIndex(i);
+        EXPECT_EQ(styleResult.width.ConvertToPx(), i + 1);
+    }
+
+    styleResult = tabBarPattern->GetIndicatorStyleByIndex(-1);
+    EXPECT_EQ(styleResult.width.ConvertToPx(), 0);
+    styleResult = tabBarPattern->GetIndicatorStyleByIndex(TABCONTENT_NUMBER);
+    EXPECT_EQ(styleResult.width.ConvertToPx(), 0);
+}
+
+/**
+ * @tc.name: TabBarPatternSetDrawableIndicatorConfig001
+ * @tc.desc: test SetDrawableIndicatorConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternSetDrawableIndicatorConfig001, TestSize.Level1)
+{
+    RefPtr<TabBarPattern> tabBarPattern = AceType::MakeRefPtr<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    ImageInfoConfig configResult;
+    for (int32_t i = 0; i < TABCONTENT_NUMBER; i++) {
+        ImageInfoConfig config;
+        config.type = ImageType::DRAWABLE;
+        tabBarPattern->SetDrawableIndicatorConfig(config, i, true);
+        configResult = tabBarPattern->GetDrawableIndicatorConfigByIndex(i);
+        EXPECT_EQ(configResult.type, ImageType::DRAWABLE);
+    }
+
+    configResult = tabBarPattern->GetDrawableIndicatorConfigByIndex(-1);
+    EXPECT_EQ(configResult.type, ImageType::BASE);
+    configResult = tabBarPattern->GetDrawableIndicatorConfigByIndex(TABCONTENT_NUMBER);
+    EXPECT_EQ(configResult.type, ImageType::BASE);
+}
+
+/**
+ * @tc.name: TabBarPatternSetDrawableIndicatorFlag001
+ * @tc.desc: test SetDrawableIndicatorFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternSetDrawableIndicatorFlag001, TestSize.Level1)
+{
+    RefPtr<TabBarPattern> tabBarPattern = AceType::MakeRefPtr<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    bool ret = false;
+    for (int32_t i = 0; i < TABCONTENT_NUMBER; i++) {
+        tabBarPattern->SetDrawableIndicatorFlag(true, i, true);
+        ret = tabBarPattern->GetDrawableIndicatorFlagByIndex(i);
+        EXPECT_TRUE(ret);
+    }
+
+    ret = tabBarPattern->GetDrawableIndicatorFlagByIndex(-1);
+    EXPECT_FALSE(ret);
+    ret = tabBarPattern->GetDrawableIndicatorFlagByIndex(TABCONTENT_NUMBER);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TabBarPatternNeedShowImageIndicator001
+ * @tc.desc: test NeedShowImageIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternNeedShowImageIndicator001, TestSize.Level1)
+{
+    RefPtr<TabBarPattern> tabBarPattern = AceType::MakeRefPtr<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->SetDrawableIndicatorFlag(true, 0, true);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0, true);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    EXPECT_TRUE(tabBarPattern->NeedShowImageIndicator(0));
+    EXPECT_FALSE(tabBarPattern->NeedShowImageIndicator(1));
+    EXPECT_FALSE(tabBarPattern->NeedShowImageIndicator(-1));
+
+    tabBarPattern->SetDrawableIndicatorFlag(false, 0, false);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0, false);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    EXPECT_FALSE(tabBarPattern->NeedShowImageIndicator(0));
+
+    tabBarPattern->SetDrawableIndicatorFlag(true, 0, false);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::NOSTYLE, 0, false);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    EXPECT_FALSE(tabBarPattern->NeedShowImageIndicator(0));
+
+    tabBarPattern->SetDrawableIndicatorFlag(true, 0, false);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0, false);
+    tabBarPattern->axis_ = Axis::VERTICAL;
+    EXPECT_FALSE(tabBarPattern->NeedShowImageIndicator(0));
 }
 } // namespace OHOS::Ace::NG

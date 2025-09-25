@@ -76,6 +76,8 @@ private:
     static void SetBottomTabBarStyle(const JSCallbackInfo& info);
     static void SetOnWillShow(const JSCallbackInfo& info);
     static void SetOnWillHide(const JSCallbackInfo& info);
+    static bool ParseDrawableIndicator(const JSRef<JSVal>& info, ImageInfoConfig& drawableIndicatorConfig);
+    static ImageType ParseImageType(const JSRef<JSVal>& imageInfo);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -47,6 +47,7 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_F
                                 static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
+const auto IMAGE_INDICATOR_COUNT = 1;
 const std::string KEY_PADDING = "tabContent.tabBarPadding";
 const std::string KEY_PADDING_LEFT = "tabContent.tabBarPadding.left";
 const std::string KEY_PADDING_RIGHT = "tabContent.tabBarPadding.right";
@@ -198,6 +199,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     tabBarPattern->AddTabBarItemCallBack(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
+    auto drawableIndicatorConfig = tabContentPattern->GetDrawableIndicatorConfig();
+    auto isDrawableIndicator = tabContentPattern->IsDrawableIndicator();
     auto boardStyle = tabContentPattern->GetBoardStyle();
     auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
     auto padding = tabContentPattern->GetPadding();
@@ -259,6 +262,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     tabBarPattern->SetSelectedMode(selectedMode, myIndex, newTabBar);
     tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex, newTabBar);
+    tabBarPattern->SetDrawableIndicatorConfig(drawableIndicatorConfig, myIndex, newTabBar);
+    tabBarPattern->SetDrawableIndicatorFlag(isDrawableIndicator, myIndex, newTabBar);
 
     if (tabBarParam.GetTabBarStyle() == TabBarStyle::NOSTYLE && !tabBarParam.HasBuilder() &&
         !tabBarParam.HasContent() && tabBarParam.GetIcon().empty() && tabBarParam.GetText().empty()) {
@@ -288,7 +293,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         if (oldColumnNode != columnNode) {
             if (!oldColumnNode) {
                 auto index =
-                    std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+                    std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+                    MASK_COUNT - IMAGE_INDICATOR_COUNT);
                 columnNode->MountToParent(tabBarNode, index);
             } else if (oldColumnNode != columnNode) {
                 tabBarNode->ReplaceChild(oldColumnNode, columnNode);
@@ -317,7 +323,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
-            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+                MASK_COUNT - IMAGE_INDICATOR_COUNT);
             columnNode->MountToParent(tabBarNode, index);
         } else if (oldColumnNode != columnNode) {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
@@ -370,7 +377,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+            MASK_COUNT - IMAGE_INDICATOR_COUNT);
         columnNode->MountToParent(tabBarNode, index);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
@@ -1174,6 +1182,20 @@ void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetIndicatorStyle(indicator);
+}
+
+void TabContentModelNG::SetDrawableIndicatorConfig(const ImageInfoConfig& config)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorConfig(config);
+}
+
+void TabContentModelNG::SetDrawableIndicatorFlag(bool isDrawableIndicator)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorFlag(isDrawableIndicator);
 }
 
 void TabContentModelNG::SetIndicatorColorByUser(bool isByUser)
