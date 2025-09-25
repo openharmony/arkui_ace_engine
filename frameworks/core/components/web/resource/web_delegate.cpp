@@ -8063,6 +8063,13 @@ void WebDelegate::EnableSecurityLayer(bool isNeedSecurityLayer)
     webPattern->EnableSecurityLayer(isNeedSecurityLayer);
 }
 
+void WebDelegate::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateTextFieldStatus(isShowKeyboard, isAttachIME);
+}
+
 void WebDelegate::OnRootLayerChanged(int width, int height)
 {
     auto webPattern = webPattern_.Upgrade();

@@ -6544,6 +6544,16 @@ void WebPattern::UpdateOnFocusTextField(bool isFocus)
             : textFieldManager->ClearOnFocusTextField(host->GetId());
 }
 
+void WebPattern::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+{
+    UpdateOnFocusTextField(isAttachIME);
+    if (isShowKeyboard) {
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+    } else {
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+    }
+}
+
 bool WebPattern::OnBackPressed()
 {
     auto host = GetHost();
@@ -6556,10 +6566,10 @@ bool WebPattern::OnBackPressed()
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         CHECK_NULL_RETURN(inputMethod, false);
         inputMethod->HideTextInput();
-        inputMethod->Close();
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
         delegate_->GestureBackBlur();
+        UpdateOnFocusTextField(false);
         return true;
     }
     return false;
