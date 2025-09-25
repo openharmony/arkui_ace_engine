@@ -419,7 +419,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
                 }
                 auto navCustomNodeJsonNode = GetNavCustomNodeInfo(navCustomNode, parent, filter);
                 auto navCustomNodeChildrenArray = JsonUtil::CreateArray(true);
-                GetInspectorChildren(uinode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
+                GetInspectorChildren(uiNode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
                 if (navCustomNodeChildrenArray->GetArraySize()) {
                     navCustomNodeJsonNode->PutRef(INSPECTOR_CHILDREN, std::move(navCustomNodeChildrenArray));
                 }
