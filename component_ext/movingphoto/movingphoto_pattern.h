@@ -227,7 +227,9 @@ private:
     void RegisterMediaPlayerEvent();
     void PrintMediaPlayerStatus(PlaybackStatus status);
     void RegisterImageEvent(const RefPtr<FrameNode>& imageNode);
+    void RegisterTransitionImageEvent(const RefPtr<FrameNode>& imageNode);
     void HandleImageCompleteEvent(const LoadImageSuccessEvent& info);
+    void HandleTransitionImageCompleteEvent(const LoadImageSuccessEvent& info);
     void MediaResetToPlay();
 
     void FireMediaPlayerImageComplete();
@@ -283,6 +285,7 @@ private:
     void EightyToHundredAnimation();
     void AddTempNode(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& movingPhotoNode);
     void DetachFirstImageFromFrameNode();
+    void DetachTempImageFromFrameNode();
     RefPtr<FrameNode> GetTempNode();
     void StopAnimation();
     void StopAnimationCallback();
@@ -322,6 +325,7 @@ private:
     float hdrBrightness_ = 1.0f;
     std::string uri_ = "";
     int32_t xmageModeValue_ = 0;
+    bool refreshTransitionFlag_ = false;
     bool isXmageMode_ = false;
     bool startAnimationFlag_ = false;
     bool isPrepared_ = false;
@@ -333,6 +337,7 @@ private:
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
+    bool isRepeatChangePlayMode_ = false;
     bool isAutoChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
     bool isPlayWithMask_ = false;

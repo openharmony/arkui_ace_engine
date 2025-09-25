@@ -85,6 +85,7 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             int32_t childCount = host->GetTotalChildCount();
             CHECK_NULL_VOID(childCount >= 1);
             auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
+            CHECK_NULL_VOID(childLayoutWrapper);
             ChildMeasure(childLayoutWrapper, contentSize, layoutConstraint);
             if (childLayoutWrapper) {
                 PerformMeasureSelf(&*childLayoutWrapper);
@@ -141,6 +142,7 @@ void MovingPhotoLayoutAlgorithm::MeasureInXmageMode(LayoutWrapper* layoutWrapper
             int32_t childCount = host->GetTotalChildCount();
             CHECK_NULL_VOID(childCount >= 1);
             auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
+            CHECK_NULL_VOID(childLayoutWrapper);
             ChildMeasureInXmage(childLayoutWrapper, contentSize, imageSize, xmageOffsetRatio, layoutConstraint);
             if (childLayoutWrapper) {
                 PerformMeasureSelf(&*childLayoutWrapper);
