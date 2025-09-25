@@ -411,8 +411,12 @@ public:
 
     void HandleCancel(const JSCallbackInfo& args)
     {
+        bool abortLoading = false;
+        if (args.Length() >= 1 && args[0]->IsBoolean()) {
+            abortLoading = args[0]->ToBoolean();
+        }
         if (result_) {
-            result_->HandleCancel();
+            result_->HandleCancel(abortLoading);
         }
     }
 
