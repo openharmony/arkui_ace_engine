@@ -889,4 +889,111 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridOnDidScroll, TestSize.Level1)
     nodeAPI->unregisterNodeEvent(scroll, NODE_GRID_ON_DID_SCROLL);
     nodeAPI->disposeNode(scroll);
 }
+
+/**
+ * @tc.name: NativeNodeEdgeEffectTest001
+ * @tc.desc: Test EdgeEffect of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeEdgeEffectTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(rootNode, nullptr);
+
+    // set get and reset
+    ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_NONE } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), "test" };
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_NONE);
+    EXPECT_EQ(result->value[1].i32, 0);
+    EXPECT_EQ(result->value[2].i32, 0);
+
+    ArkUI_NumberValue newValue[] = { { .i32 = ARKUI_EDGE_EFFECT_SPRING }, { .i32 = 0 },
+        { .i32 = ARKUI_EFFECT_EDGE_START } };
+    item = { newValue, sizeof(newValue) / sizeof(ArkUI_NumberValue), "test" };
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_SPRING);
+    EXPECT_EQ(result->value[1].i32, 0);
+    EXPECT_EQ(result->value[2].i32, ARKUI_EFFECT_EDGE_START);
+
+    ArkUI_NumberValue newValue2[] = { { .i32 = ARKUI_EDGE_EFFECT_FADE }, { .i32 = 1 },
+        { .i32 = ARKUI_EFFECT_EDGE_END } };
+    item = { newValue2, sizeof(newValue2) / sizeof(ArkUI_NumberValue), "test" };
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_FADE);
+    EXPECT_EQ(result->value[1].i32, 1);
+    EXPECT_EQ(result->value[2].i32, ARKUI_EFFECT_EDGE_END);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_NONE);
+    EXPECT_EQ(result->value[1].i32, 0);
+    EXPECT_EQ(result->value[2].i32, static_cast<int32_t>(EffectEdge::ALL));
+}
+
+/**
+ * @tc.name: NativeNodeEdgeEffectTest002
+ * @tc.desc: Test EdgeEffect of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeEdgeEffectTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(rootNode, nullptr);
+
+    // set invalid value
+    ArkUI_NumberValue invalidValue[] = { { .i32 = -1 }, { .i32 = 1 },
+        { .i32 = ARKUI_EFFECT_EDGE_END } };
+    ArkUI_AttributeItem item = { invalidValue, sizeof(invalidValue) / sizeof(ArkUI_NumberValue), "test" };
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_NONE);
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_NONE);
+
+    ArkUI_NumberValue zeroSizeValue[] = {};
+    ArkUI_AttributeItem zeroSizeItem = { zeroSizeValue, sizeof(zeroSizeValue) / sizeof(ArkUI_NumberValue), "test" };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &zeroSizeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(result->value[0].i32, ARKUI_EDGE_EFFECT_NONE);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeEdgeEffectTest003
+ * @tc.desc: Test EdgeEffect of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeEdgeEffectTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_SPRING }, { .i32 = 0 },
+        { .i32 = ARKUI_EFFECT_EDGE_START } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), "test" };
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT), ARKUI_ERROR_CODE_NO_ERROR);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE_EFFECT);
+    ASSERT_NE(result, nullptr);
+
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace

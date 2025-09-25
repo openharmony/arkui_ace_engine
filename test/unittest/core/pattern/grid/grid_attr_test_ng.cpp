@@ -955,6 +955,23 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EdgeEffectOption005
+ * @tc.desc: Test EdgeEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, EdgeEffectOption005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(3); // 3 is item count
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::ALL);
+    CreateDone();
+    EXPECT_TRUE(pattern_->GetAlwaysEnabled());
+    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::ALL);
+}
+
+/**
  * @tc.name: GridSetFriction001
  * @tc.desc: Test SetFriction Function.
  * @tc.type: FUNC
