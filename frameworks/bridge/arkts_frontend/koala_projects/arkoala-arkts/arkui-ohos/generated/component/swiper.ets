@@ -1071,6 +1071,9 @@ export type ContentWillScrollCallback = (result: SwiperContentWillScrollResult) 
 
 export class ArkSwiperComponent extends ArkCommonMethodComponent implements SwiperAttribute {
     getPeer(): ArkSwiperPeer {
+        if (!this.peer) {
+            throw new Error("Attribute function should be called in memo context")
+        }
         return (this.peer as ArkSwiperPeer)
     }
     public setSwiperOptions(controller?: SwiperController): this {
@@ -1355,8 +1358,10 @@ export function SwiperImpl(
     const receiver = remember<ArkSwiperComponent>((): ArkSwiperComponent => {
         return new ArkSwiperComponent()
     })
-    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (_: ArkSwiperPeer): void => {
+    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (peer: ArkSwiperPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }
