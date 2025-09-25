@@ -953,14 +953,14 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
 
 void VideoPattern::PrepareSurface()
 {
-    if (!mediaPlayer_ || renderSurface_->IsSurfaceValid()) {
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
     }
-    renderSurface_->InitSurface();
-    mediaPlayer_->SetRenderSurface(renderSurface_);
+    if (!renderSurface_->IsSurfaceValid()) {
+        renderSurface_->InitSurface();
+        mediaPlayer_->SetRenderSurface(renderSurface_);
+    }
     if (mediaPlayer_->SetSurface() != 0) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
     }
