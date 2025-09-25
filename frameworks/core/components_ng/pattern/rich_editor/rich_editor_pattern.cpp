@@ -8514,6 +8514,7 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
     auto selectType = selectedType_.value_or(TextSpanType::NONE);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textSpanType=%{public}d, responseType=%{public}d", selectType, responseType);
     std::shared_ptr<SelectionMenuParams> menuParams = GetMenuParams(selectType, responseType);
+    IF_TRUE(!menuParams, selectInfo.menuInfo.menuBuilder = nullptr);
     CHECK_NULL_VOID(menuParams);
 
     // long pressing on the image needs to set the position of the pop-up menu following the long pressing position
