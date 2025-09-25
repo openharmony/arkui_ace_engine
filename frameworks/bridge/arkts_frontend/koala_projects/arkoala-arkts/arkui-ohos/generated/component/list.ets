@@ -445,7 +445,8 @@ export enum StickyStyle {
     HEADER = 1,
     Header = 1,
     FOOTER = 2,
-    Footer = 2
+    Footer = 2,
+    BOTH = 3
 }
 export enum ChainEdgeEffect {
     DEFAULT = 0,

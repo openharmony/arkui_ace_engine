@@ -6289,6 +6289,7 @@ typedef enum Ark_StickyStyle {
     ARK_STICKY_STYLE_NONE = 0,
     ARK_STICKY_STYLE_HEADER = 1,
     ARK_STICKY_STYLE_FOOTER = 2,
+    ARK_STICKY_STYLE_BOTH = 3,
 } Ark_StickyStyle;
 typedef struct Opt_StickyStyle {
     Ark_Tag tag;

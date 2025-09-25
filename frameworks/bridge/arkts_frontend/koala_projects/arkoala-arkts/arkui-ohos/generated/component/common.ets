@@ -8830,8 +8830,6 @@ export interface ItemDragEventHandler {
     onMoveThrough?: OnMoveHandler;
     onDrop?: ((value0: number) => void);
 }
-export interface DynamicNode {
-}
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
     effectEdge?: number;

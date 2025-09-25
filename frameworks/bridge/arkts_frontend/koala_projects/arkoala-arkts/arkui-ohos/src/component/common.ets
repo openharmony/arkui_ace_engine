@@ -1015,3 +1015,8 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
         ArkUIAniModule._CommonInterface_setCommonOptions(this.peer.ptr)
     }
 }
+
+export interface DynamicNode {
+    onMove(handler?: OnMoveHandler): this;
+    onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this;
+}
