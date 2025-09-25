@@ -143,6 +143,25 @@ auto g_bindMenuOptionsParamCallbacks = [](
     }
 };
 
+auto g_parseLayoutRegionMargin = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    if (layoutRegionMargin->left.has_value() && !layoutRegionMargin->left.value().IsValid()) {
+        layoutRegionMargin->left = std::nullopt;
+    }
+    if (layoutRegionMargin->right.has_value() && !layoutRegionMargin->right.value().IsValid()) {
+        layoutRegionMargin->right = std::nullopt;
+    }
+    if (layoutRegionMargin->top.has_value() && !layoutRegionMargin->top.value().IsValid()) {
+        layoutRegionMargin->top = std::nullopt;
+    }
+    if (layoutRegionMargin->bottom.has_value() && !layoutRegionMargin->bottom.value().IsValid()) {
+        layoutRegionMargin->bottom = std::nullopt;
+    }
+    layoutRegionMargin->start = layoutRegionMargin->left;
+    layoutRegionMargin->end = layoutRegionMargin->right;
+    menuParam.layoutRegionMargin = layoutRegionMargin;
+};
+
 auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
     auto offsetVal =
         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
@@ -185,9 +204,7 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
         },
         [](const CustomNodeBuilder& value) {}, []() {});
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
-    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
-    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
-    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    g_parseLayoutRegionMargin(menuOptions, menuParam);
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
