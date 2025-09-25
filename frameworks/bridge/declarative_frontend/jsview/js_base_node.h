@@ -66,7 +66,7 @@ private:
     bool ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent);
     bool GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
     RefPtr<NG::FrameNode> viewNode_;
-    RefPtr<NG::UINode> realNode_;
+    WeakPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;
