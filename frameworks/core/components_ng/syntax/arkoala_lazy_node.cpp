@@ -194,6 +194,9 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
         parent->NotifyChange(changeIndex, count, accessibilityId, type);
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+
+    // do not call when visible items have not changed
+    MarkNeedSyncRenderTree(true);
 }
 
 void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
