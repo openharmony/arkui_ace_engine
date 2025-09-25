@@ -486,6 +486,7 @@ HWTEST_F(WebPatternTest, UpdateTextFieldStatus, TestSize.Level1)
     EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_HIDE);
 }
 
+/**
  * @tc.name: ProcessVirtualKeyBoardShow
  * @tc.desc: Test ProcessVirtualKeyBoardShow.
  * @tc.type: FUNC
