@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double AUTO_STRETCH_EPSILON = 0.01;
 constexpr double FULL_PERCENT = 100.0;
 constexpr uint32_t REPEAT_MIN_SIZE = 6;
 constexpr uint32_t CROSS_WIDTH = 2;
@@ -474,7 +475,15 @@ std::pair<std::vector<double>, double> ParseArgsWithAutoStretch(const std::strin
     float realGap = gap;
     int32_t columnCount = 1;
     if (trackSize + gap > 0) {
-        columnCount = std::floor((size + gap) / (trackSize + gap));
+        // use float to calculate vp2px may make floorCount off by one in some display scale
+        auto count = (size + gap) / (trackSize + gap);
+        auto floorCount = std::floor(count);
+        auto ceilCount = std::ceil(count);
+        if (NearEqual(count, ceilCount, AUTO_STRETCH_EPSILON)) {
+            columnCount = ceilCount;
+        } else {
+            columnCount = floorCount;
+        }
         columnCount = std::max(columnCount, 1);
         if (columnCount > 1) {
             realGap = (size - columnCount * trackSize) / (columnCount - 1);
