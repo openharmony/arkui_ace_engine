@@ -46,19 +46,8 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void UpdateProperty(const RequestFormInfo& formInfo);
-    static void SetVisibility(FrameNode* frameNode, VisibleType visible);
-    static void AllowUpdate(FrameNode* frameNode, bool value);
-    static void SetDimension(FrameNode* frameNode, int32_t value);
-    static void SetModuleName(FrameNode* frameNode, const std::string& value);
-    static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
     int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg) override;
-    static void SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired);
-    static void SetOnError(FrameNode* frameNode, std::function<void(const std::string&)>&& onError);
-    static void SetOnUninstall(FrameNode* frameNode, std::function<void(const std::string&)>&& onUninstall);
-    static void SetOnLoad(FrameNode* frameNode, std::function<void(const std::string&)>&& onLoad);
-    static void SetOnRouter(FrameNode* frameNode, std::function<void(const std::string&)>&& onRouter);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
