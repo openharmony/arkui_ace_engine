@@ -5325,7 +5325,7 @@ export class Serializer extends SerializerBase {
     writePluginErrorData(value: PluginErrorData): void {
         let valueSerializer : Serializer = this
         const value_errcode  = value.errcode
-        valueSerializer.writeNumber(value_errcode)
+        valueSerializer.writeInt32(value_errcode)
         const value_msg  = value.msg
         valueSerializer.writeString(value_msg)
     }

@@ -14394,7 +14394,7 @@ typedef struct Opt_Array_ShapePoint {
     Array_ShapePoint value;
 } Opt_Array_ShapePoint;
 typedef struct Ark_PluginErrorData {
-    Ark_Number errcode;
+    Ark_Int32 errcode;
     Ark_String msg;
 } Ark_PluginErrorData;
 typedef struct Opt_PluginErrorData {

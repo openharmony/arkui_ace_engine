@@ -10324,7 +10324,7 @@ export class Deserializer extends DeserializerBase {
     }
     readPluginErrorData(): PluginErrorData {
         let valueDeserializer : Deserializer = this
-        const errcode_result : number = (valueDeserializer.readNumber() as number)
+        const errcode_result : int32 = (valueDeserializer.readInt32() as int32)
         const msg_result : string = (valueDeserializer.readString() as string)
         let value : PluginErrorData = ({errcode: errcode_result, msg: msg_result} as PluginErrorData)
         return value

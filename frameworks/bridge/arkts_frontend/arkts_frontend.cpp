@@ -58,7 +58,7 @@ const AppInfo KOALA_APP_INFO = {
     "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
     ":Larkui/ArkUIEntry/Application;",
     "start",
-    ":J",
+    "Z:J",
     "enter",
     "IIJ:Z",
     "emitEvent",
@@ -285,7 +285,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     ani_long result;
-    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
+    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, false) != ANI_OK) {
         LOGE("call start method returned null");
         return UIContentErrorCode::INVALID_URL;
     }
