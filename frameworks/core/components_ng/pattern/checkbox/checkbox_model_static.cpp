@@ -50,8 +50,8 @@ void CheckBoxModelStatic::SetSelectedColor(FrameNode* frameNode, const std::opti
 void CheckBoxModelStatic::SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     if (color.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color.value(), frameNode);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, true, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, frameNode);
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, frameNode);
