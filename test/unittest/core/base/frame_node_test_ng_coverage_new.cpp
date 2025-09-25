@@ -1491,4 +1491,40 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetIgnoreLayoutSafeAreaOptsTest001, TestSize.
     EXPECT_EQ(opts.type, NG::SAFE_AREA_TYPE_SYSTEM);
     EXPECT_EQ(opts.edges, NG::SAFE_AREA_EDGE_ALL);
 }
+
+/**
+ * @tc.name: FrameNodeInResponseRegionListTest001
+ * @tc.desc: Test the function InResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeInResponseRegionListTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = mockRenderContext;
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    mockRenderContext->paintRect_ = RectF(0, 10, 0, 10);
+
+    /**
+     * @tc.steps: step2. callback InResponseRegionList.
+     * @tc.expected: expect The function return value is true.
+     */
+    NG::PointF point { 1.0, 1.0 };
+    NG::RectF responseRect = { 0.0f, 0.0f, 10.0f, 10.0f };
+    std::vector<RectF> responseRegionList;
+    responseRegionList.emplace_back(responseRect);
+    auto test1 = frameNode->InResponseRegionList(point, responseRegionList, false);
+    EXPECT_TRUE(test1);
+    auto test2 = frameNode->InResponseRegionList(point, responseRegionList, true);
+    EXPECT_TRUE(test2);
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    mockRenderContext->paintRect_ = RectF(0, 0, 0, 10);
+    auto test3 = frameNode->InResponseRegionList(point, responseRegionList, true);
+    EXPECT_FALSE(test3);
+}
 } // namespace OHOS::Ace::NG
