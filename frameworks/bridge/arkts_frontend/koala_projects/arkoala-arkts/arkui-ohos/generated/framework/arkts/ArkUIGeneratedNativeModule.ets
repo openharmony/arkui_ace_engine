@@ -3730,13 +3730,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CustomSpan_invalidate(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _CustomSpan_getOnMeasure(ptr: KPointer): KPointer
+    native static _CustomSpan_getOnMeasure_callback(ptr: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _CustomSpan_setOnMeasure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CustomSpan_setOnMeasure_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CustomSpan_getOnDraw(ptr: KPointer): KPointer
+    native static _CustomSpan_getOnDraw_callback(ptr: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _CustomSpan_setOnDraw(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CustomSpan_setOnDraw_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DataResubmissionHandler_construct(): KPointer
     @ani.unsafe.Direct

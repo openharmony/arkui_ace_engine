@@ -432,7 +432,8 @@ private:
 struct StyledStringUnionCustomSpan {
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
-        peer = PeerUtils::CreatePeer<CustomSpanPeer>(AceType::MakeRefPtr<CustomSpan>());
+        peer = PeerUtils::CreatePeer<CustomSpanPeer>();
+        peer->span = AceType::MakeRefPtr<CustomSpanImpl>();
         static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
             Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer);
         return &value;

@@ -24103,12 +24103,12 @@ typedef struct GENERATED_ArkUICustomSpanAccessor {
     Ark_CustomSpan (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*invalidate)(Ark_CustomSpan peer);
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics (*getOnMeasure)(Ark_CustomSpan peer);
-    void (*setOnMeasure)(Ark_CustomSpan peer,
-                         const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure);
-    Callback_DrawContext_CustomSpanDrawInfo_Void (*getOnDraw)(Ark_CustomSpan peer);
-    void (*setOnDraw)(Ark_CustomSpan peer,
-                      const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw);
+    Callback_CustomSpanMeasureInfo_CustomSpanMetrics (*getOnMeasure_callback)(Ark_CustomSpan peer);
+    void (*setOnMeasure_callback)(Ark_CustomSpan peer,
+                                  const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback);
+    Callback_DrawContext_CustomSpanDrawInfo_Void (*getOnDraw_callback)(Ark_CustomSpan peer);
+    void (*setOnDraw_callback)(Ark_CustomSpan peer,
+                               const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback);
 } GENERATED_ArkUICustomSpanAccessor;
 
 typedef struct GENERATED_ArkUIDataResubmissionHandlerAccessor {

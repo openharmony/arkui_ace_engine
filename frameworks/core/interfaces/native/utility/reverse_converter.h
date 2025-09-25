@@ -51,6 +51,14 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+// this is for excluding the conflics with macros which defined
+// in ../../prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/include/nb30.h
+#ifdef REGISTERING
+#undef REGISTERING
+#endif
+#ifdef REGISTERED
+#undef REGISTERED
+#endif
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
@@ -196,6 +204,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
+    void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src);
+    void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src);
+    void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src);
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);

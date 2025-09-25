@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
@@ -66,8 +67,11 @@ Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_Cus
                 auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<MutableSpanString>(options);
             },
-            [](const Ark_CustomSpan& arkCustomSpan) {
-                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            [&peer](const Ark_CustomSpan& arkCustomSpan) {
+                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
+                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );

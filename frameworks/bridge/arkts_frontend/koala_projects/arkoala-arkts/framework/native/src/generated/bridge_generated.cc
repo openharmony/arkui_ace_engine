@@ -28187,34 +28187,34 @@ void impl_CustomSpan_invalidate(Ark_NativePointer thisPtr) {
         GetAccessors()->getCustomSpanAccessor()->invalidate(self);
 }
 KOALA_INTEROP_DIRECT_V1(CustomSpan_invalidate, Ark_NativePointer)
-Ark_NativePointer impl_CustomSpan_getOnMeasure(Ark_NativePointer thisPtr) {
+Ark_NativePointer impl_CustomSpan_getOnMeasure_callback(Ark_NativePointer thisPtr) {
         Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getCustomSpanAccessor()->getOnMeasure(self);
+        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getCustomSpanAccessor()->getOnMeasure_callback(self);
         // TODO: Value serialization needs to be implemented
         return {};
 }
-KOALA_INTEROP_DIRECT_1(CustomSpan_getOnMeasure, Ark_NativePointer, Ark_NativePointer)
-void impl_CustomSpan_setOnMeasure(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_1(CustomSpan_getOnMeasure_callback, Ark_NativePointer, Ark_NativePointer)
+void impl_CustomSpan_setOnMeasure_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_CustomSpanMeasureInfo_CustomSpanMetrics onMeasureValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics))))};;
-        GetAccessors()->getCustomSpanAccessor()->setOnMeasure(self, static_cast<Callback_CustomSpanMeasureInfo_CustomSpanMetrics*>(&onMeasureValueTemp));
+        Callback_CustomSpanMeasureInfo_CustomSpanMetrics onMeasure_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics))))};;
+        GetAccessors()->getCustomSpanAccessor()->setOnMeasure_callback(self, static_cast<Callback_CustomSpanMeasureInfo_CustomSpanMetrics*>(&onMeasure_callbackValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnMeasure, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_CustomSpan_getOnDraw(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnMeasure_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CustomSpan_getOnDraw_callback(Ark_NativePointer thisPtr) {
         Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getCustomSpanAccessor()->getOnDraw(self);
+        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getCustomSpanAccessor()->getOnDraw_callback(self);
         // TODO: Value serialization needs to be implemented
         return {};
 }
-KOALA_INTEROP_DIRECT_1(CustomSpan_getOnDraw, Ark_NativePointer, Ark_NativePointer)
-void impl_CustomSpan_setOnDraw(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_1(CustomSpan_getOnDraw_callback, Ark_NativePointer, Ark_NativePointer)
+void impl_CustomSpan_setOnDraw_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_DrawContext_CustomSpanDrawInfo_Void onDrawValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DrawContext_CustomSpanDrawInfo_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DrawContext_CustomSpanDrawInfo_Void))))};;
-        GetAccessors()->getCustomSpanAccessor()->setOnDraw(self, static_cast<Callback_DrawContext_CustomSpanDrawInfo_Void*>(&onDrawValueTemp));
+        Callback_DrawContext_CustomSpanDrawInfo_Void onDraw_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DrawContext_CustomSpanDrawInfo_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DrawContext_CustomSpanDrawInfo_Void))))};;
+        GetAccessors()->getCustomSpanAccessor()->setOnDraw_callback(self, static_cast<Callback_DrawContext_CustomSpanDrawInfo_Void*>(&onDraw_callbackValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnDraw, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnDraw_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_DataResubmissionHandler_construct() {
         return GetAccessors()->getDataResubmissionHandlerAccessor()->construct();
 }

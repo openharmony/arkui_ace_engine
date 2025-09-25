@@ -12167,20 +12167,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void InvalidateImpl(Ark_CustomSpan peer)
     {
     }
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
+    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasure_callbackImpl(Ark_CustomSpan peer)
     {
         return {};
     }
-    void SetOnMeasureImpl(Ark_CustomSpan peer,
-                          const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
+    void SetOnMeasure_callbackImpl(Ark_CustomSpan peer,
+                                   const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback)
     {
     }
-    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDrawImpl(Ark_CustomSpan peer)
+    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_CustomSpan peer)
     {
         return {};
     }
-    void SetOnDrawImpl(Ark_CustomSpan peer,
-                       const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw)
+    void SetOnDraw_callbackImpl(Ark_CustomSpan peer,
+                                const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback)
     {
     }
     } // CustomSpanAccessor
@@ -18685,10 +18685,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomSpanAccessor::ConstructImpl,
             CustomSpanAccessor::GetFinalizerImpl,
             CustomSpanAccessor::InvalidateImpl,
-            CustomSpanAccessor::GetOnMeasureImpl,
-            CustomSpanAccessor::SetOnMeasureImpl,
-            CustomSpanAccessor::GetOnDrawImpl,
-            CustomSpanAccessor::SetOnDrawImpl,
+            CustomSpanAccessor::GetOnMeasure_callbackImpl,
+            CustomSpanAccessor::SetOnMeasure_callbackImpl,
+            CustomSpanAccessor::GetOnDraw_callbackImpl,
+            CustomSpanAccessor::SetOnDraw_callbackImpl,
         };
         return &CustomSpanAccessorImpl;
     }
