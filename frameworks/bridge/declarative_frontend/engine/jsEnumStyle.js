@@ -3611,6 +3611,8 @@ let SaveButtonOnClickResult;
     'SUCCESS';
   SaveButtonOnClickResult[SaveButtonOnClickResult.TEMPORARY_AUTHORIZATION_FAILED = 1] =
     'TEMPORARY_AUTHORIZATION_FAILED ';
+  SaveButtonOnClickResult[SaveButtonOnClickResult.CANCELED_BY_USER = 2] =
+    'CANCELED_BY_USER';
 })(SaveButtonOnClickResult || (SaveButtonOnClickResult = {}));
 
 let ObscuredReasons;
