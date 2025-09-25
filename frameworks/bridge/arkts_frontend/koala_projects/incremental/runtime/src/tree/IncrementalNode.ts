@@ -69,7 +69,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to reuse.
      * @returns A recycled scope, or undefined if none is available.
      */
-    reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+    reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
         return undefined
     }
 
@@ -80,7 +80,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param id - The id of the scope to recycle.
      * @return true if child is successfully recycled
      */
-    recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+    recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
     }
 

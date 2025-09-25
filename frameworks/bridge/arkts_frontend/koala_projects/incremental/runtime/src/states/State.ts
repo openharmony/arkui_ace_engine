@@ -1041,7 +1041,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
+        let reused = this.nodeRef?.reuse(reuseKey, id)
         const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
@@ -1207,14 +1207,28 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     }
 
     private recycleOrDispose(child: ManagedScope): void {
-        // TEMP: explicit compares to avoid compiler bug
-        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child, child.id) == true
+        const recycled = this._nodeRef?.recycle(child.reuseKey, child, child.id) == true
         if (recycled) {
-            // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
-            if (!child.node) throw Error("reusable scope doesn't have a node")
-            child.node!.detach()
+            if (child.reuseKey !== undefined) {
+                // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
+                if (!child.node) throw Error("reusable scope doesn't have a node")
+                child.node!.detach()
+            } else {
+                (child as ScopeImpl<void>).detachNodes();
+            }
         } else {
             child.dispose()
+        }
+    }
+
+    private detachNodes(): void {
+        if (this.node) {
+            this.node!.detach();
+            return;
+        }
+
+        for (let child = this.child; child; child = child!.next) {
+            (child as ScopeImpl<void>).detachNodes();
         }
     }
 

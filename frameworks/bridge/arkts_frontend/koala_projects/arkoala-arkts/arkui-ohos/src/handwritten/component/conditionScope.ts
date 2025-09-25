@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { int32 } from '@koalaui/common'
+import { KoalaCallsiteKey, int32 } from '@koalaui/common'
 import { KPointer } from "@koalaui/interop"
-import { __context, __id, IncrementalNode, InternalScope, NodeAttach } from '@koalaui/runtime';
+import { __context, __id, Disposable, IncrementalNode, InternalScope, NodeAttach } from '@koalaui/runtime';
 import { ArkUIAniModule } from "arkui.ani"
 import { PeerNode } from '../PeerNode';
 
@@ -30,6 +30,7 @@ class ConditionScopePeer extends PeerNode {
     }
 
     private _branchesNode: ConditionBranchesNode = new ConditionBranchesNode();
+    private scopes: Map<KoalaCallsiteKey, Disposable> = new Map<KoalaCallsiteKey, Disposable>();
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
@@ -37,6 +38,45 @@ class ConditionScopePeer extends PeerNode {
 
     get branchesNode(): ConditionBranchesNode {
         return this._branchesNode;
+    }
+
+    /* reuse and recycle object on RootPeers */
+    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+        if (reuseKey !== undefined) {
+            return super.reuse(reuseKey, id);
+        }
+
+        const result = this.scopes.get(id);
+        if (result !== undefined) {
+            this.scopes.delete(id);
+        }
+
+        return result;
+    }
+
+    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (reuseKey !== undefined) {
+            return super.recycle(reuseKey, child, id);
+        }
+
+        if (!this.scopes.has(id)) {
+            this.scopes.set(id, child);
+            return true;
+        }
+
+        return false;
+    }
+
+    private clearScopes(): void {
+        for (const item of this.scopes.values()) {
+            item.dispose();
+        }
+        this.scopes.clear();
+    }
+
+    override dispose(): void {
+        this.clearScopes();
+        super.dispose();
     }
 }
 
