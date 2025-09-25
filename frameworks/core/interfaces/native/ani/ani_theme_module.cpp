@@ -85,7 +85,7 @@ void AniThemeModule::ConvertToColorArray(
     const std::vector<Ark_ResourceColor>& colorArray, std::vector<uint32_t>& colors)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    for (int i = 0; i < colorArray.size(); i++) {
+    for (size_t i = 0; i < colorArray.size(); i++) {
         // type ResourceColor = number | string | Resource
         auto value = colorArray[i];
         Color color;
