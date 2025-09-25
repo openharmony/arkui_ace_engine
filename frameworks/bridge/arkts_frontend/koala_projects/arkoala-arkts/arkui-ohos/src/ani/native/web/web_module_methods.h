@@ -19,8 +19,8 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
-void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object object);
-void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_long handler, ani_object object);
+ani_long ExtractorsToWebviewWebviewControllerPtr(ani_env* env, ani_class aniClass, ani_object object);
+ani_object ExtractorsFromWebviewWebviewControllerPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 
 ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferJsGeolocationToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);

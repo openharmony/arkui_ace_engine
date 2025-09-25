@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ControllerHandlerAccessor {
 void DestroyPeerImpl(Ark_ControllerHandler peer)
 {
+    peer->DestroyController();
     delete peer;
 }
 Ark_ControllerHandler ConstructImpl()
@@ -39,27 +40,18 @@ void SetWebControllerImpl(Ark_ControllerHandler peer,
                           Ark_webview_WebviewController controller)
 {
 #ifdef WEB_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->handler);
-
-    int32_t parentNWebId = peer->handler->GetParentNWebId();
-    if (parentNWebId == -1) {
+    LOGI("SetWebControllerImpl");
+    if (!peer) {
+        if (!controller) {
+            return;
+        }
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
         return;
     }
-
-    if (controller == nullptr) {
-        WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
-        return;
-    }
-
-    int32_t childWebId = controller->nwebId;
-    if (childWebId == parentNWebId || childWebId != -1) {
-        WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
-        return;
-    }
-    ControllerHandlerPeer::ChildWindowInfo info { parentNWebId, Referenced::Claim(controller) };
-    ControllerHandlerPeer::controllerMap.insert(std::pair<int32_t, ControllerHandlerPeer::ChildWindowInfo>(
-        peer->handler->GetId(), info));
+    peer->SetWebController(controller);
 #endif // WEB_SUPPORTED
 }
 } // ControllerHandlerAccessor

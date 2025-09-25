@@ -52,26 +52,37 @@ HWTEST_F(ControllerHandlerAccessorTest, setWebControllerTest, TestSize.Level1)
     auto webControllerPeer = accessors_->getWebviewControllerAccessor()->construct();
     ASSERT_NE(webControllerPeer, nullptr);
     EXPECT_TRUE(ControllerHandlerPeer::controllerMap.empty());
-    accessor_->setWebController(peer_, webControllerPeer);
-    EXPECT_TRUE(ControllerHandlerPeer::controllerMap.empty());
     RefPtr<MockWebWindowNewHandler> mockHandler = Referenced::MakeRefPtr<MockWebWindowNewHandler>();
     peer_->handler = mockHandler;
-    webControllerPeer->nwebId = 5;
     ASSERT_NE(peer_->handler, nullptr);
     EXPECT_CALL(*mockHandler, GetParentNWebId()).Times(3).WillRepeatedly(Return(5));
     EXPECT_CALL(*mockHandler, GetId()).Times(1).WillOnce(Return(15));
-    accessor_->setWebController(peer_, webControllerPeer);
+
+    accessor_->setWebController(peer_, nullptr);
     EXPECT_TRUE(ControllerHandlerPeer::controllerMap.empty());
-    webControllerPeer->nwebId = 10;
-    accessor_->setWebController(peer_, webControllerPeer);
+
+    auto webviewControllerPeer = new webview_WebviewControllerPeer();
+    accessor_->setWebController(peer_, webviewControllerPeer);
     EXPECT_TRUE(ControllerHandlerPeer::controllerMap.empty());
-    webControllerPeer->nwebId = -1;
-    accessor_->setWebController(peer_, webControllerPeer);
+
+    auto getWebIdFunc = []() -> int32_t { return 0; };
+    webviewControllerPeer->getWebIdFunc = getWebIdFunc;
+    auto setWebIdFunc = [](int32_t nwebId) { return; };
+    webviewControllerPeer->setWebIdFunc = setWebIdFunc;
+    auto setHapPathFunc = [](const std::string& hapPath) { return; };
+    webviewControllerPeer->setHapPathFunc = setHapPathFunc;
+    auto getNativePtrFunc = []() -> long { return 0L; };
+    webviewControllerPeer->getNativePtrFunc = getNativePtrFunc;
+    auto releaseRefFunc = []() { return; };
+    webviewControllerPeer->releaseRefFunc = releaseRefFunc;
+    accessor_->setWebController(peer_, webviewControllerPeer);
     EXPECT_FALSE(ControllerHandlerPeer::controllerMap.empty());
     EXPECT_EQ(ControllerHandlerPeer::controllerMap.size(), 1);
+    delete webviewControllerPeer;
+
     auto it = ControllerHandlerPeer::controllerMap.find(15);
     ASSERT_NE(it, ControllerHandlerPeer::controllerMap.end());
-    EXPECT_EQ(it->second.controller, webControllerPeer);
+    EXPECT_EQ(it->second.controller, webviewControllerPeer);
     EXPECT_EQ(it->second.parentWebId, 5);
     auto weakWebController = Referenced::WeakClaim(webControllerPeer);
     EXPECT_FALSE(weakWebController.Invalid());
