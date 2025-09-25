@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_stack_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -354,6 +355,14 @@ void FfiOHOSAceFrameworkNavdestinationSetSystemBarStyle(uint32_t styleColor)
 {
     RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(styleColor);
     NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
+}
+
+void FfiOHOSAceFrameworkNavdestinationSetBackgroundColor(uint32_t color)
+{
+    Color backgroundColor = Color(color);
+    RefPtr<ResourceObject> backgroundColorResObj;
+    CompleteResourceObjectFromColor(backgroundColorResObj, backgroundColor, true);
+    NavDestinationModel::GetInstance()->SetBackgroundColor(backgroundColor, true, backgroundColorResObj);
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetOnShown(void (*callback)())

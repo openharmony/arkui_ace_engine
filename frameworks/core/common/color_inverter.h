@@ -51,7 +51,7 @@ private:
     std::unordered_map<std::string, ColorInvertFunc> colorInvertFuncMap_;
 };
 
-class ColorInverter : public Singleton<ColorInverter> {
+class ACE_FORCE_EXPORT ColorInverter : public Singleton<ColorInverter> {
     DECLARE_SINGLETON(ColorInverter);
 
 public:
