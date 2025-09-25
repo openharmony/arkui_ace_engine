@@ -19,6 +19,7 @@
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
@@ -537,10 +538,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
         case Ace::SpanType::Image:
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
-        case Ace::SpanType::CustomSpan: {
-            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_CustomSpan is not implemented.");
+        case Ace::SpanType::CustomSpan:
+            CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
             break;
-        }
         case Ace::SpanType::ExtSpan: {
             LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
             break;
@@ -823,11 +823,11 @@ template<>
 Ark_Resource ArkCreate(int64_t id, ResourceType type)
 {
     return {
-        .id = ArkValue<Ark_Int64>(id),
-        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
-        .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
+        .moduleName = ArkValue<Ark_String>(""),
+        .id = ArkValue<Ark_Int64>(id),
         .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(),
+        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
     };
 }
 
@@ -836,11 +836,11 @@ Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
 {
     std::vector params = { ArkUnion<Ark_Union_String_I32_I64_F64_Resource, Ark_String>(name, ctx) };
     return {
-        .id = ArkValue<Ark_Int64>(static_cast<int64_t>(-1)),
-        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
-        .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
+        .moduleName = ArkValue<Ark_String>(""),
+        .id = ArkValue<Ark_Int64>(static_cast<int64_t>(-1)),
         .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(params, ctx),
+        .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
     };
 }
 

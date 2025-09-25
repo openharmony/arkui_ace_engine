@@ -27891,51 +27891,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasureImpl(Ark_CustomSpan peer)
+    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasure_callbackImpl(Ark_CustomSpan peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("getOnMeasure(");
+        string out("getOnMeasure_callback(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void SetOnMeasureImpl(Ark_CustomSpan peer,
-                          const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure)
+    void SetOnMeasure_callbackImpl(Ark_CustomSpan peer,
+                                   const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setOnMeasure(");
-        WriteToString(&out, onMeasure);
+        string out("setOnMeasure_callback(");
+        WriteToString(&out, onMeasure_callback);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDrawImpl(Ark_CustomSpan peer)
+    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_CustomSpan peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
-        string out("getOnDraw(");
+        string out("getOnDraw_callback(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
     }
-    void SetOnDrawImpl(Ark_CustomSpan peer,
-                       const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw)
+    void SetOnDraw_callbackImpl(Ark_CustomSpan peer,
+                                const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setOnDraw(");
-        WriteToString(&out, onDraw);
+        string out("setOnDraw_callback(");
+        WriteToString(&out, onDraw_callback);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -43990,10 +43990,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomSpanAccessor::ConstructImpl,
             CustomSpanAccessor::GetFinalizerImpl,
             CustomSpanAccessor::InvalidateImpl,
-            CustomSpanAccessor::GetOnMeasureImpl,
-            CustomSpanAccessor::SetOnMeasureImpl,
-            CustomSpanAccessor::GetOnDrawImpl,
-            CustomSpanAccessor::SetOnDrawImpl,
+            CustomSpanAccessor::GetOnMeasure_callbackImpl,
+            CustomSpanAccessor::SetOnMeasure_callbackImpl,
+            CustomSpanAccessor::GetOnDraw_callbackImpl,
+            CustomSpanAccessor::SetOnDraw_callbackImpl,
         };
         return &CustomSpanAccessorImpl;
     }

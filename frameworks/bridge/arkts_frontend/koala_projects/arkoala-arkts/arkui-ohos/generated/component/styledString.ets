@@ -118,23 +118,31 @@ export class CustomSpan implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get onMeasure(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure()
+    onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
+        throw new Error("Not implemented!")
     }
-    set onMeasure(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
-        this.setOnMeasure(onMeasure)
+    get onMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        return this.getOnMeasure_callback()
     }
-    get onDraw(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw()
+    set onMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
+        this.setOnMeasure_callback(onMeasure_callback)
     }
-    set onDraw(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
-        this.setOnDraw(onDraw)
+    onDraw(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
+        throw new Error("Not implemented!")
+    }
+    get onDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        return this.getOnDraw_callback()
+    }
+    set onDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
+        this.setOnDraw_callback(onDraw_callback)
     }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, CustomSpan.getFinalizer())
     }
     constructor() {
         this(CustomSpan.construct())
+        this.onMeasure_callback = this.onMeasure
+        this.onDraw_callback = this.onDraw
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_construct()
@@ -147,43 +155,43 @@ export class CustomSpan implements MaterializedBase {
         this.invalidate_serialize()
         return
     }
-    private getOnMeasure(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure_serialize()
+    private getOnMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        return this.getOnMeasure_callback_serialize()
     }
-    private setOnMeasure(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
-        const onMeasure_casted = onMeasure as (((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics))
-        this.setOnMeasure_serialize(onMeasure_casted)
+    private setOnMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
+        const onMeasure_callback_casted = onMeasure_callback as (((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics))
+        this.setOnMeasure_callback_serialize(onMeasure_callback_casted)
         return
     }
-    private getOnDraw(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw_serialize()
+    private getOnDraw_callback(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        return this.getOnDraw_callback_serialize()
     }
-    private setOnDraw(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
-        const onDraw_casted = onDraw as (((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void))
-        this.setOnDraw_serialize(onDraw_casted)
+    private setOnDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+        const onDraw_callback_casted = onDraw_callback as (((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void))
+        this.setOnDraw_callback_serialize(onDraw_callback_casted)
         return
     }
     invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
     }
-    private getOnMeasure_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure(this.peer!.ptr)
+    private getOnMeasure_callback_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure_callback(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setOnMeasure_serialize(onMeasure: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
+    private setOnMeasure_callback_serialize(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onMeasure)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(onMeasure_callback)
+        ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getOnDraw_serialize(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw(this.peer!.ptr)
+    private getOnDraw_callback_serialize(): ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw_callback(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setOnDraw_serialize(onDraw: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
+    private setOnDraw_callback_serialize(onDraw_callback: ((context: DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onDraw)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(onDraw_callback)
+        ArkUIGeneratedNativeModule._CustomSpan_setOnDraw_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

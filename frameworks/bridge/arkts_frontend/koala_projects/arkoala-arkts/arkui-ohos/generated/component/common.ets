@@ -924,6 +924,7 @@ export class DrawModifier implements MaterializedBase {
         return this.peer
     }
     drawBehind(drawContext: DrawContext): void {
+        throw new Error("Not implemented!")
     }
     get drawBehind_callback(): ((drawContext: DrawContext) => void) {
         return this.getDrawBehind_callback()
@@ -932,6 +933,7 @@ export class DrawModifier implements MaterializedBase {
         this.setDrawBehind_callback(drawBehind_callback)
     }
     drawContent(drawContext: DrawContext): void {
+        throw new Error("Not implemented!")
     }
     get drawContent_callback(): ((drawContext: DrawContext) => void) {
         return this.getDrawContent_callback()

@@ -15,16 +15,17 @@
 
 #pragma once
 
-
-#include "core/event/key_event.h"
-
-#include "core/components_ng/pattern/text/span/span_object.h"
+#include "custom_span_impl.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct CustomSpanPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::CustomSpan> span;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CustomSpanImpl> span;
 
 protected:
-    explicit CustomSpanPeer(OHOS::Ace::RefPtr<OHOS::Ace::CustomSpan> customSpan) : span(customSpan) {}
-    ~CustomSpanPeer() = default;
+    explicit CustomSpanPeer(OHOS::Ace::RefPtr<OHOS::Ace::NG::CustomSpanImpl> spn = nullptr): span(spn) {};
+    ~CustomSpanPeer()
+    {
+        span = nullptr;
+    }
     friend OHOS::Ace::NG::PeerUtils;
 };

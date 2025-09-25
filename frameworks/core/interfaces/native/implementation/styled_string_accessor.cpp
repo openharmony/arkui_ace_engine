@@ -183,7 +183,8 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
             [&peer](const Ark_CustomSpan& arkCustomSpan) {
                 CustomSpanPeer* peerCustomSpan = arkCustomSpan;
                 CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
         );
