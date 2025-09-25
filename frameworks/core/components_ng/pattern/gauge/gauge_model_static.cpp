@@ -78,12 +78,12 @@ void GaugeModelStatic::SetIndicatorSpace(FrameNode* frameNode, const std::option
 
 void GaugeModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    // if (flag) {
-    //     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
-    // } else {
-    //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
-    // }
-    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
+    if (flag) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsSensitive, *flag, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
 
 void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode)
