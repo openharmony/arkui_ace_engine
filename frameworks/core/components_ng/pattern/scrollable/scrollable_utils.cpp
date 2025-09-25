@@ -211,4 +211,12 @@ float ScrollableUtils::GetMoveOffset(
     }
     return notMove;
 }
+
+bool ScrollableUtils::IsMainThreadBusy(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->GetIsRequestFrame();
+}
 } // namespace OHOS::Ace::NG

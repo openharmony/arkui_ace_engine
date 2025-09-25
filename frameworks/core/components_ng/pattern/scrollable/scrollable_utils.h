@@ -70,6 +70,11 @@ struct ScrollableUtils {
         const RefPtr<FrameNode>& parentFrameNode,
         const RefPtr<FrameNode>& curFrameNode,
         const MoveOffsetParam& param);
+
+    /**
+     * @brief get whether the main thread is busy.
+     */
+    static bool IsMainThreadBusy(const RefPtr<FrameNode>& frameNode);
 };
 } // namespace OHOS::Ace::NG
 

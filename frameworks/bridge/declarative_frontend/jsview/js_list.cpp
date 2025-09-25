@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_list.h"
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/axis.h"
@@ -26,11 +27,11 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-
 namespace OHOS::Ace {
 
 std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
@@ -194,6 +195,21 @@ void JSList::SetCachedCount(const JSCallbackInfo& info)
     // 2: represent 2 params.
     if (info.Length() == 2) {
         show = info[1]->ToBoolean();
+    }
+
+    if (info[0]->IsObject()) {
+        NG::CacheRange cacheRange = { 1, 1 };
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        int32_t minCacheCount = obj->GetProperty("minCount")->IsNumber() ? 1 :
+                                obj->GetProperty("minCount")->ToNumber<int32_t>();
+        int32_t maxCacheCount = obj->GetProperty("maxCount")->IsNumber() ? minCacheCount :
+                                obj->GetProperty("maxCount")->ToNumber<int32_t>();
+        minCacheCount = minCacheCount < 0 ? 1 : minCacheCount;
+        maxCacheCount = maxCacheCount < 0 ? minCacheCount : maxCacheCount;
+        cacheRange.min = minCacheCount;
+        cacheRange.max = maxCacheCount;
+        ListModel::GetInstance()->SetCacheRange(cacheRange, show);
+        return;
     }
     ListModel::GetInstance()->SetCachedCount(cachedCount, show);
 }

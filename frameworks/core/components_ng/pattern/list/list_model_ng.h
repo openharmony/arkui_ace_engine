@@ -47,6 +47,7 @@ public:
     void SetLaneGutter(const Dimension& laneGutter) override;
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
     void SetCachedCount(int32_t cachedCount, bool show = false) override;
+    void SetCacheRange(NG::CacheRange cacheRange, bool show = false) override;
     void SetMultiSelectable(bool selectable) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
@@ -101,6 +102,7 @@ public:
     static bool GetShowCached(FrameNode* frameNode);
     static void SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max);
     static void ResetCacheRange(FrameNode* frameNode);
+    static CacheRange GetCacheRange(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);

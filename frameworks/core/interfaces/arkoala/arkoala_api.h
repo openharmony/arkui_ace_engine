@@ -3397,6 +3397,7 @@ struct ArkUIListModifier {
     void (*resetCachedIsShown)(ArkUINodeHandle node);
     void (*setCacheRange)(ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max);
     void (*resetCacheRange)(ArkUINodeHandle node);
+    void (*getCacheRange)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
     ArkUI_Int32 (*getListFocusWrapMode)(ArkUINodeHandle node);
     void (*setListFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
     void (*resetListFocusWrapMode)(ArkUINodeHandle node);

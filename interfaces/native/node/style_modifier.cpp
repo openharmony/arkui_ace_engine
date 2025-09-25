@@ -7125,12 +7125,17 @@ int32_t SetListCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getListModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
     ArkUI_Bool isShown = DEFAULT_FALSE;
     if (item->size > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
         isShown = item->value[1].i32;
     }
     GetFullImpl()->getNodeModifiers()->getListModifier()->setCachedIsShown(node->uiNodeHandle, isShown);
+    if (item->size > NUM_2 && GreatOrEqual(item->value[2].i32, NUM_0)) {
+        GetFullImpl()->getNodeModifiers()->getListModifier()->setCacheRange(
+            node->uiNodeHandle, item->value[0].i32, item->value[2].i32);
+        return ERROR_CODE_NO_ERROR;
+    }
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7139,15 +7144,24 @@ void ResetListCachedCount(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getListModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getListModifier()->resetCacheRange (node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getListModifier()->resetCachedIsShown(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetListCachedCount(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getListModifier()->getCachedCount(node->uiNodeHandle);
     ArkUI_Int32 isShown = GetFullImpl()->getNodeModifiers()->getListModifier()->getCachedIsShown(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
     g_numberValues[1].i32 = isShown;
+    ArkUI_Int32 cacheRange[NUM_2];
+    GetFullImpl()->getNodeModifiers()->getListModifier()->getCacheRange(node->uiNodeHandle, &cacheRange);
+    if (cacheRange[0] != -1 ) {
+        g_numberValues[0].i32 = cacheRange[0];
+        g_numberValues[2].i32 = cacheRange[1];
+        return &g_attributeItem;
+    }
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getListModifier()->getCachedCount(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    g_numberValues[2].i32 = value;
     return &g_attributeItem;
 }
 
