@@ -20017,6 +20017,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void ForceEnableZoomImpl(Ark_NativePointer node,
+                             const Opt_Boolean *value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("forceEnableZoom(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebAttributeModifier
     namespace WindowSceneModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -23299,6 +23309,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::RegisterNativeEmbedRuleImpl,
             WebAttributeModifier::BindSelectionMenuImpl,
             WebAttributeModifier::GestureFocusModeImpl,
+            WebAttributeModifier::ForceEnableZoomImpl,
         };
         return &ArkUIWebModifierImpl;
     }

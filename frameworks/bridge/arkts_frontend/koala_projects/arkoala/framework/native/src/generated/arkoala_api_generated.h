@@ -24206,6 +24206,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_SelectionMenuOptionsExt* options);
     void (*setGestureFocusMode)(Ark_NativePointer node,
                                 const Opt_GestureFocusMode* value);
+    void (*setForceEnableZoom)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {

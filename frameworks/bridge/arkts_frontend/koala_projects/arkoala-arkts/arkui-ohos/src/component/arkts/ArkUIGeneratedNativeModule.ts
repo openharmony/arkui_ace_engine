@@ -3582,6 +3582,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_gestureFocusMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_forceEnableZoom(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WindowScene_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _WindowSceneInterface_setWindowSceneOptions(ptr: KPointer, persistentId: number): void
