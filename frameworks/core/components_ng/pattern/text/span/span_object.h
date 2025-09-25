@@ -58,6 +58,7 @@ struct SpanParagraphStyle {
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<Dimension> textIndent;
     std::optional<Dimension> paragraphSpacing;
+    std::optional<NG::DrawableLeadingMargin> drawableLeadingMargin;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
@@ -68,6 +69,11 @@ struct SpanParagraphStyle {
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {
+            flag &= true;
+        } else {
+            flag &= false;
+        }
+        if (!drawableLeadingMargin.has_value() && !other.drawableLeadingMargin.has_value()) {
             flag &= true;
         } else {
             flag &= false;
@@ -367,6 +373,7 @@ public:
     explicit ParagraphStyleSpan(SpanParagraphStyle paragraphStyle);
     ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
     SpanParagraphStyle GetParagraphStyle() const;
+    void SetParagraphStyle(const SpanParagraphStyle& paragraphStyle);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;

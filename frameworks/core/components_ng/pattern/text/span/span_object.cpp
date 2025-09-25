@@ -968,6 +968,10 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
         spanItem->textLineStyle->UpdateLeadingMargin(paragraphStyle_.leadingMargin.value());
     }
 
+    if (paragraphStyle_.drawableLeadingMargin.has_value()) {
+        spanItem->textLineStyle->UpdateDrawableLeadingMargin(paragraphStyle_.drawableLeadingMargin.value());
+    }
+
     if (paragraphStyle_.wordBreak.has_value()) {
         spanItem->textLineStyle->UpdateWordBreak(paragraphStyle_.wordBreak.value());
     }
@@ -988,6 +992,7 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetMaxLines();
     spanItem->textLineStyle->ResetTextOverflow();
     spanItem->textLineStyle->ResetLeadingMargin();
+    spanItem->textLineStyle->ResetDrawableLeadingMargin();
     spanItem->textLineStyle->ResetWordBreak();
     spanItem->textLineStyle->ResetTextIndent();
     spanItem->textLineStyle->ResetParagraphSpacing();
@@ -1006,6 +1011,11 @@ bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 SpanParagraphStyle ParagraphStyleSpan::GetParagraphStyle() const
 {
     return paragraphStyle_;
+}
+
+void ParagraphStyleSpan::SetParagraphStyle(const SpanParagraphStyle& paragraphStyle)
+{
+    paragraphStyle_ = paragraphStyle;
 }
 
 SpanType ParagraphStyleSpan::GetSpanType() const

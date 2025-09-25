@@ -4089,6 +4089,16 @@ class UserDataSpan {
   type_ = 'ExtSpan';
 }
 
+class LeadingMarginSpan extends NativeLeadingMarginSpan {
+  type_ = 'LeadingMarginSpan';
+}
+
+let TextDirection;
+(function (TextDirection) {
+  TextDirection[TextDirection.LTR = 0] = 'LTR';
+  TextDirection[TextDirection.RTL = 1] = 'RTL';
+})(TextDirection || (TextDirection = {}));
+
 let FocusPriority;
 (function (FocusPriority) {
   FocusPriority[FocusPriority.AUTO = 0] = 'AUTO';

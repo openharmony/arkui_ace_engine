@@ -181,6 +181,8 @@ private:
     void PaintCustomSpan(DrawingContext& drawingContext);
     void DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info, RefPtr<ParagraphManager> pManager);
     void DrawText(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern);
+    void PaintLeadingMarginSpan(const RefPtr<TextPattern>& textPattern, DrawingContext& drawingContext,
+        const RefPtr<ParagraphManager>& pManager);
     void DrawContent(DrawingContext& drawingContext, const FadeoutInfo& info);
     void DrawActualText(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
         const RefPtr<ParagraphManager>& pManager, const FadeoutInfo& fadeoutInfo);
