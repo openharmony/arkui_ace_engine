@@ -248,55 +248,18 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
         LOGW("SendShowingImage write interface token failed");
         return;
     }
-    std::vector<std::pair<int32_t, sptr<Ashmem>>> tempMaps;
-    for (auto& map : maps) {
-        std::vector<uint8_t> buf;
-        map.second->EncodeTlv(buf);
-        auto dataSize = buf.size();
-        sptr<Ashmem> ashmem = Ashmem::CreateAshmem((std::to_string(map.first)).c_str(), dataSize);
-        if (ashmem == nullptr) {
-            LOGW("Create shared memory failed");
-            continue;
-        }
-        // Set the read/write mode of the ashme.
-        if (!ashmem->MapReadAndWriteAshmem()) {
-            ClearAshmem(ashmem);
-            LOGW("Map shared memory fail");
-            continue;
-        }
-        // Write the size and content of each item to the ashmem.
-        int32_t offset = 0;
-        if (!ashmem->WriteToAshmem(reinterpret_cast<uint8_t*>(buf.data()), dataSize, offset)) {
-            LOGW("Write info to shared memory fail");
-            ClearAshmem(ashmem);
-            continue;
-        }
-
-        tempMaps.push_back({map.first, ashmem});
-    }
-    LOGI("before send images,collect tempMaps size:%{public}zu", tempMaps.size());
-    if (!messageData.WriteInt32(tempMaps.size())) {
+    if (!messageData.WriteInt32(maps.size())) {
         LOGW("SendShowingImage write size failed");
         return;
     }
-    for (auto& map : tempMaps) {
-        if (!messageData.WriteInt32(map.first) || !messageData.WriteAshmem(map.second)) {
-            ClearAshmem(map.second);
+    for (auto& map : maps) {
+        if (!messageData.WriteInt32(map.first) || !map.second->Marshalling(messageData)) {
             LOGW("SendShowingImage write data failed");
             return;
         }
-        ClearAshmem(map.second);
     }
     if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
         LOGW("SendShowingImage send request failed");
-    }
-}
-
-void UiReportProxy::ClearAshmem(sptr<Ashmem>& optMem)
-{
-    if (optMem != nullptr) {
-        optMem->UnmapAshmem();
-        optMem->CloseAshmem();
     }
 }
 

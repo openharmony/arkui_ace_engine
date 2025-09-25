@@ -140,7 +140,6 @@ public:
     void SendCurrentPageName(const std::string& result) override;
     void SendWebText(int32_t nodeId, std::string res) override;
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
-    void ClearAshmem(sptr<Ashmem>& optMem);
     void RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback);
     void SendExeAppAIFunctionResult(uint32_t result) override;
 
