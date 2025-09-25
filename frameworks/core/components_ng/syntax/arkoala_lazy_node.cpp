@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 ArkoalaLazyNode::ArkoalaLazyNode(int32_t nodeId, bool isRepeat) : ForEachBaseNode(
@@ -24,7 +25,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
-        "nodeId: %{public}d: DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
+        "ArkoalaLazyNode(%{public}d).DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     // range of screen node & preload node
     const RangeType cacheRange { start - cacheStart, end + cacheEnd };
@@ -90,7 +91,7 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 {
     const auto indexCasted = static_cast<int32_t>(index);
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
-        "nodeId: %{public}d: GetFrameChildByIndex(%{public}d, %{public}d, %{public}d, %{public}d)",
+        "ArkoalaLazyNode(%{public}d).GetFrameChildByIndex(%{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), indexCasted, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache),
         static_cast<int32_t>(addToRenderTree));
 
@@ -104,10 +105,13 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (!child) {
         TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH,
-            "(%{public}d) createItem_ failed to create new node for index %{public}d", GetId(), indexMapped);
+            "createItem_ failed to create new node for index %{public}d", indexMapped);
         return nullptr;
     }
     node4Index_.Put(indexMapped, child);
+
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+        "GetChild returns node %{public}s for index %{public}d", DumpUINode(child).c_str(), indexMapped);
 
     if (isCache) {
         child->SetJSViewActive(false, !isRepeat_);
@@ -124,6 +128,7 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
 
     AddChild(child);
+    RequestSyncTree();
 
     auto childNode = child->GetFrameChildByIndex(0, needBuild);
     if (onMoveEvent_) {
@@ -136,6 +141,32 @@ RefPtr<UINode> ArkoalaLazyNode::GetChildByIndex(int32_t index)
 {
     auto node = node4Index_.Get(index);
     return node ? node->Upgrade() : nullptr;
+}
+
+const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach */) const
+{
+    if (!children_.empty()) {
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+            "ArkoalaLazyNode(%{public}d).GetChildren just returns non-empty children_", GetId());
+        return children_;
+    }
+    
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "GetChildren rebuild starting ...");
+    // can not modify l1_cache while iterating
+    // GetChildren is overloaded, can not change it to non-const
+    // need to order the child.
+    ForEachL1Node([&](int32_t index, const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
+
+    return children_;
+}
+
+void ArkoalaLazyNode::RequestSyncTree()
+{
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "requesting sync of UI tree");
+    UINode::MarkNeedSyncRenderTree();
+    children_.clear();
+    // re-assemble children_
+    PostIdleTask();
 }
 
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
@@ -175,6 +206,27 @@ void ArkoalaLazyNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool 
         node->SetJSViewActive(active);
     }
     isActive_ = active;
+}
+
+void ArkoalaLazyNode::PostIdleTask()
+{
+    if (postUpdateTaskHasBeenScheduled_) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "ArkoalaLazyNode(%{public}d).PostIdleTask Posting idle task", GetId());
+    postUpdateTaskHasBeenScheduled_ = true;
+    auto* context = GetContext();
+    CHECK_NULL_VOID(context);
+
+    context->AddPredictTask(
+        [weak = AceType::WeakClaim(this)](int64_t /* deadline */, bool /* canUseLongPredictTask */) {
+        ACE_SCOPED_TRACE("ArkoalaLazyNode.IdleTask");
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->postUpdateTaskHasBeenScheduled_ = false;
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "idle task calls GetChildren");
+        node->GetChildren();
+    });
 }
 
 void ArkoalaLazyNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
@@ -394,10 +446,26 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
     }
 }
 
+void ArkoalaLazyNode::ForEachL1Node(
+    const std::function<void(int32_t index, const RefPtr<UINode>& node)>& cbFunc) const
+{
+    for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
+        if (const RefPtr<UINode> node = it->second.Upgrade()) {
+            cbFunc(static_cast<int32_t>(it->first), node);
+        }
+    }
+}
+
 void ArkoalaLazyNode::DumpInfo()
 {
     if (isRepeat_) {
         DumpLog::GetInstance().AddDesc("VirtualScroll: true");
     }
+}
+
+std::string ArkoalaLazyNode::DumpUINode(const RefPtr<UINode>& node) const
+{
+    return (node == nullptr)
+        ? "UINode: nullptr" : "UINode: " + node->GetTag() + "(" + std::to_string(node->GetId()) + ")";
 }
 } // namespace OHOS::Ace::NG
