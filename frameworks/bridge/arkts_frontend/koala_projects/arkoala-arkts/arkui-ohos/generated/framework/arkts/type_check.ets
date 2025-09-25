@@ -25,7 +25,7 @@ import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, Sel
 import { AttributeModifier, extractors, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
 import { AttributeUpdaterFlag } from "./../../AttributeUpdaterFlag"
 import { AudioSessionType, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, AdsBlockedDetails, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedTouchInfo } from "./../../component/web"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig } from "./../../component/textCommon"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, TextMenuOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig } from "./../../component/textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
@@ -153,6 +153,7 @@ import { Configuration } from "@ohos.app.ability.Configuration"
 import { CustomTheme, CustomColors } from "@ohos.arkui.theme"
 import { DataItem, Dependency, PreloadItem, RouterItem, HapModuleInfo } from "bundleManager.HapModuleInfo"
 import { EllipseOptions } from "./../../component/ellipse"
+import { default as font } from "@ohos.font"
 import { FormLinkOptions } from "./../../component/formLink"
 import { RenderNode } from "arkui.RenderNode"
 import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
@@ -1080,6 +1081,30 @@ export class TypeChecker {
     }
     static isFont(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Font
+    }
+    static isfont_FontInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
+        return value instanceof font.FontInfo
+    }
+    static isfont_FontOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof font.FontOptions
+    }
+    static isfont_UIFontAdjustInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof font.UIFontAdjustInfo
+    }
+    static isfont_UIFontAliasInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof font.UIFontAliasInfo
+    }
+    static isfont_UIFontConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof font.UIFontConfig
+    }
+    static isfont_UIFontFallbackGroupInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof font.UIFontFallbackGroupInfo
+    }
+    static isfont_UIFontFallbackInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof font.UIFontFallbackInfo
+    }
+    static isfont_UIFontGenericInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof font.UIFontGenericInfo
     }
     static isFontSettingOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FontSettingOptions
@@ -2952,6 +2977,9 @@ export class TypeChecker {
     }
     static isTextMenuItemId(value: Object | string | number | undefined): boolean {
         return value instanceof TextMenuItemId
+    }
+    static isTextMenuOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof TextMenuOptions
     }
     static isTextMenuShowMode(value: Object | string | number | undefined): boolean {
         return value instanceof TextMenuShowMode
@@ -5348,6 +5376,21 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_Object(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_font_UIFontGenericInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_font_UIFontFallbackGroupInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_font_UIFontFallbackInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_font_UIFontAliasInfo(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_font_UIFontAdjustInfo(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_AbilityInfo(value: Object | string | number | undefined): boolean {

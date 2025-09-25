@@ -29467,8 +29467,8 @@ void impl_GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(Ark_Int
 KOALA_INTEROP_DIRECT_V3(GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime, Ark_Int32, Ark_Int32, KLong)
 void impl_GlobalScope_ohos_font_registerFont(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_CustomObject optionsValueTemp = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));;
-        GetAccessors()->getGlobalScope_ohos_fontAccessor()->registerFont(static_cast<Ark_CustomObject*>(&optionsValueTemp));
+        Ark_font_FontOptions optionsValueTemp = font_FontOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getGlobalScope_ohos_fontAccessor()->registerFont(static_cast<Ark_font_FontOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(GlobalScope_ohos_font_registerFont, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_GlobalScope_ohos_font_getSystemFontList() {
@@ -29482,10 +29482,20 @@ KInteropReturnBuffer impl_GlobalScope_ohos_font_getSystemFontList() {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_0(GlobalScope_ohos_font_getSystemFontList, KInteropReturnBuffer)
-void impl_GlobalScope_ohos_font_getFontByName(const KStringPtr& fontName) {
-        GetAccessors()->getGlobalScope_ohos_fontAccessor()->getFontByName((const Ark_String*) (&fontName));
+KInteropReturnBuffer impl_GlobalScope_ohos_font_getFontByName(const KStringPtr& fontName) {
+        const auto &retValue = GetAccessors()->getGlobalScope_ohos_fontAccessor()->getFontByName((const Ark_String*) (&fontName));
+        SerializerBase _retSerializer {};
+        font_FontInfo_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_V1(GlobalScope_ohos_font_getFontByName, KStringPtr)
+KOALA_INTEROP_1(GlobalScope_ohos_font_getFontByName, KInteropReturnBuffer, KStringPtr)
+KInteropReturnBuffer impl_GlobalScope_ohos_font_getUIFontConfig() {
+        const auto &retValue = GetAccessors()->getGlobalScope_ohos_fontAccessor()->getUIFontConfig();
+        SerializerBase _retSerializer {};
+        font_UIFontConfig_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_0(GlobalScope_ohos_font_getUIFontConfig, KInteropReturnBuffer)
 Ark_Int32 impl_GlobalScope_ohos_measure_utils_measureText(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_MeasureOptions optionsValueTemp = MeasureOptions_serializer::read(thisDeserializer);;
@@ -29501,6 +29511,20 @@ KInteropReturnBuffer impl_GlobalScope_ohos_measure_utils_measureTextSize(KSerial
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(GlobalScope_ohos_measure_utils_measureTextSize, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_GlobalScopeUicontextFontScale_isFollowingSystemFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->isFollowingSystemFontScale();
+}
+KOALA_INTEROP_DIRECT_0(GlobalScopeUicontextFontScale_isFollowingSystemFontScale, Ark_Boolean)
+Ark_Int32 impl_GlobalScopeUicontextFontScale_getMaxFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->getMaxFontScale();
+}
+KOALA_INTEROP_0(GlobalScopeUicontextFontScale_getMaxFontScale, Ark_Int32)
+void impl_GlobalScopeUicontextTextMenu_setMenuOptions(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TextMenuOptions optionsValueTemp = TextMenuOptions_serializer::read(thisDeserializer);;
+        GetAccessors()->getGlobalScopeUicontextTextMenuAccessor()->setMenuOptions(static_cast<Ark_TextMenuOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(GlobalScopeUicontextTextMenu_setMenuOptions, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_HierarchicalSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto fillStyleValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

@@ -221,6 +221,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_Float64& dst, const double& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
+    void AssignArkValue(Ark_font_FontInfo& dst, const FontInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
@@ -361,6 +362,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_font_UIFontFallbackInfo& dst, const FallbackInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontFallbackGroupInfo& dst, const FallbackGroup& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontAdjustInfo& dst, const AdjustInfo& src);
+    void AssignArkValue(Ark_font_UIFontAliasInfo& dst, const AliasInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontGenericInfo& dst, const FontGenericInfo& src, ConvContext* ctx);
+    void AssignArkValue(Ark_font_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);

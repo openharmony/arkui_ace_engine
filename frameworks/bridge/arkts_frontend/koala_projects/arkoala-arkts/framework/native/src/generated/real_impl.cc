@@ -13256,14 +13256,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_arkui_performanceMonitorAccessor
     namespace GlobalScope_ohos_fontAccessor {
-    void RegisterFontImpl(const Ark_CustomObject* options)
+    void RegisterFontImpl(const Ark_font_FontOptions* options)
     {
     }
     Array_String GetSystemFontListImpl()
     {
         return {};
     }
-    Ark_CustomObject GetFontByNameImpl(const Ark_String* fontName)
+    Ark_font_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+    {
+        return {};
+    }
+    Ark_font_UIFontConfig GetUIFontConfigImpl()
     {
         return {};
     }
@@ -13278,6 +13282,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // GlobalScope_ohos_measure_utilsAccessor
+    namespace GlobalScopeUicontextFontScaleAccessor {
+    Ark_Boolean IsFollowingSystemFontScaleImpl()
+    {
+        return {};
+    }
+    Ark_Float64 GetMaxFontScaleImpl()
+    {
+        return {};
+    }
+    } // GlobalScopeUicontextFontScaleAccessor
+    namespace GlobalScopeUicontextTextMenuAccessor {
+    void SetMenuOptionsImpl(const Ark_TextMenuOptions* options)
+    {
+    }
+    } // GlobalScopeUicontextTextMenuAccessor
     namespace HierarchicalSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
     {
@@ -19198,6 +19217,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -19209,6 +19229,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
+            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
+            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
+        };
+        return &GlobalScopeUicontextFontScaleAccessorImpl;
+    }
+
+    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
+            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
+        };
+        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -21425,6 +21462,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
+            GetGlobalScopeUicontextFontScaleAccessor,
+            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,
