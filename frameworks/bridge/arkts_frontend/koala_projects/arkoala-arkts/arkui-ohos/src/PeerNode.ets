@@ -21,6 +21,7 @@ import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
 import { StateUpdateLoop } from "./stateManagement"  
 import { RecordData } from "@ohos.base"
+import { ArkUIAniModule } from 'arkui.ani';
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -125,6 +126,11 @@ export class PeerNode extends IncrementalNode {
         }
         this._reusePool!.get(reuseKey)!.put(child);
         return true
+    }
+
+    override incrementalUpdateDone(parent?: IncrementalNode) {
+        super.incrementalUpdateDone(parent)
+        ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
     }
 
     setReusePoolSize(size: number, reuseKey: string): void {
