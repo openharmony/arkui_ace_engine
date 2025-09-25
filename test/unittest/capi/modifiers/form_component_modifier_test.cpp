@@ -698,4 +698,39 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsDimensionVal
         checkValue(input, value, expected);
     }
 }
+
+/*
+ * @tc.name: setOnUpdateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnUpdateTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnUpdate, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
+    auto onUpdate = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+        std::pair<int64_t, std::string> info;
+        info.first = Converter::Convert<int64_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
+    };
+    auto optFunc = Converter::ArkValue<Opt_Callback_FormCallbackInfo_Void>(
+        Converter::ArkValue<Callback_FormCallbackInfo_Void>(onUpdate, frameNode->GetId()));
+
+    modifier_->setOnUpdate(node_, &optFunc);
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
+        formInfo = std::nullopt;
+        auto testValue = ToJson(actual);
+        eventHub->FireOnUpdate(testValue);
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,10 @@ Ark_ImageBitmap ConstructImpl(const Ark_Union_PixelMap_String* src,
             peer->SetOptions("", src->pixelMap);
         },
         []() {});
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (optUnit) {
+        peer->SetUnit(optUnit.value());
+    }
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -59,6 +63,10 @@ Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
 void SetHeightImpl(Ark_ImageBitmap peer,
                    const Ark_Number* height)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(height);
+    auto value = Converter::Convert<float>(*height);
+    peer->SetHeight(value);
 }
 Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
@@ -69,6 +77,10 @@ Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 void SetWidthImpl(Ark_ImageBitmap peer,
                   const Ark_Number* width)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(width);
+    auto value = Converter::Convert<float>(*width);
+    peer->SetWidth(value);
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
