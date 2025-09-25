@@ -6199,32 +6199,31 @@ void PipelineContext::RegisterFocusCallback()
     });
 }
 
-void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
+void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
 {
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    auto cb = [root, onlyNeedVisible]() {
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        auto res = JsonUtil::Create(true);
+        res->Put("0", json.c_str());
+        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        if (!onlyNeedVisible) {
+            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+        }
+    };
     if (onlyNeedVisible) {
-        auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
         uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
         if (topNavNode != nullptr) {
-            topNavNode->DumpSimplifyTree(0, root);
+            topNavNode->DumpSimplifyTreeWithParamConfig(0, root, true, config);
         } else {
-            rootNode_->DumpSimplifyTree(0, root);
+            rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
         }
-        auto cb = [root]() {
-            auto json = root->ToString();
-            json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-            auto res = JsonUtil::Create(true);
-            res->Put("0", json.c_str());
-            UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        };
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
-        bool needThrow = false;
-        NG::InspectorFilter filter;
-        filter.AddFilterAttr("content");
-        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-        UiSessionManager::GetInstance()->AddValueForTree(0, nodeInfos);
-        rootNode_->GetInspectorValue();
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
     }
 }
 

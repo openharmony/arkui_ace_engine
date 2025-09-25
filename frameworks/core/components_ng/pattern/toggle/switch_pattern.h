@@ -145,6 +145,8 @@ public:
     void SetSwitchIsOn(bool value);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
+    void DumpSimplifyInfoOnlyForParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void SetIsUserSetMargin(bool isUserSetMargin)
     {
         isUserSetMargin_ = isUserSetMargin;

@@ -1491,6 +1491,8 @@ protected:
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfoOnlyForParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void OnCollectRemoved() override;
 
 private:
@@ -1536,6 +1538,8 @@ private:
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfoOnlyForParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,

@@ -26,6 +26,7 @@
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"

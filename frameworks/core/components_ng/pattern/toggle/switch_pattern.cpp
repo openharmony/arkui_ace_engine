@@ -828,6 +828,15 @@ void SwitchPattern::DumpInfo()
     }
 }
 
+void SwitchPattern::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasIsOn() && config.interactionInfo) {
+        json->Put("isOn", paintProperty->GetIsOn().value() ? "true" : "false");
+    }
+}
+
 void SwitchPattern::SetSwitchIsOn(bool ison)
 {
     auto host = GetHost();

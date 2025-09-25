@@ -40,7 +40,7 @@ public:
     bool GetSearchEventRegistered() override;
     bool GetRouterChangeEventRegistered() override;
     bool GetComponentChangeEventRegistered() override;
-    void GetInspectorTree() override;
+    void GetInspectorTree(ParamConfig config = ParamConfig()) override;
     void SaveInspectorTreeFunction(InspectorFunction&& function) override;
     void AddValueForTree(int32_t id, const std::string& value) override;
     void WebTaskNumsChange(int32_t num) override;
@@ -74,7 +74,7 @@ public:
     void ResetTranslate(int32_t nodeId) override;
     void GetPixelMap() override;
     void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) override;
-    void GetVisibleInspectorTree() override;
+    void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
     void RegisterPipeLineExeAppAIFunction(
