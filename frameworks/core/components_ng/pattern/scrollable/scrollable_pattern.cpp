@@ -620,22 +620,40 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
         isHitTestBlock, clickJudge);
     auto scrollableNode = GetHost();
     CHECK_NULL_VOID(scrollableNode);
+    bool isChild = true;
     for (auto iter = activeRecognizers.begin(); iter != activeRecognizers.end(); ++iter) {
         auto recognizer = *iter;
         CHECK_NULL_CONTINUE(recognizer);
         auto frameNode = recognizer->GetAttachedNode().Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
         if (frameNode == scrollableNode) {
-            break;
+            isChild = false;
         }
-        auto gestureInfo = recognizer->GetGestureInfo();
-        CHECK_NULL_CONTINUE(gestureInfo);
-        GestureTypeName type = gestureInfo->GetRecognizerType();
-        if (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
-            type == GestureTypeName::TAP_GESTURE) {
+        if (IsNeedPreventRecognizer(recognizer, isChild)) {
             recognizer->SetPreventBegin(true);
         }
     }
+}
+
+bool ScrollablePattern::IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer, bool isChild) const
+{
+    auto gestureInfo = recognizer->GetGestureInfo();
+    CHECK_NULL_RETURN(gestureInfo, false);
+    GestureTypeName type = gestureInfo->GetRecognizerType();
+    if (isChild && (type == GestureTypeName::CLICK || type == GestureTypeName::LONG_PRESS_GESTURE ||
+        type == GestureTypeName::TAP_GESTURE)) {
+        return true;
+    }
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
+    if (panRecognizer) {
+        auto dir = panRecognizer->GetDirection().type;
+        if (axis_ == Axis::VERTICAL) {
+            return (dir == PanDirection::HORIZONTAL || dir == PanDirection::LEFT || dir == PanDirection::RIGHT);
+        } else if (axis_ == Axis::HORIZONTAL) {
+            return (dir == PanDirection::VERTICAL || dir == PanDirection::UP || dir == PanDirection::DOWN);
+        }
+    }
+    return false;
 }
 
 void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable)

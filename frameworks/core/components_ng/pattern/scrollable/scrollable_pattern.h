@@ -1069,6 +1069,7 @@ private:
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<RefPtr<NGGestureRecognizer>>& activeRecognizers);
+    bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer, bool isChild) const;
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};

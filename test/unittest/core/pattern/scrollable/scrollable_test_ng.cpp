@@ -1573,6 +1573,113 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnTouchTestDone002
+ * @tc.desc: Test OnTouchTestDone with panRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, OnTouchTestDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize baseGestureEvent and activeRecognizers.
+     */
+    auto baseGestureEvent = std::make_shared<BaseGestureEvent>();
+    baseGestureEvent->SetSourceDevice(SourceType::TOUCH);
+    std::list<FingerInfo> fingerInfos;
+    FingerInfo fingerInfo;
+    fingerInfos.emplace_back(fingerInfo);
+    baseGestureEvent->SetFingerList(fingerInfos);
+    std::list<RefPtr<NGGestureRecognizer>> activeRecognizers;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::HORIZONTAL;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5, false);
+    panRecognizer->AttachFrameNode(AceType::WeakClaim(AceType::RawPtr(mockScroll_)));
+    panRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    activeRecognizers.emplace_back(panRecognizer);
+
+    /**
+     * @tc.steps: step2. currentVelocity_ is greater than 200 and state_ is SPRING.
+     * @tc.expected: isHitTestBlock_ is true.
+     */
+    auto scrollablePattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    RefPtr<Scrollable> scrollable = scrollablePattern->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->currentVelocity_ = 300;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(scrollablePattern->isHitTestBlock_);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step3. Set pan direction to PanDirection::RIGHT.
+     * @tc.expected: IsPreventBegin is true.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::RIGHT;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step4. Set pan direction to PanDirection::LEFT.
+     * @tc.expected: IsPreventBegin is true.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::LEFT;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step5. Set pan direction to PanDirection::VERTICAL.
+     * @tc.expected: IsPreventBegin is false.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::VERTICAL;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_FALSE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step6. Set scroll direction to Axis::HORIZONTAL.
+     * @tc.expected: IsPreventBegin is true.
+     */
+    panRecognizer->SetPreventBegin(false);
+    scrollablePattern->axis_ = Axis::HORIZONTAL;
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step7. Set pan direction to PanDirection::UP.
+     * @tc.expected: IsPreventBegin is true.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::UP;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step8. Set pan direction to PanDirection::DOWN.
+     * @tc.expected: IsPreventBegin is true.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::DOWN;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_TRUE(panRecognizer->IsPreventBegin());
+
+    /**
+     * @tc.steps: step9. Set pan direction to PanDirection::HORIZONTAL.
+     * @tc.expected: IsPreventBegin is false.
+     */
+    panRecognizer->SetPreventBegin(false);
+    panDirection.type = PanDirection::HORIZONTAL;
+    panRecognizer->SetDirection(panDirection);
+    scrollablePattern->OnTouchTestDone(baseGestureEvent, activeRecognizers);
+    EXPECT_FALSE(panRecognizer->IsPreventBegin());
+}
+
+/**
  * @tc.name: onScrollerAreaChangeEventTest001
  * @tc.desc: Test onScrollerAreaChangeEvent
  * @tc.type: FUNC
