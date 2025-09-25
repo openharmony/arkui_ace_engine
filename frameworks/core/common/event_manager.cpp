@@ -1117,6 +1117,7 @@ void EventManager::DispatchTouchCancelToRecognizer(
     TouchEvent touchEvent;
     for (auto& item : items) {
         if (idToTouchPoints_.find(item.first) == idToTouchPoints_.end()) {
+            touchEvent.sourceType = lastTouchEvent_.sourceType;
             touchEvent.originalId = item.first;
             touchEvent.id = item.first;
         } else {
