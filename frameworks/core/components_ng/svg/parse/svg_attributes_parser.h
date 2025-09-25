@@ -242,7 +242,7 @@ struct SvgBaseAttribute {
         clipState.Inherit(parent.clipState);
     }
 
-    void Inherit(const SvgBaseAttribute& parent)
+    void Inherit(const SvgBaseAttribute& parent, bool inheritClipPath)
     {
         if (!hasOpacity) {
             if (parent.hasOpacity) {
@@ -253,7 +253,9 @@ struct SvgBaseAttribute {
         }
         fillState.Inherit(parent.fillState);
         strokeState.Inherit(parent.strokeState);
-        clipState.Inherit(parent.clipState);
+        if (inheritClipPath) {
+            clipState.Inherit(parent.clipState);
+        }
     }
 };
 
