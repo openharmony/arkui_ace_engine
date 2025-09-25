@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/components_ng/pattern/divider/divider_model_ng_static.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "test/mock/base/mock_system_properties.h"
@@ -372,5 +373,21 @@ HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
     ASSERT_NE(paintProperty, nullptr);
     auto color = paintProperty->GetDividerColorValue();
     EXPECT_EQ(color.ColorToString(), "#FF000000");
+}
+
+HWTEST_F(DividerTestNg, SetDividerColor, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto theme = AceType::MakeRefPtr<DividerTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color themeColor = theme->GetColor();
+    std::optional<Color> colorOpt = std::nullopt;
+    DividerModelNGStatic::SetDividerColor(AceType::RawPtr(frameNode), colorOpt);
+    auto paintProperty = frameNode->GetPaintProperty<DividerRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetDividerColorValue(), themeColor);
 }
 } // namespace OHOS::Ace::NG

@@ -55,7 +55,7 @@ void SetColorImpl(Ark_NativePointer node,
     if (color) {
         BlankModelNG::SetColor(frameNode, color.value());
     } else {
-        LOGI("#### BlankAttribute::ColorImpl: color is empty");
+        BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
     }
 }
 } // BlankAttributeModifier

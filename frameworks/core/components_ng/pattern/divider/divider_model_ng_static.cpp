@@ -41,7 +41,14 @@ void DividerModelNGStatic::SetDividerColor(FrameNode* frameNode, std::optional<C
     if (colorOpt) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, colorOpt.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<DividerTheme>(frameNode->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        auto paintProperty = frameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateDividerColorByTheme(theme->GetColor());
     }
 }
-}
+}
