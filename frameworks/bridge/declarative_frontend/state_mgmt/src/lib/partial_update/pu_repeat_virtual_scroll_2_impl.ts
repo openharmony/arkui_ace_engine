@@ -356,12 +356,6 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
-    // record the additional spare rid added in addRemovedItemsToSpare()
-    private additionalSpareRid_: Set<number> = new Set<number>();
-
-    // record the rid that need to Call OnRecycle() on C++ side
-    private ridNeedToRecycle_: Set<number> = new Set<number>();
-
     // request container re-layout
     private firstIndexChanged_: number = 0;
 
@@ -642,7 +636,7 @@ class __RepeatVirtualScroll2Impl<T> {
             this.firstIndexChangedInTryFastRelayout_ = Number.NaN;
         }
         RepeatVirtualScroll2Native.updateL1Rid4Index(this.repeatElmtId_, arrLen, this.totalCount(),
-            this.firstIndexChanged_, Array.from(newL1Rid4Index), Array.from(this.ridNeedToRecycle_));
+            this.firstIndexChanged_, Array.from(newL1Rid4Index));
 
         this.rerenderOngoing_ = false;
 
@@ -785,11 +779,9 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private addRemovedItemsToSpare(): void {
-        this.additionalSpareRid_.clear();
         for (let oldIndex in this.activeDataItems_) {
             if (this.activeDataItems_[oldIndex].rid) {
                 this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
-                this.additionalSpareRid_.add(this.activeDataItems_[oldIndex].rid);
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
                 this.key4Index_.delete(index);
@@ -799,7 +791,6 @@ class __RepeatVirtualScroll2Impl<T> {
 
     private newItemsNeedToRender(
         newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
-        this.ridNeedToRecycle_.clear();
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -808,7 +799,7 @@ class __RepeatVirtualScroll2Impl<T> {
                 continue;
             }
 
-            const optRid = this.canUpdate(newActiveDataItemAtActiveIndex.ttype);
+            const optRid = this.canUpdate(activeIndex, newActiveDataItemAtActiveIndex.ttype);
             if (optRid <= 0) {
                 stateMgmtConsole.debug(`active range index ${activeIndex}: no rid found to update`);
                 continue;
@@ -834,11 +825,6 @@ class __RepeatVirtualScroll2Impl<T> {
 
                 // add to index -> rid map to be sent to C++
                 newL1Rid4Index.set(activeIndex, optRid);
-
-                // if the rid is recycled in current render, notify C++ to call OnRecycle()
-                if (this.additionalSpareRid_.has(optRid)) {
-                    this.ridNeedToRecycle_.add(optRid);
-                }
 
                 // don't need to call getItem here, already checked that the data item exists
                 ridMeta.repeatItem_.updateItem(newActiveDataItemAtActiveIndex.item as T);
@@ -961,7 +947,7 @@ class __RepeatVirtualScroll2Impl<T> {
             `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // spare UINode / RID available to update?
-        const optRid = this.canUpdateTryMatch(ttype, dataItem, key);
+        const optRid = this.canUpdateTryMatch(forIndex, ttype, dataItem, key);
 
         const result: [number, number] = (optRid > 0)
             ? this.updateChild(optRid, ttype, forIndex, key)
@@ -974,11 +960,12 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // return RID of Node that can be updated (matching ttype), 
     // or -1 if none
-    private canUpdate(ttype: string): number {
+    private canUpdate(index: number, ttype: string): number {
         if (!this.allowUpdate_) {
             return -1;
         }
-        for (const rid of this.spareRid_) {
+        const sortedSpareRid = this.sortSpareRid(index);
+        for (const rid of sortedSpareRid) {
             const ridMeta = this.meta4Rid_.get(rid);
             if (ridMeta && ridMeta.ttype_ === ttype) {
                 stateMgmtConsole.debug(`canUpdate: Found spare rid ${rid} for ttype '${ttype}'`);
@@ -991,12 +978,13 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // return RID of Node that can be updated (matching ttype), 
     // or -1 if none
-    private canUpdateTryMatch(ttype: string, dataItem: T, key?: string): number {
+    private canUpdateTryMatch(index: number, ttype: string, dataItem: T, key?: string): number {
         if (!this.allowUpdate_) {
             return -1;
         }
+        const sortedSpareRid = this.sortSpareRid(index);
         // 1. round: find matching RID, also data item matches
-        for (const rid of this.spareRid_) {
+        for (const rid of sortedSpareRid) {
             const ridMeta = this.meta4Rid_.get(rid);
             // compare ttype and data item, or ttype and key
             if (ridMeta && ridMeta.ttype_ === ttype &&
@@ -1009,7 +997,7 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         // just find a matching RID
-        for (const rid of this.spareRid_) {
+        for (const rid of sortedSpareRid) {
             const ridMeta = this.meta4Rid_.get(rid);
             if (ridMeta && ridMeta.ttype_ === ttype) {
                 stateMgmtConsole.debug(`canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}'`);
@@ -1018,6 +1006,17 @@ class __RepeatVirtualScroll2Impl<T> {
         }
         stateMgmtConsole.debug(`canUpdateTryMatch: Found NO spare rid for ttype '${ttype}'`);
         return -1;
+    }
+
+    private sortSpareRid(index: number): Array<number> {
+        return Array.from(this.spareRid_).sort((rid1: number, rid2: number) => {
+            const ridMeta1 = this.meta4Rid_.get(rid1);
+            const ridMeta2 = this.meta4Rid_.get(rid2);
+            if (ridMeta1 && ridMeta1.repeatItem_.index && ridMeta2 && ridMeta2.repeatItem_.index) {
+                return Math.abs(index - ridMeta1.repeatItem_.index) - Math.abs(index - ridMeta2.repeatItem_.index);
+            }
+            return 0;
+        });
     }
 
     /**

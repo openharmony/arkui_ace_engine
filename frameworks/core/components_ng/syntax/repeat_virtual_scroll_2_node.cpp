@@ -383,10 +383,9 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
 // TS calls this function at the end of rerender to update caches.l1Rid4Index_
 // forceRunDoSetActiveRange_ indicates that following DoSetActiveChildRange
 // must do a full run even if range is unchanged (which is typically the case).
-void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index,
-    std::unordered_set<uint32_t>& ridNeedToRecycle)
+void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index)
 {
-    caches_.UpdateL1Rid4Index(l1Rd4Index, ridNeedToRecycle);
+    caches_.UpdateL1Rid4Index(l1Rd4Index);
 
     // run next DoSetActiveChild range even if range unchanged
     forceRunDoSetActiveRange_ = true;

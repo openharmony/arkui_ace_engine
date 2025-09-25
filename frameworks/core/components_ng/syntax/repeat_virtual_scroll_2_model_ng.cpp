@@ -84,8 +84,7 @@ void RepeatVirtualScroll2ModelNG::NotifyContainerLayoutChange(int32_t repeatElmt
 }
 
 void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
-    uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index,
-    std::unordered_set<uint32_t>& ridNeedToRecycle)
+    uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
@@ -95,7 +94,7 @@ void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32
     CHECK_NULL_VOID(repeatNode);
     repeatNode->UpdateTotalCount(totalCount);
     repeatNode->UpdateArrLen(arrLen);
-    repeatNode->UpdateL1Rid4Index(l1Rd4Index, ridNeedToRecycle);
+    repeatNode->UpdateL1Rid4Index(l1Rd4Index);
     repeatNode->RequestContainerReLayout(invalidateContainerLayoutFromChildIndex);
 }
 

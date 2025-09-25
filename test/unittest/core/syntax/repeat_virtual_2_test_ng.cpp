@@ -853,7 +853,7 @@ HWTEST_F(RepeatVirtual2TestNg, UpdateL1Rid4Index001, TestSize.Level1)
     repeatNode->caches_.cacheItem4Rid_ = {
         { 1, cacheItem0 }, { 2, cacheItem1 }, { 3, cacheItem2 }
     };
-    repeatNode->caches_.UpdateL1Rid4Index({ { 1, 2 }, { 2, 3 } }, { 2 });
+    repeatNode->caches_.UpdateL1Rid4Index({ { 1, 2 }, { 2, 3 } });
     EXPECT_EQ(cacheItem0->isL1_, false);
     EXPECT_EQ(cacheItem1->isL1_, true);
     EXPECT_EQ(cacheItem2->isL1_, true);
