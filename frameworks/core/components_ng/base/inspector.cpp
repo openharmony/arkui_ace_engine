@@ -402,25 +402,33 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             if (IsInternalNode(uiNode)) {
                 continue;
             }
-            if (uiNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            bool wantGetInspectorChildren = true;
+            do {
+                if (uiNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                    break;
+                }
                 TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node is %{public}d", uiNode->GetId());
                 auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(uiNode);
-                if (navDestinationNode != nullptr) {
-                    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node: %{public}d", uiNode->GetId());
-                    auto navCustomNode = navDestinationNode->GetPattern<NavDestinationPattern>()->GetCustomNode();
-                    if (navCustomNode != nullptr) {
-                        auto navCustomNodeJsonNode = GetNavCustomNodeInfo(navCustomNode, parent, filter);
-                        auto navCustomNodeChildrenArray = JsonUtil::CreateArray(true);
-                        GetInspectorChildren(uinode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
-                        if (navCustomNodeChildrenArray->GetArraySize()) {
-                            navCustomNodeJsonNode->PutRef(INSPECTOR_CHILDREN, std::move(navCustomNodeChildrenArray));
-                        }
-                        jsonChildrenArray->PutRef(std::move(navCustomNodeJsonNode));
-                        continue;
-                    }
+                if (navDestinationNode == nullptr) {
+                    break;
                 }
+                TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "NavDestination node: %{public}d", uiNode->GetId());
+                auto navCustomNode = navDestinationNode->GetPattern<NavDestinationPattern>()->GetCustomNode();
+                if (navCustomNode == nullptr) {
+                    break;
+                }
+                auto navCustomNodeJsonNode = GetNavCustomNodeInfo(navCustomNode, parent, filter);
+                auto navCustomNodeChildrenArray = JsonUtil::CreateArray(true);
+                GetInspectorChildren(uinode, navCustomNodeChildrenArray, inspectorParameters, filter, depth - 1);
+                if (navCustomNodeChildrenArray->GetArraySize()) {
+                    navCustomNodeJsonNode->PutRef(INSPECTOR_CHILDREN, std::move(navCustomNodeChildrenArray));
+                }
+                jsonChildrenArray->PutRef(std::move(navCustomNodeJsonNode));
+                wantGetInspectorChildren = false;
+            } while (false);
+            if (wantGetInspectorChildren) {
+                GetInspectorChildren(uiNode, jsonChildrenArray, inspectorParameters, filter, depth - 1);
             }
-            GetInspectorChildren(uiNode, jsonChildrenArray, inspectorParameters, filter, depth - 1);
         }
         if (jsonChildrenArray->GetArraySize()) {
             jsonNodeNew->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
