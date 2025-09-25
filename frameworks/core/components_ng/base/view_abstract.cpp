@@ -5334,9 +5334,9 @@ void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend, 
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
-        updateFunc(resObj);
         pattern->AddResObj("viewAbstract.colorBlend", resObj, std::move(updateFunc));
     }
+    SetColorBlend(frameNode, colorBlend);
 }
 
 void ViewAbstract::CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resObj)
@@ -6734,7 +6734,6 @@ void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color, 
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode();
         };
-        updateFunc(resObj);
         pattern->AddResObj("foregroundColor", resObj, std::move(updateFunc));
     }
     SetForegroundColor(frameNode, color);

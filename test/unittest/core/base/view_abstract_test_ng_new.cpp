@@ -2357,4 +2357,152 @@ HWTEST_F(ViewAbstractTestNg, AllowForceDark001, TestSize.Level1)
     ViewAbstract::AllowForceDark(AceType::RawPtr(topNode), true);
     EXPECT_TRUE(topNode->GetForceDarkAllowed());
 }
+
+/**
+ * @tc.name: SetForegroundColor
+ * @tc.desc: Branch: if (SystemProperties::ConfigChangePerform() && resObj) => true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetForegroundColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch, before test "SetForegroundColor".
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+
+    /**
+     * @tc.steps: step2. Get frame node and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the foreground.
+     */
+    std::string foregroundColor = pattern->GetResCacheMapByKey("foreground");
+    EXPECT_EQ(foregroundColor, "");
+    std::string bundleName = "com.example.foregroundTest";
+    std::string moduleName = "Entry";
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    Color color;
+    ViewAbstract::SetForegroundColor(frameNode, color, colorResObj);
+    Color finalColor;
+    ResourceParseUtils::ParseResColor(colorResObj, finalColor);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, finalColor.ColorToString());
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetForegroundColorFlagValue());
+}
+
+/**
+ * @tc.name: SetForegroundColor
+ * @tc.desc: Branch: if (SystemProperties::ConfigChangePerform() && resObj) => false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetForegroundColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch, before test "SetForegroundColor".
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+
+    /**
+     * @tc.steps: step2. Get frame node and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the foreground.
+     */
+    Color color = Color::RED;
+    ViewAbstract::SetForegroundColor(frameNode, color, nullptr);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    EXPECT_TRUE(target->GetForegroundColorFlagValue());
+}
+
+/**
+ * @tc.name: SetColorBlend
+ * @tc.desc: Branch: if (SystemProperties::ConfigChangePerform() && resObj) => true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetColorBlendTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn on the dark and light switch, before test "SetColorBlend".
+     */
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+
+    /**
+     * @tc.steps: step2. Get frame node and pattern.
+     */
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto pattern = targetNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the front color blend.
+     */
+    std::string frontColorBlend = pattern->GetResCacheMapByKey("frontColorBlend");
+    EXPECT_EQ(frontColorBlend, "");
+    std::string bundleName = "com.example.frontColorBlendTest";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    Color color = Color::BLUE;
+    ViewAbstract::SetColorBlend(targetNode, color, colorResObj);
+    Color finalColor;
+    ResourceParseUtils::ParseResColor(colorResObj, finalColor);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+    frontColorBlend = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+    EXPECT_EQ(frontColorBlend, finalColor.ColorToString());
+    auto renderContext = targetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetFrontColorBlend().has_value());
+}
+
+/**
+ * @tc.name: SetColorBlend
+ * @tc.desc: Branch: if (SystemProperties::ConfigChangePerform() && resObj) => false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetColorBlendTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Turn off the dark and light switch, before test "SetColorBlend".
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_FALSE(SystemProperties::ConfigChangePerform());
+
+    /**
+     * @tc.steps: step2. Get frame node and pattern.
+     */
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize the color value of the front color blend.
+     */
+    Color color = Color::GREEN;
+    ViewAbstract::SetColorBlend(node, color, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetFrontColorBlend().has_value());
+}
 } // namespace OHOS::Ace::NG
