@@ -14,7 +14,7 @@
  */
 
 import { ResourceColor } from 'arkui/component';
-import { Colors } from '@ohos/arkui/theme';
+import { Colors, CustomColors } from '@ohos/arkui/theme';
 import { _r } from 'arkui/component/resources';
 
 export class ArkSystemColors implements Colors {
@@ -136,5 +136,70 @@ export class ArkSystemColors implements Colors {
         this.interactiveActive = _r(125831022, 10001, '', '');
         this.interactiveSelect = _r(125831023, 10001, '', '');
         this.interactiveClick = _r(125831024, 10001, '', '');
+    }
+}
+
+export class ArkSystemCustomColors implements CustomColors {
+
+    brand?: ResourceColor;
+    warning?: ResourceColor;
+    alert?: ResourceColor;
+    confirm?: ResourceColor;
+
+    fontPrimary?: ResourceColor;
+    fontSecondary?: ResourceColor;
+    fontTertiary?: ResourceColor;
+    fontFourth?: ResourceColor;
+    fontEmphasize?: ResourceColor;
+
+    fontOnPrimary?: ResourceColor;
+    fontOnSecondary?: ResourceColor;
+    fontOnTertiary?: ResourceColor;
+    fontOnFourth?: ResourceColor;
+
+    iconPrimary?: ResourceColor;
+    iconSecondary?: ResourceColor;
+    iconTertiary?: ResourceColor;
+    iconFourth?: ResourceColor;
+    iconEmphasize?: ResourceColor;
+    iconSubEmphasize?: ResourceColor;
+
+    iconOnPrimary?: ResourceColor;
+    iconOnSecondary?: ResourceColor;
+    iconOnTertiary?: ResourceColor;
+    iconOnFourth?: ResourceColor;
+
+    backgroundPrimary?: ResourceColor;
+    backgroundSecondary?: ResourceColor;
+    backgroundTertiary?: ResourceColor;
+    backgroundFourth?: ResourceColor;
+    backgroundEmphasize?: ResourceColor;
+
+    compForegroundPrimary?: ResourceColor;
+    compBackgroundPrimary?: ResourceColor;
+    compBackgroundPrimaryTran?: ResourceColor;
+    compBackgroundPrimaryContrary?: ResourceColor;
+    compBackgroundGray?: ResourceColor;
+    compBackgroundSecondary?: ResourceColor;
+    compBackgroundTertiary?: ResourceColor;
+    compBackgroundEmphasize?: ResourceColor;
+    compBackgroundNeutral?: ResourceColor;
+    compEmphasizeSecondary?: ResourceColor;
+    compEmphasizeTertiary?: ResourceColor;
+    compDivider?: ResourceColor;
+    compCommonContrary?: ResourceColor;
+    compBackgroundFocus?: ResourceColor;
+    compFocusedPrimary?: ResourceColor;
+    compFocusedSecondary?: ResourceColor;
+    compFocusedTertiary?: ResourceColor;
+
+    interactiveHover?: ResourceColor;
+    interactivePressed?: ResourceColor;
+    interactiveFocus?: ResourceColor;
+    interactiveActive?: ResourceColor;
+    interactiveSelect?: ResourceColor;
+    interactiveClick?: ResourceColor;
+
+    constructor() {
     }
 }
