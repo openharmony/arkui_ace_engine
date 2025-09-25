@@ -1122,6 +1122,8 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
+void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

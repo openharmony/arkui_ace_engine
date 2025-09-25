@@ -7992,6 +7992,8 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
+    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
+    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
@@ -8007,6 +8009,8 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
 {
+    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
+    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
